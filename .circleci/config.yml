@@ -1,0 +1,321 @@
+version: 2.1
+
+scala_212: &scala_212
+  SCALA_VERSION: 2.12.10
+
+scala_213: &scala_213
+  SCALA_VERSION: 2.13.1
+
+scala_dotty: &scala_dotty
+  SCALA_VERSION: 0.20.0-RC1
+
+jdk_8: &jdk_8
+  JDK_VERSION: 8
+
+jdk_11: &jdk_11
+  JDK_VERSION: 11
+
+machine_ubuntu: &machine_ubuntu
+  machine:
+    image: ubuntu-1604:201903-01
+
+install_jdk: &install_jdk
+  - run:
+      name: Install JDK
+      command: |
+        while $(ps aux | grep -i ' apt ' | grep -v grep > /dev/null); do sleep 1; done # Wait for apt to be ready
+
+        sudo rm /etc/apt/sources.list.d/*
+        sudo tee /etc/apt/sources.list > /dev/null \<< 'EOF'
+        deb http://mirror.math.princeton.edu/pub/ubuntu/ xenial main universe
+        deb http://mirror.math.princeton.edu/pub/ubuntu/ xenial-updates main universe
+        deb http://mirror.math.princeton.edu/pub/ubuntu/ xenial-backports main universe
+        deb http://mirror.math.princeton.edu/pub/ubuntu/ xenial-security main restricted universe
+        EOF
+
+        if [ $JDK_VERSION == 11 ]; then
+          wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -
+          sudo add-apt-repository https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ -y
+        fi
+        sudo apt update
+        if [ $JDK_VERSION == 11 ]; then
+          sudo apt install -y adoptopenjdk-11-hotspot
+        elif [ $JDK_VERSION == 8 ]; then
+          sudo apt install -y openjdk-8-jdk
+        fi
+        java -version
+
+load_cache: &load_cache
+  - restore_cache:
+      key: sbt-zio-prelude-cache-v2
+
+clean_cache: &clean_cache
+  - run:
+      name: Clean unwanted files from cache
+      command: |
+        rm -fv $HOME/.ivy2/.sbt.ivy.lock
+        find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+        find $HOME/.sbt        -name "*.lock"               -print -delete
+
+save_cache: &save_cache
+  - save_cache:
+      key: sbt-zio-prelude-cache-v2
+      paths:
+          - "~/.ivy2/cache"
+          - "~/.sbt"
+          - "~/.m2"
+          - "~/.cache"
+          - "~/website/node_modules"
+
+install_yarn: &install_yarn
+  - run:
+      name: Install Yarn
+      command: |
+        curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        sudo bash -c 'echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list'
+        sudo apt update && sudo apt install yarn -y
+        yarn policies set-version
+        yarn -v
+
+install_nodejs: &install_nodejs
+  - run:
+      name: Install node.js
+      command: |
+        export NVM_DIR="/opt/circleci/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install
+        nvm use
+        node -v
+
+filter_tags: &filter_tags
+  tags:
+    only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+
+compile: &compile
+  steps:
+    - checkout
+    - <<: *load_cache
+    - run:
+        name: Compile code
+        command: ./sbt ++${SCALA_VERSION}! compile
+    - <<: *save_cache
+
+lint: &lint
+  steps:
+    - checkout
+    - <<: *load_cache
+    - run:
+        name: Lint code
+        command: ./sbt ++${SCALA_VERSION}! check
+    - <<: *save_cache
+
+mdoc: &mdoc
+  steps:
+    - checkout
+    - <<: *load_cache
+    - run:
+        name: Generate documentation
+        command: |
+          ./sbt doc
+          ./sbt ++${SCALA_VERSION}! docs/mdoc
+    - <<: *save_cache
+
+test: &test
+  steps:
+    - checkout
+    - <<: *load_cache
+    - <<: *install_jdk
+    - run:
+        name: Run tests
+        command: ./sbt ++${SCALA_VERSION}! test
+    - <<: *save_cache
+
+release: &release
+  steps:
+      - checkout
+      - run:
+          name: Fetch git tags
+          command: git fetch --tags
+      - <<: *load_cache
+      - run: 
+          name: Write sonatype credentials
+          command: echo "credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", \"${SONATYPE_USER}\", \"${SONATYPE_PASSWORD}\")" > ~/.sbt/1.0/sonatype.sbt
+      - run:
+          name: Write PGP public key
+          command: echo -n "${PGP_PUBLIC}" | base64 -di > /tmp/public.asc
+      - run:
+          name: Write PGP secret key
+          command: echo -n "${PGP_SECRET}" | base64 -di > /tmp/secret.asc
+      - run:
+          name: Release artifacts
+          command: |
+            mkdir -p $HOME/bin
+            sudo apt-get update && sudo apt-get -y install gnupg2
+            echo pinentry-mode loopback >> ~/.gnupg/gpg.conf
+            echo allow-loopback-pinentry >> ~/.gnupg/gpg-agent.conf
+            chmod 600 ~/.gnupg/*
+            ln -s /usr/bin/gpg2 $HOME/bin/gpg
+            $HOME/bin/gpg --version
+            echo RELOADAGENT | gpg-connect-agent
+            echo $PGP_SECRET | base64 -di | gpg2 --import --no-tty --batch --yes
+            PATH=$HOME/bin:$PATH ./sbt ++${SCALA_VERSION}! clean ci-release
+
+microsite: &microsite
+  steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "11:2c:fa:98:69:d8:a1:d5:76:2e:38:d0:91:39:85:ce"
+      - checkout
+      - <<: *load_cache
+      - <<: *install_nodejs
+      - <<: *install_yarn
+      - run:
+          name: Publishing website
+          command: |
+            git config --global user.email "${GH_NAME}@users.noreply.github.com"
+            git config --global user.name "${GH_NAME}"
+            export GIT_USER=${GH_NAME}
+            export TRAVIS_BUILD_NUMBER="${CIRCLE_BUILD_NUM}"
+            export TRAVIS_COMMIT="${CIRCLE_SHA1}"
+            sudo chown -R $USER:$USER /tmp
+            export NVM_DIR="/opt/circleci/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install
+            nvm use
+            node -v
+            ./sbt ++${SCALA_VERSION}! docs/docusaurusCreateSite
+            ./sbt ++${SCALA_VERSION}! docs/docusaurusPublishGhpages
+      - <<: *clean_cache
+      - <<: *save_cache
+
+jobs:
+  lint:
+    <<: *lint
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_8
+
+  compile_dotty:
+    <<: *compile
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_dotty
+      - <<: *jdk_8
+
+  mdoc:
+    <<: *mdoc
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_8
+
+  test_212_jdk8_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_8
+
+  test_213_jdk8_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_8
+
+  test_dotty_jdk8_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_dotty
+      - <<: *jdk_8
+
+  test_212_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_11
+
+  test_213_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_11
+
+  test_dotty_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_dotty
+      - <<: *jdk_11
+
+  release:
+    <<: *release
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_8
+
+  microsite:
+    <<: *microsite
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_8
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint:
+          filters:
+            <<: *filter_tags
+      - mdoc:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_212_jdk8_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_213_jdk8_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_212_jdk11_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_213_jdk11_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - release:
+          context: Sonatype2
+          requires:
+            - test_212_jdk8_jvm
+            - test_212_jdk11_jvm
+            - test_213_jdk8_jvm
+            - test_213_jdk11_jvm
+            - mdoc
+          filters:
+            <<: *filter_tags
+            branches:
+              only:
+                - master
+      - microsite:
+          context: Website
+          requires:
+            - microsite
+          filters:
+            <<: *filter_tags
+            branches:
+              ignore: /.*/
