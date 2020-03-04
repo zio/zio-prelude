@@ -13,14 +13,14 @@ object HelloWorld {
     console.putStrLn("Hello, World!")
 }
 
-object HelloWorldSpec
-    extends DefaultRunnableSpec(
-      suite("HelloWorldSpec")(
-        testM("sayHello correctly displays output") {
-          for {
-            _      <- sayHello
-            output <- TestConsole.output
-          } yield assert(output, equalTo(Vector("Hello, World!\n")))
-        }
-      )
-    )
+object HelloWorldSpec extends DefaultRunnableSpec {
+
+  def spec = suite("HelloWorldSpec")(
+    testM("sayHello correctly displays output") {
+      for {
+        _      <- sayHello
+        output <- TestConsole.output
+      } yield assert(output)(equalTo(Vector("Hello, World!\n")))
+    }
+  )
+}

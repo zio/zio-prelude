@@ -4,18 +4,18 @@ import zio.App
 import zio.console._
 
 object HelloWorld extends App {
-  trait Json 
+  trait Json
 
   /**
-    * For all a: A: 
-    *   fromJson(toJson(a)) == Some(a)
-    */
+   * For all a: A:
+   *   fromJson(toJson(a)) == Some(a)
+   */
   trait JsonCodec[A] {
-    def toJson(self: A): Json 
+    def toJson(self: A): Json
 
-    def fromJson(json: Json): Option[A] 
+    def fromJson(json: Json): Option[A]
 
-    final def identityLaw(a: A): Boolean = 
+    final def identityLaw(a: A): Boolean =
       fromJson(toJson(a)) == Some(a)
   }
   object JsonCodec {
@@ -29,7 +29,7 @@ object HelloWorld extends App {
 
   final case class Person(name: String, age: Int)
   object Person {
-    implicit val PersonJsonCodec: JsonCodec[Person] = 
+    implicit val PersonJsonCodec: JsonCodec[Person] =
       new JsonCodec[Person] {
         def toJson(self: Person): Json = ???
 
@@ -39,23 +39,22 @@ object HelloWorld extends App {
 
   final case class MyPerson(person: Person)
   object MyPerson {
-    // 
+    //
   }
 
   // check(genPerson) { PersonJsonCodec.identityLaw(_) }
 
-  def dumpToFile[A: JsonCodec](a: A): Unit = ???
+  def dumpToFile[A: JsonCodec](a: A): Unit          = ???
   def readFromFile[A: JsonCodec]: scala.util.Try[A] = ???
 
-  lazy val person: Person = ???
+  lazy val person: Person           = ???
   lazy val personList: List[Person] = ???
-  
+
   JsonCodec[Person].toJson(person)
 
   dumpToFile(person)
   dumpToFile(personList)
 
-  
   // java.util.ArrayList
 
   def run(args: List[String]) =
@@ -68,4 +67,3 @@ object HelloWorld extends App {
       _    <- putStrLn(s"Hello, $name, welcome to ZIO!")
     } yield ()
 }
-
