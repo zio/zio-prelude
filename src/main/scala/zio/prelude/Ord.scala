@@ -1,7 +1,7 @@
 package zio.prelude
 
-sealed trait Ord[-A] {
-  private implicit val self: Ord[A] = this
+trait OrdLaws[-A] {
+  protected implicit val self: Ord[A]
 
   def compare(l: A, r: A): Ordering
 
@@ -22,6 +22,9 @@ sealed trait Ord[-A] {
 
   final def connexityLaw2(a1: A, a2: A): Boolean =
     (a1 >= a2) || (a2 >= a1)
+}
+sealed trait Ord[-A] extends OrdLaws[A] {
+  protected implicit val self: Ord[A] = this
 }
 object Ord {
   def apply[A](implicit ord: Ord[A]): Ord[A] = ord

@@ -1,8 +1,9 @@
 package zio.prelude
 
-trait Debug[-A] {
+trait DebugLaws[-A] {
   def debug(a: A): Debug.Repr
 }
+trait Debug[-A] extends DebugLaws[A]
 object Debug {
   def apply[A](implicit debug: Debug[A]): Debug[A] = debug
 
