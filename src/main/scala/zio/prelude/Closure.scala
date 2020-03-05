@@ -1,6 +1,6 @@
 package zio.prelude
 
-sealed trait Closure[A] {
+trait ClosureLaws[A] {
   def combine(l: A, r: A): A
 
   final def closureLaw(l: A, r: A): Boolean =
@@ -10,6 +10,7 @@ sealed trait Closure[A] {
       true
     } catch { case _: Throwable => false }
 }
+sealed trait Closure[A] extends ClosureLaws[A]
 object Closure extends ClosureImplicits0 {
   def apply[A](implicit closure: Closure[A]): Closure[A] = closure
 

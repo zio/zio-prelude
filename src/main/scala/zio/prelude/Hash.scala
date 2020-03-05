@@ -1,11 +1,12 @@
 package zio.prelude
 
-sealed trait Hash[-A] {
+trait HashLaws[-A] {
   def hash(a: A): Int
 
   final def consistencyLaw[A1 <: A](a1: A1, a2: A1)(implicit equal: Equal[A1]): Boolean =
     (a1 === a2) ==> (hash(a1) === hash(a2))
 }
+sealed trait Hash[-A] extends HashLaws[A]
 object Hash {
   def apply[A](implicit hash: Hash[A]): Hash[A] = hash
 

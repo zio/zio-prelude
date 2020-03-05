@@ -1,6 +1,6 @@
 package zio.prelude
 
-sealed trait Equal[-A] { self =>
+trait EqualLaws[-A] {
   def equal(l: A, r: A): Boolean
 
   final def notEqual(l: A, r: A): Boolean = !equal(l, r)
@@ -12,6 +12,7 @@ sealed trait Equal[-A] { self =>
   final def transitivityLaw(a1: A, a2: A, a3: A): Boolean =
     equal(a1, a2) && equal(a2, a3) ==> equal(a1, a3)
 }
+sealed trait Equal[-A] extends EqualLaws[A]
 object Equal extends EqualImplicits0 {
   def apply[A](implicit equal: Equal[A]): Equal[A] = equal
 
