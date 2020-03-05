@@ -12,7 +12,7 @@ sealed trait Equal[-A] { self =>
   final def transitivityLaw(a1: A, a2: A, a3: A): Boolean =
     equal(a1, a2) && equal(a2, a3) ==> equal(a1, a3)
 }
-object Equal {
+object Equal extends EqualImplicits0 {
   def apply[A](implicit equal: Equal[A]): Equal[A] = equal
 
   def apply[A](eq0: (A, A) => Boolean): Equal[A] =
@@ -27,11 +27,12 @@ object Equal {
   implicit val IntEqual: Equal[Int]         = default[Int]
   implicit val DoubleEqual: Equal[Double]   = Equal(_ == _) // FIXME
 
-  implicit def OrdDerivesEqual[A](implicit ord: Ord[A]): Equal[A] =
-    Equal((l, r) => ord.compare(l, r) eq Ordering.Equals)
-
   private def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
+}
+trait EqualImplicits0 {
+  implicit def OrdDerivesEqual[A](implicit ord: Ord[A]): Equal[A] =
+    Equal((l, r) => ord.compare(l, r) eq Ordering.Equals)
 }
 trait EqualSyntax {
   implicit class EqualSyntax[A](l: A) {

@@ -1,6 +1,6 @@
 package zio.prelude
 
-trait Commutative[A] {
+sealed trait Commutative[A] {
   def combine(l: A, r: A): A
 
   final def commutativeLaw(a1: A, a2: A)(implicit equal: Equal[A]): Boolean =
