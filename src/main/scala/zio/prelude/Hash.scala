@@ -6,7 +6,11 @@ package zio.prelude
 sealed trait Hash[-A] { self =>
   def hash(a: A): Int
 
-  final def concat[B: Hash](a: A, b: B): Int = self.hash(a) ^ b.hash
+  final def combine[B: Hash](a: A, b: B): Int = {
+    val lhs = self.hash(a)
+    lhs ^ (b.hash + 0x9e3779b9 + (lhs << 6) + (lhs >> 2))
+  }
+
 }
 
 object Hash {
@@ -19,13 +23,7 @@ object Hash {
 
   def default[A]: Hash[A] = Hash[A]((a: A) => a.hashCode)
 
-  def ordered[A: Hash]: Hash[Iterable[A]] =
-    Hash(_.foldLeft((Iterable.hashCode, 0)) {
-      case ((h, i), a) => (h concat a concat i , i + 1)
-    }._2)
-
-  def unordered[A: Hash]: Hash[Iterable[A]] =
-    Hash(_.foldLeft(Iterable.hashCode)(_ concat _))
+  implicit def arrayHash[A: Hash]: Hash[Array[A]] = Hash(_.foldLeft(Array.empty.hashCode)(_ combine _))
 
   implicit val booleanHash: Hash[Boolean] = Hash.default[Boolean]
 
@@ -37,35 +35,35 @@ object Hash {
 
   implicit def eitherHash[L: Hash, R: Hash]: Hash[Either[L, R]] =
     Hash(_ match {
-      case Left(l)  => l.concat(Left(()).hashCode)
-      case Right(r) => r.concat(Right(()).hashCode)
+      case Left(l)  => l.combine(Left(()).hashCode)
+      case Right(r) => r.combine(Right(()).hashCode)
     })
 
   implicit val floatHash: Hash[Float] = Hash.default[Float]
 
   implicit val intHash: Hash[Int] = Hash.default[Int]
 
-  implicit def listHash[A: Hash]: Hash[List[A]] = Hash.ordered[A]
+  implicit def listHash[A: Hash]: Hash[List[A]] = Hash.default[List[A]]
 
   implicit val longHash: Hash[Long] = Hash.default[Long]
 
-  implicit def mapHash[K: Hash, V: Hash]: Hash[Map[K, V]] = Hash.unordered[(K, V)]
+  implicit def mapHash[K: Hash, V: Hash]: Hash[Map[K, V]] = Hash.default[Map[K, V]]
 
   implicit def optionHash[A: Hash]: Hash[Option[A]] =
     Hash(_ match {
-      case Some(a) => Some(()).hashCode concat a
+      case Some(a) => a combine Some(()).hashCode
       case None    => None.hashCode
     })
 
-  implicit def setHash[A: Hash]: Hash[Set[A]] = Hash.unordered[A]
+  implicit def setHash[A: Hash]: Hash[Set[A]] = Hash.default[Set[A]]
 
   implicit val stringHash: Hash[String] = Hash.default[String]
 
-  implicit def tuple2[A: Hash, B: Hash]: Hash[(A, B)] = Hash((ab: (A, B)) => ab._1.hash ^ ab._2.hash)
+  implicit def tuple2[A: Hash, B: Hash]: Hash[(A, B)] = Hash((ab: (A, B)) => ab._1 combine ab._2)
 
   implicit val unitHash: Hash[Unit] = Hash.default[Unit]
 
-  implicit def vectorHash[A: Hash]: Hash[Vector[A]] = Hash.ordered[A]
+  implicit def vectorHash[A: Hash]: Hash[Vector[A]] = Hash.default[Vector[A]]
 }
 
 trait HashSyntax {
@@ -75,8 +73,7 @@ trait HashSyntax {
 
     def ##(implicit hash: Hash[A]): Int = hash.hash(a)
 
-    def concat[B: Hash](b: B)(implicit hash: Hash[A]): Int = hash.concat(a, b)
-
+    def combine[B: Hash](b: B)(implicit hash: Hash[A]): Int = hash.combine(a, b)
   }
 
 }
