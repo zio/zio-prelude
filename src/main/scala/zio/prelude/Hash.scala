@@ -24,7 +24,7 @@ object Hash {
       case ((h, i), a) => (h concat a concat i , i + 1)
     }._2)
 
-  def unOrdered[A: Hash]: Hash[Iterable[A]] =
+  def unordered[A: Hash]: Hash[Iterable[A]] =
     Hash(_.foldLeft(Iterable.hashCode)(_ concat _))
 
   implicit val booleanHash: Hash[Boolean] = Hash.default[Boolean]
