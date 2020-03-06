@@ -49,7 +49,7 @@ object Hash {
 
   implicit val longHash: Hash[Long] = Hash.default[Long]
 
-  implicit def mapHash[K: Hash, V: Hash]: Hash[Map[K, V]] = Hash.unOrdered[(K, V)]
+  implicit def mapHash[K: Hash, V: Hash]: Hash[Map[K, V]] = Hash.unordered[(K, V)]
 
   implicit def optionHash[A: Hash]: Hash[Option[A]] =
     Hash(_ match {
@@ -57,7 +57,7 @@ object Hash {
       case None    => None.hashCode
     })
 
-  implicit def setHash[A: Hash]: Hash[Set[A]] = Hash.unOrdered[A]
+  implicit def setHash[A: Hash]: Hash[Set[A]] = Hash.unordered[A]
 
   implicit val stringHash: Hash[String] = Hash.default[String]
 
