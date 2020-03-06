@@ -8,7 +8,7 @@ import zio.test.DefaultRunnableSpec
 object HashSpec extends DefaultRunnableSpec {
   final def consistencyLaw[R, A: Hash : Equal] (gen: Gen[R, A]): ZIO[R, Nothing, TestResult] =
     check(gen, gen) { (a1, a2) =>
-      assert((a1 === a2) ==> (a1.## === a2.##))(isTrue ?? "consistencyLaw")
+      assert((a1 === a2) <==> (a1.hash === a2.hash))(isTrue ?? "consistencyLaw")
     }
 
   def spec = suite("HashSpec")(

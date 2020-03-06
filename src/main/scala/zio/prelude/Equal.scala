@@ -128,8 +128,8 @@ object Equal {
     Equal[A] either Equal[B]
 
   /**
-   * Equality for `Double` values. Note that to honor the contract that a
-   * value is always equal to itself, comparing `Double.NaN` with itself will
+   * Equality for `Float` values. Note that to honor the contract that a
+   * value is always equal to itself, comparing `Float.NaN` with itself will
    * return `true`, which is different from the behavior of `Float#equals`.
    */
   implicit val FloatEqual: Equal[Float] =
@@ -150,23 +150,24 @@ object Equal {
     Equal(_.corresponds(_)(Equal[A].equal))
 
   /**
+   * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
+   */
+  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
+    Equal(_.corresponds(_)(Equal[A].equal))
+
+  /**
    * Equality for `Long` values.
    */
   implicit val LongEqual: Equal[Long] = default[Long]
 
   /**
-   * Derives an `Equal[Map[A, B]]` given an `Equal[A]` and an `Equal[B]`.
+   * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations
+   * of Scala's `Map`, this uses object equality and hash code on the keys.
    */
-  implicit def MapEqual[A: Equal, B: Equal]: Equal[Map[A, B]] =
+  implicit def MapEqual[A, B: Equal]: Equal[Map[A, B]] =
     Equal { (map1, map2) =>
       map1.size == map2.size &&
-      map1.forall {
-        case (a1, b1) =>
-          map2.exists {
-            case (a2, b2) =>
-              Equal[A].equal(a1, a2) && Equal[B].equal(b1, b2)
-          }
-      }
+      map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
     }
 
   /**
@@ -193,7 +194,7 @@ object Equal {
    */
   implicit def SetEqual[A: Equal]: Equal[Set[A]] =
     Equal { (a1, a2) =>
-      a1.size == a2.size && a1.forall(a => a2.exists(Equal[A].equal(a, _)))
+      a1.size == a2.size && a1.forall(a => a2.exists(_ === a))
     }
 
   /**
@@ -709,12 +710,6 @@ object Equal {
    * equality comparisons will always be true.
    */
   implicit val UnitEqual: Equal[Unit] = Equal((_, _) => true)
-
-  /**
-   * Derives an `Equal[Set[A]]` given an `Equal[A]`.
-   */
-  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
-    Equal(_.corresponds(_)(Equal[A].equal))
 
   /**
    * Derives an `Equal[A]` given an `Ord[A]`.
