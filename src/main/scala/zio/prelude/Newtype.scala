@@ -17,25 +17,33 @@ sealed trait NewtypeModule {
     def unwrap(value: Type): Some[A] = Some(unwrapAll[Id](value))
 
     def wrapAll[F[_]](value: F[A]): F[Type]
-    
+
     def unwrapAll[F[_]](value: F[Type]): F[A]
   }
 }
 private[prelude] object NewtypeModule {
-  val instance: NewtypeModule = 
+  val instance: NewtypeModule =
     new NewtypeModule {
-      def newtype[A]: Newtype[A] = 
+      def newtype[A]: Newtype[A] =
         new Newtype[A] {
           type Type = A
 
           def wrapAll[F[_]](value: F[A]): F[Type] = value
-          
+
           def unwrapAll[F[_]](value: F[Type]): F[A] = value
         }
     }
 }
 trait NewtypeExports {
-  import NewtypeModule._ 
+  import NewtypeModule._
 
-  def newtype[A]: instance.Newtype[A] = instance.newtype[A]
+  type Newtype[A] = instance.Newtype[A]
+
+  def newtype[A]: Newtype[A] = instance.newtype[A]
+
+  def derive[F[_]]: NewtypeDerive[F] = new NewtypeDerive[F]
+
+  class NewtypeDerive[F[_]] {
+    def forNewtype[A](n: NewtypeModule.instance.Newtype[A])(implicit instance: F[A]): F[n.Type] = n.wrapAll(instance)
+  }
 }

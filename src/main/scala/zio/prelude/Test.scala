@@ -13,13 +13,14 @@ object Tests {
   test[Commutative, Int]
   test[Associative, Int]
 
-
   val Mult = newtype[Int]
-  type Mult = Mult.Type 
+  type Mult = Mult.Type
 
-  def acceptInt(i: Int): Unit = println(i)
+  def acceptInt(i: Int): Unit   = println(i)
   def acceptMult(m: Mult): Unit = println(m)
 
   acceptInt(Mult(23))
   // acceptMult(23)
+
+  implicit val MultEqual: Equal[Mult] = derive[Equal].forNewtype(Mult)
 }

@@ -152,7 +152,7 @@ object Equal {
   /**
    * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
    */
-  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] = 
+  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
     Equal(_.corresponds(_)(Equal[A].equal))
 
   /**
@@ -161,7 +161,7 @@ object Equal {
   implicit val LongEqual: Equal[Long] = default[Long]
 
   /**
-   * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations 
+   * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations
    * of Scala's `Map`, this uses object equality and hash code on the keys.
    */
   implicit def MapEqual[A, B: Equal]: Equal[Map[A, B]] =
