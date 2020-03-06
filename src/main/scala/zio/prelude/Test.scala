@@ -23,10 +23,7 @@ object Tests {
 
   scotty === stray // No ambiguous implicit
 
-  object Mult extends Newtype[Int] {
-    implicit def equalMult: Equal[Mult] =
-      Equal((l: Mult, r: Mult) => { println("Here!"); l == r })
-  }
+  object Mult extends Newtype[Int]
   type Mult = Mult.Type
 
   def acceptInt(i: Int): Unit   = println(i)
