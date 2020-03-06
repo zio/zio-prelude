@@ -26,6 +26,7 @@ object HashSpec extends DefaultRunnableSpec {
       testM("option")(consistencyLaw(Gen.option(Gen.anyInt))),
       testM("set")(consistencyLaw(TestUtil.anySet(Gen.anyInt))),
       testM("string")(consistencyLaw(Gen.anyString)),
+      testM("tuple2")(consistencyLaw(Gen.anyInt.zip(Gen.anyString))),
       testM("unit")(consistencyLaw(Gen.unit)),
       testM("vector")(consistencyLaw(Gen.vectorOf(Gen.anyInt)))
       )
