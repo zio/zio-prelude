@@ -40,6 +40,7 @@ lazy val root =
       stdSettings("zio-prelude")
     )
     .settings(buildInfoSettings("zio.prelude"))
+    .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
     .enablePlugins(BuildInfoPlugin)
 
 lazy val docs = project

@@ -37,13 +37,13 @@ private[prelude] object NewtypeModule {
 trait NewtypeExports {
   import NewtypeModule._
 
-  type Newtype[A] = instance.Newtype[A]
+  abstract class Newtype[A] extends instance.Newtype[A] {
+    val newtype: instance.Newtype[A] = instance.newtype[A]
 
-  def newtype[A]: Newtype[A] = instance.newtype[A]
+    type Type = newtype.Type
 
-  def derive[F[_]]: NewtypeDerive[F] = new NewtypeDerive[F]
+    def wrapAll[F[_]](value: F[A]): F[Type] = newtype.wrapAll(value)
 
-  class NewtypeDerive[F[_]] {
-    def forNewtype[A](n: NewtypeModule.instance.Newtype[A])(implicit instance: F[A]): F[n.Type] = n.wrapAll(instance)
+    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value)
   }
 }
