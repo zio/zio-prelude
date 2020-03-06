@@ -6,7 +6,9 @@ trait CommutativeLaws[A] extends ClosureLaws[A] {
   final def commutativeLaw(a1: A, a2: A)(implicit equal: Equal[A]): Boolean =
     combine(a1, a2) === combine(a2, a1)
 }
-sealed trait Commutative[A] extends CommutativeLaws[A]
+sealed trait Commutative[A] extends CommutativeLaws[A] { self =>
+  final def commute: Commutative[A] = Commutative((l, r) => self.combine(r, l))
+}
 object Commutative {
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 

@@ -12,4 +12,14 @@ object Tests {
   test[Closure, Int]
   test[Commutative, Int]
   test[Associative, Int]
+
+
+  val Mult = newtype[Int]
+  type Mult = Mult.Type 
+
+  def acceptInt(i: Int): Unit = println(i)
+  def acceptMult(m: Mult): Unit = println(m)
+
+  acceptInt(Mult(23))
+  // acceptMult(23)
 }
