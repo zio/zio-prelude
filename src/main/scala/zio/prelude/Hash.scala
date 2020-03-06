@@ -1,10 +1,12 @@
 package zio.prelude
 
 /**
- * `Hash[A]` provides implicit evidence that a value of type `A` hash a Hash(`A`)
+ * `Hash[A]` provides implicit evidence that a value of type `A` has a Hash(`A`)
  */
 sealed trait Hash[-A] { self =>
   def hash(a: A): Int
+
+  final def concat[B: Hash](a: A, b: B): Int = self.hash(a) ^ b.hash
 }
 
 object Hash {
@@ -18,13 +20,12 @@ object Hash {
   def default[A]: Hash[A] = Hash[A]((a: A) => a.hashCode)
 
   def ordered[A: Hash]: Hash[Iterable[A]] =
-    Hash(_.foldLeft((Nil.hashCode, 0)) {
-      case ((h, i), a) =>
-        (h ^ (a.hash ^ i.hash), i + 1)
+    Hash(_.foldLeft((Iterable.hashCode, 0)) {
+      case ((h, i), a) => (h concat a concat i , i + 1)
     }._2)
 
   def unOrdered[A: Hash]: Hash[Iterable[A]] =
-    Hash(_.foldLeft(Nil.hashCode)(_ ^ _.hash))
+    Hash(_.foldLeft(Iterable.hashCode)(_ concat _))
 
   implicit val booleanHash: Hash[Boolean] = Hash.default[Boolean]
 
@@ -36,8 +37,8 @@ object Hash {
 
   implicit def eitherHash[L: Hash, R: Hash]: Hash[Either[L, R]] =
     Hash(_ match {
-      case Left(l)  => List("Left".hashCode, l.hash).hash
-      case Right(r) => List("Right".hashCode, r.hash).hash
+      case Left(l)  => l.concat(Left(()).hashCode)
+      case Right(r) => r.concat(Right(()).hashCode)
     })
 
   implicit val floatHash: Hash[Float] = Hash.default[Float]
@@ -52,7 +53,7 @@ object Hash {
 
   implicit def optionHash[A: Hash]: Hash[Option[A]] =
     Hash(_ match {
-      case Some(a) => List("Some".hashCode, a.hash).hash
+      case Some(a) => Some(()).hashCode concat a
       case None    => None.hashCode
     })
 
@@ -73,6 +74,9 @@ trait HashSyntax {
     def hash(implicit hash: Hash[A]): Int = hash.hash(a)
 
     def ##(implicit hash: Hash[A]): Int = hash.hash(a)
+
+    def concat[B: Hash](b: B)(implicit hash: Hash[A]): Int = hash.concat(a, b)
+
   }
 
 }
