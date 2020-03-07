@@ -34,6 +34,9 @@ object Ord {
       def compare(l: A, r: A): Ordering = f(l, r)
     }
 
+  implicit val ordInt: Ord[Int] =
+    Ord[Int]((l: Int, r: Int) => if (l < r) Ordering.LessThan else if (l > r) Ordering.GreaterThan else Ordering.Equals)
+
   implicit val ordString: Ord[String] = Ord[String]((l: String, r: String) =>
     if (l < r) Ordering.LessThan
     else if (l > r) Ordering.GreaterThan
@@ -53,25 +56,23 @@ trait OrdSyntax {
 
     def <=(r: A)(implicit ord: Ord[A]): Boolean =
       (l < r) || (l === r)
+
+    def =?=(r: A)(implicit ord: Ord[A]): Ordering = ord.compare(l, r)
   }
 }
 
-sealed trait Ordering
+sealed trait Ordering { self =>
+  def ordinal: Int = self match {
+    case Ordering.LessThan    => 0
+    case Ordering.Equals      => 1
+    case Ordering.GreaterThan => 2
+  }
+}
 object Ordering {
   case object LessThan    extends Ordering
   case object Equals      extends Ordering
   case object GreaterThan extends Ordering
 
   implicit val orderingOrdering: Ord[Ordering] =
-    new Ord[Ordering] {
-      def compare(l: Ordering, r: Ordering): Ordering =
-        (l, r) match {
-          case (LessThan, LessThan)       => Equals
-          case (LessThan, _)              => LessThan
-          case (Equals, Equals)           => Equals
-          case (Equals, _)                => LessThan
-          case (GreaterThan, GreaterThan) => Equals
-          case _                          => GreaterThan
-        }
-    }
+    Ord((l: Ordering, r: Ordering) => Ord[Int].compare(l.ordinal, r.ordinal))
 }

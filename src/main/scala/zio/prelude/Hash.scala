@@ -16,7 +16,7 @@ sealed trait Hash[-A] extends HashLaws[A] { self =>
 
       java.util.Arrays.hashCode(Array(self.hash(a), that.hash(b)))
     }
-  
+
   def contramap[B](f: B => A): Hash[B] = Hash[B]((b: B) => self.hash(f(b)))
 
   def either[B](that: Hash[B]): Hash[Either[A, B]] = (self eitherWith that)(identity)
