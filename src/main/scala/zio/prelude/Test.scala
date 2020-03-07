@@ -23,7 +23,13 @@ object Tests {
 
   scotty === stray // No ambiguous implicit
 
-  object Mult extends Newtype[Int]
+  trait Dummy[A]
+
+  object Mult extends Newtype[Int] {
+    object Type {
+      implicit val DummyMult: Dummy[Type] = new Dummy[Type] {}
+    }
+  }
   type Mult = Mult.Type
 
   def acceptInt(i: Int): Unit   = println(i)

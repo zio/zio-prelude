@@ -6,11 +6,28 @@ package zio.prelude
 sealed trait Hash[-A] { self =>
   def hash(a: A): Int
 
-  final def combine[B: Hash](a: A, b: B): Int = {
-    val lhs = self.hash(a)
-    lhs ^ (b.hash + 0x9e3779b9 + (lhs << 6) + (lhs >> 2))
-  }
+  def both[B](that: Hash[B]): Hash[(A, B)] = (self bothWith that)(t => t._1 -> t._2)
 
+  def bothWith[B, C](that: Hash[B])(f: C => (A, B)): Hash[C] =
+    Hash { (c: C) =>
+      // TODO: Use Tuple hash when it exists
+      val (a, b) = f(c)
+
+      java.util.Arrays.hashCode(Array(self.hash(a), that.hash(b)))
+    }
+
+  def contramap[B](f: B => A): Hash[B] = Hash[B]((b: B) => self.hash(f(b)))
+
+  def either[B](that: Hash[B]): Hash[Either[A, B]] = (self eitherWith that)(identity)
+
+  def eitherWith[B, C](that: Hash[B])(f: C => Either[A, B]): Hash[C] =
+    Hash { (c: C) =>
+      // TODO: Use Either hash when it exists
+      f(c) match {
+        case Left(a)  => java.util.Arrays.hashCode(Array("Left".hashCode, self.hash(a)))
+        case Right(b) => java.util.Arrays.hashCode(Array("Right".hashCode, that.hash(b)))
+      }
+    }
 }
 
 object Hash {
@@ -73,7 +90,6 @@ trait HashSyntax {
 
     def ##(implicit hash: Hash[A]): Int = hash.hash(a)
 
-    def combine[B: Hash](b: B)(implicit hash: Hash[A]): Int = hash.combine(a, b)
   }
 
 }
