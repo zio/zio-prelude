@@ -25,11 +25,7 @@ object Tests {
 
   trait Dummy[A]
 
-  object Mult extends Subtype[Int] {
-    object Type {
-      implicit val DummyMult: Dummy[Type] = new Dummy[Type] {}
-    }
-  }
+  object Mult extends Subtype[Int]
   type Mult = Mult.Type
 
   def acceptInt(i: Int): Unit   = println(i)

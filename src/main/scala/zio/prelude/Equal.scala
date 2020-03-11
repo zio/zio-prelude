@@ -41,7 +41,7 @@ sealed trait Equal[-A] { self =>
    * `B` value into an `A` and the compare the `A` values for equality.
    */
   final def contramap[B](f: B => A): Equal[B] =
-    Equal((b1, b2) => equal(f(b1), f(b2)))
+    Equal((b1, b2) => self.equal(f(b1), f(b2)))
 
   /**
    * Constructs an `Equal[Either[A, B]]` given an `Equal[A]` and an

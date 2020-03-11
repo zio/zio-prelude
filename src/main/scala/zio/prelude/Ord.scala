@@ -24,7 +24,7 @@ trait OrdLaws[-A] {
     (a1 >= a2) || (a2 >= a1)
 
   final def complementLaw(a1: A, a2: A): Boolean =
-    (a1 <= a2) === (a2 >= a1)
+    (a1 <= a2) <==> (a2 >= a1)
 }
 sealed trait Ord[-A] extends OrdLaws[A] {
   protected implicit val self: Ord[A] = this
