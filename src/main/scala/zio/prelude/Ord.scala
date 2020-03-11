@@ -22,9 +22,18 @@ trait OrdLaws[-A] {
 
   final def connexityLaw2(a1: A, a2: A): Boolean =
     (a1 >= a2) || (a2 >= a1)
+
+  final def complementLaw(a1: A, a2: A): Boolean = 
+    (a1 <= a2) === (a2 >= a1)
 }
 sealed trait Ord[-A] extends OrdLaws[A] {
   protected implicit val self: Ord[A] = this
+
+  def contramap[A1](f: A1 => A): Ord[A1] = Ord((l: A1, r: A1) => self.compare(f(l), f(r)))
+
+  def mapOrdering(f: Ordering => Ordering): Ord[A] = Ord((l: A, r: A) => f(self.compare(l, r)))
+
+  def reverse: Ord[A] = mapOrdering(_.opposite)
 }
 object Ord {
   def apply[A](implicit ord: Ord[A]): Ord[A] = ord
@@ -66,6 +75,12 @@ sealed trait Ordering { self =>
     case Ordering.LessThan    => 0
     case Ordering.Equals      => 1
     case Ordering.GreaterThan => 2
+  }
+
+  def opposite: Ordering = self match {
+    case Ordering.LessThan    => Ordering.GreaterThan
+    case Ordering.Equals      => Ordering.Equals
+    case Ordering.GreaterThan => Ordering.LessThan
   }
 }
 object Ordering {
