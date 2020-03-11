@@ -25,7 +25,7 @@ object Tests {
 
   trait Dummy[A]
 
-  object Mult extends Newtype[Int] {
+  object Mult extends Subtype[Int] {
     object Type {
       implicit val DummyMult: Dummy[Type] = new Dummy[Type] {}
     }
