@@ -2,6 +2,29 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
+
+trait EqualLaws extends Lawful[Equal] {
+
+  final val reflexiveLaw = new Laws.Law1[Equal]("reflexiveLaw") {
+    def apply[A: Equal](a1: A): TestResult =
+      a1 <-> a1
+  }
+
+  final val symmetryLaw = new Laws.Law2[Equal]("symmetryalaw") {
+    def apply[A: Equal](a1: A, a2: A): TestResult =
+      (a1 === a2) ==> (a2 === a1)
+  }
+
+  final val transitivityLaw = new Laws.Law3[Equal]("transitivityLaw") {
+    def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
+      ((a1 === a2) && (a2 === a3)) ==> (a1 === a3)
+  }
+
+  final val laws = reflexiveLaw + symmetryLaw + transitivityLaw
+}
+
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be
  * compared for equality.
@@ -72,7 +95,7 @@ sealed trait Equal[-A] { self =>
   final def notEqual(l: A, r: A): Boolean = !equal(l, r)
 }
 
-object Equal {
+object Equal extends EqualLaws {
 
   /**
    * Summons an implicit `Equal[A]`.

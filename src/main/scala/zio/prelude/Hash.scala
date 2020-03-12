@@ -1,12 +1,22 @@
 package zio.prelude
 
-trait HashLaws[-A] {
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
+
+trait HashLaws extends Lawful[Equal with Hash] {
+
+  final val laws = consistencyLaw
+
+  final val consistencyLaw = new Laws.Law2[Equal with Hash]("consistencyLaw") {
+    def apply[A](a1: A, a2: A)(implicit caps: Equal[A] with Hash[A]): TestResult =
+      (a1 === a2) <==> (Hash[A].hash(a1) === Hash[A].hash(a2))
+  }
+}
+
+sealed trait Hash[-A] { self =>
+
   def hash(a: A): Int
 
-  final def consistencyLaw[A1 <: A](a1: A1, a2: A1)(implicit equal: Equal[A1]): Boolean =
-    (a1 === a2) <==> (hash(a1) === hash(a2))
-}
-sealed trait Hash[-A] extends HashLaws[A] { self =>
   def both[B](that: Hash[B]): Hash[(A, B)] = (self bothWith that)(t => t._1 -> t._2)
 
   def bothWith[B, C](that: Hash[B])(f: C => (A, B)): Hash[C] =
@@ -30,7 +40,9 @@ sealed trait Hash[-A] extends HashLaws[A] { self =>
       }
     }
 }
-object Hash {
+
+object Hash extends HashLaws {
+
   def apply[A](implicit hash: Hash[A]): Hash[A] = hash
 
   def apply[A](f: A => Int): Hash[A] =
