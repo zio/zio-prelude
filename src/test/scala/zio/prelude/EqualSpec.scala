@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.random.Random
 import zio.test._
 import zio.test.Assertion._
 import zio.ZIO
@@ -40,9 +39,9 @@ object EqualSpec extends DefaultRunnableSpec {
       testM("int")(equalLaws(Gen.anyInt)),
       testM("list")(equalLaws(Gen.listOf(Gen.anyInt))),
       testM("long")(equalLaws(Gen.anyLong)),
-      testM("map")(equalLaws(anyMap(Gen.anyInt, Gen.anyInt))),
+      testM("map")(equalLaws(TestUtil.anyMap(Gen.anyInt, Gen.anyInt))),
       testM("option")(equalLaws(Gen.option(Gen.anyInt))),
-      testM("set")(equalLaws(anySet(Gen.anyInt))),
+      testM("set")(equalLaws(TestUtil.anySet(Gen.anyInt))),
       testM("string")(equalLaws(Gen.anyString)),
       testM("tuple")(equalLaws(Gen.anyInt.zip(Gen.anyInt))),
       testM("unit")(equalLaws(Gen.unit)),
@@ -55,10 +54,4 @@ object EqualSpec extends DefaultRunnableSpec {
       assert(Equal[Float].equal(Float.NaN, Float.NaN))(isTrue)
     }
   )
-
-  def anyMap[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, Map[A, B]] =
-    Gen.listOf(a.zip(b)).map(_.toMap)
-
-  def anySet[R <: Random with Sized, A](gen: Gen[R, A]): Gen[R, Set[A]] =
-    Gen.listOf(gen).map(_.toSet)
 }
