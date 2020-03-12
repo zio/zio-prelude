@@ -17,7 +17,7 @@ sealed trait Equal[-A] { self =>
   /**
    * Constructs an `Equal[(A, B)]` given an `Equal[A]` and `Equal[B]` by first
    * comparing the `A` values for equality and then comparing the `B` values
-   * for equality, if necesasry.
+   * for equality, if necessary.
    */
   final def both[B](that: Equal[B]): Equal[(A, B)] =
     bothWith(that)(identity)
@@ -147,12 +147,6 @@ object Equal {
    * Derives an `Equal[List[A]]` given an `Equal[A]`.
    */
   implicit def ListEqual[A: Equal]: Equal[List[A]] =
-    Equal(_.corresponds(_)(Equal[A].equal))
-
-  /**
-   * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
-   */
-  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
     Equal(_.corresponds(_)(Equal[A].equal))
 
   /**
@@ -712,6 +706,12 @@ object Equal {
   implicit val UnitEqual: Equal[Unit] = Equal((_, _) => true)
 
   /**
+   * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
+   */
+  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
+    Equal(_.corresponds(_)(Equal[A].equal))
+
+  /**
    * Derives an `Equal[A]` given an `Ord[A]`.
    */
   implicit def OrdDerivesEqual[A](implicit ord: Ord[A]): Equal[A] =
@@ -720,7 +720,7 @@ object Equal {
   /**
    * Returns whether two values refer to the same location in memory.
    */
-  private def refEq[A](l: A, r: A): Boolean =
+  private[prelude] def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
 }
 
