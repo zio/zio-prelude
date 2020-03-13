@@ -2,31 +2,53 @@ package zio.prelude
 
 import scala.annotation.{ implicitNotFound, tailrec }
 
-trait OrdLaws[-A] {
-  protected implicit val self: Ord[A]
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
 
-  def compare(l: A, r: A): Ordering
+trait OrdLaws extends Lawful[Ord] {
 
-  final def transitivityLaw1(a1: A, a2: A, a3: A): Boolean =
-    ((a1 < a2) && (a2 < a3)) ==> (a1 < a3)
+  final val transitivityLaw1 = new Laws.Law3[Ord]("transitivityLaw1") {
+    def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
+      ((a1 < a2) && (a2 < a3)) ==> (a1 < a3)
+  }
 
-  final def transitivityLaw2(a1: A, a2: A, a3: A): Boolean =
-    ((a1 > a2) && (a2 > a3)) ==> (a1 > a3)
+  final val transitivityLaw2 = new Laws.Law3[Ord]("transitivityLaw2") {
+    def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
+      ((a1 > a2) && (a2 > a3)) ==> (a1 > a3)
+  }
 
-  final def antisymmetryLaw1(a1: A, a2: A): Boolean =
-    ((a1 <= a2) && (a2 <= a1)) ==> (a1 === a2)
+  final val antisymmetryLaw1 = new Laws.Law2[Ord]("antisymmetryLaw1") {
+    def apply[A: Ord](a1: A, a2: A): TestResult =
+      ((a1 <= a2) && (a2 <= a1)) ==> (a1 === a2)
+  }
 
-  final def antisymmetryLaw2(a1: A, a2: A): Boolean =
-    ((a1 >= a2) && (a2 >= a1)) ==> (a1 === a2)
+  final val antisymmetryLaw2 = new Laws.Law2[Ord]("antisymmetryLaw2") {
+    def apply[A: Ord](a1: A, a2: A): TestResult =
+      ((a1 >= a2) && (a2 >= a1)) ==> (a1 === a2)
+  }
 
-  final def connexityLaw1(a1: A, a2: A): Boolean =
-    (a1 <= a2) || (a2 <= a1)
+  final val connexityLaw1 = new Laws.Law2[Ord]("connexityLaw1") {
+    def apply[A: Ord](a1: A, a2: A): TestResult =
+      (a1 <= a2) or (a2 <= a1)
+  }
 
-  final def connexityLaw2(a1: A, a2: A): Boolean =
-    (a1 >= a2) || (a2 >= a1)
+  final val connexityLaw2 = new Laws.Law2[Ord]("connexityLaw2") {
+    def apply[A: Ord](a1: A, a2: A): TestResult =
+      (a1 >= a2) or (a2 >= a1)
+  }
 
-  final def complementLaw(a1: A, a2: A): Boolean =
-    (a1 <= a2) <==> (a2 >= a1)
+  final val complementLaw = new Laws.Law2[Ord]("complementLaw") {
+    def apply[A: Ord](a1: A, a2: A): TestResult =
+      (a1 <= a2) <==> (a2 >= a1)
+  }
+
+  final val laws = transitivityLaw1 +
+    transitivityLaw2 +
+    antisymmetryLaw1 +
+    antisymmetryLaw2 +
+    connexityLaw1 +
+    connexityLaw2 +
+    complementLaw
 }
 
 /**
@@ -34,8 +56,9 @@ trait OrdLaws[-A] {
  * ordering.
  */
 @implicitNotFound("No implicit Ord defined for ${A}.")
-sealed trait Ord[-A] extends OrdLaws[A] {
-  protected implicit val self: Ord[A] = this
+sealed trait Ord[-A] { self =>
+
+  def compare(l: A, r: A): Ordering
 
   /**
    * Constructs an `Ord[(A, B)]` given an `Ord[A]` and `Ord[B]` by first
@@ -106,7 +129,7 @@ sealed trait Ord[-A] extends OrdLaws[A] {
     mapOrdering(_.opposite)
 }
 
-object Ord {
+object Ord extends OrdLaws {
 
   /**
    * Summons an implicit `Ord[A]`.
