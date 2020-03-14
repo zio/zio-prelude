@@ -188,7 +188,7 @@ object Equal extends Lawful[Equal] {
    * type `Nothing` the `equals` method of this instance can never be called
    * but it can be useful in deriving instances for more complex types.
    */
-  implicit val NothingEqual: Equal[Nothing] = Equal[Nothing]((l: Nothing, _: Nothing) => l)
+  implicit val NothingEqual: Equal[Nothing] = default[Nothing]
 
   /**
    * Derives an `Equal[Option[A]]` given an `Equal[A]`.
@@ -203,11 +203,12 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * Derives an `Equal[Set[A]]` given an `Equal[A]`.
+   * Equality for `Set[A]` values. Due to the limitations of Scala's `Set`,
+   * this uses object equality and hash code on the elements.
    */
-  implicit def SetEqual[A: Equal]: Equal[Set[A]] =
-    Equal { (a1, a2) =>
-      a1.size == a2.size && a1.forall(a => a2.exists(_ === a))
+  implicit def SetEqual[A]: Equal[Set[A]] =
+    Equal { (set1, set2) =>
+      set1.size == set2.size && set1.forall(set2)
     }
 
   /**
@@ -220,11 +221,7 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple2Equal[A: Equal, B: Equal]: Equal[(A, B)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1), (a2, b2)) => a1 === a2 && b1 === b2
-      }
-    }
+    Equal[A] both Equal[B]
 
   /**
    * Derives an `Equal` for a product type given an `Equal` for each element of
