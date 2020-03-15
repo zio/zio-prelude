@@ -23,7 +23,7 @@ private[prelude] trait ClosureImplicits1 {
   implicit def CommutativeDerivesClosure[A](implicit commutative: Commutative[A]): Closure[A] =
     Closure(commutative.combine(_, _))
 }
-private[prelude] trait ClosureImplicits0 {
+private[prelude] trait ClosureImplicits0 extends ClosureImplicits1 {
   implicit def AssociativeDerivesClosure[A](implicit associative: Associative[A]): Closure[A] =
     Closure(associative.combine(_, _))
 }

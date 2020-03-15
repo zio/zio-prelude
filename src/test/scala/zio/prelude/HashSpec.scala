@@ -2,33 +2,30 @@ package zio.prelude
 
 import zio.ZIO
 import zio.test._
+import zio.test.laws._
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
+import zio.prelude.Equal._
 
 object HashSpec extends DefaultRunnableSpec {
-  final def consistencyLaw[R, A: Hash : Equal] (gen: Gen[R, A]): ZIO[R, Nothing, TestResult] =
-    check(gen, gen) { (a1, a2) =>
-      assert((a1 === a2) <==> (a1.hash === a2.hash))(isTrue ?? "consistencyLaw")
-    }
-
   def spec = suite("HashSpec")(
     suite("laws")(
-      testM("boolean")(consistencyLaw(Gen.boolean)),
-      testM("byte")(consistencyLaw(Gen.anyByte)),
-      testM("char")(consistencyLaw(Gen.anyChar)),
-      testM("double")(consistencyLaw(Gen.anyDouble)),
-      testM("either")(consistencyLaw(Gen.either(Gen.anyInt, Gen.anyInt))),
-      testM("float")(consistencyLaw(Gen.anyFloat)),
-      testM("int")(consistencyLaw(Gen.anyInt)),
-      testM("list")(consistencyLaw(Gen.listOf(Gen.anyInt))),
-      testM("long")(consistencyLaw(Gen.anyLong)),
-      testM("map")(consistencyLaw(TestUtil.anyMap(Gen.anyInt, Gen.anyInt))),
-      testM("option")(consistencyLaw(Gen.option(Gen.anyInt))),
-      testM("set")(consistencyLaw(TestUtil.anySet(Gen.anyInt))),
-      testM("string")(consistencyLaw(Gen.anyString)),
-      testM("tuple2")(consistencyLaw(Gen.anyInt.zip(Gen.anyString))),
-      testM("unit")(consistencyLaw(Gen.unit)),
-      testM("vector")(consistencyLaw(Gen.vectorOf(Gen.anyInt)))
+      testM("boolean")(checkAllLaws(Hash)(Gen.boolean)),
+      testM("byte")(checkAllLaws(Hash)(Gen.anyByte)),
+      testM("char")(checkAllLaws(Hash)(Gen.anyChar)),
+      testM("double")(checkAllLaws(Hash)(Gen.anyDouble)),
+      testM("either")(checkAllLaws(Hash)(Gen.either(Gen.anyInt, Gen.anyInt))),
+      testM("float")(checkAllLaws(Hash)(Gen.anyFloat)),
+      testM("int")(checkAllLaws(Hash)(Gen.anyInt)),
+      testM("list")(checkAllLaws(Hash)(Gen.listOf(Gen.anyInt))),
+      testM("long")(checkAllLaws(Hash)(Gen.anyLong)),
+      testM("map")(checkAllLaws(Hash)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
+      testM("option")(checkAllLaws(Hash)(Gen.option(Gen.anyInt))),
+      testM("set")(checkAllLaws(Hash)(Gen.setOf(Gen.anyInt))),
+      testM("string")(checkAllLaws(Hash)(Gen.anyString)),
+      testM("tuple2")(checkAllLaws(Hash)(Gen.anyInt.zip(Gen.anyString))),
+      testM("unit")(checkAllLaws(Hash)(Gen.unit)),
+      testM("vector")(checkAllLaws(Hash)(Gen.vectorOf(Gen.anyInt)))
       )
     )
 }

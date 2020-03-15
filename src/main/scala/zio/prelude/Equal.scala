@@ -2,6 +2,9 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
+
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be
  * compared for equality.
@@ -17,7 +20,7 @@ sealed trait Equal[-A] { self =>
   /**
    * Constructs an `Equal[(A, B)]` given an `Equal[A]` and `Equal[B]` by first
    * comparing the `A` values for equality and then comparing the `B` values
-   * for equality, if necesasry.
+   * for equality, if necessary.
    */
   final def both[B](that: Equal[B]): Equal[(A, B)] =
     bothWith(that)(identity)
@@ -41,7 +44,7 @@ sealed trait Equal[-A] { self =>
    * `B` value into an `A` and the compare the `A` values for equality.
    */
   final def contramap[B](f: B => A): Equal[B] =
-    Equal((b1, b2) => equal(f(b1), f(b2)))
+    Equal((b1, b2) => self.equal(f(b1), f(b2)))
 
   /**
    * Constructs an `Equal[Either[A, B]]` given an `Equal[A]` and an
@@ -72,7 +75,23 @@ sealed trait Equal[-A] { self =>
   final def notEqual(l: A, r: A): Boolean = !equal(l, r)
 }
 
-object Equal {
+object Equal extends Lawful[Equal] {
+  final val reflexiveLaw = new Laws.Law1[Equal]("reflexiveLaw") {
+    def apply[A: Equal](a1: A): TestResult =
+      a1 <-> a1
+  }
+
+  final val symmetryLaw = new Laws.Law2[Equal]("symmetryLaw") {
+    def apply[A: Equal](a1: A, a2: A): TestResult =
+      (a1 <-> a2) ==> (a2 <-> a1)
+  }
+
+  final val transitivityLaw = new Laws.Law3[Equal]("transitivityLaw") {
+    def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
+      ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
+  }
+
+  final val laws = reflexiveLaw + symmetryLaw + transitivityLaw
 
   /**
    * Summons an implicit `Equal[A]`.
@@ -147,12 +166,6 @@ object Equal {
    * Derives an `Equal[List[A]]` given an `Equal[A]`.
    */
   implicit def ListEqual[A: Equal]: Equal[List[A]] =
-    Equal(_.corresponds(_)(Equal[A].equal))
-
-  /**
-   * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
-   */
-  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
     Equal(_.corresponds(_)(Equal[A].equal))
 
   /**
@@ -712,6 +725,12 @@ object Equal {
   implicit val UnitEqual: Equal[Unit] = Equal((_, _) => true)
 
   /**
+   * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
+   */
+  implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
+    Equal(_.corresponds(_)(Equal[A].equal))
+
+  /**
    * Derives an `Equal[A]` given an `Ord[A]`.
    */
   implicit def OrdDerivesEqual[A](implicit ord: Ord[A]): Equal[A] =
@@ -720,7 +739,7 @@ object Equal {
   /**
    * Returns whether two values refer to the same location in memory.
    */
-  private def refEq[A](l: A, r: A): Boolean =
+  private[prelude] def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
 }
 

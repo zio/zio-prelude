@@ -1,6 +1,8 @@
 package zio.prelude
 
 import java.util.{Arrays => JArrays}
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
 
 /**
  * `Hash[A]` provides implicit evidence that a value of type `A` has a Hash(`A`)
@@ -42,7 +44,14 @@ sealed trait Hash[-A] { self =>
     }
 }
 
-object Hash {
+object Hash extends Lawful[Equal with Hash] {
+  final val consistencyLaw = new Laws.Law2[Equal with Hash]("consistencyLaw") {
+    def apply[A](a1: A, a2: A)(implicit caps: Equal[A] with Hash[A]): TestResult =
+      (a1 === a2) <==> (Hash[A].hash(a1) === Hash[A].hash(a2))
+  }
+
+  final val laws = consistencyLaw
+
   def apply[A](implicit hash: Hash[A]): Hash[A] = hash
 
   def apply[A](f: A => Int): Hash[A] =
