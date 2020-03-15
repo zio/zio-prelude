@@ -117,17 +117,17 @@ object Equal extends Lawful[Equal] {
   /**
    * Equality for `Boolean` values.
    */
-  implicit val BooleanEqual: Equal[Boolean] = default[Boolean]
+  implicit val BooleanEqual: Equal[Boolean] = default
 
   /**
    * Equality for `Byte` values.
    */
-  implicit val ByteEqual: Equal[Byte] = default[Byte]
+  implicit val ByteEqual: Equal[Byte] = default
 
   /**
    * Equality for `Char` values.
    */
-  implicit val CharEqual: Equal[Char] = default[Char]
+  implicit val CharEqual: Equal[Char] = default
 
   /**
    * Equality for `Double` values. Note that to honor the contract that a
@@ -160,7 +160,7 @@ object Equal extends Lawful[Equal] {
   /**
    * Equality for `Int` values.
    */
-  implicit val IntEqual: Equal[Int] = default[Int]
+  implicit val IntEqual: Equal[Int] = default
 
   /**
    * Derives an `Equal[List[A]]` given an `Equal[A]`.
@@ -171,7 +171,7 @@ object Equal extends Lawful[Equal] {
   /**
    * Equality for `Long` values.
    */
-  implicit val LongEqual: Equal[Long] = default[Long]
+  implicit val LongEqual: Equal[Long] = default
 
   /**
    * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations
@@ -188,7 +188,7 @@ object Equal extends Lawful[Equal] {
    * type `Nothing` the `equals` method of this instance can never be called
    * but it can be useful in deriving instances for more complex types.
    */
-  implicit val NothingEqual: Equal[Nothing] = default[Nothing]
+  implicit val NothingEqual: Equal[Nothing] = default
 
   /**
    * Derives an `Equal[Option[A]]` given an `Equal[A]`.
@@ -206,15 +206,12 @@ object Equal extends Lawful[Equal] {
    * Equality for `Set[A]` values. Due to the limitations of Scala's `Set`,
    * this uses object equality and hash code on the elements.
    */
-  implicit def SetEqual[A]: Equal[Set[A]] =
-    Equal { (set1, set2) =>
-      set1.size == set2.size && set1.forall(set2)
-    }
+  implicit def SetEqual[A]: Equal[Set[A]] = default
 
   /**
    * Equality for `String` values.
    */
-  implicit val StringEqual: Equal[String] = default[String]
+  implicit val StringEqual: Equal[String] = default
 
   /**
    * Derives an `Equal` for a product type given an `Equal` for each element of
