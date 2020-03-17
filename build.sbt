@@ -44,6 +44,16 @@ lazy val root =
     .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
     .enablePlugins(BuildInfoPlugin)
 
+lazy val deriving = project
+  .in(file("zio-prelude-deriving"))
+  .dependsOn(root)
+  .settings(stdSettings("zio-prelude-deriving"))
+  .settings(
+    scalacOptions += "-language:experimental.macros",
+    libraryDependencies += "com.propensive" %% "magnolia" % "0.12.6",
+    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
+  )
+
 lazy val docs = project
   .in(file("zio-prelude-docs"))
   .settings(
