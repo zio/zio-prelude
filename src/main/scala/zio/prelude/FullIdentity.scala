@@ -1,6 +1,8 @@
 package zio.prelude
 
-sealed trait FullIdentityLaws[A] extends LeftIdentityLaws[A] with RightIdentityLaws[A] {
+import zio.test.laws.Lawful
+
+sealed trait FullIdentity[A] {
   def identity: A
 
   final def leftIdentity: A = identity
@@ -9,9 +11,13 @@ sealed trait FullIdentityLaws[A] extends LeftIdentityLaws[A] with RightIdentityL
 
   def combine(l: A, r: A): A
 }
-sealed trait FullIdentity[A] extends FullIdentityLaws[A]
-object FullIdentity {
-  def apply[A](implicit fullIdentity: FullIdentityLaws[A]): FullIdentityLaws[A] = fullIdentity
+
+object FullIdentity
+    extends Lawful[FullIdentity with LeftIdentity with RightIdentity with Associative with Closure with Equal] {
+
+  final val laws = LeftIdentity.leftIdentityLaw + RightIdentity.laws
+
+  def apply[A](implicit fullIdentity: FullIdentity[A]): FullIdentity[A] = fullIdentity
 
   def apply[A](identity0: A, op: (A, A) => A): FullIdentity[A] =
     new FullIdentity[A] {
