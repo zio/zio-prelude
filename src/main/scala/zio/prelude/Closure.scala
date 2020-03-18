@@ -1,17 +1,25 @@
 package zio.prelude
 
+import zio.test.TestResult
+import zio.test.laws.{Lawful, Laws}
+
 trait ClosureLaws[A] {
   def combine(l: A, r: A): A
-
-  final def closureLaw(l: A, r: A): Boolean =
-    try {
-      combine(l, r)
-
-      true
-    } catch { case _: Throwable => false }
 }
+
 sealed trait Closure[A] extends ClosureLaws[A]
-object Closure extends ClosureImplicits0 {
+
+object Closure extends ClosureImplicits0 with Lawful[Closure] {
+  final val closureLaw = new Laws.Law2[Closure]("closureLaw") {
+    def apply[A: Closure] (a1: A, a2: A): TestResult =
+      (try {
+        a1 <> a2
+        true
+      } catch { case _: Throwable => false }) <-> true
+  }
+
+  final val laws = closureLaw
+
   def apply[A](implicit closure: Closure[A]): Closure[A] = closure
 
   def apply[A](f: (A, A) => A): Closure[A] =
