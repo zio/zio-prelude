@@ -12,11 +12,11 @@ sealed trait NewtypeModule {
 
     def apply(value: A): Type = wrap(value)
 
-    def unapply(value: Type): Some[A] = unwrap(value)
+    def unapply(value: Type): Some[A] = Some(unwrap(value))
 
     def wrap(value: A): Type = wrapAll[Id](value)
 
-    def unwrap(value: Type): Some[A] = Some(unwrapAll[Id](value))
+    def unwrap(value: Type): A = unwrapAll[Id](value)
 
     def wrapAll[F[_]](value: F[A]): F[Type]
 
