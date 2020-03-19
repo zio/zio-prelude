@@ -1,20 +1,13 @@
 package zio.prelude
 
+import java.util.{Arrays => JArrays}
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait HashLaws extends Lawful[Equal with Hash] {
-
-  final val laws = consistencyLaw
-
-  final val consistencyLaw = new Laws.Law2[Equal with Hash]("consistencyLaw") {
-    def apply[A](a1: A, a2: A)(implicit caps: Equal[A] with Hash[A]): TestResult =
-      (a1 === a2) <==> (Hash[A].hash(a1) === Hash[A].hash(a2))
-  }
-}
-
+/**
+ * `Hash[A]` provides implicit evidence that a value of type `A` has a Hash(`A`)
+ */
 sealed trait Hash[-A] { self =>
-
   def hash(a: A): Int
 
   def both[B](that: Hash[B]): Hash[(A, B)] = (self bothWith that)(t => t._1 -> t._2)
@@ -24,7 +17,7 @@ sealed trait Hash[-A] { self =>
       // TODO: Use Tuple hash when it exists
       val (a, b) = f(c)
 
-      java.util.Arrays.hashCode(Array(self.hash(a), that.hash(b)))
+      JArrays.hashCode(Array(self.hash(a), that.hash(b)))
     }
 
   def contramap[B](f: B => A): Hash[B] = Hash[B]((b: B) => self.hash(f(b)))
@@ -35,13 +28,29 @@ sealed trait Hash[-A] { self =>
     Hash { (c: C) =>
       // TODO: Use Either hash when it exists
       f(c) match {
-        case Left(a)  => java.util.Arrays.hashCode(Array("Left".hashCode, self.hash(a)))
-        case Right(b) => java.util.Arrays.hashCode(Array("Right".hashCode, that.hash(b)))
+        case Left(a)  => JArrays.hashCode(Array("Left".hashCode, self.hash(a)))
+        case Right(b) => JArrays.hashCode(Array("Right".hashCode, that.hash(b)))
+      }
+    }
+
+  def option: Hash[Option[A]] = self optionWith identity
+
+  def optionWith[B](f: B => Option[A]): Hash[B] =
+    Hash { b: B =>
+      f(b) match {
+        case Some(a) => JArrays.hashCode(Array("Some".hashCode, self.hash(a)))
+        case None => None.hashCode
       }
     }
 }
 
-object Hash extends HashLaws {
+object Hash extends Lawful[Equal with Hash] {
+  final val consistencyLaw = new Laws.Law2[Equal with Hash]("consistencyLaw") {
+    def apply[A](a1: A, a2: A)(implicit caps: Equal[A] with Hash[A]): TestResult =
+      (a1 === a2) <==> (Hash[A].hash(a1) === Hash[A].hash(a2))
+  }
+
+  final val laws = consistencyLaw
 
   def apply[A](implicit hash: Hash[A]): Hash[A] = hash
 
@@ -52,12 +61,48 @@ object Hash extends HashLaws {
 
   def default[A]: Hash[A] = Hash[A]((a: A) => a.hashCode)
 
+  implicit def arrayHash[A: Hash]: Hash[Array[A]] = Hash(arr => JArrays.hashCode(arr.map(_.hash)))
+
+  implicit val booleanHash: Hash[Boolean] = Hash.default[Boolean]
+
+  implicit val byteHash: Hash[Byte] = Hash.default[Byte]
+
+  implicit val charHash: Hash[Char] = Hash.default[Char]
+
+  implicit val doubleHash: Hash[Double] = Hash.default[Double]
+
+  implicit def eitherHash[A: Hash, B: Hash]: Hash[Either[A, B]] = Hash[A] either Hash[B]
+
+  implicit val floatHash: Hash[Float] = Hash.default[Float]
+
+  implicit val intHash: Hash[Int] = Hash.default[Int]
+
+  implicit def ListHash[A: Hash]: Hash[List[A]] = ???
+
+  implicit val longHash: Hash[Long] = Hash.default[Long]
+
+  implicit def mapHash[K: Hash, V: Hash]: Hash[Map[K, V]] = ???
+
+  implicit def optionHash[A: Hash]: Hash[Option[A]] = Hash[A].option
+
+  implicit def setHash[A: Hash]: Hash[Set[A]] = ???
+
   implicit val stringHash: Hash[String] = Hash.default[String]
-  implicit val intHash: Hash[Int]       = Hash.default[Int]
-  implicit val longHash: Hash[Long]     = Hash.default[Long]
+
+  implicit def tuple2[A: Hash, B: Hash]: Hash[(A, B)] = Hash[A] both Hash[B]
+
+  implicit val unitHash: Hash[Unit] = Hash.default[Unit]
+
+  implicit def vectorHash[A: Hash]: Hash[Vector[A]] = ???
 }
+
 trait HashSyntax {
+
   implicit class HashSyntax[A](a: A) {
     def hash(implicit hash: Hash[A]): Int = hash.hash(a)
+
+    def ##(implicit hash: Hash[A]): Int = hash.hash(a)
+
   }
+
 }
