@@ -1,14 +1,20 @@
 package zio.prelude
 
-trait AssociativeLaws[A] extends ClosureLaws[A] {
-  def combine(l: A, r: A): A
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
 
-  final def associativityLaw(a1: A, a2: A, a3: A)(implicit equal: Equal[A]): Boolean =
-    combine(a1, combine(a2, a3)) ===
-      combine(combine(a1, a2), a3)
+sealed trait Associative[A] {
+  def combine(l: A, r: A): A
 }
-sealed trait Associative[A] extends AssociativeLaws[A]
-object Associative {
+
+object Associative extends Lawful[Associative with Closure with Equal] {
+  final val associativityLaw = new Laws.Law3[Associative with Closure with Equal]("associativityLaw") {
+    def apply[A] (a1: A, a2: A, a3: A)(implicit A: Associative[A] with Closure[A] with Equal[A]): TestResult =
+      (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
+  }
+
+  final val laws = associativityLaw + Closure.laws
+
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 
   def apply[A](f: (A, A) => A): Associative[A] =

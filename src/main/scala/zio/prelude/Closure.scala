@@ -1,17 +1,23 @@
 package zio.prelude
 
-trait ClosureLaws[A] {
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
+
+sealed trait Closure[A] {
   def combine(l: A, r: A): A
-
-  final def closureLaw(l: A, r: A): Boolean =
-    try {
-      combine(l, r)
-
-      true
-    } catch { case _: Throwable => false }
 }
-sealed trait Closure[A] extends ClosureLaws[A]
-object Closure extends ClosureImplicits0 {
+
+object Closure extends ClosureImplicits0 with Lawful[Closure] {
+  final val closureLaw = new Laws.Law2[Closure]("closureLaw") {
+    def apply[A: Closure](a1: A, a2: A): TestResult =
+      (try {
+        a1 <> a2
+        true
+      } catch { case _: Throwable => false }) <-> true
+  }
+
+  final val laws = closureLaw
+
   def apply[A](implicit closure: Closure[A]): Closure[A] = closure
 
   def apply[A](f: (A, A) => A): Closure[A] =
@@ -19,6 +25,7 @@ object Closure extends ClosureImplicits0 {
       def combine(l: A, r: A): A = f(l, r)
     }
 }
+
 private[prelude] trait ClosureImplicits1 {
   implicit def CommutativeDerivesClosure[A](implicit commutative: Commutative[A]): Closure[A] =
     Closure(commutative.combine(_, _))

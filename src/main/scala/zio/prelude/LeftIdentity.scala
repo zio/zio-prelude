@@ -1,14 +1,21 @@
 package zio.prelude
 
-trait LeftIdentityLaws[A] extends AssociativeLaws[A] {
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
+
+sealed trait LeftIdentity[A] {
   def leftIdentity: A
 
   def combine(l: A, r: A): A
-
-  final def leftIdentityLaw(a: A)(implicit equal: Equal[A]): Boolean =
-    combine(leftIdentity, a) === a
 }
-sealed trait LeftIdentity[A] extends LeftIdentityLaws[A]
-object LeftIdentity {
+
+object LeftIdentity extends Lawful[LeftIdentity with Equal with Closure with Associative] {
+  final val leftIdentityLaw = new Laws.Law1[LeftIdentity with Equal with Closure with Associative]("leftIdentityLaw") {
+    def apply[A](a: A)(implicit L: LeftIdentity[A] with Equal[A] with Closure[A] with Associative[A]): TestResult =
+      (L.leftIdentity <> a) <-> a
+  }
+
+  final val laws = leftIdentityLaw + Associative.laws
+
   def apply[A](implicit leftIdentity: LeftIdentity[A]): LeftIdentity[A] = leftIdentity
 }
