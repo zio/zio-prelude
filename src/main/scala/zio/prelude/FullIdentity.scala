@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.test.laws.Lawful
 
-sealed trait FullIdentity[A] {
+sealed trait FullIdentity[A] extends LeftIdentity[A] with RightIdentity[A] {
   def identity: A
 
   final def leftIdentity: A = identity
@@ -12,8 +12,7 @@ sealed trait FullIdentity[A] {
   def combine(l: A, r: A): A
 }
 
-object FullIdentity
-    extends Lawful[FullIdentity with LeftIdentity with RightIdentity with Associative with Closure with Equal] {
+object FullIdentity extends Lawful[FullIdentity with Equal] {
 
   final val laws = LeftIdentity.leftIdentityLaw + RightIdentity.laws
 

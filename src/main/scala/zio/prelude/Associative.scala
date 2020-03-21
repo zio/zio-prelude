@@ -1,15 +1,15 @@
 package zio.prelude
 
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
-sealed trait Associative[A] {
-  def combine(l: A, r: A): A
-}
+trait Associative[A] extends Closure[A]
 
-object Associative extends Lawful[Associative with Closure with Equal] {
-  final val associativityLaw = new Laws.Law3[Associative with Closure with Equal]("associativityLaw") {
-    def apply[A] (a1: A, a2: A, a3: A)(implicit A: Associative[A] with Closure[A] with Equal[A]): TestResult =
+object Associative extends Lawful[Associative with Equal] {
+
+  final val associativityLaw = new Laws.Law3[Associative with Equal]("associativityLaw") {
+
+    def apply[A](a1: A, a2: A, a3: A)(implicit A: Associative[A] with Equal[A]): TestResult =
       (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
   }
 
@@ -17,9 +17,10 @@ object Associative extends Lawful[Associative with Closure with Equal] {
 
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 
-  def apply[A](f: (A, A) => A): Associative[A] =
-    new Associative[A] {
-      def combine(l: A, r: A): A = f(l, r)
-    }
+  // DOES NOT COMPILE - ambiguous reference because of summoner and Single Abstract Method(SAM) trait
+  //  def apply[A](f: (A, A) => A): Associative[A] =
+  //    new Associative[A] {
+  //      def combine(l: A, r: A): A = f(l, r)
+  //    }
 
 }

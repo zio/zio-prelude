@@ -10,9 +10,11 @@ import zio.test.laws.{ Lawful, Laws }
  * ordering.
  */
 @implicitNotFound("No implicit Ord defined for ${A}.")
-sealed trait Ord[-A] { self =>
+sealed trait Ord[-A] extends Equal[A] { self =>
 
   def compare(l: A, r: A): Ordering
+
+  def equal(l: A, r: A): Boolean = compare(l, r).isEqual
 
   /**
    * Constructs an `Ord[(A, B)]` given an `Ord[A]` and `Ord[B]` by first
@@ -40,7 +42,7 @@ sealed trait Ord[-A] { self =>
    * `B` value into an `A` value. The instance will convert each `B` value into
    * an `A` and compare the `A` values.
    */
-  def contramap[B](f: B => A): Ord[B] =
+  override def contramap[B](f: B => A): Ord[B] =
     Ord((b1, b2) => self.compare(f(b1), f(b2)))
 
   /**

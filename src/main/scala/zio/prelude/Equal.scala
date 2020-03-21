@@ -10,7 +10,7 @@ import zio.test.laws.{ Lawful, Laws }
  * compared for equality.
  */
 @implicitNotFound("No implicit Equal defined for ${A}.")
-sealed trait Equal[-A] { self =>
+trait Equal[-A] { self =>
 
   /**
    * Returns whether two values of type `A` are equal.
@@ -43,7 +43,7 @@ sealed trait Equal[-A] { self =>
    * transform a `B` value into an `A` value. The instance will convert each
    * `B` value into an `A` and the compare the `A` values for equality.
    */
-  final def contramap[B](f: B => A): Equal[B] =
+  def contramap[B](f: B => A): Equal[B] =
     Equal((b1, b2) => self.equal(f(b1), f(b2)))
 
   /**
@@ -98,15 +98,16 @@ object Equal extends Lawful[Equal] {
    */
   def apply[A](implicit equal: Equal[A]): Equal[A] = equal
 
+  // DOES NOT COMPILE - ambiguous reference because of summoner and Single Abstract Method(SAM) trait
   /**
    * Constructs an `Equal[A]` from a function. The instance will be optimized
    * to first compare the values for reference equality and then compare the
    * values for value equality.
    */
-  def apply[A](eq0: (A, A) => Boolean): Equal[A] =
-    new Equal[A] {
-      def equal(l: A, r: A): Boolean = refEq(l, r) || eq0(l, r)
-    }
+  //  def apply[A](eq0: (A, A) => Boolean): Equal[A] =
+  //    new Equal[A] {
+  //      def equal(l: A, r: A): Boolean = refEq(l, r) || eq0(l, r)
+  //    }
 
   /**
    * Constructs an `Equal[A]` that uses the default notion of equality
@@ -724,11 +725,6 @@ object Equal extends Lawful[Equal] {
   implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
     Equal(_.corresponds(_)(Equal[A].equal))
 
-  /**
-   * Derives an `Equal[A]` given an `Ord[A]`.
-   */
-  implicit def OrdDerivesEqual[A](implicit ord: Ord[A]): Equal[A] =
-    Equal((l, r) => ord.compare(l, r) eq Ordering.Equals)
 
   /**
    * Returns whether two values refer to the same location in memory.
