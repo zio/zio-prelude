@@ -1,6 +1,6 @@
 package zio.prelude
 
-import java.util.{Arrays => JArrays}
+import java.util.{ Arrays => JArrays }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -14,7 +14,6 @@ sealed trait Hash[-A] { self =>
 
   def bothWith[B, C](that: Hash[B])(f: C => (A, B)): Hash[C] =
     Hash { (c: C) =>
-      // TODO: Use Tuple hash when it exists
       val (a, b) = f(c)
 
       JArrays.hashCode(Array(self.hash(a), that.hash(b)))
@@ -39,7 +38,7 @@ sealed trait Hash[-A] { self =>
     Hash { b: B =>
       f(b) match {
         case Some(a) => JArrays.hashCode(Array("Some".hashCode, self.hash(a)))
-        case None => None.hashCode
+        case None    => None.hashCode
       }
     }
 }
