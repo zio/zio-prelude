@@ -3,7 +3,8 @@ package zio.prelude
 import zio.test.TestResult
 import zio.test.laws.Laws
 
-sealed trait Commutative[A] extends Closure[A] { self =>
+trait Commutative[A] extends Closure[A] {
+  self =>
   final def commute: Commutative[A] = Commutative((l, r) => self.combine(r, l))
 }
 
@@ -18,7 +19,7 @@ object Commutative {
 
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 
-  def apply[A](f: (A, A) => A): Commutative[A] =
+  def fromFunction[A](f: (A, A) => A): Commutative[A] =
     new Commutative[A] {
       def combine(l: A, r: A): A = f(l, r)
     }

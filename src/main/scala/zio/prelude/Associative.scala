@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 /**
  * The `Associative[A]` type class describes an associative binary operator
@@ -21,7 +21,7 @@ object Associative extends Lawful[Associative with Equal] {
    * }}}
    */
   final val associativityLaw = new Laws.Law3[Associative with Equal]("associativityLaw") {
-    def apply[A](a1: A, a2: A, a3: A)(implicit A: Associative[A] with Closure[A] with Equal[A]): TestResult =
+    def apply[A](a1: A, a2: A, a3: A)(implicit A: Associative[A] with Equal[A]): TestResult =
       (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
   }
 
@@ -29,10 +29,9 @@ object Associative extends Lawful[Associative with Equal] {
 
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 
-  // TODO - DOES NOT COMPILE
-//  def apply[A](f: (A, A) => A): Associative[A] =
-//    new Associative[A] {
-//      def combine(l: A, r: A): A = f(l, r)
-//    }
+  def fromFunction[A](f: (A, A) => A): Associative[A] =
+    new Associative[A] {
+      def combine(l: A, r: A): A = f(l, r)
+    }
 
 }

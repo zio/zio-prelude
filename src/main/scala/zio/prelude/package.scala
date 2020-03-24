@@ -1,15 +1,16 @@
 package zio
 
-import zio.test.{ assert, Assertion, TestResult }
-import zio.test.Assertion.{ isFalse, isTrue }
+import zio.test.{assert, Assertion, TestResult}
+import zio.test.Assertion.{isFalse, isTrue}
 
 package object prelude
-    extends DebugSyntax
+  extends DebugSyntax
     with EqualSyntax
     with OrdSyntax
     with HashSyntax
     with ClosureSyntax
-    with NewtypeExports {
+    with NewtypeExports
+    with StdInstances {
 
   /**
    * Makes a new assertion that requires a value equal the specified value.
@@ -29,8 +30,10 @@ package object prelude
   implicit class BoolSyntax(private val l: Boolean) extends AnyVal {
     def or(r: Boolean): TestResult =
       assert(l)(isTrue) || assert(r)(isTrue)
+
     def ==>(r: Boolean): TestResult =
       assert(r)(isTrue) || assert(l)(isFalse)
+
     def <==>(r: Boolean): TestResult =
       assert(r)(equalTo(l))
   }

@@ -7,22 +7,23 @@ object EqualSpec extends DefaultRunnableSpec {
 
   def spec = suite("EqualSpec")(
     suite("laws")(
+      testM("unit")(checkAllLaws(Equal)(Gen.unit)),
       testM("boolean")(checkAllLaws(Equal)(Gen.boolean)),
       testM("byte")(checkAllLaws(Equal)(Gen.anyByte)),
       testM("char")(checkAllLaws(Equal)(Gen.anyChar)),
-      testM("double")(checkAllLaws(Equal)(Gen.anyDouble)),
-      testM("either")(checkAllLaws(Equal)(Gen.either(Gen.anyInt, Gen.anyInt))),
-      testM("float")(checkAllLaws(Equal)(Gen.anyFloat)),
-      testM("int")(checkAllLaws(Equal)(Gen.anyInt)),
-      testM("list")(checkAllLaws(Equal)(Gen.listOf(Gen.anyInt))),
-      testM("long")(checkAllLaws(Equal)(Gen.anyLong)),
-      testM("map")(checkAllLaws(Equal)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
-      testM("option")(checkAllLaws(Equal)(Gen.option(Gen.anyInt))),
-      testM("set")(checkAllLaws(Equal)(Gen.setOf(Gen.anyInt))),
       testM("string")(checkAllLaws(Equal)(Gen.anyString)),
-      testM("tuple")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyInt))),
-      testM("unit")(checkAllLaws(Equal)(Gen.unit)),
-      testM("vector")(checkAllLaws(Equal)(Gen.vectorOf(Gen.anyInt)))
+      testM("int")(checkAllLaws(Equal)(Gen.anyInt)),
+      testM("long")(checkAllLaws(Equal)(Gen.anyLong)),
+      testM("float")(checkAllLaws(Equal)(Gen.anyFloat)),
+      testM("double")(checkAllLaws(Equal)(Gen.anyDouble)),
+      testM("option")(checkAllLaws(Equal)(Gen.option(Gen.anyInt))),
+      testM("either")(checkAllLaws(Equal)(Gen.either(Gen.anyInt, Gen.anyInt))),
+      testM("tuple2")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyInt))),
+      testM("tuple3")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
+      testM("list")(checkAllLaws(Equal)(Gen.listOf(Gen.anyInt))),
+      testM("vector")(checkAllLaws(Equal)(Gen.vectorOf(Gen.anyInt))),
+      testM("map")(checkAllLaws(Equal)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
+      testM("set")(checkAllLaws(Equal)(Gen.setOf(Gen.anyInt))),
     ),
     test("DoubleEqual correctly handles `Double.NaN") {
       Double.NaN <-> Double.NaN
