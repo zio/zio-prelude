@@ -4,6 +4,10 @@ import zio.test.laws.Lawful
 
 trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
   def identity: A
+
+  override final def leftIdentity: A = identity
+
+  override final def rightIdentity: A = identity
 }
 
 object Identity extends Lawful[Identity with Equal] {
@@ -15,10 +19,6 @@ object Identity extends Lawful[Identity with Equal] {
   def apply[A](identity0: A, op: (A, A) => A): Identity[A] =
     new Identity[A] {
       def identity: A = identity0
-
-      def leftIdentity: A = identity0
-
-      def rightIdentity: A = identity0
 
       def combine(l: A, r: A): A = op(l, r)
     }

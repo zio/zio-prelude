@@ -1,8 +1,10 @@
 package zio.prelude
 
 object Tests {
-  implicit def additionCommutative: Commutative[Int] = Commutative[Int]((l: Int, r: Int) => l + r)
-  implicit def additionAssociative: Associative[Int] = Associative[Int]((l: Int, r: Int) => l + r)
+  implicit def additionCommutativeAssociative: Commutative[Int] with Associative[Int] =
+    new Commutative[Int] with Associative[Int] {
+      def combine(l: Int, r: Int) = l + r
+    }
 
   def test[TypeClass[_], T](implicit ev: TypeClass[T]): Unit = { val _ = ev }
 
@@ -10,8 +12,7 @@ object Tests {
   test[Equal, Double]
 
   test[Commutative, Int]
-  // TODO - ambiguous implicit values
-  //test[Closure, Int]
+  test[Closure, Int]
   test[Associative, Int]
 
   trait Animal
