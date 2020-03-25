@@ -83,6 +83,16 @@ trait Ord[-A] extends Equal[A] { self =>
    */
   def reverse: Ord[A] =
     mapOrdering(_.opposite)
+
+  def toScalaOrdering[A1 <: A]: scala.math.Ordering[A1] =
+    new scala.math.Ordering[A1] {
+      def compare(l: A1, r: A1): Int =
+        self.compare(l, r) match {
+          case Ordering.LessThan    => -1
+          case Ordering.Equals      => 0
+          case Ordering.GreaterThan => 0
+        }
+    }
 }
 
 object Ord extends Lawful[Ord] {
