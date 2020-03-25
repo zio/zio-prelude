@@ -5,7 +5,6 @@ import zio.test.laws._
 
 import zio.test.DefaultRunnableSpec
 
-
 object HashSpec extends DefaultRunnableSpec {
   def spec = suite("HashSpec")(
     suite("laws")(
@@ -25,7 +24,7 @@ object HashSpec extends DefaultRunnableSpec {
       testM("list")(checkAllLaws(Hash)(Gen.listOf(Gen.anyInt))),
       testM("vector")(checkAllLaws(Hash)(Gen.vectorOf(Gen.anyInt))),
       testM("set")(checkAllLaws(Hash)(Gen.setOf(Gen.anyInt))),
-      testM("map")(checkAllLaws(Hash)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
+      testM("map")(checkAllLaws(Hash)(Gen.mapOf(Gen.anyInt, Gen.anyInt)))
     )
   )
 }

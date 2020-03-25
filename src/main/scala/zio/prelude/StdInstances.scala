@@ -9,8 +9,8 @@ trait StdInstances {
   /**
    * Constructs an `Ord[A]` from a [[`scala.math.Ordering]].
    */
-  def default[A](implicit ord: scala.math.Ordering[A]): OrdWithHash[A] = OrdWithHash[A] {
-    (l, r) => Ordering.fromCompare(ord.compare(l, r))
+  def default[A](implicit ord: scala.math.Ordering[A]): OrdWithHash[A] = OrdWithHash[A] { (l, r) =>
+    Ordering.fromCompare(ord.compare(l, r))
   }
 
   /**
@@ -58,10 +58,9 @@ trait StdInstances {
    * value is always equal to itself, comparing `Float.NaN` with itself will
    * return `true`, which is different from the behavior of `Float#equals`.
    */
-  implicit val float: OrdWithHash[Float] = OrdWithHash[Float] {
-    (l, r) =>
-      if (l.isNaN && r.isNaN) Ordering.Equals
-      else Ordering.fromCompare(java.lang.Float.compare(l, r))
+  implicit val float: OrdWithHash[Float] = OrdWithHash[Float] { (l, r) =>
+    if (l.isNaN && r.isNaN) Ordering.Equals
+    else Ordering.fromCompare(java.lang.Float.compare(l, r))
   }
 
   /**
@@ -69,10 +68,9 @@ trait StdInstances {
    * value is always equal to itself, comparing `Double.NaN` with itself will
    * return `true`, which is different from the behavior of `Double#equals`.
    */
-  implicit val double: OrdWithHash[Double] = OrdWithHash[Double] {
-    (l, r) =>
-      if (l.isNaN && r.isNaN) Ordering.Equals
-      else Ordering.fromCompare(java.lang.Double.compare(l, r))
+  implicit val double: OrdWithHash[Double] = OrdWithHash[Double] { (l, r) =>
+    if (l.isNaN && r.isNaN) Ordering.Equals
+    else Ordering.fromCompare(java.lang.Double.compare(l, r))
   }
 
   /**
@@ -82,30 +80,29 @@ trait StdInstances {
    */
   implicit val nothing: OrdWithHash[Nothing] = OrdWithHash[Nothing]((l, _) => l)
 
-
   /**
    * Derives an `Ord[Option[A]]` given an `Ord[A]`. `None` will be treated as
    * less than all other values.
    */
   implicit def option[A: OrdWithHash]: OrdWithHash[Option[A]] =
-    OrdWithHash[Option[A]] { (l, r)  =>
+    OrdWithHash[Option[A]] { (l, r) =>
       (l, r) match {
         case (None, None)       => Ordering.Equals
         case (Some(l), Some(r)) => l =?= r
         case (Some(_), None)    => Ordering.GreaterThan
         case _                  => Ordering.LessThan
       }
-  }
-
+    }
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
    */
-  implicit def either[A: OrdWithHash, B: OrdWithHash]: OrdWithHash[Either[A, B]] = new Ord[Either[A, B]] with Hash[Either[A, B]] {
-    override def compare(l: Either[A, B], r: Either[A, B]): Ordering = (Ord[A] either Ord[B]).compare(l, r)
+  implicit def either[A: OrdWithHash, B: OrdWithHash]: OrdWithHash[Either[A, B]] =
+    new Ord[Either[A, B]] with Hash[Either[A, B]] {
+      override def compare(l: Either[A, B], r: Either[A, B]): Ordering = (Ord[A] either Ord[B]).compare(l, r)
 
-    override def hash(a: Either[A, B]): Int = (Hash[A] either Hash[B]).hashCode()
-  }
+      override def hash(a: Either[A, B]): Int = (Hash[A] either Hash[B]).hashCode()
+    }
 
   /**
    * Derives an `Equal[List[A]]` given an `Equal[A]`.
@@ -117,8 +114,8 @@ trait StdInstances {
       def loop[A: Ord](left: List[A], right: List[A]): Ordering =
         (left, right) match {
           case (Nil, Nil) => Ordering.Equals
-          case (Nil, _) => Ordering.LessThan
-          case (_, Nil) => Ordering.GreaterThan
+          case (Nil, _)   => Ordering.LessThan
+          case (_, Nil)   => Ordering.GreaterThan
           case ((h1 :: t1), (h2 :: t2)) =>
             val compare = Ord[A].compare(h1, h2)
             if (compare.isEqual) loop(t1, t2) else compare
@@ -165,14 +162,12 @@ trait StdInstances {
    * of Scala's `Map`, this uses object equality and hash code on the keys.
    */
   implicit def map[K: Hash, V: Hash]: Hash[Map[K, V]] = new Hash[Map[K, V]] {
-    override def equal(map1: Map[K, V], map2: Map[K, V]): Boolean = {
+    override def equal(map1: Map[K, V], map2: Map[K, V]): Boolean =
       map1.size == map2.size &&
         map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
-    }
 
     override def hash(map: Map[K, V]): Int = map.hashCode()
   }
-
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -211,7 +206,8 @@ trait StdInstances {
    * Derives an `Ord` for a product type given an `Ord` for each element of
    * the product type.
    */
-  implicit def Tuple5Ord[A: OrdWithHash, B: OrdWithHash, C: OrdWithHash, D: OrdWithHash, E: OrdWithHash]: OrdWithHash[(A, B, C, D, E)] =
+  implicit def Tuple5Ord[A: OrdWithHash, B: OrdWithHash, C: OrdWithHash, D: OrdWithHash, E: OrdWithHash]
+    : OrdWithHash[(A, B, C, D, E)] =
     OrdWithHash { (a, b) =>
       (a, b) match {
         case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
@@ -271,8 +267,7 @@ trait StdInstances {
     F: OrdWithHash,
     G: OrdWithHash,
     H: OrdWithHash
-  ]
-  : OrdWithHash[(A, B, C, D, E, F, G, H)] =
+  ]: OrdWithHash[(A, B, C, D, E, F, G, H)] =
     OrdWithHash { (a, b) =>
       (a, b) match {
         case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
@@ -396,9 +391,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2)
       }
     }
@@ -426,9 +421,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2)
       }
     }
@@ -457,9 +452,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2)
       }
     }
@@ -489,9 +484,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2)
       }
     }
@@ -522,9 +517,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2)
       }
     }
@@ -556,9 +551,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2)
       }
     }
@@ -591,9 +586,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2)
       }
     }
@@ -627,13 +622,12 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2)
       }
     }
-
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -665,9 +659,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2)
       }
     }
@@ -703,9 +697,9 @@ trait StdInstances {
     OrdWithHash { (a, b) =>
       (a, b) match {
         case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
-          ) =>
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
+            ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2) <> (v1 =?= v2)
       }
     }

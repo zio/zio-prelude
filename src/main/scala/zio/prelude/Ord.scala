@@ -3,7 +3,7 @@ package zio.prelude
 import scala.annotation.implicitNotFound
 
 import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
+import zio.test.laws.{ Lawful, Laws }
 
 /**
  * `Ord[A]` provides implicit evidence that values of type `A` have a total
@@ -139,11 +139,20 @@ object Ord extends Lawful[Ord] {
    * first compare the values for reference equality and then compare the
    * values using the specified function.
    */
-    def fromFunction[A](f: (A, A) => Ordering): Ord[A] =
-      new Ord[A] {
-        def compare(l: A, r: A): Ordering =
-          if (Equal.refEq(l, r)) Ordering.Equals else f(l, r)
+  def fromFunction[A](f: (A, A) => Ordering): Ord[A] =
+    new Ord[A] {
+      def compare(l: A, r: A): Ordering =
+        if (Equal.refEq(l, r)) Ordering.Equals else f(l, r)
+    }
+
+  def fromScalaOrdering[A](ordering: scala.math.Ordering[A]): Ord[A] =
+    fromFunction((l: A, r: A) =>
+      ordering.compare(l, r) match {
+        case x if x < 0  => Ordering.LessThan
+        case x if x == 0 => Ordering.Equals
+        case _           => Ordering.GreaterThan
       }
+    )
 }
 
 trait OrdSyntax {

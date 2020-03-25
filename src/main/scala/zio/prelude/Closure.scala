@@ -27,7 +27,6 @@ object Closure extends Lawful[Closure] {
     }
 }
 
-
 trait ClosureSyntax {
 
   implicit class ClosureSyntax[A](l: A) {

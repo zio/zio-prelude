@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
+import zio.test.laws.{ Lawful, Laws }
 
 /**
  * The `Associative[A]` type class describes an associative binary operator

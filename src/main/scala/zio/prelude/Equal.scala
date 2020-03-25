@@ -3,7 +3,7 @@ package zio.prelude
 import scala.annotation.implicitNotFound
 
 import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
+import zio.test.laws.{ Lawful, Laws }
 
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be

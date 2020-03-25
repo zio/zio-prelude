@@ -8,8 +8,8 @@ import zio.ZIO
 object OrdSpec extends DefaultRunnableSpec {
 
   final def scalaOrderingConsistency[R, A: Ord](
-                                                 gen: Gen[R, A]
-                                               )(implicit ord: scala.math.Ordering[A]): ZIO[R, Nothing, TestResult] =
+    gen: Gen[R, A]
+  )(implicit ord: scala.math.Ordering[A]): ZIO[R, Nothing, TestResult] =
     check(gen, gen) { (a1, a2) =>
       assert((a1 =?= a2) === Ordering.fromCompare(ord.compare(a1, a2)))(isTrue)
     }

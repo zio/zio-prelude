@@ -1,10 +1,10 @@
 package zio
 
-import zio.test.{assert, Assertion, TestResult}
-import zio.test.Assertion.{isFalse, isTrue}
+import zio.test.{ assert, Assertion, TestResult }
+import zio.test.Assertion.{ isFalse, isTrue }
 
 package object prelude
-  extends DebugSyntax
+    extends DebugSyntax
     with EqualSyntax
     with OrdSyntax
     with HashSyntax
