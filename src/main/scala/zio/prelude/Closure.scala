@@ -12,8 +12,7 @@ object Closure extends Lawful[Closure] {
   final val closureLaw = new Laws.Law2[Closure]("closureLaw") {
     def apply[A: Closure](a1: A, a2: A): TestResult =
       (try {
-        a1 <> a2
-        true
+        (a1 <> a2) != null
       } catch { case _: Throwable => false }) <-> true
   }
 

@@ -10,7 +10,8 @@ package object prelude
     with HashSyntax
     with ClosureSyntax
     with NewtypeExports
-    with StdInstances {
+    with StdInstances
+    with Newtypes {
 
   /**
    * Makes a new assertion that requires a value equal the specified value.
