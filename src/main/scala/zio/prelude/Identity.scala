@@ -2,17 +2,11 @@ package zio.prelude
 
 import zio.test.laws.Lawful
 
-sealed trait Identity[A] {
+trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
   def identity: A
-
-  final def leftIdentity: A = identity
-
-  final def rightIdentity: A = identity
-
-  def combine(l: A, r: A): A
 }
 
-object Identity extends Lawful[Identity with LeftIdentity with RightIdentity with Associative with Closure with Equal] {
+object Identity extends Lawful[Identity with Equal] {
 
   final val laws = LeftIdentity.laws + RightIdentity.laws
 
@@ -21,6 +15,10 @@ object Identity extends Lawful[Identity with LeftIdentity with RightIdentity wit
   def apply[A](identity0: A, op: (A, A) => A): Identity[A] =
     new Identity[A] {
       def identity: A = identity0
+
+      def leftIdentity: A = identity0
+
+      def rightIdentity: A = identity0
 
       def combine(l: A, r: A): A = op(l, r)
     }
