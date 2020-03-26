@@ -2,10 +2,13 @@ package zio.prelude
 
 import zio.test._
 import zio.test.laws._
-
-import zio.test.DefaultRunnableSpec
+import zio.ZIO
 
 object HashSpec extends DefaultRunnableSpec {
+
+  final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R, Nothing, TestResult] =
+    check(gen)(a => assert(a.hash)(equalTo(a.hashCode)))
+
   def spec = suite("HashSpec")(
     suite("laws")(
       testM("unit")(checkAllLaws(Hash)(Gen.unit)),
@@ -25,6 +28,25 @@ object HashSpec extends DefaultRunnableSpec {
       testM("vector")(checkAllLaws(Hash)(Gen.vectorOf(Gen.anyInt))),
       testM("set")(checkAllLaws(Hash)(Gen.setOf(Gen.anyInt))),
       testM("map")(checkAllLaws(Hash)(Gen.mapOf(Gen.anyInt, Gen.anyInt)))
+    ),
+    suite("ScalaHashCode consistency")(
+      testM("unit")(scalaHashCodeConsistency(Gen.unit)),
+      testM("boolean")(scalaHashCodeConsistency(Gen.boolean)),
+      testM("byte")(scalaHashCodeConsistency(Gen.anyByte)),
+      testM("char")(scalaHashCodeConsistency(Gen.anyChar)),
+      testM("string")(scalaHashCodeConsistency(Gen.anyString)),
+      testM("int")(scalaHashCodeConsistency(Gen.anyInt)),
+      testM("long")(scalaHashCodeConsistency(Gen.anyLong)),
+      testM("float")(scalaHashCodeConsistency(Gen.anyFloat)),
+      testM("double")(scalaHashCodeConsistency(Gen.anyDouble)),
+      testM("option")(scalaHashCodeConsistency(Gen.option(Gen.anyInt))),
+      testM("tuple2")(scalaHashCodeConsistency(Gen.anyInt.zip(Gen.anyString))),
+      testM("tuple3")(scalaHashCodeConsistency(Gen.anyInt.zip(Gen.anyString).zip(Gen.anyString))),
+      testM("either")(scalaHashCodeConsistency(Gen.either(Gen.anyInt, Gen.anyInt))),
+      testM("list")(scalaHashCodeConsistency(Gen.listOf(Gen.anyInt))),
+      testM("vector")(scalaHashCodeConsistency(Gen.vectorOf(Gen.anyInt))),
+      testM("set")(scalaHashCodeConsistency(Gen.setOf(Gen.anyInt))),
+      testM("map")(scalaHashCodeConsistency(Gen.mapOf(Gen.anyInt, Gen.anyInt)))
     )
   )
 }
