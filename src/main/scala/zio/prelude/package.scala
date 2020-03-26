@@ -10,6 +10,7 @@ package object prelude
     with HashSyntax
     with ClosureSyntax
     with NewtypeExports
+    with NewtypeFExports
     with Newtypes {
 
   /**
