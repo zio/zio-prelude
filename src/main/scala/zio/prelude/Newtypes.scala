@@ -10,9 +10,15 @@ trait Newtypes {
   object Conj extends Subtype[Boolean]
   type Conj = Conj.Type
 
-  sealed case class First[A](value: A)
-  sealed case class Last[A](value: A)
+  object First extends SubtypeF
+  type First[A] = First.Type[A]
 
-  sealed case class Min[A](value: A)
-  sealed case class Max[A](value: A)
+  object Last extends SubtypeF
+  type Last[A] = Last.Type[A]
+
+  object Min extends SubtypeF
+  type Min[A] = Min.Type[A]
+
+  object Max extends SubtypeF
+  type Max[A] = Max.Type[A]
 }

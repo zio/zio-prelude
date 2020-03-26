@@ -41,8 +41,8 @@ object Associative extends Lawful[Associative with Equal] {
     fromFunction((l: First[A], _: First[A]) => l)
 
   implicit def minAssociative[A: Ord]: Associative[Min[A]] =
-    fromFunction((l: Min[A], r: Min[A]) => if (l.value < r.value) l else r)
+    fromFunction((l: Min[A], r: Min[A]) => if (l < r) l else r)
 
   implicit def maxAssociative[A: Ord]: Associative[Max[A]] =
-    fromFunction((l: Max[A], r: Max[A]) => if (l.value > r.value) l else r)
+    fromFunction((l: Max[A], r: Max[A]) => if (l > r) l else r)
 }
