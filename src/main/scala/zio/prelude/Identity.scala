@@ -102,4 +102,40 @@ object Identity extends Lawful[Identity with Equal] {
 
   implicit def setIdentity[A]: Identity[Set[A]] =
     Identity.fromFunctions[Set[A]](Set.empty, _ | _)
+
+  implicit def tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
+    new Identity[(A, B)] {
+      def identity: (A, B) = (Identity[A].identity, Identity[B].identity)
+
+      def combine(l: (A, B), r: (A, B)): (A, B) = 
+        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2))
+    }
+
+  implicit def tuple3Identity[A: Identity, B: Identity, C: Identity]: Identity[(A, B, C)] =
+    new Identity[(A, B, C)] {
+      def identity: (A, B, C) = 
+        (Identity[A].identity, Identity[B].identity, Identity[C].identity)
+
+      def combine(l: (A, B, C), r: (A, B, C)): (A, B, C) = 
+        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2), Identity[C].combine(l._3, r._3))
+    }
+
+  implicit def tuple4Identity[A: Identity, B: Identity, C: Identity, D: Identity]: Identity[(A, B, C, D)] =
+    new Identity[(A, B, C, D)] {
+      def identity: (A, B, C, D) = 
+        (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity)
+
+      def combine(l: (A, B, C, D), r: (A, B, C, D)): (A, B, C, D) = 
+        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2), Identity[C].combine(l._3, r._3), Identity[D].combine(l._4, r._4))
+    }
+
+  implicit def tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]: Identity[(A, B, C, D, E)] =
+    new Identity[(A, B, C, D, E)] {
+      def identity: (A, B, C, D, E) = 
+        (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity, Identity[E].identity)
+
+      def combine(l: (A, B, C, D, E), r: (A, B, C, D, E)): (A, B, C, D, E) = 
+        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2), Identity[C].combine(l._3, r._3), Identity[D].combine(l._4, r._4), Identity[E].combine(l._5, r._5))
+    }
+
 }
