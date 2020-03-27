@@ -29,29 +29,29 @@ object Identity extends Lawful[Identity with Equal] {
   implicit val StringIdentity: Identity[String] =
     Identity.fromFunctions[String]("", _ + _)
 
-  implicit val ByteIdentity: Identity[Byte] =
-    Identity.fromFunctions[Byte](0, (l: Byte, r: Byte) => (l + r).toByte)
+  implicit val ByteSumIdentity: Identity[Sum[Byte]] =
+    Identity.fromFunctions[Sum[Byte]](Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
 
-  implicit val MultByteIdentity: Identity[MultByte] =
-    Identity.fromFunctions[MultByte](MultByte(1), (l: MultByte, r: MultByte) => MultByte((l * r).toByte))
+  implicit val ByteProdIdentity: Identity[Prod[Byte]] =
+    Identity.fromFunctions[Prod[Byte]](Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
 
-  implicit val IntIdentity: Identity[Int] =
-    Identity.fromFunctions[Int](0, _ + _)
+  implicit val IntSumIdentity: Identity[Sum[Int]] =
+    Identity.fromFunctions[Sum[Int]](Sum(0), (l: Sum[Int], r: Sum[Int]) => Sum(l + r))
 
-  implicit val MultIntIdentity: Identity[MultInt] =
-    Identity.fromFunctions[MultInt](MultInt(1), (l: MultInt, r: MultInt) => MultInt(l * r))
+  implicit val IntProdIdentity: Identity[Prod[Int]] =
+    Identity.fromFunctions[Prod[Int]](Prod(1), (l: Prod[Int], r: Prod[Int]) => Prod(l * r))
 
-  implicit val LongIdentity: Identity[Long] =
-    Identity.fromFunctions[Long](0L, _ + _)
+  implicit val LongSumIdentity: Identity[Sum[Long]] =
+    Identity.fromFunctions[Sum[Long]](Sum(0L), (l: Sum[Long], r: Sum[Long]) => Sum(l + r))
 
-  implicit val MultLongIdentity: Identity[MultLong] =
-    Identity.fromFunctions[MultLong](MultLong(1L), (l: MultLong, r: MultLong) => MultLong(l * r))
+  implicit val LongProdIdentity: Identity[Prod[Long]] =
+    Identity.fromFunctions[Prod[Long]](Prod(1L), (l: Prod[Long], r: Prod[Long]) => Prod(l * r))
 
-  implicit val FloatIdentity: Identity[Float] =
-    Identity.fromFunctions[Float](0, _ + _)
+  implicit val FloatSumIdentity: Identity[Sum[Float]] =
+    Identity.fromFunctions[Sum[Float]](Sum(0.0f), (l: Sum[Float], r: Sum[Float]) => Sum(l + r))
 
-  implicit val DoubleIdentity: Identity[Double] =
-    Identity.fromFunctions[Double](0, _ + _)
+  implicit val DoubleSumIdentity: Identity[Sum[Double]] =
+    Identity.fromFunctions[Sum[Double]](Sum(0.0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r))
 
   implicit val BooleanIdentity: Identity[Boolean] =
     Identity.fromFunctions[Boolean](false, _ || _)
