@@ -37,6 +37,8 @@ object Identity extends Lawful[Identity with Equal] {
   implicit val conjIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
 
+  implicit val charIdentity: Identity[Char] = Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
+
   implicit def optionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
       def identity: Option[A] = None
