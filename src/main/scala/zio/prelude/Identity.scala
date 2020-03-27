@@ -67,6 +67,8 @@ object Identity extends Lawful[Identity with Equal] {
 
   implicit def listIdentity[A]: Identity[List[A]] = Identity.fromFunctions[List[A]](Nil, _ ++ _)
 
+  implicit def vectorIdentity[A]: Identity[Vector[A]] = Identity.fromFunctions[Vector[A]](Vector.empty, _ ++ _)
+
   implicit def mapIdentity[K, V: Associative]: Identity[Map[K, V]] =
     new Identity[Map[K, V]] {
       def identity: Map[K, V] = Map()
