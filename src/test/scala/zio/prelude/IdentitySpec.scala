@@ -26,7 +26,7 @@ object IdentitySpec extends DefaultRunnableSpec {
       testM("map")(checkAllLaws(Equal)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
       testM("set")(checkAllLaws(Equal)(Gen.setOf(Gen.anyInt))),
       testM("tuple2")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyString))),
-      testM("tuple3")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyString).zip(Gen.anyString))),
+      testM("tuple3")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyString).zip(Gen.anyString)))
     )
   )
 }
