@@ -78,4 +78,6 @@ object Identity extends Lawful[Identity with Equal] {
           case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
         }
     }
+
+  implicit def setIdentity[A]: Identity[Set[A]] = Identity.fromFunctions[Set[A]](Set.empty, _ | _)
 }
