@@ -23,6 +23,9 @@ object Identity extends Lawful[Identity with Equal] {
       def combine(l: A, r: A): A = op(l, r)
     }
 
+  implicit val charIdentity: Identity[Char] =
+    Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
+
   implicit val stringIdentity: Identity[String] =
     Identity.fromFunctions[String]("", (l: String, r: String) => l + r)
 
@@ -49,9 +52,6 @@ object Identity extends Lawful[Identity with Equal] {
 
   implicit val conjIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
-
-  implicit val charIdentity: Identity[Char] =
-    Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
 
   implicit def optionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
