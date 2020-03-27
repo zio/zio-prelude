@@ -147,6 +147,12 @@ object Equal extends Lawful[Equal] {
     default
 
   /**
+   * Equality for `Short` values.
+   */
+  implicit val ShortEqual: Equal[Short] =
+    default
+
+  /**
    * Equality for `Char` values.
    */
   implicit val CharEqual: Equal[Char] =

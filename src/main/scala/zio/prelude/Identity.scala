@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.test.laws.Lawful
+import zio.prelude.coherent.IdentityEqual
 
 trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
   def identity: A
@@ -10,7 +11,7 @@ trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
   override final def rightIdentity: A = identity
 }
 
-object Identity extends Lawful[Identity with Equal] {
+object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 
   final val laws = LeftIdentity.laws + RightIdentity.laws
 
@@ -29,34 +30,34 @@ object Identity extends Lawful[Identity with Equal] {
   implicit val StringIdentity: Identity[String] =
     Identity.fromFunctions[String]("", _ + _)
 
-  implicit val ByteIdentity: Identity[Byte] =
-    Identity.fromFunctions[Byte](0, (l: Byte, r: Byte) => (l + r).toByte)
+  implicit val ByteSumIdentity: Identity[Sum[Byte]] =
+    Identity.fromFunctions[Sum[Byte]](Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
 
-  implicit val MultByteIdentity: Identity[MultByte] =
-    Identity.fromFunctions[MultByte](MultByte(1), (l: MultByte, r: MultByte) => MultByte((l * r).toByte))
+  implicit val ByteProdIdentity: Identity[Prod[Byte]] =
+    Identity.fromFunctions[Prod[Byte]](Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
 
-  implicit val IntIdentity: Identity[Int] =
-    Identity.fromFunctions[Int](0, _ + _)
+  implicit val ShortSumIdentity: Identity[Sum[Short]] =
+    Identity.fromFunctions[Sum[Short]](Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
 
-  implicit val MultIntIdentity: Identity[MultInt] =
-    Identity.fromFunctions[MultInt](MultInt(1), (l: MultInt, r: MultInt) => MultInt(l * r))
+  implicit val ShortProdIdentity: Identity[Prod[Short]] =
+    Identity.fromFunctions[Prod[Short]](Prod(1), (l: Prod[Short], r: Prod[Short]) => Prod((l * r).toShort))
 
-  implicit val LongIdentity: Identity[Long] =
-    Identity.fromFunctions[Long](0L, _ + _)
+  implicit val IntSumIdentity: Identity[Sum[Int]] =
+    Identity.fromFunctions[Sum[Int]](Sum(0), (l: Sum[Int], r: Sum[Int]) => Sum(l + r))
 
-  implicit val MultLongIdentity: Identity[MultLong] =
-    Identity.fromFunctions[MultLong](MultLong(1L), (l: MultLong, r: MultLong) => MultLong(l * r))
+  implicit val IntProdIdentity: Identity[Prod[Int]] =
+    Identity.fromFunctions[Prod[Int]](Prod(1), (l: Prod[Int], r: Prod[Int]) => Prod(l * r))
 
-  implicit val FloatIdentity: Identity[Float] =
-    Identity.fromFunctions[Float](0, _ + _)
+  implicit val LongSumIdentity: Identity[Sum[Long]] =
+    Identity.fromFunctions[Sum[Long]](Sum(0L), (l: Sum[Long], r: Sum[Long]) => Sum(l + r))
 
-  implicit val DoubleIdentity: Identity[Double] =
-    Identity.fromFunctions[Double](0, _ + _)
+  implicit val LongProdIdentity: Identity[Prod[Long]] =
+    Identity.fromFunctions[Prod[Long]](Prod(1L), (l: Prod[Long], r: Prod[Long]) => Prod(l * r))
 
-  implicit val BooleanIdentity: Identity[Boolean] =
-    Identity.fromFunctions[Boolean](false, _ || _)
+  implicit val BooleanDisjunctionIdentity: Identity[Disj] =
+    Identity.fromFunctions[Disj](Disj(false), (l: Disj, r: Disj) => Disj(l || r))
 
-  implicit val ConjIdentity: Identity[Conj] =
+  implicit val BooleanConjunctionIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
 
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =

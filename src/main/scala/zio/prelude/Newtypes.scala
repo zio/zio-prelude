@@ -1,14 +1,14 @@
 package zio.prelude
 
 trait Newtypes {
-  object MultByte extends Subtype[Byte]
-  type MultByte = MultByte.Type
+  object Sum extends SubtypeF
+  type Sum[A] = Sum.Type[A]
 
-  object MultInt extends Subtype[Int]
-  type MultInt = MultInt.Type
+  object Prod extends SubtypeF
+  type Prod[A] = Prod.Type[A]
 
-  object MultLong extends Subtype[Long]
-  type MultLong = MultLong.Type
+  object Disj extends Subtype[Boolean]
+  type Disj = Disj.Type
 
   object Conj extends Subtype[Boolean]
   type Conj = Conj.Type
