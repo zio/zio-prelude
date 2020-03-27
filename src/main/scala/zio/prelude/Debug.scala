@@ -1,6 +1,6 @@
 package zio.prelude
 
-trait Debug[-A]{
+trait Debug[-A] {
   def debug(a: A): Debug.Repr
 }
 object Debug {

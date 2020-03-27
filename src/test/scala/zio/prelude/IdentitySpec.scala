@@ -24,7 +24,7 @@ object IdentitySpec extends DefaultRunnableSpec {
       testM("list")(checkAllLaws(Identity)(Gen.listOf(Gen.anyInt))),
       testM("vector")(checkAllLaws(Identity)(Gen.vectorOf(Gen.anyInt))),
       // testM("map")(checkAllLaws(Identity)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
-      testM("set")(checkAllLaws(Identity)(Gen.setOf(Gen.anyInt))),
+      testM("set")(checkAllLaws(Identity)(Gen.setOf(Gen.anyInt)))
       // testM("tuple2")(checkAllLaws(Identity)(Gen.anyInt.zip(Gen.anyString))),
       // testM("tuple3")(checkAllLaws(Identity)(Gen.anyInt.zip(Gen.anyString).zip(Gen.anyString)))
     )
