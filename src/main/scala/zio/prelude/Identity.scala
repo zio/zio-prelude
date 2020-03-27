@@ -53,10 +53,10 @@ object Identity extends Lawful[Identity with Equal] {
   implicit val DoubleSumIdentity: Identity[Sum[Double]] =
     Identity.fromFunctions[Sum[Double]](Sum(0.0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r))
 
-  implicit val BooleanIdentity: Identity[Boolean] =
-    Identity.fromFunctions[Boolean](false, _ || _)
+  implicit val BooleanDisjunctionIdentity: Identity[Disj] =
+    Identity.fromFunctions[Disj](Disj(false), (l: Disj, r: Disj) => Disj(l && r))
 
-  implicit val ConjIdentity: Identity[Conj] =
+  implicit val BooleanConjunctionIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
 
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
