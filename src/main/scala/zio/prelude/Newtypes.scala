@@ -1,6 +1,9 @@
 package zio.prelude
 
 trait Newtypes {
+  object MultByte extends Subtype[Byte]
+  type MultByte = MultByte.Type
+
   object MultInt extends Subtype[Int]
   type MultInt = MultInt.Type
 
