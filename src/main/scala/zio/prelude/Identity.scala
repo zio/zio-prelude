@@ -37,7 +37,8 @@ object Identity extends Lawful[Identity with Equal] {
   implicit val conjIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
 
-  implicit val charIdentity: Identity[Char] = Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
+  implicit val charIdentity: Identity[Char] =
+    Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
 
   implicit def optionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
@@ -49,6 +50,19 @@ object Identity extends Lawful[Identity with Equal] {
           case (Some(l), None)    => Some(l)
           case (None, Some(r))    => Some(r)
           case _                  => None
+        }
+    }
+
+  implicit def eitherIdentity[E: Associative, A: Identity]: Identity[Either[E, A]] =
+    new Identity[Either[E, A]] {
+      def identity: Either[E, A] = Right(Identity[A].identity)
+
+      def combine(l: Either[E, A], r: Either[E, A]): Either[E, A] =
+        (l, r) match {
+          case (Left(l), Left(r))   => Left(l <> r)
+          case (Left(l), Right(_))  => Left(l)
+          case (Right(_), Left(r))  => Left(r)
+          case (Right(l), Right(r)) => Right(l <> r)
         }
     }
 
