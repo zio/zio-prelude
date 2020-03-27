@@ -11,6 +11,7 @@ package object prelude
     with ClosureSyntax
     with NewtypeExports
     with NewtypeFExports
+    with IdentitySyntax
     with Newtypes {
 
   /**

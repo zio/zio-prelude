@@ -107,35 +107,44 @@ object Identity extends Lawful[Identity with Equal] {
     new Identity[(A, B)] {
       def identity: (A, B) = (Identity[A].identity, Identity[B].identity)
 
-      def combine(l: (A, B), r: (A, B)): (A, B) = 
-        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2))
+      def combine(l: (A, B), r: (A, B)): (A, B) =
+        (l._1 |+| r._1, l._2 |+| r._2)
     }
 
   implicit def tuple3Identity[A: Identity, B: Identity, C: Identity]: Identity[(A, B, C)] =
     new Identity[(A, B, C)] {
-      def identity: (A, B, C) = 
+      def identity: (A, B, C) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity)
 
-      def combine(l: (A, B, C), r: (A, B, C)): (A, B, C) = 
-        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2), Identity[C].combine(l._3, r._3))
+      def combine(l: (A, B, C), r: (A, B, C)): (A, B, C) =
+        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3)
     }
 
   implicit def tuple4Identity[A: Identity, B: Identity, C: Identity, D: Identity]: Identity[(A, B, C, D)] =
     new Identity[(A, B, C, D)] {
-      def identity: (A, B, C, D) = 
+      def identity: (A, B, C, D) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity)
 
-      def combine(l: (A, B, C, D), r: (A, B, C, D)): (A, B, C, D) = 
-        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2), Identity[C].combine(l._3, r._3), Identity[D].combine(l._4, r._4))
+      def combine(l: (A, B, C, D), r: (A, B, C, D)): (A, B, C, D) =
+        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4)
     }
 
-  implicit def tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]: Identity[(A, B, C, D, E)] =
+  implicit def tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]
+    : Identity[(A, B, C, D, E)] =
     new Identity[(A, B, C, D, E)] {
-      def identity: (A, B, C, D, E) = 
+      def identity: (A, B, C, D, E) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity, Identity[E].identity)
 
-      def combine(l: (A, B, C, D, E), r: (A, B, C, D, E)): (A, B, C, D, E) = 
-        (Identity[A].combine(l._1, r._1), Identity[B].combine(l._2, r._2), Identity[C].combine(l._3, r._3), Identity[D].combine(l._4, r._4), Identity[E].combine(l._5, r._5))
+      def combine(l: (A, B, C, D, E), r: (A, B, C, D, E)): (A, B, C, D, E) =
+        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4, l._5 |+| r._5)
     }
 
+}
+
+trait IdentitySyntax {
+  implicit class IdentitySyntax[A](l: A) {
+    def identity(implicit id: Identity[A]): A = id.identity
+
+    def |+|(r: A)(implicit id: Identity[A]): A = id.combine(l, r)
+  }
 }
