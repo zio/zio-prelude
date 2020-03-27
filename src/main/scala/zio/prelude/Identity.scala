@@ -23,43 +23,43 @@ object Identity extends Lawful[Identity with Equal] {
       def combine(l: A, r: A): A = op(l, r)
     }
 
-  implicit val charIdentity: Identity[Char] =
+  implicit val CharIdentity: Identity[Char] =
     Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
 
-  implicit val stringIdentity: Identity[String] =
+  implicit val StringIdentity: Identity[String] =
     Identity.fromFunctions[String]("", (l: String, r: String) => l + r)
 
-  implicit val byteIdentity: Identity[Byte] =
+  implicit val ByteIdentity: Identity[Byte] =
     Identity.fromFunctions[Byte](0, (l: Byte, r: Byte) => (l + r).toByte)
 
-  implicit val multByteIdentity: Identity[MultByte] =
+  implicit val MultByteIdentity: Identity[MultByte] =
     Identity.fromFunctions[MultByte](MultByte(1), (l: MultByte, r: MultByte) => MultByte((l * r).toByte))
 
-  implicit val intIdentity: Identity[Int] =
+  implicit val IntIdentity: Identity[Int] =
     Identity.fromFunctions[Int](0, (l: Int, r: Int) => l + r)
 
-  implicit val multIntIdentity: Identity[MultInt] =
+  implicit val MultIntIdentity: Identity[MultInt] =
     Identity.fromFunctions[MultInt](MultInt(1), (l: MultInt, r: MultInt) => MultInt(l * r))
 
-  implicit val longIdentity: Identity[Long] =
+  implicit val LongIdentity: Identity[Long] =
     Identity.fromFunctions[Long](0L, (l: Long, r: Long) => l + r)
 
-  implicit val multLongIdentity: Identity[MultLong] =
+  implicit val MultLongIdentity: Identity[MultLong] =
     Identity.fromFunctions[MultLong](MultLong(1L), (l: MultLong, r: MultLong) => MultLong(l * r))
 
-  implicit val floatIdentity: Identity[Float] =
+  implicit val FloatIdentity: Identity[Float] =
     Identity.fromFunctions[Float](0, (l: Float, r: Float) => l + r)
 
-  implicit val doubleIdentity: Identity[Double] =
+  implicit val DoubleIdentity: Identity[Double] =
     Identity.fromFunctions[Double](0, (l: Double, r: Double) => l + r)
 
-  implicit val booleanIdentity: Identity[Boolean] =
+  implicit val BooleanIdentity: Identity[Boolean] =
     Identity.fromFunctions[Boolean](false, (l: Boolean, r: Boolean) => l || r)
 
-  implicit val conjIdentity: Identity[Conj] =
+  implicit val ConjIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
 
-  implicit def optionIdentity[A: Associative]: Identity[Option[A]] =
+  implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
       def identity: Option[A] = None
 
@@ -72,7 +72,7 @@ object Identity extends Lawful[Identity with Equal] {
         }
     }
 
-  implicit def eitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
+  implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
     new Identity[Either[E, A]] {
       def identity: Either[E, A] = Right(Identity[A].identity)
 
@@ -84,13 +84,13 @@ object Identity extends Lawful[Identity with Equal] {
         }
     }
 
-  implicit def listIdentity[A]: Identity[List[A]] =
+  implicit def ListIdentity[A]: Identity[List[A]] =
     Identity.fromFunctions[List[A]](Nil, _ ++ _)
 
-  implicit def vectorIdentity[A]: Identity[Vector[A]] =
+  implicit def VectorIdentity[A]: Identity[Vector[A]] =
     Identity.fromFunctions[Vector[A]](Vector.empty, _ ++ _)
 
-  implicit def mapIdentity[K, V: Associative]: Identity[Map[K, V]] =
+  implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
     new Identity[Map[K, V]] {
       def identity: Map[K, V] = Map()
 
@@ -100,10 +100,10 @@ object Identity extends Lawful[Identity with Equal] {
         }
     }
 
-  implicit def setIdentity[A]: Identity[Set[A]] =
+  implicit def SetIdentity[A]: Identity[Set[A]] =
     Identity.fromFunctions[Set[A]](Set.empty, _ | _)
 
-  implicit def tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
+  implicit def Tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
     new Identity[(A, B)] {
       def identity: (A, B) = (Identity[A].identity, Identity[B].identity)
 
@@ -111,7 +111,7 @@ object Identity extends Lawful[Identity with Equal] {
         (l._1 |+| r._1, l._2 |+| r._2)
     }
 
-  implicit def tuple3Identity[A: Identity, B: Identity, C: Identity]: Identity[(A, B, C)] =
+  implicit def Tuple3Identity[A: Identity, B: Identity, C: Identity]: Identity[(A, B, C)] =
     new Identity[(A, B, C)] {
       def identity: (A, B, C) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity)
@@ -120,7 +120,7 @@ object Identity extends Lawful[Identity with Equal] {
         (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3)
     }
 
-  implicit def tuple4Identity[A: Identity, B: Identity, C: Identity, D: Identity]: Identity[(A, B, C, D)] =
+  implicit def Tuple4Identity[A: Identity, B: Identity, C: Identity, D: Identity]: Identity[(A, B, C, D)] =
     new Identity[(A, B, C, D)] {
       def identity: (A, B, C, D) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity)
@@ -129,7 +129,7 @@ object Identity extends Lawful[Identity with Equal] {
         (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4)
     }
 
-  implicit def tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]
+  implicit def Tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]
     : Identity[(A, B, C, D, E)] =
     new Identity[(A, B, C, D, E)] {
       def identity: (A, B, C, D, E) =
@@ -139,7 +139,7 @@ object Identity extends Lawful[Identity with Equal] {
         (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4, l._5 |+| r._5)
     }
 
-  implicit def tuple6Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity]
+  implicit def Tuple6Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity]
     : Identity[(A, B, C, D, E, F)] =
     new Identity[(A, B, C, D, E, F)] {
       def identity: (A, B, C, D, E, F) =
@@ -156,7 +156,7 @@ object Identity extends Lawful[Identity with Equal] {
         (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4, l._5 |+| r._5, l._6 |+| r._6)
     }
 
-  implicit def tuple7Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity, G: Identity]
+  implicit def Tuple7Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity, G: Identity]
     : Identity[(A, B, C, D, E, F, G)] =
     new Identity[(A, B, C, D, E, F, G)] {
       def identity: (A, B, C, D, E, F, G) =
@@ -174,7 +174,7 @@ object Identity extends Lawful[Identity with Equal] {
         (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4, l._5 |+| r._5, l._6 |+| r._6, l._7 |+| r._7)
     }
 
-  implicit def tuple8Identity[
+  implicit def Tuple8Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -210,7 +210,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple9Identity[
+  implicit def Tuple9Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -249,7 +249,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple10Identity[
+  implicit def Tuple10Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -294,7 +294,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple11Identity[
+  implicit def Tuple11Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -342,7 +342,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple12Identity[
+  implicit def Tuple12Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -393,7 +393,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple13Identity[
+  implicit def Tuple13Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -447,7 +447,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple14Identity[
+  implicit def Tuple14Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -504,7 +504,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple15Identity[
+  implicit def Tuple15Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -564,7 +564,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple16Identity[
+  implicit def Tuple16Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -627,7 +627,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple17Identity[
+  implicit def Tuple17Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -693,7 +693,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple18Identity[
+  implicit def Tuple18Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -762,7 +762,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple19Identity[
+  implicit def Tuple19Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -834,7 +834,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple20Identity[
+  implicit def Tuple20Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -909,7 +909,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple21Identity[
+  implicit def Tuple21Identity[
     A: Identity,
     B: Identity,
     C: Identity,
@@ -987,7 +987,7 @@ object Identity extends Lawful[Identity with Equal] {
         )
     }
 
-  implicit def tuple22Identity[
+  implicit def Tuple22Identity[
     A: Identity,
     B: Identity,
     C: Identity,
