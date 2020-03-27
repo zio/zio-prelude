@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.test.laws.Lawful
+import zio.prelude.coherent.IdentityEqual
 
 trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
   def identity: A
@@ -10,7 +11,7 @@ trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
   override final def rightIdentity: A = identity
 }
 
-object Identity extends Lawful[Identity with Equal] {
+object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 
   final val laws = LeftIdentity.laws + RightIdentity.laws
 
@@ -54,7 +55,7 @@ object Identity extends Lawful[Identity with Equal] {
     Identity.fromFunctions[Sum[Double]](Sum(0.0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r))
 
   implicit val BooleanDisjunctionIdentity: Identity[Disj] =
-    Identity.fromFunctions[Disj](Disj(false), (l: Disj, r: Disj) => Disj(l && r))
+    Identity.fromFunctions[Disj](Disj(false), (l: Disj, r: Disj) => Disj(l || r))
 
   implicit val BooleanConjunctionIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
