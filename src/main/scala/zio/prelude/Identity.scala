@@ -36,6 +36,12 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
   implicit val ByteProdIdentity: Identity[Prod[Byte]] =
     Identity.fromFunctions[Prod[Byte]](Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
 
+  implicit val ShortSumIdentity: Identity[Sum[Short]] =
+    Identity.fromFunctions[Sum[Short]](Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
+
+  implicit val ShortProdIdentity: Identity[Prod[Short]] =
+    Identity.fromFunctions[Prod[Short]](Prod(1), (l: Prod[Short], r: Prod[Short]) => Prod((l * r).toShort))
+
   implicit val IntSumIdentity: Identity[Sum[Int]] =
     Identity.fromFunctions[Sum[Int]](Sum(0), (l: Sum[Int], r: Sum[Int]) => Sum(l + r))
 

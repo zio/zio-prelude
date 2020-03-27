@@ -11,6 +11,8 @@ object IdentitySpec extends DefaultRunnableSpec {
       testM("string")(checkAllLaws(Identity)(Gen.anyString)),
       testM("byte addition")(checkAllLaws(Identity)(Gen.anyByte.map(Sum(_)))),
       testM("byte multiplication")(checkAllLaws(Identity)(Gen.anyByte.map(Prod(_)))),
+      testM("short addition")(checkAllLaws(Identity)(Gen.anyShort.map(Sum(_)))),
+      testM("short multiplication")(checkAllLaws(Identity)(Gen.anyShort.map(Prod(_)))),
       testM("int addition")(checkAllLaws(Identity)(Gen.anyInt.map(Sum(_)))),
       testM("int multiplication")(checkAllLaws(Identity)(Gen.anyInt.map(Prod(_)))),
       testM("long addition")(checkAllLaws(Identity)(Gen.anyLong.map(Sum(_)))),
