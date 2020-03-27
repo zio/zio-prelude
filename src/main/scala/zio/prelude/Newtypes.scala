@@ -7,11 +7,11 @@ trait Newtypes {
   object Prod extends SubtypeF
   type Prod[A] = Prod.Type[A]
 
-  object Disj extends Subtype[Boolean]
-  type Disj = Disj.Type
+  object Or extends Subtype[Boolean]
+  type Or = Or.Type
 
-  object Conj extends Subtype[Boolean]
-  type Conj = Conj.Type
+  object And extends Subtype[Boolean]
+  type And = And.Type
 
   object First extends SubtypeF
   type First[A] = First.Type[A]
