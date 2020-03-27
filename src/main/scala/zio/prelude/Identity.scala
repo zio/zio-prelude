@@ -53,18 +53,19 @@ object Identity extends Lawful[Identity with Equal] {
         }
     }
 
-  implicit def eitherIdentity[E: Associative, A: Identity]: Identity[Either[E, A]] =
+  implicit def eitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
     new Identity[Either[E, A]] {
       def identity: Either[E, A] = Right(Identity[A].identity)
 
       def combine(l: Either[E, A], r: Either[E, A]): Either[E, A] =
         (l, r) match {
-          case (Left(l), Left(r))   => Left(l <> r)
-          case (Left(l), Right(_))  => Left(l)
-          case (Right(_), Left(r))  => Left(r)
+          case (Left(l), _)         => Left(l)
+          case (_, Left(r))         => Left(r)
           case (Right(l), Right(r)) => Right(l <> r)
         }
     }
+
+  implicit def listIdentity[A]: Identity[List[A]] = Identity.fromFunctions[List[A]](Nil, _ ++ _)
 
   implicit def mapIdentity[K, V: Associative]: Identity[Map[K, V]] =
     new Identity[Map[K, V]] {
