@@ -29,6 +29,12 @@ object Identity extends Lawful[Identity with Equal] {
   implicit val stringIdentity: Identity[String] =
     Identity.fromFunctions[String]("", (l: String, r: String) => l + r)
 
+  implicit val byteIdentity: Identity[Byte] =
+    Identity.fromFunctions[Byte](0, (l: Byte, r: Byte) => (l + r).toByte)
+
+  implicit val multByteIdentity: Identity[MultByte] =
+    Identity.fromFunctions[MultByte](MultByte(1), (l: MultByte, r: MultByte) => MultByte((l * r).toByte))
+
   implicit val intIdentity: Identity[Int] =
     Identity.fromFunctions[Int](0, (l: Int, r: Int) => l + r)
 
