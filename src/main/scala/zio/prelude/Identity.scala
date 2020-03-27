@@ -54,11 +54,11 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
   implicit val LongProdIdentity: Identity[Prod[Long]] =
     Identity.make[Prod[Long]](Prod(1L), (l: Prod[Long], r: Prod[Long]) => Prod(l * r))
 
-  implicit val BooleanDisjunctionIdentity: Identity[Disj] =
-    Identity.make[Disj](Disj(false), (l: Disj, r: Disj) => Disj(l || r))
+  implicit val BooleanDisjunctionIdentity: Identity[Or] =
+    Identity.make[Or](Or(false), (l: Or, r: Or) => Or(l || r))
 
-  implicit val BooleanConjunctionIdentity: Identity[Conj] =
-    Identity.make[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
+  implicit val BooleanConjunctionIdentity: Identity[And] =
+    Identity.make[And](And(true), (l: And, r: And) => And(l && r))
 
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
