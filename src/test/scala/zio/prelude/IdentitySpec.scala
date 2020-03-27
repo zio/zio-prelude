@@ -15,8 +15,6 @@ object IdentitySpec extends DefaultRunnableSpec {
       testM("int multiplication")(checkAllLaws(Identity)(Gen.anyInt.map(Prod(_)))),
       testM("long addition")(checkAllLaws(Identity)(Gen.anyLong.map(Sum(_)))),
       testM("long multiplication")(checkAllLaws(Identity)(Gen.anyLong.map(Prod(_)))),
-      testM("float")(checkAllLaws(Identity)(Gen.anyFloat.map(Sum(_)))),
-      testM("double")(checkAllLaws(Identity)(Gen.anyDouble.map(Sum(_)))),
       testM("boolean disjunction")(checkAllLaws(Identity)(Gen.boolean.map(Disj(_)))),
       testM("boolean conjuction")(checkAllLaws(Identity)(Gen.boolean.map(Conj(_)))),
       // testM("option")(checkAllLaws(Identity)(Gen.option(Gen.anyInt))),
