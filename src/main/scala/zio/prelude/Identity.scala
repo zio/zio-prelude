@@ -27,7 +27,7 @@ object Identity extends Lawful[Identity with Equal] {
     Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
 
   implicit val StringIdentity: Identity[String] =
-    Identity.fromFunctions[String]("", (l: String, r: String) => l + r)
+    Identity.fromFunctions[String]("", _ + _)
 
   implicit val ByteIdentity: Identity[Byte] =
     Identity.fromFunctions[Byte](0, (l: Byte, r: Byte) => (l + r).toByte)
@@ -36,25 +36,25 @@ object Identity extends Lawful[Identity with Equal] {
     Identity.fromFunctions[MultByte](MultByte(1), (l: MultByte, r: MultByte) => MultByte((l * r).toByte))
 
   implicit val IntIdentity: Identity[Int] =
-    Identity.fromFunctions[Int](0, (l: Int, r: Int) => l + r)
+    Identity.fromFunctions[Int](0, _ + _)
 
   implicit val MultIntIdentity: Identity[MultInt] =
     Identity.fromFunctions[MultInt](MultInt(1), (l: MultInt, r: MultInt) => MultInt(l * r))
 
   implicit val LongIdentity: Identity[Long] =
-    Identity.fromFunctions[Long](0L, (l: Long, r: Long) => l + r)
+    Identity.fromFunctions[Long](0L, _ + _)
 
   implicit val MultLongIdentity: Identity[MultLong] =
     Identity.fromFunctions[MultLong](MultLong(1L), (l: MultLong, r: MultLong) => MultLong(l * r))
 
   implicit val FloatIdentity: Identity[Float] =
-    Identity.fromFunctions[Float](0, (l: Float, r: Float) => l + r)
+    Identity.fromFunctions[Float](0, _ + _)
 
   implicit val DoubleIdentity: Identity[Double] =
-    Identity.fromFunctions[Double](0, (l: Double, r: Double) => l + r)
+    Identity.fromFunctions[Double](0, _ + _)
 
   implicit val BooleanIdentity: Identity[Boolean] =
-    Identity.fromFunctions[Boolean](false, (l: Boolean, r: Boolean) => l || r)
+    Identity.fromFunctions[Boolean](false, _ || _)
 
   implicit val ConjIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
