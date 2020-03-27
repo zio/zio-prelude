@@ -24,16 +24,24 @@ object Identity extends Lawful[Identity with Equal] {
     }
 
   implicit val stringIdentity: Identity[String] = Identity.fromFunctions[String]("", (l: String, r: String) => l + r)
-  implicit val intIdentity: Identity[Int]       = Identity.fromFunctions[Int](0, (l: Int, r: Int) => l + r)
+
+  implicit val intIdentity: Identity[Int] = Identity.fromFunctions[Int](0, (l: Int, r: Int) => l + r)
+
   implicit val multIntIdentity: Identity[MultInt] =
     Identity.fromFunctions[MultInt](MultInt(1), (l: MultInt, r: MultInt) => MultInt(l * r))
+
   implicit val longIdentity: Identity[Long] = Identity.fromFunctions[Long](0L, (l: Long, r: Long) => l + r)
+
   implicit val multLongIdentity: Identity[MultLong] =
     Identity.fromFunctions[MultLong](MultLong(1L), (l: MultLong, r: MultLong) => MultLong(l * r))
-  implicit val floatIdentity: Identity[Float]   = Identity.fromFunctions[Float](0, (l: Float, r: Float) => l + r)
+
+  implicit val floatIdentity: Identity[Float] = Identity.fromFunctions[Float](0, (l: Float, r: Float) => l + r)
+
   implicit val doubleIdentity: Identity[Double] = Identity.fromFunctions[Double](0, (l: Double, r: Double) => l + r)
+
   implicit val booleanIdentity: Identity[Boolean] =
     Identity.fromFunctions[Boolean](false, (l: Boolean, r: Boolean) => l || r)
+
   implicit val conjIdentity: Identity[Conj] =
     Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
 
