@@ -17,7 +17,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 
-  def fromFunctions[A](identity0: A, op: (A, A) => A): Identity[A] =
+  def make[A](identity0: A, op: (A, A) => A): Identity[A] =
     new Identity[A] {
       def identity: A = identity0
 
@@ -25,40 +25,40 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     }
 
   implicit val CharIdentity: Identity[Char] =
-    Identity.fromFunctions[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
+    Identity.make[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
 
   implicit val StringIdentity: Identity[String] =
-    Identity.fromFunctions[String]("", _ + _)
+    Identity.make[String]("", _ + _)
 
   implicit val ByteSumIdentity: Identity[Sum[Byte]] =
-    Identity.fromFunctions[Sum[Byte]](Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
+    Identity.make[Sum[Byte]](Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
 
   implicit val ByteProdIdentity: Identity[Prod[Byte]] =
-    Identity.fromFunctions[Prod[Byte]](Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
+    Identity.make[Prod[Byte]](Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
 
   implicit val ShortSumIdentity: Identity[Sum[Short]] =
-    Identity.fromFunctions[Sum[Short]](Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
+    Identity.make[Sum[Short]](Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
 
   implicit val ShortProdIdentity: Identity[Prod[Short]] =
-    Identity.fromFunctions[Prod[Short]](Prod(1), (l: Prod[Short], r: Prod[Short]) => Prod((l * r).toShort))
+    Identity.make[Prod[Short]](Prod(1), (l: Prod[Short], r: Prod[Short]) => Prod((l * r).toShort))
 
   implicit val IntSumIdentity: Identity[Sum[Int]] =
-    Identity.fromFunctions[Sum[Int]](Sum(0), (l: Sum[Int], r: Sum[Int]) => Sum(l + r))
+    Identity.make[Sum[Int]](Sum(0), (l: Sum[Int], r: Sum[Int]) => Sum(l + r))
 
   implicit val IntProdIdentity: Identity[Prod[Int]] =
-    Identity.fromFunctions[Prod[Int]](Prod(1), (l: Prod[Int], r: Prod[Int]) => Prod(l * r))
+    Identity.make[Prod[Int]](Prod(1), (l: Prod[Int], r: Prod[Int]) => Prod(l * r))
 
   implicit val LongSumIdentity: Identity[Sum[Long]] =
-    Identity.fromFunctions[Sum[Long]](Sum(0L), (l: Sum[Long], r: Sum[Long]) => Sum(l + r))
+    Identity.make[Sum[Long]](Sum(0L), (l: Sum[Long], r: Sum[Long]) => Sum(l + r))
 
   implicit val LongProdIdentity: Identity[Prod[Long]] =
-    Identity.fromFunctions[Prod[Long]](Prod(1L), (l: Prod[Long], r: Prod[Long]) => Prod(l * r))
+    Identity.make[Prod[Long]](Prod(1L), (l: Prod[Long], r: Prod[Long]) => Prod(l * r))
 
   implicit val BooleanDisjunctionIdentity: Identity[Disj] =
-    Identity.fromFunctions[Disj](Disj(false), (l: Disj, r: Disj) => Disj(l || r))
+    Identity.make[Disj](Disj(false), (l: Disj, r: Disj) => Disj(l || r))
 
   implicit val BooleanConjunctionIdentity: Identity[Conj] =
-    Identity.fromFunctions[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
+    Identity.make[Conj](Conj(true), (l: Conj, r: Conj) => Conj(l && r))
 
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
@@ -86,10 +86,10 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     }
 
   implicit def ListIdentity[A]: Identity[List[A]] =
-    Identity.fromFunctions[List[A]](Nil, _ ++ _)
+    Identity.make[List[A]](Nil, _ ++ _)
 
   implicit def VectorIdentity[A]: Identity[Vector[A]] =
-    Identity.fromFunctions[Vector[A]](Vector.empty, _ ++ _)
+    Identity.make[Vector[A]](Vector.empty, _ ++ _)
 
   implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
     new Identity[Map[K, V]] {
@@ -102,7 +102,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     }
 
   implicit def SetIdentity[A]: Identity[Set[A]] =
-    Identity.fromFunctions[Set[A]](Set.empty, _ | _)
+    Identity.make[Set[A]](Set.empty, _ | _)
 
   implicit def Tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
     new Identity[(A, B)] {

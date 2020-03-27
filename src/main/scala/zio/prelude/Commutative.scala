@@ -19,7 +19,7 @@ object Commutative {
 
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 
-  def fromFunction[A](f: (A, A) => A): Commutative[A] =
+  def make[A](f: (A, A) => A): Commutative[A] =
     new Commutative[A] {
       def combine(l: A, r: A): A = f(l, r)
     }

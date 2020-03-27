@@ -1,13 +1,12 @@
 package zio.prelude
 
-trait DebugLaws[-A] {
+trait Debug[-A]{
   def debug(a: A): Debug.Repr
 }
-trait Debug[-A] extends DebugLaws[A]
 object Debug {
   def apply[A](implicit debug: Debug[A]): Debug[A] = debug
 
-  def apply[A](f: A => Debug.Repr): Debug[A] = f(_)
+  def make[A](f: A => Debug.Repr): Debug[A] = f(_)
 
   // primitives, case classes, sealed traits, collections
   sealed trait Repr {

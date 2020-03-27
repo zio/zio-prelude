@@ -20,7 +20,7 @@ object Closure extends Lawful[Closure] {
 
   def apply[A](implicit closure: Closure[A]): Closure[A] = closure
 
-  def fromFunction[A](f: (A, A) => A): Closure[A] =
+  def make[A](f: (A, A) => A): Closure[A] =
     new Closure[A] {
       def combine(l: A, r: A): A = f(l, r)
     }

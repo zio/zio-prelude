@@ -29,20 +29,20 @@ object Associative extends Lawful[Associative with Equal] {
 
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 
-  def fromFunction[A](f: (A, A) => A): Associative[A] =
+  def make[A](f: (A, A) => A): Associative[A] =
     new Associative[A] {
       def combine(l: A, r: A): A = f(l, r)
     }
 
   implicit def lastAssociative[A]: Associative[Last[A]] =
-    fromFunction((_: Last[A], r: Last[A]) => r)
+    make((_: Last[A], r: Last[A]) => r)
 
   implicit def firstAssociative[A]: Associative[First[A]] =
-    fromFunction((l: First[A], _: First[A]) => l)
+    make((l: First[A], _: First[A]) => l)
 
   implicit def minAssociative[A: Ord]: Associative[Min[A]] =
-    fromFunction((l: Min[A], r: Min[A]) => if (l < r) l else r)
+    make((l: Min[A], r: Min[A]) => if (l < r) l else r)
 
   implicit def maxAssociative[A: Ord]: Associative[Max[A]] =
-    fromFunction((l: Max[A], r: Max[A]) => if (l > r) l else r)
+    make((l: Max[A], r: Max[A]) => if (l > r) l else r)
 }

@@ -14,8 +14,7 @@ trait Hash[-A] extends Equal[A] { self =>
 
   def hash(a: A): Int
 
-  def equal(l: A, r: A): Boolean =
-    Equal.refEq(l, r) || hash(l) == hash(r)
+  def equal(l: A, r: A): Boolean
 
   /**
    * Constructs a `Hash[(A, B)]` given a `Hash[A]` and `Hash[B]` by hashing the
