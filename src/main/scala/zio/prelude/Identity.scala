@@ -54,6 +54,18 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
   implicit val LongProdIdentity: Identity[Prod[Long]] =
     Identity.make[Prod[Long]](Prod(1L), (l: Prod[Long], r: Prod[Long]) => Prod(l * r))
 
+  implicit val FloatSumIdentity: Identity[Sum[Float]] =
+    Identity.make[Sum[Float]](Sum(0), (l: Sum[Float], r: Sum[Float]) => Sum(l + r))
+
+  implicit val FloatProdIdentity: Identity[Prod[Float]] =
+    Identity.make[Prod[Float]](Prod(1), (l: Prod[Float], r: Prod[Float]) => Prod(l * r))
+
+  implicit val DoubleSumIdentity: Identity[Sum[Double]] =
+    Identity.make[Sum[Double]](Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r))
+
+  implicit val DoubleProdIdentity: Identity[Prod[Double]] =
+    Identity.make[Prod[Double]](Prod(1), (l: Prod[Double], r: Prod[Double]) => Prod(l * r))
+
   implicit val BooleanDisjunctionIdentity: Identity[Or] =
     Identity.make[Or](Or(false), (l: Or, r: Or) => Or(l || r))
 
