@@ -853,16 +853,16 @@ sealed trait Ordering { self =>
    * Returns whether this `Ordering` is `Ordering.GreaterThan`.
    */
   final def isGreaterThan: Boolean = self match {
-    case Ordering.Equals => true
-    case _               => false
+    case Ordering.GreaterThan => true
+    case _                    => false
   }
 
   /**
    * Returns whether this `Ordering` is `Ordering.LessThan`.
    */
   final def isLessThan: Boolean = self match {
-    case Ordering.Equals => true
-    case _               => false
+    case Ordering.LessThan => true
+    case _                 => false
   }
 
   /**
