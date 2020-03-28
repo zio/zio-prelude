@@ -183,7 +183,7 @@ object Hash extends Lawful[Hash] with HashOrd {
    */
   implicit def MapHash[A, B: Hash]: Hash[Map[A, B]] =
     make(
-      _.mapValues(_.hash).hashCode,
+      _.transform((_, v) => v.hash).hashCode,
       (map1, map2) =>
         map1.size == map2.size &&
           map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
