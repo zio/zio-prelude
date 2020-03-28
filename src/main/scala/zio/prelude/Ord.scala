@@ -205,7 +205,7 @@ object Ord extends Lawful[Ord] {
     (l, r) => if (Equal.refEq(l, r)) Ordering.Equals else ord(l, r)
 
   /**
-   * Constructs an `Ord[A]` from a [[`scala.math.Ordering]].
+   * Constructs an `Ord[A]` from a [[scala.math.Ordering]].
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
     make((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)))
