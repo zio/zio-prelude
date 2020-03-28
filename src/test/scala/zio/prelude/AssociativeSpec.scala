@@ -1,0 +1,33 @@
+package zio.prelude
+
+import zio.prelude.newtypes.{And, Or, Prod, Sum}
+import zio.test.{testM, _}
+import zio.test.laws._
+
+object AssociativeSpec extends DefaultRunnableSpec {
+
+  def spec = suite("AssociativeSpec")(
+    suite("laws")(
+      testM("char")(checkAllLaws(Associative)(Gen.anyChar)),
+      testM("string")(checkAllLaws(Associative)(Gen.anyString)),
+      testM("byte addition")(checkAllLaws(Associative)(Gen.anyByte.map(Sum(_)))),
+      testM("byte multiplication")(checkAllLaws(Associative)(Gen.anyByte.map(Prod(_)))),
+      testM("short addition")(checkAllLaws(Associative)(Gen.anyShort.map(Sum(_)))),
+      testM("short multiplication")(checkAllLaws(Associative)(Gen.anyShort.map(Prod(_)))),
+      testM("int addition")(checkAllLaws(Associative)(Gen.anyInt.map(Sum(_)))),
+      testM("int multiplication")(checkAllLaws(Associative)(Gen.anyInt.map(Prod(_)))),
+      testM("long addition")(checkAllLaws(Associative)(Gen.anyLong.map(Sum(_)))),
+      testM("long multiplication")(checkAllLaws(Associative)(Gen.anyLong.map(Prod(_)))),
+      testM("boolean disjunction")(checkAllLaws(Associative)(Gen.boolean.map(Or(_)))),
+      testM("boolean conjuction")(checkAllLaws(Associative)(Gen.boolean.map(And(_)))),
+      testM("option")(checkAllLaws(Associative)(Gen.option(Gen.anyString))),
+      testM("either")(checkAllLaws(Associative)(Gen.either(Gen.anyString, Gen.anyString))),
+      testM("list")(checkAllLaws(Associative)(Gen.listOf(Gen.anyString))),
+      testM("vector")(checkAllLaws(Associative)(Gen.vectorOf(Gen.anyString))),
+      testM("map")(checkAllLaws(Associative)(Gen.mapOf(Gen.anyString, Gen.anyString))),
+      testM("set")(checkAllLaws(Associative)(Gen.setOf(Gen.anyString))),
+      testM("tuple2")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString))),
+      testM("tuple3")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString).zip(Gen.anyString)))
+    )
+  )
+}
