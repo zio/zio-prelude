@@ -11,8 +11,7 @@ package object prelude
     with ClosureSyntax
     with NewtypeExports
     with NewtypeFExports
-    with IdentitySyntax
-    with Newtypes {
+    with IdentitySyntax {
 
   /**
    * Makes a new assertion that requires a value equal the specified value.

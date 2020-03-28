@@ -1,7 +1,8 @@
 package zio.prelude
 
-import zio.test.laws.Lawful
 import zio.prelude.coherent.IdentityEqual
+import zio.prelude.newtypes.{ And, Or, Prod, Sum }
+import zio.test.laws.Lawful
 
 trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
   def identity: A
