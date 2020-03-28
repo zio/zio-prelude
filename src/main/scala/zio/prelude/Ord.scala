@@ -105,7 +105,7 @@ object Ord extends Lawful[Ord] {
   val transitivityLaw1: Laws.Law3[Ord] =
     new Laws.Law3[Ord]("transitivityLaw1") {
       def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-        ((a1 < a2) && (a2 < a3)) ==> (a1 < a3)
+        (a1 lessThan a2) && (a2 lessThan a3) ==> (a1 lessThan a3)
     }
 
   /**
@@ -115,7 +115,7 @@ object Ord extends Lawful[Ord] {
   val transitivityLaw2: Laws.Law3[Ord] =
     new Laws.Law3[Ord]("transitivityLaw2") {
       def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-        ((a1 > a2) && (a2 > a3)) ==> (a1 > a3)
+        ((a1 greaterThan a2) && (a2 greaterThan a3)) ==> (a1 greaterThan a3)
     }
 
   /**
@@ -125,7 +125,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw1: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 <= a2) && (a2 <= a1)) ==> (a1 === a2)
+        ((a1 lessThanEqualTo a2) && (a2 lessThanEqualTo a1)) ==> (a1 <-> a2)
     }
 
   /**
@@ -135,7 +135,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw2: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 >= a2) && (a2 >= a1)) ==> (a1 === a2)
+        ((a1 greaterThanEqualTo a2) && (a2 greaterThanEqualTo a1)) ==> (a1 <-> a2)
     }
 
   /**
@@ -145,7 +145,7 @@ object Ord extends Lawful[Ord] {
   val connexityLaw1: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("connexityLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 <= a2) or (a2 <= a1)
+        (a1 lessThanEqualTo a2) || (a2 lessThanEqualTo a1)
     }
 
   /**
@@ -155,7 +155,7 @@ object Ord extends Lawful[Ord] {
   val connexityLaw2: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("connexityLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 >= a2) or (a2 >= a1)
+        (a1 greaterThanEqualTo a2) || (a2 greaterThanEqualTo a1)
     }
 
   /**
@@ -165,7 +165,7 @@ object Ord extends Lawful[Ord] {
   val complementLaw: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("complementLaw") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 <= a2) <==> (a2 >= a1)
+        (a1 lessThanEqualTo a2) <==> (a2 greaterThanEqualTo a1)
     }
 
   /**

@@ -1,7 +1,6 @@
 package zio
 
-import zio.test.{ assert, Assertion, TestResult }
-import zio.test.Assertion.{ isFalse, isTrue }
+import zio.test.{ assert, TestResult }
 
 package object prelude
     extends DebugSyntax
@@ -12,31 +11,22 @@ package object prelude
     with NewtypeExports
     with NewtypeFExports
     with IdentitySyntax
-    with Newtypes {
+    with Newtypes
+    with Assertions {
 
   /**
-   * Makes a new assertion that requires a value equal the specified value.
+   * Provides implicit syntax for assertions.
    */
-  def equalTo[A: Equal](expected: A): Assertion[A] =
-    Assertion.assertion("equalTo")(Assertion.Render.param(expected))(_ === expected)
-
-  /**
-   * Provides implicit syntax for asserting that two values of type `A` are
-   * equal to each other.
-   */
-  implicit class AssertSyntax[A](private val self: A) extends AnyVal {
+  implicit class AssertionSyntax[A](private val self: A) extends AnyVal {
     def <->(that: A)(implicit eq: Equal[A]): TestResult =
       assert(self)(equalTo(that))
-  }
-
-  implicit class BoolSyntax(private val l: Boolean) extends AnyVal {
-    def or(r: Boolean): TestResult =
-      assert(l)(isTrue) || assert(r)(isTrue)
-
-    def ==>(r: Boolean): TestResult =
-      assert(r)(isTrue) || assert(l)(isFalse)
-
-    def <==>(r: Boolean): TestResult =
-      assert(r)(equalTo(l))
+    def greaterThan(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isGreaterThan(that))
+    def greaterThanEqualTo(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isGreaterThanEqualTo(that))
+    def lessThan(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isLessThan(that))
+    def lessThanEqualTo(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isLessThanEqualTo(that))
   }
 }
