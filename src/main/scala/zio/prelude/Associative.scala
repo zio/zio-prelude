@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.newtypes.{ First, Last, Max, Min }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 

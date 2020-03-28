@@ -1,6 +1,6 @@
 package zio.prelude
 
-trait Newtypes {
+package object newtypes {
   object Sum extends SubtypeF
   type Sum[A] = Sum.Type[A]
 
