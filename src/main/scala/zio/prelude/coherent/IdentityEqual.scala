@@ -13,6 +13,6 @@ trait IdentityEqual {
 
       def combine(l: A, r: A): A = identity0.combine(l, r)
 
-      def equal(l: A, r: A): Boolean = equal0.equal(l, r)
+      def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }
