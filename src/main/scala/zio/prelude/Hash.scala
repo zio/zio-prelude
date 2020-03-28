@@ -12,9 +12,12 @@ import zio.test.laws.{ Lawful, Laws }
 @implicitNotFound("No implicit Hash defined for ${A}.")
 trait Hash[-A] extends Equal[A] { self =>
 
+  /**
+   * Returns the hash of the specified value.
+   */
   def hash(a: A): Int
 
-  def equal(l: A, r: A): Boolean
+  override protected def checkEqual(l: A, r: A): Boolean
 
   /**
    * Constructs a `Hash[(A, B)]` given a `Hash[A]` and `Hash[B]` by hashing the
@@ -109,8 +112,8 @@ object Hash extends Lawful[Hash] with HashOrd {
    */
   def make[A](hash0: A => Int, equal0: (A, A) => Boolean): Hash[A] =
     new Hash[A] {
-      def hash(a: A): Int                     = hash0(a)
-      override def equal(l: A, r: A): Boolean = equal0(l, r)
+      def hash(a: A): Int                 = hash0(a)
+      def checkEqual(l: A, r: A): Boolean = equal0(l, r)
     }
 
   /**

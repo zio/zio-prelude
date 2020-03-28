@@ -12,9 +12,18 @@ import zio.test.laws.{ Lawful, Laws }
 @implicitNotFound("No implicit Ord defined for ${A}.")
 trait Ord[-A] extends Equal[A] { self =>
 
-  def compare(l: A, r: A): Ordering
+  /**
+   * Returns the result of comparing two values of type `A`.
+   */
+  final def compare(l: A, r: A): Ordering =
+    if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
 
-  def equal(l: A, r: A): Boolean =
+  /**
+   * Returns the result of comparing two values of type `A`.
+   */
+  protected def checkCompare(l: A, r: A): Ordering
+
+  override protected def checkEqual(l: A, r: A): Boolean =
     compare(l, r).isEqual
 
   /**
