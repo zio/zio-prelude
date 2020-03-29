@@ -26,52 +26,52 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     }
 
   implicit val CharIdentity: Identity[Char] =
-    Identity.make[Char]('\u0000', (l: Char, r: Char) => (l + r).toChar)
+    Identity.make('\u0000', (l, r) => (l + r).toChar)
 
   implicit val StringIdentity: Identity[String] =
-    Identity.make[String]("", _ + _)
+    Identity.make("", _ + _)
 
   implicit val ByteSumIdentity: Identity[Sum[Byte]] =
-    Identity.make[Sum[Byte]](Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
+    Identity.make(Sum(0), (l, r) => Sum((l + r).toByte))
 
   implicit val ByteProdIdentity: Identity[Prod[Byte]] =
-    Identity.make[Prod[Byte]](Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
+    Identity.make(Prod(1), (l, r) => Prod((l * r).toByte))
 
   implicit val ShortSumIdentity: Identity[Sum[Short]] =
-    Identity.make[Sum[Short]](Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
+    Identity.make(Sum(0), (l, r) => Sum((l + r).toShort))
 
   implicit val ShortProdIdentity: Identity[Prod[Short]] =
-    Identity.make[Prod[Short]](Prod(1), (l: Prod[Short], r: Prod[Short]) => Prod((l * r).toShort))
+    Identity.make(Prod(1), (l, r) => Prod((l * r).toShort))
 
   implicit val IntSumIdentity: Identity[Sum[Int]] =
-    Identity.make[Sum[Int]](Sum(0), (l: Sum[Int], r: Sum[Int]) => Sum(l + r))
+    Identity.make(Sum(0), (l, r) => Sum(l + r))
 
   implicit val IntProdIdentity: Identity[Prod[Int]] =
-    Identity.make[Prod[Int]](Prod(1), (l: Prod[Int], r: Prod[Int]) => Prod(l * r))
+    Identity.make(Prod(1), (l, r) => Prod(l * r))
 
   implicit val LongSumIdentity: Identity[Sum[Long]] =
-    Identity.make[Sum[Long]](Sum(0L), (l: Sum[Long], r: Sum[Long]) => Sum(l + r))
+    Identity.make(Sum(0L), (l, r) => Sum(l + r))
 
   implicit val LongProdIdentity: Identity[Prod[Long]] =
-    Identity.make[Prod[Long]](Prod(1L), (l: Prod[Long], r: Prod[Long]) => Prod(l * r))
+    Identity.make(Prod(1L), (l, r) => Prod(l * r))
 
   implicit val FloatSumIdentity: Identity[Sum[Float]] =
-    Identity.make[Sum[Float]](Sum(0), (l: Sum[Float], r: Sum[Float]) => Sum(l + r))
+    Identity.make(Sum(0), (l, r) => Sum(l + r))
 
   implicit val FloatProdIdentity: Identity[Prod[Float]] =
-    Identity.make[Prod[Float]](Prod(1), (l: Prod[Float], r: Prod[Float]) => Prod(l * r))
+    Identity.make(Prod(1), (l, r) => Prod(l * r))
 
   implicit val DoubleSumIdentity: Identity[Sum[Double]] =
-    Identity.make[Sum[Double]](Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r))
+    Identity.make(Sum(0), (l, r) => Sum(l + r))
 
   implicit val DoubleProdIdentity: Identity[Prod[Double]] =
-    Identity.make[Prod[Double]](Prod(1), (l: Prod[Double], r: Prod[Double]) => Prod(l * r))
+    Identity.make(Prod(1), (l, r) => Prod(l * r))
 
   implicit val BooleanDisjunctionIdentity: Identity[Or] =
-    Identity.make[Or](Or(false), (l: Or, r: Or) => Or(l || r))
+    Identity.make[Or](Or(false), (l, r) => Or(l || r))
 
   implicit val BooleanConjunctionIdentity: Identity[And] =
-    Identity.make[And](And(true), (l: And, r: And) => And(l && r))
+    Identity.make[And](And(true), (l, r) => And(l && r))
 
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
@@ -99,10 +99,10 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     }
 
   implicit def ListIdentity[A]: Identity[List[A]] =
-    Identity.make[List[A]](Nil, _ ++ _)
+    Identity.make(Nil, _ ++ _)
 
   implicit def VectorIdentity[A]: Identity[Vector[A]] =
-    Identity.make[Vector[A]](Vector.empty, _ ++ _)
+    Identity.make(Vector.empty, _ ++ _)
 
   implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
     new Identity[Map[K, V]] {
@@ -115,7 +115,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     }
 
   implicit def SetIdentity[A]: Identity[Set[A]] =
-    Identity.make[Set[A]](Set.empty, _ | _)
+    Identity.make(Set.empty, _ | _)
 
   implicit def Tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
     new Identity[(A, B)] {
