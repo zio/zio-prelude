@@ -25,56 +25,72 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
       def combine(l: A, r: A): A = op(l, r)
     }
 
-  implicit val CharSumIdentity: Identity[Sum[Char]] =
-    Identity.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar))
+  implicit val BooleanConjunctionIdentity: Identity[And] =
+    Identity.make(And(true), (l, r) => And(l && r))
+
+  implicit val BooleanDisjunctionIdentity: Identity[Or] =
+    Identity.make(Or(false), (l, r: Or) => Or(l || r))
+
+  implicit val ByteProdIdentity: Identity[Prod[Byte]] =
+    Identity.make(Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
+
+  implicit val ByteSumIdentity: Identity[Sum[Byte]] =
+    Identity.make(Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
 
   implicit val CharProdIdentity: Identity[Prod[Char]] =
     Identity.make(Prod('\u0001'), (l, r) => Prod((l * r).toChar))
 
-  implicit val StringIdentity: Identity[String] =
-    Identity.make("", _ + _)
+  implicit val CharSumIdentity: Identity[Sum[Char]] =
+    Identity.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar))
 
-  implicit val ByteSumIdentity: Identity[Sum[Byte]] =
-    Identity.make(Sum(0), (l, r) => Sum((l + r).toByte))
+  implicit val DoubleProdIdentity: Identity[Prod[Double]] =
+    Identity.make(Prod(1), (l: Prod[Double], r: Prod[Double]) => Prod(l * r))
 
-  implicit val ByteProdIdentity: Identity[Prod[Byte]] =
-    Identity.make(Prod(1), (l, r) => Prod((l * r).toByte))
+  implicit val DoubleSumIdentity: Identity[Sum[Double]] =
+    Identity.make(Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r))
 
-  implicit val ShortSumIdentity: Identity[Sum[Short]] =
-    Identity.make(Sum(0), (l, r) => Sum((l + r).toShort))
+  implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
+    new Identity[Either[E, A]] {
+      def identity: Either[E, A] = Right(Identity[A].identity)
 
-  implicit val ShortProdIdentity: Identity[Prod[Short]] =
-    Identity.make(Prod(1), (l, r) => Prod((l * r).toShort))
+      def combine(l: Either[E, A], r: Either[E, A]): Either[E, A] =
+        (l, r) match {
+          case (Left(l), _)         => Left(l)
+          case (_, Left(r))         => Left(r)
+          case (Right(l), Right(r)) => Right(l <> r)
+        }
+    }
 
-  implicit val IntSumIdentity: Identity[Sum[Int]] =
+  implicit val FloatProdIdentity: Identity[Prod[Float]] =
+    Identity.make(Prod(1), (l, r) => Prod(l * r))
+
+  implicit val FloatSumIdentity: Identity[Sum[Float]] =
     Identity.make(Sum(0), (l, r) => Sum(l + r))
 
   implicit val IntProdIdentity: Identity[Prod[Int]] =
     Identity.make(Prod(1), (l, r) => Prod(l * r))
 
-  implicit val LongSumIdentity: Identity[Sum[Long]] =
-    Identity.make(Sum(0L), (l, r) => Sum(l + r))
+  implicit val IntSumIdentity: Identity[Sum[Int]] =
+    Identity.make(Sum(0), (l, r) => Sum(l + r))
+
+  implicit def ListIdentity[A]: Identity[List[A]] =
+    Identity.make[List[A]](Nil, _ ++ _)
 
   implicit val LongProdIdentity: Identity[Prod[Long]] =
     Identity.make(Prod(1L), (l, r) => Prod(l * r))
 
-  implicit val FloatSumIdentity: Identity[Sum[Float]] =
-    Identity.make(Sum(0), (l, r) => Sum(l + r))
+  implicit val LongSumIdentity: Identity[Sum[Long]] =
+    Identity.make(Sum(0L), (l, r) => Sum(l + r))
 
-  implicit val FloatProdIdentity: Identity[Prod[Float]] =
-    Identity.make(Prod(1), (l, r) => Prod(l * r))
+  implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
+    new Identity[Map[K, V]] {
+      def identity: Map[K, V] = Map()
 
-  implicit val DoubleSumIdentity: Identity[Sum[Double]] =
-    Identity.make(Sum(0), (l, r) => Sum(l + r))
-
-  implicit val DoubleProdIdentity: Identity[Prod[Double]] =
-    Identity.make(Prod(1), (l, r) => Prod(l * r))
-
-  implicit val BooleanDisjunctionIdentity: Identity[Or] =
-    Identity.make[Or](Or(false), (l, r) => Or(l || r))
-
-  implicit val BooleanConjunctionIdentity: Identity[And] =
-    Identity.make[And](And(true), (l, r) => And(l && r))
+      def combine(l: Map[K, V], r: Map[K, V]): Map[K, V] =
+        r.foldLeft(l) {
+          case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
+        }
+    }
 
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
     new Identity[Option[A]] {
@@ -89,36 +105,17 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         }
     }
 
-  implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
-    new Identity[Either[E, A]] {
-      def identity: Either[E, A] = Right(Identity[A].identity)
-
-      def combine(l: Either[E, A], r: Either[E, A]): Either[E, A] =
-        (l, r) match {
-          case (Left(l), _)         => Left(l)
-          case (_, Left(r))         => Left(r)
-          case (Right(l), Right(r)) => Right(l <> r)
-        }
-    }
-
-  implicit def ListIdentity[A]: Identity[List[A]] =
-    Identity.make(Nil, _ ++ _)
-
-  implicit def VectorIdentity[A]: Identity[Vector[A]] =
-    Identity.make(Vector.empty, _ ++ _)
-
-  implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
-    new Identity[Map[K, V]] {
-      def identity: Map[K, V] = Map()
-
-      def combine(l: Map[K, V], r: Map[K, V]): Map[K, V] =
-        r.foldLeft(l) {
-          case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
-        }
-    }
-
   implicit def SetIdentity[A]: Identity[Set[A]] =
     Identity.make(Set.empty, _ | _)
+
+  implicit val ShortProdIdentity: Identity[Prod[Short]] =
+    Identity.make(Prod(1), (l: Prod[Short], r: Prod[Short]) => Prod((l * r).toShort))
+
+  implicit val ShortSumIdentity: Identity[Sum[Short]] =
+    Identity.make(Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
+
+  implicit val StringIdentity: Identity[String] =
+    Identity.make("", _ + _)
 
   implicit def Tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
     new Identity[(A, B)] {
@@ -1084,6 +1081,9 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
           l._22 |+| r._22
         )
     }
+
+  implicit def VectorIdentity[A]: Identity[Vector[A]] =
+    Identity.make(Vector.empty, _ ++ _)
 }
 
 trait IdentitySyntax {
