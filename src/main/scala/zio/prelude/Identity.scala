@@ -25,8 +25,11 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
       def combine(l: A, r: A): A = op(l, r)
     }
 
-  implicit val CharIdentity: Identity[Char] =
-    Identity.make('\u0000', (l, r) => (l + r).toChar)
+  implicit val CharSumIdentity: Identity[Sum[Char]] =
+    Identity.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar))
+
+  implicit val CharProdIdentity: Identity[Prod[Char]] =
+    Identity.make(Prod('\u0001'), (l, r) => Prod((l * r).toChar))
 
   implicit val StringIdentity: Identity[String] =
     Identity.make("", _ + _)
