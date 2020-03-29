@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{And, Or, Prod, Sum}
+import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
+import zio.test.laws.{ Lawful, Laws }
 
 trait Closure[A] {
   def combine(l: A, r: A): A
@@ -27,16 +27,16 @@ object Closure extends Lawful[Closure] {
     }
 
   implicit val CharClosure: Closure[Char] =
-    Closure.make[Char]( (l: Char, r: Char) => (l + r).toChar)
+    Closure.make[Char]((l: Char, r: Char) => (l + r).toChar)
 
   implicit val StringClosure: Closure[String] =
-    Closure.make[String]( (l: String, r: String) => l + r)
+    Closure.make[String]((l: String, r: String) => l + r)
 
   implicit val ByteSumClosure: Closure[Sum[Byte]] =
     Closure.make[Sum[Byte]]((l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
 
   implicit val ByteProdClosure: Closure[Prod[Byte]] =
-    Closure.make[Prod[Byte]]( (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
+    Closure.make[Prod[Byte]]((l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
 
   implicit val ShortSumClosure: Closure[Sum[Short]] =
     Closure.make[Sum[Short]]((l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
@@ -100,7 +100,7 @@ object Closure extends Lawful[Closure] {
     Closure.make[List[A]]((l: List[A], r: List[A]) => l ++ r)
 
   implicit def VectorClosure[A]: Closure[Vector[A]] =
-    Closure.make[Vector[A]]((l: Vector[A], r: Vector[A]) =>  l ++ r)
+    Closure.make[Vector[A]]((l: Vector[A], r: Vector[A]) => l ++ r)
 
   implicit def MapClosure[K, V: Closure]: Closure[Map[K, V]] =
     new Closure[Map[K, V]] {
@@ -132,8 +132,7 @@ object Closure extends Lawful[Closure] {
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4)
     }
 
-  implicit def Tuple5Closure[A: Closure, B: Closure, C: Closure, D: Closure, E: Closure]
-  : Closure[(A, B, C, D, E)] =
+  implicit def Tuple5Closure[A: Closure, B: Closure, C: Closure, D: Closure, E: Closure]: Closure[(A, B, C, D, E)] =
     new Closure[(A, B, C, D, E)] {
 
       def combine(l: (A, B, C, D, E), r: (A, B, C, D, E)): (A, B, C, D, E) =
@@ -141,14 +140,14 @@ object Closure extends Lawful[Closure] {
     }
 
   implicit def Tuple6Closure[A: Closure, B: Closure, C: Closure, D: Closure, E: Closure, F: Closure]
-  : Closure[(A, B, C, D, E, F)] =
+    : Closure[(A, B, C, D, E, F)] =
     new Closure[(A, B, C, D, E, F)] {
       def combine(l: (A, B, C, D, E, F), r: (A, B, C, D, E, F)): (A, B, C, D, E, F) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6)
     }
 
   implicit def Tuple7Closure[A: Closure, B: Closure, C: Closure, D: Closure, E: Closure, F: Closure, G: Closure]
-  : Closure[(A, B, C, D, E, F, G)] =
+    : Closure[(A, B, C, D, E, F, G)] =
     new Closure[(A, B, C, D, E, F, G)] {
       def combine(l: (A, B, C, D, E, F, G), r: (A, B, C, D, E, F, G)): (A, B, C, D, E, F, G) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7)
@@ -221,9 +220,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J),
-                   r: (A, B, C, D, E, F, G, H, I, J)
-                 ): (A, B, C, D, E, F, G, H, I, J) =
+        l: (A, B, C, D, E, F, G, H, I, J),
+        r: (A, B, C, D, E, F, G, H, I, J)
+      ): (A, B, C, D, E, F, G, H, I, J) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -254,9 +253,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K),
-                   r: (A, B, C, D, E, F, G, H, I, J, K)
-                 ): (A, B, C, D, E, F, G, H, I, J, K) =
+        l: (A, B, C, D, E, F, G, H, I, J, K),
+        r: (A, B, C, D, E, F, G, H, I, J, K)
+      ): (A, B, C, D, E, F, G, H, I, J, K) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -289,9 +288,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -326,9 +325,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -365,9 +364,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -406,9 +405,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -449,9 +448,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -494,9 +493,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -541,9 +540,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -590,9 +589,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -641,9 +640,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -694,9 +693,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -749,9 +748,9 @@ object Closure extends Lawful[Closure] {
     new Closure[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] {
 
       def combine(
-                   l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V),
-                   r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
-                 ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) =
+        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V),
+        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
+      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -778,7 +777,6 @@ object Closure extends Lawful[Closure] {
         )
     }
 }
-
 
 trait ClosureSyntax {
 

@@ -1,8 +1,7 @@
-
 package zio.prelude
 
-import zio.prelude.newtypes.{And, Or, Prod, Sum}
-import zio.test.{testM, _}
+import zio.prelude.newtypes.{ And, Or, Prod, Sum }
+import zio.test.{ testM, _ }
 import zio.test.laws._
 
 object ClosureSpec extends DefaultRunnableSpec {
