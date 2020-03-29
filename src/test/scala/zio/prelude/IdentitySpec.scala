@@ -8,7 +8,8 @@ import zio.test.DefaultRunnableSpec
 object IdentitySpec extends DefaultRunnableSpec {
   def spec = suite("IdentitySpec")(
     suite("laws")(
-      testM("char")(checkAllLaws(Identity)(Gen.anyChar)),
+      testM("char addition")(checkAllLaws(Identity)(Gen.anyChar.map(Sum(_)))),
+      testM("char multiplication")(checkAllLaws(Identity)(Gen.anyChar.map(Prod(_)))),
       testM("string")(checkAllLaws(Identity)(Gen.anyString)),
       testM("byte addition")(checkAllLaws(Identity)(Gen.anyByte.map(Sum(_)))),
       testM("byte multiplication")(checkAllLaws(Identity)(Gen.anyByte.map(Prod(_)))),
