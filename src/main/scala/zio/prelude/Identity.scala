@@ -122,7 +122,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
       def identity: (A, B) = (Identity[A].identity, Identity[B].identity)
 
       def combine(l: (A, B), r: (A, B)): (A, B) =
-        (l._1 |+| r._1, l._2 |+| r._2)
+        (l._1 <> r._1, l._2 <> r._2)
     }
 
   implicit def Tuple3Identity[A: Identity, B: Identity, C: Identity]: Identity[(A, B, C)] =
@@ -131,7 +131,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         (Identity[A].identity, Identity[B].identity, Identity[C].identity)
 
       def combine(l: (A, B, C), r: (A, B, C)): (A, B, C) =
-        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3)
+        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3)
     }
 
   implicit def Tuple4Identity[A: Identity, B: Identity, C: Identity, D: Identity]: Identity[(A, B, C, D)] =
@@ -140,7 +140,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity)
 
       def combine(l: (A, B, C, D), r: (A, B, C, D)): (A, B, C, D) =
-        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4)
+        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4)
     }
 
   implicit def Tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]
@@ -150,7 +150,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity, Identity[E].identity)
 
       def combine(l: (A, B, C, D, E), r: (A, B, C, D, E)): (A, B, C, D, E) =
-        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4, l._5 |+| r._5)
+        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5)
     }
 
   implicit def Tuple6Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity]
@@ -167,7 +167,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(l: (A, B, C, D, E, F), r: (A, B, C, D, E, F)): (A, B, C, D, E, F) =
-        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4, l._5 |+| r._5, l._6 |+| r._6)
+        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6)
     }
 
   implicit def Tuple7Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity, G: Identity]
@@ -185,7 +185,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(l: (A, B, C, D, E, F, G), r: (A, B, C, D, E, F, G)): (A, B, C, D, E, F, G) =
-        (l._1 |+| r._1, l._2 |+| r._2, l._3 |+| r._3, l._4 |+| r._4, l._5 |+| r._5, l._6 |+| r._6, l._7 |+| r._7)
+        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7)
     }
 
   implicit def Tuple8Identity[
@@ -213,14 +213,14 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 
       def combine(l: (A, B, C, D, E, F, G, H), r: (A, B, C, D, E, F, G, H)): (A, B, C, D, E, F, G, H) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8
         )
     }
 
@@ -251,15 +251,15 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 
       def combine(l: (A, B, C, D, E, F, G, H, I), r: (A, B, C, D, E, F, G, H, I)): (A, B, C, D, E, F, G, H, I) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9
         )
     }
 
@@ -295,16 +295,16 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J)
       ): (A, B, C, D, E, F, G, H, I, J) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10
         )
     }
 
@@ -342,17 +342,17 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K)
       ): (A, B, C, D, E, F, G, H, I, J, K) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11
         )
     }
 
@@ -392,18 +392,18 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L)
       ): (A, B, C, D, E, F, G, H, I, J, K, L) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12
         )
     }
 
@@ -445,19 +445,19 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13
         )
     }
 
@@ -501,20 +501,20 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14
         )
     }
 
@@ -560,21 +560,21 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15
         )
     }
 
@@ -622,22 +622,22 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15,
-          l._16 |+| r._16
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15,
+          l._16 <> r._16
         )
     }
 
@@ -687,23 +687,23 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15,
-          l._16 |+| r._16,
-          l._17 |+| r._17
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15,
+          l._16 <> r._16,
+          l._17 <> r._17
         )
     }
 
@@ -755,24 +755,24 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15,
-          l._16 |+| r._16,
-          l._17 |+| r._17,
-          l._18 |+| r._18
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15,
+          l._16 <> r._16,
+          l._17 <> r._17,
+          l._18 <> r._18
         )
     }
 
@@ -826,25 +826,25 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15,
-          l._16 |+| r._16,
-          l._17 |+| r._17,
-          l._18 |+| r._18,
-          l._19 |+| r._19
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15,
+          l._16 <> r._16,
+          l._17 <> r._17,
+          l._18 <> r._18,
+          l._19 <> r._19
         )
     }
 
@@ -900,26 +900,26 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15,
-          l._16 |+| r._16,
-          l._17 |+| r._17,
-          l._18 |+| r._18,
-          l._19 |+| r._19,
-          l._20 |+| r._20
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15,
+          l._16 <> r._16,
+          l._17 <> r._17,
+          l._18 <> r._18,
+          l._19 <> r._19,
+          l._20 <> r._20
         )
     }
 
@@ -977,27 +977,27 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15,
-          l._16 |+| r._16,
-          l._17 |+| r._17,
-          l._18 |+| r._18,
-          l._19 |+| r._19,
-          l._20 |+| r._20,
-          l._21 |+| r._21
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15,
+          l._16 <> r._16,
+          l._17 <> r._17,
+          l._18 <> r._18,
+          l._19 <> r._19,
+          l._20 <> r._20,
+          l._21 <> r._21
         )
     }
 
@@ -1057,28 +1057,28 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) =
         (
-          l._1 |+| r._1,
-          l._2 |+| r._2,
-          l._3 |+| r._3,
-          l._4 |+| r._4,
-          l._5 |+| r._5,
-          l._6 |+| r._6,
-          l._7 |+| r._7,
-          l._8 |+| r._8,
-          l._9 |+| r._9,
-          l._10 |+| r._10,
-          l._11 |+| r._11,
-          l._12 |+| r._12,
-          l._13 |+| r._13,
-          l._14 |+| r._14,
-          l._15 |+| r._15,
-          l._16 |+| r._16,
-          l._17 |+| r._17,
-          l._18 |+| r._18,
-          l._19 |+| r._19,
-          l._20 |+| r._20,
-          l._21 |+| r._21,
-          l._22 |+| r._22
+          l._1 <> r._1,
+          l._2 <> r._2,
+          l._3 <> r._3,
+          l._4 <> r._4,
+          l._5 <> r._5,
+          l._6 <> r._6,
+          l._7 <> r._7,
+          l._8 <> r._8,
+          l._9 <> r._9,
+          l._10 <> r._10,
+          l._11 <> r._11,
+          l._12 <> r._12,
+          l._13 <> r._13,
+          l._14 <> r._14,
+          l._15 <> r._15,
+          l._16 <> r._16,
+          l._17 <> r._17,
+          l._18 <> r._18,
+          l._19 <> r._19,
+          l._20 <> r._20,
+          l._21 <> r._21,
+          l._22 <> r._22
         )
     }
 
@@ -1088,8 +1088,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 
 trait IdentitySyntax {
   implicit class IdentitySyntax[A](l: A) {
+
     def identity(implicit id: Identity[A]): A = id.identity
 
-    def |+|(r: A)(implicit id: Identity[A]): A = id.combine(l, r)
   }
 }
