@@ -40,7 +40,7 @@ object Debug {
     vector => Repr.VConstructor(List("scala"), "Vector", vector.map(_.debug).toList)
 }
 trait DebugSyntax {
-  implicit class DebugSyntax[A](self: A) {
+  implicit class DebugOps[A](self: A) {
     def debug(implicit debug: Debug[A]): Debug.Repr = debug.debug(self)
   }
 }

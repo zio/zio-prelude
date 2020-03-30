@@ -746,7 +746,7 @@ object Closure extends Lawful[Closure] with ClosureEqual {
 
 trait ClosureSyntax {
 
-  implicit class ClosureSyntax[A](l: A) {
+  implicit class ClosureOps[A](l: A) {
     def combine(r: A)(implicit closure: Closure[A]): A = closure.combine(l, r)
 
     def <>(r: A)(implicit closure: Closure[A]): A = closure.combine(l, r)
