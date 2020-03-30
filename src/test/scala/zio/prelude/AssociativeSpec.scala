@@ -8,7 +8,8 @@ object AssociativeSpec extends DefaultRunnableSpec {
 
   def spec = suite("AssociativeSpec")(
     suite("laws")(
-      testM("char")(checkAllLaws(Associative)(Gen.anyChar)),
+      testM("char addition")(checkAllLaws(Associative)(Gen.anyChar.map(Sum(_)))),
+      testM("char multiplication")(checkAllLaws(Associative)(Gen.anyChar.map(Prod(_)))),
       testM("string")(checkAllLaws(Associative)(Gen.anyString)),
       testM("byte addition")(checkAllLaws(Associative)(Gen.anyByte.map(Sum(_)))),
       testM("byte multiplication")(checkAllLaws(Associative)(Gen.anyByte.map(Prod(_)))),
@@ -21,7 +22,6 @@ object AssociativeSpec extends DefaultRunnableSpec {
       testM("boolean disjunction")(checkAllLaws(Associative)(Gen.boolean.map(Or(_)))),
       testM("boolean conjuction")(checkAllLaws(Associative)(Gen.boolean.map(And(_)))),
       testM("option")(checkAllLaws(Associative)(Gen.option(Gen.anyString))),
-      testM("either")(checkAllLaws(Associative)(Gen.either(Gen.anyString, Gen.anyString))),
       testM("list")(checkAllLaws(Associative)(Gen.listOf(Gen.anyString))),
       testM("vector")(checkAllLaws(Associative)(Gen.vectorOf(Gen.anyString))),
       testM("map")(checkAllLaws(Associative)(Gen.mapOf(Gen.anyString, Gen.anyString))),

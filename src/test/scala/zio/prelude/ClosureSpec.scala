@@ -8,7 +8,8 @@ object ClosureSpec extends DefaultRunnableSpec {
 
   def spec = suite("ClosureSpec")(
     suite("laws")(
-      testM("char")(checkAllLaws(Closure)(Gen.anyChar)),
+      testM("char")(checkAllLaws(Closure)(Gen.anyChar.map(Sum(_)))),
+      testM("char")(checkAllLaws(Closure)(Gen.anyChar.map(Prod(_)))),
       testM("string")(checkAllLaws(Closure)(Gen.anyString)),
       testM("byte addition")(checkAllLaws(Closure)(Gen.anyByte.map(Sum(_)))),
       testM("byte multiplication")(checkAllLaws(Closure)(Gen.anyByte.map(Prod(_)))),
@@ -21,7 +22,6 @@ object ClosureSpec extends DefaultRunnableSpec {
       testM("boolean disjunction")(checkAllLaws(Closure)(Gen.boolean.map(Or(_)))),
       testM("boolean conjuction")(checkAllLaws(Closure)(Gen.boolean.map(And(_)))),
       testM("option")(checkAllLaws(Closure)(Gen.option(Gen.anyString))),
-      testM("either")(checkAllLaws(Closure)(Gen.either(Gen.anyString, Gen.anyString))),
       testM("list")(checkAllLaws(Closure)(Gen.listOf(Gen.anyString))),
       testM("vector")(checkAllLaws(Closure)(Gen.vectorOf(Gen.anyString))),
       testM("map")(checkAllLaws(Closure)(Gen.mapOf(Gen.anyString, Gen.anyString))),
