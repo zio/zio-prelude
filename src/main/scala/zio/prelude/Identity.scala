@@ -1087,7 +1087,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 }
 
 trait IdentitySyntax {
-  implicit class IdentitySyntax[A](l: A) {
+  implicit class IdentityOps[A](l: A) {
 
     def identity(implicit id: Identity[A]): A = id.identity
 

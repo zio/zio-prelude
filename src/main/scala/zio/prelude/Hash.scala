@@ -950,7 +950,7 @@ trait HashSyntax {
   /**
    * Provides infix syntax for hashing a value.
    */
-  implicit class HashSyntax[A](a: A) {
+  implicit class HashOps[A](a: A) {
 
     /**
      * Returns the hash of this value.

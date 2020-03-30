@@ -734,7 +734,7 @@ trait EqualSyntax {
   /**
    * Provides infix syntax for comparing two values for equality.
    */
-  implicit class EqualSyntax[A](l: A) {
+  implicit class EqualOps[A](l: A) {
 
     /**
      * Returns whether this value and the specified value are equal.

@@ -794,7 +794,7 @@ trait OrdSyntax {
   /**
    * Provides infix syntax for comparing two values with a total ordering.
    */
-  implicit class OrdSyntax[A](val l: A) {
+  implicit class OrdOps[A](val l: A) {
 
     /**
      * Returns whether this value is greater than the specified value.
