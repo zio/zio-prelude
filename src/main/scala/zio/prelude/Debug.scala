@@ -68,7 +68,7 @@ object Debug {
     map => Repr.VConstructor(List("scala"), "Map", List(map.toList.debug))
 
   implicit def Tuple2Debug[A: Debug, B: Debug]: Debug[(A, B)] =
-    tup2 => Repr.VConstructor(List("scala"), "Tuple2", List(tup2._1.debug,tup2._2.debug))
+    tup2 => Repr.VConstructor(List("scala"), "Tuple2", List(tup2._1.debug, tup2._2.debug))
 
 }
 
