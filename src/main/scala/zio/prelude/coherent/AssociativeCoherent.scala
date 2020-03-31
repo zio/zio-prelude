@@ -2,7 +2,7 @@ package zio.prelude.coherent
 
 import zio.prelude._
 
-trait AssociativeEqual {
+trait AssociativeCoherent {
 
   /**
    * Derives a `Associative[A] with Equal[A]` given a Associative[A]` and an `Equal[A]`.

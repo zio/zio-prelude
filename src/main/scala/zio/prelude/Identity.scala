@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.coherent.IdentityEqual
+import zio.prelude.coherent.IdentityCoherent
 import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
@@ -9,7 +9,7 @@ trait Identity[A] extends Associative[A] {
   def identity: A
 }
 
-object Identity extends Lawful[Identity with Equal] with IdentityEqual {
+object Identity extends Lawful[Identity with Equal] with IdentityCoherent {
 
   final val leftIdentityLaw = new Laws.Law1[Identity with Equal]("leftIdentityLaw") {
     def apply[A](a: A)(implicit I: Identity[A] with Equal[A]): TestResult =

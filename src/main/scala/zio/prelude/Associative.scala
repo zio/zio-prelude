@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.coherent.AssociativeEqual
+import zio.prelude.coherent.AssociativeCoherent
 import zio.prelude.newtypes.{ And, First, Last, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
@@ -12,7 +12,7 @@ import zio.test.laws.{ Lawful, Laws }
  */
 trait Associative[A] extends Closure[A]
 
-object Associative extends Lawful[Associative with Equal] with AssociativeEqual {
+object Associative extends Lawful[Associative with Equal] with AssociativeCoherent {
 
   /**
    * The associativity law states that for some binary operator `*`, for all

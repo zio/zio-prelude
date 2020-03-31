@@ -37,6 +37,12 @@ object CoherentSpec extends DefaultRunnableSpec {
 
       assert(instance.combine(Sum(1), Sum(5)))(equalTo(Sum(6))) &&
       assert(instance.equal(Sum(5), Sum(5)))(isTrue)
+    },
+    test("AssociativeCommutativeEqual") {
+      val instance = implicitly[Associative[Sum[Int]] with Commutative[Sum[Int]] with Equal[Sum[Int]]]
+
+      assert(instance.combine(Sum(1), Sum(5)))(equalTo(Sum(6))) &&
+      assert(instance.equal(Sum(5), Sum(5)))(isTrue)
     }
   )
 }

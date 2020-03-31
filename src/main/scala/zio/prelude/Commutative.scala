@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.coherent.CommutativeEqual
+import zio.prelude.coherent.CommutativeCoherent
 import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
@@ -10,7 +10,7 @@ trait Commutative[A] extends Closure[A] {
   final def commute: Commutative[A] = Commutative((l, r) => self.combine(r, l))
 }
 
-object Commutative extends Lawful[Commutative with Equal] with CommutativeEqual {
+object Commutative extends Lawful[Commutative with Equal] with CommutativeCoherent {
 
   final val commutativeLaw = new Laws.Law2[Commutative with Equal]("commutativeLaw") {
     def apply[A](a1: A, a2: A)(implicit c: Commutative[A] with Equal[A]): TestResult =
