@@ -9,10 +9,22 @@ object Debug {
 
   def make[A](f: A => Debug.Repr): Debug[A] = f(_)
 
-  // primitives, case classes, sealed traits, collections
-  sealed trait Repr {
-    override def toString: String = ???
+  sealed trait Repr { self =>
+    override def toString: String = self match {
+      case Repr.Int(v)        => v.toString
+      case Repr.Double(v)     => v.toString
+      case Repr.Float(v)      => v.toString
+      case Repr.Long(v)       => v.toString
+      case Repr.Byte(v)       => v.toString
+      case Repr.Char(v)       => v.toString
+      case Repr.String(v)     => v.toString
+      case Repr.Object(ns, n) => s"${ns.mkString(".")}.$n"
+      case Repr.Constructor(ns, n, reprs) =>
+        s"${ns.mkString(".")}.$n(${reprs.map(kv =>  s"${kv._1} -> ${kv._2}").mkString(", ")})"
+      case Repr.VConstructor(ns, n, reprs) => s"${ns.mkString(".")}.$n(${reprs.mkString(", ")})"
+    }
   }
+
   object Repr {
     import scala.{ Int => SInt, Double => SDouble, Float => SFloat, Long => SLong, Char => SChar, Byte => SByte }
     import java.lang.{ String => SString }
@@ -69,7 +81,6 @@ object Debug {
 
   implicit def Tuple2Debug[A: Debug, B: Debug]: Debug[(A, B)] =
     tup2 => Repr.VConstructor(List("scala"), "Tuple2", List(tup2._1.debug, tup2._2.debug))
-
 }
 
 trait DebugSyntax {
