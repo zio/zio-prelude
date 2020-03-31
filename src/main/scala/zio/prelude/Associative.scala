@@ -33,7 +33,7 @@ object Associative extends Lawful[Associative with Equal] with AssociativeEqual 
 
   def make[A](f: (A, A) => A): Associative[A] =
     new Associative[A] {
-      def combine(l: A, r: A): A = f(l, r)
+      def combine(l: => A, r: => A): A = f(l, r)
     }
 
   implicit val BooleanConjunctionAssociative: Associative[And] =

@@ -3,7 +3,7 @@ package zio.prelude
 object Tests {
   implicit def additionCommutativeAssociative: Commutative[Int] with Associative[Int] =
     new Commutative[Int] with Associative[Int] {
-      def combine(l: Int, r: Int) = l + r
+      def combine(l: => Int, r: => Int) = l + r
     }
 
   def test[TypeClass[_], T](implicit ev: TypeClass[T]): Unit = { val _ = ev }
