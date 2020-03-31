@@ -2,7 +2,7 @@ package zio.prelude.coherent
 
 import zio.prelude._
 
-trait ClosureEqual {
+trait ClosureCoherent {
 
   /**
    * Derives a `Closure[A] with Equal[A]` given a closure[A]` and an `Equal[A]`.

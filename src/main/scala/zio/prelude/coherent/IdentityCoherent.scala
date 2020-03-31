@@ -2,7 +2,7 @@ package zio.prelude.coherent
 
 import zio.prelude._
 
-trait IdentityEqual {
+trait IdentityCoherent {
 
   /**
    * Derives a `Identity[A] with Equal[A]` given a `Identity[A]` and an `Equal[A]`.
