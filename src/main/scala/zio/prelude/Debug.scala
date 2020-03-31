@@ -20,7 +20,7 @@ object Debug {
       case Repr.String(v)     => v.toString
       case Repr.Object(ns, n) => s"${ns.mkString(".")}.$n"
       case Repr.Constructor(ns, n, reprs) =>
-        s"${ns.mkString(".")}.$n(${reprs.map(kv =>  s"${kv._1} -> ${kv._2}").mkString(", ")})"
+        s"${ns.mkString(".")}.$n(${reprs.map(kv => s"${kv._1} -> ${kv._2}").mkString(", ")})"
       case Repr.VConstructor(ns, n, reprs) => s"${ns.mkString(".")}.$n(${reprs.mkString(", ")})"
     }
   }
