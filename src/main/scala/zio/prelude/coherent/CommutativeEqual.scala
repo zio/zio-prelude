@@ -12,7 +12,7 @@ trait CommutativeEqual {
     equal0: Equal[A]
   ): Commutative[A] with Equal[A] =
     new Commutative[A] with Equal[A] {
-      override def combine(l: A, r: A): A = commutative0.combine(l, r)
+      override def combine(l: => A, r: => A): A = commutative0.combine(l, r)
 
       override protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }

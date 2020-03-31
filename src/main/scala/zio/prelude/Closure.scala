@@ -6,7 +6,7 @@ import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
 trait Closure[A] {
-  def combine(l: A, r: A): A
+  def combine(l: => A, r: => A): A
 }
 
 object Closure extends Lawful[Closure] with ClosureEqual {
@@ -26,7 +26,7 @@ object Closure extends Lawful[Closure] with ClosureEqual {
 
   def make[A](f: (A, A) => A): Closure[A] =
     new Closure[A] {
-      def combine(l: A, r: A): A = f(l, r)
+      def combine(l: => A, r: => A): A = f(l, r)
     }
 
   implicit val BooleanConjunctionClosure: Closure[And] =
@@ -747,9 +747,9 @@ object Closure extends Lawful[Closure] with ClosureEqual {
 trait ClosureSyntax {
 
   implicit class ClosureOps[A](l: A) {
-    def combine(r: A)(implicit closure: Closure[A]): A = closure.combine(l, r)
+    def combine(r: => A)(implicit closure: Closure[A]): A = closure.combine(l, r)
 
-    def <>(r: A)(implicit closure: Closure[A]): A = closure.combine(l, r)
+    def <>(r: => A)(implicit closure: Closure[A]): A = closure.combine(l, r)
   }
 
 }

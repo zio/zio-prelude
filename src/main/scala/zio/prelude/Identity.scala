@@ -22,7 +22,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     new Identity[A] {
       def identity: A = identity0
 
-      def combine(l: A, r: A): A = op(l, r)
+      def combine(l: => A, r: => A): A = op(l, r)
     }
 
   implicit val BooleanConjunctionIdentity: Identity[And] =
@@ -53,7 +53,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     new Identity[Either[E, A]] {
       def identity: Either[E, A] = Right(Identity[A].identity)
 
-      def combine(l: Either[E, A], r: Either[E, A]): Either[E, A] =
+      def combine(l: => Either[E, A], r: => Either[E, A]): Either[E, A] =
         (l, r) match {
           case (Left(l), _)         => Left(l)
           case (_, Left(r))         => Left(r)
@@ -86,7 +86,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     new Identity[Map[K, V]] {
       def identity: Map[K, V] = Map()
 
-      def combine(l: Map[K, V], r: Map[K, V]): Map[K, V] =
+      def combine(l: => Map[K, V], r: => Map[K, V]): Map[K, V] =
         r.foldLeft(l) {
           case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
         }
@@ -96,7 +96,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     new Identity[Option[A]] {
       def identity: Option[A] = None
 
-      def combine(l: Option[A], r: Option[A]): Option[A] =
+      def combine(l: => Option[A], r: => Option[A]): Option[A] =
         (l, r) match {
           case (Some(l), Some(r)) => Some(l <> r)
           case (Some(l), None)    => Some(l)
@@ -121,7 +121,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
     new Identity[(A, B)] {
       def identity: (A, B) = (Identity[A].identity, Identity[B].identity)
 
-      def combine(l: (A, B), r: (A, B)): (A, B) =
+      def combine(l: => (A, B), r: => (A, B)): (A, B) =
         (l._1 <> r._1, l._2 <> r._2)
     }
 
@@ -130,7 +130,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
       def identity: (A, B, C) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity)
 
-      def combine(l: (A, B, C), r: (A, B, C)): (A, B, C) =
+      def combine(l: => (A, B, C), r: => (A, B, C)): (A, B, C) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3)
     }
 
@@ -139,7 +139,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
       def identity: (A, B, C, D) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity)
 
-      def combine(l: (A, B, C, D), r: (A, B, C, D)): (A, B, C, D) =
+      def combine(l: => (A, B, C, D), r: => (A, B, C, D)): (A, B, C, D) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4)
     }
 
@@ -149,7 +149,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
       def identity: (A, B, C, D, E) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity, Identity[E].identity)
 
-      def combine(l: (A, B, C, D, E), r: (A, B, C, D, E)): (A, B, C, D, E) =
+      def combine(l: => (A, B, C, D, E), r: => (A, B, C, D, E)): (A, B, C, D, E) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5)
     }
 
@@ -166,7 +166,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
           Identity[F].identity
         )
 
-      def combine(l: (A, B, C, D, E, F), r: (A, B, C, D, E, F)): (A, B, C, D, E, F) =
+      def combine(l: => (A, B, C, D, E, F), r: => (A, B, C, D, E, F)): (A, B, C, D, E, F) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6)
     }
 
@@ -184,7 +184,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
           Identity[G].identity
         )
 
-      def combine(l: (A, B, C, D, E, F, G), r: (A, B, C, D, E, F, G)): (A, B, C, D, E, F, G) =
+      def combine(l: => (A, B, C, D, E, F, G), r: => (A, B, C, D, E, F, G)): (A, B, C, D, E, F, G) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7)
     }
 
@@ -211,7 +211,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
           Identity[H].identity
         )
 
-      def combine(l: (A, B, C, D, E, F, G, H), r: (A, B, C, D, E, F, G, H)): (A, B, C, D, E, F, G, H) =
+      def combine(l: => (A, B, C, D, E, F, G, H), r: => (A, B, C, D, E, F, G, H)): (A, B, C, D, E, F, G, H) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -249,7 +249,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
           Identity[I].identity
         )
 
-      def combine(l: (A, B, C, D, E, F, G, H, I), r: (A, B, C, D, E, F, G, H, I)): (A, B, C, D, E, F, G, H, I) =
+      def combine(l: => (A, B, C, D, E, F, G, H, I), r: => (A, B, C, D, E, F, G, H, I)): (A, B, C, D, E, F, G, H, I) =
         (
           l._1 <> r._1,
           l._2 <> r._2,
@@ -291,8 +291,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J),
-        r: (A, B, C, D, E, F, G, H, I, J)
+        l: => (A, B, C, D, E, F, G, H, I, J),
+        r: => (A, B, C, D, E, F, G, H, I, J)
       ): (A, B, C, D, E, F, G, H, I, J) =
         (
           l._1 <> r._1,
@@ -338,8 +338,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K),
-        r: (A, B, C, D, E, F, G, H, I, J, K)
+        l: => (A, B, C, D, E, F, G, H, I, J, K),
+        r: => (A, B, C, D, E, F, G, H, I, J, K)
       ): (A, B, C, D, E, F, G, H, I, J, K) =
         (
           l._1 <> r._1,
@@ -388,8 +388,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L)
       ): (A, B, C, D, E, F, G, H, I, J, K, L) =
         (
           l._1 <> r._1,
@@ -441,8 +441,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M) =
         (
           l._1 <> r._1,
@@ -497,8 +497,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N) =
         (
           l._1 <> r._1,
@@ -556,8 +556,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) =
         (
           l._1 <> r._1,
@@ -618,8 +618,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) =
         (
           l._1 <> r._1,
@@ -683,8 +683,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) =
         (
           l._1 <> r._1,
@@ -751,8 +751,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) =
         (
           l._1 <> r._1,
@@ -822,8 +822,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) =
         (
           l._1 <> r._1,
@@ -896,8 +896,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) =
         (
           l._1 <> r._1,
@@ -973,8 +973,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) =
         (
           l._1 <> r._1,
@@ -1053,8 +1053,8 @@ object Identity extends Lawful[Identity with Equal] with IdentityEqual {
         )
 
       def combine(
-        l: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V),
-        r: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
+        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V),
+        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
       ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) =
         (
           l._1 <> r._1,
