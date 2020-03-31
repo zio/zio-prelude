@@ -4,13 +4,14 @@ import zio.test._
 
 object DebugSpec extends DefaultRunnableSpec {
 
-  def primitiveTest[A: Debug](a: A, exp: Option[String] = None) = assert(a.debug.toString)(equalTo(exp.getOrElse(a.toString)))
+  def primitiveTest[A: Debug](a: A, exp: Option[String] = None) =
+    assert(a.debug.toString)(equalTo(exp.getOrElse(a.toString)))
 
   case class TestCase(string: String, number: Int, list: List[String])
   val genTestCase = for {
-    str <- Gen.anyString
+    str    <- Gen.anyString
     number <- Gen.anyInt
-    list <- Gen.listOf(Gen.anyString)
+    list   <- Gen.listOf(Gen.anyString)
   } yield TestCase(str, number, list)
 
   def spec = suite("DebugSpec")(
