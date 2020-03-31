@@ -2,19 +2,26 @@ package zio.prelude
 
 import zio.prelude.coherent.IdentityEqual
 import zio.prelude.newtypes.{ And, Or, Prod, Sum }
-import zio.test.laws.Lawful
+import zio.test.TestResult
+import zio.test.laws.{ Lawful, Laws }
 
-trait Identity[A] extends LeftIdentity[A] with RightIdentity[A] {
+trait Identity[A] extends Associative[A] {
   def identity: A
-
-  override final def leftIdentity: A = identity
-
-  override final def rightIdentity: A = identity
 }
 
 object Identity extends Lawful[Identity with Equal] with IdentityEqual {
 
-  final val laws = LeftIdentity.laws + RightIdentity.laws
+  final val leftIdentityLaw = new Laws.Law1[Identity with Equal]("leftIdentityLaw") {
+    def apply[A](a: A)(implicit I: Identity[A] with Equal[A]): TestResult =
+      (I.identity <> a) <-> a
+  }
+
+  final val rightIdentityLaw = new Laws.Law1[Identity with Equal]("rightIdentityLaw") {
+    def apply[A](a: A)(implicit I: Identity[A] with Equal[A]): TestResult =
+      (a <> I.identity) <-> a
+  }
+
+  final val laws = leftIdentityLaw + rightIdentityLaw
 
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 
