@@ -11,7 +11,6 @@ package object prelude
     with NewtypeExports
     with NewtypeFExports
     with IdentitySyntax
-    with Newtypes
     with Assertions {
 
   /**
@@ -19,14 +18,16 @@ package object prelude
    */
   implicit class AssertionSyntax[A](private val self: A) extends AnyVal {
     def <->(that: A)(implicit eq: Equal[A]): TestResult =
+      equal(that)
+    def equal(that: A)(implicit eq: Equal[A]): TestResult =
       assert(self)(equalTo(that))
-    def greaterThan(that: A)(implicit ord: Ord[A]): TestResult =
+    def greater(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isGreaterThan(that))
-    def greaterThanEqualTo(that: A)(implicit ord: Ord[A]): TestResult =
+    def greaterOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isGreaterThanEqualTo(that))
-    def lessThan(that: A)(implicit ord: Ord[A]): TestResult =
+    def less(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isLessThan(that))
-    def lessThanEqualTo(that: A)(implicit ord: Ord[A]): TestResult =
+    def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isLessThanEqualTo(that))
   }
 }

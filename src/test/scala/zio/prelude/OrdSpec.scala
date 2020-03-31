@@ -13,11 +13,26 @@ object OrdSpec extends DefaultRunnableSpec {
       assert(a1 =?= a2)(equalTo(Ordering.fromCompare(ord.compare(a1, a2))))
     }
 
-  implicit def scalaListOrdering[A: scala.math.Ordering]: scala.math.Ordering[List[A]] =
-    scala.math.Ordering.Iterable[A].on(identity)
+  /*
+   * Copied from Ordering.Implicits to resolve incompatibility in implicits
+   * organization between 2.12 and 2.13.
+   */
+  implicit def iterableOrdering[CC[A] <: Iterable[A], A](
+    implicit ord: scala.math.Ordering[A]
+  ): scala.math.Ordering[CC[A]] =
+    new scala.math.Ordering[CC[A]] {
+      def compare(x: CC[A], y: CC[A]): Int = {
+        val xit = x.iterator
+        val yit = y.iterator
 
-  implicit def scalaVectorOrdering[A: scala.math.Ordering]: scala.math.Ordering[Vector[A]] =
-    scala.math.Ordering.Iterable[A].on(identity)
+        while (xit.hasNext && yit.hasNext) {
+          val res = ord.compare(xit.next(), yit.next())
+          if (res != 0) return res
+        }
+
+        scala.math.Ordering[Boolean].compare(xit.hasNext, yit.hasNext)
+      }
+    }
 
   def spec = suite("OrdSpec")(
     suite("laws")(

@@ -15,7 +15,13 @@ trait Equal[-A] { self =>
   /**
    * Returns whether two values of type `A` are equal.
    */
-  def equal(l: A, r: A): Boolean
+  final def equal(l: A, r: A): Boolean =
+    Equal.refEq(l, r) || checkEqual(l, r)
+
+  /**
+   * Returns whether two values of type `A` are equal.
+   */
+  protected def checkEqual(l: A, r: A): Boolean
 
   /**
    * Constructs an `Equal[(A, B)]` given an `Equal[A]` and `Equal[B]` by first
@@ -728,7 +734,7 @@ trait EqualSyntax {
   /**
    * Provides infix syntax for comparing two values for equality.
    */
-  implicit class EqualSyntax[A](l: A) {
+  implicit class EqualOps[A](l: A) {
 
     /**
      * Returns whether this value and the specified value are equal.

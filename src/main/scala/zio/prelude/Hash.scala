@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
-import zio.prelude.coherent.HashOrd
+import zio.prelude.coherent.HashCoherent
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -12,9 +12,12 @@ import zio.test.laws.{ Lawful, Laws }
 @implicitNotFound("No implicit Hash defined for ${A}.")
 trait Hash[-A] extends Equal[A] { self =>
 
+  /**
+   * Returns the hash of the specified value.
+   */
   def hash(a: A): Int
 
-  def equal(l: A, r: A): Boolean
+  override protected def checkEqual(l: A, r: A): Boolean
 
   /**
    * Constructs a `Hash[(A, B)]` given a `Hash[A]` and `Hash[B]` by hashing the
@@ -80,7 +83,7 @@ trait Hash[-A] extends Equal[A] { self =>
     )
 }
 
-object Hash extends Lawful[Hash] with HashOrd {
+object Hash extends Lawful[Hash] with HashCoherent {
 
   /**
    * For all values `a1` and `a2`, if `a1` is equal to `a2` then the hash of
@@ -109,8 +112,8 @@ object Hash extends Lawful[Hash] with HashOrd {
    */
   def make[A](hash0: A => Int, equal0: (A, A) => Boolean): Hash[A] =
     new Hash[A] {
-      def hash(a: A): Int                     = hash0(a)
-      override def equal(l: A, r: A): Boolean = equal0(l, r)
+      def hash(a: A): Int                 = hash0(a)
+      def checkEqual(l: A, r: A): Boolean = equal0(l, r)
     }
 
   /**
@@ -180,7 +183,7 @@ object Hash extends Lawful[Hash] with HashOrd {
    */
   implicit def MapHash[A, B: Hash]: Hash[Map[A, B]] =
     make(
-      _.mapValues(_.hash).hashCode,
+      _.transform((_, v) => v.hash).hashCode,
       (map1, map2) =>
         map1.size == map2.size &&
           map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
@@ -947,7 +950,7 @@ trait HashSyntax {
   /**
    * Provides infix syntax for hashing a value.
    */
-  implicit class HashSyntax[A](a: A) {
+  implicit class HashOps[A](a: A) {
 
     /**
      * Returns the hash of this value.

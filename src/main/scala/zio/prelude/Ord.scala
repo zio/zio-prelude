@@ -12,9 +12,18 @@ import zio.test.laws.{ Lawful, Laws }
 @implicitNotFound("No implicit Ord defined for ${A}.")
 trait Ord[-A] extends Equal[A] { self =>
 
-  def compare(l: A, r: A): Ordering
+  /**
+   * Returns the result of comparing two values of type `A`.
+   */
+  final def compare(l: A, r: A): Ordering =
+    if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
 
-  def equal(l: A, r: A): Boolean =
+  /**
+   * Returns the result of comparing two values of type `A`.
+   */
+  protected def checkCompare(l: A, r: A): Ordering
+
+  override protected def checkEqual(l: A, r: A): Boolean =
     compare(l, r).isEqual
 
   /**
@@ -105,7 +114,7 @@ object Ord extends Lawful[Ord] {
   val transitivityLaw1: Laws.Law3[Ord] =
     new Laws.Law3[Ord]("transitivityLaw1") {
       def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-        (a1 lessThan a2) && (a2 lessThan a3) ==> (a1 lessThan a3)
+        (a1 less a2) && (a2 less a3) ==> (a1 less a3)
     }
 
   /**
@@ -115,7 +124,7 @@ object Ord extends Lawful[Ord] {
   val transitivityLaw2: Laws.Law3[Ord] =
     new Laws.Law3[Ord]("transitivityLaw2") {
       def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-        ((a1 greaterThan a2) && (a2 greaterThan a3)) ==> (a1 greaterThan a3)
+        ((a1 greater a2) && (a2 greater a3)) ==> (a1 greater a3)
     }
 
   /**
@@ -125,7 +134,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw1: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 lessThanEqualTo a2) && (a2 lessThanEqualTo a1)) ==> (a1 <-> a2)
+        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equal a2)
     }
 
   /**
@@ -135,7 +144,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw2: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 greaterThanEqualTo a2) && (a2 greaterThanEqualTo a1)) ==> (a1 <-> a2)
+        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equal a2)
     }
 
   /**
@@ -145,7 +154,7 @@ object Ord extends Lawful[Ord] {
   val connexityLaw1: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("connexityLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 lessThanEqualTo a2) || (a2 lessThanEqualTo a1)
+        (a1 lessOrEqual a2) || (a2 lessOrEqual a1)
     }
 
   /**
@@ -155,7 +164,7 @@ object Ord extends Lawful[Ord] {
   val connexityLaw2: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("connexityLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 greaterThanEqualTo a2) || (a2 greaterThanEqualTo a1)
+        (a1 greaterOrEqual a2) || (a2 greaterOrEqual a1)
     }
 
   /**
@@ -165,7 +174,7 @@ object Ord extends Lawful[Ord] {
   val complementLaw: Laws.Law2[Ord] =
     new Laws.Law2[Ord]("complementLaw") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 lessThanEqualTo a2) <==> (a2 greaterThanEqualTo a1)
+        (a1 lessOrEqual a2) <==> (a2 greaterOrEqual a1)
     }
 
   /**
@@ -196,7 +205,7 @@ object Ord extends Lawful[Ord] {
     (l, r) => if (Equal.refEq(l, r)) Ordering.Equals else ord(l, r)
 
   /**
-   * Constructs an `Ord[A]` from a [[`scala.math.Ordering]].
+   * Constructs an `Ord[A]` from a [[scala.math.Ordering]].
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
     make((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)))
@@ -785,7 +794,7 @@ trait OrdSyntax {
   /**
    * Provides infix syntax for comparing two values with a total ordering.
    */
-  implicit class OrdSyntax[A](val l: A) {
+  implicit class OrdOps[A](val l: A) {
 
     /**
      * Returns whether this value is greater than the specified value.
@@ -844,16 +853,16 @@ sealed trait Ordering { self =>
    * Returns whether this `Ordering` is `Ordering.GreaterThan`.
    */
   final def isGreaterThan: Boolean = self match {
-    case Ordering.Equals => true
-    case _               => false
+    case Ordering.GreaterThan => true
+    case _                    => false
   }
 
   /**
    * Returns whether this `Ordering` is `Ordering.LessThan`.
    */
   final def isLessThan: Boolean = self match {
-    case Ordering.Equals => true
-    case _               => false
+    case Ordering.LessThan => true
+    case _                 => false
   }
 
   /**
