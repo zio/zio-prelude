@@ -23,6 +23,17 @@ object DebugSpec extends DefaultRunnableSpec {
     )
   )
 
+  sealed trait TestTrait
+  case object TestObject1 extends TestTrait
+  case object TestObject2 extends TestTrait
+
+  implicit val testObject: Debug[TestTrait] = _ match {
+    case TestObject1 => Repr.Object(List("DebugSpec"), "TestObject1")
+    case TestObject2 => Repr.Object(List("DebugSpec"), "TestObject2")
+  }
+
+  val genTestTrait = Gen.elements(List[TestTrait](TestObject1, TestObject2): _*)
+
   def spec = suite("DebugSpec")(
     testM("unit")(check(Gen.unit)(primitiveTest(_, Some("scala.()")))),
     testM("int")(check(Gen.anyInt)(primitiveTest(_))),
@@ -40,6 +51,13 @@ object DebugSpec extends DefaultRunnableSpec {
           equalTo(s"DebugSpec.TestCase(string -> $str, number -> ${c.number}, list -> scala.${c.list})")
         }
       )
-    )
+    ),
+    testM("testTrait")(check(genTestTrait) { c =>
+      val expected = c match {
+        case TestObject1 => 1
+        case TestObject2 => 2
+      }
+      assert(c.debug.render())(equalTo(s"DebugSpec.TestObject$expected"))
+    })
   )
 }
