@@ -17,8 +17,8 @@ object Debug {
     case Repr.String(v)     => s""""$v""""
     case Repr.Object(ns, n) => s"${ns.mkString(".")}.$n"
     case Repr.Constructor(ns, n, reprs) =>
-      s"${ns.mkString(".")}.$n(${reprs.map(kv => s"${kv._1} -> ${kv._2}").mkString(", ")})"
-    case Repr.VConstructor(ns, n, reprs) => s"${ns.mkString(".")}.$n(${reprs.mkString(", ")})"
+      s"${ns.mkString(".")}.$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render()}").mkString(", ")})"
+    case Repr.VConstructor(ns, n, reprs) => s"${ns.mkString(".")}.$n(${reprs.map(_.render()).mkString(", ")})"
   }
 
   def apply[A](implicit debug: Debug[A]): Debug[A] = debug

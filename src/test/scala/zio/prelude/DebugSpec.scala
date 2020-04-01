@@ -23,6 +23,6 @@ object DebugSpec extends DefaultRunnableSpec {
     testM("byte")(check(Gen.anyByte)(primitiveTest(_))),
     testM("char")(check(Gen.anyChar)(primitiveTest(_))),
     testM("string")(check(Gen.anyString)(s => primitiveTest(s, Some(s""""$s"""")))),
-    testM("list")(check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render())(equalTo(c.toString))))
+    testM("list")(check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render())(equalTo(s"scala.${c.toString}"))))
   )
 }
