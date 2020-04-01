@@ -13,6 +13,13 @@ package object prelude
     with IdentitySyntax
     with Assertions {
 
+  object classic {
+    type Semigroup[A]            = Associative[A]
+    type CommutativeSemigroup[A] = Semigroup[A] with Commutative[A]
+    type Monoid[A]               = Semigroup[A] with Identity[A]
+    type CommutativeMonoid[A]    = Monoid[A] with Commutative[A]
+  }
+
   /**
    * Provides implicit syntax for assertions.
    */
