@@ -5,24 +5,28 @@ trait Debug[-A] {
 }
 
 object Debug {
+  type Renderer = Repr => String
+
+  val defaultRenderer: Renderer = _ match {
+    case Repr.Int(v)        => v.toString
+    case Repr.Double(v)     => v.toString
+    case Repr.Float(v)      => s"${v}f"
+    case Repr.Long(v)       => s"${v}L"
+    case Repr.Byte(v)       => v.toString
+    case Repr.Char(v)       => v.toString
+    case Repr.String(v)     => s""""$v""""
+    case Repr.Object(ns, n) => s"${ns.mkString(".")}.$n"
+    case Repr.Constructor(ns, n, reprs) =>
+      s"${ns.mkString(".")}.$n(${reprs.map(kv => s"${kv._1} -> ${kv._2}").mkString(", ")})"
+    case Repr.VConstructor(ns, n, reprs) => s"${ns.mkString(".")}.$n(${reprs.mkString(", ")})"
+  }
+
   def apply[A](implicit debug: Debug[A]): Debug[A] = debug
 
   def make[A](f: A => Debug.Repr): Debug[A] = f(_)
 
   sealed trait Repr { self =>
-    override def toString: String = self match {
-      case Repr.Int(v)        => v.toString
-      case Repr.Double(v)     => v.toString
-      case Repr.Float(v)      => v.toString
-      case Repr.Long(v)       => v.toString
-      case Repr.Byte(v)       => v.toString
-      case Repr.Char(v)       => v.toString
-      case Repr.String(v)     => v.toString
-      case Repr.Object(ns, n) => s"${ns.mkString(".")}.$n"
-      case Repr.Constructor(ns, n, reprs) =>
-        s"${ns.mkString(".")}.$n(${reprs.map(kv => s"${kv._1} -> ${kv._2}").mkString(", ")})"
-      case Repr.VConstructor(ns, n, reprs) => s"${ns.mkString(".")}.$n(${reprs.mkString(", ")})"
-    }
+    def render(renderer: Renderer = defaultRenderer): String = renderer(self)
   }
 
   object Repr {
@@ -80,7 +84,7 @@ object Debug {
     map => Repr.VConstructor(List("scala"), "Map", List(map.toList.debug))
 
   implicit def Tuple2Debug[A: Debug, B: Debug]: Debug[(A, B)] =
-    tup2 => Repr.VConstructor(List("scala"), "Tuple2", List(tup2._1.debug, tup2._2.debug))
+    tup2 => Repr.VConstructor(List("scala"), "", List(tup2._1.debug, tup2._2.debug))
 }
 
 trait DebugSyntax {
