@@ -2,7 +2,7 @@ package zio.prelude.coherent
 
 import zio.prelude._
 
-trait HashOrd {
+trait HashCoherent {
 
   /**
    * Derive a `Hash[A] with Ord[A]` given a `Hash[A]` and an `Ord[A]`.

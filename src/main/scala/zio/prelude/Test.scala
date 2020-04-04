@@ -3,10 +3,22 @@ package zio.prelude
 object Tests {
   implicit def additionCommutativeAssociative: Commutative[Int] with Associative[Int] =
     new Commutative[Int] with Associative[Int] {
-      def combine(l: Int, r: Int) = l + r
+      def combine(l: => Int, r: => Int) = l + r
     }
 
   def test[TypeClass[_], T](implicit ev: TypeClass[T]): Unit = { val _ = ev }
+
+  trait CollectionLike[F[_]] {
+    def empty[A]: F[A]
+    def concat[A](l: F[A], r: F[A]): F[A]
+  }
+  object CollectionList {
+    implicit val ListCollectionLike =
+      new CollectionLike[List] {
+        def empty[A]: List[A]                          = Nil
+        def concat[A](l: List[A], r: List[A]): List[A] = l ++ r
+      }
+  }
 
   test[Equal, String]
   test[Equal, Double]

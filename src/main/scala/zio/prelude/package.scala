@@ -1,7 +1,6 @@
 package zio
 
-import zio.test.{ assert, Assertion, TestResult }
-import zio.test.Assertion.{ isFalse, isTrue }
+import zio.test.{ assert, TestResult }
 
 package object prelude
     extends DebugSyntax
@@ -11,31 +10,31 @@ package object prelude
     with ClosureSyntax
     with NewtypeExports
     with NewtypeFExports
-    with IdentitySyntax {
+    with IdentitySyntax
+    with Assertions {
 
-  /**
-   * Makes a new assertion that requires a value equal the specified value.
-   */
-  def equalTo[A: Equal](expected: A): Assertion[A] =
-    Assertion.assertion("equalTo")(Assertion.Render.param(expected))(_ === expected)
-
-  /**
-   * Provides implicit syntax for asserting that two values of type `A` are
-   * equal to each other.
-   */
-  implicit class AssertSyntax[A](private val self: A) extends AnyVal {
-    def <->(that: A)(implicit eq: Equal[A]): TestResult =
-      assert(self)(equalTo(that))
+  object classic {
+    type Semigroup[A]            = Associative[A]
+    type CommutativeSemigroup[A] = Semigroup[A] with Commutative[A]
+    type Monoid[A]               = Semigroup[A] with Identity[A]
+    type CommutativeMonoid[A]    = Monoid[A] with Commutative[A]
   }
 
-  implicit class BoolSyntax(private val l: Boolean) extends AnyVal {
-    def or(r: Boolean): TestResult =
-      assert(l)(isTrue) || assert(r)(isTrue)
-
-    def ==>(r: Boolean): TestResult =
-      assert(r)(isTrue) || assert(l)(isFalse)
-
-    def <==>(r: Boolean): TestResult =
-      assert(r)(equalTo(l))
+  /**
+   * Provides implicit syntax for assertions.
+   */
+  implicit class AssertionSyntax[A](private val self: A) extends AnyVal {
+    def <->(that: A)(implicit eq: Equal[A]): TestResult =
+      equal(that)
+    def equal(that: A)(implicit eq: Equal[A]): TestResult =
+      assert(self)(equalTo(that))
+    def greater(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isGreaterThan(that))
+    def greaterOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isGreaterThanEqualTo(that))
+    def less(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isLessThan(that))
+    def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isLessThanEqualTo(that))
   }
 }

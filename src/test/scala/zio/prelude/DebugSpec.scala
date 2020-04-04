@@ -53,11 +53,7 @@ object DebugSpec extends DefaultRunnableSpec {
       )
     ),
     testM("testTrait")(check(genTestTrait) { c =>
-      val expected = c match {
-        case TestObject1 => 1
-        case TestObject2 => 2
-      }
-      assert(c.debug.render())(equalTo(s"DebugSpec.TestObject$expected"))
+      assert(c.debug.render())(equalTo(s"DebugSpec.${c.getClass.getSimpleName.init}"))
     })
   )
 }

@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
-import zio.prelude.coherent.HashOrd
+import zio.prelude.coherent.HashCoherent
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -83,7 +83,7 @@ trait Hash[-A] extends Equal[A] { self =>
     )
 }
 
-object Hash extends Lawful[Hash] with HashOrd {
+object Hash extends Lawful[Hash] with HashCoherent {
 
   /**
    * For all values `a1` and `a2`, if `a1` is equal to `a2` then the hash of

@@ -2,7 +2,7 @@ package zio.prelude.coherent
 
 import zio.prelude._
 
-trait IdentityEqual {
+trait IdentityCoherent {
 
   /**
    * Derives a `Identity[A] with Equal[A]` given a `Identity[A]` and an `Equal[A]`.
@@ -11,7 +11,7 @@ trait IdentityEqual {
     new Identity[A] with Equal[A] {
       def identity: A = identity0.identity
 
-      def combine(l: A, r: A): A = identity0.combine(l, r)
+      def combine(l: => A, r: => A): A = identity0.combine(l, r)
 
       def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
