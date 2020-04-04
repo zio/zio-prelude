@@ -15,10 +15,10 @@ object Debug {
     case Repr.Byte(v)       => v.toString
     case Repr.Char(v)       => v.toString
     case Repr.String(v)     => s""""$v""""
-    case Repr.Object(ns, n) => s"${ns.mkString(".")}.$n"
+    case Repr.Object(ns, n) => (ns :+ n).mkString(".")
     case Repr.Constructor(ns, n, reprs) =>
-      s"${ns.mkString(".")}.$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render()}").mkString(", ")})"
-    case Repr.VConstructor(ns, n, reprs) => s"${ns.mkString(".")}.$n(${reprs.map(_.render()).mkString(", ")})"
+      (ns :+ s"$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render()}").mkString(", ")})").mkString(".")
+    case Repr.VConstructor(ns, n, reprs) => (ns :+ s"$n(${reprs.map(_.render()).mkString(", ")})").mkString(".")
   }
 
   def apply[A](implicit debug: Debug[A]): Debug[A] = debug
@@ -84,28 +84,27 @@ object Debug {
     map => Repr.VConstructor(List("scala"), "Map", List(map.toList.debug))
 
   implicit def Tuple2Debug[A: Debug, B: Debug]: Debug[(A, B)] =
-    tup2 => Repr.VConstructor(List("scala"), "", List(tup2._1.debug, tup2._2.debug))
+    tup2 => Repr.VConstructor(Nil, "", List(tup2._1.debug, tup2._2.debug))
 
   implicit def Tuple3Debug[A: Debug, B: Debug, C: Debug]: Debug[(A, B, C)] =
-    tuple => Repr.VConstructor(List("scala"), "Tuple3", List(tuple._1.debug, tuple._2.debug, tuple._3.debug))
+    tuple => Repr.VConstructor(Nil, "", List(tuple._1.debug, tuple._2.debug, tuple._3.debug))
 
   implicit def Tuple4Debug[A: Debug, B: Debug, C: Debug, D: Debug]: Debug[(A, B, C, D)] =
-    tuple =>
-      Repr.VConstructor(List("scala"), "Tuple4", List(tuple._1.debug, tuple._2.debug, tuple._3.debug, tuple._4.debug))
+    tuple => Repr.VConstructor(Nil, "", List(tuple._1.debug, tuple._2.debug, tuple._3.debug, tuple._4.debug))
 
   implicit def Tuple5Debug[A: Debug, B: Debug, C: Debug, D: Debug, E: Debug]: Debug[(A, B, C, D, E)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple5",
+        Nil,
+        "",
         List(tuple._1.debug, tuple._2.debug, tuple._3.debug, tuple._4.debug, tuple._5.debug)
       )
 
   implicit def Tuple6Debug[A: Debug, B: Debug, C: Debug, D: Debug, E: Debug, F: Debug]: Debug[(A, B, C, D, E, F)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple6",
+        Nil,
+        "",
         List(tuple._1.debug, tuple._2.debug, tuple._3.debug, tuple._4.debug, tuple._5.debug, tuple._6.debug)
       )
 
@@ -113,8 +112,8 @@ object Debug {
     : Debug[(A, B, C, D, E, F, G)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple7",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -130,8 +129,8 @@ object Debug {
     : Debug[(A, B, C, D, E, F, G, H)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple8",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -148,8 +147,8 @@ object Debug {
     : Debug[(A, B, C, D, E, F, G, H, I)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple9",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -177,8 +176,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple10",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -208,8 +207,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple11",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -241,8 +240,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple12",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -276,8 +275,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple13",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -313,8 +312,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple14",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -352,8 +351,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple15",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -393,8 +392,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple16",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -436,8 +435,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple17",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -481,8 +480,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple18",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -528,8 +527,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple19",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -577,8 +576,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple20",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -628,8 +627,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple21",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,
@@ -681,8 +680,8 @@ object Debug {
   ]: Debug[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
     tuple =>
       Repr.VConstructor(
-        List("scala"),
-        "Tuple22",
+        Nil,
+        "",
         List(
           tuple._1.debug,
           tuple._2.debug,

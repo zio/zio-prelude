@@ -34,6 +34,8 @@ object DebugSpec extends DefaultRunnableSpec {
 
   val genTestTrait = Gen.elements(List[TestTrait](TestObject1, TestObject2): _*)
 
+  def expectedTuple(n: Int)(v: Int): String = s"(${List.fill(n)(v).mkString(", ")})"
+
   def spec = suite("DebugSpec")(
     testM("unit")(check(Gen.unit)(primitiveTest(_, Some("scala.()")))),
     testM("int")(check(Gen.anyInt)(primitiveTest(_))),
@@ -44,6 +46,19 @@ object DebugSpec extends DefaultRunnableSpec {
     testM("char")(check(Gen.anyChar)(primitiveTest(_))),
     testM("string")(check(Gen.anyString)(s => primitiveTest(s, Some(s""""$s"""")))),
     testM("list")(check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render())(equalTo(s"scala.${c.toString}")))),
+    testM("tuple2")(check(Gen.anyInt)(i => assert((i, i).debug.render())(equalTo(expectedTuple(2)(i))))),
+    testM("tuple3")(check(Gen.anyInt)(i => assert((i, i, i).debug.render())(equalTo(expectedTuple(3)(i))))),
+    testM("tuple4")(check(Gen.anyInt)(i => assert((i, i, i, i).debug.render())(equalTo(expectedTuple(4)(i))))),
+    testM("tuple10")(
+      check(Gen.anyInt)(i => assert((i, i, i, i, i, i, i, i, i, i).debug.render())(equalTo(expectedTuple(10)(i))))
+    ),
+    testM("tuple22")(
+      check(Gen.anyInt)(i =>
+        assert((i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i).debug.render())(
+          equalTo(expectedTuple(22)(i))
+        )
+      )
+    ),
     testM("caseclass")(
       check(genTestCase)(c =>
         assert(c.debug.render()) {
