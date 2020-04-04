@@ -34,7 +34,7 @@ object DebugSpec extends DefaultRunnableSpec {
 
   val genTestTrait = Gen.elements(List[TestTrait](TestObject1, TestObject2): _*)
 
-  def expectedTuple(n: Int)(v: Int): String = s"(${List.fill(n)(v).mkString(", ")})"
+  def expectedTuple(n: Int)(v: Int): String = s"scala.Tuple$n(${List.fill(n)(v).mkString(", ")})"
 
   def spec = suite("DebugSpec")(
     testM("unit")(check(Gen.unit)(primitiveTest(_, Some("scala.()")))),
