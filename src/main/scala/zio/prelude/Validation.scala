@@ -16,19 +16,19 @@ import zio.test.Assertion
 sealed trait Validation[+E, +A] { self =>
 
   /**
-   * A symbolic alias for `zipLeft`.
+   * A symbolic alias for `zipParLeft`.
    */
   final def <&[E1 >: E, B](that: Validation[E1, B]): Validation[E1, A] =
     zipParLeft(that)
 
   /**
-   * A symbolic alias for `zipRight`.
+   * A symbolic alias for `zipParRight`.
    */
   final def &>[E1 >: E, B](that: Validation[E1, B]): Validation[E1, B] =
     zipParRight(that)
 
   /**
-   * A symbolic alias for `zip`.
+   * A symbolic alias for `zipPar`.
    */
   final def <&>[E1 >: E, B](that: Validation[E1, B]): Validation[E1, (A, B)] =
     zipPar(that)
@@ -65,8 +65,8 @@ sealed trait Validation[+E, +A] { self =>
   /**
    * Transforms this `Validation` to an `Either`.
    */
-  final def toEither: Either[Vector[E], A] =
-    fold((e, es) => Left(Vector(e) ++ es), a => Right(a))
+  final def toEither[E1 >: E]: Either[::[E1], A] =
+    fold((e, es) => Left(::(e, es.toList)), a => Right(a))
 
   /**
    * Transforms this `Validation` to an `Option`, discarding information about
@@ -76,24 +76,25 @@ sealed trait Validation[+E, +A] { self =>
     fold((_, _) => None, a => Some(a))
 
   /**
-   * A variant of `zipPar` that keeps only the left success value, but
-   * returns a failure with all errors if either the left or the right fail.
+   * A variant of `zipPar` that keeps only the left success value, but returns
+   * a failure with all errors if either this `Validation` or the specififed
+   * `Validation` fail.
    */
   final def zipParLeft[E1 >: E, B](that: Validation[E1, B]): Validation[E1, A] =
     zipWithPar(that)((a, _) => a)
 
   /**
-   * A variant of `zipPar` that keeps only the right success value, but
-   * returns a failure with all errors if either the this `Validation` or the
-   * speciifed `Validation` fail.
+   * A variant of `zipPar` that keeps only the right success value, but returns
+   * a failure with all errors if either this `Validation` or the specififed
+   * `Validation` fail.
    */
   final def zipParRight[E1 >: E, B](that: Validation[E1, B]): Validation[E1, B] =
     zipWithPar(that)((_, b) => b)
 
   /**
-   * A variant of `zipPar` that keeps only the left success value, but returns
-   * a failure with all errors if either the this `Validation` or the
-   * speciifed `Validation` fail.
+   * Combines this `Validation` with the specified `Validation`, returning a
+   * tuple of their results. Returns either the combined result if both were
+   * successes or otherwise returns a failure with all errors.
    */
   final def zipPar[E1 >: E, B](that: Validation[E1, B]): Validation[E1, (A, B)] =
     zipWithPar(that)((_, _))
@@ -115,8 +116,8 @@ sealed trait Validation[+E, +A] { self =>
 
 object Validation {
 
-  final case class Failure[+E](error: E, errors: Vector[E] = Vector.empty) extends Validation[E, Nothing]
-  final case class Success[+A](value: A)                                   extends Validation[Nothing, A]
+  final case class Failure[+E](error: E, errors: Vector[E]) extends Validation[E, Nothing]
+  final case class Success[+A](value: A)                    extends Validation[Nothing, A]
 
   /**
    * Attempts to evaluate the specified value, catching any error that occurs
@@ -126,13 +127,14 @@ object Validation {
     try {
       succeed(a)
     } catch {
-      case e: Throwable => fail(e)
+      case e: VirtualMachineError => throw e
+      case e: Throwable           => fail(e)
     }
 
   /**
-   * Collect a list of `Validation`s into a single `Validation` that either
-   * returns the values of all of them, if all of them are successful, or else
-   * fails with all of their errors.
+   * Combine a collection of `Validation` values into a single `Validation`
+   * that either returns the values of all of them, if their all succeed, or
+   * else fails with all of their errors.
    */
   def collectAllPar[E, A](validations: Iterable[Validation[E, A]]): Validation[E, List[A]] =
     validations.foldRight[Validation[E, List[A]]](succeed(List.empty))(_.zipWithPar(_)(_ :: _))
@@ -141,7 +143,7 @@ object Validation {
    * Constructs a `Validation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(error)
+    Failure(error, Vector.empty)
 
   /**
    * Constructs a `Validation` from a value and an assertion about that value.
@@ -172,7 +174,7 @@ object Validation {
   /**
    * Constructs a `Validation` from a `Try`.
    */
-  def fromTry[A](value: Try[A]): Validation[Throwable, A] =
+  def fromTry[A](value: => Try[A]): Validation[Throwable, A] =
     value.fold(fail, succeed)
 
   /**
@@ -182,15 +184,15 @@ object Validation {
     Success(value)
 
   /**
-   * Combines the results of the specified `Validation`s using the function
-   * `f`, failing with the accumulation of all errors if any of them fail.
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
    */
   def mapParN[E, A, B, C](a: Validation[E, A], b: Validation[E, B])(f: (A, B) => C): Validation[E, C] =
     a.zipWithPar(b)(f)
 
   /**
-   * Combines the results of the specified `Validation`s using the function
-   * `f`, failing with the accumulation of all errors if any of them fail.
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
    */
   def mapParN[E, A, B, C, D](a: Validation[E, A], b: Validation[E, B], c: Validation[E, C])(
     f: (A, B, C) => D
@@ -198,8 +200,8 @@ object Validation {
     (a <&> b <&> c).map { case ((a, b), c) => f(a, b, c) }
 
   /**
-   * Combines the results of the specified `Validation`s using the function
-   * `f`, failing with the accumulation of all errors if any of them fail.
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
    */
   def mapParN[E, A, B, C, D, F](a: Validation[E, A], b: Validation[E, B], c: Validation[E, C], d: Validation[E, D])(
     f: (A, B, C, D) => F

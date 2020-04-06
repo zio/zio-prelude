@@ -4,7 +4,8 @@ import zio.test.Assertion
 import zio.test.Assertion.Render._
 
 /**
- * Provides versions of assertions from _ZIO Test_ that use `Equal` and `Ord`.
+ * Provides versions of assertions from _ZIO Test_ that use `Equal`, `Ord`, and
+ * `Validation`.
  */
 trait Assertions {
 
@@ -13,6 +14,16 @@ trait Assertions {
    */
   def equalTo[A: Equal](expected: A): Assertion[A] =
     Assertion.assertion("equalTo")(param(expected))(_ === expected)
+
+  /**
+   * Makes a new assertion that requires a validation failure satisfying a
+   * specified assertion.
+   */
+  def isFailureV[E](assertion: Assertion[::[E]]): Assertion[Validation[E, Any]] =
+    Assertion.assertionRec("isFailureV")(param(assertion))(assertion) {
+      case Validation.Failure(e, es) => Some(::(e, es.toList))
+      case _                         => None
+    }
 
   /**
    * Makes a new assertion that requires the value be greater than the
@@ -41,4 +52,14 @@ trait Assertions {
    */
   def isLessThanEqualTo[A](reference: A)(implicit ord: Ord[A]): Assertion[A] =
     Assertion.assertion("isLessThanEqualTo")(param(reference))(_ <= reference)
+
+  /**
+   * Makes a new assertion that requires a validation failure satisfying a
+   * specified assertion.
+   */
+  def isSuccessV[A](assertion: Assertion[A]): Assertion[Validation[Any, A]] =
+    Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) {
+      case Validation.Success(a) => Some(a)
+      case _                     => None
+    }
 }
