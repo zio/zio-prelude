@@ -22,7 +22,9 @@ package object prelude
     type Monoid[A]               = Semigroup[A] with Identity[A]
     type CommutativeMonoid[A]    = Monoid[A] with Commutative[A]
 
-    type Functor[F[+_]] = Covariant[F]
+    type Functor[F[+_]]       = Covariant[F]
+    type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
+    type Invariant[F[_]]      = zio.prelude.Invariant[F]
   }
 
   /**
