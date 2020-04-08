@@ -53,4 +53,12 @@ object Tests {
   }
 
   Equal[Mult].equal(Mult(23), Mult(342))
+
+  val v1 = Validation.succeed(42)
+  val v2 = Validation.fail(new Exception("Uh oh!"))
+  val v3 = Validation.succeed("foo")
+  val v4 = Validation.fromTry(scala.util.Try(???))
+
+  val v5 =
+    v1 zipPar v2 zipPar v3 zipPar v4
 }

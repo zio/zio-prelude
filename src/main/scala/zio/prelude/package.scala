@@ -11,13 +11,18 @@ package object prelude
     with NewtypeExports
     with NewtypeFExports
     with IdentitySyntax
+    with IdExports
     with Assertions {
+
+  type <=>[A, B] = Equivalence[A, B]
 
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Semigroup[A] with Commutative[A]
     type Monoid[A]               = Semigroup[A] with Identity[A]
     type CommutativeMonoid[A]    = Monoid[A] with Commutative[A]
+
+    type Functor[F[+_]] = Covariant[F]
   }
 
   /**

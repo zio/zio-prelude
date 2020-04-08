@@ -62,10 +62,10 @@ private[prelude] sealed trait NewtypeModuleF {
 
   def subtypeF: SubtypeF
 
-  private type Id[A] = A
+  private type Id[+A] = A
 
   sealed trait NewtypeF {
-    type Type[A]
+    type Type[+A]
 
     /**
      * Converts an instance of the underlying type to an instance of the
@@ -109,7 +109,7 @@ private[prelude] sealed trait NewtypeModuleF {
   }
 
   sealed trait SubtypeF extends NewtypeF {
-    type Type[A] <: A
+    type Type[+A] <: A
   }
 }
 private[prelude] object NewtypeModuleF {
@@ -117,20 +117,20 @@ private[prelude] object NewtypeModuleF {
     new NewtypeModuleF {
       def newtypeF: NewtypeF =
         new NewtypeF {
-          type Type[A] = A
+          type Type[+A] = A
 
-          def wrapAll[F[_], A](value: F[A]): F[Type[A]] = value
+          def wrapAll[F[_], A](value: F[A]): F[A] = value
 
-          def unwrapAll[F[_], A](value: F[Type[A]]): F[A] = value
+          def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
 
       def subtypeF: SubtypeF =
         new SubtypeF {
-          type Type[A] = A
+          type Type[+A] = A
 
-          def wrapAll[F[_], A](value: F[A]): F[Type[A]] = value
+          def wrapAll[F[_], A](value: F[A]): F[A] = value
 
-          def unwrapAll[F[_], A](value: F[Type[A]]): F[A] = value
+          def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
     }
 }
@@ -151,7 +151,7 @@ trait NewtypeFExports {
     val newtypeF: instance.NewtypeF =
       instance.newtypeF
 
-    type Type[A] = newtypeF.Type[A]
+    type Type[+A] = newtypeF.Type[A]
 
     def wrapAll[F[_], A](value: F[A]): F[Type[A]] =
       newtypeF.wrapAll(value)
@@ -174,7 +174,7 @@ trait NewtypeFExports {
     val subtypeF: instance.SubtypeF =
       instance.subtypeF
 
-    type Type[A] = subtypeF.Type[A]
+    type Type[+A] = subtypeF.Type[A]
 
     def wrapAll[F[_], A](value: F[A]): F[Type[A]] =
       subtypeF.wrapAll(value)
