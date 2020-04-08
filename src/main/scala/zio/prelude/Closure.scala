@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.Chunk
 import zio.prelude.coherent.ClosureCoherent
 import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
@@ -46,6 +47,9 @@ object Closure extends Lawful[Closure] with ClosureCoherent {
 
   implicit val CharSumIdentity: Closure[Sum[Char]] =
     make((l, r) => Sum((l + r).toChar))
+
+  implicit def ChunkClosure[A]: Closure[Chunk[A]] =
+    make(_ ++ _)
 
   implicit val DoubleProdClosure: Closure[Prod[Double]] =
     make[Prod[Double]]((l, r) => Prod(l * r))

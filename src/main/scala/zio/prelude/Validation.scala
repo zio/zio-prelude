@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.util.Try
 
+import zio.{ Chunk, NonEmptyChunk }
 import zio.prelude.Validation._
 import zio.test.Assertion
 
@@ -36,10 +37,10 @@ sealed trait Validation[+E, +A] { self =>
   /**
    * Folds over the error and success values of this `Validation`.
    */
-  final def fold[B](failure: (E, Vector[E]) => B, success: A => B): B =
+  final def fold[B](failure: NonEmptyChunk[E] => B, success: A => B): B =
     self match {
-      case Failure(e, es) => failure(e, es)
-      case Success(a)     => success(a)
+      case Failure(es) => failure(es)
+      case Success(a)  => success(a)
     }
 
   /**
@@ -48,8 +49,8 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def map[B](f: A => B): Validation[E, B] =
     self match {
-      case Success(a)              => Success(f(a))
-      case failure @ Failure(_, _) => failure
+      case Success(a)           => Success(f(a))
+      case failure @ Failure(_) => failure
     }
 
   /**
@@ -58,22 +59,22 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def mapError[E1](f: E => E1): Validation[E1, A] =
     self match {
-      case Failure(e, es)       => Failure(f(e), es.map(f))
+      case Failure(es)          => Failure(es.map(f))
       case success @ Success(_) => success
     }
 
   /**
    * Transforms this `Validation` to an `Either`.
    */
-  final def toEither[E1 >: E]: Either[::[E1], A] =
-    fold((e, es) => Left(::(e, es.toList)), a => Right(a))
+  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+    fold(Left(_), Right(_))
 
   /**
    * Transforms this `Validation` to an `Option`, discarding information about
    * the errors.
    */
   final def toOption: Option[A] =
-    fold((_, _) => None, a => Some(a))
+    fold(_ => None, Some(_))
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
@@ -107,17 +108,17 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def zipWithPar[E1 >: E, B, C](that: Validation[E1, B])(f: (A, B) => C): Validation[E1, C] =
     (self, that) match {
-      case (Failure(e, es), Failure(e1, e1s)) => Failure(e, es ++ Vector(e1) ++ e1s)
-      case (failure @ Failure(_, _), _)       => failure
-      case (_, failure @ Failure(_, _))       => failure
-      case (Success(a), Success(b))           => Success(f(a, b))
+      case (Failure(es), Failure(e1s)) => Failure(es ++ e1s)
+      case (failure @ Failure(_), _)   => failure
+      case (_, failure @ Failure(_))   => failure
+      case (Success(a), Success(b))    => Success(f(a, b))
     }
 }
 
 object Validation {
 
-  final case class Failure[+E](error: E, errors: Vector[E]) extends Validation[E, Nothing]
-  final case class Success[+A](value: A)                    extends Validation[Nothing, A]
+  final case class Failure[+E](errors: NonEmptyChunk[E]) extends Validation[E, Nothing]
+  final case class Success[+A](value: A)                 extends Validation[Nothing, A]
 
   /**
    * Attempts to evaluate the specified value, catching any error that occurs
@@ -143,7 +144,7 @@ object Validation {
    * Constructs a `Validation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(error, Vector.empty)
+    Failure(Chunk(error))
 
   /**
    * Constructs a `Validation` from a value and an assertion about that value.

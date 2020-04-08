@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.Chunk
 import zio.prelude.coherent.IdentityCoherent
 import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
@@ -49,6 +50,9 @@ object Identity extends Lawful[Identity with Equal] with IdentityCoherent {
 
   implicit val CharSumIdentity: Identity[Sum[Char]] =
     Identity.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar))
+
+  implicit def ChunkIdentity[A]: Identity[Chunk[A]] =
+    Identity.make(Chunk.empty, _ ++ _)
 
   implicit val DoubleProdIdentity: Identity[Prod[Double]] =
     Identity.make(Prod(1), (l: Prod[Double], r: Prod[Double]) => Prod(l * r))

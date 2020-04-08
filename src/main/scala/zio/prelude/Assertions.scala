@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.NonEmptyChunk
 import zio.test.Assertion
 import zio.test.Assertion.Render._
 
@@ -19,10 +20,10 @@ trait Assertions {
    * Makes a new assertion that requires a validation failure satisfying a
    * specified assertion.
    */
-  def isFailureV[E](assertion: Assertion[::[E]]): Assertion[Validation[E, Any]] =
+  def isFailureV[E](assertion: Assertion[NonEmptyChunk[E]]): Assertion[Validation[E, Any]] =
     Assertion.assertionRec("isFailureV")(param(assertion))(assertion) {
-      case Validation.Failure(e, es) => Some(::(e, es.toList))
-      case _                         => None
+      case Validation.Failure(es) => Some(es)
+      case _                      => None
     }
 
   /**

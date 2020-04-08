@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.annotation.{ implicitNotFound, tailrec }
 
+import zio.Chunk
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -227,6 +228,26 @@ object Ord extends Lawful[Ord] {
    */
   implicit val CharOrd: Ord[Char] =
     default
+
+  /**
+   * Derives an `Ord[Vector[A]]` given an `Ord[A]`.
+   */
+  implicit def ChunkOrd[A: Ord]: Ord[Chunk[A]] =
+    make { (l, r) =>
+      val j = l.length
+      val k = r.length
+
+      def loop(i: Int): Ordering =
+        if (i == j && i == k) Ordering.Equals
+        else if (i == j) Ordering.LessThan
+        else if (i == k) Ordering.GreaterThan
+        else {
+          val compare = Ord[A].compare(l(i), r(i))
+          if (compare.isEqual) loop(i + 1) else compare
+        }
+
+      loop(0)
+    }
 
   /**
    * Ordering for `Double` values. Note that to honor the contract of a total

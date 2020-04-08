@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.Chunk
 import zio.prelude.newtypes._
 import zio.test._
 import zio.test.Assertion._
@@ -12,7 +13,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
         assert(Natural.make(0))(isSuccessV(anything))
       },
       test("invalid values") {
-        val expected = List("-1 did not satisfy isGreaterThanEqualTo(0)")
+        val expected = Chunk("-1 did not satisfy isGreaterThanEqualTo(0)")
         assert(Natural.make(-1))(isFailureV(equalTo(expected)))
       }
     ),

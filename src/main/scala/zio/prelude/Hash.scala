@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
+import zio.Chunk
 import zio.prelude.coherent.HashCoherent
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
@@ -140,6 +141,12 @@ object Hash extends Lawful[Hash] with HashCoherent {
    */
   implicit val CharHash: Hash[Char] =
     default
+
+  /**
+   * Derives a `Hash[Chunk[A]]` given a `Hash[A]`.
+   */
+  implicit def ChunkHash[A: Hash]: Hash[Chunk[A]] =
+    make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
 
   /**
    * Hashing for `Double` values.
