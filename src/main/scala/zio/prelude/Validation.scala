@@ -152,12 +152,8 @@ object Validation {
    * value did not satisfy the assertion.
    */
   def fromAssert[A](value: A)(assertion: Assertion[A]): Validation[String, A] =
-    zio.Runtime.default.unsafeRun {
-      assertion.test(value).map { b =>
-        if (b)(succeed(value))
-        else fail(s"$value did not satisfy ${assertion.render}")
-      }
-    }
+    if (assertion.test(value)) succeed(value)
+    else fail(s"$value did not satisfy ${assertion.render}")
 
   /**
    * Constructs a `Validation` from an `Either`.
