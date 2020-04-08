@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
+import zio.Chunk
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -163,6 +164,12 @@ object Equal extends Lawful[Equal] {
    */
   implicit val CharEqual: Equal[Char] =
     default
+
+  /**
+   * Derives an `Equal[Chunk[A]]` given an `Equal[A]`.
+   */
+  implicit def ChunkEqual[A: Equal]: Equal[Chunk[A]] =
+    make(_.corresponds(_)(_ === _))
 
   /**
    * Equality for `Double` values. Note that to honor the contract that a

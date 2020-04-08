@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.Chunk
 import zio.prelude.coherent.AssociativeCoherent
 import zio.prelude.newtypes.{ And, First, Last, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
@@ -53,6 +54,9 @@ object Associative extends Lawful[Associative with Equal] with AssociativeCohere
 
   implicit val CharSumIdentity: Associative[Sum[Char]] =
     make((l, r) => Sum((l + r).toChar))
+
+  implicit def ChunkAssociative[A]: Associative[Chunk[A]] =
+    make(_ ++ _)
 
   implicit val DoubleProdAssociative: Associative[Prod[Double]] =
     make[Prod[Double]]((l, r) => Prod(l * r))
