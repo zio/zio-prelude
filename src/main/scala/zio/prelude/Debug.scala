@@ -1,5 +1,7 @@
 package zio.prelude
 
+import zio.Chunk
+
 trait Debug[-A] {
   def debug(a: A): Debug.Repr
 }
@@ -59,6 +61,9 @@ object Debug {
   implicit val ByteDebug: Debug[Byte]       = Repr.Byte(_)
   implicit val CharDebug: Debug[Char]       = Repr.Char(_)
   implicit val StringDebug: Debug[String]   = Repr.String(_)
+
+  implicit def ChunkDebug[A: Debug]: Debug[Chunk[A]] =
+    chunk => Repr.VConstructor(List("zio"), "Chunk", chunk.map(_.debug).toList)
 
   implicit def EitherDebug[E: Debug, A: Debug]: Debug[Either[E, A]] =
     either =>
