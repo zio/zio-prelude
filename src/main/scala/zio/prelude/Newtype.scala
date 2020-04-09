@@ -42,13 +42,13 @@ import zio.test.Assertion
  * val z = x + y
  * }}}
  *
- * In the example above, `Meter` is completely indepnedent of `Double`. Outside
+ * In the example above, `Meter` is completely independent of `Double`. Outside
  * of the methods we create to convert between them, the two types are
  * completely unrelated from the perspective of the Scala compiler. This can be
  * valuable because it fully hides the underlying type. For example, we cannot
  * accidentally add a `Meter` and a `Foot`. On the other hand `Meter` also does
  * not have any of the methods defined on it that are defined for `Double`
- * values so we have to reimplement them ourselves or wrap and unwrap each
+ * values so we have to re-implement them ourselves or wrap and unwrap each
  * time.
  *
  * It is also possible to create newtypes that are subtypes of existing types.
