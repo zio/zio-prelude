@@ -50,7 +50,8 @@ object OrdSpec extends DefaultRunnableSpec {
       testM("tuple2")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyInt))),
       testM("tuple3")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
       testM("list")(checkAllLaws(Equal)(Gen.listOf(Gen.anyInt))),
-      testM("vector")(checkAllLaws(Equal)(Gen.vectorOf(Gen.anyInt)))
+      testM("vector")(checkAllLaws(Equal)(Gen.vectorOf(Gen.anyInt))),
+      testM("chunk")(checkAllLaws(Equal)(Gens.chunkOf(Gen.anyInt)))
     ),
     suite("ScalaOrdering consistency")(
       testM("unit")(scalaOrderingConsistency(Gen.unit)),
