@@ -24,7 +24,7 @@ object EqualSpec extends DefaultRunnableSpec {
       testM("vector")(checkAllLaws(Equal)(Gen.vectorOf(Gen.anyInt))),
       testM("map")(checkAllLaws(Equal)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
       testM("set")(checkAllLaws(Equal)(Gen.setOf(Gen.anyInt))),
-      testM("chunk")(checkAllLaws(Equal)(Gens.chunkOf(Gen.anyInt)))
+      testM("chunk")(checkAllLaws(Equal)(Gen.chunkOf(Gen.anyInt)))
     ),
     test("DoubleEqual correctly handles `Double.NaN") {
       Double.NaN <-> Double.NaN

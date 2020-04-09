@@ -29,7 +29,7 @@ object IdentitySpec extends DefaultRunnableSpec {
       testM("set")(checkAllLaws(Identity)(Gen.setOf(Gen.anyString))),
       testM("tuple2")(checkAllLaws(Identity)(Gen.anyString.zip(Gen.anyString))),
       testM("tuple3")(checkAllLaws(Identity)(Gen.anyString.zip(Gen.anyString).zip(Gen.anyString))),
-      testM("chunk")(checkAllLaws(Identity)(Gens.chunkOf(Gen.anyString)))
+      testM("chunk")(checkAllLaws(Identity)(Gen.chunkOf(Gen.anyString)))
     )
   )
 }

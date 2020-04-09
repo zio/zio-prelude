@@ -28,7 +28,7 @@ object AssociativeSpec extends DefaultRunnableSpec {
       testM("set")(checkAllLaws(Associative)(Gen.setOf(Gen.anyString))),
       testM("tuple2")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString))),
       testM("tuple3")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString).zip(Gen.anyString))),
-      testM("chunk")(checkAllLaws(Associative)(Gens.chunkOf(Gen.anyString)))
+      testM("chunk")(checkAllLaws(Associative)(Gen.chunkOf(Gen.anyString)))
     )
   )
 }

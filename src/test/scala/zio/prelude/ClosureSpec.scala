@@ -28,7 +28,7 @@ object ClosureSpec extends DefaultRunnableSpec {
       testM("set")(checkAllLaws(Closure)(Gen.setOf(Gen.anyString))),
       testM("tuple2")(checkAllLaws(Closure)(Gen.anyString.zip(Gen.anyString))),
       testM("tuple3")(checkAllLaws(Closure)(Gen.anyString.zip(Gen.anyString).zip(Gen.anyString))),
-      testM("chunk")(checkAllLaws(Closure)(Gens.chunkOf(Gen.anyString)))
+      testM("chunk")(checkAllLaws(Closure)(Gen.chunkOf(Gen.anyString)))
     )
   )
 }
