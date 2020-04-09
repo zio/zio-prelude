@@ -135,8 +135,8 @@ object Validation {
   implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] =
     validation =>
       validation match {
-        case Failure(es) => Debug.Repr.VConstructor(List("zio", "prelude", "Validation"), "Failure", List(es.debug))
-        case Success(a)  => Debug.Repr.VConstructor(List("zio", "prelude", "Validation"), "Success", List(a.debug))
+        case Failure(es) => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Failure", List(es.debug))
+        case Success(a)  => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Success", List(a.debug))
       }
 
   /**
