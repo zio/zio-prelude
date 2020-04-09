@@ -22,7 +22,7 @@ object Identity extends Lawful[Identity with Equal] with IdentityCoherent {
       (a <> I.identity) <-> a
   }
 
-  final val laws = leftIdentityLaw + rightIdentityLaw
+  final val laws = leftIdentityLaw + rightIdentityLaw + Closure.laws
 
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 
