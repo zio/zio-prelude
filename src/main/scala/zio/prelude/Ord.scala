@@ -115,7 +115,7 @@ object Ord extends Lawful[Ord] {
   val transitivityLaw1: Laws.Law3[Ord] =
     new Laws.Law3[Ord]("transitivityLaw1") {
       def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-        (a1 less a2) && (a2 less a3) ==> (a1 less a3)
+        ((a1 less a2) && (a2 less a3)) ==> (a1 less a3)
     }
 
   /**

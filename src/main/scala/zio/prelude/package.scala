@@ -31,9 +31,9 @@ package object prelude
    * Provides implicit syntax for assertions.
    */
   implicit class AssertionSyntax[A](private val self: A) extends AnyVal {
-    def <->(that: A)(implicit eq: Equal[A]): TestResult =
+    def <->[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
       equal(that)
-    def equal(that: A)(implicit eq: Equal[A]): TestResult =
+    def equal[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
       assert(self)(equalTo(that))
     def greater(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isGreaterThan(that))
