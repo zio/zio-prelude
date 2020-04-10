@@ -103,6 +103,15 @@ object Hash extends Lawful[Hash] with HashCoherent {
     consistencyLaw + Equal.laws
 
   /**
+   * The contravariant instance for `Hash`.
+   */
+  implicit val HashContravariant: Contravariant[Hash] =
+    new Contravariant[Hash] {
+      def contramap[A, B](f: B => A): Hash[A] => Hash[B] =
+        _.contramap(f)
+    }
+
+  /**
    * Summons an implicit `Hash[A]`.
    */
   def apply[A](implicit hash: Hash[A]): Hash[A] =

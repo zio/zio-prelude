@@ -192,6 +192,15 @@ object Ord extends Lawful[Ord] {
       Equal.laws
 
   /**
+   * The contravariant instance for `Ord`.
+   */
+  implicit val OrdContravariant: Contravariant[Ord] =
+    new Contravariant[Ord] {
+      def contramap[A, B](f: B => A): Ord[A] => Ord[B] =
+        _.contramap(f)
+    }
+
+  /**
    * Summons an implicit `Ord[A]`.
    */
   def apply[A](implicit ord: Ord[A]): Ord[A] =
