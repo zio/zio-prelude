@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.coherent.EqualInverse
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -13,9 +14,9 @@ trait Inverse[A] extends Identity[A] {
   def inverse(a: A): A
 }
 
-object Inverse extends Lawful[Inverse with Equal] {
-  final val rightInverseLaw = new Laws.Law1[Inverse with Equal]("rightInverseLaw") {
-    def apply[A](a: A)(implicit I: Inverse[A] with Equal[A]): TestResult =
+object Inverse extends Lawful[EqualInverse] {
+  final val rightInverseLaw = new Laws.Law1[EqualInverse]("rightInverseLaw") {
+    def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
       I.combine(a, I.inverse(a)) <-> I.identity
   }
 
