@@ -27,7 +27,8 @@ object HashSpec extends DefaultRunnableSpec {
       testM("list")(checkAllLaws(Hash)(Gen.listOf(Gen.anyInt))),
       testM("vector")(checkAllLaws(Hash)(Gen.vectorOf(Gen.anyInt))),
       testM("set")(checkAllLaws(Hash)(Gen.setOf(Gen.anyInt))),
-      testM("map")(checkAllLaws(Hash)(Gen.mapOf(Gen.anyInt, Gen.anyInt)))
+      testM("map")(checkAllLaws(Hash)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
+      testM("chunk")(checkAllLaws(Hash)(Gen.chunkOf(Gen.anyInt)))
     ),
     suite("ScalaHashCode consistency")(
       testM("unit")(scalaHashCodeConsistency(Gen.unit)),
@@ -46,7 +47,8 @@ object HashSpec extends DefaultRunnableSpec {
       testM("list")(scalaHashCodeConsistency(Gen.listOf(Gen.anyInt))),
       testM("vector")(scalaHashCodeConsistency(Gen.vectorOf(Gen.anyInt))),
       testM("set")(scalaHashCodeConsistency(Gen.setOf(Gen.anyInt))),
-      testM("map")(scalaHashCodeConsistency(Gen.mapOf(Gen.anyInt, Gen.anyInt)))
+      testM("map")(scalaHashCodeConsistency(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
+      testM("chunk")(scalaHashCodeConsistency(Gen.chunkOf(Gen.anyInt)))
     )
   )
 }

@@ -121,6 +121,38 @@ object Validation {
   final case class Success[+A](value: A)                 extends Validation[Nothing, A]
 
   /**
+   * The `Covariant` instance for `Validation`.
+   */
+  implicit def CovarantValidation[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] {
+      def map[A, B](f: A => B): Validation[E, A] => Validation[E, B] =
+        _.map(f)
+    }
+
+  /**
+   * Derives a `Degug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
+   */
+  implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] =
+    validation =>
+      validation match {
+        case Failure(es) => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Failure", List(es.debug))
+        case Success(a)  => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Success", List(a.debug))
+      }
+
+  /**
+   * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an
+   * `Equal[A]`.
+   */
+  implicit def ValidationEqual[E: Equal, A: Equal]: Equal[Validation[E, A]] =
+    Equal[NonEmptyChunk[E]].eitherWith(Equal[A])(_.toEither)
+
+  /**
+   * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
+   */
+  implicit def ValidationHash[E: Hash, A: Hash]: Hash[Validation[E, A]] =
+    Hash[NonEmptyChunk[E]].eitherWith(Hash[A])(_.toEither)
+
+  /**
    * Attempts to evaluate the specified value, catching any error that occurs
    * during evaluation and capturing it as a failure.
    */
