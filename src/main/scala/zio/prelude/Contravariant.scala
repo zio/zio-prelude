@@ -1,5 +1,8 @@
 package zio.prelude
 
+import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef }
+import zio.stream.{ ZSink, ZStream }
+
 /**
  * `Contravariant[F]` provides implicit evidence that `F[-_]` is a
  * contravariant enfofunctor in the category of Scala objects.
@@ -304,5 +307,78 @@ object Contravariant {
         apply =>
           (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
             apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
+    }
+
+  /**
+   * The contravariant instance for `Schedule`.
+   */
+  implicit def ScheduleContravariant[R, B]: Contravariant[({ type f[-x] = Schedule[R, x, B] })#f] =
+    new Contravariant[({ type f[-x] = Schedule[R, x, B] })#f] {
+      def contramap[A, A0](f: A0 => A): Schedule[R, A, B] => Schedule[R, A0, B] =
+        schedule => schedule.contramap(f)
+    }
+
+  /**
+   * The contravariant instance for `ZIO`.
+   */
+  implicit def ZIOContravariant[E, A]: Contravariant[({ type f[-x] = ZIO[x, E, A] })#f] =
+    new Contravariant[({ type f[-x] = ZIO[x, E, A] })#f] {
+      def contramap[R, R0](f: R0 => R): ZIO[R, E, A] => ZIO[R0, E, A] =
+        zio => zio.provideSome(f)
+    }
+
+  /**
+   * The contravariant instance for `ZLayer`.
+   */
+  implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type f[-x] = ZLayer[x, E, ROut] })#f] =
+    new Contravariant[({ type f[-x] = ZLayer[x, E, ROut] })#f] {
+      def contramap[RIn, RIn0](f: RIn0 => RIn): ZLayer[RIn, E, ROut] => ZLayer[RIn0, E, ROut] =
+        layer => ZLayer.fromFunctionMany(f) >>> layer
+    }
+
+  /**
+   * The contravariant instance for `ZManaged`.
+   */
+  implicit def ZManagedContravariant[E, A]: Contravariant[({ type f[-x] = ZManaged[x, E, A] })#f] =
+    new Contravariant[({ type f[-x] = ZManaged[x, E, A] })#f] {
+      def contramap[R, R0](f: R0 => R): ZManaged[R, E, A] => ZManaged[R0, E, A] =
+        managed => managed.provideSome(f)
+    }
+
+  /**
+   * The contravariant instance for `ZQueue`.
+   */
+  implicit def ZQueueContravariant[RA, EA, RB, EB, A, B]
+    : Contravariant[({ type f[-x] = ZQueue[RA, EA, RB, EB, x, B] })#f] =
+    new Contravariant[({ type f[-x] = ZQueue[RA, EA, RB, EB, x, B] })#f] {
+      def contramap[A, C](f: C => A): ZQueue[RA, EA, RB, EB, A, B] => ZQueue[RA, EA, RB, EB, C, B] =
+        queue => queue.contramap(f)
+    }
+
+  /**
+   * The contravariant instance for `ZRef`.
+   */
+  implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type f[-x] = ZRef[EA, EB, x, B] })#f] =
+    new Contravariant[({ type f[-x] = ZRef[EA, EB, x, B] })#f] {
+      def contramap[A, C](f: C => A): ZRef[EA, EB, A, B] => ZRef[EA, EB, C, B] =
+        ref => ref.contramap(f)
+    }
+
+  /**
+   * The contravariant instance for `ZSink`.
+   */
+  implicit def ZSinkContravariant[R, E, A0, B]: Contravariant[({ type f[-x] = ZSink[R, E, A0, x, B] })#f] =
+    new Contravariant[({ type f[-x] = ZSink[R, E, A0, x, B] })#f] {
+      def contramap[A, C](f: C => A): ZSink[R, E, A0, A, B] => ZSink[R, E, A0, C, B] =
+        sink => sink.contramap(f)
+    }
+
+  /**
+   * The contravariant instance for `ZStream`.
+   */
+  implicit def ZStreamContravariant[E, A]: Contravariant[({ type f[-x] = ZStream[x, E, A] })#f] =
+    new Contravariant[({ type f[-x] = ZStream[x, E, A] })#f] {
+      def contramap[R, R0](f: R0 => R): ZStream[R, E, A] => ZStream[R0, E, A] =
+        stream => stream.provideSome(f)
     }
 }
