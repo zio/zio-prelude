@@ -12,7 +12,8 @@ object ValidationSpec extends DefaultRunnableSpec {
   def spec = suite("ValidationSpec")(
     suite("laws")(
       testM("equal")(checkAllLaws(Equal)(genValidation)),
-      testM("hash")(checkAllLaws(Hash)(genValidation))
+      testM("hash")(checkAllLaws(Hash)(genValidation)),
+      testM("ord")(checkAllLaws(Ord)(genValidation))
     )
   )
 }

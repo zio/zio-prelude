@@ -755,11 +755,13 @@ trait EqualSyntax {
     /**
      * Returns whether this value and the specified value are equal.
      */
-    def ===(r: A)(implicit equal: Equal[A]): Boolean = equal.equal(l, r)
+    def ===[A1 >: A](r: A1)(implicit equal: Equal[A1]): Boolean =
+      equal.equal(l, r)
 
     /**
      * Returns whether this value and the specified value are not equal.
      */
-    def !==(r: A)(implicit equal: Equal[A]): Boolean = equal.notEqual(l, r)
+    def !==[A1 >: A](r: A1)(implicit equal: Equal[A1]): Boolean =
+      equal.notEqual(l, r)
   }
 }

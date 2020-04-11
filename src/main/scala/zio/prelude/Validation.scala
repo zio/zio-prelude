@@ -115,7 +115,7 @@ sealed trait Validation[+E, +A] { self =>
     }
 }
 
-object Validation {
+object Validation extends LowPriorityValidationImplicits {
 
   final case class Failure[+E](errors: NonEmptyChunk[E]) extends Validation[E, Nothing]
   final case class Success[+A](value: A)                 extends Validation[Nothing, A]
@@ -147,10 +147,10 @@ object Validation {
     Equal[NonEmptyChunk[E]].eitherWith(Equal[A])(_.toEither)
 
   /**
-   * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
+   * Derives an `Ord[Validation[E, A]]` given na `Ord[E]` and an `Ord[A]`.
    */
-  implicit def ValidationHash[E: Hash, A: Hash]: Hash[Validation[E, A]] =
-    Hash[NonEmptyChunk[E]].eitherWith(Hash[A])(_.toEither)
+  implicit def ValidationOrd[E: Ord, A: Ord]: Ord[Validation[E, A]] =
+    Ord[NonEmptyChunk[E]].eitherWith(Ord[A])(_.toEither)
 
   /**
    * Attempts to evaluate the specified value, catching any error that occurs
@@ -236,4 +236,13 @@ object Validation {
     f: (A, B, C, D) => F
   ): Validation[E, F] =
     (a <&> b <&> c <&> d).map { case (((a, b), c), d) => f(a, b, c, d) }
+}
+
+trait LowPriorityValidationImplicits {
+
+  /**
+   * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
+   */
+  implicit def ValidationHash[E: Hash, A: Hash]: Hash[Validation[E, A]] =
+    Hash[NonEmptyChunk[E]].eitherWith(Hash[A])(_.toEither)
 }
