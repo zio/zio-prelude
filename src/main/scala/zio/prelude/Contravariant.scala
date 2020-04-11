@@ -57,263 +57,271 @@ object Contravariant {
   /**
    * The contravariant instance for `Function1`.
    */
-  implicit def Function1Contravariant[A]: Contravariant[({ type f[-x] = x => A })#f] =
-    new Contravariant[({ type f[-x] = x => A })#f] {
-      def contramap[X, Y](function: Y => X): (X => A) => (Y => A) =
-        apply => x => apply(function(x))
+  implicit def Function1Contravariant[B]: Contravariant[({ type lambda[-x] = x => B })#lambda] =
+    new Contravariant[({ type lambda[-x] = x => B })#lambda] {
+      def contramap[A, C](function: C => A): (A => B) => (C => B) =
+        apply => a => apply(function(a))
     }
 
   /**
    * The contravariant instance for `Function2`.
    */
-  implicit def Function2Contravariant[A, B]: Contravariant[({ type f[-x] = (x, A) => B })#f] =
-    new Contravariant[({ type f[-x] = (x, A) => B })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A) => B) => ((Y, A) => B) =
-        apply => (x, a) => apply(function(x), a)
+  implicit def Function2Contravariant[B, C]: Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] {
+      def contramap[A, D](function: D => A): ((A, B) => C) => ((D, B) => C) =
+        apply => (a, b) => apply(function(a), b)
     }
 
   /**
    * The contravariant instance for `Function3`.
    */
-  implicit def Function3Contravariant[A, B, C]: Contravariant[({ type f[-x] = (x, A, B) => C })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B) => C })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A, B) => C) => ((Y, A, B) => C) =
-        apply => (x, a, b) => apply(function(x), a, b)
+  implicit def Function3Contravariant[B, C, D]: Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] {
+      def contramap[A, E](function: E => A): ((A, B, C) => D) => ((E, B, C) => D) =
+        apply => (a, b, c) => apply(function(a), b, c)
     }
 
   /**
    * The contravariant instance for `Function4`.
    */
-  implicit def Function4Contravariant[A, B, C, D]: Contravariant[({ type f[-x] = (x, A, B, C) => D })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C) => D })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A, B, C) => D) => ((Y, A, B, C) => D) =
-        apply => (x, a, b, c) => apply(function(x), a, b, c)
+  implicit def Function4Contravariant[B, C, D, E]: Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] {
+      def contramap[A, F](function: F => A): ((A, B, C, D) => E) => ((F, B, C, D) => E) =
+        apply => (a, b, c, d) => apply(function(a), b, c, d)
     }
 
   /**
    * The contravariant instance for `Function5`.
    */
-  implicit def Function5Contravariant[A, B, C, D, E]: Contravariant[({ type f[-x] = (x, A, B, C, D) => E })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D) => E })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A, B, C, D) => E) => ((Y, A, B, C, D) => E) =
-        apply => (x, a, b, c, d) => apply(function(x), a, b, c, d)
+  implicit def Function5Contravariant[B, C, D, E, F]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] {
+      def contramap[A, G](function: G => A): ((A, B, C, D, E) => F) => ((G, B, C, D, E) => F) =
+        apply => (a, b, c, d, e) => apply(function(a), b, c, d, e)
     }
 
   /**
    * The contravariant instance for `Function6`.
    */
-  implicit def Function6Contravariant[A, B, C, D, E, F]: Contravariant[({ type f[-x] = (x, A, B, C, D, E) => F })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E) => F })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A, B, C, D, E) => F) => ((Y, A, B, C, D, E) => F) =
-        apply => (x, a, b, c, d, e) => apply(function(x), a, b, c, d, e)
+  implicit def Function6Contravariant[B, C, D, E, F, G]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] {
+      def contramap[A, H](function: H => A): ((A, B, C, D, E, F) => G) => ((H, B, C, D, E, F) => G) =
+        apply => (a, b, c, d, e, f) => apply(function(a), b, c, d, e, f)
     }
 
   /**
    * The contravariant instance for `Function7`.
    */
-  implicit def Function7Contravariant[A, B, C, D, E, F, G]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F) => G })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F) => G })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A, B, C, D, E, F) => G) => ((Y, A, B, C, D, E, F) => G) =
-        apply => (x, a, b, c, d, e, f) => apply(function(x), a, b, c, d, e, f)
+  implicit def Function7Contravariant[B, C, D, E, F, G, H]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] {
+      def contramap[A, I](function: I => A): ((A, B, C, D, E, F, G) => H) => ((I, B, C, D, E, F, G) => H) =
+        apply => (a, b, c, d, e, f, g) => apply(function(a), b, c, d, e, f, g)
     }
 
   /**
    * The contravariant instance for `Function8`.
    */
-  implicit def Function8Contravariant[A, B, C, D, E, F, G, H]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G) => H })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G) => H })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A, B, C, D, E, F, G) => H) => ((Y, A, B, C, D, E, F, G) => H) =
-        apply => (x, a, b, c, d, e, f, g) => apply(function(x), a, b, c, d, e, f, g)
+  implicit def Function8Contravariant[B, C, D, E, F, G, H, I]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] {
+      def contramap[A, J](function: J => A): ((A, B, C, D, E, F, G, H) => I) => ((J, B, C, D, E, F, G, H) => I) =
+        apply => (a, b, c, d, e, f, g, h) => apply(function(a), b, c, d, e, f, g, h)
     }
 
   /**
    * The contravariant instance for `Function9`.
    */
-  implicit def Function9Contravariant[A, B, C, D, E, F, G, H, I]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H) => I })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H) => I })#f] {
-      def contramap[X, Y](function: Y => X): ((X, A, B, C, D, E, F, G, H) => I) => ((Y, A, B, C, D, E, F, G, H) => I) =
-        apply => (x, a, b, c, d, e, f, g, h) => apply(function(x), a, b, c, d, e, f, g, h)
+  implicit def Function9Contravariant[B, C, D, E, F, G, H, I, J]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] {
+      def contramap[A, K](function: K => A): ((A, B, C, D, E, F, G, H, I) => J) => ((K, B, C, D, E, F, G, H, I) => J) =
+        apply => (a, b, c, d, e, f, g, h, i) => apply(function(a), b, c, d, e, f, g, h, i)
     }
 
   /**
    * The contravariant instance for `Function10`.
    */
-  implicit def Function10Contravariant[A, B, C, D, E, F, G, H, I, J]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I) => J })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I) => J })#f] {
-      def contramap[X, Y](
-        function: Y => X
-      ): ((X, A, B, C, D, E, F, G, H, I) => J) => ((Y, A, B, C, D, E, F, G, H, I) => J) =
-        apply => (x, a, b, c, d, e, f, g, h, i) => apply(function(x), a, b, c, d, e, f, g, h, i)
+  implicit def Function10Contravariant[B, C, D, E, F, G, H, I, J, K]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J) => K })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J) => K })#lambda] {
+      def contramap[A, L](
+        function: L => A
+      ): ((A, B, C, D, E, F, G, H, I, J) => K) => ((L, B, C, D, E, F, G, H, I, J) => K) =
+        apply => (a, b, c, d, e, f, g, h, i, j) => apply(function(a), b, c, d, e, f, g, h, i, j)
     }
 
   /**
    * The contravariant instance for `Function11`.
    */
-  implicit def Function11Contravariant[A, B, C, D, E, F, G, H, I, J, K]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J) => K })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J) => K })#f] {
-      def contramap[X, Y](
-        function: Y => X
-      ): ((X, A, B, C, D, E, F, G, H, I, J) => K) => ((Y, A, B, C, D, E, F, G, H, I, J) => K) =
-        apply => (x, a, b, c, d, e, f, g, h, i, j) => apply(function(x), a, b, c, d, e, f, g, h, i, j)
+  implicit def Function11Contravariant[B, C, D, E, F, G, H, I, J, K, L]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K) => L })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K) => L })#lambda] {
+      def contramap[A, M](
+        function: M => A
+      ): ((A, B, C, D, E, F, G, H, I, J, K) => L) => ((M, B, C, D, E, F, G, H, I, J, K) => L) =
+        apply => (a, b, c, d, e, f, g, h, i, j, k) => apply(function(a), b, c, d, e, f, g, h, i, j, k)
     }
 
   /**
    * The contravariant instance for `Function12`.
    */
-  implicit def Function12Contravariant[A, B, C, D, E, F, G, H, I, J, K, L]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K) => L })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K) => L })#f] {
-      def contramap[X, Y](
-        function: Y => X
-      ): ((X, A, B, C, D, E, F, G, H, I, J, K) => L) => ((Y, A, B, C, D, E, F, G, H, I, J, K) => L) =
-        apply => (x, a, b, c, d, e, f, g, h, i, j, k) => apply(function(x), a, b, c, d, e, f, g, h, i, j, k)
+  implicit def Function12Contravariant[B, C, D, E, F, G, H, I, J, K, L, M]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L) => M })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L) => M })#lambda] {
+      def contramap[A, N](
+        function: N => A
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L) => M) => ((N, B, C, D, E, F, G, H, I, J, K, L) => M) =
+        apply => (a, b, c, d, e, f, g, h, i, j, k, l) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l)
     }
 
   /**
    * The contravariant instance for `Function13`.
    */
-  implicit def Function13Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L) => M })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L) => M })#f] {
-      def contramap[X, Y](
-        function: Y => X
-      ): ((X, A, B, C, D, E, F, G, H, I, J, K, L) => M) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L) => M) =
-        apply => (x, a, b, c, d, e, f, g, h, i, j, k, l) => apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l)
+  implicit def Function13Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M) => N })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M) => N })#lambda] {
+      def contramap[A, O](
+        function: O => A
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M) => N) => ((O, B, C, D, E, F, G, H, I, J, K, L, M) => N) =
+        apply => (a, b, c, d, e, f, g, h, i, j, k, l, m) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m)
     }
 
   /**
    * The contravariant instance for `Function14`.
    */
-  implicit def Function14Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M) => N })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M) => N })#f] {
-      def contramap[X, Y](
-        function: Y => X
-      ): ((X, A, B, C, D, E, F, G, H, I, J, K, L, M) => N) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M) => N) =
-        apply => (x, a, b, c, d, e, f, g, h, i, j, k, l, m) => apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m)
+  implicit def Function14Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#lambda] {
+      def contramap[A, P](
+        function: P => A
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) => ((P, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) =
+        apply => (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n)
     }
 
   /**
    * The contravariant instance for `Function15`.
    */
-  implicit def Function15Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#f] {
-      def contramap[X, Y](
-        function: Y => X
-      ): ((X, A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) =
+  implicit def Function15Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#lambda] {
+      def contramap[A, Q](
+        function: Q => A
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) => ((Q, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n) => apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o)
     }
 
   /**
    * The contravariant instance for `Function16`.
    */
-  implicit def Function16Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#f] {
-      def contramap[X, Y](function: Y => X): (
-        (X, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P
-      ) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) =
+  implicit def Function16Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#lambda] {
+      def contramap[A, R](function: R => A): (
+        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q
+      ) => ((R, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) =>
-            apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
+            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
     }
 
   /**
    * The contravariant instance for `Function17`.
    */
-  implicit def Function17Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#f] {
-      def contramap[X, Y](function: Y => X): (
-        (X, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q
-      ) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q) =
+  implicit def Function17Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#lambda] {
+      def contramap[A, S](function: S => A): (
+        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R
+      ) => ((S, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
-            apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
+            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
     }
 
   /**
    * The contravariant instance for `Function18`.
    */
-  implicit def Function18Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#f] {
-      def contramap[X, Y](function: Y => X): (
-        (X, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R
-      ) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R) =
+  implicit def Function18Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#lambda] {
+      def contramap[A, T](function: T => A): (
+        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S
+      ) => ((T, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
-            apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
+            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
     }
 
   /**
    * The contravariant instance for `Function10`.
    */
-  implicit def Function19Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#f] {
-      def contramap[X, Y](function: Y => X): (
-        (X, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S
-      ) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S) =
+  implicit def Function19Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#lambda] {
+      def contramap[A, U](function: U => A): (
+        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T
+      ) => ((U, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
-            apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
+            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
     }
 
   /**
    * The contravariant instance for `Function20`.
    */
-  implicit def Function20Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#f] {
-      def contramap[X, Y](function: Y => X): (
-        (X, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T
-      ) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T) =
+  implicit def Function20Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U]
+    : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#lambda] =
+    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#lambda] {
+      def contramap[A, V](function: V => A): (
+        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U
+      ) => ((V, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
-            apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
+            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
     }
 
   /**
    * The contravariant instance for `Function21`.
    */
-  implicit def Function21Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#f] {
-      def contramap[X, Y](function: Y => X): (
-        (X, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U
-      ) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U) =
+  implicit def Function21Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]: Contravariant[
+    ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V })#lambda
+  ] =
+    new Contravariant[
+      ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V })#lambda
+    ] {
+      def contramap[A, W](function: W => A): (
+        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V
+      ) => ((W, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
-            apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
+            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
     }
 
   /**
    * The contravariant instance for `Function22`.
    */
-  implicit def Function22Contravariant[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]
-    : Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V })#f] =
-    new Contravariant[({ type f[-x] = (x, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V })#f] {
-      def contramap[X, Y](function: Y => X): (
-        (X, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V
-      ) => ((Y, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V) =
+  implicit def Function22Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W]: Contravariant[
+    ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W })#lambda
+  ] =
+    new Contravariant[
+      ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W })#lambda
+    ] {
+      def contramap[A, X](function: X => A): (
+        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W
+      ) => ((X, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W) =
         apply =>
-          (x, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
-            apply(function(x), a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
+          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
+            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
     }
 
   /**
    * The contravariant instance for `Schedule`.
    */
-  implicit def ScheduleContravariant[R, B]: Contravariant[({ type f[-x] = Schedule[R, x, B] })#f] =
-    new Contravariant[({ type f[-x] = Schedule[R, x, B] })#f] {
+  implicit def ScheduleContravariant[R, B]: Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] =
+    new Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] {
       def contramap[A, A0](f: A0 => A): Schedule[R, A, B] => Schedule[R, A0, B] =
         schedule => schedule.contramap(f)
     }
@@ -321,8 +329,8 @@ object Contravariant {
   /**
    * The contravariant instance for `ZIO`.
    */
-  implicit def ZIOContravariant[E, A]: Contravariant[({ type f[-x] = ZIO[x, E, A] })#f] =
-    new Contravariant[({ type f[-x] = ZIO[x, E, A] })#f] {
+  implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] {
       def contramap[R, R0](f: R0 => R): ZIO[R, E, A] => ZIO[R0, E, A] =
         zio => zio.provideSome(f)
     }
@@ -330,8 +338,8 @@ object Contravariant {
   /**
    * The contravariant instance for `ZLayer`.
    */
-  implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type f[-x] = ZLayer[x, E, ROut] })#f] =
-    new Contravariant[({ type f[-x] = ZLayer[x, E, ROut] })#f] {
+  implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] {
       def contramap[RIn, RIn0](f: RIn0 => RIn): ZLayer[RIn, E, ROut] => ZLayer[RIn0, E, ROut] =
         layer => ZLayer.fromFunctionMany(f) >>> layer
     }
@@ -339,8 +347,8 @@ object Contravariant {
   /**
    * The contravariant instance for `ZManaged`.
    */
-  implicit def ZManagedContravariant[E, A]: Contravariant[({ type f[-x] = ZManaged[x, E, A] })#f] =
-    new Contravariant[({ type f[-x] = ZManaged[x, E, A] })#f] {
+  implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] {
       def contramap[R, R0](f: R0 => R): ZManaged[R, E, A] => ZManaged[R0, E, A] =
         managed => managed.provideSome(f)
     }
@@ -349,8 +357,8 @@ object Contravariant {
    * The contravariant instance for `ZQueue`.
    */
   implicit def ZQueueContravariant[RA, EA, RB, EB, A, B]
-    : Contravariant[({ type f[-x] = ZQueue[RA, EA, RB, EB, x, B] })#f] =
-    new Contravariant[({ type f[-x] = ZQueue[RA, EA, RB, EB, x, B] })#f] {
+    : Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] {
       def contramap[A, C](f: C => A): ZQueue[RA, EA, RB, EB, A, B] => ZQueue[RA, EA, RB, EB, C, B] =
         queue => queue.contramap(f)
     }
@@ -358,8 +366,8 @@ object Contravariant {
   /**
    * The contravariant instance for `ZRef`.
    */
-  implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type f[-x] = ZRef[EA, EB, x, B] })#f] =
-    new Contravariant[({ type f[-x] = ZRef[EA, EB, x, B] })#f] {
+  implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] {
       def contramap[A, C](f: C => A): ZRef[EA, EB, A, B] => ZRef[EA, EB, C, B] =
         ref => ref.contramap(f)
     }
@@ -367,8 +375,8 @@ object Contravariant {
   /**
    * The contravariant instance for `ZSink`.
    */
-  implicit def ZSinkContravariant[R, E, A0, B]: Contravariant[({ type f[-x] = ZSink[R, E, A0, x, B] })#f] =
-    new Contravariant[({ type f[-x] = ZSink[R, E, A0, x, B] })#f] {
+  implicit def ZSinkContravariant[R, E, A0, B]: Contravariant[({ type lambda[-x] = ZSink[R, E, A0, x, B] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZSink[R, E, A0, x, B] })#lambda] {
       def contramap[A, C](f: C => A): ZSink[R, E, A0, A, B] => ZSink[R, E, A0, C, B] =
         sink => sink.contramap(f)
     }
@@ -376,8 +384,8 @@ object Contravariant {
   /**
    * The contravariant instance for `ZStream`.
    */
-  implicit def ZStreamContravariant[E, A]: Contravariant[({ type f[-x] = ZStream[x, E, A] })#f] =
-    new Contravariant[({ type f[-x] = ZStream[x, E, A] })#f] {
+  implicit def ZStreamContravariant[E, A]: Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] {
       def contramap[R, R0](f: R0 => R): ZStream[R, E, A] => ZStream[R0, E, A] =
         stream => stream.provideSome(f)
     }
