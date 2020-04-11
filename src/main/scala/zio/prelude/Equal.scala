@@ -121,6 +121,15 @@ object Equal extends Lawful[Equal] {
     reflexiveLaw + symmetryLaw + transitivityLaw
 
   /**
+   * The contravariant instance for `Equal`.
+   */
+  implicit val EqualContravariant: Contravariant[Equal] =
+    new Contravariant[Equal] {
+      def contramap[A, B](f: B => A): Equal[A] => Equal[B] =
+        _.contramap(f)
+    }
+
+  /**
    * Summons an implicit `Equal[A]`.
    */
   def apply[A](implicit equal: Equal[A]): Equal[A] =
