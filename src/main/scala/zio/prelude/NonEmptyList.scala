@@ -1,18 +1,25 @@
 package zio.prelude
 
 import scala.annotation.tailrec
-import scala.collection.immutable.Seq
+import scala.language.implicitConversions
+import scala.util.hashing.MurmurHash3
 
 import zio.{ Chunk, NonEmptyChunk }
 import zio.prelude.NonEmptyList._
+import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
 /**
  * A `NonEmptyList[A]` is a list of one or more values of type A. Unlike a
  * `List`, a `NonEmptyList` is guaranteed to contain at least one element.
  * This additional structure allows some operations to be defined on
- * `NonEmptyList` which are not safe on lists, such as `head` and `reduce`.
+ * `NonEmptyList` that are not safe on `List`, such as `head` and `reduce`.
+ *
+ * For interoperability with Scala's collection library an implicit conversion
+ * is provided from `NonEmptyList` to the `::` case of `List`. Operations that
+ * cannot preserve the guarantee that the resulting collection must have at
+ * least one element will return a `List` instead.
  */
-sealed trait NonEmptyList[+A] extends Seq[A] { self =>
+sealed trait NonEmptyList[+A] { self =>
 
   /**
    * Concatenates this `NonEmptyList` with the specified `NonEmptyList`.
@@ -21,17 +28,15 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
     foldRight(that)(cons)
 
   /**
-   * Returns the element at the specified index. Note that this method is not
-   * safe because the `NonEmptyList` may not contain the specified index and
-   * is provided solely for compatibility with Scala's `Seq`.
+   * Returns whether this `NonEmptyList` contains the specified element.
    */
-  override final def apply(n: Int): A =
-    dropOption(n).map(_.head).getOrElse(throw new IndexOutOfBoundsException(n.toString))
+  final def contains[A1 >: A](a: A1)(implicit A: Equal[A1]): Boolean =
+    exists(_ === a)
 
   /**
    * Determines whether this `NonEmptyList` and the specified `NonEmptyList`
    * have the same length and every pair of corresponding elements of this
-   * `NonEmptyList` and the specified `NonEmptyList satisfy the specified
+   * `NonEmptyList` and the specified `NonEmptyList` satisfy the specified
    * predicate.
    */
   @tailrec
@@ -43,44 +48,64 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
     }
 
   /**
-   * Returns this `NonEmptyList` with the specified number of elements
-   * dropped, returning `None` if all of the elements were dropped.
+   * Returns the number of elements in this `NonEmptyList` that satisfy the
+   * specified predicate.
    */
-  @tailrec
-  final def dropOption(n: Int): Option[NonEmptyList[A]] =
-    if (n <= 0) Some(self)
-    else
-      self match {
-        case Cons(_, t) => t.dropOption(n - 1)
-        case _          => None
-      }
+  final def count(f: A => Boolean): Int =
+    foldLeft(0)((n, a) => if (f(a)) n + 1 else n)
 
   /**
-   * Drops elements from the left of this `NonEmptyList` as long as the
-   * elements satisfy the specified predicate.
+   * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
+   * equal to each other.
+   */
+  override final def equals(that: Any): Boolean =
+    that match {
+      case that: NonEmptyList[_] => self.corresponds(that)(_ == _)
+      case _                     => false
+    }
+
+  /**
+   * Returns whether an element exists in this `NonEmptyList` satisfying the
+   * specified predicate.
    */
   @tailrec
-  final def dropWhileOption(f: A => Boolean): Option[NonEmptyList[A]] =
-    if (!f(head)) Some(self)
-    else
-      self match {
-        case Cons(_, t) => t.dropWhileOption(f)
-        case _          => None
-      }
+  final def exists(f: A => Boolean): Boolean =
+    self match {
+      case Cons(h, t) => if (f(h)) true else t.exists(f)
+      case Single(h)  => f(h)
+    }
+
+  /**
+   * Returns the first element in this `NonEmptyList` satisfying the
+   * specified predicate or `None` otherwise.
+   */
+  @tailrec
+  final def find(f: A => Boolean): Option[A] =
+    self match {
+      case Cons(h, t) => if (f(h)) Some(h) else t.find(f)
+      case Single(h)  => if (f(h)) Some(h) else None
+    }
 
   /**
    * Transforms each element of this `NonEmptyList` to a `NonEmptyList` and
    * combines them into a single `NonEmptyList`.
    */
   final def flatMap[B](f: A => NonEmptyList[B]): NonEmptyList[B] =
-    reduceMapRight(f)((a, z) => f(a) ++ z)
+    reduceMapRight(f)((a, bs) => f(a) ++ bs)
+
+  /**
+   * Flattens a `NonEmptyList` of `NonEmptyList` values into a single
+   * `NonEmptyList`.
+   */
+  final def flatten[B](implicit ev: A <:< NonEmptyList[B]): NonEmptyList[B] =
+    flatMap(ev)
 
   /**
    * Folds over the elements of this `NonEmptyList` from left to right using
    * the specified initial value and combining function
    */
   @tailrec
-  override final def foldLeft[Z](z: Z)(f: (Z, A) => Z): Z =
+  final def foldLeft[B](z: B)(f: (B, A) => B): B =
     self match {
       case Cons(h, t) => t.foldLeft(f(z, h))(f)
       case Single(h)  => f(z, h)
@@ -90,36 +115,40 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
    * Folds over the elements of this `NonEmptyList` from right to left using
    * the specified initial value and combining function.
    */
-  override final def foldRight[B](z: B)(op: (A, B) => B): B =
+  final def foldRight[B](z: B)(op: (A, B) => B): B =
     self.reverse.foldLeft(z)((b, a) => op(a, b))
 
   /**
-   * Returns whether this `NonEmptyList` has more than one element.
+   * Returns whether all elements of this `NonEmptyList` satisfy the specified
+   * predicate.
    */
-  def hasTail: Boolean
+  @tailrec
+  final def forall(f: A => Boolean): Boolean =
+    self match {
+      case Cons(h, t) => if (f(h)) t.forall(f) else false
+      case Single(h)  => f(h)
+    }
 
   /**
-   * Returns an `Iterator` that iterates over the elements of this
-   * `NonEmptyList`. Note that `Iterator` is not a referentially transparent
-   * interface and this method is provided solely for compatibility with
-   * Scala's `Seq`.
+   * Returns the hashCode of this `NonEmptyList`.
    */
-  override final def iterator: Iterator[A] =
-    new Iterator[A] {
-      var state = self
-      def hasNext: Boolean =
-        state != null
-      def next(): A = {
-        val a = state.head
-        state = if (state.hasTail) state.tail else null
-        a
-      }
+  override final def hashCode: Int = {
+    val (hash, n) = foldLeft((nonEmptyListSeed, 0)) {
+      case ((hash, n), a) =>
+        (MurmurHash3.mix(hash, a.hashCode), n + 1)
     }
+    MurmurHash3.finalizeHash(hash, n)
+  }
+
+  /**
+   * Returns the head of this `NonEmptyList`.
+   */
+  def head: A
 
   /**
    * Returns the length of this `NonEmptyList`.
    */
-  override final def length: Int =
+  final def length: Int =
     foldLeft(0)((n, _) => n + 1)
 
   /**
@@ -127,39 +156,78 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
    * function.
    */
   final def map[B](f: A => B): NonEmptyList[B] =
-    reduceMapRight(a => single(f(a)))((a, z) => cons(f(a), z))
+    reduceMapRight(a => single(f(a)))((a, bs) => cons(f(a), bs))
+
+  /**
+   * Returns the maximum element in this `NonEmptyList`.
+   */
+  final def max(implicit A: Ord[A]): A =
+    maxBy(identity)
+
+  /**
+   * Returns the maximum element in this `NonEmptyList` using the specified
+   * function to map values of type `A` to values of type `B` that an ordering
+   * is defined on.
+   */
+  final def maxBy[B](f: A => B)(implicit B: Ord[B]): A = {
+    implicit val A = B.contramap(f)
+    reduceMap(Max[A])
+  }
+
+  /**
+   * Returns the minimum element in this `NonEmptyList`.
+   */
+  final def min(implicit A: Ord[A]): A =
+    minBy(identity)
+
+  /**
+   * Returns the minimum element in this `NonEmptyList` using the specified
+   * function to map values of type `A` to values of type `B` that an ordering
+   * is defined on.
+   */
+  final def minBy[B](f: A => B)(implicit B: Ord[B]): A = {
+    implicit val A = B.contramap(f)
+    reduceMap(Min[A])
+  }
 
   /**
    * Renders the elements of this `NonEmptyList` as a `String`.
    */
-  override final def mkString: String =
+  final def mkString: String =
     mkString("")
 
   /**
    * Renders the elements of this `NonEmptyList` as a `String` using the
    * specified separator.
    */
-  override final def mkString(sep: String): String =
+  final def mkString(sep: String): String =
     mkString("", sep, "")
 
   /**
    * Renders the elements of this `NonEmptyList` as a `String` using the
    * specified separator and start and end values.
    */
-  override final def mkString(start: String, sep: String, end: String): String =
+  final def mkString(start: String, sep: String, end: String): String =
     start + reduceMapLeft(_.toString)((b, a) => b + sep + a.toString) + end
 
   /**
    * Returns the product of the elements of this `NonEmptyList`.
    */
-  override final def product[A1 >: A](implicit num: Numeric[A1]): A1 =
-    reduce(num.times)
+  final def product[A1 >: A](implicit A: Associative[Prod[A1]]): A1 =
+    reduceMap(Prod[A1])
+
+  /**
+   * Reduces the elements of this `NonEmptyList` using the specified
+   * associative operator.
+   */
+  final def reduce[A1 >: A](implicit A: Associative[A1]): A1 =
+    reduceMap[A1](identity)
 
   /**
    * Reduces the elements of this `NonEmptyList` from left to right using the
    * specified function.
    */
-  override def reduce[A1 >: A](f: (A1, A1) => A1): A1 =
+  final def reduceLeft[A1 >: A](f: (A1, A1) => A1): A1 =
     reduceMapLeft[A1](identity)(f)
 
   /**
@@ -175,7 +243,7 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
    * function `map` to transform the first value to the type `Z` and then the
    * function `reduce` to combine the `Z` value with each other `A` value.
    */
-  final def reduceMapLeft[Z](map: A => Z)(reduce: (Z, A) => Z): Z =
+  final def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B): B =
     self match {
       case Cons(h, t) => t.foldLeft(map(h))(reduce)
       case Single(t)  => map(t)
@@ -187,39 +255,41 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
    * function `reduce` to combine the `Z` value with each other `A` value.
    */
   final def reduceMapRight[B](map: A => B)(reduce: (A, B) => B): B =
-    self.reverse.reduceMapLeft[B](map)((b, a) => reduce(a, b))
+    self.reverse.reduceMapLeft(map)((b, a) => reduce(a, b))
+
+  /**
+   * Reduces the elements of this `NonEmptyList` from right to left using the
+   * specified function.
+   */
+  final def reduceRight[A1 >: A](f: (A1, A1) => A1): A1 =
+    reduceMapRight[A1](identity)(f)
 
   /**
    * Reverses the order of elements in this `NonEmptyList`.
    */
-  override final def reverse: NonEmptyList[A] =
-    reduceMapLeft[NonEmptyList[A]](Single(_))((b, a) => Cons(a, b))
+  final def reverse: NonEmptyList[A] =
+    reduceMapLeft(single)((b, a) => cons(a, b))
 
   /**
    * Returns the sum of the elements of this `NonEmptyList`.
    */
-  override final def sum[A1 >: A](implicit num: Numeric[A1]): A1 =
-    reduce(num.plus)
-
-  /**
-   * Returns the tail of this `NonEmptyList`. Note that this method is not
-   * safe because a `NonEmptyList` with a single element does not have a tail
-   * and is provided solely for compatibility with Scala's `Seq`.
-   */
-  override def tail: NonEmptyList[A] =
-    unsafeTail
+  final def sum[A1 >: A](implicit A: Associative[Sum[A1]]): A1 =
+    reduceMap(Sum[A1])
 
   /**
    * Returns the tail of this `NonEmptyList` if it exists or `None` otherwise.
    */
   final def tailOption: Option[NonEmptyList[A]] =
-    if (hasTail) Some(tail) else None
+    self match {
+      case Cons(_, t) => Some(t)
+      case _          => None
+    }
 
   /**
    * Returns a new `NonEmptyList` composed of this `NonEmptyList` followed by
    * each of its tails, ending with a singleton `NonEmptyList`.
    */
-  final def tails0: NonEmptyList[NonEmptyList[A]] =
+  final def tails: NonEmptyList[NonEmptyList[A]] =
     unfold(self)(identity)(_.tailOption)
 
   /**
@@ -227,22 +297,6 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
    */
   final def toCons[A1 >: A]: ::[A1] =
     reduceMapRight[::[A1]](::(_, Nil))(::(_, _))
-
-  /**
-   * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
-   * equal to each other.
-   */
-  override final def equals(that: Any): Boolean =
-    that match {
-      case that: NonEmptyList[_] => self.corresponds(that)(_ == _)
-      case _                     => false
-    }
-
-  /**
-   * Converts this `NonEmptyList` to a `List`.
-   */
-  override final def toList: List[A] =
-    foldRight[List[A]](List.empty)(_ :: _)
 
   /**
    * Renders this `NonEmptyList` as a `String`.
@@ -254,25 +308,45 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
    * Converts this `NonEmptyList` to a `NonEmptyChunk`.
    */
   final def toNonEmptyChunk: NonEmptyChunk[A] =
-    self match {
-      case Cons(h, t) => Chunk(h, t: _*)
-      case Single(h)  => Chunk(h)
+    toCons match { case h :: t => Chunk(h, t: _*) }
+
+  /**
+   * Zips this `NonEmptyList` together with the specified `NonEmptyList`,
+   * returning a new `NonEmptyList` with a length equal to the minimum of the
+   * two and elements combined pairwise.
+   */
+  final def zip[B](that: NonEmptyList[B]): NonEmptyList[(A, B)] =
+    zipWith(that)((_, _))
+
+  /**
+   * Zips this `NonEmptyList` together with the specified `NonEmptyList`,
+   * returning a new `NonEmptyList` with a length equal to the minimum of the
+   * two and elements combined pairwise using the specified function.
+   */
+  final def zipWith[B, C](that: NonEmptyList[B])(f: (A, B) => C): NonEmptyList[C] =
+    unfold((self, that)) {
+      case (l, r) => f(l.head, r.head)
+    } {
+      case (Cons(_, t1), Cons(_, t2)) => Some((t1, t2))
+      case _                          => None
     }
 
-  protected def unsafeTail: NonEmptyList[A]
+  /**
+   * Annotates each element of this `NonEmptyList` with its index.
+   */
+  final def zipWithIndex: NonEmptyList[(A, Int)] =
+    unfold((self, 0)) {
+      case (as, n) => (as.head, n)
+    } {
+      case (Cons(_, t), n) => Some((t, n + 1))
+      case _               => None
+    }
 }
 
 object NonEmptyList extends LowPriorityNonEmptyListImplicits {
 
-  final case class Cons[+A](override val head: A, override val tail: NonEmptyList[A]) extends NonEmptyList[A] {
-    def hasTail: Boolean                               = true
-    protected override def unsafeTail: NonEmptyList[A] = tail
-  }
-
-  final case class Single[+A](override val head: A) extends NonEmptyList[A] {
-    def hasTail: Boolean                      = false
-    protected def unsafeTail: NonEmptyList[A] = throw new NoSuchElementException("Single.tail")
-  }
+  final case class Cons[+A](head: A, tail: NonEmptyList[A]) extends NonEmptyList[A]
+  final case class Single[+A](head: A)                      extends NonEmptyList[A]
 
   /**
    * The `Associative` instance for `NonEmptyList`.
@@ -284,7 +358,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    * Derives a `Debug[NonEmptyList[A]]` given a `Debug[A]`.
    */
   implicit def NonEmptyListDebug[A: Debug]: Debug[NonEmptyList[A]] =
-    chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptyList", chunk.map[Debug.Repr](_.debug).toCons)
+    chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptyList", chunk.map(_.debug).toCons)
 
   /**
    * Derives an `Equal[NonEmptyList[A]]` given an `Equal[A]`.
@@ -339,10 +413,24 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     fromCons(::(head, tail.toList))
 
   /**
+   * Constructs a `NonEmptyList` from an initial state `start` by repeatedly
+   * applying `iterate` as long as it returns `Some`.
+   */
+  def iterate[A](start: A)(iterate: A => Option[A]): NonEmptyList[A] =
+    unfold(start)(identity)(iterate)
+
+  /**
    * Constructs a `NonEmptyList` with the specified single value.
    */
   def single[A](head: A): NonEmptyList[A] =
     Single(head)
+
+  /**
+   * Provides an implicit conversion from `NonEmptyList` to the `::` case of
+   * `List` for interoperability with Scala's collection library.
+   */
+  implicit def toCons[A](nonEmptyList: NonEmptyList[A]): ::[A] =
+    nonEmptyList.toCons
 
   /**
    * Constructs a `NonEmptyList` from an initial state `start` by repeatedly
@@ -364,8 +452,8 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
   }
 
-  private[prelude] val message =
-    "This method is provided solely for compatibility with Scala's `Seq`."
+  private val nonEmptyListSeed: Int =
+    27515742
 }
 
 trait LowPriorityNonEmptyListImplicits {
@@ -374,5 +462,5 @@ trait LowPriorityNonEmptyListImplicits {
    * Derives a `Hash[NonEmptyList[A]]` given a `Hash[A]`.
    */
   implicit def NonEmptyListHash[A: Hash]: Hash[NonEmptyList[A]] =
-    Hash.make(_.map[Int](_.hash).hashCode, _.corresponds(_)(_ === _))
+    Hash.make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
 }

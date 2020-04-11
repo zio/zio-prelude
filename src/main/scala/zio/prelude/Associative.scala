@@ -99,10 +99,10 @@ object Associative extends Lawful[AssociativeEqual] {
     )
 
   implicit def maxAssociative[A: Ord]: Associative[Max[A]] =
-    make((l: Max[A], r: Max[A]) => if (l > r) l else r)
+    make((l: Max[A], r: Max[A]) => if (l >= r) l else r)
 
   implicit def minAssociative[A: Ord]: Associative[Min[A]] =
-    make((l: Min[A], r: Min[A]) => if (l < r) l else r)
+    make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
 
   implicit def OptionAssociative[A: Associative]: Associative[Option[A]] =
     make[Option[A]]((l, r) =>
