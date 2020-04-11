@@ -262,7 +262,7 @@ sealed trait NonEmptyList[+A] extends Seq[A] { self =>
   protected def unsafeTail: NonEmptyList[A]
 }
 
-object NonEmptyList {
+object NonEmptyList extends LowPriorityNonEmptyListImplicits {
 
   final case class Cons[+A](override val head: A, override val tail: NonEmptyList[A]) extends NonEmptyList[A] {
     def hasTail: Boolean                               = true
