@@ -46,6 +46,17 @@ object Commutative extends Lawful[CommutativeEqual] {
   implicit val DoubleSumCommutative: Commutative[Sum[Double]] =
     Commutative.make((l, r) => Sum(l + r))
 
+  implicit def EitherCommutative[E: Commutative, A: Commutative]: Commutative[Either[E, A]] =
+    new Commutative[Either[E, A]] {
+      def combine(l: => Either[E, A], r: => Either[E, A]): Either[E, A] =
+        (l, r) match {
+          case (Right(l), Right(r)) => Right(l <> r)
+          case (Left(l), Right(_))  => Left(l)
+          case (Right(_), Left(r))  => Left(r)
+          case (Left(l), Left(r))   => Left(l <> r)
+        }
+    }
+
   implicit val FloatProdCommutative: Commutative[Prod[Float]] =
     Commutative.make((l, r) => Prod(l * r))
 
