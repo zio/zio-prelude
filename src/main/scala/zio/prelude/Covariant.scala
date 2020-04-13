@@ -62,8 +62,8 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
   /**
    * Summons an implicit `Covariant[F]`.
    */
-  def apply[F[-_]](implicit contravariant: Contravariant[F]): Contravariant[F] =
-    contravariant
+  def apply[F[+_]](implicit covariant: Covariant[F]): Covariant[F] =
+    covariant
 
   /**
    * The `Covariant` instance for `Option`.

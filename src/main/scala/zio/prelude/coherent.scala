@@ -62,8 +62,8 @@ package coherent {
   object CovariantEqualF {
     implicit def derive[F[+_]](implicit covariant0: Covariant[F], equalF0: EqualF[F]): CovariantEqualF[F] =
       new CovariantEqualF[F] {
-        def deriveEqual[A](equal: Equal[A]): Equal[F[A]] =
-          equalF0.deriveEqual(equal)
+        def deriveEqual[A: Equal]: Equal[F[A]] =
+          equalF0.deriveEqual
         def map[A, B](f: A => B): F[A] => F[B] =
           covariant0.map(f)
       }

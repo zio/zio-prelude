@@ -19,7 +19,7 @@ trait EqualF[F[_]] {
   /**
    * Derive an `Equal[F[A]]` given an `Equal[A]`.
    */
-  def deriveEqual[A](equal: Equal[A]): Equal[F[A]]
+  def deriveEqual[A: Equal]: Equal[F[A]]
 }
 
 object EqualF {
@@ -35,7 +35,7 @@ object EqualF {
    */
   implicit val OptionEqualF: EqualF[Option] =
     new EqualF[Option] {
-      def deriveEqual[A](A: Equal[A]): Equal[Option[A]] =
-        Equal.OptionEqual(A)
+      def deriveEqual[A: Equal]: Equal[Option[A]] =
+        Equal.OptionEqual
     }
 }
