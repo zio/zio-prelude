@@ -198,6 +198,12 @@ object Equal extends Lawful[Equal] {
     Equal[A] either Equal[B]
 
   /**
+   * Derives an `Equal[F[A]]` given an `EqualF[F]` and an `Equal[A]`.
+   */
+  implicit def EqualFEqual[F[_]: EqualF, A: Equal]: Equal[F[A]] =
+    EqualF[F].deriveEqual(Equal[A])
+
+  /**
    * Equality for `Float` values. Note that to honor the contract that a
    * value is always equal to itself, comparing `Float.NaN` with itself will
    * return `true`, which is different from the behavior of `Float#equals`.

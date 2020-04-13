@@ -3,16 +3,17 @@ package zio
 import zio.test.{ assert, TestResult }
 
 package object prelude
-    extends DebugSyntax
-    with EqualSyntax
-    with OrdSyntax
-    with HashSyntax
+    extends Assertions
     with ClosureSyntax
+    with CovariantSyntax
+    with DebugSyntax
+    with EqualSyntax
+    with HashSyntax
+    with IdExports
+    with IdentitySyntax
     with NewtypeExports
     with NewtypeFExports
-    with IdentitySyntax
-    with IdExports
-    with Assertions {
+    with OrdSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
 

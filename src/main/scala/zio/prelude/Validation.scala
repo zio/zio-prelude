@@ -59,7 +59,7 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def mapError[E1](f: E => E1): Validation[E1, A] =
     self match {
-      case Failure(es)          => Failure(es.map(f))
+      case Failure(es)          => Failure(es.mapNonEmpty(f))
       case success @ Success(_) => success
     }
 
@@ -108,7 +108,7 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def zipWithPar[E1 >: E, B, C](that: Validation[E1, B])(f: (A, B) => C): Validation[E1, C] =
     (self, that) match {
-      case (Failure(es), Failure(e1s)) => Failure(es ++ e1s)
+      case (Failure(es), Failure(e1s)) => Failure(Chunk.concat(es, e1s))
       case (failure @ Failure(_), _)   => failure
       case (_, failure @ Failure(_))   => failure
       case (Success(a), Success(b))    => Success(f(a, b))
