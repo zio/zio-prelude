@@ -355,6 +355,15 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Associative.make(_ ++ _)
 
   /**
+   * The `Covariant` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListCovariant: Covariant[NonEmptyList] =
+    new Covariant[NonEmptyList] {
+      def map[A, B](f: A => B): NonEmptyList[A] => NonEmptyList[B] =
+        nonEmptyList => nonEmptyList.map(f)
+    }
+
+  /**
    * Derives a `Debug[NonEmptyList[A]]` given a `Debug[A]`.
    */
   implicit def NonEmptyListDebug[A: Debug]: Debug[NonEmptyList[A]] =
@@ -365,6 +374,15 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    */
   implicit def NonEmptyListEqual[A: Equal]: Equal[NonEmptyList[A]] =
     Equal.make(_.corresponds(_)(_ === _))
+
+  /**
+   * The `EqualF` instance for `NonEmptyList`.
+   */
+  implicit def NonEmptyListEqualF: EqualF[NonEmptyList] =
+    new EqualF[NonEmptyList] {
+      def deriveEqual[A: Equal]: Equal[NonEmptyList[A]] =
+        NonEmptyListEqual
+    }
 
   /**
    * Derives an `Ord[NonEmptyList[A]]` given an `Ord[A]`.
