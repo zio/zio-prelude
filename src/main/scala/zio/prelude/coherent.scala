@@ -57,6 +57,18 @@ package coherent {
       }
   }
 
+  trait CovariantEqualF[F[+_]] extends Covariant[F] with EqualF[F]
+
+  object CovariantEqualF {
+    implicit def derive[F[+_]](implicit covariant0: Covariant[F], equalF0: EqualF[F]): CovariantEqualF[F] =
+      new CovariantEqualF[F] {
+        def deriveEqual[A: Equal]: Equal[F[A]] =
+          equalF0.deriveEqual
+        def map[A, B](f: A => B): F[A] => F[B] =
+          covariant0.map(f)
+      }
+  }
+
   trait HashOrd[-A] extends Hash[A] with Ord[A] { self =>
     final override def contramap[B](f: B => A): HashOrd[B] =
       HashOrd.derive(self.contramap(f), self.contramap(f))
