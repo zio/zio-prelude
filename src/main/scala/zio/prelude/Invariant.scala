@@ -53,6 +53,25 @@ object Invariant {
         )
     }
 
+  implicit val InverseInvariant: Invariant[Inverse] =
+    new Invariant[Inverse] {
+      def invmap[A, B](f: A <=> B): Inverse[A] <=> Inverse[B] =
+        Equivalence(
+          (a: Inverse[A]) =>
+            Inverse.make[B](
+              f.to(a.identity),
+              (l, r) => f.to(a.combine(f.from(l), f.from(r))),
+              v => f.to(a.inverse(f.from(v)))
+            ),
+          (b: Inverse[B]) =>
+            Inverse.make[A](
+              f.from(b.identity),
+              (l, r) => f.from(b.combine(f.to(l), f.to(r))),
+              v => f.from(b.inverse(f.to(v)))
+            )
+        )
+    }
+
   implicit def MapInvariant[V]: Invariant[({ type lambda[x] = Map[x, V] })#lambda] =
     new Invariant[({ type lambda[x] = Map[x, V] })#lambda] {
       def invmap[A, B](f: A <=> B): Map[A, V] <=> Map[B, V] =
