@@ -9,8 +9,9 @@ object DebugSpec extends DefaultRunnableSpec {
   def primitiveTest[A: Debug](renderer: Renderer)(a: A, exp: Option[String] = None) =
     assert(a.debug.render(renderer))(equalTo(exp.getOrElse(a.toString)))
 
-  def primScalaTest[A: Debug](a: A)                            = primitiveTest[A](Renderer.Scala)(a)
-  def primFullTest[A: Debug](a: A, exp: Option[String] = None) = primitiveTest[A](Renderer.Full)(a, exp)
+  def primScalaTest[A: Debug](a: A)                              = primitiveTest[A](Renderer.Scala)(a)
+  def primSimpleTest[A: Debug](a: A, exp: Option[String] = None) = primitiveTest[A](Renderer.Simple)(a, exp)
+  def primFullTest[A: Debug](a: A, exp: Option[String] = None)   = primitiveTest[A](Renderer.Full)(a, exp)
 
   case class TestCase(string: String, number: Int, list: List[Double])
   val genTestCase = for {
@@ -68,9 +69,19 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("testTrait")(check(genTestTrait)(primScalaTest(_)))
       ),
       suite("SimpleRenderer")(
-        testM("list")(
-          check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Simple))(equalTo(c.toString)))
-        ),
+        testM("unit")(check(Gen.unit)(primSimpleTest(_))),
+        testM("int")(check(Gen.anyInt)(primSimpleTest(_))),
+        testM("double")(check(Gen.anyDouble)(primSimpleTest(_))),
+        testM("float")(check(Gen.anyFloat)(f => primSimpleTest(f, Some(s"${f.toString}f")))),
+        testM("long")(check(Gen.anyLong)(l => primSimpleTest(l, Some(s"${l.toString}L")))),
+        testM("byte")(check(Gen.anyByte)(primSimpleTest(_))),
+        testM("char")(check(Gen.anyChar)(primSimpleTest(_))),
+        testM("string")(check(Gen.anyString)(s => primSimpleTest(s, Some(s""""$s"""")))),
+        testM("either")(check(Gen.either(Gen.anyInt, Gen.anyInt))(primSimpleTest(_))),
+        testM("option")(check(Gen.option(Gen.anyInt))(primSimpleTest(_))),
+        testM("vector")(check(Gen.vectorOf(Gen.anyInt))(primSimpleTest(_))),
+        testM("map")(check(Gen.mapOf(Gen.anyInt, Gen.anyInt))(primSimpleTest(_))),
+        testM("list")(check(Gen.listOf(Gen.anyInt))(primSimpleTest(_))),
         testM("tuple2")(
           check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Simple))(equalTo(expectedTupleSimple(2)(i))))
         ),
@@ -113,8 +124,26 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("byte")(check(Gen.anyByte)(primFullTest(_))),
         testM("char")(check(Gen.anyChar)(primFullTest(_))),
         testM("string")(check(Gen.anyString)(s => primFullTest(s, Some(s""""$s"""")))),
+        testM("either")(
+          check(Gen.either(Gen.anyInt, Gen.anyInt))(c =>
+            assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}"))
+          )
+        ),
+        testM("option")(
+          check(Gen.option(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}")))
+        ),
+        testM("vector")(
+          check(Gen.vectorOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}")))
+        ),
         testM("list")(
           check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}")))
+        ),
+        testM("map")(
+          check(Gen.mapOf(Gen.anyInt, Gen.anyInt))(c =>
+            assert(c.debug.render(Renderer.Full))(
+              equalTo(s"scala.Map(${c.map(kv => s"key: ${kv._1} -> value: ${kv._2}").mkString(", ")})")
+            )
+          )
         ),
         testM("tuple2")(
           check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Full))(equalTo(expectedTupleFull(2)(i))))
