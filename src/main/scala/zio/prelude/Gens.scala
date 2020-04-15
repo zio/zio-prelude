@@ -9,7 +9,13 @@ import zio.test._
 object Gens {
 
   /**
-   * A generator of validation values.
+   * A generator of `NonEmptyList` values.
+   */
+  def nonEmptyListOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptyList[A]] =
+    Gen.listOf1(a).map(NonEmptyList.fromCons)
+
+  /**
+   * A generator of `Validation` values.
    */
   def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
     Gen.either(Gen.chunkOf1(e), a).map {

@@ -123,7 +123,7 @@ object Validation extends LowPriorityValidationImplicits {
   /**
    * The `Covariant` instance for `Validation`.
    */
-  implicit def CovarantValidation[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
+  implicit def ValidationCovariant[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
     new Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] {
       def map[A, B](f: A => B): Validation[E, A] => Validation[E, B] =
         _.map(f)
@@ -145,6 +145,15 @@ object Validation extends LowPriorityValidationImplicits {
    */
   implicit def ValidationEqual[E: Equal, A: Equal]: Equal[Validation[E, A]] =
     Equal[NonEmptyChunk[E]].eitherWith(Equal[A])(_.toEither)
+
+  /**
+   * The `EqualF` instance for `Validation`.
+   */
+  implicit def ValidationEqualF[E: Equal]: EqualF[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new EqualF[({ type lambda[+x] = Validation[E, x] })#lambda] {
+      def deriveEqual[A: Equal]: Equal[Validation[E, A]] =
+        ValidationEqual
+    }
 
   /**
    * Derives an `Ord[Validation[E, A]]` given na `Ord[E]` and an `Ord[A]`.
