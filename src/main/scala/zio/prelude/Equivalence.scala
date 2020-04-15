@@ -48,10 +48,31 @@ object Equivalence {
    */
   def identity[A]: Equivalence[A, A] = Equivalence(Predef.identity[A](_), Predef.identity[A](_))
 
+  /**
+   * Constructs an equivalence between a right-associated nested tuple, and a
+   * left-associated nested tuple.
+   */
   def tuple[A, B, C]: Equivalence[(A, (B, C)), ((A, B), C)] =
     Equivalence({
       case (a, (b, c)) => ((a, b), c)
     }, {
       case ((a, b), c) => (a, (b, c))
     })
+
+  /**
+   * Constructs an equivalence between a right-associated nested either, and a
+   * left-associated nested either.
+   */
+  def either[A, B, C]: Equivalence[Either[A, Either[B, C]], Either[Either[A, B], C]] =
+    Equivalence(
+      {
+        case Left(a)         => Left(Left(a))
+        case Right(Left(b))  => Left(Right(b))
+        case Right(Right(c)) => Right(c)
+      }, {
+        case Left(Left(a))  => Left(a)
+        case Left(Right(b)) => Right(Left(b))
+        case Right(c)       => Right(Right(c))
+      }
+    )
 }
