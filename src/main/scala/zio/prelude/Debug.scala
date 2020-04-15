@@ -8,19 +8,39 @@ trait Debug[-A] {
 
 object Debug {
   type Renderer = Repr => String
-
-  val defaultRenderer: Renderer = _ match {
-    case Repr.Int(v)        => v.toString
-    case Repr.Double(v)     => v.toString
-    case Repr.Float(v)      => s"${v}f"
-    case Repr.Long(v)       => s"${v}L"
-    case Repr.Byte(v)       => v.toString
-    case Repr.Char(v)       => v.toString
-    case Repr.String(v)     => s""""$v""""
-    case Repr.Object(ns, n) => (ns :+ n).mkString(".")
-    case Repr.Constructor(ns, n, reprs) =>
-      (ns :+ s"$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render()}").mkString(", ")})").mkString(".")
-    case Repr.VConstructor(ns, n, reprs) => (ns :+ s"$n(${reprs.map(_.render()).mkString(", ")})").mkString(".")
+  object Renderer {
+    val Scala: Renderer = _ match {
+      case Repr.Float(v)     => v.toString
+      case Repr.Long(v)      => v.toString
+      case Repr.String(v)    => v.toString
+      case Repr.Object(_, n) => n
+      case Repr.Constructor(_, n, reprs) =>
+        s"$n(${reprs.map(kv => kv._2.render(Scala)).mkString(",")})"
+      case Repr.VConstructor(_, "List", reprs) => s"List(${reprs.map(_.render(Scala)).mkString(", ")})"
+      case Repr.VConstructor(_, n, reprs)      => s"$n(${reprs.map(_.render(Scala)).mkString(",")})"
+      case any                                 => Simple(any)
+    }
+    val Simple: Renderer = _ match {
+      case Repr.Int(v)       => v.toString
+      case Repr.Double(v)    => v.toString
+      case Repr.Float(v)     => s"${v}f"
+      case Repr.Long(v)      => s"${v}L"
+      case Repr.Byte(v)      => v.toString
+      case Repr.Char(v)      => v.toString
+      case Repr.String(v)    => s""""$v""""
+      case Repr.Object(_, n) => n
+      case Repr.Constructor(_, n, reprs) =>
+        s"$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render(Simple)}").mkString(", ")})"
+      case Repr.VConstructor(_, n, reprs) => s"$n(${reprs.map(_.render(Simple)).mkString(", ")})"
+    }
+    val Full: Renderer = _ match {
+      case Repr.Object(ns, n) => (ns :+ n).mkString(".")
+      case Repr.Constructor(ns, n, reprs) =>
+        (ns :+ s"$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render(Full)}").mkString(", ")})").mkString(".")
+      case Repr.VConstructor(ns, n, reprs) =>
+        (ns :+ n).mkString(".") + s"(${reprs.map(_.render(Full)).mkString(", ")})"
+      case any => Simple(any)
+    }
   }
 
   def apply[A](implicit debug: Debug[A]): Debug[A] = debug
@@ -28,7 +48,7 @@ object Debug {
   def make[A](f: A => Debug.Repr): Debug[A] = f(_)
 
   sealed trait Repr { self =>
-    def render(renderer: Renderer = defaultRenderer): String = renderer(self)
+    def render(renderer: Renderer = Renderer.Simple): String = renderer(self)
   }
 
   object Repr {
@@ -86,7 +106,7 @@ object Debug {
     vector => Repr.VConstructor(List("scala"), "Vector", vector.map(_.debug).toList)
 
   implicit def MapDebug[K: Debug, V: Debug]: Debug[Map[K, V]] =
-    map => Repr.VConstructor(List("scala"), "Map", List(map.toList.debug))
+    map => Repr.VConstructor(List("scala"), "Map", map.map(_.debug).toList)
 
   implicit def Tuple2Debug[A: Debug, B: Debug]: Debug[(A, B)] =
     tup2 => Repr.VConstructor(List("scala"), "Tuple2", List(tup2._1.debug, tup2._2.debug))
