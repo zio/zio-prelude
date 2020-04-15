@@ -26,12 +26,15 @@ import zio.test.laws._
  * `String => Int` that returns the length of a string, then we can construct
  * a `List[Int]` with the length of each string.
  */
-trait Covariant[F[+_]] {
+trait Covariant[F[+_]] extends Invariant[F] {
 
   /**
    * Lift a function from `A` to `B` to a function from `F[A]` to `F[B]`.
    */
   def map[A, B](f: A => B): F[A] => F[B]
+
+  final def invariantMap[A, B](f: A <=> B): F[A] <=> F[B] =
+    Equivalence((fa: F[A]) => map(f.to)(fa), (fb: F[B]) => map(f.from)(fb))
 }
 
 object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {

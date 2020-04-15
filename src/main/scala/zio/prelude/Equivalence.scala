@@ -47,4 +47,11 @@ object Equivalence {
    * equivalent to itself and is trivially true.
    */
   def identity[A]: Equivalence[A, A] = Equivalence(Predef.identity[A](_), Predef.identity[A](_))
+
+  def tuple[A, B, C]: Equivalence[(A, (B, C)), ((A, B), C)] =
+    Equivalence({
+      case (a, (b, c)) => ((a, b), c)
+    }, {
+      case ((a, b), c) => (a, (b, c))
+    })
 }

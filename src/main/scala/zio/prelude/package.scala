@@ -26,6 +26,8 @@ package object prelude
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
+
+    type Apply[F[+_]] = Covariant[F] with AssociativeF.Tuple[F]
   }
 
   /**

@@ -416,7 +416,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Cons(head, tail)
 
   /**
-   * Constructs a `NonEmptylist` from the `::` case of a `List`.
+   * Constructs a `NonEmptyList` from the `::` case of a `List`.
    */
   def fromCons[A](cons: ::[A]): NonEmptyList[A] =
     unfold(cons)(_.head) {

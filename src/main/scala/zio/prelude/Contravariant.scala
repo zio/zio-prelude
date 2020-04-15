@@ -26,7 +26,7 @@ import zio.stream.{ ZSink, ZStream }
  * compares strings by computing their lengths with the provided function and
  * comparing those.
  */
-trait Contravariant[F[-_]] {
+trait Contravariant[F[-_]] extends Invariant[F] {
 
   /**
    * Lift a function from `A` to `B` to a function from `F[B]` to `F[A]`.
@@ -45,6 +45,9 @@ trait Contravariant[F[-_]] {
    */
   def compositionLaw[A, B, C](fa: F[A], f: C => B, g: B => A)(implicit equal: Equal[F[C]]): Boolean =
     contramap(f)(contramap(g)(fa)) === contramap(f andThen g)(fa)
+
+  final def invariantMap[A, B](f: A <=> B): F[A] <=> F[B] =
+    Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
 object Contravariant {
 
@@ -55,13 +58,16 @@ object Contravariant {
     contravariant
 
   /**
-   * The contravariant instance for `Function1`.
+   * The contravariant instance for `Function1[-A, +B] : [*, *] => *`.
    */
-  implicit def Function1Contravariant[B]: Contravariant[({ type lambda[-x] = x => B })#lambda] =
-    new Contravariant[({ type lambda[-x] = x => B })#lambda] {
+  implicit def Function1Contravariant[B]: Contravariant[({ type lambda[-x] = x => B })#lambda] = {
+    type Function1B[-A] = Function1[A, B]
+
+    new Contravariant[Function1B] {
       def contramap[A, C](function: C => A): (A => B) => (C => B) =
         apply => a => apply(function(a))
     }
+  }
 
   /**
    * The contravariant instance for `Function2`.
