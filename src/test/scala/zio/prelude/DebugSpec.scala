@@ -56,7 +56,7 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("either")(check(Gen.either(Gen.anyString, Gen.anyInt))(primScalaTest(_))),
         testM("option")(check(Gen.option(Gen.anyInt))(primScalaTest(_))),
         testM("vector")(check(Gen.vectorOf(Gen.anyInt))(primScalaTest(_))),
-        testM("map")(check(Gen.mapOf(Gen.anyInt, Gen.anyString))(primScalaTest(_))),
+        testM("map")(check(Gen.mapOf(Gen.anyInt, Gen.anyString))((c: Map[Int, String]) => primScalaTest(c))),
         testM("list")(check(Gen.listOf(Gen.anyInt))(primScalaTest(_))),
         testM("tuple2")(check(Gen.anyInt)(i => primScalaTest((i, i)))),
         testM("tuple3")(check(Gen.anyInt)(i => primScalaTest((i, i, i)))),
@@ -80,7 +80,7 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("either")(check(Gen.either(Gen.anyInt, Gen.anyInt))(primSimpleTest(_))),
         testM("option")(check(Gen.option(Gen.anyInt))(primSimpleTest(_))),
         testM("vector")(check(Gen.vectorOf(Gen.anyInt))(primSimpleTest(_))),
-        testM("map")(check(Gen.mapOf(Gen.anyInt, Gen.anyInt))(primSimpleTest(_))),
+        testM("map")(check(Gen.mapOf(Gen.anyInt, Gen.anyInt))((c: Map[Int, Int]) => primSimpleTest(c))),
         testM("list")(check(Gen.listOf(Gen.anyInt))(primSimpleTest(_))),
         testM("tuple2")(
           check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Simple))(equalTo(expectedTupleSimple(2)(i))))
@@ -139,9 +139,11 @@ object DebugSpec extends DefaultRunnableSpec {
           check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}")))
         ),
         testM("map")(
-          check(Gen.mapOf(Gen.anyInt, Gen.anyInt))(c =>
+          check(Gen.mapOf(Gen.anyInt, Gen.anyInt))((c: Map[Int, Int]) =>
             assert(c.debug.render(Renderer.Full))(
-              equalTo(s"scala.Map(${c.map(kv => s"key: ${kv._1} -> value: ${kv._2}").mkString(", ")})")
+              equalTo(
+                s"scala.Map(${c.map(kv => s"key: ${kv._1} -> value: ${kv._2}").mkString(", ")})"
+              )
             )
           )
         ),

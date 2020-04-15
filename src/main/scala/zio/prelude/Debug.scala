@@ -56,7 +56,8 @@ object Debug {
   def make[A](f: A => Debug.Repr): Debug[A] = f(_)
 
   sealed trait Repr { self =>
-    def render(renderer: Renderer = Renderer.Simple): String = renderer(self)
+    def render(renderer: Renderer): String = renderer(self)
+    def render: String                     = render(Renderer.Simple)
   }
 
   object Repr {
