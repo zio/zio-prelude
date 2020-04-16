@@ -56,7 +56,11 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("either")(check(Gen.either(Gen.anyString, Gen.anyInt))(primScalaTest(_))),
         testM("option")(check(Gen.option(Gen.anyInt))(primScalaTest(_))),
         testM("vector")(check(Gen.vectorOf(Gen.anyInt))(primScalaTest(_))),
-        testM("map")(check(Gen.mapOf(Gen.anyInt, Gen.anyString))((c: Map[Int, String]) => primScalaTest(c))),
+        testM("map")(
+          check(Gen.mapOf(Gen.anyInt, Gen.anyString))(c =>
+            primitiveTest(Renderer.Scala)(c, Some(s"Map(${c.map(kv => s"${kv._1} -> ${kv._2}").mkString(", ")})"))
+          )
+        ),
         testM("list")(check(Gen.listOf(Gen.anyInt))(primScalaTest(_))),
         testM("tuple2")(check(Gen.anyInt)(i => primScalaTest((i, i)))),
         testM("tuple3")(check(Gen.anyInt)(i => primScalaTest((i, i, i)))),
@@ -80,7 +84,11 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("either")(check(Gen.either(Gen.anyInt, Gen.anyInt))(primSimpleTest(_))),
         testM("option")(check(Gen.option(Gen.anyInt))(primSimpleTest(_))),
         testM("vector")(check(Gen.vectorOf(Gen.anyInt))(primSimpleTest(_))),
-        testM("map")(check(Gen.mapOf(Gen.anyInt, Gen.anyInt))((c: Map[Int, Int]) => primSimpleTest(c))),
+        testM("map")(
+          check(Gen.mapOf(Gen.anyInt, Gen.anyInt))(c =>
+            primitiveTest(Renderer.Simple)(c, Some(s"Map(${c.map(kv => s"${kv._1} -> ${kv._2}").mkString(", ")})"))
+          )
+        ),
         testM("list")(check(Gen.listOf(Gen.anyInt))(primSimpleTest(_))),
         testM("tuple2")(
           check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Simple))(equalTo(expectedTupleSimple(2)(i))))
