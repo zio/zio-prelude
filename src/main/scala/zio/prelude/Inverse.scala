@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.EqualInverse
+import zio.prelude.newtypes.{ Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -21,4 +22,35 @@ object Inverse extends Lawful[EqualInverse] {
   }
 
   def laws = rightInverseLaw + Identity.laws
+
+  def apply[A](implicit Inverse: Inverse[A]): Inverse[A] = Inverse
+
+  def make[A](identity0: A, op: (A, A) => A, inv: (A) => A): Inverse[A] =
+    new Inverse[A] {
+      def identity: A                  = identity0
+      def combine(l: => A, r: => A): A = op(l, r)
+      def inverse(a: A): A             = inv(a)
+    }
+
+  implicit val ByteSumInverse: Inverse[Sum[Byte]] =
+    Inverse.make(Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte), a => Sum((-a).toByte))
+
+  implicit val CharSumInverse: Inverse[Sum[Char]] =
+    Inverse.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar), a => Sum((-a).toChar))
+
+  implicit val DoubleSumInverse: Inverse[Sum[Double]] =
+    Inverse.make(Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r), a => Sum(-a))
+
+  implicit val FloatSumInverse: Inverse[Sum[Float]] =
+    Inverse.make(Sum(0), (l, r) => Sum(l + r), a => Sum(-a))
+
+  implicit val IntSumInverse: Inverse[Sum[Int]] =
+    Inverse.make(Sum(0), (l, r) => Sum(l + r), a => Sum(-a))
+
+  implicit val LongSumInverse: Inverse[Sum[Long]] =
+    Inverse.make(Sum(0L), (l, r) => Sum(l + r), a => Sum(-a))
+
+  implicit val ShortSumInverse: Inverse[Sum[Short]] =
+    Inverse.make(Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort), a => Sum((-a).toShort))
+
 }
