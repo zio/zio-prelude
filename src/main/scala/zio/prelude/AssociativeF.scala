@@ -11,7 +11,7 @@ object AssociativeF {
       val left  = both(fa, both(fb, fc))
       val right = both(both(fa, fb), fc)
 
-      val left2 = invariant.invariantMap(Equivalence.tuple[A, B, C]).to(left)
+      val left2 = invariant.invmap(Equivalence.tuple[A, B, C]).to(left)
 
       left2 === right
     }
@@ -37,7 +37,7 @@ object AssociativeF {
       val left  = either(fa, either(fb, fc))
       val right = either(either(fa, fb), fc)
 
-      val left2 = invariant.invariantMap(Equivalence.either[A, B, C]).to(left)
+      val left2 = invariant.invmap(Equivalence.either[A, B, C]).to(left)
 
       left2 === right
     }
