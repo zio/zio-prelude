@@ -69,6 +69,18 @@ package coherent {
       }
   }
 
+  trait ContravariantEqualF[F[-_]] extends Contravariant[F] with EqualF[F]
+
+  object ContravariantEqualF {
+    implicit def derive[F[-_]](implicit contravariant0: Contravariant[F], equalF0: EqualF[F]): ContravariantEqualF[F] =
+      new ContravariantEqualF[F] {
+        def deriveEqual[A: Equal]: Equal[F[A]] =
+          equalF0.deriveEqual
+        def contramap[A, B](f: B => A): F[A] => F[B] =
+          contravariant0.contramap(f)
+      }
+  }
+
   trait HashOrd[-A] extends Hash[A] with Ord[A] { self =>
     final override def contramap[B](f: B => A): HashOrd[B] =
       HashOrd.derive(self.contramap(f), self.contramap(f))

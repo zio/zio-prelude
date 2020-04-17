@@ -7,6 +7,7 @@ package object prelude
     with AssociativeFSyntax
     with ClosureSyntax
     with CovariantSyntax
+    with ContravariantSyntax
     with DebugSyntax
     with EqualSyntax
     with HashSyntax

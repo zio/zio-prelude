@@ -33,7 +33,7 @@ trait Covariant[F[+_]] extends Invariant[F] {
    */
   def map[A, B](f: A => B): F[A] => F[B]
 
-  final def invariantMap[A, B](f: A <=> B): F[A] <=> F[B] =
+  final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => map(f.to)(fa), (fb: F[B]) => map(f.from)(fb))
 }
 

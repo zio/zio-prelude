@@ -4,7 +4,7 @@ trait Invariant[F[_]] {
 
   def invmap[A, B](f: A <=> B): F[A] <=> F[B]
 
-  def identityLaw[A](fa: F[A])(implicit equal: Equal[F[A]]): Boolean =
+  def identityLaw1[A](fa: F[A])(implicit equal: Equal[F[A]]): Boolean =
     invmap(Equivalence.identity[A]).to(fa) === fa
 
   def compositionLaw[A, B, C](fa: F[A], f: A <=> B, g: B <=> C)(implicit equal: Equal[F[C]]): Boolean =

@@ -1,7 +1,10 @@
 package zio.prelude
 
+import zio.prelude.coherent.ContravariantEqualF
 import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef }
 import zio.stream.{ ZSink, ZStream }
+import zio.test.TestResult
+import zio.test.laws._
 
 /**
  * `Contravariant[F]` provides implicit evidence that `F[-_]` is a
@@ -46,10 +49,33 @@ trait Contravariant[F[-_]] extends Invariant[F] {
   def compositionLaw[A, B, C](fa: F[A], f: C => B, g: B => A)(implicit equal: Equal[F[C]]): Boolean =
     contramap(f)(contramap(g)(fa)) === contramap(f andThen g)(fa)
 
-  final def invariantMap[A, B](f: A <=> B): F[A] <=> F[B] =
+  final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
-object Contravariant {
+object Contravariant extends LawfulF.Contravariant[ContravariantEqualF, Equal] {
+
+  /**
+   * Contramapping with the identity function must not change the structure.
+   */
+  val identityLaw = new LawsF.Contravariant.Law1[ContravariantEqualF, Equal]("identityLaw") {
+    def apply[F[-_]: ContravariantEqualF, A: Equal](fa: F[A]): TestResult =
+      fa.contramap(identity[A]) <-> fa
+  }
+
+  /**
+   * FIXME: Cannot do this since ZLawsF.Contravariant is sealed in ZIO Test!!!
+   *
+   * Contramap composition.
+   */
+  // val compositionLaw = new ZLawsF.Contravariant[ContravariantEqualF, Equal, Any]("compositionLaw") {
+  //   final def run[R, F[-_]: ContravariantEqualF, A: Caps](genF: GenF[R, F], gen: Gen[R, A]): ZIO[R, Nothing, TestResult] =
+  //     check(genF(gen), Gen.function(gen), Gen.function(gen))(apply(_, _, _).map(_.label(label)))
+
+  //   def apply[F[-_]: ContravariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
+  //     fa.contramap(g).contramap(f) <-> fa.contramap(f compose g)
+  // }
+
+  val laws = identityLaw
 
   /**
    * Summons an implicit `Contravariant[F]`.
@@ -395,4 +421,15 @@ object Contravariant {
       def contramap[R, R0](f: R0 => R): ZStream[R, E, A] => ZStream[R0, E, A] =
         stream => stream.provideSome(f)
     }
+}
+
+trait ContravariantSyntax {
+
+  /**
+   * Provides infix syntax for mapping over covariant values.
+   */
+  implicit class ContravariantOps[F[-_], A](private val self: F[A]) {
+    def contramap[B](f: B => A)(implicit contravariant: Contravariant[F]): F[B] =
+      contravariant.contramap(f)(self)
+  }
 }
