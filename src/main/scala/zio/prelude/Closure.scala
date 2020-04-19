@@ -25,7 +25,7 @@ object Closure extends Lawful[Closure] {
   def apply[A](implicit closure: Closure[A]): Closure[A] = closure
 
   def make[A](f: (A, A) => A): Closure[A] =
-      (l, r) => f(l, r)
+    (l, r) => f(l, r)
 
   implicit val BooleanConjunctionClosure: Closure[And] =
     make[And]((l, r) => And(l && r))
