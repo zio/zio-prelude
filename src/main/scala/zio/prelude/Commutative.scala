@@ -22,9 +22,7 @@ object Commutative extends Lawful[CommutativeEqual] {
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 
   def make[A](f: (A, A) => A): Commutative[A] =
-    new Commutative[A] {
-      def combine(l: => A, r: => A): A = f(l, r)
-    }
+    (l, r) => f(l, r)
 
   implicit val BooleanConjunctionCommutative: Commutative[And] = Commutative.make((l, r) => And(l && r))
 
