@@ -32,7 +32,7 @@ import zio.test.laws._
 trait Contravariant[F[-_]] extends Invariant[F] {
 
   /**
-   * Lift a function from `A` to `B` to a function from `F[B]` to `F[A]`.
+   * Lift a function from `B` to `A` to a function from `F[A]` to `F[B]`.
    */
   def contramap[A, B](f: B => A): F[A] => F[B]
 
