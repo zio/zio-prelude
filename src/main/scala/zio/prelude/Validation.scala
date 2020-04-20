@@ -78,7 +78,7 @@ sealed trait Validation[+E, +A] { self =>
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
-   * a failure with all errors if either this `Validation` or the specififed
+   * a failure with all errors if either this `Validation` or the specified
    * `Validation` fail.
    */
   final def zipParLeft[E1 >: E, B](that: Validation[E1, B]): Validation[E1, A] =
@@ -86,7 +86,7 @@ sealed trait Validation[+E, +A] { self =>
 
   /**
    * A variant of `zipPar` that keeps only the right success value, but returns
-   * a failure with all errors if either this `Validation` or the specififed
+   * a failure with all errors if either this `Validation` or the specified
    * `Validation` fail.
    */
   final def zipParRight[E1 >: E, B](that: Validation[E1, B]): Validation[E1, B] =
