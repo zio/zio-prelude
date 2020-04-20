@@ -60,7 +60,7 @@ object Contravariant {
   implicit def Function1Contravariant[B]: Contravariant[({ type lambda[-x] = x => B })#lambda] =
     new Contravariant[({ type lambda[-x] = x => B })#lambda] {
       def contramap[A, C](function: C => A): (A => B) => (C => B) =
-        apply => a => apply(function(a))
+        apply => c => apply(function(c))
     }
 
   /**
@@ -69,7 +69,7 @@ object Contravariant {
   implicit def Function2Contravariant[B, C]: Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] {
       def contramap[A, D](function: D => A): ((A, B) => C) => ((D, B) => C) =
-        apply => (a, b) => apply(function(a), b)
+        apply => (d, b) => apply(function(d), b)
     }
 
   /**
@@ -78,7 +78,7 @@ object Contravariant {
   implicit def Function3Contravariant[B, C, D]: Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] {
       def contramap[A, E](function: E => A): ((A, B, C) => D) => ((E, B, C) => D) =
-        apply => (a, b, c) => apply(function(a), b, c)
+        apply => (e, b, c) => apply(function(e), b, c)
     }
 
   /**
@@ -87,7 +87,7 @@ object Contravariant {
   implicit def Function4Contravariant[B, C, D, E]: Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] {
       def contramap[A, F](function: F => A): ((A, B, C, D) => E) => ((F, B, C, D) => E) =
-        apply => (a, b, c, d) => apply(function(a), b, c, d)
+        apply => (f, b, c, d) => apply(function(f), b, c, d)
     }
 
   /**
@@ -97,7 +97,7 @@ object Contravariant {
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] {
       def contramap[A, G](function: G => A): ((A, B, C, D, E) => F) => ((G, B, C, D, E) => F) =
-        apply => (a, b, c, d, e) => apply(function(a), b, c, d, e)
+        apply => (g, b, c, d, e) => apply(function(g), b, c, d, e)
     }
 
   /**
@@ -107,7 +107,7 @@ object Contravariant {
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] {
       def contramap[A, H](function: H => A): ((A, B, C, D, E, F) => G) => ((H, B, C, D, E, F) => G) =
-        apply => (a, b, c, d, e, f) => apply(function(a), b, c, d, e, f)
+        apply => (h, b, c, d, e, f) => apply(function(h), b, c, d, e, f)
     }
 
   /**
@@ -117,7 +117,7 @@ object Contravariant {
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] {
       def contramap[A, I](function: I => A): ((A, B, C, D, E, F, G) => H) => ((I, B, C, D, E, F, G) => H) =
-        apply => (a, b, c, d, e, f, g) => apply(function(a), b, c, d, e, f, g)
+        apply => (i, b, c, d, e, f, g) => apply(function(i), b, c, d, e, f, g)
     }
 
   /**
@@ -127,7 +127,7 @@ object Contravariant {
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] {
       def contramap[A, J](function: J => A): ((A, B, C, D, E, F, G, H) => I) => ((J, B, C, D, E, F, G, H) => I) =
-        apply => (a, b, c, d, e, f, g, h) => apply(function(a), b, c, d, e, f, g, h)
+        apply => (j, b, c, d, e, f, g, h) => apply(function(j), b, c, d, e, f, g, h)
     }
 
   /**
@@ -137,7 +137,7 @@ object Contravariant {
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] {
       def contramap[A, K](function: K => A): ((A, B, C, D, E, F, G, H, I) => J) => ((K, B, C, D, E, F, G, H, I) => J) =
-        apply => (a, b, c, d, e, f, g, h, i) => apply(function(a), b, c, d, e, f, g, h, i)
+        apply => (k, b, c, d, e, f, g, h, i) => apply(function(k), b, c, d, e, f, g, h, i)
     }
 
   /**
@@ -149,7 +149,7 @@ object Contravariant {
       def contramap[A, L](
         function: L => A
       ): ((A, B, C, D, E, F, G, H, I, J) => K) => ((L, B, C, D, E, F, G, H, I, J) => K) =
-        apply => (a, b, c, d, e, f, g, h, i, j) => apply(function(a), b, c, d, e, f, g, h, i, j)
+        apply => (l, b, c, d, e, f, g, h, i, j) => apply(function(l), b, c, d, e, f, g, h, i, j)
     }
 
   /**
@@ -161,7 +161,7 @@ object Contravariant {
       def contramap[A, M](
         function: M => A
       ): ((A, B, C, D, E, F, G, H, I, J, K) => L) => ((M, B, C, D, E, F, G, H, I, J, K) => L) =
-        apply => (a, b, c, d, e, f, g, h, i, j, k) => apply(function(a), b, c, d, e, f, g, h, i, j, k)
+        apply => (m, b, c, d, e, f, g, h, i, j, k) => apply(function(m), b, c, d, e, f, g, h, i, j, k)
     }
 
   /**
@@ -173,7 +173,7 @@ object Contravariant {
       def contramap[A, N](
         function: N => A
       ): ((A, B, C, D, E, F, G, H, I, J, K, L) => M) => ((N, B, C, D, E, F, G, H, I, J, K, L) => M) =
-        apply => (a, b, c, d, e, f, g, h, i, j, k, l) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l)
+        apply => (n, b, c, d, e, f, g, h, i, j, k, l) => apply(function(n), b, c, d, e, f, g, h, i, j, k, l)
     }
 
   /**
@@ -185,7 +185,7 @@ object Contravariant {
       def contramap[A, O](
         function: O => A
       ): ((A, B, C, D, E, F, G, H, I, J, K, L, M) => N) => ((O, B, C, D, E, F, G, H, I, J, K, L, M) => N) =
-        apply => (a, b, c, d, e, f, g, h, i, j, k, l, m) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m)
+        apply => (o, b, c, d, e, f, g, h, i, j, k, l, m) => apply(function(o), b, c, d, e, f, g, h, i, j, k, l, m)
     }
 
   /**
@@ -197,7 +197,7 @@ object Contravariant {
       def contramap[A, P](
         function: P => A
       ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) => ((P, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) =
-        apply => (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n)
+        apply => (p, b, c, d, e, f, g, h, i, j, k, l, m, n) => apply(function(p), b, c, d, e, f, g, h, i, j, k, l, m, n)
     }
 
   /**
@@ -210,7 +210,7 @@ object Contravariant {
         function: Q => A
       ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) => ((Q, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) => apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+          (q, b, c, d, e, f, g, h, i, j, k, l, m, n, o) => apply(function(q), b, c, d, e, f, g, h, i, j, k, l, m, n, o)
     }
 
   /**
@@ -223,8 +223,8 @@ object Contravariant {
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q
       ) => ((R, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
-            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
+          (r, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
+            apply(function(r), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
     }
 
   /**
@@ -237,8 +237,8 @@ object Contravariant {
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R
       ) => ((S, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
-            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
+          (s, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
+            apply(function(s), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
     }
 
   /**
@@ -251,8 +251,8 @@ object Contravariant {
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S
       ) => ((T, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
-            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
+          (t, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
+            apply(function(t), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
     }
 
   /**
@@ -265,8 +265,8 @@ object Contravariant {
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T
       ) => ((U, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
-            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
+          (u, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
+            apply(function(u), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
     }
 
   /**
@@ -279,8 +279,8 @@ object Contravariant {
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U
       ) => ((V, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
-            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
+          (v, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
+            apply(function(v), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
     }
 
   /**
@@ -296,8 +296,8 @@ object Contravariant {
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V
       ) => ((W, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
-            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
+          (w, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
+            apply(function(w), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
     }
 
   /**
@@ -313,8 +313,8 @@ object Contravariant {
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W
       ) => ((X, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W) =
         apply =>
-          (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
-            apply(function(a), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
+          (x, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
+            apply(function(x), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
     }
 
   /**
