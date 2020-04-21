@@ -192,12 +192,30 @@ object Ord extends Lawful[Ord] {
       Equal.laws
 
   /**
-   * The contravariant instance for `Ord`.
+   * The `Both` instance for `Ord`.
+   */
+  implicit val OrdBoth: AssociativeF.Both[Ord] =
+    new AssociativeF.Both[Ord] {
+      def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
+   * The `Contravariant` instance for `Ord`.
    */
   implicit val OrdContravariant: Contravariant[Ord] =
     new Contravariant[Ord] {
       def contramap[A, B](f: B => A): Ord[A] => Ord[B] =
         _.contramap(f)
+    }
+
+  /**
+   * The `Either instance for `Ord`.
+   */
+  implicit val OrdEither: AssociativeF.Either[Ord] =
+    new AssociativeF.Either[Ord] {
+      def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
+        fa.either(fb)
     }
 
   /**

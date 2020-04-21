@@ -121,12 +121,30 @@ object Equal extends Lawful[Equal] {
     reflexiveLaw + symmetryLaw + transitivityLaw
 
   /**
+   * The `Both` instance for `Equal`.
+   */
+  implicit val EqualBoth: AssociativeF.Both[Equal] =
+    new AssociativeF.Both[Equal] {
+      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
    * The contravariant instance for `Equal`.
    */
   implicit val EqualContravariant: Contravariant[Equal] =
     new Contravariant[Equal] {
       def contramap[A, B](f: B => A): Equal[A] => Equal[B] =
         _.contramap(f)
+    }
+
+  /**
+   * The `Either instance for `Equal`.
+   */
+  implicit val EqualEither: AssociativeF.Either[Equal] =
+    new AssociativeF.Either[Equal] {
+      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
+        fa.either(fb)
     }
 
   /**

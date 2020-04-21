@@ -12,8 +12,11 @@ object ValidationSpec extends DefaultRunnableSpec {
   val genFValidation: GenF[Random with Sized, ({ type lambda[+x] = Validation[Int, x] })#lambda] =
     GenFs.validation(Gen.anyInt)
 
+  type IntValidation[+A] = Validation[Int, A]
+
   def spec = suite("ValidationSpec")(
     suite("laws")(
+      testM("both")(checkAllLaws(AssociativeF.Both)(genFValidation, Gen.anyInt)),
       testM("covariant")(checkAllLaws(Covariant)(genFValidation, Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genValidation)),
       testM("hash")(checkAllLaws(Hash)(genValidation)),

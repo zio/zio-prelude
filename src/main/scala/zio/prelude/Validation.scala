@@ -121,6 +121,15 @@ object Validation extends LowPriorityValidationImplicits {
   final case class Success[+A](value: A)                 extends Validation[Nothing, A]
 
   /**
+   * The `Both` instance for `Validation`.
+   */
+  implicit def ValidationBoth[E]: AssociativeF.Both[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new AssociativeF.Both[({ type lambda[x] = Validation[E, x] })#lambda] {
+      def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
+        fa.zipPar(fb)
+    }
+
+  /**
    * The `Covariant` instance for `Validation`.
    */
   implicit def ValidationCovariant[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =

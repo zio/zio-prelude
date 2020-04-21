@@ -355,6 +355,15 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Associative.make(_ ++ _)
 
   /**
+   * The `Both` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListBothF: AssociativeF.Both[NonEmptyList] =
+    new AssociativeF.Both[NonEmptyList] {
+      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
+        fa.zip(fb)
+    }
+
+  /**
    * The `Covariant` instance for `NonEmptyList`.
    */
   implicit val NonEmptyListCovariant: Covariant[NonEmptyList] =
