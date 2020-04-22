@@ -4,6 +4,7 @@ trait Invariant[F[_]] {
 
   def invmap[A, B](f: A <=> B): F[A] <=> F[B]
 
+
   def identityLaw1[A](fa: F[A])(implicit equal: Equal[F[A]]): Boolean =
     invmap(Equivalence.identity[A]).to(fa) === fa
 
