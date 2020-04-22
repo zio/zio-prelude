@@ -59,6 +59,15 @@ object Equivalence {
       case ((a, b), c) => (a, (b, c))
     })
 
+  def tupleFlip[A, B]: Equivalence[(A, B), (B, A)] =
+    Equivalence({
+      case (a, b) => (b, a)
+    }, {
+      case (b, a) => (a, b)
+    })
+
+  def tupleUnit[A]: Equivalence[(A, Unit), A] = Equivalence(_._1, a => (a, ()))
+
   /**
    * Constructs an equivalence between a right-associated nested either, and a
    * left-associated nested either.
@@ -75,4 +84,22 @@ object Equivalence {
         case Right(c)       => Right(Right(c))
       }
     )
+
+  def eitherFlip[A, B]: Equivalence[Either[A, B], Either[B, A]] =
+    Equivalence(
+      {
+        case Left(a)  => Right(a)
+        case Right(b) => Left(b)
+      }, {
+        case Right(a) => Left(a)
+        case Left(b)  => Right(b)
+      }
+    )
+
+  def eitherNothing[A]: Equivalence[Either[A, Nothing], A] =
+    Equivalence({
+      case Left(a)        => a
+      case Right(nothing) => nothing
+    }, a => Left(a))
+
 }

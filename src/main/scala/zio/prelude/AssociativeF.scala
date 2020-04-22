@@ -12,6 +12,8 @@ import zio.test.laws._
  * of them or either of them.
  */
 object AssociativeF {
+  // AssociativeF.Both    => AssociativeBothF
+  // AssociativeF.Either  => AssociativeEitherF
 
   /**
    * An associative binary operator that combines two values of types `F[A]`

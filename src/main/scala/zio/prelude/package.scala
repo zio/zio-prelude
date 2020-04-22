@@ -29,7 +29,8 @@ package object prelude
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
 
-    type Apply[F[+_]] = Covariant[F] with AssociativeF.Both[F]
+    type Apply[F[+_]]       = Covariant[F] with AssociativeF.Both[F]
+    type Applicative[F[+_]] = Covariant[F] with AssociativeF.Both[F] with IdentityF.Both[F]
   }
 
   /**
