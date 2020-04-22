@@ -81,6 +81,12 @@ object Invariant {
         )
     }
 
+  implicit val OptionInvariant: Invariant[Option] =
+    new Invariant[Option] {
+      def invmap[A, B](f: A <=> B): Option[A] <=> Option[B] =
+        Equivalence(_.map(f.to), _.map(f.from))
+    }
+
   implicit val SetInvariant: Invariant[Set] =
     new Invariant[Set] {
       def invmap[A, B](f: A <=> B): Set[A] <=> Set[B] =
