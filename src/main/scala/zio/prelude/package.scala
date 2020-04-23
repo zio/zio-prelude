@@ -4,8 +4,11 @@ import zio.test.{ assert, TestResult }
 
 package object prelude
     extends Assertions
-    with AssociativeFSyntax
+    with AssociativeBothFSyntax
+    with AssociativeEitherFSyntax
     with ClosureSyntax
+    with CommutativeBothFSyntax
+    with CommutativeEitherFSyntax
     with CovariantSyntax
     with ContravariantSyntax
     with DebugSyntax
@@ -29,8 +32,8 @@ package object prelude
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
 
-    type Apply[F[+_]]       = Covariant[F] with AssociativeF.Both[F]
-    type Applicative[F[+_]] = Covariant[F] with AssociativeF.Both[F] with IdentityF.Both[F]
+    type Apply[F[+_]]       = Covariant[F] with AssociativeBothF[F]
+    type Applicative[F[+_]] = Covariant[F] with AssociativeBothF[F] with IdentityBothF[F]
   }
 
   /**

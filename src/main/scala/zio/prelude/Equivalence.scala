@@ -66,7 +66,8 @@ object Equivalence {
       case (b, a) => (a, b)
     })
 
-  def tupleUnit[A]: Equivalence[(A, Unit), A] = Equivalence(_._1, a => (a, ()))
+  def tupleAny[A]: Equivalence[(A, Any), A] =
+    Equivalence(_._1, a => (a, ()))
 
   /**
    * Constructs an equivalence between a right-associated nested either, and a
