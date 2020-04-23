@@ -192,12 +192,21 @@ object Ord extends Lawful[Ord] {
       Equal.laws
 
   /**
-   * The `Both` instance for `Ord`.
+   * The `AssociativeBothF` instance for `Ord`.
    */
-  implicit val OrdBoth: AssociativeF.Both[Ord] =
-    new AssociativeF.Both[Ord] {
+  implicit val OrdAssociativeBothF: AssociativeBothF[Ord] =
+    new AssociativeBothF[Ord] {
       def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
         fa.both(fb)
+    }
+
+  /**
+   * The `AssociativeEitherF` instance for `Ord`.
+   */
+  implicit val OrdAssociativeEitherF: AssociativeEitherF[Ord] =
+    new AssociativeEitherF[Ord] {
+      def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
+        fa.either(fb)
     }
 
   /**
@@ -210,12 +219,25 @@ object Ord extends Lawful[Ord] {
     }
 
   /**
-   * The `Either instance for `Ord`.
+   * The `IdentityBothF` instance for `Ord`.
    */
-  implicit val OrdEither: AssociativeF.Either[Ord] =
-    new AssociativeF.Either[Ord] {
+  implicit val OrdIdentityBothF: IdentityBothF[Ord] =
+    new IdentityBothF[Ord] {
+      def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
+        fa.both(fb)
+      val identity: Ord[Any] =
+        AnyOrd
+    }
+
+  /**
+   * The `IdentityEitherF` instance for `Ord`.
+   */
+  implicit val OrdIdentityEitherF: IdentityEitherF[Ord] =
+    new IdentityEitherF[Ord] {
       def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
         fa.either(fb)
+      val identity: Ord[Nothing] =
+        NothingOrd
     }
 
   /**
@@ -237,6 +259,14 @@ object Ord extends Lawful[Ord] {
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
     make((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)))
+
+  /**
+   * Ordering for `Any` values. Note that since values of type `Any` contain
+   * no information, all values of type `Any` can be treated as equal to each
+   * other.
+   */
+  val AnyOrd: Ord[Any] =
+    make((_, _) => Ordering.Equals)
 
   /**
    * Ordering for `Boolean` values.

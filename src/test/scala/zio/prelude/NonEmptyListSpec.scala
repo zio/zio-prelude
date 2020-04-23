@@ -36,7 +36,8 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
   def spec = suite("NonEmptyListSpec")(
     suite("laws")(
       testM("associative")(checkAllLaws(Associative)(genNonEmptyList)),
-      testM("both")(checkAllLaws(AssociativeF.Both)(GenFs.nonEmptyList, Gen.anyInt)),
+      testM("associativeBothF")(checkAllLaws(AssociativeBothF)(GenFs.nonEmptyList, Gen.anyInt)),
+      testM("commutativeBothF")(checkAllLaws(CommutativeBothF)(GenFs.nonEmptyList, Gen.anyInt)),
       testM("covariant")(checkAllLaws(Covariant)(GenFs.nonEmptyList, Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genNonEmptyList)),
       testM("hash")(checkAllLaws(Hash)(genNonEmptyList)),

@@ -35,6 +35,17 @@ sealed trait Validation[+E, +A] { self =>
     zipPar(that)
 
   /**
+   * Returns whether this `Validation` and the specified `Validation` are equal
+   * to each other.
+   */
+  override final def equals(that: Any): Boolean =
+    (self, that) match {
+      case (Failure(es), Failure(e1s)) => es.toList.toSet == e1s.toList.toSet
+      case (Success(a), Success(a1))   => a == a1
+      case _                           => false
+    }
+
+  /**
    * Folds over the error and success values of this `Validation`.
    */
   final def fold[B](failure: NonEmptyChunk[E] => B, success: A => B): B =
@@ -121,10 +132,19 @@ object Validation extends LowPriorityValidationImplicits {
   final case class Success[+A](value: A)                 extends Validation[Nothing, A]
 
   /**
-   * The `Both` instance for `Validation`.
+   * The `AssociativeBothF` instance for `Validation`.
    */
-  implicit def ValidationBoth[E]: AssociativeF.Both[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new AssociativeF.Both[({ type lambda[x] = Validation[E, x] })#lambda] {
+  implicit def ValidationAssociativeBothF[E]: AssociativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new AssociativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
+      def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
+        fa.zipPar(fb)
+    }
+
+  /**
+   * The `CommutativeBothF` instance for `Validation`.
+   */
+  implicit def ValidationCommutativeBothF[E]: CommutativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new CommutativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
     }
@@ -152,8 +172,12 @@ object Validation extends LowPriorityValidationImplicits {
    * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an
    * `Equal[A]`.
    */
-  implicit def ValidationEqual[E: Equal, A: Equal]: Equal[Validation[E, A]] =
-    Equal[NonEmptyChunk[E]].eitherWith(Equal[A])(_.toEither)
+  implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
+    Equal.make {
+      case (Failure(es), Failure(e1s)) => es.toList.toSet === e1s.toList.toSet
+      case (Success(a), Success(a1))   => a === a1
+      case _                           => false
+    }
 
   /**
    * The `EqualF` instance for `Validation`.
@@ -162,6 +186,17 @@ object Validation extends LowPriorityValidationImplicits {
     new EqualF[({ type lambda[+x] = Validation[E, x] })#lambda] {
       def deriveEqual[A: Equal]: Equal[Validation[E, A]] =
         ValidationEqual
+    }
+
+  /**
+   * The `IdentityBothF` instance for `Validation`.
+   */
+  implicit def ValidationIdentityBothF[E]: IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
+      def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
+        fa.zipPar(fb)
+      val identity: Validation[Nothing, Any] =
+        Validation.unit
     }
 
   /**
@@ -225,12 +260,6 @@ object Validation extends LowPriorityValidationImplicits {
     value.fold(fail, succeed)
 
   /**
-   * Constructs a `Validation` that succeeds with the specified value.
-   */
-  def succeed[A](value: A): Validation[Nothing, A] =
-    Success(value)
-
-  /**
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
@@ -254,6 +283,18 @@ object Validation extends LowPriorityValidationImplicits {
     f: (A, B, C, D) => F
   ): Validation[E, F] =
     (a <&> b <&> c <&> d).map { case (((a, b), c), d) => f(a, b, c, d) }
+
+  /**
+   * Constructs a `Validation` that succeeds with the specified value.
+   */
+  def succeed[A](value: A): Validation[Nothing, A] =
+    Success(value)
+
+  /**
+   * The `Validation` that succeeds with the `Unit` value.
+   */
+  val unit: Validation[Nothing, Unit] =
+    succeed(())
 }
 
 trait LowPriorityValidationImplicits {
