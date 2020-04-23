@@ -76,3 +76,49 @@ object IdentityBothF extends LawfulF.Invariant[EqualFIdentityBothFInvariant, Equ
         Some(())
     }
 }
+
+trait IdentityBothFSyntax {
+
+  /**
+   * Provides infix syntax for identity operations for invariant types.
+   */
+  implicit class IdentityBothFOps[F[_], A](fa: => F[A]) {
+
+    /**
+     * Combines two values of types `F[A]` and `F[B]` to produce an
+     * `F[(A, B)]`.
+     */
+    def zipIdentity[B](fb: => F[B])(implicit both: IdentityBothF[F]): F[(A, B)] =
+      both.both(fa, fb)
+  }
+
+  /**
+   * Provides infix syntax for identity operations for covariant types.
+   */
+  implicit class IdentityBothFCovariantOps[F[+_], A](fa: => F[A]) {
+
+    /**
+     * Combines two values of types `F[A]` and `F[B]` to produce an
+     * `F[(A, B)]` and then maps the result with the specified function.
+     */
+    def zipWithIdentity[B, C](
+      fb: => F[B]
+    )(f: (A, B) => C)(implicit both: IdentityBothF[F], covariant: Covariant[F]): F[C] =
+      both.both(fa, fb).map(f.tupled)
+  }
+
+  /**
+   * Provides infix syntax for identity operations for contravariant types.
+   */
+  implicit class IdentityBothFContravariantOps[F[-_], A](fa: => F[A]) {
+
+    /**
+     * Combines two values of types `F[A]` and `F[B]` to produce an
+     * `F[(A, B)]` and then contramaps the result with the specified function.
+     */
+    def bothWithIdentity[B, C](
+      fb: => F[B]
+    )(f: C => (A, B))(implicit both: IdentityBothF[F], contravariant: Contravariant[F]): F[C] =
+      both.both(fa, fb).contramap(f)
+  }
+}
