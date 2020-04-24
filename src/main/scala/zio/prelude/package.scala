@@ -16,6 +16,8 @@ package object prelude
     with HashSyntax
     with IdExports
     with IdentitySyntax
+    with IdentityBothFSyntax
+    with IdentityEitherFSyntax
     with NewtypeExports
     with NewtypeFExports
     with OrdSyntax {
