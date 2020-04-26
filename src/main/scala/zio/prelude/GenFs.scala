@@ -5,7 +5,7 @@ import zio.test._
 import zio.test.laws.GenF
 
 /**
- * Provides generators for data types from _ZIO Prelude_.
+ * Provides higher kinded generators.
  */
 object GenFs {
 
@@ -13,6 +13,12 @@ object GenFs {
     new GenF[Random with Sized, NonEmptyList] {
       def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, NonEmptyList[A]] =
         Gens.nonEmptyListOf(gen)
+    }
+
+  val option: GenF[Random, Option] =
+    new GenF[Random, Option] {
+      def apply[R1 <: Random, A](gen: Gen[R1, A]): Gen[R1, Option[A]] =
+        Gen.option(gen)
     }
 
   /**

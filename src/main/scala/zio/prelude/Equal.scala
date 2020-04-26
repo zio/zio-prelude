@@ -121,12 +121,70 @@ object Equal extends Lawful[Equal] {
     reflexiveLaw + symmetryLaw + transitivityLaw
 
   /**
-   * The contravariant instance for `Equal`.
+   * The `AssociativeBothF` instance for `Equal`.
+   */
+  implicit val EqualAssociativeBothF: AssociativeBothF[Equal] =
+    new AssociativeBothF[Equal] {
+      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
+   * The `AssociativeEitherF` instance for `Equal`.
+   */
+  implicit val EqualAssociativeEitherF: AssociativeEitherF[Equal] =
+    new AssociativeEitherF[Equal] {
+      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
+        fa.either(fb)
+    }
+
+  /**
+   * The `CommutativeBothF` instance for `Equal`.
+   */
+  implicit val EqualCommutativeBothF: CommutativeBothF[Equal] =
+    new CommutativeBothF[Equal] {
+      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
+   * The `CommutativeEitherF` instance for `Equal`.
+   */
+  implicit val EqualCommutativeEitherF: CommutativeEitherF[Equal] =
+    new CommutativeEitherF[Equal] {
+      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
+        fa.either(fb)
+    }
+
+  /**
+   * The `Contravariant` instance for `Equal`.
    */
   implicit val EqualContravariant: Contravariant[Equal] =
     new Contravariant[Equal] {
       def contramap[A, B](f: B => A): Equal[A] => Equal[B] =
         _.contramap(f)
+    }
+
+  /**
+   * The `IdentityBothF` instance for `Equal`.
+   */
+  implicit val EqualIdentityBothF: IdentityBothF[Equal] =
+    new IdentityBothF[Equal] {
+      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
+      val identity: Equal[Any] =
+        AnyEqual
+    }
+
+  /**
+   * The `IdentityEitherF` instance for `Equal`.
+   */
+  implicit val EqualIdentityEitherF: IdentityEitherF[Equal] =
+    new IdentityEitherF[Equal] {
+      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
+        fa.either(fb)
+      val identity: Equal[Nothing] =
+        NothingEqual
     }
 
   /**
@@ -149,6 +207,14 @@ object Equal extends Lawful[Equal] {
    */
   def default[A]: Equal[A] =
     make(_ == _)
+
+  /**
+   * Equality for `Any` values. Note that since values of type `Any` contain
+   * no information, all values of type `Any` can be treated as equal to each
+   * other.
+   */
+  val AnyEqual: Equal[Any] =
+    make((_, _) => true)
 
   /**
    * Equality for `Boolean` values.
