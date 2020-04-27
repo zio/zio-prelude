@@ -360,7 +360,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
   implicit val NonEmptyListAssociativeBothF: AssociativeBothF[NonEmptyList] =
     new AssociativeBothF[NonEmptyList] {
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
-        fa.zip(fb)
+        fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
@@ -400,6 +400,17 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     new EqualF[NonEmptyList] {
       def deriveEqual[A: Equal]: Equal[NonEmptyList[A]] =
         NonEmptyListEqual
+    }
+
+  /**
+   * The `IdentityBothF` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListIdentityBothF: IdentityBothF[NonEmptyList] =
+    new IdentityBothF[NonEmptyList] {
+      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
+        fa.flatMap(a => fb.map(b => (a, b)))
+      val identity: NonEmptyList[Any] =
+        single(())
     }
 
   /**
