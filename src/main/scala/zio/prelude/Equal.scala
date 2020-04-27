@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
+import zio.Chunk
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -10,19 +11,25 @@ import zio.test.laws.{ Lawful, Laws }
  * compared for equality.
  */
 @implicitNotFound("No implicit Equal defined for ${A}.")
-sealed trait Equal[-A] { self =>
+trait Equal[-A] { self =>
 
   /**
    * Returns whether two values of type `A` are equal.
    */
-  def equal(l: A, r: A): Boolean
+  final def equal(l: A, r: A): Boolean =
+    Equal.refEq(l, r) || checkEqual(l, r)
+
+  /**
+   * Returns whether two values of type `A` are equal.
+   */
+  protected def checkEqual(l: A, r: A): Boolean
 
   /**
    * Constructs an `Equal[(A, B)]` given an `Equal[A]` and `Equal[B]` by first
    * comparing the `A` values for equality and then comparing the `B` values
    * for equality, if necessary.
    */
-  final def both[B](that: Equal[B]): Equal[(A, B)] =
+  final def both[B](that: => Equal[B]): Equal[(A, B)] =
     bothWith(that)(identity)
 
   /**
@@ -31,8 +38,8 @@ sealed trait Equal[-A] { self =>
    * will convert each `C` value into an `(A, B)`, compare the `A` values for
    * equality, and then compare the `B` values for equality if necessary.
    */
-  final def bothWith[B, C](that: Equal[B])(f: C => (A, B)): Equal[C] =
-    Equal { (c1, c2) =>
+  final def bothWith[B, C](that: => Equal[B])(f: C => (A, B)): Equal[C] =
+    Equal.make { (c1, c2) =>
       (f(c1), f(c2)) match {
         case ((a1, b1), (a2, b2)) => self.equal(a1, a2) && that.equal(b1, b2)
       }
@@ -43,15 +50,15 @@ sealed trait Equal[-A] { self =>
    * transform a `B` value into an `A` value. The instance will convert each
    * `B` value into an `A` and the compare the `A` values for equality.
    */
-  final def contramap[B](f: B => A): Equal[B] =
-    Equal((b1, b2) => self.equal(f(b1), f(b2)))
+  def contramap[B](f: B => A): Equal[B] =
+    Equal.make((b1, b2) => equal(f(b1), f(b2)))
 
   /**
    * Constructs an `Equal[Either[A, B]]` given an `Equal[A]` and an
    * `Equal[B]`. The instance will compare the `Either[A, B]` values and if
    * both are `Right` or `Left` compare them for equality.
    */
-  final def either[B](that: Equal[B]): Equal[Either[A, B]] =
+  final def either[B](that: => Equal[B]): Equal[Either[A, B]] =
     eitherWith(that)(identity)
 
   /**
@@ -60,8 +67,8 @@ sealed trait Equal[-A] { self =>
    * instance will convert each `C` value into an `Either[A, B]` and then
    * if both are `Right` or `Left` compare them for equality.
    */
-  final def eitherWith[B, C](that: Equal[B])(f: C => Either[A, B]): Equal[C] =
-    Equal { (c1, c2) =>
+  final def eitherWith[B, C](that: => Equal[B])(f: C => Either[A, B]): Equal[C] =
+    Equal.make { (c1, c2) =>
       (f(c1), f(c2)) match {
         case (Left(a1), Left(a2))   => self.equal(a1, a2)
         case (Right(b1), Right(b2)) => that.equal(b1, b2)
@@ -72,62 +79,172 @@ sealed trait Equal[-A] { self =>
   /**
    * Returns whether two values of type `A` are not equal.
    */
-  final def notEqual(l: A, r: A): Boolean = !equal(l, r)
+  final def notEqual(l: A, r: A): Boolean =
+    !equal(l, r)
 }
 
 object Equal extends Lawful[Equal] {
-  final val reflexiveLaw = new Laws.Law1[Equal]("reflexiveLaw") {
-    def apply[A: Equal](a1: A): TestResult =
-      a1 <-> a1
-  }
 
-  final val symmetryLaw = new Laws.Law2[Equal]("symmetryLaw") {
-    def apply[A: Equal](a1: A, a2: A): TestResult =
-      (a1 <-> a2) ==> (a2 <-> a1)
-  }
+  /**
+   * For all values `a1`, `a1` is equal to `a1`.
+   */
+  val reflexiveLaw: Laws.Law1[Equal] =
+    new Laws.Law1[Equal]("reflexiveLaw") {
+      def apply[A: Equal](a1: A): TestResult =
+        a1 <-> a1
+    }
 
-  final val transitivityLaw = new Laws.Law3[Equal]("transitivityLaw") {
-    def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
-      ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
-  }
+  /**
+   * For all values `a1` and `a2`, if `a1` is equal to `a2` then `a2` is equal
+   * to `a1`.
+   */
+  val symmetryLaw: Laws.Law2[Equal] =
+    new Laws.Law2[Equal]("symmetryLaw") {
+      def apply[A: Equal](a1: A, a2: A): TestResult =
+        (a1 <-> a2) ==> (a2 <-> a1)
+    }
 
-  final val laws = reflexiveLaw + symmetryLaw + transitivityLaw
+  /**
+   * For all values `a1`, `a2`, and `a3`, if `a1` is equal to `a2` and `a2` is
+   * equal `a3`, then `a1` is equal to `a3`.
+   */
+  val transitivityLaw: Laws.Law3[Equal] =
+    new Laws.Law3[Equal]("transitivityLaw") {
+      def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
+        ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
+    }
+
+  /**
+   * The set of all laws that instances of `Equal` must satisfy.
+   */
+  val laws: Laws[Equal] =
+    reflexiveLaw + symmetryLaw + transitivityLaw
+
+  /**
+   * The `AssociativeBothF` instance for `Equal`.
+   */
+  implicit val EqualAssociativeBothF: AssociativeBothF[Equal] =
+    new AssociativeBothF[Equal] {
+      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
+   * The `AssociativeEitherF` instance for `Equal`.
+   */
+  implicit val EqualAssociativeEitherF: AssociativeEitherF[Equal] =
+    new AssociativeEitherF[Equal] {
+      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
+        fa.either(fb)
+    }
+
+  /**
+   * The `CommutativeBothF` instance for `Equal`.
+   */
+  implicit val EqualCommutativeBothF: CommutativeBothF[Equal] =
+    new CommutativeBothF[Equal] {
+      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
+   * The `CommutativeEitherF` instance for `Equal`.
+   */
+  implicit val EqualCommutativeEitherF: CommutativeEitherF[Equal] =
+    new CommutativeEitherF[Equal] {
+      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
+        fa.either(fb)
+    }
+
+  /**
+   * The `Contravariant` instance for `Equal`.
+   */
+  implicit val EqualContravariant: Contravariant[Equal] =
+    new Contravariant[Equal] {
+      def contramap[A, B](f: B => A): Equal[A] => Equal[B] =
+        _.contramap(f)
+    }
+
+  /**
+   * The `IdentityBothF` instance for `Equal`.
+   */
+  implicit val EqualIdentityBothF: IdentityBothF[Equal] =
+    new IdentityBothF[Equal] {
+      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
+      val identity: Equal[Any] =
+        AnyEqual
+    }
+
+  /**
+   * The `IdentityEitherF` instance for `Equal`.
+   */
+  implicit val EqualIdentityEitherF: IdentityEitherF[Equal] =
+    new IdentityEitherF[Equal] {
+      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
+        fa.either(fb)
+      val identity: Equal[Nothing] =
+        NothingEqual
+    }
 
   /**
    * Summons an implicit `Equal[A]`.
    */
-  def apply[A](implicit equal: Equal[A]): Equal[A] = equal
+  def apply[A](implicit equal: Equal[A]): Equal[A] =
+    equal
 
   /**
    * Constructs an `Equal[A]` from a function. The instance will be optimized
    * to first compare the values for reference equality and then compare the
    * values for value equality.
    */
-  def apply[A](eq0: (A, A) => Boolean): Equal[A] =
-    new Equal[A] {
-      def equal(l: A, r: A): Boolean = refEq(l, r) || eq0(l, r)
-    }
+  def make[A](equal: (A, A) => Boolean): Equal[A] =
+    (l, r) => refEq(l, r) || equal(l, r)
 
   /**
    * Constructs an `Equal[A]` that uses the default notion of equality
    * embodied in the implementation of `equals` for values of type `A`.
    */
-  def default[A]: Equal[A] = Equal((l: A, r: A) => l == r)
+  def default[A]: Equal[A] =
+    make(_ == _)
+
+  /**
+   * Equality for `Any` values. Note that since values of type `Any` contain
+   * no information, all values of type `Any` can be treated as equal to each
+   * other.
+   */
+  val AnyEqual: Equal[Any] =
+    make((_, _) => true)
 
   /**
    * Equality for `Boolean` values.
    */
-  implicit val BooleanEqual: Equal[Boolean] = default
+  implicit val BooleanEqual: Equal[Boolean] =
+    default
 
   /**
    * Equality for `Byte` values.
    */
-  implicit val ByteEqual: Equal[Byte] = default
+  implicit val ByteEqual: Equal[Byte] =
+    default
+
+  /**
+   * Equality for `Short` values.
+   */
+  implicit val ShortEqual: Equal[Short] =
+    default
 
   /**
    * Equality for `Char` values.
    */
-  implicit val CharEqual: Equal[Char] = default
+  implicit val CharEqual: Equal[Char] =
+    default
+
+  /**
+   * Derives an `Equal[Chunk[A]]` given an `Equal[A]`.
+   */
+  implicit def ChunkEqual[A: Equal]: Equal[Chunk[A]] =
+    make(_.corresponds(_)(_ === _))
 
   /**
    * Equality for `Double` values. Note that to honor the contract that a
@@ -135,7 +252,7 @@ object Equal extends Lawful[Equal] {
    * return `true`, which is different from the behavior of `Double#equals`.
    */
   implicit val DoubleEqual: Equal[Double] =
-    Equal { (n1, n2) =>
+    make { (n1, n2) =>
       if (n1.isNaN && n2.isNaN) true
       else n1 == n2
     }
@@ -147,12 +264,18 @@ object Equal extends Lawful[Equal] {
     Equal[A] either Equal[B]
 
   /**
+   * Derives an `Equal[F[A]]` given an `EqualF[F]` and an `Equal[A]`.
+   */
+  implicit def EqualFEqual[F[_]: EqualF, A: Equal]: Equal[F[A]] =
+    EqualF[F].deriveEqual(Equal[A])
+
+  /**
    * Equality for `Float` values. Note that to honor the contract that a
    * value is always equal to itself, comparing `Float.NaN` with itself will
    * return `true`, which is different from the behavior of `Float#equals`.
    */
   implicit val FloatEqual: Equal[Float] =
-    Equal { (n1, n2) =>
+    make { (n1, n2) =>
       if (n1.isNaN && n2.isNaN) true
       else n1 == n2
     }
@@ -160,25 +283,27 @@ object Equal extends Lawful[Equal] {
   /**
    * Equality for `Int` values.
    */
-  implicit val IntEqual: Equal[Int] = default
+  implicit val IntEqual: Equal[Int] =
+    default
 
   /**
    * Derives an `Equal[List[A]]` given an `Equal[A]`.
    */
   implicit def ListEqual[A: Equal]: Equal[List[A]] =
-    Equal(_.corresponds(_)(Equal[A].equal))
+    make(_.corresponds(_)(_ === _))
 
   /**
    * Equality for `Long` values.
    */
-  implicit val LongEqual: Equal[Long] = default
+  implicit val LongEqual: Equal[Long] =
+    default
 
   /**
    * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations
    * of Scala's `Map`, this uses object equality and hash code on the keys.
    */
   implicit def MapEqual[A, B: Equal]: Equal[Map[A, B]] =
-    Equal { (map1, map2) =>
+    make { (map1, map2) =>
       map1.size == map2.size &&
       map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
     }
@@ -188,30 +313,31 @@ object Equal extends Lawful[Equal] {
    * type `Nothing` the `equals` method of this instance can never be called
    * but it can be useful in deriving instances for more complex types.
    */
-  implicit val NothingEqual: Equal[Nothing] = default
+  implicit val NothingEqual: Equal[Nothing] =
+    default
 
   /**
    * Derives an `Equal[Option[A]]` given an `Equal[A]`.
    */
   implicit def OptionEqual[A: Equal]: Equal[Option[A]] =
-    Equal { (o1, o2) =>
-      (o1, o2) match {
-        case (None, None)         => true
-        case (Some(a1), Some(a2)) => Equal[A].equal(a1, a2)
-        case _                    => false
-      }
+    make {
+      case (None, None)         => true
+      case (Some(a1), Some(a2)) => a1 === a2
+      case _                    => false
     }
 
   /**
    * Equality for `Set[A]` values. Due to the limitations of Scala's `Set`,
    * this uses object equality and hash code on the elements.
    */
-  implicit def SetEqual[A]: Equal[Set[A]] = default
+  implicit def SetEqual[A]: Equal[Set[A]] =
+    default
 
   /**
    * Equality for `String` values.
    */
-  implicit val StringEqual: Equal[String] = default
+  implicit val StringEqual: Equal[String] =
+    default
 
   /**
    * Derives an `Equal` for a product type given an `Equal` for each element of
@@ -225,10 +351,8 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple3Equal[A: Equal, B: Equal, C: Equal]: Equal[(A, B, C)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1), (a2, b2, c2)) => a1 === a2 && b1 === b2 && c1 === c2
-      }
+    make {
+      case ((a1, b1, c1), (a2, b2, c2)) => a1 === a2 && b1 === b2 && c1 === c2
     }
 
   /**
@@ -236,10 +360,8 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple4Equal[A: Equal, B: Equal, C: Equal, D: Equal]: Equal[(A, B, C, D)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2
-      }
+    make {
+      case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2
     }
 
   /**
@@ -247,11 +369,8 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple5Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal]: Equal[(A, B, C, D, E)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) => a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2
     }
 
   /**
@@ -259,11 +378,9 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple6Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal]: Equal[(A, B, C, D, E, F)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2
     }
 
   /**
@@ -272,11 +389,9 @@ object Equal extends Lawful[Equal] {
    */
   implicit def Tuple7Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal, G: Equal]
     : Equal[(A, B, C, D, E, F, G)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2
     }
 
   /**
@@ -285,11 +400,9 @@ object Equal extends Lawful[Equal] {
    */
   implicit def Tuple8Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal, G: Equal, H: Equal]
     : Equal[(A, B, C, D, E, F, G, H)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2
     }
 
   /**
@@ -298,11 +411,9 @@ object Equal extends Lawful[Equal] {
    */
   implicit def Tuple9Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal, G: Equal, H: Equal, I: Equal]
     : Equal[(A, B, C, D, E, F, G, H, I)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2
     }
 
   /**
@@ -321,11 +432,9 @@ object Equal extends Lawful[Equal] {
     I: Equal,
     J: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2
     }
 
   /**
@@ -345,11 +454,9 @@ object Equal extends Lawful[Equal] {
     J: Equal,
     K: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2
     }
 
   /**
@@ -370,11 +477,9 @@ object Equal extends Lawful[Equal] {
     K: Equal,
     L: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2
     }
 
   /**
@@ -396,14 +501,12 @@ object Equal extends Lawful[Equal] {
     L: Equal,
     M: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2
     }
 
   /**
@@ -426,14 +529,12 @@ object Equal extends Lawful[Equal] {
     M: Equal,
     N: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2
     }
 
   /**
@@ -457,14 +558,12 @@ object Equal extends Lawful[Equal] {
     N: Equal,
     O: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2
     }
 
   /**
@@ -489,14 +588,12 @@ object Equal extends Lawful[Equal] {
     O: Equal,
     P: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2
     }
 
   /**
@@ -522,14 +619,12 @@ object Equal extends Lawful[Equal] {
     P: Equal,
     Q: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2
     }
 
   /**
@@ -556,14 +651,12 @@ object Equal extends Lawful[Equal] {
     Q: Equal,
     R: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2
     }
 
   /**
@@ -591,14 +684,12 @@ object Equal extends Lawful[Equal] {
     R: Equal,
     S: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2
     }
 
   /**
@@ -627,14 +718,12 @@ object Equal extends Lawful[Equal] {
     S: Equal,
     T: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2
     }
 
   /**
@@ -664,14 +753,12 @@ object Equal extends Lawful[Equal] {
     T: Equal,
     U: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2
     }
 
   /**
@@ -702,33 +789,26 @@ object Equal extends Lawful[Equal] {
     U: Equal,
     V: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
-    Equal { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2 && v1 === v2
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
+          ) =>
+        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2 && v1 === v2
     }
 
   /**
    * Equality for `Unit` values. Since there is only one `Unit` value all
    * equality comparisons will always be true.
    */
-  implicit val UnitEqual: Equal[Unit] = Equal((_, _) => true)
+  implicit val UnitEqual: Equal[Unit] =
+    make((_, _) => true)
 
   /**
    * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
    */
   implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
-    Equal(_.corresponds(_)(Equal[A].equal))
-
-  /**
-   * Derives an `Equal[A]` given an `Ord[A]`.
-   */
-  implicit def OrdDerivesEqual[A](implicit ord: Ord[A]): Equal[A] =
-    Equal((l, r) => ord.compare(l, r) eq Ordering.Equals)
+    make(_.corresponds(_)(_ === _))
 
   /**
    * Returns whether two values refer to the same location in memory.
@@ -742,16 +822,18 @@ trait EqualSyntax {
   /**
    * Provides infix syntax for comparing two values for equality.
    */
-  implicit class EqualSyntax[A](l: A) {
+  implicit class EqualOps[A](l: A) {
 
     /**
      * Returns whether this value and the specified value are equal.
      */
-    def ===(r: A)(implicit equal: Equal[A]): Boolean = equal.equal(l, r)
+    def ===[A1 >: A](r: A1)(implicit equal: Equal[A1]): Boolean =
+      equal.equal(l, r)
 
     /**
      * Returns whether this value and the specified value are not equal.
      */
-    def !==(r: A)(implicit equal: Equal[A]): Boolean = equal.notEqual(l, r)
+    def !==[A1 >: A](r: A1)(implicit equal: Equal[A1]): Boolean =
+      equal.notEqual(l, r)
   }
 }

@@ -1,37 +1,58 @@
 package zio
 
-import zio.test.{ assert, Assertion, TestResult }
-import zio.test.Assertion.{ isFalse, isTrue }
+import zio.test.{ assert, TestResult }
 
 package object prelude
-    extends DebugSyntax
-    with EqualSyntax
-    with OrdSyntax
-    with HashSyntax
+    extends Assertions
+    with AssociativeBothFSyntax
+    with AssociativeEitherFSyntax
     with ClosureSyntax
-    with NewtypeExports {
+    with CommutativeBothFSyntax
+    with CommutativeEitherFSyntax
+    with CovariantSyntax
+    with ContravariantSyntax
+    with DebugSyntax
+    with EqualSyntax
+    with HashSyntax
+    with IdExports
+    with IdentitySyntax
+    with IdentityBothFSyntax
+    with IdentityEitherFSyntax
+    with NewtypeExports
+    with NewtypeFExports
+    with OrdSyntax {
 
-  /**
-   * Makes a new assertion that requires a value equal the specified value.
-   */
-  def equalTo[A: Equal](expected: A): Assertion[A] =
-    Assertion.assertion("equalTo")(Assertion.Render.param(expected))(_ === expected)
+  type <=>[A, B] = Equivalence[A, B]
 
-  /**
-   * Provides implicit syntax for asserting that two values of type `A` are
-   * equal to each other.
-   */
-  implicit class AssertSyntax[A](private val self: A) extends AnyVal {
-    def <->(that: A)(implicit eq: Equal[A]): TestResult =
-      assert(self)(equalTo(that))
+  object classic {
+    type Semigroup[A]            = Associative[A]
+    type CommutativeSemigroup[A] = Semigroup[A] with Commutative[A]
+    type Monoid[A]               = Semigroup[A] with Identity[A]
+    type CommutativeMonoid[A]    = Monoid[A] with Commutative[A]
+
+    type Functor[F[+_]]       = Covariant[F]
+    type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
+    type Invariant[F[_]]      = zio.prelude.Invariant[F]
+
+    type Apply[F[+_]]       = Covariant[F] with AssociativeBothF[F]
+    type Applicative[F[+_]] = Covariant[F] with AssociativeBothF[F] with IdentityBothF[F]
   }
 
-  implicit class BoolSyntax(private val l: Boolean) extends AnyVal {
-    def or(r: Boolean): TestResult =
-      assert(l)(isTrue) || assert(r)(isTrue)
-    def ==>(r: Boolean): TestResult =
-      assert(r)(isTrue) || assert(l)(isFalse)
-    def <==>(r: Boolean): TestResult =
-      assert(r)(equalTo(l))
+  /**
+   * Provides implicit syntax for assertions.
+   */
+  implicit class AssertionSyntax[A](private val self: A) extends AnyVal {
+    def <->[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
+      equal(that)
+    def equal[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
+      assert(self)(equalTo(that))
+    def greater(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isGreaterThan(that))
+    def greaterOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isGreaterThanEqualTo(that))
+    def less(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isLessThan(that))
+    def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
+      assert(self)(isLessThanEqualTo(that))
   }
 }

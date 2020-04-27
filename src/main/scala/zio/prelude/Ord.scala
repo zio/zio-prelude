@@ -2,70 +2,37 @@ package zio.prelude
 
 import scala.annotation.{ implicitNotFound, tailrec }
 
+import zio.Chunk
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
-
-trait OrdLaws extends Lawful[Ord] {
-
-  final val transitivityLaw1 = new Laws.Law3[Ord]("transitivityLaw1") {
-    def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-      ((a1 < a2) && (a2 < a3)) ==> (a1 < a3)
-  }
-
-  final val transitivityLaw2 = new Laws.Law3[Ord]("transitivityLaw2") {
-    def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-      ((a1 > a2) && (a2 > a3)) ==> (a1 > a3)
-  }
-
-  final val antisymmetryLaw1 = new Laws.Law2[Ord]("antisymmetryLaw1") {
-    def apply[A: Ord](a1: A, a2: A): TestResult =
-      ((a1 <= a2) && (a2 <= a1)) ==> (a1 === a2)
-  }
-
-  final val antisymmetryLaw2 = new Laws.Law2[Ord]("antisymmetryLaw2") {
-    def apply[A: Ord](a1: A, a2: A): TestResult =
-      ((a1 >= a2) && (a2 >= a1)) ==> (a1 === a2)
-  }
-
-  final val connexityLaw1 = new Laws.Law2[Ord]("connexityLaw1") {
-    def apply[A: Ord](a1: A, a2: A): TestResult =
-      (a1 <= a2) or (a2 <= a1)
-  }
-
-  final val connexityLaw2 = new Laws.Law2[Ord]("connexityLaw2") {
-    def apply[A: Ord](a1: A, a2: A): TestResult =
-      (a1 >= a2) or (a2 >= a1)
-  }
-
-  final val complementLaw = new Laws.Law2[Ord]("complementLaw") {
-    def apply[A: Ord](a1: A, a2: A): TestResult =
-      (a1 <= a2) <==> (a2 >= a1)
-  }
-
-  final val laws = transitivityLaw1 +
-    transitivityLaw2 +
-    antisymmetryLaw1 +
-    antisymmetryLaw2 +
-    connexityLaw1 +
-    connexityLaw2 +
-    complementLaw
-}
 
 /**
  * `Ord[A]` provides implicit evidence that values of type `A` have a total
  * ordering.
  */
 @implicitNotFound("No implicit Ord defined for ${A}.")
-sealed trait Ord[-A] { self =>
+trait Ord[-A] extends Equal[A] { self =>
 
-  def compare(l: A, r: A): Ordering
+  /**
+   * Returns the result of comparing two values of type `A`.
+   */
+  final def compare(l: A, r: A): Ordering =
+    if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
+
+  /**
+   * Returns the result of comparing two values of type `A`.
+   */
+  protected def checkCompare(l: A, r: A): Ordering
+
+  override protected def checkEqual(l: A, r: A): Boolean =
+    compare(l, r).isEqual
 
   /**
    * Constructs an `Ord[(A, B)]` given an `Ord[A]` and `Ord[B]` by first
    * comparing the `A` values, and then if the `A` values are equal comparing
    * the `B` values
    */
-  def both[B](that: Ord[B]): Ord[(A, B)] =
+  final def both[B](that: => Ord[B]): Ord[(A, B)] =
     bothWith(that)(identity)
 
   /**
@@ -74,8 +41,8 @@ sealed trait Ord[-A] { self =>
    * `C` value into an `(A, B)`, compare the `A` values, and then if the `A`
    * values are equal compare the `B` values.
    */
-  def bothWith[B, C](that: Ord[B])(f: C => (A, B)): Ord[C] =
-    Ord { (c1, c2) =>
+  final def bothWith[B, C](that: => Ord[B])(f: C => (A, B)): Ord[C] =
+    Ord.make { (c1, c2) =>
       (f(c1), f(c2)) match {
         case ((a1, b1), (a2, b2)) => self.compare(a1, a2) <> that.compare(b1, b2)
       }
@@ -86,8 +53,8 @@ sealed trait Ord[-A] { self =>
    * `B` value into an `A` value. The instance will convert each `B` value into
    * an `A` and compare the `A` values.
    */
-  def contramap[B](f: B => A): Ord[B] =
-    Ord((b1, b2) => self.compare(f(b1), f(b2)))
+  override def contramap[B](f: B => A): Ord[B] =
+    Ord.make((b1, b2) => compare(f(b1), f(b2)))
 
   /**
    * Constructs an `Ord[Either[A, B]]` given an `Ord[A]` and an `Ord[B]`. If
@@ -95,7 +62,7 @@ sealed trait Ord[-A] { self =>
    * value as less than the `Right` value. Otherwise, it will compare the two
    * values.
    */
-  def either[B](that: Ord[B]): Ord[Either[A, B]] =
+  final def either[B](that: => Ord[B]): Ord[Either[A, B]] =
     eitherWith(that)(identity)
 
   /**
@@ -105,8 +72,8 @@ sealed trait Ord[-A] { self =>
    * value is `Right` it will treat the `Left` value as less than the `Right`
    * value. Otherwise, it will compare the two values.
    */
-  def eitherWith[B, C](that: Ord[B])(f: C => Either[A, B]): Ord[C] =
-    Ord { (c1, c2) =>
+  final def eitherWith[B, C](that: => Ord[B])(f: C => Either[A, B]): Ord[C] =
+    Ord.make { (c1, c2) =>
       (f(c1), f(c2)) match {
         case (Left(a1), Left(a2))   => self.compare(a1, a2)
         case (Left(_), Right(_))    => Ordering.LessThan
@@ -119,64 +86,232 @@ sealed trait Ord[-A] { self =>
    * Constructs a new `Ord[A]` by mapping the result of this ordering using the
    * specified function.
    */
-  def mapOrdering(f: Ordering => Ordering): Ord[A] =
-    Ord((l, r) => f(self.compare(l, r)))
+  final def mapOrdering(f: Ordering => Ordering): Ord[A] =
+    Ord.make((l, r) => f(compare(l, r)))
 
   /**
    * Returns a new ordering that is the reverse of this one.
    */
-  def reverse: Ord[A] =
+  final def reverse: Ord[A] =
     mapOrdering(_.opposite)
+
+  final def toScalaOrdering[A1 <: A]: scala.math.Ordering[A1] =
+    new scala.math.Ordering[A1] {
+      def compare(l: A1, r: A1): Int =
+        self.compare(l, r) match {
+          case Ordering.LessThan    => -1
+          case Ordering.Equals      => 0
+          case Ordering.GreaterThan => 0
+        }
+    }
 }
 
-object Ord extends OrdLaws {
+object Ord extends Lawful[Ord] {
+
+  /**
+   * For all values `a1`, `a2`, and `a3`, if `a1` is less than `a2` and `a2` is
+   * less than `a3` then `a1` is less than `a3`.
+   */
+  val transitivityLaw1: Laws.Law3[Ord] =
+    new Laws.Law3[Ord]("transitivityLaw1") {
+      def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
+        ((a1 less a2) && (a2 less a3)) ==> (a1 less a3)
+    }
+
+  /**
+   * For all values `a1`, `a2`, and `a3`, if `a1` is greater than `a2` and `a2`
+   * is greater than `a3` then `a1` is greater than `a3`.
+   */
+  val transitivityLaw2: Laws.Law3[Ord] =
+    new Laws.Law3[Ord]("transitivityLaw2") {
+      def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
+        ((a1 greater a2) && (a2 greater a3)) ==> (a1 greater a3)
+    }
+
+  /**
+   * For all values `a1` and `a2`, if `a1` is less than or equal to `a2` and
+   * `a2` is less than or equal to `a1` then `a1` is equal to `a2`.
+   */
+  val antisymmetryLaw1: Laws.Law2[Ord] =
+    new Laws.Law2[Ord]("antisymmetryLaw1") {
+      def apply[A: Ord](a1: A, a2: A): TestResult =
+        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equal a2)
+    }
+
+  /**
+   * For all values `a1` and `a2`, if `a1` is greater than or equal to `a2` and
+   * `a2` is greater than or equal to `a1` then `a1` is equal to `a2`.
+   */
+  val antisymmetryLaw2: Laws.Law2[Ord] =
+    new Laws.Law2[Ord]("antisymmetryLaw2") {
+      def apply[A: Ord](a1: A, a2: A): TestResult =
+        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equal a2)
+    }
+
+  /**
+   * For all values `a1` and `a2`, `a1` is less than or equal to `a2` or `a2`
+   * is less than or equal to `a1`.
+   */
+  val connexityLaw1: Laws.Law2[Ord] =
+    new Laws.Law2[Ord]("connexityLaw1") {
+      def apply[A: Ord](a1: A, a2: A): TestResult =
+        (a1 lessOrEqual a2) || (a2 lessOrEqual a1)
+    }
+
+  /**
+   * For all values `a1` and `a2`, `a1` is greater than or equal to `a2` or
+   * `a2` is greater than or equal to `a1`.
+   */
+  val connexityLaw2: Laws.Law2[Ord] =
+    new Laws.Law2[Ord]("connexityLaw2") {
+      def apply[A: Ord](a1: A, a2: A): TestResult =
+        (a1 greaterOrEqual a2) || (a2 greaterOrEqual a1)
+    }
+
+  /**
+   * For all values `a1` and `a2`, `a1` is less than or equal to `a2` if and
+   * only if `a2` is greater than or equal to `a1`.
+   */
+  val complementLaw: Laws.Law2[Ord] =
+    new Laws.Law2[Ord]("complementLaw") {
+      def apply[A: Ord](a1: A, a2: A): TestResult =
+        (a1 lessOrEqual a2) <==> (a2 greaterOrEqual a1)
+    }
+
+  /**
+   * The set of all laws that instances of `Ord` must satify.
+   */
+  val laws: Laws[Ord] =
+    transitivityLaw1 +
+      transitivityLaw2 +
+      antisymmetryLaw1 +
+      antisymmetryLaw2 +
+      connexityLaw1 +
+      connexityLaw2 +
+      complementLaw +
+      Equal.laws
+
+  /**
+   * The `AssociativeBothF` instance for `Ord`.
+   */
+  implicit val OrdAssociativeBothF: AssociativeBothF[Ord] =
+    new AssociativeBothF[Ord] {
+      def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
+   * The `AssociativeEitherF` instance for `Ord`.
+   */
+  implicit val OrdAssociativeEitherF: AssociativeEitherF[Ord] =
+    new AssociativeEitherF[Ord] {
+      def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
+        fa.either(fb)
+    }
+
+  /**
+   * The `Contravariant` instance for `Ord`.
+   */
+  implicit val OrdContravariant: Contravariant[Ord] =
+    new Contravariant[Ord] {
+      def contramap[A, B](f: B => A): Ord[A] => Ord[B] =
+        _.contramap(f)
+    }
+
+  /**
+   * The `IdentityBothF` instance for `Ord`.
+   */
+  implicit val OrdIdentityBothF: IdentityBothF[Ord] =
+    new IdentityBothF[Ord] {
+      def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
+        fa.both(fb)
+      val identity: Ord[Any] =
+        AnyOrd
+    }
+
+  /**
+   * The `IdentityEitherF` instance for `Ord`.
+   */
+  implicit val OrdIdentityEitherF: IdentityEitherF[Ord] =
+    new IdentityEitherF[Ord] {
+      def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
+        fa.either(fb)
+      val identity: Ord[Nothing] =
+        NothingOrd
+    }
 
   /**
    * Summons an implicit `Ord[A]`.
    */
-  def apply[A](implicit ord: Ord[A]): Ord[A] = ord
+  def apply[A](implicit ord: Ord[A]): Ord[A] =
+    ord
 
   /**
    * Constructs an `Ord[A]` from a function. The instance will be optimized to
    * first compare the values for reference equality and then compare the
    * values using the specified function.
    */
-  def apply[A](f: (A, A) => Ordering): Ord[A] =
-    new Ord[A] {
-      def compare(l: A, r: A): Ordering =
-        if (Equal.refEq(l, r)) Ordering.Equals else f(l, r)
-    }
+  def make[A](ord: (A, A) => Ordering): Ord[A] =
+    (l, r) => if (Equal.refEq(l, r)) Ordering.Equals else ord(l, r)
 
   /**
-   * Constructs an `Ord[A]` from a [[`scala.math.Ordering]].
+   * Constructs an `Ord[A]` from a [[scala.math.Ordering]].
    */
-  def fromScalaOrdering[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
-    Ord((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)))
+  def default[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
+    make((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)))
+
+  /**
+   * Ordering for `Any` values. Note that since values of type `Any` contain
+   * no information, all values of type `Any` can be treated as equal to each
+   * other.
+   */
+  val AnyOrd: Ord[Any] =
+    make((_, _) => Ordering.Equals)
 
   /**
    * Ordering for `Boolean` values.
    */
   implicit val BoolOrd: Ord[Boolean] =
-    fromScalaOrdering[Boolean]
+    default
 
   /**
    * Ordering for `Byte` values.
    */
   implicit val ByteOrd: Ord[Byte] =
-    fromScalaOrdering[Byte]
+    default
 
   /**
    * Ordering for `Char` values.
    */
   implicit val CharOrd: Ord[Char] =
-    fromScalaOrdering[Char]
+    default
+
+  /**
+   * Derives an `Ord[Vector[A]]` given an `Ord[A]`.
+   */
+  implicit def ChunkOrd[A: Ord]: Ord[Chunk[A]] =
+    make { (l, r) =>
+      val j = l.length
+      val k = r.length
+
+      def loop(i: Int): Ordering =
+        if (i == j && i == k) Ordering.Equals
+        else if (i == j) Ordering.LessThan
+        else if (i == k) Ordering.GreaterThan
+        else {
+          val compare = Ord[A].compare(l(i), r(i))
+          if (compare.isEqual) loop(i + 1) else compare
+        }
+
+      loop(0)
+    }
 
   /**
    * Ordering for `Double` values. Note that to honor the contract of a total
    * ordering, `Double.NaN` will be treated as greater than any other number.
    */
   implicit val DoubleOrd: Ord[Double] =
-    Ord((n1, n2) => Ordering.fromCompare(java.lang.Double.compare(n1, n2)))
+    make((n1, n2) => Ordering.fromCompare(java.lang.Double.compare(n1, n2)))
 
   /**
    * Derives an `Ord[Either[A, B]]` given an `Ord[A]` and an `Ord[B]`.
@@ -189,13 +324,13 @@ object Ord extends OrdLaws {
    * ordering, `Flat.NaN` will be treated as greater than any other number.
    */
   implicit val FloatOrd: Ord[Float] =
-    Ord((n1, n2) => Ordering.fromCompare(java.lang.Float.compare(n1, n2)))
+    make((n1, n2) => Ordering.fromCompare(java.lang.Float.compare(n1, n2)))
 
   /**
    * Ordering for `Int` values.
    */
   implicit val IntOrd: Ord[Int] =
-    fromScalaOrdering[Int]
+    default
 
   /**
    * Derives an `Ord[List[A]]` given an `Ord[A]`.
@@ -213,14 +348,14 @@ object Ord extends OrdLaws {
           if (compare.isEqual) loop(t1, t2) else compare
       }
 
-    Ord((l, r) => loop(l, r))
+    make((l, r) => loop(l, r))
   }
 
   /**
    * Ordering for `Long` values.
    */
   implicit val LongOrd: Ord[Long] =
-    fromScalaOrdering[Long]
+    default
 
   /**
    * Ordering for `Nothing` values. Note that since there are not values of
@@ -228,7 +363,7 @@ object Ord extends OrdLaws {
    * but it can be useful in deriving instances for more complex types.
    */
   implicit val NothingOrd: Ord[Nothing] =
-    Ord[Nothing]((l: Nothing, _: Nothing) => l)
+    make[Nothing]((l: Nothing, _: Nothing) => l)
 
   /**
    * Derives an `Ord[Option[A]]` given an `Ord[A]`. `None` will be treated as
@@ -244,28 +379,22 @@ object Ord extends OrdLaws {
    * Ordering for `String` values.
    */
   implicit val StringOrd: Ord[String] =
-    fromScalaOrdering[String]
+    default
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
    * the product type.
    */
   implicit def Tuple2Ord[A: Ord, B: Ord]: Ord[(A, B)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1), (a2, b2)) => (a1 =?= a2) <> (b1 =?= b2)
-      }
-    }
+    Ord[A] both Ord[B]
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
    * the product type.
    */
   implicit def Tuple3Ord[A: Ord, B: Ord, C: Ord]: Ord[(A, B, C)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1), (a2, b2, c2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2)
-      }
+    make {
+      case ((a1, b1, c1), (a2, b2, c2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2)
     }
 
   /**
@@ -273,10 +402,8 @@ object Ord extends OrdLaws {
    * the product type.
    */
   implicit def Tuple4Ord[A: Ord, B: Ord, C: Ord, D: Ord]: Ord[(A, B, C, D)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2)
-      }
+    make {
+      case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2)
     }
 
   /**
@@ -284,11 +411,9 @@ object Ord extends OrdLaws {
    * the product type.
    */
   implicit def Tuple5Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord]: Ord[(A, B, C, D, E)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2)
     }
 
   /**
@@ -296,11 +421,9 @@ object Ord extends OrdLaws {
    * the product type.
    */
   implicit def Tuple6Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord]: Ord[(A, B, C, D, E, F)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2)
     }
 
   /**
@@ -308,11 +431,9 @@ object Ord extends OrdLaws {
    * the product type.
    */
   implicit def Tuple7Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord, G: Ord]: Ord[(A, B, C, D, E, F, G)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2)
     }
 
   /**
@@ -321,11 +442,9 @@ object Ord extends OrdLaws {
    */
   implicit def Tuple8Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord, G: Ord, H: Ord]
     : Ord[(A, B, C, D, E, F, G, H)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2)
     }
 
   /**
@@ -334,11 +453,9 @@ object Ord extends OrdLaws {
    */
   implicit def Tuple9Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord, G: Ord, H: Ord, I: Ord]
     : Ord[(A, B, C, D, E, F, G, H, I)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2)
     }
 
   /**
@@ -357,11 +474,9 @@ object Ord extends OrdLaws {
     I: Ord,
     J: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2)
     }
 
   /**
@@ -381,11 +496,9 @@ object Ord extends OrdLaws {
     J: Ord,
     K: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2)
     }
 
   /**
@@ -406,11 +519,9 @@ object Ord extends OrdLaws {
     K: Ord,
     L: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2)
-      }
+    make {
+      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2)
     }
 
   /**
@@ -432,14 +543,12 @@ object Ord extends OrdLaws {
     L: Ord,
     M: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2)
     }
 
   /**
@@ -462,14 +571,12 @@ object Ord extends OrdLaws {
     M: Ord,
     N: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2)
     }
 
   /**
@@ -493,14 +600,12 @@ object Ord extends OrdLaws {
     N: Ord,
     O: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2)
     }
 
   /**
@@ -525,14 +630,12 @@ object Ord extends OrdLaws {
     O: Ord,
     P: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2)
     }
 
   /**
@@ -558,14 +661,12 @@ object Ord extends OrdLaws {
     P: Ord,
     Q: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2)
     }
 
   /**
@@ -592,14 +693,12 @@ object Ord extends OrdLaws {
     Q: Ord,
     R: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2)
     }
 
   /**
@@ -627,14 +726,12 @@ object Ord extends OrdLaws {
     R: Ord,
     S: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2)
     }
 
   /**
@@ -663,14 +760,12 @@ object Ord extends OrdLaws {
     S: Ord,
     T: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2)
     }
 
   /**
@@ -700,14 +795,12 @@ object Ord extends OrdLaws {
     T: Ord,
     U: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2)
     }
 
   /**
@@ -738,14 +831,12 @@ object Ord extends OrdLaws {
     U: Ord,
     V: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
-    Ord { (a, b) =>
-      (a, b) match {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
-            ) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2) <> (v1 =?= v2)
-      }
+    make {
+      case (
+          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
+          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
+          ) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2) <> (v1 =?= v2)
     }
 
   /**
@@ -753,13 +844,13 @@ object Ord extends OrdLaws {
    * values will be equal.
    */
   implicit val UnitOrd: Ord[Unit] =
-    Ord((_, _) => Ordering.Equals)
+    make((_, _) => Ordering.Equals)
 
   /**
    * Derives an `Ord[Vector[A]]` given an `Ord[A]`.
    */
   implicit def VectorOrd[A: Ord]: Ord[Vector[A]] =
-    Ord { (l, r) =>
+    make { (l, r) =>
       val j = l.length
       val k = r.length
 
@@ -781,38 +872,38 @@ trait OrdSyntax {
   /**
    * Provides infix syntax for comparing two values with a total ordering.
    */
-  implicit class OrdSyntax[A](val l: A) {
+  implicit class OrdOps[A](val l: A) {
 
     /**
      * Returns whether this value is greater than the specified value.
      */
-    def >(r: A)(implicit ord: Ord[A]): Boolean =
+    def >[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
       ord.compare(l, r) === Ordering.GreaterThan
 
     /**
      * Returns whether this value is greater than or equal to the specified
      * value.
      */
-    def >=(r: A)(implicit ord: Ord[A]): Boolean =
+    def >=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
       (l > r) || (l === r)
 
     /**
      * Returns whether this value is less than the specified value.
      */
-    def <(r: A)(implicit ord: Ord[A]): Boolean =
+    def <[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
       ord.compare(l, r) === Ordering.LessThan
 
     /**
      * Returns whether this value is less than or equal to the specified
      * value.
      */
-    def <=(r: A)(implicit ord: Ord[A]): Boolean =
+    def <=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
       (l < r) || (l === r)
 
     /**
      * Returns the result of comparing this value with the specified value.
      */
-    def =?=(r: A)(implicit ord: Ord[A]): Ordering = ord.compare(l, r)
+    def =?=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Ordering = ord.compare(l, r)
   }
 }
 
@@ -840,16 +931,16 @@ sealed trait Ordering { self =>
    * Returns whether this `Ordering` is `Ordering.GreaterThan`.
    */
   final def isGreaterThan: Boolean = self match {
-    case Ordering.Equals => true
-    case _               => false
+    case Ordering.GreaterThan => true
+    case _                    => false
   }
 
   /**
    * Returns whether this `Ordering` is `Ordering.LessThan`.
    */
   final def isLessThan: Boolean = self match {
-    case Ordering.Equals => true
-    case _               => false
+    case Ordering.LessThan => true
+    case _                 => false
   }
 
   /**
