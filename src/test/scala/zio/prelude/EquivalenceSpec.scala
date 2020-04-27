@@ -51,6 +51,7 @@ object EquivalenceSpec extends DefaultRunnableSpec {
         checkAllLaws(Equivalence)(left, right)
       },
       testM("eitherNothing") {
+        implicit val equal       = Equal.EitherEqual[Int, Nothing](Equal.IntEqual, Equal.NothingEqual)
         implicit val equivalence = Equivalence.eitherNothing[Int]
         val left                 = Gen.either(Gen.anyInt, genNothing)
         val right                = Gen.anyInt
