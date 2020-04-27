@@ -1,5 +1,8 @@
 package zio.prelude
 
+import zio.test.TestResult
+import zio.test.laws._
+
 /**
  * An `Equivalence[A, B]` defines an equivalence between two types `A` and `B`.
  * These types represent different ways to store the same information.
@@ -40,7 +43,20 @@ final case class Equivalence[A, B](to: A => B, from: B => A) { self =>
   def toPartialEquivalence: PartialEquivalence[A, B, Nothing, Nothing] =
     PartialEquivalence((a: A) => Right(to(a)), (b: B) => Right(from(b)))
 }
-object Equivalence {
+
+object Equivalence extends Lawful2[Equivalence, Equal, Equal] {
+
+  val leftIdentity = new Laws2.Law1Left[Equivalence, Equal, AnyF]("leftIdentity") {
+    def apply[A: Equal, B: AnyF](a: A)(implicit equivalence: Equivalence[A, B]): TestResult =
+      equivalence.from(equivalence.to(a)) <-> a
+  }
+
+  val rightIdentity = new Laws2.Law1Right[Equivalence, AnyF, Equal]("rightIdentity") {
+    def apply[A: AnyF, B: Equal](b: B)(implicit equivalence: Equivalence[A, B]): TestResult =
+      equivalence.to(equivalence.from(b)) <-> b
+  }
+
+  val laws = leftIdentity + rightIdentity
 
   /**
    * Constructs the identity equivalence, which just says that any type is

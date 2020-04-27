@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.util.Try
 
-import zio.{ Chunk, NonEmptyChunk }
+import zio.NonEmptyChunk
 import zio.prelude.Validation._
 import zio.test.Assertion
 
@@ -229,7 +229,7 @@ object Validation extends LowPriorityValidationImplicits {
    * Constructs a `Validation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(Chunk(error))
+    Failure(NonEmptyChunk(error))
 
   /**
    * Constructs a `Validation` from a value and an assertion about that value.

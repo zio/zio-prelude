@@ -24,6 +24,8 @@ package object prelude
 
   type <=>[A, B] = Equivalence[A, B]
 
+  type AnyF[_] = Any
+
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Semigroup[A] with Commutative[A]

@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.Chunk
+import zio.{ Chunk, NonEmptyChunk }
 import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
@@ -81,6 +81,9 @@ object Closure extends Lawful[Closure] {
         case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
       }
     )
+
+  implicit def NonEmptyChunkClosure[A]: Closure[NonEmptyChunk[A]] =
+    make(_ ++ _)
 
   implicit def OptionClosure[A: Closure]: Closure[Option[A]] =
     make[Option[A]]((l, r) =>

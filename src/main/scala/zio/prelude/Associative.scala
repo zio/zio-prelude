@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.Chunk
+import zio.{ Chunk, NonEmptyChunk }
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{ And, First, Last, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
@@ -101,6 +101,9 @@ object Associative extends Lawful[AssociativeEqual] {
 
   implicit def minAssociative[A: Ord]: Associative[Min[A]] =
     make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
+
+  implicit def NonEmptyChunkAssociative[A]: Associative[NonEmptyChunk[A]] =
+    make(_ ++ _)
 
   implicit def OptionAssociative[A: Associative]: Associative[Option[A]] =
     make[Option[A]]((l, r) =>

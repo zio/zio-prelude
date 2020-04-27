@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
-import zio.Chunk
+import zio.{ Chunk, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -307,6 +307,12 @@ object Equal extends Lawful[Equal] {
       map1.size == map2.size &&
       map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
     }
+
+  /**
+   * Derives an `Equal[NonEmptyChunk[A]]` given an `Equal[A]`.
+   */
+  implicit def NonEmptyChunkEqual[A: Equal]: Equal[NonEmptyChunk[A]] =
+    Equal[Chunk[A]].contramap(_.toChunk)
 
   /**
    * Equality for `Nothing` values. Note that since there are not values of

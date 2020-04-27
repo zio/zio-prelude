@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.Chunk
+import zio.NonEmptyChunk
 import zio.prelude.coherent.AssociativeIdentity
 import zio.prelude.newtypes._
 import zio.test._
@@ -14,7 +14,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
         assert(Natural.make(0))(isSuccessV(anything))
       },
       test("invalid values") {
-        val expected = Chunk("-1 did not satisfy isGreaterThanEqualTo(0)")
+        val expected = NonEmptyChunk("-1 did not satisfy isGreaterThanEqualTo(0)")
         assert(Natural.make(-1))(isFailureV(equalTo(expected)))
       }
     ),

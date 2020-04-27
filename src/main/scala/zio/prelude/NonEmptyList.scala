@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.util.hashing.MurmurHash3
 
-import zio.{ Chunk, NonEmptyChunk }
+import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
@@ -308,7 +308,7 @@ sealed trait NonEmptyList[+A] { self =>
    * Converts this `NonEmptyList` to a `NonEmptyChunk`.
    */
   final def toNonEmptyChunk: NonEmptyChunk[A] =
-    toCons match { case h :: t => Chunk(h, t: _*) }
+    NonEmptyChunk.fromCons(toCons)
 
   /**
    * Zips this `NonEmptyList` together with the specified `NonEmptyList`,
