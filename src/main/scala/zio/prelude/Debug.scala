@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.Chunk
+import zio.{ Chunk, NonEmptyChunk }
 
 trait Debug[-A] {
   def debug(a: A): Debug.Repr
@@ -102,6 +102,9 @@ object Debug {
         case Left(e)  => Repr.VConstructor(List("scala"), "Left", List(e.debug))
         case Right(a) => Repr.VConstructor(List("scala"), "Right", List(a.debug))
       }
+
+  implicit def NonEmptyChunkDebug[A: Debug]: Debug[NonEmptyChunk[A]] =
+    nonEmptyChunk => Repr.VConstructor(List("zio"), "NonEmptyChunk", nonEmptyChunk.map(_.debug).toList)
 
   implicit def OptionDebug[A: Debug]: Debug[Option[A]] =
     option =>

@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.annotation.{ implicitNotFound, tailrec }
 
-import zio.Chunk
+import zio.{ Chunk, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -287,7 +287,7 @@ object Ord extends Lawful[Ord] {
     default
 
   /**
-   * Derives an `Ord[Vector[A]]` given an `Ord[A]`.
+   * Derives an `Ord[Chunk[A]]` given an `Ord[A]`.
    */
   implicit def ChunkOrd[A: Ord]: Ord[Chunk[A]] =
     make { (l, r) =>
@@ -356,6 +356,12 @@ object Ord extends Lawful[Ord] {
    */
   implicit val LongOrd: Ord[Long] =
     default
+
+  /**
+   * Derives an `Ord[NonEmptyChunk[A]]` given an `Ord[A]`.
+   */
+  implicit def NonEmptyChunkOrd[A: Ord]: Ord[NonEmptyChunk[A]] =
+    Ord[Chunk[A]].contramap(_.toChunk)
 
   /**
    * Ordering for `Nothing` values. Note that since there are not values of
