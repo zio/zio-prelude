@@ -159,7 +159,7 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * Derives a `Degug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
+   * Derives a `Debug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
    */
   implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] =
     validation =>
