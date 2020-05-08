@@ -150,9 +150,9 @@ package coherent {
       invariant0: Invariant[F]
     ): EqualFIdentityBothInvariant[F] =
       new EqualFIdentityBothInvariant[F] {
+        val any: F[Any]                                     = identityBoth0.any
         def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = identityBoth0.both(fa, fb)
         def deriveEqual[A: Equal]: Equal[F[A]]              = equalF0.deriveEqual
-        def identity: F[Any]                                = identityBoth0.identity
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]         = invariant0.invmap(f)
       }
   }
@@ -168,8 +168,8 @@ package coherent {
       new EqualFIdentityEitherInvariant[F] {
         def deriveEqual[A: Equal]: Equal[F[A]]                      = equalF0.deriveEqual
         def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = identityEither0.either(fa, fb)
-        def identity: F[Nothing]                                    = identityEither0.identity
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]                 = invariant0.invmap(f)
+        val none: F[Nothing]                                        = identityEither0.none
       }
   }
 

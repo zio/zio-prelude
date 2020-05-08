@@ -170,10 +170,10 @@ object Equal extends Lawful[Equal] {
    */
   implicit val EqualIdentityBoth: IdentityBoth[Equal] =
     new IdentityBoth[Equal] {
+      val any: Equal[Any] =
+        AnyEqual
       def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
         fa.both(fb)
-      val identity: Equal[Any] =
-        AnyEqual
     }
 
   /**
@@ -183,7 +183,7 @@ object Equal extends Lawful[Equal] {
     new IdentityEither[Equal] {
       def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
         fa.either(fb)
-      val identity: Equal[Nothing] =
+      val none: Equal[Nothing] =
         NothingEqual
     }
 

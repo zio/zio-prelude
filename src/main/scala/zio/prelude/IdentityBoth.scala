@@ -17,7 +17,7 @@ trait IdentityBoth[F[_]] {
    * The identity for combining two values of types `F[A]` and `F[B]` to
    * produce an `F[(A, B)]`.
    */
-  def identity: F[Any]
+  def any: F[Any]
 
   /**
    * Combines two values of types `F[A]` and `F[B]` to produce an `F[(A, B)]`.
@@ -32,7 +32,7 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
    */
   val leftIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("leftIdentityLaw") {
     def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityBoth[F].both(IdentityBoth[F].identity, fa)
+      val left  = IdentityBoth[F].both(IdentityBoth[F].any, fa)
       val right = fa
       val left2 = Invariant[F].invmap(Equivalence.tupleAny[A] compose Equivalence.tupleFlip).to(left)
       left2 <-> right
@@ -44,7 +44,7 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
    */
   val rightIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("rightIdentityLaw") {
     def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityBoth[F].both(fa, IdentityBoth[F].identity)
+      val left  = IdentityBoth[F].both(fa, IdentityBoth[F].any)
       val right = fa
       val left2 = Invariant[F].invmap(Equivalence.tupleAny[A]).to(left)
       left2 <-> right
@@ -67,13 +67,13 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
    */
   implicit val OptionidentityBoth: IdentityBoth[Option] =
     new IdentityBoth[Option] {
+      val any: Option[Any] =
+        Some(())
       def both[A, B](fa: => Option[A], fb: => Option[B]): Option[(A, B)] =
         (fa, fb) match {
           case (Some(a), Some(b)) => Some((a, b))
           case _                  => None
         }
-      val identity: Option[Any] =
-        Some(())
     }
 }
 

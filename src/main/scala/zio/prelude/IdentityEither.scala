@@ -14,16 +14,16 @@ import zio.test.laws._
 trait IdentityEither[F[_]] {
 
   /**
-   * The identity for combining two values of types `F[A]` and `F[B]` to
-   * produce an `F[Either[A, B]]`.
-   */
-  def identity: F[Nothing]
-
-  /**
    * Combines two values of types `F[A]` and `F[B]` to produce an
    * `F[Either[A, B]]`.
    */
   def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
+
+  /**
+   * The identity for combining two values of types `F[A]` and `F[B]` to
+   * produce an `F[Either[A, B]]`.
+   */
+  def none: F[Nothing]
 }
 
 object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, Equal] {
@@ -33,7 +33,7 @@ object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, E
    */
   val leftIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("leftIdentityLaw") {
     def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityEither[F].either[Nothing, A](IdentityEither[F].identity, fa)
+      val left  = IdentityEither[F].either[Nothing, A](IdentityEither[F].none, fa)
       val right = fa
       val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A] compose Equivalence.eitherFlip).to(left)
       left2 <-> right
@@ -45,7 +45,7 @@ object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, E
    */
   val rightIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("rightOdentityLaw") {
     def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityEither[F].either[A, Nothing](fa, IdentityEither[F].identity)
+      val left  = IdentityEither[F].either[A, Nothing](fa, IdentityEither[F].none)
       val right = fa
       val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A]).to(left)
       left2 <-> right
@@ -70,7 +70,7 @@ object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, E
     new IdentityEither[Option] {
       def either[A, B](fa: => Option[A], fb: => Option[B]): Option[Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
-      val identity: Option[Nothing] =
+      val none: Option[Nothing] =
         None
     }
 }
