@@ -192,19 +192,19 @@ object Ord extends Lawful[Ord] {
       Equal.laws
 
   /**
-   * The `AssociativeBothF` instance for `Ord`.
+   * The `AssociativeBoth` instance for `Ord`.
    */
-  implicit val OrdAssociativeBothF: AssociativeBothF[Ord] =
-    new AssociativeBothF[Ord] {
+  implicit val OrdAssociativeBoth: AssociativeBoth[Ord] =
+    new AssociativeBoth[Ord] {
       def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
         fa.both(fb)
     }
 
   /**
-   * The `AssociativeEitherF` instance for `Ord`.
+   * The `AssociativeEither` instance for `Ord`.
    */
-  implicit val OrdAssociativeEitherF: AssociativeEitherF[Ord] =
-    new AssociativeEitherF[Ord] {
+  implicit val OrdAssociativeEither: AssociativeEither[Ord] =
+    new AssociativeEither[Ord] {
       def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
         fa.either(fb)
     }
@@ -219,10 +219,10 @@ object Ord extends Lawful[Ord] {
     }
 
   /**
-   * The `IdentityBothF` instance for `Ord`.
+   * The `IdentityBoth` instance for `Ord`.
    */
-  implicit val OrdIdentityBothF: IdentityBothF[Ord] =
-    new IdentityBothF[Ord] {
+  implicit val OrdIdentityBoth: IdentityBoth[Ord] =
+    new IdentityBoth[Ord] {
       def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
         fa.both(fb)
       val identity: Ord[Any] =
@@ -230,10 +230,10 @@ object Ord extends Lawful[Ord] {
     }
 
   /**
-   * The `IdentityEitherF` instance for `Ord`.
+   * The `IdentityEither` instance for `Ord`.
    */
-  implicit val OrdIdentityEitherF: IdentityEitherF[Ord] =
-    new IdentityEitherF[Ord] {
+  implicit val OrdIdentityEither: IdentityEither[Ord] =
+    new IdentityEither[Ord] {
       def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
         fa.either(fb)
       val identity: Ord[Nothing] =
