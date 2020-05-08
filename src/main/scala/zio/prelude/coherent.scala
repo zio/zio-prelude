@@ -57,6 +57,24 @@ package coherent {
       }
   }
 
+  trait AssociativeFlattenCovariantEqualF[F[+_]] extends AssociativeFlatten[F] with Covariant[F] with EqualF[F]
+
+  object AssociativeFlattenCovariantEqualF {
+    implicit def derive[F[+_]](
+      implicit associativeFlatten0: AssociativeFlatten[F],
+      covariant0: Covariant[F],
+      equalF0: EqualF[F]
+    ): AssociativeFlattenCovariantEqualF[F] =
+      new AssociativeFlattenCovariantEqualF[F] {
+        def deriveEqual[A: Equal]: Equal[F[A]] =
+          equalF0.deriveEqual
+        def flatten[A](ffa: F[F[A]]): F[A] =
+          associativeFlatten0.flatten(ffa)
+        def map[A, B](f: A => B): F[A] => F[B] =
+          covariant0.map(f)
+      }
+  }
+
   trait AssociativeIdentity[A] extends Associative[A] with Identity[A]
 
   object AssociativeIdentity {
