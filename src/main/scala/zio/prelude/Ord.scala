@@ -223,10 +223,10 @@ object Ord extends Lawful[Ord] {
    */
   implicit val OrdIdentityBothF: IdentityBothF[Ord] =
     new IdentityBothF[Ord] {
+      val any: Ord[Any] =
+        AnyOrd
       def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
         fa.both(fb)
-      val identity: Ord[Any] =
-        AnyOrd
     }
 
   /**
@@ -236,7 +236,7 @@ object Ord extends Lawful[Ord] {
     new IdentityEitherF[Ord] {
       def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
         fa.either(fb)
-      val identity: Ord[Nothing] =
+      val none: Ord[Nothing] =
         NothingOrd
     }
 
