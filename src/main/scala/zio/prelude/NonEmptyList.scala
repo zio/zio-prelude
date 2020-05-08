@@ -407,10 +407,10 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    */
   implicit val NonEmptyListIdentityBothF: IdentityBothF[NonEmptyList] =
     new IdentityBothF[NonEmptyList] {
+      val any: NonEmptyList[Any] =
+        single(())
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
-      val identity: NonEmptyList[Any] =
-        single(())
     }
 
   /**

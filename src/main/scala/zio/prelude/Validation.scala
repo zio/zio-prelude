@@ -193,10 +193,10 @@ object Validation extends LowPriorityValidationImplicits {
    */
   implicit def ValidationIdentityBothF[E]: IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
     new IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
+      val any: Validation[Nothing, Any] =
+        Validation.unit
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
-      val identity: Validation[Nothing, Any] =
-        Validation.unit
     }
 
   /**
