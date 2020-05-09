@@ -3,11 +3,11 @@ package zio.prelude
 import zio.test._
 import zio.test.laws._
 
-object IdentityEitherFSpec extends DefaultRunnableSpec {
+object IdentityEitherSpec extends DefaultRunnableSpec {
 
-  def spec = suite("IdentityEitherFSpec")(
+  def spec = suite("IdentityEitherSpec")(
     suite("laws")(
-      testM("option")(checkAllLaws(IdentityEitherF)(GenFs.option, Gen.anyInt))
+      testM("option")(checkAllLaws(IdentityEither)(GenFs.option, Gen.anyInt))
     )
   )
 }
