@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.util.Try
 
-import zio.{ Chunk, NonEmptyChunk }
+import zio.NonEmptyChunk
 import zio.prelude.Validation._
 import zio.test.Assertion
 
@@ -159,7 +159,7 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * Derives a `Degug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
+   * Derives a `Debug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
    */
   implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] =
     validation =>
@@ -193,10 +193,10 @@ object Validation extends LowPriorityValidationImplicits {
    */
   implicit def ValidationIdentityBothF[E]: IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
     new IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
+      val any: Validation[Nothing, Any] =
+        Validation.unit
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
-      val identity: Validation[Nothing, Any] =
-        Validation.unit
     }
 
   /**
@@ -229,7 +229,7 @@ object Validation extends LowPriorityValidationImplicits {
    * Constructs a `Validation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(Chunk(error))
+    Failure(NonEmptyChunk(error))
 
   /**
    * Constructs a `Validation` from a value and an assertion about that value.

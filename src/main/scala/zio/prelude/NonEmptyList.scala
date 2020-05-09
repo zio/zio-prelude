@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.util.hashing.MurmurHash3
 
-import zio.{ Chunk, NonEmptyChunk }
+import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
@@ -308,7 +308,7 @@ sealed trait NonEmptyList[+A] { self =>
    * Converts this `NonEmptyList` to a `NonEmptyChunk`.
    */
   final def toNonEmptyChunk: NonEmptyChunk[A] =
-    toCons match { case h :: t => Chunk(h, t: _*) }
+    NonEmptyChunk.fromCons(toCons)
 
   /**
    * Zips this `NonEmptyList` together with the specified `NonEmptyList`,
@@ -360,7 +360,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
   implicit val NonEmptyListAssociativeBothF: AssociativeBothF[NonEmptyList] =
     new AssociativeBothF[NonEmptyList] {
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
-        fa.zip(fb)
+        fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
@@ -400,6 +400,17 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     new EqualF[NonEmptyList] {
       def deriveEqual[A: Equal]: Equal[NonEmptyList[A]] =
         NonEmptyListEqual
+    }
+
+  /**
+   * The `IdentityBothF` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListIdentityBothF: IdentityBothF[NonEmptyList] =
+    new IdentityBothF[NonEmptyList] {
+      val any: NonEmptyList[Any] =
+        single(())
+      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
+        fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**

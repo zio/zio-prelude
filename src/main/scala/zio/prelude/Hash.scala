@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
-import zio.Chunk
+import zio.{ Chunk, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -203,6 +203,12 @@ object Hash extends Lawful[Hash] {
         map1.size == map2.size &&
           map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
     )
+
+  /**
+   * Derives a `Hash[NonEmptyChunk[A]]` given a `Hash[A]`.
+   */
+  implicit def NonEmptyChunkHash[A: Hash]: Hash[NonEmptyChunk[A]] =
+    Hash[Chunk[A]].contramap(_.toChunk)
 
   /**
    * Hashing for `Nothing` values. Note that since there are not values of type

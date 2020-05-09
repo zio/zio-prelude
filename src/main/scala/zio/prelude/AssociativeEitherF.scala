@@ -70,6 +70,12 @@ trait AssociativeEitherFSyntax {
   implicit class AssociativeEitherFOps[F[_], A](fa: => F[A]) {
 
     /**
+     * A symbolic alias for `orElseEither`.
+     */
+    def <+>[B](fb: => F[B])(implicit either: AssociativeEitherF[F]): F[Either[A, B]] =
+      orElseEither(fb)
+
+    /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[Either[A, B]]`.
      */

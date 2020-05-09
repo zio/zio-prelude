@@ -54,6 +54,12 @@ trait CommutativeEitherFSyntax {
   implicit class CommutativeEitherFOps[F[_], A](fa: => F[A]) {
 
     /**
+     * A symbolic alias for `orElseEitherPar`.
+     */
+    def <|>[B](fb: => F[B])(implicit either: CommutativeEitherF[F]): F[Either[A, B]] =
+      orElseEitherPar(fb)
+
+    /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[Either[A, B]]`.
      */

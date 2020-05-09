@@ -65,6 +65,12 @@ trait CommutativeBothFSyntax {
   implicit class CommutativeBothFOps[F[_], A](fa: => F[A]) {
 
     /**
+     * A symbolic alias for `zipPar`.
+     */
+    def <&>[B](fb: => F[B])(implicit both: CommutativeBothF[F]): F[(A, B)] =
+      zipPar(fb)
+
+    /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]`.
      */

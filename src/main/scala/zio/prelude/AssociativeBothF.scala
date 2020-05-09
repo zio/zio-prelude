@@ -70,6 +70,12 @@ trait AssociativeBothFSyntax {
   implicit class AssociativeBothFOps[F[_], A](fa: => F[A]) {
 
     /**
+     * A symbolic alias for `zip`.
+     */
+    def <*>[B](fb: => F[B])(implicit both: AssociativeBothF[F]): F[(A, B)] =
+      zip(fb)
+
+    /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]`.
      */
