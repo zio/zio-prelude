@@ -355,19 +355,19 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Associative.make(_ ++ _)
 
   /**
-   * The `AssociativeBothF` instance for `NonEmptyList`.
+   * The `AssociativeBoth` instance for `NonEmptyList`.
    */
-  implicit val NonEmptyListAssociativeBothF: AssociativeBothF[NonEmptyList] =
-    new AssociativeBothF[NonEmptyList] {
+  implicit val NonEmptyListAssociativeBoth: AssociativeBoth[NonEmptyList] =
+    new AssociativeBoth[NonEmptyList] {
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
-   * The `CommutativeBothF` instance for `NonEmptyList`.
+   * The `CommutativeBoth` instance for `NonEmptyList`.
    */
-  implicit val NonEmptyListCommutativeBothF: CommutativeBothF[NonEmptyList] =
-    new CommutativeBothF[NonEmptyList] {
+  implicit val NonEmptyListCommutativeBoth: CommutativeBoth[NonEmptyList] =
+    new CommutativeBoth[NonEmptyList] {
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
         fa.zip(fb)
     }
@@ -403,14 +403,14 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
 
   /**
-   * The `IdentityBothF` instance for `NonEmptyList`.
+   * The `IdentityBoth` instance for `NonEmptyList`.
    */
-  implicit val NonEmptyListIdentityBothF: IdentityBothF[NonEmptyList] =
-    new IdentityBothF[NonEmptyList] {
+  implicit val NonEmptyListIdentityBoth: IdentityBoth[NonEmptyList] =
+    new IdentityBoth[NonEmptyList] {
+      val any: NonEmptyList[Any] =
+        single(())
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
-      val identity: NonEmptyList[Any] =
-        single(())
     }
 
   /**

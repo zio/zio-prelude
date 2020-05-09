@@ -121,37 +121,37 @@ object Equal extends Lawful[Equal] {
     reflexiveLaw + symmetryLaw + transitivityLaw
 
   /**
-   * The `AssociativeBothF` instance for `Equal`.
+   * The `AssociativeBoth` instance for `Equal`.
    */
-  implicit val EqualAssociativeBothF: AssociativeBothF[Equal] =
-    new AssociativeBothF[Equal] {
+  implicit val EqualAssociativeBoth: AssociativeBoth[Equal] =
+    new AssociativeBoth[Equal] {
       def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
         fa.both(fb)
     }
 
   /**
-   * The `AssociativeEitherF` instance for `Equal`.
+   * The `AssociativeEither` instance for `Equal`.
    */
-  implicit val EqualAssociativeEitherF: AssociativeEitherF[Equal] =
-    new AssociativeEitherF[Equal] {
+  implicit val EqualAssociativeEither: AssociativeEither[Equal] =
+    new AssociativeEither[Equal] {
       def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
         fa.either(fb)
     }
 
   /**
-   * The `CommutativeBothF` instance for `Equal`.
+   * The `CommutativeBoth` instance for `Equal`.
    */
-  implicit val EqualCommutativeBothF: CommutativeBothF[Equal] =
-    new CommutativeBothF[Equal] {
+  implicit val EqualCommutativeBoth: CommutativeBoth[Equal] =
+    new CommutativeBoth[Equal] {
       def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
         fa.both(fb)
     }
 
   /**
-   * The `CommutativeEitherF` instance for `Equal`.
+   * The `CommutativeEither` instance for `Equal`.
    */
-  implicit val EqualCommutativeEitherF: CommutativeEitherF[Equal] =
-    new CommutativeEitherF[Equal] {
+  implicit val EqualCommutativeEither: CommutativeEither[Equal] =
+    new CommutativeEither[Equal] {
       def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
         fa.either(fb)
     }
@@ -166,24 +166,24 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * The `IdentityBothF` instance for `Equal`.
+   * The `IdentityBoth` instance for `Equal`.
    */
-  implicit val EqualIdentityBothF: IdentityBothF[Equal] =
-    new IdentityBothF[Equal] {
+  implicit val EqualIdentityBoth: IdentityBoth[Equal] =
+    new IdentityBoth[Equal] {
+      val any: Equal[Any] =
+        AnyEqual
       def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
         fa.both(fb)
-      val identity: Equal[Any] =
-        AnyEqual
     }
 
   /**
-   * The `IdentityEitherF` instance for `Equal`.
+   * The `IdentityEither` instance for `Equal`.
    */
-  implicit val EqualIdentityEitherF: IdentityEitherF[Equal] =
-    new IdentityEitherF[Equal] {
+  implicit val EqualIdentityEither: IdentityEither[Equal] =
+    new IdentityEither[Equal] {
       def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
         fa.either(fb)
-      val identity: Equal[Nothing] =
+      val none: Equal[Nothing] =
         NothingEqual
     }
 

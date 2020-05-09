@@ -4,11 +4,11 @@ import zio.test.{ assert, TestResult }
 
 package object prelude
     extends Assertions
-    with AssociativeBothFSyntax
-    with AssociativeEitherFSyntax
+    with AssociativeBothSyntax
+    with AssociativeEitherSyntax
     with ClosureSyntax
-    with CommutativeBothFSyntax
-    with CommutativeEitherFSyntax
+    with CommutativeBothSyntax
+    with CommutativeEitherSyntax
     with CovariantSyntax
     with ContravariantSyntax
     with DebugSyntax
@@ -16,8 +16,8 @@ package object prelude
     with HashSyntax
     with IdExports
     with IdentitySyntax
-    with IdentityBothFSyntax
-    with IdentityEitherFSyntax
+    with IdentityBothSyntax
+    with IdentityEitherSyntax
     with NewtypeExports
     with NewtypeFExports
     with OrdSyntax {
@@ -38,31 +38,31 @@ package object prelude
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
     type Alternative[F[+_]] =
-      Covariant[F] with AssociativeBothF[F] with IdentityBothF[F] with AssociativeEitherF[F] with IdentityEitherF[F]
+      Covariant[F] with AssociativeBoth[F] with IdentityBoth[F] with AssociativeEither[F] with IdentityEither[F]
     type InvariantAlt[F[_]] =
-      Invariant[F] with AssociativeBothF[F] with IdentityBothF[F] with AssociativeEitherF[F] with IdentityEitherF[F]
+      Invariant[F] with AssociativeBoth[F] with IdentityBoth[F] with AssociativeEither[F] with IdentityEither[F]
 
-    type InvariantSemigroupal[F[_]]      = Invariant[F] with AssociativeBothF[F]
-    type Semigroupal[F[+_]]              = Covariant[F] with AssociativeBothF[F]
-    type ContravariantSemigroupal[F[-_]] = Contravariant[F] with AssociativeBothF[F]
+    type InvariantSemigroupal[F[_]]      = Invariant[F] with AssociativeBoth[F]
+    type Semigroupal[F[+_]]              = Covariant[F] with AssociativeBoth[F]
+    type ContravariantSemigroupal[F[-_]] = Contravariant[F] with AssociativeBoth[F]
 
-    type SemigroupK[F[_]] = AssociativeEitherF[F]
-    type MonoidK[F[_]]    = AssociativeEitherF[F] with IdentityEitherF[F]
+    type SemigroupK[F[_]] = AssociativeEither[F]
+    type MonoidK[F[_]]    = AssociativeEither[F] with IdentityEither[F]
 
-    type ContravariantMonoidal[F[-_]] = Contravariant[F] with AssociativeBothF[F] with IdentityBothF[F]
-    type InvariantMonoidal[F[_]]      = Invariant[F] with AssociativeBothF[F] with IdentityBothF[F]
+    type ContravariantMonoidal[F[-_]] = Contravariant[F] with AssociativeBoth[F] with IdentityBoth[F]
+    type InvariantMonoidal[F[_]]      = Invariant[F] with AssociativeBoth[F] with IdentityBoth[F]
 
     type FlatMap[F[+_]] = Covariant[F] with AssociativeFlatten[F]
-    type Monad[F[+_]]   = Covariant[F] with AssociativeFlatten[F] with AssociativeBothF[F] // Close but not quite
+    type Monad[F[+_]]   = Covariant[F] with AssociativeFlatten[F] with AssociativeBoth[F] // Close but not quite
 
-    type Divide[F[-_]]    = Contravariant[F] with AssociativeBothF[F]
-    type Divisible[F[-_]] = Contravariant[F] with AssociativeBothF[F] with IdentityBothF[F]
+    type Divide[F[-_]]    = Contravariant[F] with AssociativeBoth[F]
+    type Divisible[F[-_]] = Contravariant[F] with AssociativeBoth[F] with IdentityBoth[F]
     type Decidable[F[-_]] =
-      Contravariant[F] with AssociativeBothF[F] with IdentityBothF[F] with AssociativeEitherF[F] with IdentityEitherF[F]
+      Contravariant[F] with AssociativeBoth[F] with IdentityBoth[F] with AssociativeEither[F] with IdentityEither[F]
 
-    type Apply[F[+_]]               = Covariant[F] with AssociativeBothF[F]
-    type Applicative[F[+_]]         = Covariant[F] with AssociativeBothF[F] with IdentityBothF[F]
-    type InvariantApplicative[F[_]] = Invariant[F] with AssociativeBothF[F] with IdentityBothF[F]
+    type Apply[F[+_]]               = Covariant[F] with AssociativeBoth[F]
+    type Applicative[F[+_]]         = Covariant[F] with AssociativeBoth[F] with IdentityBoth[F]
+    type InvariantApplicative[F[_]] = Invariant[F] with AssociativeBoth[F] with IdentityBoth[F]
   }
 
   /**
