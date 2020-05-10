@@ -198,7 +198,11 @@ package coherent {
 
   trait HashOrd[-A] extends Hash[A] with Ord[A] { self =>
     final override def contramap[B](f: B => A): HashOrd[B] =
-      HashOrd.derive(self.contramap(f), self.contramap(f))
+      new HashOrd[B] {
+        def hash(b: B): Int                                    = self.hash(f(b))
+        protected def checkCompare(l: B, r: B): Ordering       = self.compare(f(l), f(r))
+        override protected def checkEqual(l: B, r: B): Boolean = self.equal(f(l), f(r))
+      }
   }
 
   object HashOrd {
