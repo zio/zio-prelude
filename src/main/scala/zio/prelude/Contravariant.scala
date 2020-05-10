@@ -407,9 +407,9 @@ object Contravariant extends LawfulF.Contravariant[ContravariantEqualF, Equal] {
   /**
    * The contravariant instance for `ZSink`.
    */
-  implicit def ZSinkContravariant[R, E, A0, B]: Contravariant[({ type lambda[-x] = ZSink[R, E, A0, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZSink[R, E, A0, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZSink[R, E, A0, A, B] => ZSink[R, E, A0, C, B] =
+  implicit def ZSinkContravariant[R, E, Z]: Contravariant[({ type lambda[-x] = ZSink[R, E, x, Z] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZSink[R, E, x, Z] })#lambda] {
+      def contramap[A, C](f: C => A): ZSink[R, E, A, Z] => ZSink[R, E, C, Z] =
         sink => sink.contramap(f)
     }
 
