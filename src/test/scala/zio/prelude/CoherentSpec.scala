@@ -9,7 +9,7 @@ object CoherentSpec extends DefaultRunnableSpec {
 
   def spec = suite("CoherentSpec")(
     test("HashOrd") {
-      val instance = implicitly[HashOrd[Int]]
+      val instance = implicitly[HashOrd[Double]].contramap[Int](_.toDouble)
       assert(instance.hash(0))(equalTo(0)) &&
       assert(instance.compare(0, 1))(equalTo(Ordering.LessThan))
     },
