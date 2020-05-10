@@ -6,6 +6,7 @@ package object prelude
     extends Assertions
     with AssociativeBothSyntax
     with AssociativeEitherSyntax
+    with AssociativeFlattenSyntax
     with ClosureSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax

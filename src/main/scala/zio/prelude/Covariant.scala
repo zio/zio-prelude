@@ -51,7 +51,7 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
    * Mapping by `f` followed by `g` must be the same as mapping with the
    * composition of `f` and `g`.
    */
-  val compositionLaw = new ZLawsF.Covariant.Law3Function[CovariantEqualF, Equal]("compositionLaw") {
+  val compositionLaw = new ZLawsF.Covariant.ComposeLaw[CovariantEqualF, Equal]("compositionLaw") {
     def apply[F[+_]: CovariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
       fa.map(f).map(g) <-> fa.map(f andThen g)
   }
