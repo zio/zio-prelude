@@ -3,6 +3,7 @@ package zio.prelude
 import scala.annotation.implicitNotFound
 
 import zio.prelude.coherent.AssociativeFlattenCovariantEqualF
+import zio.test.TestResult
 import zio.test.laws._
 
 /**
@@ -28,8 +29,10 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantE
    * For all `fffa`, `flatten(flatten(fffa))` is equivalent to
    * `flatten(fffa.map(flatten))`.
    */
-  val associativityLaw =
-    ???
+  val associativityLaw = new ZLawsF.Covariant.FlattenLaw[AssociativeFlattenCovariantEqualF, Equal]("associativityLaw") {
+    def apply[F[+_]: AssociativeFlattenCovariantEqualF, A: Equal](fffa: F[F[F[A]]]): TestResult =
+      fffa.flatten.flatten <-> fffa.map(_.flatten).flatten
+  }
 
   /**
    * The set of all laws that instances of `AssociativeFlatten` must satisfy.
