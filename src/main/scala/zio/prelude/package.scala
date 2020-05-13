@@ -54,7 +54,7 @@ package object prelude
     type InvariantMonoidal[F[_]]      = Invariant[F] with AssociativeBoth[F] with IdentityBoth[F]
 
     type FlatMap[F[+_]] = Covariant[F] with AssociativeFlatten[F]
-    type Monad[F[+_]]   = Covariant[F] with AssociativeFlatten[F] with AssociativeBoth[F] // Close but not quite
+    type Monad[F[+_]]   = Covariant[F] with IdentityFlatten[F]
 
     type Divide[F[-_]]    = Contravariant[F] with AssociativeBoth[F]
     type Divisible[F[-_]] = Contravariant[F] with AssociativeBoth[F] with IdentityBoth[F]
