@@ -132,19 +132,19 @@ object Validation extends LowPriorityValidationImplicits {
   final case class Success[+A](value: A)                 extends Validation[Nothing, A]
 
   /**
-   * The `AssociativeBothF` instance for `Validation`.
+   * The `AssociativeBoth` instance for `Validation`.
    */
-  implicit def ValidationAssociativeBothF[E]: AssociativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new AssociativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
+  implicit def ValidationAssociativeBoth[E]: AssociativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new AssociativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
     }
 
   /**
-   * The `CommutativeBothF` instance for `Validation`.
+   * The `CommutativeBoth` instance for `Validation`.
    */
-  implicit def ValidationCommutativeBothF[E]: CommutativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new CommutativeBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
+  implicit def ValidationCommutativeBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
     }
@@ -189,10 +189,10 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * The `IdentityBothF` instance for `Validation`.
+   * The `IdentityBoth` instance for `Validation`.
    */
-  implicit def ValidationIdentityBothF[E]: IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new IdentityBothF[({ type lambda[x] = Validation[E, x] })#lambda] {
+  implicit def ValidationIdentityBoth[E]: IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
       val any: Validation[Nothing, Any] =
         Validation.unit
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =

@@ -16,12 +16,12 @@ object ValidationSpec extends DefaultRunnableSpec {
 
   def spec = suite("ValidationSpec")(
     suite("laws")(
-      testM("associativeBothF")(checkAllLaws(AssociativeBothF)(genFValidation, Gen.anyInt)),
-      testM("commutativeBothF")(checkAllLaws(CommutativeBothF)(genFValidation, Gen.anyInt)),
+      testM("associativeBoth")(checkAllLaws(AssociativeBoth)(genFValidation, Gen.anyInt)),
+      testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(genFValidation, Gen.anyInt)),
       testM("covariant")(checkAllLaws(Covariant)(genFValidation, Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genValidation)),
       testM("hash")(checkAllLaws(Hash)(genValidation)),
-      testM("identityBothF")(checkAllLaws(IdentityBothF)(genFValidation, Gen.anyInt)),
+      testM("identityBoth")(checkAllLaws(IdentityBoth)(genFValidation, Gen.anyInt)),
       testM("ord")(checkAllLaws(Ord)(genValidation))
     )
   )

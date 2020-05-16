@@ -2,16 +2,16 @@ package zio.prelude
 
 package coherent {
 
-  trait AssociativeBothFEqualFInvariant[F[_]] extends AssociativeBothF[F] with EqualF[F] with Invariant[F]
+  trait AssociativeBothEqualFInvariant[F[_]] extends AssociativeBoth[F] with EqualF[F] with Invariant[F]
 
-  object AssociativeBothFEqualFInvariant {
+  object AssociativeBothEqualFInvariant {
     implicit def derive[F[_]](
-      implicit associativeBothF0: AssociativeBothF[F],
+      implicit associativeBoth0: AssociativeBoth[F],
       equalF0: EqualF[F],
       invariant0: Invariant[F]
-    ): AssociativeBothFEqualFInvariant[F] =
-      new AssociativeBothFEqualFInvariant[F] {
-        def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = associativeBothF0.both(fa, fb)
+    ): AssociativeBothEqualFInvariant[F] =
+      new AssociativeBothEqualFInvariant[F] {
+        def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = associativeBoth0.both(fa, fb)
         def deriveEqual[A: Equal]: Equal[F[A]]              = equalF0.deriveEqual
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]         = invariant0.invmap(f)
       }
@@ -32,17 +32,17 @@ package coherent {
       }
   }
 
-  trait AssociativeEitherFEqualFInvariant[F[_]] extends AssociativeEitherF[F] with EqualF[F] with Invariant[F]
+  trait AssociativeEitherEqualFInvariant[F[_]] extends AssociativeEither[F] with EqualF[F] with Invariant[F]
 
-  object AssociativeEitherFEqualFInvariant {
+  object AssociativeEitherEqualFInvariant {
     implicit def derive[F[_]](
-      implicit associativeEitherF0: AssociativeEitherF[F],
+      implicit associativeEither0: AssociativeEither[F],
       equalF0: EqualF[F],
       invariant0: Invariant[F]
-    ): AssociativeEitherFEqualFInvariant[F] =
-      new AssociativeEitherFEqualFInvariant[F] {
+    ): AssociativeEitherEqualFInvariant[F] =
+      new AssociativeEitherEqualFInvariant[F] {
         def deriveEqual[A: Equal]: Equal[F[A]]                      = equalF0.deriveEqual
-        def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = associativeEitherF0.either(fa, fb)
+        def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = associativeEither0.either(fa, fb)
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]                 = invariant0.invmap(f)
       }
   }
@@ -54,6 +54,24 @@ package coherent {
       new AssociativeEqual[A] {
         def combine(l: => A, r: => A): A              = associative0.combine(l, r)
         protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+      }
+  }
+
+  trait AssociativeFlattenCovariantEqualF[F[+_]] extends AssociativeFlatten[F] with Covariant[F] with EqualF[F]
+
+  object AssociativeFlattenCovariantEqualF {
+    implicit def derive[F[+_]](
+      implicit associativeFlatten0: AssociativeFlatten[F],
+      covariant0: Covariant[F],
+      equalF0: EqualF[F]
+    ): AssociativeFlattenCovariantEqualF[F] =
+      new AssociativeFlattenCovariantEqualF[F] {
+        def deriveEqual[A: Equal]: Equal[F[A]] =
+          equalF0.deriveEqual
+        def flatten[A](ffa: F[F[A]]): F[A] =
+          associativeFlatten0.flatten(ffa)
+        def map[A, B](f: A => B): F[A] => F[B] =
+          covariant0.map(f)
       }
   }
 
@@ -77,32 +95,32 @@ package coherent {
       }
   }
 
-  trait CommutativeBothFEqualFInvariant[F[_]] extends CommutativeBothF[F] with EqualF[F] with Invariant[F]
+  trait CommutativeBothEqualFInvariant[F[_]] extends CommutativeBoth[F] with EqualF[F] with Invariant[F]
 
-  object CommutativeBothFEqualFInvariant {
+  object CommutativeBothEqualFInvariant {
     implicit def derive[F[_]](
-      implicit commutativeBothF0: CommutativeBothF[F],
+      implicit commutativeBoth0: CommutativeBoth[F],
       equalF0: EqualF[F],
       invariant0: Invariant[F]
-    ): CommutativeBothFEqualFInvariant[F] =
-      new CommutativeBothFEqualFInvariant[F] {
-        def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = commutativeBothF0.both(fa, fb)
+    ): CommutativeBothEqualFInvariant[F] =
+      new CommutativeBothEqualFInvariant[F] {
+        def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = commutativeBoth0.both(fa, fb)
         def deriveEqual[A: Equal]: Equal[F[A]]              = equalF0.deriveEqual
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]         = invariant0.invmap(f)
       }
   }
 
-  trait CommutativeEitherFEqualFInvariant[F[_]] extends CommutativeEitherF[F] with EqualF[F] with Invariant[F]
+  trait CommutativeEitherEqualFInvariant[F[_]] extends CommutativeEither[F] with EqualF[F] with Invariant[F]
 
-  object CommutativeEitherFEqualFInvariant {
+  object CommutativeEitherEqualFInvariant {
     implicit def derive[F[_]](
-      implicit commutativeEitherF0: CommutativeEitherF[F],
+      implicit commutativeEither0: CommutativeEither[F],
       equalF0: EqualF[F],
       invariant0: Invariant[F]
-    ): CommutativeEitherFEqualFInvariant[F] =
-      new CommutativeEitherFEqualFInvariant[F] {
+    ): CommutativeEitherEqualFInvariant[F] =
+      new CommutativeEitherEqualFInvariant[F] {
         def deriveEqual[A: Equal]: Equal[F[A]]                      = equalF0.deriveEqual
-        def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = commutativeEitherF0.either(fa, fb)
+        def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = commutativeEither0.either(fa, fb)
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]                 = invariant0.invmap(f)
       }
   }
@@ -141,35 +159,35 @@ package coherent {
       }
   }
 
-  trait EqualFIdentityBothFInvariant[F[_]] extends EqualF[F] with IdentityBothF[F] with Invariant[F]
+  trait EqualFIdentityBothInvariant[F[_]] extends EqualF[F] with IdentityBoth[F] with Invariant[F]
 
-  object EqualFIdentityBothFInvariant {
+  object EqualFIdentityBothInvariant {
     implicit def derive[F[_]](
       implicit equalF0: EqualF[F],
-      identityBothF0: IdentityBothF[F],
+      identityBoth0: IdentityBoth[F],
       invariant0: Invariant[F]
-    ): EqualFIdentityBothFInvariant[F] =
-      new EqualFIdentityBothFInvariant[F] {
-        val any: F[Any]                                     = identityBothF0.any
-        def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = identityBothF0.both(fa, fb)
+    ): EqualFIdentityBothInvariant[F] =
+      new EqualFIdentityBothInvariant[F] {
+        val any: F[Any]                                     = identityBoth0.any
+        def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = identityBoth0.both(fa, fb)
         def deriveEqual[A: Equal]: Equal[F[A]]              = equalF0.deriveEqual
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]         = invariant0.invmap(f)
       }
   }
 
-  trait EqualFIdentityEitherFInvariant[F[_]] extends EqualF[F] with IdentityEitherF[F] with Invariant[F]
+  trait EqualFIdentityEitherInvariant[F[_]] extends EqualF[F] with IdentityEither[F] with Invariant[F]
 
-  object EqualFIdentityEitherFInvariant {
+  object EqualFIdentityEitherInvariant {
     implicit def derive[F[_]](
       implicit equalF0: EqualF[F],
-      identityEitherF0: IdentityEitherF[F],
+      identityEither0: IdentityEither[F],
       invariant0: Invariant[F]
-    ): EqualFIdentityEitherFInvariant[F] =
-      new EqualFIdentityEitherFInvariant[F] {
+    ): EqualFIdentityEitherInvariant[F] =
+      new EqualFIdentityEitherInvariant[F] {
         def deriveEqual[A: Equal]: Equal[F[A]]                      = equalF0.deriveEqual
-        def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = identityEitherF0.either(fa, fb)
+        def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = identityEither0.either(fa, fb)
         def invmap[A, B](f: A <=> B): F[A] <=> F[B]                 = invariant0.invmap(f)
-        val none: F[Nothing]                                        = identityEitherF0.none
+        val none: F[Nothing]                                        = identityEither0.none
       }
   }
 
@@ -198,7 +216,11 @@ package coherent {
 
   trait HashOrd[-A] extends Hash[A] with Ord[A] { self =>
     final override def contramap[B](f: B => A): HashOrd[B] =
-      HashOrd.derive(self.contramap(f), self.contramap(f))
+      new HashOrd[B] {
+        def hash(b: B): Int                                    = self.hash(f(b))
+        protected def checkCompare(l: B, r: B): Ordering       = self.compare(f(l), f(r))
+        override protected def checkEqual(l: B, r: B): Boolean = self.equal(f(l), f(r))
+      }
   }
 
   object HashOrd {
