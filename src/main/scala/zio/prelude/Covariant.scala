@@ -82,6 +82,16 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
     }
 
   /**
+   * The `Covariant` instance for `Id`.
+   */
+  implicit val IdCovariant: Covariant[Id] =
+    new Covariant[Id] {
+      def map[A, B](f: A => B): Id[A] => Id[B] = { id =>
+        Id(f(Id.unwrap(id)))
+      }
+    }
+
+  /**
    * The `Covariant` instance for `List`
    */
   implicit val ListCovariant: Covariant[List] =
@@ -1159,7 +1169,11 @@ trait CovariantSyntax {
    * Provides infix syntax for mapping over covariant values.
    */
   implicit class CovariantOps[F[+_], A](private val self: F[A]) {
+    def as[B](b: => B)(implicit F: Covariant[F]): F[B] = map(_ => b)
+
     def map[B](f: A => B)(implicit F: Covariant[F]): F[B] =
       F.map(f)(self)
+
+    def unit(implicit F: Covariant[F]): F[Unit] = as(())
   }
 }

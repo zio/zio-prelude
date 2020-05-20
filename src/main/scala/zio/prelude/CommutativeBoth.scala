@@ -11,12 +11,14 @@ import zio.test.laws._
  * `F[B]` to produce an `F[(A, B)]`.
  */
 @implicitNotFound("No implicit CommutativeBoth defined for ${F}.")
-trait CommutativeBoth[F[_]] {
+trait CommutativeBoth[F[_]] extends AssociativeBoth[F] {
 
   /**
    * Combines two values of types `F[A]` and `F[B]` to produce an `F[(A, B)]`.
    */
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
+
+  // def bothPar[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
 object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant, Equal] {
@@ -54,6 +56,14 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant,
           case (Some(a), Some(b)) => Some((a, b))
           case _                  => None
         }
+    }
+
+  /**
+   * The `CommutativeBoth` instance for `Id`.
+   */
+  implicit val IdCommutativeBoth: CommutativeBoth[Id] =
+    new CommutativeBoth[Id] {
+      def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] = Id((Id.unwrap(fa), Id.unwrap(fb)))
     }
 }
 
