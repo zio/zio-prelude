@@ -65,7 +65,7 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
   /**
    * The `IdentityBoth` instance for `Option`.
    */
-  implicit val OptionidentityBoth: IdentityBoth[Option] =
+  implicit val OptionIdentityBoth: IdentityBoth[Option] =
     new IdentityBoth[Option] {
       val any: Option[Any] =
         Some(())
@@ -78,6 +78,10 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
 }
 
 trait IdentityBothSyntax {
+  implicit class IdentityBothAnyOps[A](a: => A) {
+    def succeed[F[+_]](implicit both: IdentityBoth[F], covariant: Covariant[F]): F[A] =
+      both.any.map(_ => a)
+  }
 
   /**
    * Provides infix syntax for identity operations for invariant types.

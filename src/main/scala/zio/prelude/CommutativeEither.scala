@@ -11,13 +11,15 @@ import zio.test.laws._
  * `F[B]` to produce an `F[Either[A, B]]`.
  */
 @implicitNotFound("No implicit CommutativeEither defined for ${F}.")
-trait CommutativeEither[F[_]] {
+trait CommutativeEither[F[_]] extends AssociativeEither[F] {
 
   /**
    * Combines two values of types `F[A]` and `F[B]` to produce an
    * `F[Either[A, B]]`.
    */
   def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
+
+  // def eitherPar[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
 }
 
 object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvariant, Equal] {

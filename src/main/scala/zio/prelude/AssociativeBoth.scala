@@ -60,6 +60,14 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
           case _                  => None
         }
     }
+
+  /**
+   * The `AssociativeBoth` instance for `Id`.
+   */
+  implicit val IdAssociativeBoth: AssociativeBoth[Id] =
+    new AssociativeBoth[Id] {
+      def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] = Id((Id.unwrap(fa), Id.unwrap(fb)))
+    }
 }
 
 trait AssociativeBothSyntax {

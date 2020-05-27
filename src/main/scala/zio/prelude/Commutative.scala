@@ -5,7 +5,7 @@ import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Commutative[A] extends Closure[A] {
+trait Commutative[A] extends Associative[A] {
   self =>
   final def commute: Commutative[A] = Commutative((l, r) => self.combine(r, l))
 }

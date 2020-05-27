@@ -53,6 +53,14 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantE
       def flatten[A](ffa: Option[Option[A]]): Option[A] =
         ffa.flatten
     }
+
+  /**
+   * The `AssociativeFlatten` instance for `Id`.
+   */
+  implicit val IdAssociativeFlatten: AssociativeFlatten[Id] =
+    new AssociativeFlatten[Id] {
+      def flatten[A](ffa: Id[Id[A]]): Id[A] = Id.unwrap(ffa)
+    }
 }
 
 trait AssociativeFlattenSyntax {
