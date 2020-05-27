@@ -57,4 +57,11 @@ package object newtypes {
    * A newtype representing taking the max of two elements.
    */
   type Max[A] = Max.Type[A]
+
+  /**
+   * A newtype representing another type in a failed state
+   */
+  object Failure extends NewtypeF
+
+  type Failure[+A] = Failure.Type[A]
 }
