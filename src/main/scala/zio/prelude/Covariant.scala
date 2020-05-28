@@ -135,6 +135,21 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
     }
 
   /**
+   * The `Covariant` instance for a failed `Either`
+   */
+  implicit def EitherFailedCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+    new Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
+      override def map[L, L1](f: L => L1): Failure[Either[L, R]] => Failure[Either[L1, R]] = { either =>
+        Failure.wrap {
+          Failure.unwrap(either) match {
+            case Left(l)  => Left[L1, R](f(l))
+            case Right(r) => Right[L1, R](r)
+          }
+        }
+      }
+    }
+
+  /**
    * The `Covariant` instance for `Try`
    */
   implicit val TryCovariant: Covariant[Try] =
