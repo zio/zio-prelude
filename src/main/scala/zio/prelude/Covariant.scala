@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Chunk, Fiber, NonEmptyChunk, Schedule, ZIO, ZLayer, ZManaged, ZQueue }
+import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
 import zio.prelude.coherent.CovariantEqualF
 import zio.prelude.newtypes.Failure
 import zio.stream.ZStream
@@ -1309,6 +1309,98 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
     new Covariant[({ type lambda[+b] = ZQueue[RA, RB, EA, EB, A, b] })#lambda] {
       override def map[B, B1](f: B => B1): ZQueue[RA, RB, EA, EB, A, B] => ZQueue[RA, RB, EA, EB, A, B1] = { zqueue =>
         zqueue.map(f)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for `Cause`
+   */
+  implicit def CauseCovariant: Covariant[Cause] = new Covariant[Cause] {
+    override def map[A, B](f: A => B): Cause[A] => Cause[B] = { cause =>
+      cause.map(f)
+    }
+  }
+
+  /**
+   * The `Covariant` instance for `Exit`
+   */
+  implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
+    new Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] {
+      override def map[A, B](f: A => B): Exit[E, A] => Exit[E, B] = { exit =>
+        exit.map(f)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for a failed `Exit`
+   */
+  implicit def ExitFailedCovariant[A]: Covariant[({ type lambda[+e] = Exit[e, A] })#lambda] =
+    new Covariant[({ type lambda[+e] = Exit[e, A] })#lambda] {
+      override def map[E, E1](f: E => E1): Exit[E, A] => Exit[E1, A] = { exit =>
+        exit.mapError(f)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for `ZRef`
+   */
+  implicit def ZRefCovariant[EA, EB, A]: Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] =
+    new Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] {
+      override def map[B, C](f: B => C): ZRef[EA, EB, A, B] => ZRef[EA, EB, A, C] = { zref =>
+        zref.map(f)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for a failed `ZRef` on A
+   */
+  implicit def ZRefFailedACovariant[EB, A, B]: Covariant[({ type lambda[+ea] = ZRef[ea, EB, A, B] })#lambda] =
+    new Covariant[({ type lambda[+ea] = ZRef[ea, EB, A, B] })#lambda] {
+      override def map[E, E1](f: E => E1): ZRef[E, EB, A, B] => ZRef[E1, EB, A, B] = { zref =>
+        zref.dimapError(f, identity)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for a failed `ZRef` on B
+   */
+  implicit def ZRefFailedBCovariant[EA, A, B]: Covariant[({ type lambda[+eb] = ZRef[EA, eb, A, B] })#lambda] =
+    new Covariant[({ type lambda[+eb] = ZRef[EA, eb, A, B] })#lambda] {
+      override def map[E, E1](f: E => E1): ZRef[EA, E, A, B] => ZRef[EA, E1, A, B] = { zref =>
+        zref.dimapError(identity, f)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for `ZRefM`
+   */
+  implicit def ZRefMCovariant[RA, RB, EA, EB, A]
+    : Covariant[({ type lambda[+b] = ZRefM[RA, RB, EA, EB, A, b] })#lambda] =
+    new Covariant[({ type lambda[+b] = ZRefM[RA, RB, EA, EB, A, b] })#lambda] {
+      override def map[B, C](f: B => C): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, A, C] = { zref =>
+        zref.map(f)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for a failed `ZRefM` on A
+   */
+  implicit def ZRefMFailedACovariant[RA, RB, EB, A, B]
+    : Covariant[({ type lambda[+ea] = ZRefM[RA, RB, ea, EB, A, B] })#lambda] =
+    new Covariant[({ type lambda[+ea] = ZRefM[RA, RB, ea, EB, A, B] })#lambda] {
+      override def map[E, E1](f: E => E1): ZRefM[RA, RB, E, EB, A, B] => ZRefM[RA, RB, E1, EB, A, B] = { zref =>
+        zref.dimapError(f, identity)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for a failed `ZRefM` on B
+   */
+  implicit def ZRefMFailedBCovariant[RA, RB, EA, A, B]
+    : Covariant[({ type lambda[+eb] = ZRefM[RA, RB, EA, eb, A, B] })#lambda] =
+    new Covariant[({ type lambda[+eb] = ZRefM[RA, RB, EA, eb, A, B] })#lambda] {
+      override def map[E, E1](f: E => E1): ZRefM[RA, RB, EA, E, A, B] => ZRefM[RA, RB, EA, E1, A, B] = { zref =>
+        zref.dimapError(identity, f)
       }
     }
 }
