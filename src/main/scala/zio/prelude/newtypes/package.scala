@@ -77,4 +77,18 @@ package object newtypes {
   object Failure extends NewtypeF
 
   type Failure[+A] = Failure.Type[A]
+
+  /**
+   * A newtype representing an input error in another type
+   */
+  object FailureIn extends NewtypeF
+
+  type FailureIn[+A] = FailureIn.Type[A]
+
+  /**
+   * A newtype representing an output error in another type
+   */
+  object FailureOut extends NewtypeF
+
+  type FailureOut[+A] = FailureOut.Type[A]
 }

@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
 import zio.prelude.coherent.CovariantEqualF
-import zio.prelude.newtypes.Failure
+import zio.prelude.newtypes.{ Failure, FailureIn, FailureOut }
 import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
@@ -149,7 +149,7 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
   /**
    * The `Covariant` instance for a failed `Either`
    */
-  implicit def EitherFailedCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+  implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
     new Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
       override def map[L, L1](f: L => L1): Failure[Either[L, R]] => Failure[Either[L1, R]] = { either =>
         Failure.wrap {
@@ -1294,7 +1294,7 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
   /**
    * The `Covariant` instance for a failed `ZLayer`
    */
-  implicit def ZLayerFailedCovariant[R, Out]: Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] =
+  implicit def ZLayerFailureCovariant[R, Out]: Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] =
     new Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] {
       def map[E, E1](f: E => E1): Failure[ZLayer[R, E, Out]] => Failure[ZLayer[R, E1, Out]] = { zlayer =>
         Failure.wrap(Failure.unwrap(zlayer).mapError(f))
@@ -1334,10 +1334,10 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
   /**
    * The `Covariant` instance for a failed `Exit`
    */
-  implicit def ExitFailedCovariant[A]: Covariant[({ type lambda[+e] = Exit[e, A] })#lambda] =
-    new Covariant[({ type lambda[+e] = Exit[e, A] })#lambda] {
-      override def map[E, E1](f: E => E1): Exit[E, A] => Exit[E1, A] = { exit =>
-        exit.mapError(f)
+  implicit def ExitFailureCovariant[A]: Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] =
+    new Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
+      override def map[E, E1](f: E => E1): Failure[Exit[E, A]] => Failure[Exit[E1, A]] = { exit =>
+        Failure.wrap(Failure.unwrap(exit).mapError(f))
       }
     }
 
@@ -1352,22 +1352,24 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRef` on A
+   * The `Covariant` instance for a failed `ZRef` on its input
    */
-  implicit def ZRefFailedACovariant[EB, A, B]: Covariant[({ type lambda[+ea] = ZRef[ea, EB, A, B] })#lambda] =
-    new Covariant[({ type lambda[+ea] = ZRef[ea, EB, A, B] })#lambda] {
-      override def map[E, E1](f: E => E1): ZRef[E, EB, A, B] => ZRef[E1, EB, A, B] = { zref =>
-        zref.dimapError(f, identity)
+  implicit def ZRefFailureInCovariant[EB, A, B]
+    : Covariant[({ type lambda[+ea] = FailureIn[ZRef[ea, EB, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+ea] = FailureIn[ZRef[ea, EB, A, B]] })#lambda] {
+      override def map[E, E1](f: E => E1): FailureIn[ZRef[E, EB, A, B]] => FailureIn[ZRef[E1, EB, A, B]] = { zref =>
+        FailureIn.wrap(FailureIn.unwrap(zref).dimapError(f, identity))
       }
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRef` on B
+   * The `Covariant` instance for a failed `ZRef` on its output
    */
-  implicit def ZRefFailedBCovariant[EA, A, B]: Covariant[({ type lambda[+eb] = ZRef[EA, eb, A, B] })#lambda] =
-    new Covariant[({ type lambda[+eb] = ZRef[EA, eb, A, B] })#lambda] {
-      override def map[E, E1](f: E => E1): ZRef[EA, E, A, B] => ZRef[EA, E1, A, B] = { zref =>
-        zref.dimapError(identity, f)
+  implicit def ZRefFailureOutCovariant[EA, A, B]
+    : Covariant[({ type lambda[+eb] = FailureOut[ZRef[EA, eb, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+eb] = FailureOut[ZRef[EA, eb, A, B]] })#lambda] {
+      override def map[E, E1](f: E => E1): FailureOut[ZRef[EA, E, A, B]] => FailureOut[ZRef[EA, E1, A, B]] = { zref =>
+        FailureOut.wrap(FailureOut.unwrap(zref).dimapError(identity, f))
       }
     }
 
@@ -1383,24 +1385,28 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRefM` on A
+   * The `Covariant` instance for a failed `ZRefM` on its input
    */
-  implicit def ZRefMFailedACovariant[RA, RB, EB, A, B]
-    : Covariant[({ type lambda[+ea] = ZRefM[RA, RB, ea, EB, A, B] })#lambda] =
-    new Covariant[({ type lambda[+ea] = ZRefM[RA, RB, ea, EB, A, B] })#lambda] {
-      override def map[E, E1](f: E => E1): ZRefM[RA, RB, E, EB, A, B] => ZRefM[RA, RB, E1, EB, A, B] = { zref =>
-        zref.dimapError(f, identity)
+  implicit def ZRefMFailureInACovariant[RA, RB, EB, A, B]
+    : Covariant[({ type lambda[+ea] = FailureIn[ZRefM[RA, RB, ea, EB, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+ea] = FailureIn[ZRefM[RA, RB, ea, EB, A, B]] })#lambda] {
+      override def map[E, E1](
+        f: E => E1
+      ): FailureIn[ZRefM[RA, RB, E, EB, A, B]] => FailureIn[ZRefM[RA, RB, E1, EB, A, B]] = { zref =>
+        FailureIn.wrap(FailureIn.unwrap(zref).dimapError(f, identity))
       }
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRefM` on B
+   * The `Covariant` instance for a failed `ZRefM` on its output
    */
-  implicit def ZRefMFailedBCovariant[RA, RB, EA, A, B]
-    : Covariant[({ type lambda[+eb] = ZRefM[RA, RB, EA, eb, A, B] })#lambda] =
-    new Covariant[({ type lambda[+eb] = ZRefM[RA, RB, EA, eb, A, B] })#lambda] {
-      override def map[E, E1](f: E => E1): ZRefM[RA, RB, EA, E, A, B] => ZRefM[RA, RB, EA, E1, A, B] = { zref =>
-        zref.dimapError(identity, f)
+  implicit def ZRefMFailureOutCovariant[RA, RB, EA, A, B]
+    : Covariant[({ type lambda[+eb] = FailureOut[ZRefM[RA, RB, EA, eb, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+eb] = FailureOut[ZRefM[RA, RB, EA, eb, A, B]] })#lambda] {
+      override def map[E, E1](
+        f: E => E1
+      ): FailureOut[ZRefM[RA, RB, EA, E, A, B]] => FailureOut[ZRefM[RA, RB, EA, E1, A, B]] = { zref =>
+        FailureOut.wrap(FailureOut.unwrap(zref).dimapError(identity, f))
       }
     }
 }
