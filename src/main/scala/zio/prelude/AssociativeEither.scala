@@ -1,6 +1,7 @@
 package zio.prelude
 
 import scala.annotation.implicitNotFound
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 import zio.prelude.coherent.AssociativeEitherEqualFInvariant
@@ -54,6 +55,17 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
     associativeEither
 
   /**
+   * The `AssociativeEither` instance for `Future`.
+   */
+  implicit def FutureAssociativeEither(implicit ec: ExecutionContext): AssociativeEither[Future] =
+    new AssociativeEither[Future] {
+      def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
+        fa.map(Left(_)).recoverWith {
+          case _: Throwable => fb.map(Right(_))
+        }
+    }
+
+  /**
    * The `AssociativeEither` instance for `Option`.
    */
   implicit val OptionAssociativeEither: AssociativeEither[Option] =
@@ -67,7 +79,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
    */
   implicit val TryAssociativeEither: AssociativeEither[Try] =
     new AssociativeEither[Try] {
-      def either[A, B](fa: => Try[A], fb: => Try[B]): Try[Either[A,B]] =
+      def either[A, B](fa: => Try[A], fb: => Try[B]): Try[Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
     }
 }
