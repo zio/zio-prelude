@@ -1,8 +1,7 @@
 package zio.prelude
 
 import scala.annotation.implicitNotFound
-
-import zio.{ Chunk, NonEmptyChunk }
+import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -815,6 +814,18 @@ object Equal extends Lawful[Equal] {
    */
   implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
     make(_.corresponds(_)(_ === _))
+
+  /**
+   * Derives an `Equal[Cause[A]]` given an `Equal[A]`.
+   */
+  implicit def CauseEqual[A: Equal]: Equal[Cause[A]] =
+    default
+
+  /**
+   * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.
+   */
+  implicit def ExitEqual[E, A: Equal]: Equal[Exit[E, A]] =
+    default
 
   /**
    * Returns whether two values refer to the same location in memory.

@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.prelude.newtypes.Failure
+import zio.{ Cause, Exit, NonEmptyChunk }
 import zio.random.Random
 import zio.test._
 import zio.test.laws.GenF
@@ -40,5 +41,35 @@ object GenFs {
     new GenF[R, ({ type lambda[+x] = Failure[Validation[x, A]] })#lambda] {
       def apply[R1 <: R, E](e: Gen[R1, E]): Gen[R1, Failure[Validation[E, A]]] =
         Gens.validation(e, a).map(Failure.wrap)
+    }
+
+  /**
+   * A generator of failed `Cause` values.
+   */
+  val fail: GenF[Random, Cause] =
+    new GenF[Random, Cause] {
+      def apply[R1 <: Random, A](gen: Gen[R1, A]): Gen[R1, Cause[A]] =
+        gen.map(Cause.fail)
+    }
+
+  /**
+   * A generator of `Exit` values.
+   */
+  def exit[R <: Random with Sized, E](e: Gen[R, E]): GenF[R, ({ type lambda[+a] = Exit[E, a] })#lambda] =
+    new GenF[R, ({ type lambda[+a] = Exit[E, a] })#lambda] {
+      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, Exit[E, A]] =
+        Gen.either(e, a).map {
+          case Left(error)    => Exit.fail(error)
+          case Right(success) => Exit.succeed(success)
+        }
+    }
+
+  /**
+   * A generator of `NonEmptyChunk` values.
+   */
+  def nonEmptyChunk: GenF[Random with Sized, NonEmptyChunk] =
+    new GenF[Random with Sized, NonEmptyChunk] {
+      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, NonEmptyChunk[A]] =
+        Gen.chunkOf1(gen)
     }
 }
