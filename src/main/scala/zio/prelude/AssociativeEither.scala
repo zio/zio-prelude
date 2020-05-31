@@ -5,6 +5,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 import zio.prelude.coherent.AssociativeEitherEqualFInvariant
+import zio.prelude.newtypes.Failure
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -53,6 +54,31 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
    */
   def apply[F[+_]](implicit associativeEither: AssociativeEither[F]): AssociativeEither[F] =
     associativeEither
+
+  /**
+   * The `AssociativeEither` instance for `Either`.
+   */
+  implicit def EitherAssociativeEither[L]: AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] =
+    new AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] {
+      def either[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, Either[A, B]] =
+        fa.map(Left(_)).left.flatMap(_ => fb.map(Right(_)))
+    }
+
+  /**
+   * The `AssociativeEither` instance for a failed `Either`
+   */
+  implicit def EitherFailedAssociativeEither[R]
+    : AssociativeEither[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+    new AssociativeEither[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
+      def either[A, B](fa: => Failure[Either[A, R]], fb: => Failure[Either[B, R]]): Failure[Either[Either[A, B], R]] =
+        Failure.wrap {
+          Failure
+            .unwrap(fa)
+            .left
+            .map(Left(_))
+            .flatMap(_ => Failure.unwrap(fb).left.map(Right(_)))
+        }
+    }
 
   /**
    * The `AssociativeEither` instance for `Future`.
