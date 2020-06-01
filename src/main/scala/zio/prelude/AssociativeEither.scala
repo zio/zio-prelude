@@ -83,6 +83,29 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
     }
 
   /**
+   * The `AssociativeEither` instance for `Exit`.
+   */
+  implicit def ExitAssociativeEither[E]: AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] =
+    new AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] {
+      def either[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, Either[A, B]] =
+        fa.map(Left(_)) match {
+          case Exit.Failure(_) => fb.map(Right(_))
+          case res             => res
+        }
+    }
+
+  /**
+   * The `AssociativeEither` instance for failed `Exit`.
+   */
+  implicit def ExitFailureAssociativeEither[A]: AssociativeEither[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] =
+    new AssociativeEither[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
+      def either[EA, EB](fa: => Failure[Exit[EA, A]], fb: => Failure[Exit[EB, A]]): Failure[Exit[Either[EA, EB], A]] =
+        Failure.wrap {
+          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
+        }
+    }
+
+  /**
    * The `AssociativeEither` instance for `Fiber`.
    */
   implicit def FiberAssociativeEither[E]: AssociativeEither[({ type lambda[+a] = Fiber[E, a] })#lambda] =
