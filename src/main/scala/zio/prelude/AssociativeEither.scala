@@ -135,7 +135,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
   implicit def ZIOAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
     new AssociativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
       def either[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, Either[A, B]] =
-        fa.map(Left(_)) orElse fb.map(Right(_))
+        fa.orElseEither(fb)
     }
 
   /**
@@ -168,7 +168,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
   implicit def ZManagedAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
     new AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
       def either[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, Either[A, B]] =
-        fa.map(Left(_)) orElse fb.map(Right(_))
+        fa.orElseEither(fb)
     }
 
   /**
