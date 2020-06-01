@@ -83,6 +83,15 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
     }
 
   /**
+   * The `AssociativeEither` instance for `Fiber`.
+   */
+  implicit def FiberAssociativeEither[E]: AssociativeEither[({ type lambda[+a] = Fiber[E, a] })#lambda] =
+    new AssociativeEither[({ type lambda[+a] = Fiber[E, a] })#lambda] {
+      def either[A, B](fa: => Fiber[E, A], fb: => Fiber[E, B]): Fiber[E, Either[A, B]] =
+        fa.orElseEither(fb)
+    }
+
+  /**
    * The `AssociativeEither` instance for `Future`.
    */
   implicit def FutureAssociativeEither(implicit ec: ExecutionContext): AssociativeEither[Future] =
@@ -107,7 +116,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
    */
   implicit def ScheduleAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = Schedule[R, E, a] })#lambda] =
     new AssociativeEither[({ type lambda[+a] = Schedule[R, E, a] })#lambda] {
-      def either[A, B](fa: => Schedule[R,E,A], fb: => Schedule[R,E,B]): Schedule[R,E,Either[A,B]] =
+      def either[A, B](fa: => Schedule[R, E, A], fb: => Schedule[R, E, B]): Schedule[R, E, Either[A, B]] =
         fa.andThenEither(fb)
     }
 
