@@ -130,7 +130,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
         fb: => Failure[ZIO[R, EB, A]]
       ): Failure[ZIO[R, Either[EA, EB], A]] =
         Failure.wrap {
-          Failure.unwrap(fa).mapError(Left(_)) orElse Failure.unwrap(fb).mapError(Right(_))
+          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
         }
     }
 
@@ -154,7 +154,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
         fb: => Failure[ZManaged[R, EB, A]]
       ): Failure[ZManaged[R, Either[EA, EB], A]] =
         Failure.wrap {
-          Failure.unwrap(fa).mapError(Left(_)) orElse Failure.unwrap(fb).mapError(Right(_))
+          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
         }
     }
 }
