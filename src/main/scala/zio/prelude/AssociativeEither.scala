@@ -4,6 +4,7 @@ import scala.annotation.implicitNotFound
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
+import zio._
 import zio.prelude.coherent.AssociativeEitherEqualFInvariant
 import zio.prelude.newtypes.Failure
 import zio.test.TestResult
@@ -106,6 +107,15 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
   implicit val TryAssociativeEither: AssociativeEither[Try] =
     new AssociativeEither[Try] {
       def either[A, B](fa: => Try[A], fb: => Try[B]): Try[Either[A, B]] =
+        fa.map(Left(_)) orElse fb.map(Right(_))
+    }
+
+  /**
+   * The `AssociativeEither` instance for `ZIO`.
+   */
+  implicit def ZIOAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new AssociativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      def either[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
     }
 }
