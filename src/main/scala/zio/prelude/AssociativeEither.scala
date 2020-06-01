@@ -118,6 +118,18 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
       def either[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
     }
+
+  implicit def ZIOFailureAssociativeEither[R, A]
+    : AssociativeEither[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
+    new AssociativeEither[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
+      def either[EA, EB](
+        fa: => Failure[ZIO[R, EA, A]],
+        fb: => Failure[ZIO[R, EB, A]]
+      ): Failure[ZIO[R, Either[EA, EB], A]] =
+        Failure.wrap {
+          Failure.unwrap(fa).mapError(Left(_)) orElse Failure.unwrap(fb).mapError(Right(_))
+        }
+    }
 }
 
 trait AssociativeEitherSyntax {
