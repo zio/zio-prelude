@@ -103,6 +103,15 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
     }
 
   /**
+   * The `AssociativeEither` instance for `Schedule`.
+   */
+  implicit def ScheduleAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = Schedule[R, E, a] })#lambda] =
+    new AssociativeEither[({ type lambda[+a] = Schedule[R, E, a] })#lambda] {
+      def either[A, B](fa: => Schedule[R,E,A], fb: => Schedule[R,E,B]): Schedule[R,E,Either[A,B]] =
+        fa.andThenEither(fb)
+    }
+
+  /**
    * The `AssociativeEither` instance for `Try`.
    */
   implicit val TryAssociativeEither: AssociativeEither[Try] =
