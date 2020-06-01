@@ -119,6 +119,9 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
         fa.map(Left(_)) orElse fb.map(Right(_))
     }
 
+  /**
+   * The `AssociativeEither` instance for failed `ZIO`.
+   */
   implicit def ZIOFailureAssociativeEither[R, A]
     : AssociativeEither[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
     new AssociativeEither[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
@@ -131,12 +134,18 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
         }
     }
 
+  /**
+   * The `AssociativeEither` instance for `ZManaged`.
+   */
   implicit def ZManagedAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
     new AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
       def either[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
     }
 
+  /**
+   * The `AssociativeEither` instance for failed `ZManaged`.
+   */
   implicit def ZManagedFailureAssociativeEither[R, A]
     : AssociativeEither[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
     new AssociativeEither[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
