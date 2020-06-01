@@ -3,6 +3,7 @@ package zio.prelude
 import zio._
 import zio.prelude.coherent.AssociativeEitherEqualFInvariant
 import zio.prelude.newtypes.Failure
+import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -162,6 +163,30 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
         fa: => Failure[ZManaged[R, EA, A]],
         fb: => Failure[ZManaged[R, EB, A]]
       ): Failure[ZManaged[R, Either[EA, EB], A]] =
+        Failure.wrap {
+          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
+        }
+    }
+
+  /**
+   * The `AssociativeEither` instance for `ZStream`.
+   */
+  implicit def ZStreamAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
+    new AssociativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
+      def either[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, Either[A, B]] =
+        fa.map(Left(_)) orElse fb.map(Right(_))
+    }
+
+  /**
+   * The `AssociativeEither` instance for failed `ZStream`.
+   */
+  implicit def ZStreamFailureAssociativeEither[R, A]
+    : AssociativeEither[({ type lambda[+e] = Failure[ZStream[R, e, A]] })#lambda] =
+    new AssociativeEither[({ type lambda[+e] = Failure[ZStream[R, e, A]] })#lambda] {
+      def either[EA, EB](
+        fa: => Failure[ZStream[R, EA, A]],
+        fb: => Failure[ZStream[R, EB, A]]
+      ): Failure[ZStream[R, Either[EA, EB], A]] =
         Failure.wrap {
           Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
         }
