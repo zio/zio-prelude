@@ -29,15 +29,17 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantE
    * For all `fffa`, `flatten(flatten(fffa))` is equivalent to
    * `flatten(fffa.map(flatten))`.
    */
-  val associativityLaw = new ZLawsF.Covariant.FlattenLaw[AssociativeFlattenCovariantEqualF, Equal]("associativityLaw") {
-    def apply[F[+_]: AssociativeFlattenCovariantEqualF, A: Equal](fffa: F[F[F[A]]]): TestResult =
-      fffa.flatten.flatten <-> fffa.map(_.flatten).flatten
-  }
+  val associativityLaw: LawsF.Covariant[AssociativeFlattenCovariantEqualF, Equal] =
+    new LawsF.Covariant.FlattenLaw[AssociativeFlattenCovariantEqualF, Equal]("associativityLaw") {
+      def apply[F[+_]: AssociativeFlattenCovariantEqualF, A: Equal](fffa: F[F[F[A]]]): TestResult =
+        fffa.flatten.flatten <-> fffa.map(_.flatten).flatten
+    }
 
   /**
    * The set of all laws that instances of `AssociativeFlatten` must satisfy.
    */
-  val laws = associativityLaw
+  val laws: LawsF.Covariant[AssociativeFlattenCovariantEqualF, Equal] =
+    associativityLaw
 
   /**
    * Summons an implicit `AssociativeFlatten[F]`.

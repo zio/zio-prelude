@@ -28,24 +28,26 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
    * Adding a layer by mapping a value and mapping it into the identity
    * element and then flattening is an identity.
    */
-  val rightIdentityLaw = new ZLawsF.Covariant.Law1[CovariantEqualFIdentityFlatten, Equal]("rightIdentityLaw") {
-    def apply[F[+_]: CovariantEqualFIdentityFlatten, A: Equal](fa: F[A]): TestResult =
-      fa.map(a => IdentityFlatten[F].any.map(_ => a)).flatten <-> fa
-  }
+  val rightIdentityLaw: LawsF.Covariant[CovariantEqualFIdentityFlatten, Equal] =
+    new LawsF.Covariant.Law1[CovariantEqualFIdentityFlatten, Equal]("rightIdentityLaw") {
+      def apply[F[+_]: CovariantEqualFIdentityFlatten, A: Equal](fa: F[A]): TestResult =
+        fa.map(a => IdentityFlatten[F].any.map(_ => a)).flatten <-> fa
+    }
 
   /**
    * Adding a layer by mapping a value into the identity element and then
    * flattening is an identity
    */
-  val leftIdentityLaw = new ZLawsF.Covariant.Law1[CovariantEqualFIdentityFlatten, Equal]("leftIdentityLaw") {
-    def apply[F[+_]: CovariantEqualFIdentityFlatten, A: Equal](fa: F[A]): TestResult =
-      IdentityFlatten[F].any.map(_ => fa).flatten <-> fa
-  }
+  val leftIdentityLaw: LawsF.Covariant[CovariantEqualFIdentityFlatten, Equal] =
+    new LawsF.Covariant.Law1[CovariantEqualFIdentityFlatten, Equal]("leftIdentityLaw") {
+      def apply[F[+_]: CovariantEqualFIdentityFlatten, A: Equal](fa: F[A]): TestResult =
+        IdentityFlatten[F].any.map(_ => fa).flatten <-> fa
+    }
 
   /**
    * The set of all laws that instances of `IdentityFlatten` must satisfy.
    */
-  val laws =
+  val laws: LawsF.Covariant[CovariantEqualFIdentityFlatten, Equal] =
     rightIdentityLaw + leftIdentityLaw + AssociativeFlatten.laws
 
   /**

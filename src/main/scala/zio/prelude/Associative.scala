@@ -23,12 +23,14 @@ object Associative extends Lawful[AssociativeEqual] {
    * (a1 * a2) * a3 === a1 * (a2 * a3)
    * }}}
    */
-  final val associativityLaw = new Laws.Law3[AssociativeEqual]("associativityLaw") {
-    def apply[A: AssociativeEqual](a1: A, a2: A, a3: A): TestResult =
-      (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
-  }
+  val associativityLaw: Laws[AssociativeEqual] =
+    new Laws.Law3[AssociativeEqual]("associativityLaw") {
+      def apply[A: AssociativeEqual](a1: A, a2: A, a3: A): TestResult =
+        (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
+    }
 
-  final val laws = associativityLaw + Closure.laws
+  val laws: Laws[AssociativeEqual] =
+    associativityLaw + Closure.laws
 
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 

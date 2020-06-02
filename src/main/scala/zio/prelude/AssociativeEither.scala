@@ -26,24 +26,25 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
    * For all `fa`, `fb`, and `fc`, `either(fa, either(fb, fc))` is
    * equivalent to `either(either(fa, fb), fc)`.
    */
-  val associativityLaw = new LawsF.Invariant.Law3[AssociativeEitherEqualFInvariant, Equal]("associativityLaw") {
-    def apply[F[_]: AssociativeEitherEqualFInvariant, A: Equal, B: Equal, C: Equal](
-      fa: F[A],
-      fb: F[B],
-      fc: F[C]
-    ): TestResult = {
-      val left  = fa.orElseEither(fb.orElseEither(fc))
-      val right = (fa.orElseEither(fb)).orElseEither(fc)
-      val left2 = Invariant[F].invmap(Equivalence.either[A, B, C]).to(left)
-      left2 <-> right
+  val associativityLaw: LawsF.Invariant[AssociativeEitherEqualFInvariant, Equal] =
+    new LawsF.Invariant.Law3[AssociativeEitherEqualFInvariant, Equal]("associativityLaw") {
+      def apply[F[_]: AssociativeEitherEqualFInvariant, A: Equal, B: Equal, C: Equal](
+        fa: F[A],
+        fb: F[B],
+        fc: F[C]
+      ): TestResult = {
+        val left  = fa.orElseEither(fb.orElseEither(fc))
+        val right = (fa.orElseEither(fb)).orElseEither(fc)
+        val left2 = Invariant[F].invmap(Equivalence.either[A, B, C]).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * The set of law laws that instances of `AssociativeEither` must
    * satisfy.
    */
-  val laws: ZLawsF.Invariant[AssociativeEitherEqualFInvariant, Equal, Any] =
+  val laws: LawsF.Invariant[AssociativeEitherEqualFInvariant, Equal] =
     associativityLaw
 
   /**

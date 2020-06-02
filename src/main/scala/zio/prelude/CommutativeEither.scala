@@ -27,19 +27,21 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvari
   /**
    * For all `fa` and `fb`, `either(fa, fb)` is equivalent to `either(fb, fa)`.
    */
-  val commutativeLaw = new LawsF.Invariant.Law2[CommutativeEitherEqualFInvariant, Equal]("commutativeLaw") {
-    def apply[F[_]: CommutativeEitherEqualFInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
-      val left  = fa.orElseEitherPar(fb)
-      val right = fb.orElseEitherPar(fa)
-      val left2 = Invariant[F].invmap(Equivalence.eitherFlip[A, B]).to(left)
-      left2 <-> right
+  val commutativeLaw: LawsF.Invariant[CommutativeEitherEqualFInvariant, Equal] =
+    new LawsF.Invariant.Law2[CommutativeEitherEqualFInvariant, Equal]("commutativeLaw") {
+      def apply[F[_]: CommutativeEitherEqualFInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
+        val left  = fa.orElseEitherPar(fb)
+        val right = fb.orElseEitherPar(fa)
+        val left2 = Invariant[F].invmap(Equivalence.eitherFlip[A, B]).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * The set of law laws that instances of `CommutativeEither` must satisfy.
    */
-  val laws = commutativeLaw
+  val laws: LawsF.Invariant[CommutativeEitherEqualFInvariant, Equal] =
+    commutativeLaw
 
   /**
    * Summons an implicit `CommutativeEither[F]`.
