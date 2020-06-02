@@ -112,7 +112,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1`, `a2`, and `a3`, if `a1` is less than `a2` and `a2` is
    * less than `a3` then `a1` is less than `a3`.
    */
-  val transitivityLaw1: Laws.Law3[Ord] =
+  val transitivityLaw1: Laws[Ord] =
     new Laws.Law3[Ord]("transitivityLaw1") {
       def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
         ((a1 less a2) && (a2 less a3)) ==> (a1 less a3)
@@ -122,7 +122,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1`, `a2`, and `a3`, if `a1` is greater than `a2` and `a2`
    * is greater than `a3` then `a1` is greater than `a3`.
    */
-  val transitivityLaw2: Laws.Law3[Ord] =
+  val transitivityLaw2: Laws[Ord] =
     new Laws.Law3[Ord]("transitivityLaw2") {
       def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
         ((a1 greater a2) && (a2 greater a3)) ==> (a1 greater a3)
@@ -132,7 +132,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, if `a1` is less than or equal to `a2` and
    * `a2` is less than or equal to `a1` then `a1` is equal to `a2`.
    */
-  val antisymmetryLaw1: Laws.Law2[Ord] =
+  val antisymmetryLaw1: Laws[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equal a2)
@@ -142,7 +142,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, if `a1` is greater than or equal to `a2` and
    * `a2` is greater than or equal to `a1` then `a1` is equal to `a2`.
    */
-  val antisymmetryLaw2: Laws.Law2[Ord] =
+  val antisymmetryLaw2: Laws[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equal a2)
@@ -152,7 +152,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, `a1` is less than or equal to `a2` or `a2`
    * is less than or equal to `a1`.
    */
-  val connexityLaw1: Laws.Law2[Ord] =
+  val connexityLaw1: Laws[Ord] =
     new Laws.Law2[Ord]("connexityLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         (a1 lessOrEqual a2) || (a2 lessOrEqual a1)
@@ -162,7 +162,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, `a1` is greater than or equal to `a2` or
    * `a2` is greater than or equal to `a1`.
    */
-  val connexityLaw2: Laws.Law2[Ord] =
+  val connexityLaw2: Laws[Ord] =
     new Laws.Law2[Ord]("connexityLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         (a1 greaterOrEqual a2) || (a2 greaterOrEqual a1)
@@ -172,7 +172,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, `a1` is less than or equal to `a2` if and
    * only if `a2` is greater than or equal to `a1`.
    */
-  val complementLaw: Laws.Law2[Ord] =
+  val complementLaw: Laws[Ord] =
     new Laws.Law2[Ord]("complementLaw") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         (a1 lessOrEqual a2) <==> (a2 greaterOrEqual a1)

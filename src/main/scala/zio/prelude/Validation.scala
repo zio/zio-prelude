@@ -189,6 +189,26 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
+   * The `Covariant` instance for `Validation` with respect to its error type.
+   */
+  implicit def ValidationFailureCovariant[A]
+    : Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] =
+    new Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] {
+      def map[E, E1](f: E => E1): newtypes.Failure[Validation[E, A]] => newtypes.Failure[Validation[E1, A]] =
+        validation => newtypes.Failure.wrap(newtypes.Failure.unwrap(validation).mapError(f))
+    }
+
+  /**
+   * The `EqualF` instance for `Validation` with respect to its error type.
+   */
+  implicit def ValidationFailureEqualF[A: Equal]
+    : EqualF[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] =
+    new EqualF[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] {
+      def deriveEqual[E: Equal]: Equal[newtypes.Failure[Validation[E, A]]] =
+        ValidationEqual[E, A].contramap(newtypes.Failure.unwrap)
+    }
+
+  /**
    * The `IdentityBoth` instance for `Validation`.
    */
   implicit def ValidationIdentityBoth[E]: IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] =

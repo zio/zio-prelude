@@ -7,7 +7,7 @@ object AssociativeFlattenSpec extends DefaultRunnableSpec {
 
   def spec = suite("AssociativeFlattenSpec")(
     suite("laws")(
-      testM("option")(checkAllLaws(AssociativeFlatten)(GenFs.option, Gen.anyInt))
+      testM("option")(checkAllLaws(AssociativeFlatten)(GenF.option, Gen.anyInt))
     )
   )
 }

@@ -7,7 +7,7 @@ object CommutativeBothSpec extends DefaultRunnableSpec {
 
   def spec = suite("CommutativeBothSpec")(
     suite("laws")(
-      testM("option")(checkAllLaws(CommutativeBoth)(GenFs.option, Gen.anyInt))
+      testM("option")(checkAllLaws(CommutativeBoth)(GenF.option, Gen.anyInt))
     )
   )
 }

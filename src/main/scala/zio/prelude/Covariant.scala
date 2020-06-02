@@ -48,24 +48,26 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
   /**
    * Mapping with the identity function must be an identity function.
    */
-  val identityLaw = new LawsF.Covariant.Law1[CovariantEqualF, Equal]("identityLaw") {
-    def apply[F[+_]: CovariantEqualF, A: Equal](fa: F[A]): TestResult =
-      fa.map(identity) <-> fa
-  }
+  val identityLaw: LawsF.Covariant[CovariantEqualF, Equal] =
+    new LawsF.Covariant.Law1[CovariantEqualF, Equal]("identityLaw") {
+      def apply[F[+_]: CovariantEqualF, A: Equal](fa: F[A]): TestResult =
+        fa.map(identity) <-> fa
+    }
 
   /**
    * Mapping by `f` followed by `g` must be the same as mapping with the
    * composition of `f` and `g`.
    */
-  val compositionLaw = new ZLawsF.Covariant.ComposeLaw[CovariantEqualF, Equal]("compositionLaw") {
-    def apply[F[+_]: CovariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
-      fa.map(f).map(g) <-> fa.map(f andThen g)
-  }
+  val compositionLaw: LawsF.Covariant[CovariantEqualF, Equal] =
+    new LawsF.Covariant.ComposeLaw[CovariantEqualF, Equal]("compositionLaw") {
+      def apply[F[+_]: CovariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
+        fa.map(f).map(g) <-> fa.map(f andThen g)
+    }
 
   /**
    * The set of all laws that instances of `Covariant` must satisfy.
    */
-  val laws: ZLawsF.Covariant[CovariantEqualF, Equal, Any] =
+  val laws: LawsF.Covariant[CovariantEqualF, Equal] =
     identityLaw + compositionLaw
 
   /**

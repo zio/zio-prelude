@@ -25,23 +25,25 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
    * For all `fa`, `fb`, and `fc`, `both(fa, both(fb, fc))` is equivalent
    * to `both(both(fa, fb), fc)`.
    */
-  val associativityLaw = new LawsF.Invariant.Law3[AssociativeBothEqualFInvariant, Equal]("associativityLaw") {
-    def apply[F[_]: AssociativeBothEqualFInvariant, A: Equal, B: Equal, C: Equal](
-      fa: F[A],
-      fb: F[B],
-      fc: F[C]
-    ): TestResult = {
-      val left  = fa.zip(fb.zip(fc))
-      val right = (fa.zip(fb)).zip(fc)
-      val left2 = Invariant[F].invmap(Equivalence.tuple[A, B, C]).to(left)
-      left2 <-> right
+  val associativityLaw: LawsF.Invariant[AssociativeBothEqualFInvariant, Equal] =
+    new LawsF.Invariant.Law3[AssociativeBothEqualFInvariant, Equal]("associativityLaw") {
+      def apply[F[_]: AssociativeBothEqualFInvariant, A: Equal, B: Equal, C: Equal](
+        fa: F[A],
+        fb: F[B],
+        fc: F[C]
+      ): TestResult = {
+        val left  = fa.zip(fb.zip(fc))
+        val right = (fa.zip(fb)).zip(fc)
+        val left2 = Invariant[F].invmap(Equivalence.tuple[A, B, C]).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * The set of law laws that instances of `AssociativeBoth` must satisfy.
    */
-  val laws = associativityLaw
+  val laws: LawsF.Invariant[AssociativeBothEqualFInvariant, Equal] =
+    associativityLaw
 
   /**
    * Summons an implicit `AssociativeBoth[F]`.
