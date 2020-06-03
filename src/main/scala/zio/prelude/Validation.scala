@@ -283,32 +283,991 @@ object Validation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[E, A, B, C](a: Validation[E, A], b: Validation[E, B])(f: (A, B) => C): Validation[E, C] =
-    a.zipWithPar(b)(f)
+  def mapParN[E, A0, A1, B](a0: Validation[E, A0], a1: Validation[E, A1])(f: (A0, A1) => B): Validation[E, B] =
+    a0.zipWithPar(a1)(f)
 
   /**
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[E, A, B, C, D](a: Validation[E, A], b: Validation[E, B], c: Validation[E, C])(
-    f: (A, B, C) => D
-  ): Validation[E, D] =
-    (a <&> b <&> c).map { case ((a, b), c) => f(a, b, c) }
+  def mapParN[E, A0, A1, A2, B](a0: Validation[E, A0], a1: Validation[E, A1], a2: Validation[E, A2])(
+    f: (A0, A1, A2) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2).map { case ((a0, a1), a2) => f(a0, a1, a2) }
 
   /**
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[E, A, B, C, D, F](a: Validation[E, A], b: Validation[E, B], c: Validation[E, C], d: Validation[E, D])(
-    f: (A, B, C, D) => F
-  ): Validation[E, F] =
-    (a <&> b <&> c <&> d).map { case (((a, b), c), d) => f(a, b, c, d) }
+  def mapParN[E, A0, A1, A2, A3, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3]
+  )(
+    f: (A0, A1, A2, A3) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3).map { case (((a0, a1), a2), a3) => f(a0, a1, a2, a3) }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4]
+  )(
+    f: (A0, A1, A2, A3, A4) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4).map { case ((((a0, a1), a2), a3), a4) => f(a0, a1, a2, a3, a4) }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5]
+  )(
+    f: (A0, A1, A2, A3, A4, A5) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5).map { case (((((a0, a1), a2), a3), a4), a5) => f(a0, a1, a2, a3, a4, a5) }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6).map {
+      case ((((((a0, a1), a2), a3), a4), a5), a6) => f(a0, a1, a2, a3, a4, a5, a6)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7).map {
+      case (((((((a0, a1), a2), a3), a4), a5), a6), a7) => f(a0, a1, a2, a3, a4, a5, a6, a7)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8).map {
+      case ((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8) => f(a0, a1, a2, a3, a4, a5, a6, a7, a8)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9).map {
+      case (((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9) => f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10).map {
+      case ((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11).map {
+      case (((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12).map {
+      case ((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13).map {
+      case (((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14).map {
+      case ((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15).map {
+      case (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16).map {
+      case ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17).map {
+      case (
+          ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
+          a17
+          ) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18).map {
+      case (
+          (
+            ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
+            a17
+          ),
+          a18
+          ) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18],
+    a19: Validation[E, A19]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19).map {
+      case (
+          (
+            (
+              ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
+              a17
+            ),
+            a18
+          ),
+          a19
+          ) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18],
+    a19: Validation[E, A19],
+    a20: Validation[E, A20]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20).map {
+      case (
+          (
+            (
+              (
+                (
+                  (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
+                  a16
+                ),
+                a17
+              ),
+              a18
+            ),
+            a19
+          ),
+          a20
+          ) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)
+    }
+
+  /**
+   * Combines the results of the specified `Validation` values using the
+   * function `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21, B](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18],
+    a19: Validation[E, A19],
+    a20: Validation[E, A20],
+    a21: Validation[E, A21]
+  )(
+    f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21) => B
+  ): Validation[E, B] =
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20 <&> a21).map {
+      case (
+          (
+            (
+              (
+                (
+                  (
+                    (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
+                    a16
+                  ),
+                  a17
+                ),
+                a18
+              ),
+              a19
+            ),
+            a20
+          ),
+          a21
+          ) =>
+        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21)
+    }
 
   /**
    * Constructs a `Validation` that succeeds with the specified value.
    */
   def succeed[A](value: A): Validation[Nothing, A] =
     Success(value)
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1](a0: Validation[E, A0], a1: Validation[E, A1]): Validation[E, (A0, A1)] =
+    a0 <&> a1
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2]
+  ): Validation[E, (A0, A1, A2)] =
+    mapParN(a0, a1, a2)((_, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3]
+  ): Validation[E, (A0, A1, A2, A3)] =
+    mapParN(a0, a1, a2, a3)((_, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4]
+  ): Validation[E, (A0, A1, A2, A3, A4)] =
+    mapParN(a0, a1, a2, a3, a4)((_, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5)] =
+    mapParN(a0, a1, a2, a3, a4, a5)((_, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6)((_, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7)((_, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8)((_, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)((_, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)((_, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)((_, _, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)((_, _, _, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)((_, _, _, _, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18],
+    a19: Validation[E, A19]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18],
+    a19: Validation[E, A19],
+    a20: Validation[E, A20]
+  ): Validation[E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20)] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def tupledPar[E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21](
+    a0: Validation[E, A0],
+    a1: Validation[E, A1],
+    a2: Validation[E, A2],
+    a3: Validation[E, A3],
+    a4: Validation[E, A4],
+    a5: Validation[E, A5],
+    a6: Validation[E, A6],
+    a7: Validation[E, A7],
+    a8: Validation[E, A8],
+    a9: Validation[E, A9],
+    a10: Validation[E, A10],
+    a11: Validation[E, A11],
+    a12: Validation[E, A12],
+    a13: Validation[E, A13],
+    a14: Validation[E, A14],
+    a15: Validation[E, A15],
+    a16: Validation[E, A16],
+    a17: Validation[E, A17],
+    a18: Validation[E, A18],
+    a19: Validation[E, A19],
+    a20: Validation[E, A20],
+    a21: Validation[E, A21]
+  ): Validation[
+    E,
+    (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21)
+  ] =
+    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
 
   /**
    * The `Validation` that succeeds with the `Unit` value.
