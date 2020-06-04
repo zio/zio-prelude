@@ -75,6 +75,17 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
           case _                  => None
         }
     }
+
+  /**
+   * The `IdentityBoth` instance for `Id`.
+   */
+  implicit val IdIdentityBoth: IdentityBoth[Id] =
+    new IdentityBoth[Id] {
+      val any: Id[Any] = Id(())
+
+      def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] =
+        Id(Id.unwrap(fa) -> Id.unwrap(fb))
+    }
 }
 
 trait IdentityBothSyntax {
