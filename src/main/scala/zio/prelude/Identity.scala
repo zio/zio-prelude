@@ -12,17 +12,20 @@ trait Identity[A] extends Closure[A] {
 
 object Identity extends Lawful[EqualIdentity] {
 
-  final val leftIdentityLaw = new Laws.Law1[EqualIdentity]("leftIdentityLaw") {
-    def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
-      (I.identity <> a) <-> a
-  }
+  val leftIdentityLaw: Laws[EqualIdentity] =
+    new Laws.Law1[EqualIdentity]("leftIdentityLaw") {
+      def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
+        (I.identity <> a) <-> a
+    }
 
-  final val rightIdentityLaw = new Laws.Law1[EqualIdentity]("rightIdentityLaw") {
-    def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
-      (a <> I.identity) <-> a
-  }
+  val rightIdentityLaw: Laws[EqualIdentity] =
+    new Laws.Law1[EqualIdentity]("rightIdentityLaw") {
+      def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
+        (a <> I.identity) <-> a
+    }
 
-  final val laws = leftIdentityLaw + rightIdentityLaw + Closure.laws
+  val laws: Laws[EqualIdentity] =
+    leftIdentityLaw + rightIdentityLaw + Closure.laws
 
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 

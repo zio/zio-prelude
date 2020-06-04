@@ -12,7 +12,9 @@ object ValidationSpec extends DefaultRunnableSpec {
   val genFValidation: GenF[Random with Sized, ({ type lambda[+x] = Validation[Int, x] })#lambda] =
     GenFs.validation(Gen.anyInt)
 
-  type IntValidation[+A] = Validation[Int, A]
+  val genFValidationFailure
+    : GenF[Random with Sized, ({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda] =
+    GenFs.validationFailure(Gen.anyInt)
 
   def spec = suite("ValidationSpec")(
     suite("laws")(
@@ -20,6 +22,7 @@ object ValidationSpec extends DefaultRunnableSpec {
       testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(genFValidation, Gen.anyInt)),
       testM("covariant")(checkAllLaws(Covariant)(genFValidation, Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genValidation)),
+      testM("failureCovariant")(checkAllLaws(Covariant)(genFValidationFailure, Gen.anyInt)),
       testM("hash")(checkAllLaws(Hash)(genValidation)),
       testM("identityBoth")(checkAllLaws(IdentityBoth)(genFValidation, Gen.anyInt)),
       testM("ord")(checkAllLaws(Ord)(genValidation))

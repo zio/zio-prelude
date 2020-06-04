@@ -30,31 +30,34 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
   /**
    * For all `fa`, `both(identity, fa)` is equivalent to `fa`.
    */
-  val leftIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("leftIdentityLaw") {
-    def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityBoth[F].both(IdentityBoth[F].any, fa)
-      val right = fa
-      val left2 = Invariant[F].invmap(Equivalence.tupleAny[A] compose Equivalence.tupleFlip).to(left)
-      left2 <-> right
+  val leftIdentityLaw: LawsF.Invariant[EqualFIdentityBothInvariant, Equal] =
+    new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("leftIdentityLaw") {
+      def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
+        val left  = IdentityBoth[F].both(IdentityBoth[F].any, fa)
+        val right = fa
+        val left2 = Invariant[F].invmap(Equivalence.tupleAny[A] compose Equivalence.tupleFlip).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * For all `fa`, `both(fa, identity)` is equivalent to `fa`.
    */
-  val rightIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("rightIdentityLaw") {
-    def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityBoth[F].both(fa, IdentityBoth[F].any)
-      val right = fa
-      val left2 = Invariant[F].invmap(Equivalence.tupleAny[A]).to(left)
-      left2 <-> right
+  val rightIdentityLaw: LawsF.Invariant[EqualFIdentityBothInvariant, Equal] =
+    new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("rightIdentityLaw") {
+      def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
+        val left  = IdentityBoth[F].both(fa, IdentityBoth[F].any)
+        val right = fa
+        val left2 = Invariant[F].invmap(Equivalence.tupleAny[A]).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * The set of law laws that instances of `IdentityBoth` must satisfy.
    */
-  val laws = leftIdentityLaw + rightIdentityLaw
+  val laws: LawsF.Invariant[EqualFIdentityBothInvariant, Equal] =
+    leftIdentityLaw + rightIdentityLaw
 
   /**
    * Summons an implicit `IdentityBoth[F]`.

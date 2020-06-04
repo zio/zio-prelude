@@ -16,12 +16,15 @@ trait Inverse[A] extends Identity[A] {
 }
 
 object Inverse extends Lawful[EqualInverse] {
-  final val rightInverseLaw = new Laws.Law1[EqualInverse]("rightInverseLaw") {
-    def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
-      I.combine(a, I.inverse(a)) <-> I.identity
-  }
 
-  def laws = rightInverseLaw + Identity.laws
+  val rightInverseLaw: Laws[EqualInverse] =
+    new Laws.Law1[EqualInverse]("rightInverseLaw") {
+      def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
+        I.combine(a, I.inverse(a)) <-> I.identity
+    }
+
+  val laws: Laws[EqualInverse] =
+    rightInverseLaw + Identity.laws
 
   def apply[A](implicit Inverse: Inverse[A]): Inverse[A] = Inverse
 

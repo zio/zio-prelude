@@ -46,17 +46,20 @@ final case class Equivalence[A, B](to: A => B, from: B => A) { self =>
 
 object Equivalence extends Lawful2[Equivalence, Equal, Equal] {
 
-  val leftIdentity = new Laws2.Law1Left[Equivalence, Equal, AnyF]("leftIdentity") {
-    def apply[A: Equal, B: AnyF](a: A)(implicit equivalence: Equivalence[A, B]): TestResult =
-      equivalence.from(equivalence.to(a)) <-> a
-  }
+  val leftIdentity: Laws2[Equivalence, Equal, AnyF] =
+    new Laws2.Law1Left[Equivalence, Equal, AnyF]("leftIdentity") {
+      def apply[A: Equal, B: AnyF](a: A)(implicit equivalence: Equivalence[A, B]): TestResult =
+        equivalence.from(equivalence.to(a)) <-> a
+    }
 
-  val rightIdentity = new Laws2.Law1Right[Equivalence, AnyF, Equal]("rightIdentity") {
-    def apply[A: AnyF, B: Equal](b: B)(implicit equivalence: Equivalence[A, B]): TestResult =
-      equivalence.to(equivalence.from(b)) <-> b
-  }
+  val rightIdentity: Laws2[Equivalence, AnyF, Equal] =
+    new Laws2.Law1Right[Equivalence, AnyF, Equal]("rightIdentity") {
+      def apply[A: AnyF, B: Equal](b: B)(implicit equivalence: Equivalence[A, B]): TestResult =
+        equivalence.to(equivalence.from(b)) <-> b
+    }
 
-  val laws = leftIdentity + rightIdentity
+  val laws: Laws2[Equivalence, Equal, Equal] =
+    leftIdentity + rightIdentity
 
   /**
    * Constructs the identity equivalence, which just says that any type is

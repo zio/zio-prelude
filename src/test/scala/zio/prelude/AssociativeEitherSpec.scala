@@ -7,7 +7,8 @@ object AssociativeEitherSpec extends DefaultRunnableSpec {
 
   def spec = suite("AssociativeEitherSpec")(
     suite("laws")(
-      testM("option")(checkAllLaws(AssociativeEither)(GenFs.option, Gen.anyInt))
+      testM("option")(checkAllLaws(AssociativeEither)(GenF.option, Gen.anyInt)),
+      testM("either")(checkAllLaws(AssociativeEither)(GenF.either(Gen.anyInt), Gen.anyInt))
     )
   )
 }

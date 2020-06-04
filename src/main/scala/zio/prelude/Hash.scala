@@ -89,7 +89,7 @@ object Hash extends Lawful[Hash] {
    * For all values `a1` and `a2`, if `a1` is equal to `a2` then the hash of
    * `a1` is equal to the hash of `a2`.
    */
-  val consistencyLaw: Laws.Law2[Hash] =
+  val consistencyLaw: Laws[Hash] =
     new Laws.Law2[Hash]("consistencyLaw") {
       def apply[A](a1: A, a2: A)(implicit caps: Hash[A]): TestResult =
         (a1 <-> a2) ==> (Hash[A].hash(a1) <-> Hash[A].hash(a2))

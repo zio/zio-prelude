@@ -82,6 +82,12 @@ object Invariant {
         )
     }
 
+  implicit def EitherInvariant[L]: Invariant[({ type lambda[r] = Either[L, r] })#lambda] =
+    new Invariant[({ type lambda[r] = Either[L, r] })#lambda] {
+      def invmap[A, B](f: A <=> B): Either[L, A] <=> Either[L, B] =
+        Equivalence(_.map(f.to), _.map(f.from))
+    }
+
   implicit val OptionInvariant: Invariant[Option] =
     new Invariant[Option] {
       def invmap[A, B](f: A <=> B): Option[A] <=> Option[B] =

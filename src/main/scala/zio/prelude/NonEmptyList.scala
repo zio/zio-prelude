@@ -364,6 +364,16 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
 
   /**
+   * The `IdentityFlatten` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListIdentityFlatten: IdentityFlatten[NonEmptyList] =
+    new IdentityFlatten[NonEmptyList] {
+      val any: NonEmptyList[Any] = single(())
+      def flatten[A](ffa: NonEmptyList[NonEmptyList[A]]): NonEmptyList[A] =
+        ffa.flatten
+    }
+
+  /**
    * The `CommutativeBoth` instance for `NonEmptyList`.
    */
   implicit val NonEmptyListCommutativeBoth: CommutativeBoth[NonEmptyList] =

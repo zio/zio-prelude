@@ -7,7 +7,7 @@ object IdentityEitherSpec extends DefaultRunnableSpec {
 
   def spec = suite("IdentityEitherSpec")(
     suite("laws")(
-      testM("option")(checkAllLaws(IdentityEither)(GenFs.option, Gen.anyInt))
+      testM("option")(checkAllLaws(IdentityEither)(GenF.option, Gen.anyInt))
     )
   )
 }
