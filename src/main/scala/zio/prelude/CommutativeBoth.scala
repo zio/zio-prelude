@@ -26,19 +26,21 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant,
   /**
    * For all `fa` and `fb`, `both(fa, fb)` is equivalent to `both(fb, fa)`.
    */
-  val commutativeLaw = new LawsF.Invariant.Law2[CommutativeBothEqualFInvariant, Equal]("commutativeLaw") {
-    def apply[F[_]: CommutativeBothEqualFInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
-      val left  = fa.zipPar(fb)
-      val right = fb.zipPar(fa)
-      val left2 = Invariant[F].invmap(Equivalence.tupleFlip[A, B]).to(left)
-      left2 <-> right
+  val commutativeLaw: LawsF.Invariant[CommutativeBothEqualFInvariant, Equal] =
+    new LawsF.Invariant.Law2[CommutativeBothEqualFInvariant, Equal]("commutativeLaw") {
+      def apply[F[_]: CommutativeBothEqualFInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
+        val left  = fa.zipPar(fb)
+        val right = fb.zipPar(fa)
+        val left2 = Invariant[F].invmap(Equivalence.tupleFlip[A, B]).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * The set of law laws that instances of `CommutativeBoth` must satisfy.
    */
-  val laws = commutativeLaw
+  val laws: LawsF.Invariant[CommutativeBothEqualFInvariant, Equal] =
+    commutativeLaw
 
   /**
    * Summons an implicit `CommutativeBoth[F]`.

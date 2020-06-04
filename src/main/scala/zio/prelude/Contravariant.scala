@@ -57,25 +57,27 @@ object Contravariant extends LawfulF.Contravariant[ContravariantEqualF, Equal] {
   /**
    * Contramapping with the identity function must not change the structure.
    */
-  val identityLaw = new LawsF.Contravariant.Law1[ContravariantEqualF, Equal]("identityLaw") {
-    def apply[F[-_]: ContravariantEqualF, A: Equal](fa: F[A]): TestResult =
-      fa.contramap(identity[A]) <-> fa
-  }
+  val identityLaw: LawsF.Contravariant[ContravariantEqualF, Equal] =
+    new LawsF.Contravariant.Law1[ContravariantEqualF, Equal]("identityLaw") {
+      def apply[F[-_]: ContravariantEqualF, A: Equal](fa: F[A]): TestResult =
+        fa.contramap(identity[A]) <-> fa
+    }
 
   /**
-   * FIXME: Cannot do this since ZLawsF.Contravariant is sealed in ZIO Test!!!
-   *
-   * Contramap composition.
+   * Contramapping by `f` followed by `g` must be the same as contramapping
+   * with the composition of `f` and `g`.
    */
-  // val compositionLaw = new ZLawsF.Contravariant[ContravariantEqualF, Equal, Any]("compositionLaw") {
-  //   final def run[R, F[-_]: ContravariantEqualF, A: Caps](genF: GenF[R, F], gen: Gen[R, A]): ZIO[R, Nothing, TestResult] =
-  //     check(genF(gen), Gen.function(gen), Gen.function(gen))(apply(_, _, _).map(_.label(label)))
+  val compositionLaw: LawsF.Contravariant[ContravariantEqualF, Equal] =
+    new LawsF.Contravariant.ComposeLaw[ContravariantEqualF, Equal]("compositionLaw") {
+      def apply[F[-_]: ContravariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: B => A, g: C => B): TestResult =
+        fa.contramap(f).contramap(g) <-> fa.contramap(f compose g)
+    }
 
-  //   def apply[F[-_]: ContravariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
-  //     fa.contramap(g).contramap(f) <-> fa.contramap(f compose g)
-  // }
-
-  val laws = identityLaw
+  /**
+   * The set of all laws that instances of `Contravariant` must satisfy.
+   */
+  val laws: LawsF.Contravariant[ContravariantEqualF, Equal] =
+    identityLaw + compositionLaw
 
   /**
    * Summons an implicit `Contravariant[F]`.

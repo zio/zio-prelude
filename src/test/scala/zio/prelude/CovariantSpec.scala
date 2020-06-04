@@ -1,16 +1,16 @@
 package zio.prelude
 
 import zio.random.Random
-import zio.test.{ Gen, _ }
+import zio.test._
 import zio.test.laws._
 
 object CovariantSpec extends DefaultRunnableSpec {
 
   val genFMap: GenF[Random with Sized, ({ type lambda[+x] = Map[Int, x] })#lambda] =
-    GenFs.map(Gen.anyInt)
+    GenF.map(Gen.anyInt)
 
   val genFEither: GenF[Random with Sized, ({ type lambda[+x] = Either[Int, x] })#lambda] =
-    GenFs.either(Gen.anyInt)
+    GenF.either(Gen.anyInt)
 
   val genFTuple: GenF[Random with Sized, ({ type lambda[+x] = (Int, x) })#lambda] =
     GenFs.tuple2(Gen.anyInt)
@@ -20,9 +20,9 @@ object CovariantSpec extends DefaultRunnableSpec {
 
   def spec = suite("CovariantSpec")(
     suite("laws")(
-      testM("option")(checkAllLaws(Covariant)(GenFs.option, Gen.anyInt)),
-      testM("list")(checkAllLaws(Covariant)(GenFs.list, Gen.anyInt)),
-      testM("vector")(checkAllLaws(Covariant)(GenFs.vector, Gen.anyInt)),
+      testM("option")(checkAllLaws(Covariant)(GenF.option, Gen.anyInt)),
+      testM("list")(checkAllLaws(Covariant)(GenF.list, Gen.anyInt)),
+      testM("vector")(checkAllLaws(Covariant)(GenF.vector, Gen.anyInt)),
       testM("map")(checkAllLaws(Covariant)(genFMap, Gen.anyInt)),
       testM("either")(checkAllLaws(Covariant)(genFEither, Gen.anyInt)),
       testM("tuple2")(checkAllLaws(Covariant)(genFTuple, Gen.anyInt)),

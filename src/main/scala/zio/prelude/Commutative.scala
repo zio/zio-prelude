@@ -12,12 +12,14 @@ trait Commutative[A] extends Associative[A] {
 
 object Commutative extends Lawful[CommutativeEqual] {
 
-  final val commutativeLaw = new Laws.Law2[CommutativeEqual]("commutativeLaw") {
-    def apply[A: CommutativeEqual](a1: A, a2: A): TestResult =
-      (a1 <> a2) <-> (a2 <> a1)
-  }
+  val commutativeLaw: Laws[CommutativeEqual] =
+    new Laws.Law2[CommutativeEqual]("commutativeLaw") {
+      def apply[A: CommutativeEqual](a1: A, a2: A): TestResult =
+        (a1 <> a2) <-> (a2 <> a1)
+    }
 
-  final val laws = commutativeLaw + Closure.laws
+  val laws: Laws[CommutativeEqual] =
+    commutativeLaw + Closure.laws
 
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 

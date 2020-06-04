@@ -31,31 +31,34 @@ object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, E
   /**
    * For all `fa`, `either(identity, fa)` is equivalent to `fa`.
    */
-  val leftIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("leftIdentityLaw") {
-    def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityEither[F].either[Nothing, A](IdentityEither[F].none, fa)
-      val right = fa
-      val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A] compose Equivalence.eitherFlip).to(left)
-      left2 <-> right
+  val leftIdentityLaw: LawsF.Invariant[EqualFIdentityEitherInvariant, Equal] =
+    new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("leftIdentityLaw") {
+      def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
+        val left  = IdentityEither[F].either[Nothing, A](IdentityEither[F].none, fa)
+        val right = fa
+        val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A] compose Equivalence.eitherFlip).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * For all `fa`, `either(fa, identity)` is equivalent to `fa`.
    */
-  val rightIdentityLaw = new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("rightOdentityLaw") {
-    def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
-      val left  = IdentityEither[F].either[A, Nothing](fa, IdentityEither[F].none)
-      val right = fa
-      val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A]).to(left)
-      left2 <-> right
+  val rightIdentityLaw: LawsF.Invariant[EqualFIdentityEitherInvariant, Equal] =
+    new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("rightOdentityLaw") {
+      def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
+        val left  = IdentityEither[F].either[A, Nothing](fa, IdentityEither[F].none)
+        val right = fa
+        val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A]).to(left)
+        left2 <-> right
+      }
     }
-  }
 
   /**
    * The set of law laws that instances of `IdentityEither` must satisfy.
    */
-  val laws = leftIdentityLaw + rightIdentityLaw
+  val laws: LawsF.Invariant[EqualFIdentityEitherInvariant, Equal] =
+    leftIdentityLaw + rightIdentityLaw
 
   /**
    * Summons an implicit `IdentityEither[F]`.
