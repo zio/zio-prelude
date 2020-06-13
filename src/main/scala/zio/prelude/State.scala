@@ -44,6 +44,9 @@ object State {
   def apply[S, A](run: S => (S, A)): State[S, A] =
     Modify(run)
 
+  def suspend[S, A](state: => State[S, A]): State[S, A] =
+    unit.flatMap(_ => state)
+
   def get[S]: State[S, S] =
     State(s => (s, s))
 
@@ -59,14 +62,14 @@ object State {
   implicit def StateAssociativeBoth[S]: AssociativeBoth[({ type lambda[+A] = State[S, A] })#lambda] =
     new AssociativeBoth[({ type lambda[+A] = State[S, A] })#lambda] {
       def both[A, B](fa: => State[S, A], fb: => State[S, B]): State[S, (A, B)] =
-        fa.zip(fb)
+        State.suspend(fa.zip(fb))
     }
   implicit def StateIdentityBoth[S]: IdentityBoth[({ type lambda[+A] = State[S, A] })#lambda] =
     new IdentityBoth[({ type lambda[+A] = State[S, A] })#lambda] {
       def any: State[S, Any] =
         State.unit
       def both[A, B](fa: => State[S, A], fb: => State[S, B]): State[S, (A, B)] =
-        fa.zip(fb)
+        State.suspend(fa.zip(fb))
     }
   implicit def StateCovariant[S]: Covariant[({ type lambda[+A] = State[S, A] })#lambda] =
     new Covariant[({ type lambda[+A] = State[S, A] })#lambda] {

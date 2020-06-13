@@ -31,6 +31,12 @@ object StateSpec extends DefaultRunnableSpec {
           } yield (x + y)
         }
       assert(state.run(0))(anything)
+    },
+    test("zipWithIndex") {
+      val as       = (1 to 100000).toList
+      val expected = as.zipWithIndex
+      val actual   = Traversable.ListTraversable.zipWithIndex(as)
+      assert(actual)(equalTo(expected))
     }
   )
 }

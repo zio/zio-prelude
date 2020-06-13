@@ -27,6 +27,9 @@ trait Traversable[F[+_]] extends Covariant[F] {
     fold[A, A](fa)(Identity[A].identity)(f)
 
   def toChunk[A](fa: F[A]): Chunk[A] = foldMap(fa)(Chunk(_))
+
+  def zipWithIndex[A](fa: F[A]) =
+    mapEffect(fa)(a => State((n: Int) => (n + 1, (a, n)))).run(0)._2
 }
 
 object Traversable {
