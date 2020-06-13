@@ -3,11 +3,9 @@ package zio.prelude
 import zio.Chunk
 
 trait Traversable[F[+_]] extends Covariant[F] {
+
   def fold[S, A](fa: F[A])(s: S)(f: (S, A) => S): S = {
-    import Traversable.State
-
     type StateS[+A] = State[S, A]
-
     mapEffect[StateS, A, Any](fa)((a: A) => State((s: S) => (f(s, a), ()))).run(s)._1
   }
 
@@ -29,49 +27,9 @@ trait Traversable[F[+_]] extends Covariant[F] {
     fold[A, A](fa)(Identity[A].identity)(f)
 
   def toChunk[A](fa: F[A]): Chunk[A] = foldMap(fa)(Chunk(_))
-
-  // mapEffect(fa)(a => Id(a)) === Id(fa)
 }
+
 object Traversable {
-  final case class State[S, +A](run: S => (S, A))
-  object State {
-    implicit def StateAssociativeBoth[S]: AssociativeBoth[({ type lambda[+A] = State[S, A] })#lambda] = {
-      type StateS[+A] = State[S, A]
-
-      new AssociativeBoth[StateS] {
-        def both[A, B](fa: => StateS[A], fb: => StateS[B]): StateS[(A, B)] =
-          State { (s0: S) =>
-            val (s1, a) = fa.run(s0)
-            val (s2, b) = fb.run(s1)
-
-            (s2, (a, b))
-          }
-      }
-    }
-    implicit def StateIdentityBoth[S]: IdentityBoth[({ type lambda[+A] = State[S, A] })#lambda] = {
-      type StateS[+A] = State[S, A]
-
-      new IdentityBoth[StateS] {
-        def any: StateS[Any] = State(s => (s, ()))
-
-        def both[A, B](fa: => StateS[A], fb: => StateS[B]): StateS[(A, B)] =
-          State { (s0: S) =>
-            val (s1, a) = fa.run(s0)
-            val (s2, b) = fb.run(s1)
-
-            (s2, (a, b))
-          }
-      }
-    }
-    implicit def StateCovariant[S]: Covariant[({ type lambda[+A] = State[S, A] })#lambda] = {
-      type StateS[+A] = State[S, A]
-
-      new Covariant[StateS] {
-        def map[A, B](f: A => B): StateS[A] => StateS[B] =
-          (fa: StateS[A]) => State((s: S) => fa.run(s) match { case (s, a) => (s, f(a)) })
-      }
-    }
-  }
 
   implicit val ListTraversable: Traversable[List] =
     new Traversable[List] {
