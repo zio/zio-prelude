@@ -5,6 +5,7 @@ import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef }
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
+import zio.ZRefM
 
 /**
  * `Contravariant[F]` provides implicit evidence that `F[-_]` is a
@@ -403,6 +404,16 @@ object Contravariant extends LawfulF.Contravariant[ContravariantEqualF, Equal] {
   implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] {
       def contramap[A, C](f: C => A): ZRef[EA, EB, A, B] => ZRef[EA, EB, C, B] =
+        ref => ref.contramap(f)
+    }
+
+  /**
+   * The contravariant instance for `ZRefM`.
+   */
+  implicit def ZRefMContravariant[RA, RB, EA, EB, B]
+    : Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] {
+      def contramap[A, C](f: C => A): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, C, B] =
         ref => ref.contramap(f)
     }
 
