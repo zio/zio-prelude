@@ -8,7 +8,7 @@ import zio.test.laws._
 
 /**
  * `Contravariant[F]` provides implicit evidence that `F[-_]` is a
- * contravariant enfofunctor in the category of Scala objects.
+ * contravariant endofunctor in the category of Scala objects.
  *
  * `Contravariant` instances of type `F[A]` "consume" values of type `A` in
  * some sense. For example, `Equal[A]` takes two values of type `A` as input
