@@ -21,10 +21,10 @@ sealed trait State[S, +A] { self =>
       case Succeed(a)                    => (s, a)
       case Modify(f)                     => f(s)
       case FlatMap(Succeed(a), continue) => continue(a).run(s)
-      case FlatMap(Modify(f), continue)  =>
+      case FlatMap(Modify(f), continue) =>
         val (s1, a) = f(s)
         continue(a).run(s1)
-      case FlatMap(FlatMap(x, f), g)     =>
+      case FlatMap(FlatMap(x, f), g) =>
         x.flatMap(a => f(a).flatMap(g)).run(s)
     }
 
