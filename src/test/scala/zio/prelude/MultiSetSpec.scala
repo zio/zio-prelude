@@ -37,7 +37,7 @@ object MultiSetSpec extends DefaultRunnableSpec {
     ),
     suite("methods")(
       test("flatMap") {
-        val die  = MultiSet.fromIterable(1, 2, 3, 4, 5, 6)
+        val die  = MultiSet(1, 2, 3, 4, 5, 6)
         val pair = die.zipWith(die)(_ + _)
         assert(pair(7))(equalTo(6))
       }
