@@ -8,9 +8,9 @@ import zio.test.laws._
 
 object MultiSetSpec extends DefaultRunnableSpec {
 
-  def genFMultiSet[R <: Random with Sized, A](a: Gen[R, A]): GenF[R, ({ type lambda[+x] = MultiSet[A, x] })#lambda] =
-    new GenF[R, ({ type lambda[+x] = MultiSet[A, x] })#lambda] {
-      def apply[R1 <: R, B](b: Gen[R1, B]): Gen[R1, MultiSet[A, B]] =
+  def genFMultiSet[R <: Random with Sized, B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = MultiSet[x, B] })#lambda] =
+    new GenF[R, ({ type lambda[+x] = MultiSet[x, B] })#lambda] {
+      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, MultiSet[A, B]] =
         genMultiSet(a, b)
     }
 
@@ -25,6 +25,7 @@ object MultiSetSpec extends DefaultRunnableSpec {
       testM("combine commutative")(
         checkAllLaws(Commutative)(genMultiSet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
       ),
+      testM("covariant")(checkAllLaws(Covariant)(genFMultiSet(Gen.anyInt), Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genMultiSet(Gen.anyInt, Gen.anyInt))),
       testM("hash")(checkAllLaws(Hash)(genMultiSet(Gen.anyInt, Gen.anyInt))),
       testM("intersect commutative")(
@@ -36,7 +37,7 @@ object MultiSetSpec extends DefaultRunnableSpec {
     ),
     suite("methods")(
       test("flatMap") {
-        val die  = MultiSet(1, 2, 3, 4, 5, 6)
+        val die  = MultiSet.fromIterable(1, 2, 3, 4, 5, 6)
         val pair = die.zipWith(die)(_ + _)
         assert(pair(7))(equalTo(6))
       }

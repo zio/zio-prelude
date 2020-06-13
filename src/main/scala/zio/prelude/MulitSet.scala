@@ -1,5 +1,7 @@
 package zio.prelude
 
+import scala.annotation.unchecked.uncheckedVariance
+
 import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
 /**
@@ -9,18 +11,18 @@ import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
  * probability associated with an element in the set if `B` is a rational
  * number, or even whether an element appears at all if `B` is a boolean.
  */
-final case class MultiSet[A, +B](map: Map[A, B]) { self =>
+final class MultiSet[+A, +B] private (private val map: Map[A @uncheckedVariance, B]) { self =>
 
   /**
    * A symbolic alias for `intersect`.
    */
-  def &[B1 >: B](that: MultiSet[A, B1])(implicit ev: Commutative[Min[B1]]): MultiSet[A, B1] =
+  def &[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Commutative[Min[B1]]): MultiSet[A1, B1] =
     self intersect that
 
   /**
    * A symbolic alias for `diff`.
    */
-  def &~[B1 >: B](that: MultiSet[A, B1])(implicit ev: Inverse[B1]): MultiSet[A, B1] =
+  def &~[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Inverse[B1]): MultiSet[A1, B1] =
     self diff that
 
   /**
@@ -34,29 +36,29 @@ final case class MultiSet[A, +B](map: Map[A, B]) { self =>
   /**
    * A symbolic alias for `combine`.
    */
-  def <>[B1 >: B](that: MultiSet[A, B1])(implicit ev: Commutative[Sum[B1]]): MultiSet[A, B1] =
+  def <>[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Commutative[Sum[B1]]): MultiSet[A1, B1] =
     self combine that
 
   /**
    * A symbolic alias for `union`.
    */
-  def |[B1 >: B](that: MultiSet[A, B1])(implicit ev: Commutative[Max[B1]]): MultiSet[A, B1] =
+  def |[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Commutative[Max[B1]]): MultiSet[A1, B1] =
     self union that
 
   /**
    * Returns the number of times the specified element appears in the set.
    */
-  def apply[B1 >: B](a: A)(implicit ev: Identity[Sum[B1]]): B1 =
-    map.get(a).getOrElse(Sum.unwrap(ev.identity))
+  def apply[A1 >: A, B1 >: B](a: A1)(implicit ev: Identity[Sum[B1]]): B1 =
+    map.asInstanceOf[Map[A1, B1]].get(a).getOrElse(Sum.unwrap(ev.identity))
 
   /**
    * Combines this set with the specified set to produce a new set where the
    * number of times each element appears is the sum of the number of times it
    * appears in this set and the specified set.
    */
-  def combine[B1 >: B](that: MultiSet[A, B1])(implicit ev: Commutative[Sum[B1]]): MultiSet[A, B1] =
+  def combine[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Commutative[Sum[B1]]): MultiSet[A1, B1] =
     MultiSet {
-      that.map.foldLeft[Map[A, B1]](self.map) {
+      that.map.foldLeft(self.map.asInstanceOf[Map[A1, B1]]) {
         case (map, (a, b1)) =>
           map.get(a) match {
             case Some(b) => map + (a -> ev.combine(Sum.wrap(b), Sum.wrap(b1)))
@@ -70,9 +72,9 @@ final case class MultiSet[A, +B](map: Map[A, B]) { self =>
    * number of times each element appears is the difference between the number
    * of times it appears in this set and the specified set.
    */
-  def diff[B1 >: B](that: MultiSet[A, B1])(implicit ev: Inverse[B1]): MultiSet[A, B1] =
+  def diff[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Inverse[B1]): MultiSet[A1, B1] =
     MultiSet {
-      that.map.foldLeft[Map[A, B1]](self.map) {
+      that.map.foldLeft(self.map.asInstanceOf[Map[A1, B1]]) {
         case (map, (a, b1)) =>
           map.get(a) match {
             case Some(b) => map + (a -> ev.combine(b, ev.inverse(b1)))
@@ -110,7 +112,7 @@ final case class MultiSet[A, +B](map: Map[A, B]) { self =>
    * number of times each element appears is the minimum of the number of times
    * it appears in this set and the specified set.
    */
-  def intersect[B1 >: B](that: MultiSet[A, B1])(implicit ev: Commutative[Min[B1]]): MultiSet[A, B1] =
+  def intersect[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Commutative[Min[B1]]): MultiSet[A1, B1] =
     MultiSet {
       self.map.foldLeft(that.map) {
         case (map, (a, b)) =>
@@ -156,13 +158,13 @@ final case class MultiSet[A, +B](map: Map[A, B]) { self =>
    * number of times each element appears is the maximum of the number of times
    * it appears in this set and the specified set.
    */
-  def union[B1 >: B](that: MultiSet[A, B1])(implicit ev: Commutative[Max[B1]]): MultiSet[A, B1] =
-    new MultiSet(
+  def union[A1 >: A, B1 >: B](that: MultiSet[A1, B1])(implicit ev: Commutative[Max[B1]]): MultiSet[A1, B1] =
+    MultiSet {
       self.map.foldLeft(that.map) {
         case (map, (a, b)) =>
           map.get(a).fold(map + (a -> b))(b1 => map + (a -> ev.combine(Max.wrap(b), Max.wrap(b1))))
       }
-    )
+    }
 
   /**
    * Combines this set with the specified set to produce their cartesian
@@ -184,6 +186,12 @@ final case class MultiSet[A, +B](map: Map[A, B]) { self =>
 }
 
 object MultiSet {
+
+  /**
+   * Constructs a set from the specified `Map`.
+   */
+  def apply[A, B](map: Map[A, B]): MultiSet[A, B] =
+    new MultiSet(map)
 
   /**
    * Constructs a set with the specified elements.
@@ -230,10 +238,21 @@ object MultiSet {
   /**
    * The `EqualF` instance for `MultiSet`.
    */
-  implicit def MultiSetEqualF[A]: EqualF[({ type lambda[+x] = MultiSet[A, x] })#lambda] =
-    new EqualF[({ type lambda[+x] = MultiSet[A, x] })#lambda] {
-      def deriveEqual[B: Equal]: Equal[MultiSet[A, B]] =
+  implicit def MultiSetEqualF[B: Equal]: EqualF[({ type lambda[+x] = MultiSet[x, B] })#lambda] =
+    new EqualF[({ type lambda[+x] = MultiSet[x, B] })#lambda] {
+      def deriveEqual[A: Equal]: Equal[MultiSet[A, B]] =
         MultiSetEqual
+    }
+
+  /**
+   * The `Covariant` instance for `MultiSet`.
+   */
+  implicit def MultiSetCovariant[B](
+    implicit ev: Commutative[Sum[B]]
+  ): Covariant[({ type lambda[+x] = MultiSet[x, B] })#lambda] =
+    new Covariant[({ type lambda[+x] = MultiSet[x, B] })#lambda] {
+      def map[A, C](f: A => C): MultiSet[A, B] => MultiSet[C, B] =
+        _.map(f)
     }
 
   /**
