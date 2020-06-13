@@ -1,11 +1,10 @@
 package zio.prelude
 
 import zio.prelude.coherent.ContravariantEqualF
-import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef }
+import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
-import zio.ZRefM
 
 /**
  * `Contravariant[F]` provides implicit evidence that `F[-_]` is a
