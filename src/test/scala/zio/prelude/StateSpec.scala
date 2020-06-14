@@ -1,5 +1,7 @@
 package zio.prelude
 
+import zio.UIO
+
 import zio.random.Random
 import zio.test._
 
@@ -97,7 +99,7 @@ object StateSpec extends DefaultRunnableSpec {
         UIO(println("Running test")) *>
           check(genInt) { s =>
             assert(State.get.run(s))(equalTo((s, s)))
-          } *> UIO(println("Done with test"))
+          } <* UIO(println("Done with test"))
       }
       //   testM("modify") {
       //     check(Gen.anyInt, genIntToIntInt) { (s, f) =>
