@@ -56,6 +56,20 @@ sealed trait State[S, +A] { self =>
     }
 
   /**
+   * Runs this state transition function with the specified initial state,
+   * returning the result and discarding the updated state.
+   */
+  final def runResult(s: S): A =
+    run(s)._2
+
+  /**
+   * Runs this state transition function with the specified initial state,
+   * returning the updated state and discarding the result.
+   */
+  final def runState(s: S): S =
+    run(s)._1
+
+  /**
    * Combines this state transition function with the specified state
    * transition function, passing the updated state from this state transition
    * function to that state transition function and combining the results of
