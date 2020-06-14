@@ -31,8 +31,23 @@ sealed trait State[S, +A] { self =>
   final def <*>[B](that: State[S, B]): State[S, (A, B)] =
     self zip that
 
+  /**
+   * Extends this state transition function with another state transition
+   * function that depends on the result of this state transition function by
+   * running the first state transition function, using its results to
+   * generate a second state transition function, and running that state
+   * transition function with the updated state.
+   */
   final def flatMap[B](f: A => State[S, B]): State[S, B] =
     FlatMap(self, f)
+
+  /**
+   * Flattens a nested state transition function to a single state transition
+   * function by running the outer state transition function and then running
+   * the inner state transition function with the updated state.
+   */
+  final def flatten[B](implicit ev: A <:< State[S, B]): State[S, B] =
+    flatMap(ev)
 
   /**
    * Transforms the result of this state transition function with the
@@ -116,6 +131,23 @@ object State {
     modify(run)
 
   /**
+   * Combines a collection of state transition function into a single state
+   * transition function that passes the updated state from each state
+   * transition function to the next and collects the results.
+   */
+  def collectAll[F[+_]: Traversable, S, A](fa: F[State[S, A]]): State[S, F[A]] =
+    Traversable[F].flip(fa)
+
+  /**
+   * Maps each element of a collection to a state transition function and
+   * combines them all into a single state transition function that passes the
+   * updated state from each state transition function to the next and collects
+   * the results.
+   */
+  def foreach[F[+_]: Traversable, S, A, B](fa: F[A])(f: A => State[S, B]): State[S, F[B]] =
+    Traversable[F].mapEffect(fa)(f)
+
+  /**
    * Constructs a state transition function that returns the state.
    */
   def get[S]: State[S, S] =
@@ -172,6 +204,15 @@ object State {
     }
 
   /**
+   * The `Covariant` instance for `State`.
+   */
+  implicit def StateCovariant[S]: Covariant[({ type lambda[+A] = State[S, A] })#lambda] =
+    new Covariant[({ type lambda[+A] = State[S, A] })#lambda] {
+      def map[A, B](f: A => B): State[S, A] => State[S, B] =
+        _.map(f)
+    }
+
+  /**
    * The `IdentityBoth` instance for `State`.
    */
   implicit def StateIdentityBoth[S]: IdentityBoth[({ type lambda[+A] = State[S, A] })#lambda] =
@@ -183,12 +224,14 @@ object State {
     }
 
   /**
-   * The `Covariant` instance for `State`.
+   * The `IdentityFlatten` instance for `State`.
    */
-  implicit def StateCovariant[S]: Covariant[({ type lambda[+A] = State[S, A] })#lambda] =
-    new Covariant[({ type lambda[+A] = State[S, A] })#lambda] {
-      def map[A, B](f: A => B): State[S, A] => State[S, B] =
-        _.map(f)
+  implicit def StateIdentityFlatten[S]: IdentityFlatten[({ type lambda[+A] = State[S, A] })#lambda] =
+    new IdentityFlatten[({ type lambda[+A] = State[S, A] })#lambda] {
+      def any: State[S, Any] =
+        State.unit
+      def flatten[A](ffa: State[S, State[S, A]]): State[S, A] =
+        ffa.flatten
     }
 
   private final case class Succeed[S, A](value: A)                                          extends State[S, A]

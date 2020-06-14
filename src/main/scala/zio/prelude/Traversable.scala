@@ -34,6 +34,9 @@ trait Traversable[F[+_]] extends Covariant[F] {
 
 object Traversable {
 
+  def apply[F[+_]](implicit traversable: Traversable[F]): Traversable[F] =
+    traversable
+
   implicit val ListTraversable: Traversable[List] =
     new Traversable[List] {
       override def map[A, B](f: A => B): List[A] => List[B] =
