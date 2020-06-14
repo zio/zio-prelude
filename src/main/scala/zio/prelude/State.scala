@@ -175,12 +175,6 @@ object State {
     modify(s => (s, a))
 
   /**
-   * Lazily constructs a state transition function.
-   */
-  def suspend[S, A](state: => State[S, A]): State[S, A] =
-    unit.flatMap(_ => state)
-
-  /**
    * Constructs a state transition function that always returns the `Unit`
    * value, passing the state through unchanged.
    */
@@ -200,7 +194,7 @@ object State {
   implicit def StateAssociativeBoth[S]: AssociativeBoth[({ type lambda[+A] = State[S, A] })#lambda] =
     new AssociativeBoth[({ type lambda[+A] = State[S, A] })#lambda] {
       def both[A, B](fa: => State[S, A], fb: => State[S, B]): State[S, (A, B)] =
-        State.suspend(fa.zip(fb))
+        fa.zip(fb)
     }
 
   /**
@@ -220,7 +214,7 @@ object State {
       def any: State[S, Any] =
         State.unit
       def both[A, B](fa: => State[S, A], fb: => State[S, B]): State[S, (A, B)] =
-        State.suspend(fa.zip(fb))
+        fa.zip(fb)
     }
 
   /**

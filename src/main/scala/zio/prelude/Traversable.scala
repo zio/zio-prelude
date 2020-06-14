@@ -40,12 +40,8 @@ object Traversable {
   implicit val ListTraversable: Traversable[List] =
     new Traversable[List] {
       override def map[A, B](f: A => B): List[A] => List[B] =
-        (list: List[A]) => list.map(f)
-
+        _.map(f)
       def mapEffect[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
-        list match {
-          case Nil     => Nil.succeed[G]
-          case a :: as => (f(a) zipWith mapEffect(as)(f))(_ :: _)
-        }
+        list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
     }
 }
