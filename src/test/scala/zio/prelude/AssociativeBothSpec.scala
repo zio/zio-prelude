@@ -7,7 +7,11 @@ object AssociativeBothSpec extends DefaultRunnableSpec {
 
   def spec = suite("AssociativeBothSpec")(
     suite("laws")(
-      testM("option")(checkAllLaws(AssociativeBoth)(GenF.option, Gen.anyInt))
+      testM("chunk")(checkAllLaws(AssociativeBoth)(GenF.chunk, Gen.chunkOf(Gen.anyString))),
+      testM("either")(checkAllLaws(AssociativeBoth)(GenF.either(Gen.anyInt), Gen.anyInt)),
+      testM("option")(checkAllLaws(AssociativeBoth)(GenF.option, Gen.anyInt)),
+      testM("list")(checkAllLaws(AssociativeBoth)(GenF.list, Gen.anyString)),
+      testM("vector")(checkAllLaws(AssociativeBoth)(GenF.vector, Gen.vectorOf(Gen.anyString)))
     )
   )
 }

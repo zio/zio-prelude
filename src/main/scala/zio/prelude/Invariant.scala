@@ -1,9 +1,10 @@
 package zio.prelude
 
+import zio.Chunk
+
 trait Invariant[F[_]] {
 
   def invmap[A, B](f: A <=> B): F[A] <=> F[B]
-
 
   def identityLaw1[A](fa: F[A])(implicit equal: Equal[F[A]]): Boolean =
     invmap(Equivalence.identity[A]).to(fa) === fa
@@ -27,6 +28,12 @@ object Invariant {
         )
     }
 
+  implicit val ChunkInvariant: Invariant[Chunk] =
+    new Invariant[Chunk] {
+      def invmap[A, B](f: A <=> B): Chunk[A] <=> Chunk[B] =
+        Equivalence(_.map(f.to), _.map(f.from))
+    }
+
   implicit val ClosureInvariant: Invariant[Closure] =
     new Invariant[Closure] {
       def invmap[A, B](f: A <=> B): Closure[A] <=> Closure[B] =
@@ -43,6 +50,12 @@ object Invariant {
           (a: Commutative[A]) => Commutative.make[B]((l, r) => f.to(a.combine(f.from(l), f.from(r)))),
           (b: Commutative[B]) => Commutative.make[A]((l, r) => f.from(b.combine(f.to(l), f.to(r))))
         )
+    }
+
+  implicit def EitherInvariant[L]: Invariant[({ type lambda[r] = Either[L, r] })#lambda] =
+    new Invariant[({ type lambda[r] = Either[L, r] })#lambda] {
+      def invmap[A, B](f: A <=> B): Either[L, A] <=> Either[L, B] =
+        Equivalence(_.map(f.to), _.map(f.from))
     }
 
   implicit val IdentityInvariant: Invariant[Identity] =
@@ -82,9 +95,9 @@ object Invariant {
         )
     }
 
-  implicit def EitherInvariant[L]: Invariant[({ type lambda[r] = Either[L, r] })#lambda] =
-    new Invariant[({ type lambda[r] = Either[L, r] })#lambda] {
-      def invmap[A, B](f: A <=> B): Either[L, A] <=> Either[L, B] =
+  implicit val ListInvariant: Invariant[List] =
+    new Invariant[List] {
+      def invmap[A, B](f: A <=> B): List[A] <=> List[B] =
         Equivalence(_.map(f.to), _.map(f.from))
     }
 
@@ -100,4 +113,9 @@ object Invariant {
         Equivalence(setA => setA.map(f.to), setB => setB.map(f.from))
     }
 
+  implicit val VectorInvariant: Invariant[Vector] =
+    new Invariant[Vector] {
+      def invmap[A, B](f: A <=> B): Vector[A] <=> Vector[B] =
+        Equivalence(setA => setA.map(f.to), setB => setB.map(f.from))
+    }
 }
