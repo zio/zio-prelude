@@ -105,7 +105,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
     }
 
   /**
-   * The `AssociativeBoth` instance for `Fiber`.
+   * The `AssociativeBoth` instance for `Future`.
    */
   implicit def FutureAssociativeBoth: AssociativeBoth[Future] =
     new AssociativeBoth[Future] {
