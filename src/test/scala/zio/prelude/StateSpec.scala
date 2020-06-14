@@ -96,36 +96,41 @@ object StateSpec extends DefaultRunnableSpec {
     // ),
     suite("constructors")(
       testM("get") {
-        UIO(println("Running test")) *>
+        UIO(println("Running get")) *>
           check(genInt) { s =>
             assert(State.get.run(s))(equalTo((s, s)))
-          } <* UIO(println("Done with test"))
+          } <* UIO(println("Done with get"))
+      },
+      testM("modify") {
+        UIO(println("Running modify")) *>
+          check(Gen.anyInt, genIntToIntInt) { (s, f) =>
+            assert(State.modify(f).run(s))(equalTo(f(s)))
+          } <* UIO(println("Done with modify"))
+      },
+      testM("set") {
+        UIO(println("Running set")) *>
+          check(genInt, genInt) { (s1, s2) =>
+            assert(State.set(s2).run(s1))(equalTo((s2, ())))
+          } <* UIO(println("Done with set"))
+      },
+      testM("succeed") {
+        UIO(println("Running succeed")) *>
+          check(genInt, genInt) { (s, a) =>
+            assert(State.succeed(a).run(s))(equalTo((s, a)))
+          } <* UIO(println("Done with succeed"))
+      },
+      testM("unit") {
+        UIO(println("Running unit")) *>
+          check(genInt) { s =>
+            assert(State.unit.run(s))(equalTo((s, ())))
+          } <* UIO(println("Done with unit"))
+      },
+      testM("update") {
+        UIO(println("Running update")) *>
+          check(genInt, genIntToInt) { (s, f) =>
+            assert(State.update(f).run(s))(equalTo((f(s), ())))
+          } <* UIO(println("Done with update"))
       }
-      //   testM("modify") {
-      //     check(Gen.anyInt, genIntToIntInt) { (s, f) =>
-      //       assert(State.modify(f).run(s))(equalTo(f(s)))
-      //     }
-      //   },
-      //   testM("set") {
-      //     check(genInt, genInt) { (s1, s2) =>
-      //       assert(State.set(s2).run(s1))(equalTo((s2, ())))
-      //     }
-      //   },
-      //   testM("succeed") {
-      //     check(genInt, genInt) { (s, a) =>
-      //       assert(State.succeed(a).run(s))(equalTo((s, a)))
-      //     }
-      //   },
-      //   testM("unit") {
-      //     check(genInt) { s =>
-      //       assert(State.unit.run(s))(equalTo((s, ())))
-      //     }
-      //   },
-      //   testM("update") {
-      //     check(genInt, genIntToInt) { (s, f) =>
-      //       assert(State.update(f).run(s))(equalTo((f(s), ())))
-      //     }
-      //   }
     )
   )
 }
