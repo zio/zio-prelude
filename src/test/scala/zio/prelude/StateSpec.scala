@@ -17,7 +17,7 @@ object StateSpec extends DefaultRunnableSpec {
     Gen.function(genInt)
 
   lazy val genIntToIntInt: Gen[Random, Int => (Int, Int)] =
-    Gen.function(genInt.zip(genInt))
+    Gen.function(genInt <*> genInt)
 
   lazy val genIntToState: Gen[Random, Int => State[Int, Int]] =
     Gen.function(genState)
@@ -28,113 +28,114 @@ object StateSpec extends DefaultRunnableSpec {
   lazy val genStateState: Gen[Random, State[Int, State[Int, Int]]] =
     Gens.state(genInt, genState)
 
-  def spec = suite("StateSpec")(
-    suite("methods")(
-      //   testM("flatMap") {
-      //     check(genState, genIntToState, genInt) { (fa, f, s) =>
-      //       val (s1, a1) = fa.run(s)
-      //       val (s2, a2) = f(a1).run(s1)
-      //       assert(fa.flatMap(f).run(s))(equalTo((s2, a2)))
-      //     }
-      //   },
-      //   testM("flatten") {
-      //     check(genStateState, genInt) { (ffa, s) =>
-      //       val (s1, fa) = ffa.run(s)
-      //       val (s2, b)  = fa.run(s1)
-      //       assert(ffa.flatten.run(s))(equalTo((s2, b)))
-      //     }
-      //   },
-      testM("map") {
-        UIO(println("Running map")) *>
-          check(genState, genIntToInt, genInt) { (fa, f, s) =>
-            val (s1, a1) = fa.run(s)
-            assert(fa.map(f).run(s))(equalTo((s1, f(a1))))
-          } <* UIO(println("Done with map"))
-      },
-      testM("run") {
-        UIO(println("Running run")) *>
-          check(genIntToIntInt, genInt) { (f, s) =>
-            assert(State(f).run(s))(equalTo(f(s)))
-          } <* UIO(println("Done with run"))
-      },
-      testM("runResult") {
-        UIO(println("Running runResult")) *>
-          check(genIntToIntInt, genInt) { (f, s) =>
-            assert(State(f).runResult(s))(equalTo(f(s)._2))
-          } <* UIO(println("Done with runResult"))
-      },
-      testM("runState") {
-        UIO(println("Running runState")) *>
-          check(genIntToIntInt, genInt) { (f, s) =>
-            assert(State(f).runState(s))(equalTo(f(s)._1))
-          } <* UIO(println("Done with runState"))
-      }
-      //   testM("zip") {
-      //     check(genState, genState, genInt) { (fa, fb, s) =>
-      //       val (s1, a) = fa.run(s)
-      //       val (s2, b) = fb.run(s1)
-      //       assert(fa.zip(fb).run(s))(equalTo((s2, (a, b))))
-      //     }
-      //   },
-      //   testM("zipLeft") {
-      //     check(genState, genState, genInt) { (fa, fb, s) =>
-      //       val (s1, a) = fa.run(s)
-      //       val (s2, _) = fb.run(s1)
-      //       assert(fa.zipLeft(fb).run(s))(equalTo((s2, a)))
-      //     }
-      //   },
-      //   testM("zipRight") {
-      //     check(genState, genState, genInt) { (fa, fb, s) =>
-      //       val (s1, _) = fa.run(s)
-      //       val (s2, b) = fb.run(s1)
-      //       assert(fa.zipRight(fb).run(s))(equalTo((s2, b)))
-      //     }
-      //   },
-      //   testM("zipWith") {
-      //     check(genState, genState, genIntIntToInt, genInt) { (fa, fb, f, s) =>
-      //       val (s1, a) = fa.run(s)
-      //       val (s2, b) = fb.run(s1)
-      //       assert(fa.zipWith(fb)(f).run(s))(equalTo((s2, f(a, b))))
-      //     }
-      //   }
-    ),
-    suite("constructors")(
-      testM("get") {
-        UIO(println("Running get")) *>
-          check(genInt) { s =>
-            assert(State.get.run(s))(equalTo((s, s)))
-          } <* UIO(println("Done with get"))
-      },
-      testM("modify") {
-        UIO(println("Running modify")) *>
-          check(Gen.anyInt, genIntToIntInt) { (s, f) =>
-            assert(State.modify(f).run(s))(equalTo(f(s)))
-          } <* UIO(println("Done with modify"))
-      },
-      testM("set") {
-        UIO(println("Running set")) *>
-          check(genInt, genInt) { (s1, s2) =>
-            assert(State.set(s2).run(s1))(equalTo((s2, ())))
-          } <* UIO(println("Done with set"))
-      },
-      testM("succeed") {
-        UIO(println("Running succeed")) *>
-          check(genInt, genInt) { (s, a) =>
-            assert(State.succeed(a).run(s))(equalTo((s, a)))
-          } <* UIO(println("Done with succeed"))
-      },
-      testM("unit") {
-        UIO(println("Running unit")) *>
-          check(genInt) { s =>
-            assert(State.unit.run(s))(equalTo((s, ())))
-          } <* UIO(println("Done with unit"))
-      },
-      testM("update") {
-        UIO(println("Running update")) *>
-          check(genInt, genIntToInt) { (s, f) =>
-            assert(State.update(f).run(s))(equalTo((f(s), ())))
-          } <* UIO(println("Done with update"))
-      }
-    )
-  )
+  def spec =
+    suite("StateSpec")(
+      suite("methods")(
+        //   testM("flatMap") {
+        //     check(genState, genIntToState, genInt) { (fa, f, s) =>
+        //       val (s1, a1) = fa.run(s)
+        //       val (s2, a2) = f(a1).run(s1)
+        //       assert(fa.flatMap(f).run(s))(equalTo((s2, a2)))
+        //     }
+        //   },
+        //   testM("flatten") {
+        //     check(genStateState, genInt) { (ffa, s) =>
+        //       val (s1, fa) = ffa.run(s)
+        //       val (s2, b)  = fa.run(s1)
+        //       assert(ffa.flatten.run(s))(equalTo((s2, b)))
+        //     }
+        //   },
+        testM("map") {
+          UIO(println("Running map")) *>
+            check(genState, genIntToInt, genInt) { (fa, f, s) =>
+              val (s1, a1) = fa.run(s)
+              assert(fa.map(f).run(s))(equalTo((s1, f(a1))))
+            } <* UIO(println("Done with map"))
+        },
+        testM("run") {
+          UIO(println("Running run")) *>
+            check(genIntToIntInt, genInt) { (f, s) =>
+              assert(State(f).run(s))(equalTo(f(s)))
+            } <* UIO(println("Done with run"))
+        },
+        testM("runResult") {
+          UIO(println("Running runResult")) *>
+            check(genIntToIntInt, genInt) { (f, s) =>
+              assert(State(f).runResult(s))(equalTo(f(s)._2))
+            } <* UIO(println("Done with runResult"))
+        },
+        testM("runState") {
+          UIO(println("Running runState")) *>
+            check(genIntToIntInt, genInt) { (f, s) =>
+              assert(State(f).runState(s))(equalTo(f(s)._1))
+            } <* UIO(println("Done with runState"))
+        }
+        //   testM("zip") {
+        //     check(genState, genState, genInt) { (fa, fb, s) =>
+        //       val (s1, a) = fa.run(s)
+        //       val (s2, b) = fb.run(s1)
+        //       assert(fa.zip(fb).run(s))(equalTo((s2, (a, b))))
+        //     }
+        //   },
+        //   testM("zipLeft") {
+        //     check(genState, genState, genInt) { (fa, fb, s) =>
+        //       val (s1, a) = fa.run(s)
+        //       val (s2, _) = fb.run(s1)
+        //       assert(fa.zipLeft(fb).run(s))(equalTo((s2, a)))
+        //     }
+        //   },
+        //   testM("zipRight") {
+        //     check(genState, genState, genInt) { (fa, fb, s) =>
+        //       val (s1, _) = fa.run(s)
+        //       val (s2, b) = fb.run(s1)
+        //       assert(fa.zipRight(fb).run(s))(equalTo((s2, b)))
+        //     }
+        //   },
+        //   testM("zipWith") {
+        //     check(genState, genState, genIntIntToInt, genInt) { (fa, fb, f, s) =>
+        //       val (s1, a) = fa.run(s)
+        //       val (s2, b) = fb.run(s1)
+        //       assert(fa.zipWith(fb)(f).run(s))(equalTo((s2, f(a, b))))
+        //     }
+        //   }
+      ),
+      suite("constructors")(
+        testM("get") {
+          UIO(println("Running get")) *>
+            check(genInt) { s =>
+              assert(State.get.run(s))(equalTo((s, s)))
+            } <* UIO(println("Done with get"))
+        },
+        testM("modify") {
+          UIO(println("Running modify")) *>
+            check(Gen.anyInt, genIntToIntInt) { (s, f) =>
+              assert(State.modify(f).run(s))(equalTo(f(s)))
+            } <* UIO(println("Done with modify"))
+        },
+        testM("set") {
+          UIO(println("Running set")) *>
+            check(genInt, genInt) { (s1, s2) =>
+              assert(State.set(s2).run(s1))(equalTo((s2, ())))
+            } <* UIO(println("Done with set"))
+        },
+        testM("succeed") {
+          UIO(println("Running succeed")) *>
+            check(genInt, genInt) { (s, a) =>
+              assert(State.succeed(a).run(s))(equalTo((s, a)))
+            } <* UIO(println("Done with succeed"))
+        },
+        testM("unit") {
+          UIO(println("Running unit")) *>
+            check(genInt) { s =>
+              assert(State.unit.run(s))(equalTo((s, ())))
+            } <* UIO(println("Done with unit"))
+        },
+        testM("update") {
+          UIO(println("Running update")) *>
+            check(genInt, genIntToInt) { (s, f) =>
+              assert(State.update(f).run(s))(equalTo((f(s), ())))
+            } <* UIO(println("Done with update"))
+        }
+      )
+    ) @@ TestAspect.sequential
 }
