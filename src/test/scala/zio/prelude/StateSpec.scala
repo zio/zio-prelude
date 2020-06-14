@@ -50,22 +50,25 @@ object StateSpec extends DefaultRunnableSpec {
             val (s1, a1) = fa.run(s)
             assert(fa.map(f).run(s))(equalTo((s1, f(a1))))
           } <* UIO(println("Done with map"))
+      },
+      testM("run") {
+        UIO(println("Running run")) *>
+          check(genIntToIntInt, genInt) { (f, s) =>
+            assert(State(f).run(s))(equalTo(f(s)))
+          } <* UIO(println("Done with run"))
+      },
+      testM("runResult") {
+        UIO(println("Running runResult")) *>
+          check(genIntToIntInt, genInt) { (f, s) =>
+            assert(State(f).runResult(s))(equalTo(f(s)._2))
+          } <* UIO(println("Done with runResult"))
+      },
+      testM("runState") {
+        UIO(println("Running runState")) *>
+          check(genIntToIntInt, genInt) { (f, s) =>
+            assert(State(f).runState(s))(equalTo(f(s)._1))
+          } <* UIO(println("Done with runState"))
       }
-      //   testM("run") {
-      //     check(genIntToIntInt, genInt) { (f, s) =>
-      //       assert(State(f).run(s))(equalTo(f(s)))
-      //     }
-      //   },
-      //   testM("runResult") {
-      //     check(genIntToIntInt, genInt) { (f, s) =>
-      //       assert(State(f).runResult(s))(equalTo(f(s)._2))
-      //     }
-      //   },
-      //   testM("runState") {
-      //     check(genIntToIntInt, genInt) { (f, s) =>
-      //       assert(State(f).runState(s))(equalTo(f(s)._1))
-      //     }
-      //   },
       //   testM("zip") {
       //     check(genState, genState, genInt) { (fa, fb, s) =>
       //       val (s1, a) = fa.run(s)
