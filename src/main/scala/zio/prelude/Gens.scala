@@ -15,6 +15,12 @@ object Gens {
     Gen.listOf1(a).map(NonEmptyList.fromCons)
 
   /**
+   * A generator of state transition functions.
+   */
+  def state[R, S, A](s: Gen[R, S], a: Gen[R, A]): Gen[R, State[S, A]] =
+    Gen.function[R, S, (S, A)](s <*> a).map(State(_))
+
+  /**
    * A generator of `Validation` values.
    */
   def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
