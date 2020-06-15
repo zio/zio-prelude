@@ -4,7 +4,7 @@ import zio._
 import zio.prelude.coherent.AssociativeBothEqualFInvariant
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
-import zio.stream.{ ZSink, ZStream, ZTransducer }
+import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -198,10 +198,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
   /**
    * The `AssociativeBoth` instance for `ZLayer`.
    */
-  // TODO
   implicit def ZLayerAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
     new AssociativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = ???
+      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
     }
 
   /**
@@ -249,31 +248,6 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
   implicit def ZStreamAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa zip fb
-    }
-
-  /**
-   * The `AssociativeBoth` instance for failed `ZStream`.
-   */
-  // TODO
-  implicit def ZStreamFailureAssociativBoth[R, A]
-    : AssociativeBoth[({ type lambda[+e] = Failure[ZStream[R, e, A]] })#lambda] =
-    new AssociativeBoth[({ type lambda[+e] = Failure[ZStream[R, e, A]] })#lambda] {
-      def both[EA, EB](
-        fa: => Failure[ZStream[R, EA, A]],
-        fb: => Failure[ZStream[R, EB, A]]
-      ): Failure[ZStream[R, (EA, EB), A]] = ???
-
-    }
-
-  /**
-   * The `AssociativeBoth` instance for `ZTransducer`.
-   */
-  // TODO
-  implicit def ZTransducerAssociativeBoth[R, E, I]
-    : AssociativeBoth[({ type lambda[+a] = ZTransducer[R, E, I, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZTransducer[R, E, I, a] })#lambda] {
-      def both[A, B](fa: => ZTransducer[R, E, I, A], fb: => ZTransducer[R, E, I, B]): ZTransducer[R, E, I, (A, B)] =
-        ???
     }
 
 }

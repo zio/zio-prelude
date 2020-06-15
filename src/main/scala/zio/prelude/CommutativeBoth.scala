@@ -3,8 +3,7 @@ package zio.prelude
 import zio._
 import zio.prelude.coherent.CommutativeBothEqualFInvariant
 import zio.prelude.newtypes.Failure
-import zio.stm.ZSTM
-import zio.stream.{ ZSink, ZStream, ZTransducer }
+import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -65,7 +64,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant,
    */
   implicit def ExitCommutativeBoth[E]: CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] {
-      def both[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, (A, B)] = fa zip fb
+      def both[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, (A, B)] = fa zipPar fb
     }
 
   /**
@@ -112,7 +111,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant,
   /**
    * The `CommutativeBoth` instance for `Option`.
    */
-  implicit val OptionAssociativeBoth: CommutativeBoth[Option] =
+  implicit val OptionCommutativeBoth: CommutativeBoth[Option] =
     new CommutativeBoth[Option] {
       def both[A, B](fa: => Option[A], fb: => Option[B]): Option[(A, B)] =
         (fa, fb) match {
@@ -199,43 +198,11 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant,
     }
 
   /**
-   * The `CommutativeBoth` instance for `ZSTM`.
-   */
-  implicit def ZSTMCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZSTM[R, E, A], fb: => ZSTM[R, E, B]): ZSTM[R, E, (A, B)] = fa zip fb
-    }
-
-  /**
    * The `CommutativeBoth` instance for `ZStream`.
    */
   implicit def ZStreamCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa zip fb
-    }
-
-  /**
-   * The `CommutativeBoth` instance for failed `ZStream`.
-   */
-  implicit def ZStreamFailureAssociativBoth[R, A]
-    : CommutativeBoth[({ type lambda[+e] = Failure[ZStream[R, e, A]] })#lambda] =
-    new CommutativeBoth[({ type lambda[+e] = Failure[ZStream[R, e, A]] })#lambda] {
-      def both[EA, EB](
-        fa: => Failure[ZStream[R, EA, A]],
-        fb: => Failure[ZStream[R, EB, A]]
-      ): Failure[ZStream[R, (EA, EB), A]] = ???
-
-    }
-
-  /**
-   * The `CommutativeBoth` instance for `ZTransducer`.
-   */
-  // TODO
-  implicit def ZTransducerCommutativeBoth[R, E, I]
-    : CommutativeBoth[({ type lambda[+a] = ZTransducer[R, E, I, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZTransducer[R, E, I, a] })#lambda] {
-      def both[A, B](fa: => ZTransducer[R, E, I, A], fb: => ZTransducer[R, E, I, B]): ZTransducer[R, E, I, (A, B)] =
-        ???
     }
 
 }

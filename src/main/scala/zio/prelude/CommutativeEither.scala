@@ -1,10 +1,10 @@
 package zio.prelude
 
+import zio.ZIO
 import zio.prelude.coherent.CommutativeEitherEqualFInvariant
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
-import zio.{ Schedule, ZIO, ZManaged }
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.{ ExecutionContext, Future }
@@ -56,16 +56,6 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvari
     }
 
   /**
-   * The `CommutativeEither` instance for `Schedule`.
-   */
-  // TODO
-  implicit def ScheduleCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = Schedule[R, E, a] })#lambda] =
-    new CommutativeEither[({ type lambda[+a] = Schedule[R, E, a] })#lambda] {
-      def either[A, B](fa: => Schedule[R, E, A], fb: => Schedule[R, E, B]): Schedule[R, E, Either[A, B]] =
-        ???
-    }
-
-  /**
    * The `CommutativeEither` instance for `ZIO`.
    */
   implicit def ZIOCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
@@ -75,18 +65,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvari
     }
 
   /**
-   * The `CommutativeEither` instance for `ZManaged`.
-   */
-  // TODO
-  implicit def ZManagedCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new CommutativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def either[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, Either[A, B]] =
-        //fa.orElseEither(fb)
-        ???
-    }
-
-  /**
-   * The `AssociativeBoth` instance for `ZSink`.
+   * The `CommutativeEither` instance for `ZSink`.
    */
   implicit def ZSinkCommutativeEither[R, E, I]: CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] =
     new CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] {
@@ -100,7 +79,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvari
   implicit def ZStreamCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def either[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, Either[A, B]] =
-        ???
+        fa mergeEither fb
     }
 
   /**
