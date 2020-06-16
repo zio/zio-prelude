@@ -62,7 +62,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
    */
   implicit def ChunkAssociativeBoth: AssociativeBoth[Chunk] =
     new AssociativeBoth[Chunk] {
-      def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa zip fb
+      def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
@@ -125,7 +125,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
    */
   implicit def ListAssociativeBoth: AssociativeBoth[List] =
     new AssociativeBoth[List] {
-      def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa zip fb
+      def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
@@ -134,7 +134,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
   implicit def NonEmptyChunkAssociativeBoth: AssociativeBoth[NonEmptyChunk] =
     new AssociativeBoth[NonEmptyChunk] {
       def both[A, B](fa: => NonEmptyChunk[A], fb: => NonEmptyChunk[B]): NonEmptyChunk[(A, B)] =
-        (fa zipWith fb)((_, _))
+        fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
@@ -170,7 +170,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
    */
   implicit def VectorAssociativeBoth: AssociativeBoth[Vector] =
     new AssociativeBoth[Vector] {
-      def both[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa zip fb
+      def both[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
@@ -247,7 +247,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
    */
   implicit def ZStreamAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa zip fb
+      def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa cross fb
     }
 
 }

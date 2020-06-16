@@ -8,7 +8,6 @@ import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.Future
 
 /**
  * A commutative binary operator that combines two values of types `F[A]` and
@@ -65,22 +64,6 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant,
   implicit def ExitCommutativeBoth[E]: CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def both[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, (A, B)] = fa zipPar fb
-    }
-
-  /**
-   * The `CommutativeBoth` instance for `Fiber`.
-   */
-  implicit def FiberCommutativeBoth[E]: CommutativeBoth[({ type lambda[+a] = Fiber[E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = Fiber[E, a] })#lambda] {
-      def both[A, B](fa: => Fiber[E, A], fb: => Fiber[E, B]): Fiber[E, (A, B)] = fa zip fb
-    }
-
-  /**
-   * The `CommutativeBoth` instance for `Fiber`.
-   */
-  implicit def FutureCommutativeBoth: CommutativeBoth[Future] =
-    new CommutativeBoth[Future] {
-      def both[A, B](fa: => Future[A], fb: => Future[B]): Future[(A, B)] = fa zip fb
     }
 
   /**

@@ -7,7 +7,6 @@ import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.{ ExecutionContext, Future }
 
 /**
  * A commutative binary operator that combines two values of types `F[A]` and
@@ -45,15 +44,6 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvari
    */
   val laws: LawsF.Invariant[CommutativeEitherEqualFInvariant, Equal] =
     commutativeLaw
-
-  /**
-   * The `CommutativeEither` instance for `Future`.
-   */
-  implicit def FutureCommutativeEither(implicit ec: ExecutionContext): CommutativeEither[Future] =
-    new CommutativeEither[Future] {
-      def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
-        Future.firstCompletedOf(Seq(fa.map(Left(_)), fb.map(Right(_))))
-    }
 
   /**
    * The `CommutativeEither` instance for `ZIO`.
