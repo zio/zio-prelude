@@ -14,3 +14,6 @@ trait Divariant[:=>[-_, +_]] {
 
   def rightMap[A, B, C](f: B => C): (A :=> B) => (A :=> C)
 }
+object Divariant {
+  final case class Join[:=>[-_, +_], A](value: A :=> A)
+}
