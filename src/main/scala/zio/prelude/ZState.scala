@@ -2,43 +2,43 @@ package zio.prelude
 
 import scala.annotation.tailrec
 
-import zio.prelude.State._
+import zio.prelude.ZState._
 
 /**
- * `State[S, A]` is a purely functional description of a state transition
- * function that, given an initial state of type `S`, returns an updated state
- * of type `S` along with a value of type `A`. State can be used to model
+ * `ZState[S1, S2, A]` is a purely functional description of a state transition
+ * function that, given an initial state of type `S1`, returns an updated state
+ * of type `S2` along with a value of type `A`. State can be used to model
  * computations that maintain state in a purely functional way, automatically
  * handling the bookkeeping of threading the state through the computation.
  */
-sealed trait State[S, +A] { self =>
+sealed trait ZState[-S1, +S2, +A] { self =>
 
   /**
    * A symbolic alias for `zipRight`.
    */
-  final def *>[B](that: State[S, B]): State[S, B] =
+  final def *>[S3, B](that: ZState[S2, S3, B]): ZState[S1, S3, B] =
     self zipRight that
 
   /**
    * A symbolic alias for `zipLeft`.
    */
-  final def <*[B](that: State[S, B]): State[S, A] =
+  final def <*[S3, B](that: ZState[S2, S3, B]): ZState[S1, S3, A] =
     self zipLeft that
 
   /**
    * A symbolic alias for `zip`.
    */
-  final def <*>[B](that: State[S, B]): State[S, (A, B)] =
+  final def <*>[S3, B](that: ZState[S2, S3, B]): ZState[S1, S3, (A, B)] =
     self zip that
 
   /**
    * Extends this state transition function with another state transition
    * function that depends on the result of this state transition function by
-   * running the first state transition function, using its results to
-   * generate a second state transition function, and running that state
-   * transition function with the updated state.
+   * running the first state transition function, using its result to generate
+   * a second state transition function, and running that state transition
+   * function with the updated state.
    */
-  final def flatMap[B](f: A => State[S, B]): State[S, B] =
+  final def flatMap[S3, B](f: A => ZState[S2, S3, B]): ZState[S1, S3, B] =
     FlatMap(self, f)
 
   /**
@@ -46,42 +46,47 @@ sealed trait State[S, +A] { self =>
    * function by running the outer state transition function and then running
    * the inner state transition function with the updated state.
    */
-  final def flatten[B](implicit ev: A <:< State[S, B]): State[S, B] =
+  final def flatten[S3, B](implicit ev: A <:< ZState[S2, S3, B]): ZState[S1, S3, B] =
     flatMap(ev)
 
   /**
    * Transforms the result of this state transition function with the
    * specified function.
    */
-  final def map[B](f: A => B): State[S, B] =
-    flatMap(a => State.succeed(f(a)))
+  final def map[B](f: A => B): ZState[S1, S2, B] =
+    flatMap(a => ZState.succeed(f(a)))
 
   /**
    * Runs this state transition function with the specified initial state,
    * returning both the updated state and the result.
    */
-  @tailrec
-  final def run(s: S): (S, A) =
-    self match {
-      case Succeed(a)                    => (s, a)
-      case Modify(f)                     => f(s)
-      case FlatMap(Succeed(a), continue) => continue(a).run(s)
-      case FlatMap(Modify(f), continue)  => f(s) match { case (s, a) => continue(a).run(s) }
-      case FlatMap(FlatMap(x, f), g)     => x.flatMap(a => f(a).flatMap(g)).run(s)
-    }
+  final def run(s: S1): (S2, A) = {
+
+    @tailrec
+    def loop(self: ZState[Any, Any, Any])(s: Any): (Any, Any) =
+      self match {
+        case Succeed(value)                    => (s, value)
+        case Modify(f)                         => f(s)
+        case FlatMap(Succeed(value), continue) => loop(continue(value))(s)
+        case FlatMap(Modify(f), continue)      => f(s) match { case (s, a) => loop(continue(a))(s) }
+        case FlatMap(FlatMap(x, f), g)         => loop(x.flatMap(a => f(a).flatMap(g)))(s)
+      }
+
+    loop(self.asInstanceOf[ZState[Any, Any, Any]])(s).asInstanceOf[(S2, A)]
+  }
 
   /**
    * Runs this state transition function with the specified initial state,
    * returning the result and discarding the updated state.
    */
-  final def runResult(s: S): A =
+  final def runResult(s: S1): A =
     run(s)._2
 
   /**
    * Runs this state transition function with the specified initial state,
    * returning the updated state and discarding the result.
    */
-  final def runState(s: S): S =
+  final def runState(s: S1): S2 =
     run(s)._1
 
   /**
@@ -90,7 +95,7 @@ sealed trait State[S, +A] { self =>
    * function to that state transition function and combining the results of
    * both into a tuple.
    */
-  final def zip[B](that: State[S, B]): State[S, (A, B)] =
+  final def zip[S3, B](that: ZState[S2, S3, B]): ZState[S1, S3, (A, B)] =
     self.zipWith(that)((_, _))
 
   /**
@@ -99,7 +104,7 @@ sealed trait State[S, +A] { self =>
    * function to that state transition function and returning the result of
    * this state transition function.
    */
-  final def zipLeft[B](that: State[S, B]): State[S, A] =
+  final def zipLeft[S3, B](that: ZState[S2, S3, B]): ZState[S1, S3, A] =
     self.zipWith(that)((a, _) => a)
 
   /**
@@ -108,7 +113,7 @@ sealed trait State[S, +A] { self =>
    * function to that state transition function and returning the result of
    * that state transition function.
    */
-  final def zipRight[B](that: State[S, B]): State[S, B] =
+  final def zipRight[S3, B](that: ZState[S2, S3, B]): ZState[S1, S3, B] =
     self.zipWith(that)((_, b) => b)
 
   /**
@@ -117,17 +122,17 @@ sealed trait State[S, +A] { self =>
    * function to that state transition function and combining the results of
    * both using the specified function.
    */
-  final def zipWith[B, C](that: State[S, B])(f: (A, B) => C): State[S, C] =
+  final def zipWith[S3, B, C](that: ZState[S2, S3, B])(f: (A, B) => C): ZState[S1, S3, C] =
     self.flatMap(a => that.flatMap(b => State.succeed(f(a, b))))
 }
 
-object State {
+object ZState {
 
   /**
    * Constructs a state transition function from a function that given an
    * initial state returns an updated state and a value.
    */
-  def apply[S, A](run: S => (S, A)): State[S, A] =
+  def apply[S1, S2, A](run: S1 => (S2, A)): ZState[S1, S2, A] =
     modify(run)
 
   /**
@@ -157,22 +162,22 @@ object State {
    * Constructs a state transition function from the specified modify
    * function.
    */
-  def modify[S, A](f: S => (S, A)): State[S, A] =
+  def modify[S1, S2, A](f: S1 => (S2, A)): ZState[S1, S2, A] =
     Modify(f)
 
   /**
    * Constructs a state transition function that sets the state to the
    * specified value.
    */
-  def set[S](s: S): State[S, Unit] =
+  def set[S](s: S): ZState[Any, S, Unit] =
     modify(_ => (s, ()))
 
   /**
    * Constructs a state transition function that always returns the specified
    * value, passing the state through unchanged.
    */
-  def succeed[S, A](a: => A): State[S, A] =
-    modify(s => (s, a))
+  def succeed[S, A](a: A): State[S, A] =
+    Succeed(a)
 
   /**
    * Constructs a state transition function that always returns the `Unit`
@@ -185,7 +190,7 @@ object State {
    * Constructs a state transition function from the specified update
    * function.
    */
-  def update[S](f: S => S): State[S, Unit] =
+  def update[S1, S2](f: S1 => S2): ZState[S1, S2, Unit] =
     modify(s => (f(s), ()))
 
   /**
@@ -200,9 +205,9 @@ object State {
   /**
    * The `Covariant` instance for `State`.
    */
-  implicit def StateCovariant[S]: Covariant[({ type lambda[+A] = State[S, A] })#lambda] =
-    new Covariant[({ type lambda[+A] = State[S, A] })#lambda] {
-      def map[A, B](f: A => B): State[S, A] => State[S, B] =
+  implicit def StateCovariant[S1, S2]: Covariant[({ type lambda[+A] = ZState[S1, S2, A] })#lambda] =
+    new Covariant[({ type lambda[+A] = ZState[S1, S2, A] })#lambda] {
+      def map[A, B](f: A => B): ZState[S1, S2, A] => ZState[S1, S2, B] =
         _.map(f)
     }
 
@@ -228,7 +233,8 @@ object State {
         ffa.flatten
     }
 
-  private final case class Succeed[S, A](value: A)                                          extends State[S, A]
-  private final case class Modify[S, A](run: S => (S, A))                                   extends State[S, A]
-  private final case class FlatMap[S, A, B](value: State[S, A], continue: A => State[S, B]) extends State[S, B]
+  private final case class Succeed[S, +A](value: A)                 extends ZState[S, S, A]
+  private final case class Modify[-S1, +S2, +A](run: S1 => (S2, A)) extends ZState[S1, S2, A]
+  private final case class FlatMap[-S1, S2, +S3, A, +B](value: ZState[S1, S2, A], continue: A => ZState[S2, S3, B])
+      extends ZState[S1, S3, B]
 }
