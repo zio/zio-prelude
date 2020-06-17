@@ -2,7 +2,7 @@ package zio.prelude
 
 trait FunctionBoth[:=>[-_, +_]] extends IdentityCompose[:=>] {
   def both[A, B, C, D](f: A :=> B, g: C :=> D): (A, C) :=> (B, D)
-  
+
   def toRightBoth[A]: (Unit, A) :=> A
   def toLeftBoth[A]: (A, Unit) :=> A
 
