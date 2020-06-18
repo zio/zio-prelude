@@ -3,7 +3,7 @@ package zio.prelude
 import zio.random.Random
 import zio.test._
 
-object StateSpec extends DefaultRunnableSpec {
+object ZStateSpec extends DefaultRunnableSpec {
 
   lazy val genInt: Gen[Random, Int] =
     Gen.anyInt
@@ -27,8 +27,14 @@ object StateSpec extends DefaultRunnableSpec {
     Gens.state(genInt, genState)
 
   def spec =
-    suite("StateSpec")(
+    suite("ZStateSpec")(
       suite("methods")(
+        testM("contramap") {
+          check(genState, genIntToInt, genInt) { (fa, f, s) =>
+            val (s1, a1) = fa.run(s)
+            assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
+          }
+        },
         testM("flatMap") {
           check(genState, genIntToState, genInt) { (fa, f, s) =>
             val (s1, a1) = fa.run(s)
@@ -47,6 +53,12 @@ object StateSpec extends DefaultRunnableSpec {
           check(genState, genIntToInt, genInt) { (fa, f, s) =>
             val (s1, a1) = fa.run(s)
             assert(fa.map(f).run(s))(equalTo((s1, f(a1))))
+          }
+        },
+        testM("mapState") {
+          check(genState, genIntToInt, genInt) { (fa, f, s) =>
+            val (s1, a1) = fa.run(s)
+            assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
           }
         },
         testM("run") {

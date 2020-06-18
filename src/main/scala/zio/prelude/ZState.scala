@@ -32,6 +32,13 @@ sealed trait ZState[-S1, +S2, +A] { self =>
     self zip that
 
   /**
+   * Transforms the initial state of this state transition function with the
+   * specified function.
+   */
+  final def contramap[S0](f: S0 => S1): ZState[S0, S2, A] =
+    update(f) *> self
+
+  /**
    * Extends this state transition function with another state transition
    * function that depends on the result of this state transition function by
    * running the first state transition function, using its result to generate
@@ -55,6 +62,13 @@ sealed trait ZState[-S1, +S2, +A] { self =>
    */
   final def map[B](f: A => B): ZState[S1, S2, B] =
     flatMap(a => ZState.succeed(f(a)))
+
+  /**
+   * Transforms the updated state of this state transition function with the
+   * specified function.
+   */
+  final def mapState[S3](f: S2 => S3): ZState[S1, S3, A] =
+    self <* update(f)
 
   /**
    * Runs this state transition function with the specified initial state,
@@ -200,6 +214,15 @@ object ZState {
     new AssociativeBoth[({ type lambda[+A] = State[S, A] })#lambda] {
       def both[A, B](fa: => State[S, A], fb: => State[S, B]): State[S, (A, B)] =
         fa.zip(fb)
+    }
+
+  /**
+   * The `Contravariant` instance for `State`.
+   */
+  implicit def StateContravariant[S2, A]: Contravariant[({ type lambda[-S1] = ZState[S1, S2, A] })#lambda] =
+    new Contravariant[({ type lambda[-S1] = ZState[S1, S2, A] })#lambda] {
+      def contramap[S1, S0](f: S0 => S1): ZState[S1, S2, A] => ZState[S0, S2, A] =
+        _.contramap(f)
     }
 
   /**
