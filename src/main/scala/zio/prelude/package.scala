@@ -67,6 +67,9 @@ package object prelude
     type Apply[F[+_]]               = Covariant[F] with AssociativeBoth[F]
     type Applicative[F[+_]]         = Covariant[F] with AssociativeBoth[F] with IdentityBoth[F]
     type InvariantApplicative[F[_]] = Invariant[F] with AssociativeBoth[F] with IdentityBoth[F]
+
+    type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
+    type Profunctor[:=>[-_, +_]] = Divariant[:=>]
   }
 
   /**
