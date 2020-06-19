@@ -44,6 +44,21 @@ lazy val root =
     .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
     .enablePlugins(BuildInfoPlugin)
 
+lazy val benchmarks = project
+  .in(file("zio-prelude-benchmarks"))
+  .settings(
+    skip.in(publish) := true,
+    moduleName := "zio-prelude-benchmarks",
+    scalacOptions -= "-Yno-imports",
+    scalacOptions -= "-Xfatal-warnings",
+    libraryDependencies ++= Seq(
+      "dev.zio"       %% "zio"       % zioVersion,
+      "org.typelevel" %% "cats-core" % "2.2.0-M2"
+    )
+  )
+  .dependsOn(root)
+  .enablePlugins(JmhPlugin)
+
 lazy val docs = project
   .in(file("zio-prelude-docs"))
   .settings(

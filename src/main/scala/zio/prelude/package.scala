@@ -27,6 +27,9 @@ package object prelude
 
   type AnyF[_] = Any
 
+  type State[S, +A] = ZState[S, S, A]
+  val State: ZState.type = ZState
+
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Associative[A] with Commutative[A]
