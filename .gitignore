@@ -236,6 +236,8 @@ local.properties
 .ensime
 .ensime_cache/
 .ensime_lucene/
+# VS Code specific
+.vscode
 # default application storage directory used by the IDE Performance Cache feature
 .data/
 
