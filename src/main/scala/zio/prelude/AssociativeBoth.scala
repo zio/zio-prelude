@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.AssociativeBothEqualFInvariant
-import zio.prelude.newtypes.Failure
+import zio.prelude.newtypes.{ AndF, Failure, OrF }
 import zio.stm.ZSTM
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
@@ -150,11 +150,26 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
     }
 
   /**
-   * The `AssociativeBoth` instance for `Schedule`.
+   * The `AssociativeBoth` instance for And `Schedule`.
    */
-  implicit def ScheduleAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = Schedule[R, E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = Schedule[R, E, a] })#lambda] {
-      def both[A, B](fa: => Schedule[R, E, A], fb: => Schedule[R, E, B]): Schedule[R, E, (A, B)] = fa zip fb
+  implicit def ScheduleAndAssociativeBoth[R, E]
+    : AssociativeBoth[({ type lambda[+a] = AndF[Schedule[R, E, a]] })#lambda] =
+    new AssociativeBoth[({ type lambda[+a] = AndF[Schedule[R, E, a]] })#lambda] {
+      def both[A, B](fa: => AndF[Schedule[R, E, A]], fb: => AndF[Schedule[R, E, B]]): AndF[Schedule[R, E, (A, B)]] =
+        AndF.wrap {
+          AndF.unwrap(fa) && AndF.unwrap(fb)
+        }
+    }
+
+  /**
+   * The `AssociativeBoth` instance for Or `Schedule`.
+   */
+  implicit def ScheduleOrAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] =
+    new AssociativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] {
+      def both[A, B](fa: => OrF[Schedule[R, E, A]], fb: => OrF[Schedule[R, E, B]]): OrF[Schedule[R, E, (A, B)]] =
+        OrF.wrap {
+          OrF.unwrap(fa) || OrF.unwrap(fb)
+        }
     }
 
   /**

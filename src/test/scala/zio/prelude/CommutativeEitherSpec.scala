@@ -6,6 +6,6 @@ object CommutativeEitherSpec extends DefaultRunnableSpec {
 
   def spec = suite("CommutativeEitherSpec")(
     suite("laws")(
-    )
+      )
   )
 }
