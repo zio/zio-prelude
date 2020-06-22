@@ -14,7 +14,7 @@ trait IdentityCompose[:=>[-_, +_]] {
     eq.equal(ab1, ab) && eq.equal(ab2, ab)
   }
 }
-object IdentityCompose {  
+object IdentityCompose {
   implicit val FunctionIdentityCompose: IdentityCompose[Function] =
     new IdentityCompose[Function] {
       def identity[A]: A => A = (a: A) => a
