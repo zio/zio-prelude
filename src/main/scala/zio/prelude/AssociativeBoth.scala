@@ -945,7 +945,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
   implicit def EitherAssociativeBoth[L]: AssociativeBoth[({ type lambda[+r] = Either[L, r] })#lambda] =
     new AssociativeBoth[({ type lambda[+r] = Either[L, r] })#lambda] {
       def both[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, (A, B)] =
-        fa.right.flatMap(a => fb.right.map(b => (a, b)))
+        fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
