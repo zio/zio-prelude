@@ -30,6 +30,20 @@ package object newtypes {
    */
   type And = And.Type
 
+  object AndF extends SubtypeF
+
+  /**
+   * A newtype representing parameterized logical conjunction.
+   */
+  type AndF[+A] = AndF.Type[A]
+
+  object OrF extends SubtypeF
+
+  /**
+   * A newtype representing parameterized logical disjunction.
+   */
+  type OrF[+A] = OrF.Type[A]
+
   object First extends SubtypeF
 
   /**
