@@ -5,6 +5,7 @@ import scala.annotation.implicitNotFound
 import zio.prelude.coherent.CovariantEqualFIdentityFlatten
 import zio.test.TestResult
 import zio.test.laws._
+import zio.ZIO
 
 /**
  * `IdentityFlatten` described a type that can be "flattened" in an
@@ -63,5 +64,15 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
     new IdentityFlatten[Option] {
       def any: Option[Any]                              = Some(())
       def flatten[A](ffa: Option[Option[A]]): Option[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `ZIO`.
+   */
+  implicit def IdentityFlattenZIO[R, E]: IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      def any: ZIO[R, E, Any] = ZIO.unit
+
+      def flatten[A](ffa: ZIO[R, E, ZIO[R, E, A]]): ZIO[R, E, A] = ffa.flatten
     }
 }
