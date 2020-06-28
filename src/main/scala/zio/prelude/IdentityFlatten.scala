@@ -5,7 +5,7 @@ import scala.annotation.implicitNotFound
 import zio.prelude.coherent.CovariantEqualFIdentityFlatten
 import zio.test.TestResult
 import zio.test.laws._
-import zio.ZIO
+import zio._
 
 /**
  * `IdentityFlatten` described a type that can be "flattened" in an
@@ -74,5 +74,15 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
       def any: ZIO[R, E, Any] = ZIO.unit
 
       def flatten[A](ffa: ZIO[R, E, ZIO[R, E, A]]): ZIO[R, E, A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Cause`.
+   */
+  implicit val IdentityFlattenCause: IdentityFlatten[Cause] =
+    new IdentityFlatten[Cause] {
+      override def any: Cause[Any] = Cause.empty
+
+      override def flatten[A](ffa: Cause[Cause[A]]): Cause[A] = ffa.flatten
     }
 }
