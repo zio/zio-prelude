@@ -105,4 +105,14 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
 
       def flatten[A](ffa: ZIO[R, E, ZIO[R, E, A]]): ZIO[R, E, A] = ffa.flatten
     }
+
+  /**
+   * The `IdentityFlatten` instance for `ZManaged`.
+   */
+  implicit def IdentityFlattenManaged[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
+      def any: ZManaged[R, E, Any] = ZManaged.unit
+
+      def flatten[A](ffa: ZManaged[R, E, ZManaged[R, E, A]]): ZManaged[R, E, A] = ffa.flatten
+    }
 }
