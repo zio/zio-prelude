@@ -2,10 +2,11 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
+import zio._
 import zio.prelude.coherent.CovariantEqualFIdentityFlatten
+import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
-import zio._
 
 /**
  * `IdentityFlatten` described a type that can be "flattened" in an
@@ -109,10 +110,20 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
   /**
    * The `IdentityFlatten` instance for `ZManaged`.
    */
-  implicit def IdentityFlattenManaged[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
+  implicit def IdentityFlattenZManaged[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
     new IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
       def any: ZManaged[R, E, Any] = ZManaged.unit
 
       def flatten[A](ffa: ZManaged[R, E, ZManaged[R, E, A]]): ZManaged[R, E, A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `ZStream`.
+   */
+  implicit def IdentityFlattenZStream[R, E]: IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
+      def any: ZStream[R, E, Any] = ZStream.empty
+
+      def flatten[A](ffa: ZStream[R, E, ZStream[R, E, A]]): ZStream[R, E, A] = ffa.flatten
     }
 }
