@@ -67,16 +67,6 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
     }
 
   /**
-   * The `IdentityFlatten` instance for `ZIO`.
-   */
-  implicit def IdentityFlattenZIO[R, E]: IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      def any: ZIO[R, E, Any] = ZIO.unit
-
-      def flatten[A](ffa: ZIO[R, E, ZIO[R, E, A]]): ZIO[R, E, A] = ffa.flatten
-    }
-
-  /**
    * The `IdentityFlatten` instance for `Cause`.
    */
   implicit val IdentityFlattenCause: IdentityFlatten[Cause] =
@@ -104,5 +94,15 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
       def any: Exit[E, Any] = Exit.unit
 
       def flatten[A](ffa: Exit[E, Exit[E, A]]): Exit[E, A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `ZIO`.
+   */
+  implicit def IdentityFlattenZIO[R, E]: IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      def any: ZIO[R, E, Any] = ZIO.unit
+
+      def flatten[A](ffa: ZIO[R, E, ZIO[R, E, A]]): ZIO[R, E, A] = ffa.flatten
     }
 }
