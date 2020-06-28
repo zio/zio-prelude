@@ -85,4 +85,14 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
 
       override def flatten[A](ffa: Cause[Cause[A]]): Cause[A] = ffa.flatten
     }
+
+  /**
+   * The `IdentityFlatten` instance for `Chunk`.
+   */
+  implicit val IdentityFlattenChunk: IdentityFlatten[Chunk] =
+    new IdentityFlatten[Chunk] {
+      def any: Chunk[Any] = Chunk.empty
+
+      def flatten[A](ffa: Chunk[Chunk[A]]): Chunk[A] = ffa.flatten
+    }
 }
