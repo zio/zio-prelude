@@ -88,6 +88,16 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
     }
 
   /**
+   * The `IdentityFlatten` instance for `NonEmptyChunk`.
+   */
+  implicit val IdentityFlattenNonEmptyChunk: IdentityFlatten[NonEmptyChunk] =
+    new IdentityFlatten[NonEmptyChunk] {
+      def any: NonEmptyChunk[Any] = NonEmptyChunk.single(())
+
+      def flatten[A](ffa: NonEmptyChunk[NonEmptyChunk[A]]): NonEmptyChunk[A] = ffa.flatten
+    }
+
+  /**
    * The `IdentityFlatten` instance for `Exit`.
    */
   implicit def IdentityFlattenExit[E]: IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] =
