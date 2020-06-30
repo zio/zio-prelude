@@ -82,7 +82,7 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
    */
   implicit val IdentityFlattenChunk: IdentityFlatten[Chunk] =
     new IdentityFlatten[Chunk] {
-      def any: Chunk[Any] = Chunk.empty
+      def any: Chunk[Any] = Chunk.unit
 
       def flatten[A](ffa: Chunk[Chunk[A]]): Chunk[A] = ffa.flatten
     }
@@ -122,7 +122,7 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
    */
   implicit def IdentityFlattenZStream[R, E]: IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
-      def any: ZStream[R, E, Any] = ZStream.empty
+      def any: ZStream[R, E, Any] = ZStream.unit
 
       def flatten[A](ffa: ZStream[R, E, ZStream[R, E, A]]): ZStream[R, E, A] = ffa.flatten
     }
