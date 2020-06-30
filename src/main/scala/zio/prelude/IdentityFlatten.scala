@@ -72,7 +72,7 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
    */
   implicit val IdentityFlattenCause: IdentityFlatten[Cause] =
     new IdentityFlatten[Cause] {
-      override def any: Cause[Any] = Cause.empty
+      override def any: Cause[Any] = Cause.fail(())
 
       override def flatten[A](ffa: Cause[Cause[A]]): Cause[A] = ffa.flatten
     }
