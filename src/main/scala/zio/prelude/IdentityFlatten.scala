@@ -2,7 +2,9 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
+import zio._
 import zio.prelude.coherent.CovariantEqualFIdentityFlatten
+import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -63,5 +65,75 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
     new IdentityFlatten[Option] {
       def any: Option[Any]                              = Some(())
       def flatten[A](ffa: Option[Option[A]]): Option[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Cause`.
+   */
+  implicit val IdentityFlattenCause: IdentityFlatten[Cause] =
+    new IdentityFlatten[Cause] {
+      override def any: Cause[Any] = Cause.fail(())
+
+      override def flatten[A](ffa: Cause[Cause[A]]): Cause[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Chunk`.
+   */
+  implicit val IdentityFlattenChunk: IdentityFlatten[Chunk] =
+    new IdentityFlatten[Chunk] {
+      def any: Chunk[Any] = Chunk.unit
+
+      def flatten[A](ffa: Chunk[Chunk[A]]): Chunk[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `NonEmptyChunk`.
+   */
+  implicit val IdentityFlattenNonEmptyChunk: IdentityFlatten[NonEmptyChunk] =
+    new IdentityFlatten[NonEmptyChunk] {
+      def any: NonEmptyChunk[Any] = NonEmptyChunk.single(())
+
+      def flatten[A](ffa: NonEmptyChunk[NonEmptyChunk[A]]): NonEmptyChunk[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Exit`.
+   */
+  implicit def IdentityFlattenExit[E]: IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] {
+      def any: Exit[E, Any] = Exit.unit
+
+      def flatten[A](ffa: Exit[E, Exit[E, A]]): Exit[E, A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `ZIO`.
+   */
+  implicit def IdentityFlattenZIO[R, E]: IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      def any: ZIO[R, E, Any] = ZIO.unit
+
+      def flatten[A](ffa: ZIO[R, E, ZIO[R, E, A]]): ZIO[R, E, A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `ZManaged`.
+   */
+  implicit def IdentityFlattenZManaged[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
+      def any: ZManaged[R, E, Any] = ZManaged.unit
+
+      def flatten[A](ffa: ZManaged[R, E, ZManaged[R, E, A]]): ZManaged[R, E, A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `ZStream`.
+   */
+  implicit def IdentityFlattenZStream[R, E]: IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
+      def any: ZStream[R, E, Any] = ZStream.unit
+
+      def flatten[A](ffa: ZStream[R, E, ZStream[R, E, A]]): ZStream[R, E, A] = ffa.flatten
     }
 }
