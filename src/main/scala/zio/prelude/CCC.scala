@@ -18,17 +18,15 @@ trait Cartesian[:=>[-_, +_]] extends FunctionSwapBoth[:=>] {
   def duplicateBoth[A]: A :=> (A, A)
   def delete[A]: A :=> Unit
 
-  def leftDeleteLaw[A] = {
+  def leftDeleteLaw[A] =
     compose(toLeftBoth[A], compose(both(identity[A], delete[A]), duplicateBoth[A])) == identity[A]
-  }
-  def rightDeleteLaw[A] = {
+  def rightDeleteLaw[A] =
     compose(toRightBoth[A], compose(both(delete[A], identity[A]), duplicateBoth[A])) == identity[A]
-  }
 }
 
 trait FunctionEither[:=>[-_, +_]] extends IdentityCompose[:=>] {
   def either[A, B, C, D](f: A :=> B, g: C :=> D): Either[A, C] :=> Either[B, D]
-  
+
   def toRightEither[A]: Either[Nothing, A] :=> A
   def toLeftEither[A]: Either[A, Nothing] :=> A
 
@@ -44,12 +42,10 @@ trait Cocartesian[:=>[-_, +_]] extends FunctionSwapEither[:=>] {
   def duplicateEither[A]: A :=> Either[A, A]
   def fail[A]: A :=> Nothing
 
-  def leftDeleteLaw[A] = {
+  def leftDeleteLaw[A] =
     compose(toLeftEither[A], compose(either(identity[A], fail[A]), duplicateEither[A])) == identity[A]
-  }
-  def rightDeleteLaw[A] = {
+  def rightDeleteLaw[A] =
     compose(toRightEither[A], compose(either(fail[A], identity[A]), duplicateEither[A])) == identity[A]
-  }
 }
 
 trait CartesianClosed[:=>[-_, +_]] extends Cartesian[:=>] {
