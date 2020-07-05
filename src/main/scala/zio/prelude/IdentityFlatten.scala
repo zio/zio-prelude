@@ -1,12 +1,14 @@
 package zio.prelude
 
-import scala.annotation.implicitNotFound
-
 import zio._
 import zio.prelude.coherent.CovariantEqualFIdentityFlatten
 import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
+
+import scala.annotation.implicitNotFound
+import scala.concurrent.Future
+import scala.util.{ Success, Try }
 
 /**
  * `IdentityFlatten` described a type that can be "flattened" in an
@@ -59,18 +61,9 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
     identityFlatten
 
   /**
-   * The `IdentityFlatten` instance for `Option`.
-   */
-  implicit val IdentityFlattenOption: IdentityFlatten[Option] =
-    new IdentityFlatten[Option] {
-      def any: Option[Any]                              = Some(())
-      def flatten[A](ffa: Option[Option[A]]): Option[A] = ffa.flatten
-    }
-
-  /**
    * The `IdentityFlatten` instance for `Cause`.
    */
-  implicit val IdentityFlattenCause: IdentityFlatten[Cause] =
+  implicit val CauseIdentityFlatten: IdentityFlatten[Cause] =
     new IdentityFlatten[Cause] {
       override def any: Cause[Any] = Cause.fail(())
 
@@ -80,7 +73,7 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
   /**
    * The `IdentityFlatten` instance for `Chunk`.
    */
-  implicit val IdentityFlattenChunk: IdentityFlatten[Chunk] =
+  implicit val ChunkIdentityFlatten: IdentityFlatten[Chunk] =
     new IdentityFlatten[Chunk] {
       def any: Chunk[Any] = Chunk.unit
 
@@ -88,19 +81,23 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
     }
 
   /**
-   * The `IdentityFlatten` instance for `NonEmptyChunk`.
+   * The `IdentityFlatten` instance for `Either`.
    */
-  implicit val IdentityFlattenNonEmptyChunk: IdentityFlatten[NonEmptyChunk] =
-    new IdentityFlatten[NonEmptyChunk] {
-      def any: NonEmptyChunk[Any] = NonEmptyChunk.single(())
+  implicit def EitherIdentityFlatten[E]: IdentityFlatten[({ type lambda[+a] = Either[E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = Either[E, a] })#lambda] {
+      def any: Either[E, Any] = Right(())
 
-      def flatten[A](ffa: NonEmptyChunk[NonEmptyChunk[A]]): NonEmptyChunk[A] = ffa.flatten
+      def flatten[A](ffa: Either[E, Either[E, A]]): Either[E, A] = ffa match {
+        case Left(e)         => Left(e)
+        case Right(Left(e))  => Left(e)
+        case Right(Right(a)) => Right(a)
+      }
     }
 
   /**
    * The `IdentityFlatten` instance for `Exit`.
    */
-  implicit def IdentityFlattenExit[E]: IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] =
+  implicit def ExitIdentityFlatten[E]: IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def any: Exit[E, Any] = Exit.unit
 
@@ -108,9 +105,77 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
     }
 
   /**
+   * The `IdentityFlatten` instance for `Future`.
+   */
+  implicit val FutureIdentityFlatten: IdentityFlatten[Future] =
+    new IdentityFlatten[Future] {
+      def any: Future[Any] = Future.successful(())
+
+      def flatten[A](ffa: Future[Future[A]]): Future[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Id`.
+   */
+  implicit val IdIdentityFlatten: IdentityFlatten[Id] =
+    new IdentityFlatten[Id] {
+      def any: Id[Any] = Id(())
+
+      def flatten[A](ffa: Id[Id[A]]): Id[A] = Id.unwrap(ffa)
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `List`.
+   */
+  implicit val ListIdentityFlatten: IdentityFlatten[List] =
+    new IdentityFlatten[List] {
+      def any: List[Any] = List(())
+
+      def flatten[A](ffa: List[List[A]]): List[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `NonEmptyChunk`.
+   */
+  implicit val NonEmptyChunkIdentityFlatten: IdentityFlatten[NonEmptyChunk] =
+    new IdentityFlatten[NonEmptyChunk] {
+      def any: NonEmptyChunk[Any] = NonEmptyChunk.single(())
+
+      def flatten[A](ffa: NonEmptyChunk[NonEmptyChunk[A]]): NonEmptyChunk[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Option`.
+   */
+  implicit val OptionIdentityFlatten: IdentityFlatten[Option] =
+    new IdentityFlatten[Option] {
+      def any: Option[Any]                              = Some(())
+      def flatten[A](ffa: Option[Option[A]]): Option[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Try`.
+   */
+  implicit val TryIdentityFlatten: IdentityFlatten[Try] =
+    new IdentityFlatten[Try] {
+      def any: Try[Any]                        = Success(())
+      def flatten[A](ffa: Try[Try[A]]): Try[A] = ffa.flatten
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Vector`.
+   */
+  implicit val VectorIdentityFlatten: IdentityFlatten[Vector] =
+    new IdentityFlatten[Vector] {
+      def any: Vector[Any] = Vector(())
+
+      def flatten[A](ffa: Vector[Vector[A]]): Vector[A] = ffa.flatten
+    }
+
+  /**
    * The `IdentityFlatten` instance for `ZIO`.
    */
-  implicit def IdentityFlattenZIO[R, E]: IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+  implicit def ZIOIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
     new IdentityFlatten[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
       def any: ZIO[R, E, Any] = ZIO.unit
 
@@ -120,7 +185,7 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
   /**
    * The `IdentityFlatten` instance for `ZManaged`.
    */
-  implicit def IdentityFlattenZManaged[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
+  implicit def ZManagedIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
     new IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
       def any: ZManaged[R, E, Any] = ZManaged.unit
 
@@ -130,10 +195,11 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantEqualFIdentityFlatten,
   /**
    * The `IdentityFlatten` instance for `ZStream`.
    */
-  implicit def IdentityFlattenZStream[R, E]: IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
+  implicit def ZStreamIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def any: ZStream[R, E, Any] = ZStream.unit
 
       def flatten[A](ffa: ZStream[R, E, ZStream[R, E, A]]): ZStream[R, E, A] = ffa.flatten
     }
+
 }
