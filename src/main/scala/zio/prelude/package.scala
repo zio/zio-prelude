@@ -27,8 +27,11 @@ package object prelude
 
   type AnyF[_] = Any
 
-  type State[S, +A] = ZState[S, S, A]
-  val State: ZState.type = ZState
+  type EState[S, +E, +A] = ZPure[S, S, Any, E, A]
+  val EState: ZPure.type = ZPure
+
+  type State[S, +A] = ZPure[S, S, Any, Nothing, A]
+  val State: ZPure.type = ZPure
 
   object classic {
     type Semigroup[A]            = Associative[A]
