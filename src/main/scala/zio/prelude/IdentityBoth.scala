@@ -80,6 +80,16 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
     }
 
   /**
+   * The `IdentityBoth` instance for `List`.
+   */
+  implicit val ListAssociativeIdentityBoth: IdentityBoth[List] =
+    new IdentityBoth[List] {
+      val any: List[Any] =
+        List(())
+      def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
    * The `IdentityBoth` instance for `Id`.
    */
   implicit val IdIdentityBoth: IdentityBoth[Id] =

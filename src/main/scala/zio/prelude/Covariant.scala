@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Fiber, Schedule, ZIO, ZLayer, ZManaged, ZQueue }
+import zio.{ Chunk, Fiber, NonEmptyChunk, Schedule, ZIO, ZLayer, ZManaged, ZQueue }
 import zio.prelude.coherent.CovariantEqualF
 import zio.prelude.newtypes.Failure
 import zio.stream.ZStream
@@ -75,6 +75,16 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
    */
   def apply[F[+_]](implicit covariant: Covariant[F]): Covariant[F] =
     covariant
+
+  /**
+   * The `Covariant` instance for `Chunk`
+   */
+  implicit val ChunkCovariant: Covariant[Chunk] =
+    new Covariant[Chunk] {
+      def map[A, B](f: A => B): Chunk[A] => Chunk[B] = { chunk =>
+        chunk.map(f)
+      }
+    }
 
   /**
    * The `Covariant` instance for `Option`.
@@ -621,6 +631,15 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
               )
             )
     }
+
+  /**
+   * Covariant instance for `NonEmptyChunk`.
+   */
+  implicit val NonEmptyChunkCovariant: Covariant[NonEmptyChunk] = new Covariant[NonEmptyChunk] {
+    override def map[A, B](f: A => B): NonEmptyChunk[A] => NonEmptyChunk[B] = { chunk =>
+      chunk.map(f)
+    }
+  }
 
   /**
    * The `Covariant` instance for `Tuple2`

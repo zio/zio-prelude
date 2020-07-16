@@ -3,12 +3,10 @@ package zio.prelude
 import zio.Chunk
 
 trait Traversable[F[+_]] extends Covariant[F] {
+
   def fold[S, A](fa: F[A])(s: S)(f: (S, A) => S): S = {
-    import Traversable.State
-
     type StateS[+A] = State[S, A]
-
-    mapEffect[StateS, A, Any](fa)((a: A) => State((s: S) => (f(s, a), ()))).run(s)._1
+    mapEffect[StateS, A, Any](fa)((a: A) => State((s: S) => (f(s, a), ()))).runState(s)
   }
 
   def foldMap[A, B: Identity](fa: F[A])(f: A => B): B =
@@ -30,58 +28,20 @@ trait Traversable[F[+_]] extends Covariant[F] {
 
   def toChunk[A](fa: F[A]): Chunk[A] = foldMap(fa)(Chunk(_))
 
-  // mapEffect(fa)(a => Id(a)) === Id(fa)
+  def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
+    mapEffect(fa)(a => State((n: Int) => (n + 1, (a, n)))).runResult(0)
 }
+
 object Traversable {
-  final case class State[S, +A](run: S => (S, A))
-  object State {
-    implicit def StateAssociativeBoth[S]: AssociativeBoth[({ type lambda[+A] = State[S, A] })#lambda] = {
-      type StateS[+A] = State[S, A]
 
-      new AssociativeBoth[StateS] {
-        def both[A, B](fa: => StateS[A], fb: => StateS[B]): StateS[(A, B)] =
-          State { (s0: S) =>
-            val (s1, a) = fa.run(s0)
-            val (s2, b) = fb.run(s1)
-
-            (s2, (a, b))
-          }
-      }
-    }
-    implicit def StateIdentityBoth[S]: IdentityBoth[({ type lambda[+A] = State[S, A] })#lambda] = {
-      type StateS[+A] = State[S, A]
-
-      new IdentityBoth[StateS] {
-        def any: StateS[Any] = State(s => (s, ()))
-
-        def both[A, B](fa: => StateS[A], fb: => StateS[B]): StateS[(A, B)] =
-          State { (s0: S) =>
-            val (s1, a) = fa.run(s0)
-            val (s2, b) = fb.run(s1)
-
-            (s2, (a, b))
-          }
-      }
-    }
-    implicit def StateCovariant[S]: Covariant[({ type lambda[+A] = State[S, A] })#lambda] = {
-      type StateS[+A] = State[S, A]
-
-      new Covariant[StateS] {
-        def map[A, B](f: A => B): StateS[A] => StateS[B] =
-          (fa: StateS[A]) => State((s: S) => fa.run(s) match { case (s, a) => (s, f(a)) })
-      }
-    }
-  }
+  def apply[F[+_]](implicit traversable: Traversable[F]): Traversable[F] =
+    traversable
 
   implicit val ListTraversable: Traversable[List] =
     new Traversable[List] {
       override def map[A, B](f: A => B): List[A] => List[B] =
-        (list: List[A]) => list.map(f)
-
+        _.map(f)
       def mapEffect[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
-        list match {
-          case Nil     => Nil.succeed[G]
-          case a :: as => (f(a) zipWith mapEffect(as)(f))(_ :: _)
-        }
+        list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
     }
 }

@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.Chunk
+import zio.{ Chunk, NonEmptyChunk }
 
 /**
  * `EqualF[F]` represents a universally quantified function from `Equal[A]` to
@@ -67,6 +67,14 @@ object EqualF {
       def deriveEqual[B: Equal]: Equal[Map[A, B]] =
         Equal.MapEqual
     }
+
+  /**
+   * The `EqualF` instance for  `NonEmptyChunk`.
+   */
+  implicit val NonEmptyChunkEqualF: EqualF[NonEmptyChunk] = new EqualF[NonEmptyChunk] {
+    def deriveEqual[A: Equal]: Equal[NonEmptyChunk[A]] =
+      Equal.NonEmptyChunkEqual
+  }
 
   /**
    * The `EqualF` instance for `Option`.

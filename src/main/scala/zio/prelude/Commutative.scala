@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.CommutativeEqual
-import zio.prelude.newtypes.{ And, Or, Prod, Sum }
+import zio.prelude.newtypes.{ And, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -62,6 +62,12 @@ object Commutative extends Lawful[CommutativeEqual] {
 
   implicit val FloatSumCommutative: Commutative[Sum[Float]] =
     Commutative.make((l, r) => Sum(l + r))
+
+  implicit val IntMaxCommutative: Commutative[Max[Int]] =
+    Commutative.make((l, r) => Max(l max r))
+
+  implicit val IntMinCommutative: Commutative[Min[Int]] =
+    Commutative.make((l, r) => Min(l max r))
 
   implicit val IntProdCommutative: Commutative[Prod[Int]] =
     Commutative.make((l, r) => Prod(l * r))

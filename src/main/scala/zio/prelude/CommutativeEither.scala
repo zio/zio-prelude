@@ -1,10 +1,12 @@
 package zio.prelude
 
-import scala.annotation.implicitNotFound
-
+import zio.ZIO
 import zio.prelude.coherent.CommutativeEitherEqualFInvariant
+import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
+
+import scala.annotation.implicitNotFound
 
 /**
  * A commutative binary operator that combines two values of types `F[A]` and
@@ -42,6 +44,33 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvari
    */
   val laws: LawsF.Invariant[CommutativeEitherEqualFInvariant, Equal] =
     commutativeLaw
+
+  /**
+   * The `CommutativeEither` instance for `ZIO`.
+   */
+  implicit def ZIOCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      def either[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, Either[A, B]] =
+        fa.raceEither(fb)
+    }
+
+  /**
+   * The `CommutativeEither` instance for `ZSink`.
+   */
+  implicit def ZSinkCommutativeEither[R, E, I]: CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] {
+      def either[A, B](fa: => ZSink[R, E, I, A], fb: => ZSink[R, E, I, B]): ZSink[R, E, I, Either[A, B]] =
+        fa.raceBoth(fb)
+    }
+
+  /**
+   * The `CommutativeEither` instance for `ZStream`.
+   */
+  implicit def ZStreamCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
+      def either[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, Either[A, B]] =
+        fa mergeEither fb
+    }
 
   /**
    * Summons an implicit `CommutativeEither[F]`.
