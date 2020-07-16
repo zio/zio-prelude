@@ -6,7 +6,7 @@ import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Identity[A] extends Closure[A] {
+trait Identity[A] extends Associative[A] {
   def identity: A
 }
 

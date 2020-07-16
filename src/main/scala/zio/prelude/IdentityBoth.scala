@@ -11,7 +11,7 @@ import zio.test.laws._
  * produce an `F[(A, B)]` with an identity.
  */
 @implicitNotFound("No implicit IdentityBoth defined for ${F}.")
-trait IdentityBoth[F[_]] {
+trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
 
   /**
    * The identity for combining two values of types `F[A]` and `F[B]` to

@@ -1,11 +1,15 @@
 package zio.prelude
 
-trait Divariant[:=>[-_, +_]] {
+trait Divariant[:=>[-_, +_]] { self =>
   def deriveCovariant[A]: Covariant[({ type lambda[+B] = A :=> B })#lambda] =
-    ???
+    new Covariant[({ type lambda[+B] = A :=> B })#lambda] {
+      def map[B, C](f: B => C): A :=> B => A :=> C = dimap(identity(_), f)
+    }
 
   def deriveContravariant[B]: Contravariant[({ type lambda[-A] = A :=> B })#lambda] =
-    ???
+    new Contravariant[({ type lambda[-A] = A :=> B })#lambda] {
+      def contramap[A, C](f: C => A): A :=> B => C :=> B = dimap(f, identity(_))
+    }
 
   def dimap[A, B, C, D](f: C => A, g: B => D): (A :=> B) => (C :=> D) =
     (ab: A :=> B) => rightMap(g)(leftMap(f)(ab))

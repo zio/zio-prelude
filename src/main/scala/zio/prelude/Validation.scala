@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.util.Try
 
-import zio.NonEmptyChunk
+import zio.{ IO, NonEmptyChunk, ZIO }
 import zio.prelude.Validation._
 import zio.test.Assertion
 
@@ -43,6 +43,12 @@ sealed trait Validation[+E, +A] { self =>
       case (Failure(es), Failure(e1s)) => es.toList.toSet == e1s.toList.toSet
       case (Success(a), Success(a1))   => a == a1
       case _                           => false
+    }
+
+  final def flatMap[E1 >: E, B](f: A => Validation[E1, B]): Validation[E1, B] =
+    self match {
+      case Failure(es) => Failure(es)
+      case Success(a)  => f(a)
     }
 
   /**
@@ -86,6 +92,17 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def toOption: Option[A] =
     fold(_ => None, Some(_))
+
+  /**
+   * Transforms this `Validation` to a `Try`, discarding all but the first error.
+   */
+  final def toTry(implicit ev: E <:< Throwable): scala.util.Try[A] =
+    fold(e => scala.util.Failure(ev(e.head)), scala.util.Success(_))
+
+  /**
+   * Converts this `Validation` into a `ZIO` effect.
+   */
+  final def toZIO: IO[NonEmptyChunk[E], A] = ZIO.fromEither(self.toEither)
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns

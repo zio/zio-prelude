@@ -217,7 +217,7 @@ private[prelude] sealed trait NewtypeModule {
   }
 
   sealed trait SubtypeSmart[A] extends NewtypeSmart[A] {
-    type Type <: A
+    type Type
   }
 }
 
@@ -250,9 +250,9 @@ private[prelude] object NewtypeModule {
         new Subtype[A] {
           type Type = A
 
-          def wrapAll[F[_]](value: F[A]): F[Type] = value
+          def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
 
-          def unwrapAll[F[_]](value: F[Type]): F[A] = value
+          def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
         }
 
       def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A] =
@@ -286,11 +286,12 @@ trait NewtypeExports {
   abstract class Newtype[A] extends instance.Newtype[A] {
     val newtype: instance.Newtype[A] = instance.newtype[A]
 
-    type Type = newtype.Type
+    trait Tag
+    type Type = newtype.Type with Tag
 
-    def wrapAll[F[_]](value: F[A]): F[Type] = newtype.wrapAll(value)
+    def wrapAll[F[_]](value: F[A]): F[Type] = newtype.wrapAll(value).asInstanceOf[F[Type]]
 
-    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value)
+    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value.asInstanceOf[F[newtype.Type]])
   }
 
   /**
@@ -309,13 +310,15 @@ trait NewtypeExports {
   abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
     val newtype: instance.NewtypeSmart[A] = instance.newtypeSmart[A](assertion)
 
-    type Type = newtype.Type
+    trait Tag
+    type Type = newtype.Type with Tag
 
-    def wrap(value: A): Validation[String, Type] = newtype.wrap(value)
+    def wrap(value: A): Validation[String, Type] = newtype.wrap(value).asInstanceOf[Validation[String, Type]]
 
-    def wrapAll(value: List[A]): Validation[String, List[Type]] = newtype.wrapAll(value)
+    def wrapAll(value: List[A]): Validation[String, List[Type]] =
+      newtype.wrapAll(value).asInstanceOf[Validation[String, List[Type]]]
 
-    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value)
+    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value.asInstanceOf[F[newtype.Type]])
   }
 
   /**
@@ -331,11 +334,12 @@ trait NewtypeExports {
   abstract class Subtype[A] extends instance.Subtype[A] {
     val subtype: instance.Subtype[A] = instance.subtype[A]
 
-    type Type = subtype.Type
+    trait Tag
+    type Type = subtype.Type with Tag
 
-    def wrapAll[F[_]](value: F[A]): F[Type] = subtype.wrapAll(value)
+    def wrapAll[F[_]](value: F[A]): F[Type] = subtype.wrapAll(value).asInstanceOf[F[Type]]
 
-    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value)
+    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
   }
 
   /**
@@ -354,12 +358,14 @@ trait NewtypeExports {
   abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {
     val subtype: instance.SubtypeSmart[A] = instance.subtypeSmart[A](assertion)
 
-    type Type = subtype.Type
+    trait Tag
+    type Type = subtype.Type with Tag
 
-    def wrap(value: A): Validation[String, Type] = subtype.wrap(value)
+    def wrap(value: A): Validation[String, Type] = subtype.wrap(value).asInstanceOf[Validation[String, Type]]
 
-    def wrapAll(value: List[A]): Validation[String, List[Type]] = subtype.wrapAll(value)
+    def wrapAll(value: List[A]): Validation[String, List[Type]] =
+      subtype.wrapAll(value).asInstanceOf[Validation[String, List[Type]]]
 
-    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value)
+    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
   }
 }

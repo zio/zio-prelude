@@ -1,5 +1,6 @@
-package zio.prelude
+package zio.prelude.fx
 
+import zio.prelude._
 import zio.random.Random
 import zio.test._
 

@@ -1,7 +1,6 @@
 package zio.prelude
 
 package object newtypes {
-
   object Sum extends SubtypeF
 
   /**

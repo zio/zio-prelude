@@ -1,9 +1,9 @@
-package zio.prelude
+package zio.prelude.fx
 
 import scala.annotation.switch
 
 import zio.internal.Stack
-import zio.prelude.ZPure._
+import zio.prelude._
 
 /**
  * `ZPure[S1, S2, E, A]` is a purely functional description of a state transition
@@ -13,6 +13,7 @@ import zio.prelude.ZPure._
  * handling the bookkeeping of threading the state through the computation.
  */
 sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
+  import ZPure._
 
   /**
    * A symbolic alias for `zipRight`.
@@ -246,7 +247,7 @@ object ZPure {
    * the results.
    */
   def foreach[F[+_]: Traversable, S, A, B](fa: F[A])(f: A => State[S, B]): State[S, F[B]] =
-    Traversable[F].mapEffect(fa)(f)
+    Traversable[F].foreach(fa)(f)
 
   /**
    * Constructs a state transition function that returns the state.

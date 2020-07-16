@@ -11,7 +11,7 @@ import zio.test.laws._
  * produce an `F[Either[A, B]]` with an identity value.
  */
 @implicitNotFound("No implicit IdentityEither defined for ${F}.")
-trait IdentityEither[F[_]] {
+trait IdentityEither[F[_]] extends AssociativeEither[F] {
 
   /**
    * Combines two values of types `F[A]` and `F[B]` to produce an

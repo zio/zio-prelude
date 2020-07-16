@@ -27,11 +27,17 @@ package object prelude
 
   type AnyF[_] = Any
 
-  type EState[S, +E, +A] = ZPure[S, S, Any, E, A]
-  val EState: ZPure.type = ZPure
+  type EState[S, +E, +A] = zio.prelude.fx.ZPure[S, S, Any, E, A]
+  val EState: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type State[S, +A] = ZPure[S, S, Any, Nothing, A]
-  val State: ZPure.type = ZPure
+  type State[S, +A] = zio.prelude.fx.ZPure[S, S, Any, Nothing, A]
+  val State: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type Reader[-R, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, Nothing, A]
+  val Reader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, E, A]
+  val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
   object classic {
     type Semigroup[A]            = Associative[A]
