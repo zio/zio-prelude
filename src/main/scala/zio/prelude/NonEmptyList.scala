@@ -374,15 +374,6 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
 
   /**
-   * The `CommutativeBoth` instance for `NonEmptyList`.
-   */
-  implicit val NonEmptyListCommutativeBoth: CommutativeBoth[NonEmptyList] =
-    new CommutativeBoth[NonEmptyList] {
-      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
-        fa.zip(fb)
-    }
-
-  /**
    * The `Covariant` instance for `NonEmptyList`.
    */
   implicit val NonEmptyListCovariant: Covariant[NonEmptyList] =
@@ -514,6 +505,15 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
 }
 
 trait LowPriorityNonEmptyListImplicits {
+
+  /**
+   * The `CommutativeBoth` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListCommutativeBoth: CommutativeBoth[NonEmptyList] =
+    new CommutativeBoth[NonEmptyList] {
+      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
+        fa.zip(fb)
+    }
 
   /**
    * Derives a `Hash[NonEmptyList[A]]` given a `Hash[A]`.

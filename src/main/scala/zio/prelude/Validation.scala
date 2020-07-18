@@ -149,24 +149,6 @@ object Validation extends LowPriorityValidationImplicits {
   final case class Success[+A](value: A)                 extends Validation[Nothing, A]
 
   /**
-   * The `AssociativeBoth` instance for `Validation`.
-   */
-  implicit def ValidationAssociativeBoth[E]: AssociativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new AssociativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
-      def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
-        fa.zipPar(fb)
-    }
-
-  /**
-   * The `CommutativeBoth` instance for `Validation`.
-   */
-  implicit def ValidationCommutativeBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
-      def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
-        fa.zipPar(fb)
-    }
-
-  /**
    * The `Covariant` instance for `Validation`.
    */
   implicit def ValidationCovariant[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
@@ -1294,6 +1276,15 @@ object Validation extends LowPriorityValidationImplicits {
 }
 
 trait LowPriorityValidationImplicits {
+
+  /**
+   * The `CommutativeBoth` instance for `Validation`.
+   */
+  implicit def ValidationCommutativeBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
+      def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
+        fa.zipPar(fb)
+    }
 
   /**
    * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
