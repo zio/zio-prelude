@@ -7,17 +7,16 @@ import zio.test._
 import zio.test.Assertion._
 
 object NewtypeSpec extends DefaultRunnableSpec {
-  trait Dummy[A]  
+  trait Dummy[A]
 
   object Age extends Newtype[Int] {
     // type Instances
-    implicit val dummyType: Dummy[Age] = new Dummy[Age]{}
+    implicit val dummyType: Dummy[Age] = new Dummy[Age] {}
   }
   // Age.newtype.Type with Age.Instances
   type Age = Age.Type
 
   implicitly[Dummy[Age]]
-
 
   def spec = suite("NewtypeSpec")(
     suite("NewtypeSmart")(

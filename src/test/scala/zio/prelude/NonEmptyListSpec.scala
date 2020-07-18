@@ -41,7 +41,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
       testM("covariant")(checkAllLaws(Covariant)(GenFs.nonEmptyList, Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genNonEmptyList)),
       testM("hash")(checkAllLaws(Hash)(genNonEmptyList)),
-      testM("identityBoth")(checkAllLaws(CommutativeBoth)(GenFs.nonEmptyList, Gen.anyInt)),
+      testM("identityBoth")(checkAllLaws(IdentityBoth)(GenFs.nonEmptyList, Gen.anyInt)),
       testM("identityFlatten")(checkAllLaws(IdentityFlatten)(GenFs.nonEmptyList, Gen.anyInt)),
       testM("ord")(checkAllLaws(Ord)(genNonEmptyList))
     ),
