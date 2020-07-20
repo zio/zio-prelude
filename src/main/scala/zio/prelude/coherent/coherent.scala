@@ -214,7 +214,7 @@ object EqualInverse {
     new EqualInverse[A] {
       def combine(l: => A, r: => A): A                       = inverse0.combine(l, r)
       def identity: A                                        = inverse0.identity
-      def inverse(a: A): A                                   = inverse0.inverse(a)
+      def inverse(l: => A, r: => A): A                       = inverse0.inverse(l, r)
       override protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }

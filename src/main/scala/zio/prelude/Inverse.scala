@@ -12,7 +12,7 @@ trait Inverse[A] extends Identity[A] {
    * the value is combined with the inverse (on the right hand side),
    * the identity element is returned.
    */
-  def inverse(a: A): A
+  def inverse(l: => A, r: => A): A
 }
 
 object Inverse extends Lawful[EqualInverse] {
@@ -20,7 +20,7 @@ object Inverse extends Lawful[EqualInverse] {
   val rightInverseLaw: Laws[EqualInverse] =
     new Laws.Law1[EqualInverse]("rightInverseLaw") {
       def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
-        I.combine(a, I.inverse(a)) <-> I.identity
+        I.inverse(I.combine(I.identity, a), a) <-> I.identity
     }
 
   val laws: Laws[EqualInverse] =
@@ -28,32 +28,40 @@ object Inverse extends Lawful[EqualInverse] {
 
   def apply[A](implicit Inverse: Inverse[A]): Inverse[A] = Inverse
 
-  def make[A](identity0: A, op: (A, A) => A, inv: (A) => A): Inverse[A] =
+  def make[A](identity0: A, op: (A, A) => A, inv: (A, A) => A): Inverse[A] =
     new Inverse[A] {
       def identity: A                  = identity0
       def combine(l: => A, r: => A): A = op(l, r)
-      def inverse(a: A): A             = inv(a)
+      def inverse(l: => A, r: => A): A = inv(l, r)
     }
 
   implicit val ByteSumInverse: Inverse[Sum[Byte]] =
-    Inverse.make(Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte), a => Sum((-a).toByte))
+    Inverse.make(
+      Sum(0),
+      (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte),
+      (l: Sum[Byte], r: Sum[Byte]) => Sum((l - r).toByte)
+    )
 
   implicit val CharSumInverse: Inverse[Sum[Char]] =
-    Inverse.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar), a => Sum((-a).toChar))
+    Inverse.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar), (l, r) => Sum((l - r).toChar))
 
   implicit val DoubleSumInverse: Inverse[Sum[Double]] =
-    Inverse.make(Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r), a => Sum(-a))
+    Inverse.make(Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r), (l: Sum[Double], r: Sum[Double]) => Sum(l - r))
 
   implicit val FloatSumInverse: Inverse[Sum[Float]] =
-    Inverse.make(Sum(0), (l, r) => Sum(l + r), a => Sum(-a))
+    Inverse.make(Sum(0), (l, r) => Sum(l + r), (l, r) => Sum(l - r))
 
   implicit val IntSumInverse: Inverse[Sum[Int]] =
-    Inverse.make(Sum(0), (l, r) => Sum(l + r), a => Sum(-a))
+    Inverse.make(Sum(0), (l, r) => Sum(l + r), (l, r) => Sum(l - r))
 
   implicit val LongSumInverse: Inverse[Sum[Long]] =
-    Inverse.make(Sum(0L), (l, r) => Sum(l + r), a => Sum(-a))
+    Inverse.make(Sum(0L), (l, r) => Sum(l + r), (l, r) => Sum(l - r))
 
   implicit val ShortSumInverse: Inverse[Sum[Short]] =
-    Inverse.make(Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort), a => Sum((-a).toShort))
+    Inverse.make(
+      Sum(0),
+      (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort),
+      (l: Sum[Short], r: Sum[Short]) => Sum((l - r).toShort)
+    )
 
 }

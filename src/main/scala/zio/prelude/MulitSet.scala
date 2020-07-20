@@ -77,8 +77,8 @@ final class MultiSet[+A, +B] private (private val map: Map[A @uncheckedVariance,
       that.map.foldLeft(self.map.asInstanceOf[Map[A1, B1]]) {
         case (map, (a, b1)) =>
           map.get(a) match {
-            case Some(b) => map + (a -> ev.combine(b, ev.inverse(b1)))
-            case None    => map + (a -> ev.inverse(b1))
+            case Some(b) => map + (a -> ev.inverse(b, b1))
+            case None    => map + (a -> ev.inverse(ev.identity, b1))
           }
       }
     }

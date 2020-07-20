@@ -75,13 +75,13 @@ object Invariant {
             Inverse.make[B](
               f.to(a.identity),
               (l, r) => f.to(a.combine(f.from(l), f.from(r))),
-              v => f.to(a.inverse(f.from(v)))
+              (l, r) => f.to(a.inverse(f.from(l), f.from(r)))
             ),
           (b: Inverse[B]) =>
             Inverse.make[A](
               f.from(b.identity),
               (l, r) => f.from(b.combine(f.to(l), f.to(r))),
-              v => f.from(b.inverse(f.to(v)))
+              (l, r) => f.from(b.inverse(f.to(l), f.to(r)))
             )
         )
     }
