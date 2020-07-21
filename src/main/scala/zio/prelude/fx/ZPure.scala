@@ -374,10 +374,10 @@ object ZPure {
     override def apply(a: A): ZPure[S2, S3, R, E2, B] =
       success(a)
   }
-  private final case class Access[S1, S2, R, E, A](access: R => ZPure[R, S1, S2, E, A]) extends ZPure[S1, S2, R, E, A] {
+  private final case class Access[S1, S2, R, E, A](access: R => ZPure[S1, S2, R, E, A]) extends ZPure[S1, S2, R, E, A] {
     override def tag = Tags.Access
   }
-  private final case class Provide[S1, S2, R, E, A](r: R, continue: ZPure[R, S1, S2, E, A])
+  private final case class Provide[S1, S2, R, E, A](r: R, continue: ZPure[S1, S2, R, E, A])
       extends ZPure[S1, S2, Any, E, A] {
     override def tag = Tags.Provide
   }
