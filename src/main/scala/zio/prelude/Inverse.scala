@@ -57,11 +57,13 @@ object Inverse extends Lawful[EqualInverse] {
   implicit val LongSumInverse: Inverse[Sum[Long]] =
     Inverse.make(Sum(0L), (l, r) => Sum(l + r), (l, r) => Sum(l - r))
 
+  implicit def SetInverse[A]: Inverse[Set[A]] =
+    Inverse.make(Set.empty, _ | _, _ &~ _)
+
   implicit val ShortSumInverse: Inverse[Sum[Short]] =
     Inverse.make(
       Sum(0),
       (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort),
       (l: Sum[Short], r: Sum[Short]) => Sum((l - r).toShort)
     )
-
 }
