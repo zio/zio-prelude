@@ -118,7 +118,13 @@ private[prelude] sealed trait NewtypeModule {
 
   def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A]
 
-  private type Id[A] = A
+  private[this] type Id[+A] = A
+
+  private implicit val IdTraversable: Traversable[Id] =
+    new Traversable[Id] {
+      def foreach[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
+        f(fa)
+    }
 
   sealed trait Newtype[A] {
     type Type
@@ -168,12 +174,18 @@ private[prelude] sealed trait NewtypeModule {
     type Type
 
     /**
+     * Converts an instance of the underlying type to an instance of the
+     * newtype.
+     */
+    protected def apply(value: A): Type = wrap(value)
+
+    /**
      * Attempts to convert an instance of the underlying type to an instance
      * of the newtype, returning a `Validation` containing either a valid
      * instance of the newtype or a string message describing why the instance
      * was invalid.
      */
-    def make(value: A): Validation[String, Type] = wrap(value)
+    def make(value: A): Validation[String, Type] = makeAll[Id](value)
 
     /**
      * Allows pattern matching on newtype instances to convert them back to
@@ -182,12 +194,10 @@ private[prelude] sealed trait NewtypeModule {
     def unapply(value: Type): Some[A] = Some(unwrap(value))
 
     /**
-     * Attempts to convert an instance of the underlying type to an instance
-     * of the newtype, returning a `Validation` containing either a valid
-     * instance of the newtype or a string message describing why the instance
-     * was invalid.
+     * Converts an instance of the underlying type to an instance of the
+     * newtype.
      */
-    def wrap(value: A): Validation[String, Type]
+    protected def wrap(value: A): Type = wrapAll[Id](value)
 
     /**
      * Converts an instance of the newtype back to an instance of the
@@ -201,7 +211,15 @@ private[prelude] sealed trait NewtypeModule {
      * containing either a collection of valid instances of the newtype or an
      * accumulation of validation errors.
      */
-    def wrapAll(value: List[A]): Validation[String, List[Type]]
+    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]]
+
+    /**
+     * Converts an instance of a type parameterized on the underlying type
+     * to an instance of a type parameterized on the newtype. For example,
+     * this could be used to convert a list of instances of the underlying
+     * type to a list of instances of the newtype.
+     */
+    protected def wrapAll[F[_]](value: F[A]): F[Type]
 
     /**
      * Converts an instance of a type parameterized on the newtype back to an
@@ -210,6 +228,8 @@ private[prelude] sealed trait NewtypeModule {
      * to a list of instances of the underlying type.
      */
     def unwrapAll[F[_]](value: F[Type]): F[A]
+
+    private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[Type]
   }
 
   sealed trait Subtype[A] extends Newtype[A] {
@@ -237,13 +257,14 @@ private[prelude] object NewtypeModule {
         new NewtypeSmart[A] {
           type Type = A
 
-          def wrap(value: A): Validation[String, A] =
-            Validation.fromAssert(value)(assertion)
+          def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
+            Traversable[F].foreach(value)(Validation.fromAssert(_)(assertion))
 
-          def wrapAll(value: List[A]): Validation[String, List[A]] =
-            Validation.collectAllPar(value.map(wrap))
+          protected def wrapAll[F[_]](value: F[A]): F[A] = value
 
           def unwrapAll[F[_]](value: F[A]): F[A] = value
+
+          private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[A] = value
         }
 
       def subtype[A]: Subtype[A] =
@@ -259,13 +280,14 @@ private[prelude] object NewtypeModule {
         new SubtypeSmart[A] {
           type Type = A
 
-          def wrap(value: A): Validation[String, A] =
-            Validation.fromAssert(value)(assertion)
+          def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
+            Traversable[F].foreach(value)(Validation.fromAssert(_)(assertion))
 
-          def wrapAll(value: List[A]): Validation[String, List[A]] =
-            Validation.collectAllPar(value.map(wrap))
+          protected def wrapAll[F[_]](value: F[A]): F[A] = value
 
           def unwrapAll[F[_]](value: F[A]): F[A] = value
+
+          private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[A] = value
         }
     }
 }
@@ -313,12 +335,14 @@ trait NewtypeExports {
     trait Tag
     type Type = newtype.Type with Tag
 
-    def wrap(value: A): Validation[String, Type] = newtype.wrap(value).asInstanceOf[Validation[String, Type]]
+    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =
+      newtype.makeAll(value).asInstanceOf[Validation[String, F[Type]]]
 
-    def wrapAll(value: List[A]): Validation[String, List[Type]] =
-      newtype.wrapAll(value).asInstanceOf[Validation[String, List[Type]]]
+    protected def wrapAll[F[_]](value: F[A]): F[Type] = unsafeWrapAll(value)
 
     def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value.asInstanceOf[F[newtype.Type]])
+
+    private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[Type] = newtype.unsafeWrapAll(value).asInstanceOf[F[Type]]
   }
 
   /**
@@ -361,11 +385,13 @@ trait NewtypeExports {
     trait Tag
     type Type = subtype.Type with Tag
 
-    def wrap(value: A): Validation[String, Type] = subtype.wrap(value).asInstanceOf[Validation[String, Type]]
+    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =
+      subtype.makeAll(value).asInstanceOf[Validation[String, F[Type]]]
 
-    def wrapAll(value: List[A]): Validation[String, List[Type]] =
-      subtype.wrapAll(value).asInstanceOf[Validation[String, List[Type]]]
+    protected def wrapAll[F[_]](value: F[A]): F[Type] = unsafeWrapAll(value)
 
     def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
+
+    private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[Type] = subtype.unsafeWrapAll(value).asInstanceOf[F[Type]]
   }
 }
