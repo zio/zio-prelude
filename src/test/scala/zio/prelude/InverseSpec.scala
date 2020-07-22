@@ -12,7 +12,8 @@ object InverseSpec extends DefaultRunnableSpec {
       testM("byte addition")(checkAllLaws(Inverse)(Gen.anyByte.map(Sum(_)))),
       testM("short addition")(checkAllLaws(Inverse)(Gen.anyShort.map(Sum(_)))),
       testM("int addition")(checkAllLaws(Inverse)(Gen.anyInt.map(Sum(_)))),
-      testM("long addition")(checkAllLaws(Inverse)(Gen.anyLong.map(Sum(_))))
+      testM("long addition")(checkAllLaws(Inverse)(Gen.anyLong.map(Sum(_)))),
+      testM("set")(checkAllLaws(Inverse)(Gen.setOf(Gen.anyInt)))
     )
   )
 }
