@@ -233,7 +233,7 @@ object MultiSet {
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def MultiSetEqual[A, B: Equal]: Equal[MultiSet[A, B]] =
-    Equal[Map[A, B]].contramap(_.map)
+    Equal.instance[Map[A, B]].contramap(_.map)
 
   /**
    * The `EqualF` instance for `MultiSet`.

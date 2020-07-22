@@ -1,8 +1,9 @@
-package zio.prelude
+package zio.prelude.typeclasses
 
 import scala.annotation.implicitNotFound
 
 import zio.{ Chunk, NonEmptyChunk }
+import zio.prelude._
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -190,7 +191,7 @@ object Equal extends Lawful[Equal] {
   /**
    * Summons an implicit `Equal[A]`.
    */
-  def apply[A](implicit equal: Equal[A]): Equal[A] =
+  def instance[A](implicit equal: Equal[A]): Equal[A] =
     equal
 
   /**
@@ -261,13 +262,13 @@ object Equal extends Lawful[Equal] {
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
    */
   implicit def EitherEqual[A: Equal, B: Equal]: Equal[Either[A, B]] =
-    Equal[A] either Equal[B]
+    instance[A] either instance[B]
 
   /**
    * Derives an `Equal[F[A]]` given an `EqualF[F]` and an `Equal[A]`.
    */
   implicit def EqualFEqual[F[_]: EqualF, A: Equal]: Equal[F[A]] =
-    EqualF[F].deriveEqual(Equal[A])
+    EqualF[F].deriveEqual(instance[A])
 
   /**
    * Equality for `Float` values. Note that to honor the contract that a
@@ -312,7 +313,7 @@ object Equal extends Lawful[Equal] {
    * Derives an `Equal[NonEmptyChunk[A]]` given an `Equal[A]`.
    */
   implicit def NonEmptyChunkEqual[A: Equal]: Equal[NonEmptyChunk[A]] =
-    Equal[Chunk[A]].contramap(_.toChunk)
+    instance[Chunk[A]].contramap(_.toChunk)
 
   /**
    * Equality for `Nothing` values. Note that since there are not values of
@@ -350,7 +351,7 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple2Equal[A: Equal, B: Equal]: Equal[(A, B)] =
-    Equal[A] both Equal[B]
+    instance[A] both instance[B]
 
   /**
    * Derives an `Equal` for a product type given an `Equal` for each element of
@@ -817,18 +818,9 @@ object Equal extends Lawful[Equal] {
     make(_.corresponds(_)(_ === _))
 
   /**
-   * Returns whether two values refer to the same location in memory.
-   */
-  private[prelude] def refEq[A](l: A, r: A): Boolean =
-    l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
-}
-
-trait EqualSyntax {
-
-  /**
    * Provides infix syntax for comparing two values for equality.
    */
-  implicit class EqualOps[A](l: A) {
+  implicit final class EqualOps[A](private val l: A) extends AnyVal {
 
     /**
      * Returns whether this value and the specified value are equal.
@@ -842,4 +834,10 @@ trait EqualSyntax {
     def !==[A1 >: A](r: A1)(implicit equal: Equal[A1]): Boolean =
       equal.notEqual(l, r)
   }
+
+  /**
+   * Returns whether two values refer to the same location in memory.
+   */
+  private[prelude] def refEq[A](l: A, r: A): Boolean =
+    l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
 }

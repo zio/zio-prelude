@@ -1,5 +1,7 @@
 package zio
 
+import scala.language.implicitConversions
+
 import zio.test.{ assert, TestResult }
 
 package object prelude
@@ -13,7 +15,6 @@ package object prelude
     with CovariantSyntax
     with ContravariantSyntax
     with DebugSyntax
-    with EqualSyntax
     with HashSyntax
     with IdExports
     with IdentitySyntax
@@ -38,6 +39,12 @@ package object prelude
 
   type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, E, A]
   val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type Equal[-A] = zio.prelude.typeclasses.Equal[A]
+  val Equal: zio.prelude.typeclasses.Equal.type = zio.prelude.typeclasses.Equal
+
+  implicit def Equal[A](l: A): zio.prelude.typeclasses.Equal.EqualOps[A] =
+    new zio.prelude.typeclasses.Equal.EqualOps[A](l)
 
   object classic {
     type Semigroup[A]            = Associative[A]
