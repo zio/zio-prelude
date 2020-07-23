@@ -45,10 +45,24 @@ sealed trait Validation[+E, +A] { self =>
       case _                           => false
     }
 
+  /**
+   * Transforms the value of this `Validation` with the specified validation
+   * function if it is a success or returns the value unchanged otherwise.
+   */
   final def flatMap[E1 >: E, B](f: A => Validation[E1, B]): Validation[E1, B] =
     self match {
       case Failure(es) => Failure(es)
       case Success(a)  => f(a)
+    }
+
+  /**
+   * Transforms the value of this `Validation` with the specified effectual
+   * function if it is a success or returns the value unchanged otherwise.
+   */
+  final def foreach[F[+_]: IdentityBoth: Covariant, B](f: A => F[B]): F[Validation[E, B]] =
+    self match {
+      case Failure(es) => Failure(es).succeed
+      case Success(a)  => f(a).map(Success(_))
     }
 
   /**
@@ -223,6 +237,15 @@ object Validation extends LowPriorityValidationImplicits {
    */
   implicit def ValidationOrd[E: Ord, A: Ord]: Ord[Validation[E, A]] =
     Ord[NonEmptyChunk[E]].eitherWith(Ord[A])(_.toEither)
+
+  /**
+   * The `Traversable` instance for `Validation`.
+   */
+  implicit def ValidationTraversable[E]: Traversable[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new Traversable[({ type lambda[+x] = Validation[E, x] })#lambda] {
+      def foreach[F[+_]: IdentityBoth: Covariant, A, B](fa: Validation[E, A])(f: A => F[B]): F[Validation[E, B]] =
+        fa.foreach(f)
+    }
 
   /**
    * Attempts to evaluate the specified value, catching any error that occurs

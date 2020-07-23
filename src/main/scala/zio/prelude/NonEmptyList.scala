@@ -130,6 +130,13 @@ sealed trait NonEmptyList[+A] { self =>
     }
 
   /**
+   * Transforms each element of this `NonEmptyList` with the specified
+   * effectual function.
+   */
+  final def foreach[F[+_]: AssociativeBoth: Covariant, B](f: A => F[B]): F[NonEmptyList[B]] =
+    reduceMapRight(f(_).map(single))((a, fas) => f(a).zipWith(fas)(cons))
+
+  /**
    * Returns the hashCode of this `NonEmptyList`.
    */
   override final def hashCode: Int = {
@@ -420,7 +427,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
   implicit val NonEmptyListNonEmptyTraversable: NonEmptyTraversable[NonEmptyList] =
     new NonEmptyTraversable[NonEmptyList] {
       def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
-        fa.reduceMapRight(f(_).map(single))((a, fas) => f(a).zipWith(fas)(cons))
+        fa.foreach(f)
     }
 
   /**
