@@ -19,11 +19,14 @@ object Imperative {
   /**
    * The `Imperative` instance for `ZIO`.
    */
-  implicit val ZIOImperative: Imperative[ZIO] =
-    new Imperative[ZIO] {
-      def succeed[A](a: => A): UIO[A] =
+  implicit def ZIOImperative[S]: Imperative[({ type lambda[-R, +E, +A] = StatefulZIO[S, R, E, A] })#lambda] =
+    new Imperative[({ type lambda[-R, +E, +A] = StatefulZIO[S, R, E, A] })#lambda] {
+      def succeed[A](a: => A): StatefulZIO[S, Any, Nothing, A] =
         ZIO.succeed(a)
-      def chain[R, E, A, R1 <: R, E1 >: E, B](first: ZIO[R, E, A], f: A => ZIO[R1, E1, B]): ZIO[R1, E1, B] =
+      def chain[R, E, A, R1 <: R, E1 >: E, B](
+        first: StatefulZIO[S, R, E, A],
+        f: A => StatefulZIO[S, R1, E1, B]
+      ): StatefulZIO[S, R1, E1, B] =
         first.flatMap(f)
     }
 }

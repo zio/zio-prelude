@@ -1,6 +1,6 @@
 package zio.prelude.fx
 
-import zio.ZIO
+import zio.{ Ref, ZIO }
 import zio.prelude.Contravariant
 
 trait Contextual[F[-_, +_, +_]] {
@@ -15,23 +15,18 @@ trait Contextual[F[-_, +_, +_]] {
 
 object Contextual {
 
-  implicit val ZIOContextual: Contextual[ZIO] =
-    new Contextual[ZIO] {
-      def environment[R]: ZIO[R, Nothing, R] =
-        ZIO.environment[R]
-      def provide[R, E, A](v: ZIO[R, E, A], r: R): ZIO[Any, E, A] =
-        v.provide(r)
-      def fallible[R]: Fallible[({ type lambda[+E, +A] = ZIO[R, E, A] })#lambda] =
-        new Fallible[({ type lambda[+E, +A] = ZIO[R, E, A] })#lambda] {
-          def absolve[E, A](v: ZIO[R, E, Either[E, A]]): ZIO[R, E, A] =
-            v.absolve
-          def recover[E, A](v: ZIO[R, E, A]): ZIO[R, Nothing, Either[E, A]] =
-            v.either
+  implicit def ZIOContextual[S]: Contextual[({ type lambda[-R, +E, +A] = StatefulZIO[S, R, E, A] })#lambda] =
+    new Contextual[({ type lambda[-R, +E, +A]          = StatefulZIO[S, R, E, A] })#lambda] {
+      def fallible[R]: Fallible[({ type lambda[+E, +A] = StatefulZIO[S, R, E, A] })#lambda] =
+        Fallible.ZIOFallible[(R, Ref[S])]
+      def contravariant[E, A]: Contravariant[({ type lambda[-R] = StatefulZIO[S, R, E, A] })#lambda] =
+        new Contravariant[({ type lambda[-R] = StatefulZIO[S, R, E, A] })#lambda] {
+          def contramap[R, R1](f: R1 => R): ZIO[(R, Ref[S]), E, A] => ZIO[(R1, Ref[S]), E, A] =
+            _.provideSome { case (r, ref) => (f(r), ref) }
         }
-      def contravariant[E, A]: Contravariant[({ type lambda[-R] = ZIO[R, E, A] })#lambda] =
-        new Contravariant[({ type lambda[-R] = ZIO[R, E, A] })#lambda] {
-          def contramap[R, R0](f: R0 => R): ZIO[R, E, A] => ZIO[R0, E, A] =
-            _.provideSome(f)
-        }
+      def environment[R]: StatefulZIO[S, R, Nothing, R] =
+        ZIO.access(_._1)
+      def provide[R, E, A](v: StatefulZIO[S, R, E, A], r: R): StatefulZIO[S, Any, E, A] =
+        v.provideSome { case (_, ref) => (r, ref) }
     }
 }
