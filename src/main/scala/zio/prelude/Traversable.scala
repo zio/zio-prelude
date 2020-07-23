@@ -20,7 +20,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * function `f`, returning a new collection with the results in the context
    * of the effect.
    */
-  def foreach[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
+  def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
 
   /**
    * Returns the number of elements in the collection that satisfy the
@@ -44,19 +44,25 @@ trait Traversable[F[+_]] extends Covariant[F] {
     First.unwrapAll(foldMap(fa)(a => if (f(a)) Some(First(a)) else None))
 
   /**
-   * Converts a collection of type `F` with elements that are
+   * Converts a collection with elements that are in the context of effects to
+   * a collection of elements in the context of an effect.
    */
-  def flip[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](fa: F[G[A]]): G[F[A]] =
+  def flip[G[+_]: IdentityBoth: Covariant, A](fa: F[G[A]]): G[F[A]] =
     foreach(fa)(identity(_))
 
   /**
-   * Folds over the elements of this collection to produce a summary value,
-   * maintaining some internal state along the way.
+   * Folds over the elements of this collection using an associative operation
+   * and an identity.
    */
-  def fold[S, A](fa: F[A])(s: S)(f: (S, A) => S): S = {
-    type StateS[+A] = State[S, A]
-    foreach[StateS, A, Any](fa)((a: A) => State((s: S) => (f(s, a), ()))).runState(s)
-  }
+  def fold[A: Identity](fa: F[A]): A =
+    foldMap(fa)(identity)
+
+  /**
+   * Folds over the elements of this collection from left to right to produce a
+   * summary value, maintaining some internal state along the way.
+   */
+  def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S =
+    foreach(fa)(a => State.update(f(_, a))).runState(s)
 
   /**
    * Maps each element of the collection to a type `B` for which an `Identity`
@@ -65,7 +71,14 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * element if the collection is empty.
    */
   def foldMap[A, B: Identity](fa: F[A])(f: A => B): B =
-    fold[B, A](fa)(Identity[B].identity)((b: B, a: A) => b combine f(a))
+    foldLeft(fa)(Identity[B].identity)((b: B, a: A) => b combine f(a))
+
+  /**
+   * Folds over the elements of this collection from right to left to produce a
+   * summary value, maintaining some internal state along the way.
+   */
+  def foldRight[S, A](fa: F[A])(s: S)(f: (A, S) => S): S =
+    foldLeft(reverse(fa))(s)((s, a) => f(a, s))
 
   /**
    * Returns whether any element of the collection satisfies the specified
@@ -78,7 +91,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * Traverses each element in the collection with the specified effectual
    * function `f` purely for its effects.
    */
-  def foreach_[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
+  def foreach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     foreach(fa)(f).as(())
 
   /**
@@ -88,7 +101,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
     foldMap(fa)(_ => And(false))
 
   /**
-   * Lifts a function operation on values to a function that operates on each
+   * Lifts a function operating on values to a function that operates on each
    * element of a collection.
    */
   def map[A, B](f: A => B): F[A] => F[B] =
@@ -99,10 +112,8 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * state along the way and returning the final state along with the new
    * collection.
    */
-  def mapAccum[S, A, B](fa: F[A])(s: S)(f: (S, A) => (S, B)): (S, F[B]) = {
-    type StateS[+A] = State[S, A]
-    foreach[StateS, A, B](fa)(a => State.modify(f(_, a))).run(s)
-  }
+  def mapAccum[S, A, B](fa: F[A])(s: S)(f: (S, A) => (S, B)): (S, F[B]) =
+    foreach(fa)(a => State.modify(f(_, a))).run(s)
 
   /**
    * Returns the largest value in the collection if one exists or `None`
@@ -168,6 +179,14 @@ trait Traversable[F[+_]] extends Covariant[F] {
   }
 
   /**
+   * Reverses the order of elements in the collection.
+   */
+  def reverse[A](fa: F[A]): F[A] = {
+    val reversed = foldLeft(fa)(List.empty[A])((as, a) => a :: as)
+    mapAccum(fa)(reversed)((as, _) => (as.tail, as.head))._2
+  }
+
+  /**
    * Returns the number of elements in the collection.
    */
   def size[A](fa: F[A]): Int =
@@ -183,7 +202,13 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * Converts the collection to a `Chunk`.
    */
   def toChunk[A](fa: F[A]): Chunk[A] =
-    fold(fa)(ChunkBuilder.make[A]())((builder, a) => builder += a).result()
+    foldLeft(fa)(ChunkBuilder.make[A]())((builder, a) => builder += a).result()
+
+  /**
+   * Converts the collection to a `List`.
+   */
+  def toList[A](fa: F[A]): List[A] =
+    foldLeft(fa)(List.empty[A])((as, a) => a :: as).reverse
 
   /**
    * Zips each element of the collection with its index.
@@ -205,7 +230,7 @@ object Traversable {
    */
   implicit val ChunkTraversable: Traversable[Chunk] =
     new Traversable[Chunk] {
-      def foreach[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
         chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
     }
 
@@ -214,7 +239,7 @@ object Traversable {
    */
   implicit val ListTraversable: Traversable[List] =
     new Traversable[List] {
-      def foreach[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
         list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
       override def map[A, B](f: A => B): List[A] => List[B] = _.map(f)
     }
@@ -226,7 +251,7 @@ trait TraversableSyntax {
    * Provides infix syntax for traversing collections.
    */
   implicit class TraversableOps[F[+_], A](private val self: F[A]) {
-    def foreach[G[+_]: AssociativeBoth: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: Traversable[F]): G[F[B]] =
+    def foreach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: Traversable[F]): G[F[B]] =
       F.foreach(self)(f)
     def count(f: A => Boolean)(implicit F: Traversable[F]): Int =
       F.count(self)(f)
@@ -234,13 +259,15 @@ trait TraversableSyntax {
       F.exists(self)(f)
     def find(f: A => Boolean)(implicit F: Traversable[F]): Option[A] =
       F.find(self)(f)
-    def fold[S](s: S)(f: (S, A) => S)(implicit F: Traversable[F]): S =
-      F.fold(self)(s)(f)
+    def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: Traversable[F]): S =
+      F.foldLeft(self)(s)(f)
     def foldMap[B: Identity](f: A => B)(implicit F: Traversable[F]): B =
       F.foldMap(self)(f)
+    def foldRight[S](s: S)(f: (A, S) => S)(implicit F: Traversable[F]): S =
+      F.foldRight(self)(s)(f)
     def forall(f: A => Boolean)(implicit F: Traversable[F]): Boolean =
       F.forall(self)(f)
-    def foreach_[G[+_]: AssociativeBoth: IdentityBoth: Covariant](f: A => G[Any])(implicit F: Traversable[F]): G[Unit] =
+    def foreach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: Traversable[F]): G[Unit] =
       F.foreach_(self)(f)
     def isEmpty(implicit F: Traversable[F]): Boolean =
       F.isEmpty(self)
@@ -262,6 +289,8 @@ trait TraversableSyntax {
       F.reduceMapOption(self)(f)
     def reduceOption(f: (A, A) => A)(implicit F: Traversable[F]): Option[A] =
       F.reduceOption(self)(f)
+    def reverse(implicit F: Traversable[F]): F[A] =
+      F.reverse(self)
     def size(implicit F: Traversable[F]): Int =
       F.size(self)
     def sum(implicit A: Identity[Sum[A]], F: Traversable[F]): A =
@@ -270,5 +299,13 @@ trait TraversableSyntax {
       F.toChunk(self)
     def zipWithIndex(implicit F: Traversable[F]): F[(A, Int)] =
       F.zipWithIndex(self)
+  }
+
+  /**
+   * Provides infix syntax for flip.
+   */
+  implicit class FlipOps[F[+_], G[+_], A](private val self: F[G[A]]) {
+    def flip[B](implicit traversable: Traversable[F], identityBoth: IdentityBoth[G], covariant: Covariant[G]): G[F[A]] =
+      traversable.flip(self)
   }
 }

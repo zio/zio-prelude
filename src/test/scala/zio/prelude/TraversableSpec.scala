@@ -53,10 +53,17 @@ object TraversableSpec extends DefaultRunnableSpec {
           assert(actual)(equalTo(expected))
         }
       },
-      testM("fold") {
+      testM("foldLeft") {
         check(genList, genInt, genIntFunction2) { (as, s, f) =>
-          val actual   = Traversable[List].fold(as)(s)(f)
+          val actual   = Traversable[List].foldLeft(as)(s)(f)
           val expected = as.foldLeft(s)(f)
+          assert(actual)(equalTo(expected))
+        }
+      },
+      testM("foldRight") {
+        check(genList, genInt, genIntFunction2) { (as, s, f) =>
+          val actual   = Traversable[List].foldRight(as)(s)(f)
+          val expected = as.foldRight(s)(f)
           assert(actual)(equalTo(expected))
         }
       },
@@ -134,6 +141,13 @@ object TraversableSpec extends DefaultRunnableSpec {
         check(genList, genIntFunction2) { (as, f) =>
           val actual   = Traversable[List].reduceOption(as)(f)
           val expected = as.reduceOption(f)
+          assert(actual)(equalTo(expected))
+        }
+      },
+      testM("reverse") {
+        check(genList) { (as) =>
+          val actual   = Traversable[List].reverse(as)
+          val expected = as.reverse
           assert(actual)(equalTo(expected))
         }
       },

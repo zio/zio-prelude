@@ -240,8 +240,8 @@ sealed trait NonEmptyList[+A] { self =>
 
   /**
    * Reduces the elements of this `NonEmptyList` from left to right using the
-   * function `map` to transform the first value to the type `Z` and then the
-   * function `reduce` to combine the `Z` value with each other `A` value.
+   * function `map` to transform the first value to the type `B` and then the
+   * function `reduce` to combine the `B` value with each other `A` value.
    */
   final def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B): B =
     self match {
@@ -251,8 +251,8 @@ sealed trait NonEmptyList[+A] { self =>
 
   /**
    * Reduces the elements of this `NonEmptyList` from right to left using the
-   * function `map` to transform the first value to the type `Z` and then the
-   * function `reduce` to combine the `Z` value with each other `A` value.
+   * function `map` to transform the first value to the type `B` and then the
+   * function `reduce` to combine the `B` value with each other `A` value.
    */
   final def reduceMapRight[B](map: A => B)(reduce: (A, B) => B): B =
     self.reverse.reduceMapLeft(map)((b, a) => reduce(a, b))
@@ -412,6 +412,15 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
         single(())
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
+   * The `NonEmptyTraversable` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListNonEmptyTraversable: NonEmptyTraversable[NonEmptyList] =
+    new NonEmptyTraversable[NonEmptyList] {
+      def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
+        fa.reduceMapRight(f(_).map(single))((a, fas) => f(a).zipWith(fas)(cons))
     }
 
   /**
