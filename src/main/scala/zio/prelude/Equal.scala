@@ -820,7 +820,7 @@ object Equal extends Lawful[Equal] {
    * Derives an `Equal[Cause[A]]` given an `Equal[A]`.
    */
   implicit def CauseEqual[A: Equal]: Equal[Cause[A]] =
-    make(_.contains(_))
+    default
 
   /**
    * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.
