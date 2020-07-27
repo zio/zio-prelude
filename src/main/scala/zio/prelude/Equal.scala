@@ -819,7 +819,7 @@ object Equal extends Lawful[Equal] {
   /**
    * Derives an `Equal[Cause[A]]` given an `Equal[A]`.
    */
-  implicit def CauseEqual[A: Equal]: Equal[Cause[A]] =
+  implicit def CauseEqual[A]: Equal[Cause[A]] =
     default
 
   /**
