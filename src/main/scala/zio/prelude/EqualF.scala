@@ -508,7 +508,7 @@ object EqualF {
   /**
    * The `EqualF` instance for `Exit`.
    */
-  implicit def ExitEqualF[E]: EqualF[({ type lambda[+a] = Exit[E, a] })#lambda] =
+  implicit def ExitEqualF[E: Equal]: EqualF[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new EqualF[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def deriveEqual[A: Equal]: Equal[Exit[E, A]] =
         Equal.ExitEqual

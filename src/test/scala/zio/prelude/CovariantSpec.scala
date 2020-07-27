@@ -20,7 +20,7 @@ object CovariantSpec extends DefaultRunnableSpec {
     GenFs.tuple3(Gen.anyInt.zip(Gen.anyInt))
 
   val genFExit: GenF[Random with Sized, ({ type lambda[+a] = Exit[Int, a] })#lambda] =
-    GenFs.exit(Gen.anyInt)
+    GenFs.exit(Gen.causes(Gen.anyInt, Gen.throwable))
 
   def spec = suite("CovariantSpec")(
     suite("laws")(

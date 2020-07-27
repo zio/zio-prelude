@@ -46,20 +46,20 @@ object GenFs {
   /**
    * A generator of failed `Cause` values.
    */
-  val fail: GenF[Random, Cause] =
-    new GenF[Random, Cause] {
-      def apply[R1 <: Random, A](gen: Gen[R1, A]): Gen[R1, Cause[A]] =
-        gen.map(Cause.fail)
+  val fail: GenF[Random with Sized, Cause] =
+    new GenF[Random with Sized, Cause] {
+      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Cause[A]] =
+        Gen.causes(gen, Gen.throwable)
     }
 
   /**
    * A generator of `Exit` values.
    */
-  def exit[R <: Random with Sized, E](e: Gen[R, E]): GenF[R, ({ type lambda[+a] = Exit[E, a] })#lambda] =
+  def exit[R <: Random with Sized, E](e: Gen[R, Cause[E]]): GenF[R, ({ type lambda[+a] = Exit[E, a] })#lambda] =
     new GenF[R, ({ type lambda[+a] = Exit[E, a] })#lambda] {
       def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, Exit[E, A]] =
         Gen.either(e, a).map {
-          case Left(error)    => Exit.fail(error)
+          case Left(cause)    => Exit.halt(cause)
           case Right(success) => Exit.succeed(success)
         }
     }

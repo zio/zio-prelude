@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
+import zio._
 import zio.prelude.coherent.CovariantEqualF
 import zio.prelude.newtypes.{ Failure, FailureIn, FailureOut }
 import zio.stream.ZStream
