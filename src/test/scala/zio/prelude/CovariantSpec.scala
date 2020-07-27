@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.Exit
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -18,6 +19,9 @@ object CovariantSpec extends DefaultRunnableSpec {
   val genFTuple3: GenF[Random with Sized, ({ type lambda[+x] = ((Int, Int), x) })#lambda] =
     GenFs.tuple3(Gen.anyInt.zip(Gen.anyInt))
 
+  val genFExit: GenF[Random with Sized, ({ type lambda[+a] = Exit[Int, a] })#lambda] =
+    GenFs.exit(Gen.causes(Gen.anyInt, Gen.throwable))
+
   def spec = suite("CovariantSpec")(
     suite("laws")(
       testM("option")(checkAllLaws(Covariant)(GenF.option, Gen.anyInt)),
@@ -26,7 +30,11 @@ object CovariantSpec extends DefaultRunnableSpec {
       testM("map")(checkAllLaws(Covariant)(genFMap, Gen.anyInt)),
       testM("either")(checkAllLaws(Covariant)(genFEither, Gen.anyInt)),
       testM("tuple2")(checkAllLaws(Covariant)(genFTuple, Gen.anyInt)),
-      testM("tuple3")(checkAllLaws(Covariant)(genFTuple3, Gen.anyInt))
+      testM("tuple3")(checkAllLaws(Covariant)(genFTuple3, Gen.anyInt)),
+      testM("cause")(checkAllLaws(Covariant)(GenFs.fail, Gen.anyString)),
+      testM("chunk")(checkAllLaws(Covariant)(GenF.chunk, Gen.anyInt)),
+      testM("exit")(checkAllLaws(Covariant)(genFExit, Gen.anyInt)),
+      testM("nonEmptyChunk")(checkAllLaws(Covariant)(GenFs.nonEmptyChunk, Gen.anyInt))
     )
   )
 }
