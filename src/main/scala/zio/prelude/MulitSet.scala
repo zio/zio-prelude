@@ -236,11 +236,11 @@ object MultiSet {
     Equal[Map[A, B]].contramap(_.map)
 
   /**
-   * The `EqualF` instance for `MultiSet`.
+   * The `DeriveEqual` instance for `MultiSet`.
    */
-  implicit def MultiSetEqualF[B: Equal]: EqualF[({ type lambda[+x] = MultiSet[x, B] })#lambda] =
-    new EqualF[({ type lambda[+x] = MultiSet[x, B] })#lambda] {
-      def deriveEqual[A: Equal]: Equal[MultiSet[A, B]] =
+  implicit def MultiSetDeriveEqual[B: Equal]: DeriveEqual[({ type lambda[+x] = MultiSet[x, B] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = MultiSet[x, B] })#lambda] {
+      def derive[A: Equal]: Equal[MultiSet[A, B]] =
         MultiSetEqual
     }
 

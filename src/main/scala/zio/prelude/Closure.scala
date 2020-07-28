@@ -50,6 +50,12 @@ object Closure extends Lawful[Closure] {
   implicit def ChunkClosure[A]: Closure[Chunk[A]] =
     make(_ ++ _)
 
+  /**
+   * Derives a `Closure[F[A]]` given a `Derive[F, Closure]` and a `Closure[A]`.
+   */
+  implicit def DeriveClosure[F[_], A](implicit derive: Derive[F, Closure], closure: Closure[A]): Closure[F[A]] =
+    derive.derive(closure)
+
   implicit val DoubleProdClosure: Closure[Prod[Double]] =
     make[Prod[Double]]((l, r) => Prod(l * r))
 

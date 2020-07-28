@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.CovariantEqualF
+import zio.prelude.coherent.CovariantDeriveEqual
 import zio.prelude.newtypes.{ Failure, FailureIn, FailureOut }
 import zio.stream.ZStream
 import zio.test.TestResult
@@ -43,14 +43,14 @@ trait Covariant[F[+_]] extends Invariant[F] {
     Equivalence((fa: F[A]) => map(f.to)(fa), (fb: F[B]) => map(f.from)(fb))
 }
 
-object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
+object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
 
   /**
    * Mapping with the identity function must be an identity function.
    */
-  val identityLaw: LawsF.Covariant[CovariantEqualF, Equal] =
-    new LawsF.Covariant.Law1[CovariantEqualF, Equal]("identityLaw") {
-      def apply[F[+_]: CovariantEqualF, A: Equal](fa: F[A]): TestResult =
+  val identityLaw: LawsF.Covariant[CovariantDeriveEqual, Equal] =
+    new LawsF.Covariant.Law1[CovariantDeriveEqual, Equal]("identityLaw") {
+      def apply[F[+_]: CovariantDeriveEqual, A: Equal](fa: F[A]): TestResult =
         fa.map(identity) <-> fa
     }
 
@@ -58,16 +58,16 @@ object Covariant extends LawfulF.Covariant[CovariantEqualF, Equal] {
    * Mapping by `f` followed by `g` must be the same as mapping with the
    * composition of `f` and `g`.
    */
-  val compositionLaw: LawsF.Covariant[CovariantEqualF, Equal] =
-    new LawsF.Covariant.ComposeLaw[CovariantEqualF, Equal]("compositionLaw") {
-      def apply[F[+_]: CovariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
+  val compositionLaw: LawsF.Covariant[CovariantDeriveEqual, Equal] =
+    new LawsF.Covariant.ComposeLaw[CovariantDeriveEqual, Equal]("compositionLaw") {
+      def apply[F[+_]: CovariantDeriveEqual, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
         fa.map(f).map(g) <-> fa.map(f andThen g)
     }
 
   /**
    * The set of all laws that instances of `Covariant` must satisfy.
    */
-  val laws: LawsF.Covariant[CovariantEqualF, Equal] =
+  val laws: LawsF.Covariant[CovariantDeriveEqual, Equal] =
     identityLaw + compositionLaw
 
   /**

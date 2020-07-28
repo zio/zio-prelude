@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
-import zio.prelude.coherent.EqualFIdentityBothInvariant
+import zio.prelude.coherent.DeriveEqualIdentityBothInvariant
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -25,14 +25,14 @@ trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
-object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal] {
+object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, Equal] {
 
   /**
    * For all `fa`, `both(identity, fa)` is equivalent to `fa`.
    */
-  val leftIdentityLaw: LawsF.Invariant[EqualFIdentityBothInvariant, Equal] =
-    new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("leftIdentityLaw") {
-      def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
+  val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+    new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("leftIdentityLaw") {
+      def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityBoth[F].both(IdentityBoth[F].any, fa)
         val right = fa
         val left2 = Invariant[F].invmap(Equivalence.tupleAny[A] compose Equivalence.tupleFlip).to(left)
@@ -43,9 +43,9 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
   /**
    * For all `fa`, `both(fa, identity)` is equivalent to `fa`.
    */
-  val rightIdentityLaw: LawsF.Invariant[EqualFIdentityBothInvariant, Equal] =
-    new LawsF.Invariant.Law1[EqualFIdentityBothInvariant, Equal]("rightIdentityLaw") {
-      def apply[F[_]: EqualFIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
+  val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+    new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("rightIdentityLaw") {
+      def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityBoth[F].both(fa, IdentityBoth[F].any)
         val right = fa
         val left2 = Invariant[F].invmap(Equivalence.tupleAny[A]).to(left)
@@ -56,7 +56,7 @@ object IdentityBoth extends LawfulF.Invariant[EqualFIdentityBothInvariant, Equal
   /**
    * The set of law laws that instances of `IdentityBoth` must satisfy.
    */
-  val laws: LawsF.Invariant[EqualFIdentityBothInvariant, Equal] =
+  val laws: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
     leftIdentityLaw + rightIdentityLaw
 
   /**
