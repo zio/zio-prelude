@@ -122,7 +122,7 @@ private[prelude] sealed trait NewtypeModule {
 
   private implicit val IdTraversable: Traversable[Id] =
     new Traversable[Id] {
-      def foreach[G[+_]: AssociativeBoth: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
         f(fa)
     }
 

@@ -21,7 +21,9 @@ package object prelude
     with IdentityEitherSyntax
     with NewtypeExports
     with NewtypeFExports
-    with OrdSyntax {
+    with NonEmptyTraversableSyntax
+    with OrdSyntax
+    with TraversableSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
 
