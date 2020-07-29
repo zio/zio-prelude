@@ -6,8 +6,6 @@ import zio.test.laws._
 
 object IdentityFlattenSpec extends DefaultRunnableSpec {
 
-  IdentityFlatten[Vector]
-
   val genFEither: GenF[Random with Sized, ({ type lambda[+x] = Either[Int, x] })#lambda] =
     GenF.either(Gen.anyInt)
 

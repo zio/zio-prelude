@@ -5,10 +5,6 @@ import zio.test.laws._
 
 object AssociativeBothSpec extends DefaultRunnableSpec {
 
-  type IntEither[+A] = Either[Int, A]
-
-  implicitly[AssociativeBoth[IntEither]]
-
   def spec = suite("AssociativeBothSpec")(
     suite("laws")(
       testM("chunk")(checkAllLaws(AssociativeBoth)(GenF.chunk, Gen.chunkOf(Gen.anyString))),
