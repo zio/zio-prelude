@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.{ Chunk, NonEmptyChunk }
-import zio.prelude.newtypes.{ And, Or, Prod, Sum }
+import zio.prelude.newtypes.{ And, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -83,6 +83,12 @@ object Closure extends Lawful[Closure] {
         case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
       }
     )
+
+  implicit def MaxClosure[A: Ord]: Closure[Max[A]] =
+    make((l: Max[A], r: Max[A]) => if (l >= r) l else r)
+
+  implicit def MinClosure[A: Ord]: Closure[Min[A]] =
+    make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
 
   implicit def NonEmptyChunkClosure[A]: Closure[NonEmptyChunk[A]] =
     make(_ ++ _)

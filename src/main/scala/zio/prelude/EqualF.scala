@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Chunk, NonEmptyChunk }
+import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
 
 /**
  * `EqualF[F]` represents a universally quantified function from `Equal[A]` to
@@ -496,4 +496,21 @@ object EqualF {
         Equal.VectorEqual
     }
 
+  /**
+   * The `EqualF` instance for `Cause`.
+   */
+  implicit val CauseEqualF: EqualF[Cause] =
+    new EqualF[Cause] {
+      def deriveEqual[A: Equal]: Equal[Cause[A]] =
+        Equal.CauseEqual
+    }
+
+  /**
+   * The `EqualF` instance for `Exit`.
+   */
+  implicit def ExitEqualF[E: Equal]: EqualF[({ type lambda[+a] = Exit[E, a] })#lambda] =
+    new EqualF[({ type lambda[+a] = Exit[E, a] })#lambda] {
+      def deriveEqual[A: Equal]: Equal[Exit[E, A]] =
+        Equal.ExitEqual
+    }
 }
