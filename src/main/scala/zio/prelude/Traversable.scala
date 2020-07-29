@@ -214,7 +214,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * Zips each element of the collection with its index.
    */
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
-    foreach(fa)(a => State((n: Int) => (n + 1, (a, n)))).runResult(0)
+    foreach(fa)(a => State.modify((n: Int) => (n + 1, (a, n)))).runResult(0)
 }
 
 object Traversable extends TraversableVersionSpecific {
