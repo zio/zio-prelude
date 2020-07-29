@@ -41,6 +41,9 @@ package object prelude
   type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, E, A]
   val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
+  type MultiSet[+A] = ZSet[A, Int]
+  val MultiSet: ZSet.type = ZSet
+
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Associative[A] with Commutative[A]

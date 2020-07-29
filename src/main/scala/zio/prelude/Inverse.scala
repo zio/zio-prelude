@@ -35,6 +35,9 @@ object Inverse extends Lawful[EqualInverse] {
       def inverse(l: => A, r: => A): A = inv(l, r)
     }
 
+  implicit val BooleanSumInverse: Inverse[Sum[Boolean]] =
+    Inverse.make(Sum(false), (l: Sum[Boolean], r: Sum[Boolean]) => Sum((l || r)), (l: Sum[Boolean], r: Sum[Boolean]) => Sum((l && !r)))
+
   implicit val ByteSumInverse: Inverse[Sum[Byte]] =
     Inverse.make(
       Sum(0),
