@@ -64,17 +64,17 @@ object ZPureSpec extends DefaultRunnableSpec {
         },
         testM("run") {
           check(genIntToIntInt, genInt) { (f, s) =>
-            assert(State(f).run(s))(equalTo(f(s)))
+            assert(State.modify(f).run(s))(equalTo(f(s)))
           }
         },
         testM("runResult") {
           check(genIntToIntInt, genInt) { (f, s) =>
-            assert(State(f).runResult(s))(equalTo(f(s)._2))
+            assert(State.modify(f).runResult(s))(equalTo(f(s)._2))
           }
         },
         testM("runState") {
           check(genIntToIntInt, genInt) { (f, s) =>
-            assert(State(f).runState(s))(equalTo(f(s)._1))
+            assert(State.modify(f).runState(s))(equalTo(f(s)._1))
           }
         },
         testM("zip") {
