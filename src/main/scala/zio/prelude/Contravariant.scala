@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.coherent.ContravariantEqualF
+import zio.prelude.coherent.ContravariantDeriveEqual
 import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
@@ -52,14 +52,14 @@ trait Contravariant[F[-_]] extends Invariant[F] {
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
-object Contravariant extends LawfulF.Contravariant[ContravariantEqualF, Equal] {
+object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
 
   /**
    * Contramapping with the identity function must not change the structure.
    */
-  val identityLaw: LawsF.Contravariant[ContravariantEqualF, Equal] =
-    new LawsF.Contravariant.Law1[ContravariantEqualF, Equal]("identityLaw") {
-      def apply[F[-_]: ContravariantEqualF, A: Equal](fa: F[A]): TestResult =
+  val identityLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
+    new LawsF.Contravariant.Law1[ContravariantDeriveEqual, Equal]("identityLaw") {
+      def apply[F[-_]: ContravariantDeriveEqual, A: Equal](fa: F[A]): TestResult =
         fa.contramap(identity[A]) <-> fa
     }
 
@@ -67,16 +67,20 @@ object Contravariant extends LawfulF.Contravariant[ContravariantEqualF, Equal] {
    * Contramapping by `f` followed by `g` must be the same as contramapping
    * with the composition of `f` and `g`.
    */
-  val compositionLaw: LawsF.Contravariant[ContravariantEqualF, Equal] =
-    new LawsF.Contravariant.ComposeLaw[ContravariantEqualF, Equal]("compositionLaw") {
-      def apply[F[-_]: ContravariantEqualF, A: Equal, B: Equal, C: Equal](fa: F[A], f: B => A, g: C => B): TestResult =
+  val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
+    new LawsF.Contravariant.ComposeLaw[ContravariantDeriveEqual, Equal]("compositionLaw") {
+      def apply[F[-_]: ContravariantDeriveEqual, A: Equal, B: Equal, C: Equal](
+        fa: F[A],
+        f: B => A,
+        g: C => B
+      ): TestResult =
         fa.contramap(f).contramap(g) <-> fa.contramap(f compose g)
     }
 
   /**
    * The set of all laws that instances of `Contravariant` must satisfy.
    */
-  val laws: LawsF.Contravariant[ContravariantEqualF, Equal] =
+  val laws: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
     identityLaw + compositionLaw
 
   /**

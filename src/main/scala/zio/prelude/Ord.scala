@@ -307,6 +307,12 @@ object Ord extends Lawful[Ord] {
     }
 
   /**
+   * Derives an `Ord[F[A]]` given a `Derive[F, Ord]` and an `Ord[A]`.
+   */
+  implicit def DeriveOrd[F[_], A](implicit derive: Derive[F, Ord], ord: Ord[A]): Ord[F[A]] =
+    derive.derive(ord)
+
+  /**
    * Ordering for `Double` values. Note that to honor the contract of a total
    * ordering, `Double.NaN` will be treated as greater than any other number.
    */

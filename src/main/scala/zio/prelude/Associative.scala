@@ -64,6 +64,16 @@ object Associative extends Lawful[AssociativeEqual] {
   implicit def ChunkAssociative[A]: Associative[Chunk[A]] =
     make(_ ++ _)
 
+  /**
+   * Derives an `Associative[F[A]]` given a `Derive[F, Associative]` and an
+   * `Associative[A]`.
+   */
+  implicit def DeriveAssociative[F[_], A](
+    implicit derive: Derive[F, Associative],
+    associative: Associative[A]
+  ): Associative[F[A]] =
+    derive.derive(associative)
+
   implicit val DoubleProdAssociative: Associative[Prod[Double]] =
     make[Prod[Double]]((l, r) => Prod(l * r))
 

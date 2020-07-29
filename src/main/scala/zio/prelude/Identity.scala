@@ -63,6 +63,13 @@ object Identity extends Lawful[EqualIdentity] {
   implicit def ChunkIdentity[A]: Identity[Chunk[A]] =
     Identity.make(Chunk.empty, _ ++ _)
 
+  /**
+   * Derives an `Identity[F[A]]` given a `Derive[F, Identity]` and an
+   * `Identity[A]`.
+   */
+  implicit def DeriveIdentity[F[_], A](implicit derive: Derive[F, Identity], identity: Identity[A]): Identity[F[A]] =
+    derive.derive(identity)
+
   implicit val DoubleProdIdentity: Identity[Prod[Double]] =
     Identity.make(Prod(1), (l: Prod[Double], r: Prod[Double]) => Prod(l * r))
 

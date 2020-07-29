@@ -44,6 +44,16 @@ package object prelude
   type MultiSet[+A] = ZSet[A, Int]
   val MultiSet: ZSet.type = ZSet
 
+  type DeriveAssociative[F[_]] = Derive[F, Associative]
+  type DeriveClosure[F[_]]     = Derive[F, Closure]
+  type DeriveCommutative[F[_]] = Derive[F, Commutative]
+  type DeriveDebug[F[_]]       = Derive[F, Debug]
+  type DeriveEqual[F[_]]       = Derive[F, Equal]
+  type DeriveHash[F[_]]        = Derive[F, Hash]
+  type DeriveIdentity[F[_]]    = Derive[F, Identity]
+  type DeriveInverse[F[_]]     = Derive[F, Inverse]
+  type DeriveOrd[F[_]]         = Derive[F, Ord]
+
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Associative[A] with Commutative[A]

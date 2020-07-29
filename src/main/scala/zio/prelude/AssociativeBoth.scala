@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.AssociativeBothEqualFInvariant
+import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
 import zio.prelude.newtypes.{ AndF, Failure, OrF }
 import zio.stm.ZSTM
 import zio.stream.{ ZSink, ZStream }
@@ -25,7 +25,7 @@ trait AssociativeBoth[F[_]] {
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
-object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant, Equal] {
+object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] {
 
   /**
    * Summons an implicit `AssociativeBoth[F]`.
@@ -37,9 +37,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
    * For all `fa`, `fb`, and `fc`, `both(fa, both(fb, fc))` is equivalent
    * to `both(both(fa, fb), fc)`.
    */
-  val associativityLaw: LawsF.Invariant[AssociativeBothEqualFInvariant, Equal] =
-    new LawsF.Invariant.Law3[AssociativeBothEqualFInvariant, Equal]("associativityLaw") {
-      def apply[F[_]: AssociativeBothEqualFInvariant, A: Equal, B: Equal, C: Equal](
+  val associativityLaw: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
+    new LawsF.Invariant.Law3[AssociativeBothDeriveEqualInvariant, Equal]("associativityLaw") {
+      def apply[F[_]: AssociativeBothDeriveEqualInvariant, A: Equal, B: Equal, C: Equal](
         fa: F[A],
         fb: F[B],
         fc: F[C]
@@ -54,7 +54,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothEqualFInvariant,
   /**
    * The set of law laws that instances of `AssociativeBoth` must satisfy.
    */
-  val laws: LawsF.Invariant[AssociativeBothEqualFInvariant, Equal] =
+  val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
     associativityLaw
 
   /**

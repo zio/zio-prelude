@@ -193,11 +193,11 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * The `EqualF` instance for `Validation`.
+   * The `DeriveEqual` instance for `Validation`.
    */
-  implicit def ValidationEqualF[E: Equal]: EqualF[({ type lambda[+x] = Validation[E, x] })#lambda] =
-    new EqualF[({ type lambda[+x] = Validation[E, x] })#lambda] {
-      def deriveEqual[A: Equal]: Equal[Validation[E, A]] =
+  implicit def ValidationDeriveEqual[E: Equal]: DeriveEqual[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = Validation[E, x] })#lambda] {
+      def derive[A: Equal]: Equal[Validation[E, A]] =
         ValidationEqual
     }
 
@@ -212,12 +212,12 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * The `EqualF` instance for `Validation` with respect to its error type.
+   * The `DeriveEqual` instance for `Validation` with respect to its error type.
    */
-  implicit def ValidationFailureEqualF[A: Equal]
-    : EqualF[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] =
-    new EqualF[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] {
-      def deriveEqual[E: Equal]: Equal[newtypes.Failure[Validation[E, A]]] =
+  implicit def ValidationFailureDeriveEqual[A: Equal]
+    : DeriveEqual[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] {
+      def derive[E: Equal]: Equal[newtypes.Failure[Validation[E, A]]] =
         ValidationEqual[E, A].contramap(newtypes.Failure.unwrap)
     }
 

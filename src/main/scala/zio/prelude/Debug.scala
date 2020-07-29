@@ -96,6 +96,12 @@ object Debug {
   implicit def ChunkDebug[A: Debug]: Debug[Chunk[A]] =
     chunk => Repr.VConstructor(List("zio"), "Chunk", chunk.map(_.debug).toList)
 
+  /**
+   * Derives a `Debug[F[A]]` given a `Derive[F, Debug]` and a `Debug[A]`.
+   */
+  implicit def DeriveDebug[F[_], A](implicit derive: Derive[F, Debug], debug: Debug[A]): Debug[F[A]] =
+    derive.derive(debug)
+
   implicit def EitherDebug[E: Debug, A: Debug]: Debug[Either[E, A]] =
     either =>
       either match {

@@ -247,6 +247,12 @@ object Equal extends Lawful[Equal] {
     make(_.corresponds(_)(_ === _))
 
   /**
+   * Derives an `Equal[F[A]]` given a `Derive[F, Equal]` and an `Equal[A]`.
+   */
+  implicit def DeriveEqual[F[_]: DeriveEqual, A: Equal]: Equal[F[A]] =
+    Derive[F, Equal].derive(Equal[A])
+
+  /**
    * Equality for `Double` values. Note that to honor the contract that a
    * value is always equal to itself, comparing `Double.NaN` with itself will
    * return `true`, which is different from the behavior of `Double#equals`.
@@ -262,12 +268,6 @@ object Equal extends Lawful[Equal] {
    */
   implicit def EitherEqual[A: Equal, B: Equal]: Equal[Either[A, B]] =
     Equal[A] either Equal[B]
-
-  /**
-   * Derives an `Equal[F[A]]` given an `EqualF[F]` and an `Equal[A]`.
-   */
-  implicit def EqualFEqual[F[_]: EqualF, A: Equal]: Equal[F[A]] =
-    EqualF[F].deriveEqual(Equal[A])
 
   /**
    * Equality for `Float` values. Note that to honor the contract that a

@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.annotation.implicitNotFound
 
-import zio.prelude.coherent.EqualFIdentityEitherInvariant
+import zio.prelude.coherent.DeriveEqualIdentityEitherInvariant
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -26,14 +26,14 @@ trait IdentityEither[F[_]] extends AssociativeEither[F] {
   def none: F[Nothing]
 }
 
-object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, Equal] {
+object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] {
 
   /**
    * For all `fa`, `either(identity, fa)` is equivalent to `fa`.
    */
-  val leftIdentityLaw: LawsF.Invariant[EqualFIdentityEitherInvariant, Equal] =
-    new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("leftIdentityLaw") {
-      def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
+  val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
+    new LawsF.Invariant.Law1[DeriveEqualIdentityEitherInvariant, Equal]("leftIdentityLaw") {
+      def apply[F[_]: DeriveEqualIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityEither[F].either[Nothing, A](IdentityEither[F].none, fa)
         val right = fa
         val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A] compose Equivalence.eitherFlip).to(left)
@@ -44,9 +44,9 @@ object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, E
   /**
    * For all `fa`, `either(fa, identity)` is equivalent to `fa`.
    */
-  val rightIdentityLaw: LawsF.Invariant[EqualFIdentityEitherInvariant, Equal] =
-    new LawsF.Invariant.Law1[EqualFIdentityEitherInvariant, Equal]("rightOdentityLaw") {
-      def apply[F[_]: EqualFIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
+  val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
+    new LawsF.Invariant.Law1[DeriveEqualIdentityEitherInvariant, Equal]("rightOdentityLaw") {
+      def apply[F[_]: DeriveEqualIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityEither[F].either[A, Nothing](fa, IdentityEither[F].none)
         val right = fa
         val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A]).to(left)
@@ -57,7 +57,7 @@ object IdentityEither extends LawfulF.Invariant[EqualFIdentityEitherInvariant, E
   /**
    * The set of law laws that instances of `IdentityEither` must satisfy.
    */
-  val laws: LawsF.Invariant[EqualFIdentityEitherInvariant, Equal] =
+  val laws: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
     leftIdentityLaw + rightIdentityLaw
 
   /**

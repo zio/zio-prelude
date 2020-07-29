@@ -402,11 +402,11 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Equal.make(_.corresponds(_)(_ === _))
 
   /**
-   * The `EqualF` instance for `NonEmptyList`.
+   * The `DeriveEqual` instance for `NonEmptyList`.
    */
-  implicit def NonEmptyListEqualF: EqualF[NonEmptyList] =
-    new EqualF[NonEmptyList] {
-      def deriveEqual[A: Equal]: Equal[NonEmptyList[A]] =
+  implicit def NonEmptyListDeriveEqual: DeriveEqual[NonEmptyList] =
+    new DeriveEqual[NonEmptyList] {
+      def derive[A: Equal]: Equal[NonEmptyList[A]] =
         NonEmptyListEqual
     }
 

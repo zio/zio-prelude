@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.ZIO
-import zio.prelude.coherent.CommutativeEitherEqualFInvariant
+import zio.prelude.coherent.CommutativeEitherDeriveEqualInvariant
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
@@ -24,14 +24,14 @@ trait CommutativeEither[F[_]] extends AssociativeEither[F] {
   // def eitherPar[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
 }
 
-object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvariant, Equal] {
+object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] {
 
   /**
    * For all `fa` and `fb`, `either(fa, fb)` is equivalent to `either(fb, fa)`.
    */
-  val commutativeLaw: LawsF.Invariant[CommutativeEitherEqualFInvariant, Equal] =
-    new LawsF.Invariant.Law2[CommutativeEitherEqualFInvariant, Equal]("commutativeLaw") {
-      def apply[F[_]: CommutativeEitherEqualFInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
+  val commutativeLaw: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
+    new LawsF.Invariant.Law2[CommutativeEitherDeriveEqualInvariant, Equal]("commutativeLaw") {
+      def apply[F[_]: CommutativeEitherDeriveEqualInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
         val left  = fa.orElseEitherPar(fb)
         val right = fb.orElseEitherPar(fa)
         val left2 = Invariant[F].invmap(Equivalence.eitherFlip[A, B]).to(left)
@@ -42,7 +42,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherEqualFInvari
   /**
    * The set of law laws that instances of `CommutativeEither` must satisfy.
    */
-  val laws: LawsF.Invariant[CommutativeEitherEqualFInvariant, Equal] =
+  val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
     commutativeLaw
 
   /**

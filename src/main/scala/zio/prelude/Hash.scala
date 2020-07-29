@@ -157,6 +157,12 @@ object Hash extends Lawful[Hash] {
     make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
 
   /**
+   * Derives a `Hash[F[A]]` given a `Derive[F, Hash]` and a `Hash[A]`.
+   */
+  implicit def DeriveHash[F[_], A](implicit derive: Derive[F, Hash], hash: Hash[A]): Hash[F[A]] =
+    derive.derive(hash)
+
+  /**
    * Hashing for `Double` values.
    */
   implicit val DoubleHash: Hash[Double] =

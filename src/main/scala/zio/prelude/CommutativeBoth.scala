@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.CommutativeBothEqualFInvariant
+import zio.prelude.coherent.CommutativeBothDeriveEqualInvariant
 import zio.prelude.newtypes.{ AndF, Failure, OrF }
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
@@ -23,14 +23,14 @@ trait CommutativeBoth[F[_]] extends AssociativeBoth[F] {
 
 }
 
-object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant, Equal] {
+object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] {
 
   /**
    * For all `fa` and `fb`, `both(fa, fb)` is equivalent to `both(fb, fa)`.
    */
-  val commutativeLaw: LawsF.Invariant[CommutativeBothEqualFInvariant, Equal] =
-    new LawsF.Invariant.Law2[CommutativeBothEqualFInvariant, Equal]("commutativeLaw") {
-      def apply[F[_]: CommutativeBothEqualFInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
+  val commutativeLaw: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
+    new LawsF.Invariant.Law2[CommutativeBothDeriveEqualInvariant, Equal]("commutativeLaw") {
+      def apply[F[_]: CommutativeBothDeriveEqualInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
         val left  = fa.zipPar(fb)
         val right = fb.zipPar(fa)
         val left2 = Invariant[F].invmap(Equivalence.tupleFlip[A, B]).to(left)
@@ -41,7 +41,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothEqualFInvariant,
   /**
    * The set of law laws that instances of `CommutativeBoth` must satisfy.
    */
-  val laws: LawsF.Invariant[CommutativeBothEqualFInvariant, Equal] =
+  val laws: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
     commutativeLaw
 
   /**
