@@ -41,6 +41,16 @@ package object prelude
   type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, E, A]
   val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
+  type DeriveAssociative[F[_]] = Derive[F, Associative]
+  type DeriveClosure[F[_]]     = Derive[F, Closure]
+  type DeriveCommutative[F[_]] = Derive[F, Commutative]
+  type DeriveDebug[F[_]]       = Derive[F, Debug]
+  type DeriveEqual[F[_]]       = Derive[F, Equal]
+  type DeriveHash[F[_]]        = Derive[F, Hash]
+  type DeriveIdentity[F[_]]    = Derive[F, Identity]
+  type DeriveInverse[F[_]]     = Derive[F, Inverse]
+  type DeriveOrd[F[_]]         = Derive[F, Ord]
+
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Associative[A] with Commutative[A]

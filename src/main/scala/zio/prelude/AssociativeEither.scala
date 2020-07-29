@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.AssociativeEitherEqualFInvariant
+import zio.prelude.coherent.AssociativeEitherDeriveEqualInvariant
 import zio.prelude.newtypes.Failure
 import zio.stream.ZStream
 import zio.test.TestResult
@@ -25,15 +25,15 @@ trait AssociativeEither[F[_]] {
   def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
 }
 
-object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvariant, Equal] {
+object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] {
 
   /**
    * For all `fa`, `fb`, and `fc`, `either(fa, either(fb, fc))` is
    * equivalent to `either(either(fa, fb), fc)`.
    */
-  val associativityLaw: LawsF.Invariant[AssociativeEitherEqualFInvariant, Equal] =
-    new LawsF.Invariant.Law3[AssociativeEitherEqualFInvariant, Equal]("associativityLaw") {
-      def apply[F[_]: AssociativeEitherEqualFInvariant, A: Equal, B: Equal, C: Equal](
+  val associativityLaw: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
+    new LawsF.Invariant.Law3[AssociativeEitherDeriveEqualInvariant, Equal]("associativityLaw") {
+      def apply[F[_]: AssociativeEitherDeriveEqualInvariant, A: Equal, B: Equal, C: Equal](
         fa: F[A],
         fb: F[B],
         fc: F[C]
@@ -49,7 +49,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherEqualFInvari
    * The set of law laws that instances of `AssociativeEither` must
    * satisfy.
    */
-  val laws: LawsF.Invariant[AssociativeEitherEqualFInvariant, Equal] =
+  val laws: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
     associativityLaw
 
   /**

@@ -45,6 +45,13 @@ object Inverse extends Lawful[EqualInverse] {
   implicit val CharSumInverse: Inverse[Sum[Char]] =
     Inverse.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar), (l, r) => Sum((l - r).toChar))
 
+  /**
+   * Derives an `Inverse[F[A]]` given a `Derive[F, Inverse]` and an
+   * `Inverse[A]`.
+   */
+  implicit def DeriveInverse[F[_], A](implicit derive: Derive[F, Inverse], inverse: Inverse[A]): Inverse[F[A]] =
+    derive.derive(inverse)
+
   implicit val DoubleSumInverse: Inverse[Sum[Double]] =
     Inverse.make(Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r), (l: Sum[Double], r: Sum[Double]) => Sum(l - r))
 

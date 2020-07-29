@@ -40,6 +40,16 @@ object Commutative extends Lawful[CommutativeEqual] {
 
   implicit val CharSumCommutative: Commutative[Sum[Char]] = Commutative.make((l, r) => Sum((l + r).toChar))
 
+  /**
+   * Derives a `Commutative[F[A]]` given a `Derive[F, Commutative]` and a
+   * `Commutative[A]`.
+   */
+  implicit def DeriveCommutative[F[_], A](
+    implicit derive: Derive[F, Commutative],
+    commutative: Commutative[A]
+  ): Commutative[F[A]] =
+    derive.derive(commutative)
+
   implicit val DoubleProdCommutative: Commutative[Prod[Double]] =
     Commutative.make((l, r) => Prod(l * r))
 
