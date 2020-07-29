@@ -286,9 +286,9 @@ object ZSet {
   /**
    * The `EqualF` instance for `ZSet`.
    */
-  implicit def ZSetEqualF[B: Equal]: EqualF[({ type lambda[+x] = ZSet[x, B] })#lambda] =
-    new EqualF[({ type lambda[+x] = ZSet[x, B] })#lambda] {
-      def deriveEqual[A: Equal]: Equal[ZSet[A, B]] =
+  implicit def ZSetDeriveEqual[B: Equal]: DeriveEqual[({ type lambda[+x] = ZSet[x, B] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = ZSet[x, B] })#lambda] {
+      def derive[A: Equal]: Equal[ZSet[A, B]] =
         ZSetEqual
     }
 
