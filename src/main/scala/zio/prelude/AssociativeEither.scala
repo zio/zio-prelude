@@ -262,6 +262,14 @@ trait AssociativeEitherSyntax {
   implicit class AssociativeEitherCovariantOps[F[+_], A](fa: => F[A]) {
 
     /**
+     * Combines an `F[A]` value with itself using `orElse` until it eventually
+     * returns the result of the left value without having to evaluate the
+     * right value.
+     */
+    def eventually(implicit either: AssociativeEither[F], covariant: Covariant[F]): F[A] =
+      fa orElse eventually
+
+    /**
      * Combines two values of types `F[A]` and `F[A]` to produce an
      * `F[Either[A, A]]` and then merges the result.
      */
