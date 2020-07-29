@@ -1196,7 +1196,7 @@ trait AssociativeBothSyntax {
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]`, keeping only the right value.
      */
-    def zipRght[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[B] =
+    def zipRight[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[B] =
       zipWith(fb)((_, b) => b)
 
     /**
