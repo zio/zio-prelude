@@ -178,6 +178,13 @@ object TraversableSpec extends DefaultRunnableSpec {
       val expected = as.zipWithIndex
       val actual   = Traversable.ListTraversable.zipWithIndex(as)
       assert(actual)(equalTo(expected))
+    },
+    testM("Traversable can be derived from Iterable") {
+      check(genList, genInt, genIntFunction2) { (as, s, f) =>
+        val actual   = Traversable[Seq].foldLeft(as)(s)(f)
+        val expected = as.foldLeft(s)(f)
+        assert(actual)(equalTo(expected))
+      }
     }
   )
 }
