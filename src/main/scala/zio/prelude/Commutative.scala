@@ -30,6 +30,12 @@ object Commutative extends Lawful[CommutativeEqual] {
 
   implicit val BooleanDisjunctionCommutative: Commutative[Or] = Commutative.make((l, r) => Or(l || r))
 
+  implicit val BooleanProdCommutative: Commutative[Prod[Boolean]] =
+    Commutative.make((l, r) => Prod(l && r))
+
+  implicit val BooleanSumCommutative: Commutative[Sum[Boolean]] =
+    Commutative.make((l, r) => Sum(l || r))
+
   implicit val ByteProdCommutative: Commutative[Prod[Byte]] =
     Commutative.make((l, r) => Prod((l * r).toByte))
 
@@ -73,12 +79,6 @@ object Commutative extends Lawful[CommutativeEqual] {
   implicit val FloatSumCommutative: Commutative[Sum[Float]] =
     Commutative.make((l, r) => Sum(l + r))
 
-  implicit val IntMaxCommutative: Commutative[Max[Int]] =
-    Commutative.make((l, r) => Max(l max r))
-
-  implicit val IntMinCommutative: Commutative[Min[Int]] =
-    Commutative.make((l, r) => Min(l max r))
-
   implicit val IntProdCommutative: Commutative[Prod[Int]] =
     Commutative.make((l, r) => Prod(l * r))
 
@@ -99,6 +99,12 @@ object Commutative extends Lawful[CommutativeEqual] {
           case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
         }
     }
+
+  implicit def MaxCommutative[A: Ord]: Commutative[Max[A]] =
+    make((l: Max[A], r: Max[A]) => if (l >= r) l else r)
+
+  implicit def MinCommutative[A: Ord]: Commutative[Min[A]] =
+    make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
 
   implicit def OptionCommutative[A: Commutative]: Commutative[Option[A]] =
     new Commutative[Option[A]] {

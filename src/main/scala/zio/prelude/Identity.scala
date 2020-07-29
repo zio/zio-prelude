@@ -42,6 +42,12 @@ object Identity extends Lawful[EqualIdentity] {
   implicit val BooleanDisjunctionIdentity: Identity[Or] =
     Identity.make(Or(false), (l, r: Or) => Or(l || r))
 
+  implicit val BooleanProdIdentity: Identity[Prod[Boolean]] =
+    Identity.make(Prod(true), (l, r) => Prod(l && r))
+
+  implicit val BooleanSumIdentity: Identity[Sum[Boolean]] =
+    Identity.make(Sum(false), (l, r) => Sum(l || r))
+
   implicit val ByteProdIdentity: Identity[Prod[Byte]] =
     Identity.make(Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
 

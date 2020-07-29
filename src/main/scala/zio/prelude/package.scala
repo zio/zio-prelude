@@ -41,6 +41,9 @@ package object prelude
   type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, E, A]
   val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
+  type MultiSet[+A] = ZSet[A, Int]
+  val MultiSet: ZSet.type = ZSet
+
   type DeriveAssociative[F[_]] = Derive[F, Associative]
   type DeriveClosure[F[_]]     = Derive[F, Closure]
   type DeriveCommutative[F[_]] = Derive[F, Commutative]

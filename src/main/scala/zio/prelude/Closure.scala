@@ -35,6 +35,12 @@ object Closure extends Lawful[Closure] {
   implicit val BooleanDisjunctionClosure: Closure[Or] =
     make[Or]((l, r) => Or(l || r))
 
+  implicit val BooleanProdClosure: Closure[Prod[Boolean]] =
+    make[Prod[Boolean]]((l, r) => Prod(l && r))
+
+  implicit val BooleanSumClosure: Closure[Sum[Boolean]] =
+    make[Sum[Boolean]]((l, r) => Sum(l || r))
+
   implicit val ByteProdClosure: Closure[Prod[Byte]] =
     make[Prod[Byte]]((l, r) => Prod((l * r).toByte))
 
