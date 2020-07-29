@@ -243,58 +243,6 @@ object Traversable {
         list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
       override def map[A, B](f: A => B): List[A] => List[B] = _.map(f)
     }
-
-  /**
-   * The `Traversable` instance for `Map`.
-   */
-  implicit def MapTraversable[K]: Traversable[({ type lambda[+v] = Map[K, v] })#lambda] =
-    new Traversable[({ type lambda[+v] = Map[K, v] })#lambda] {
-      def foreach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
-        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) {
-          case (map, (k, v)) =>
-            map.zipWith(f(v))((map, v2) => map + (k -> v2))
-        }
-    }
-
-  import scala.collection.BuildFrom
-  // import scala.collection.mutable.Builder
-
-  trait BuildFromF[F[+_]] {
-    def derive[A]: BuildFrom[F[Any], A, F[A]]
-  }
-
-  object BuildFromF {
-
-    implicit def default[F[+_]](implicit bf: BuildFrom[F[Any], Any, F[Any]]): BuildFromF[F] =
-      new BuildFromF[F] {
-        def derive[A]: BuildFrom[F[Any], A, F[A]] =
-          bf.asInstanceOf[BuildFrom[F[Any], A, F[A]]]
-      }
-  }
-
-  /**
-   * Derives a `Traverable[F]` given an `Iterable[F]`.
-   */
-  implicit def IterableTraversable[F[+x] <: Iterable[x]](implicit bf: BuildFromF[F]): Traversable[F] =
-    new Traversable[F] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-        fa.foldLeft(bf.derive[B].newBuilder(fa).succeed)((bs, a) => bs.zipWith(f(a))(_ += _)).map(_.result())
-    }
-
-  IterableTraversable[List]
-  IterableTraversable[Vector]
-  IterableTraversable[Chunk]
-
-  // BuildFromF.default[List]
-
-  /**
-   * The `Traversable` instance for `Vector`.
-   */
-  implicit val VectorTraversable: Traversable[Vector] =
-    new Traversable[Vector] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]] =
-        vector.foldLeft[G[Vector[B]]](Vector.empty.succeed)((bs, a) => bs.zipWith(f(a))(_ :+ _))
-    }
 }
 
 trait TraversableSyntax {
