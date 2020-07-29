@@ -302,7 +302,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     var a: Any                                              = null
     var r: Any                                              = null
     var failed                                              = false
-    var curState: ZPure[Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any]]
+    var curZPure: ZPure[Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any]]
 
     def findNextErrorHandler(): Unit = {
       var unwinding = true
@@ -318,67 +318,67 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
       }
     }
 
-    while (curState ne null) {
-      val tag = curState.tag
+    while (curZPure ne null) {
+      val tag = curZPure.tag
       (tag: @switch) match {
         case Tags.FlatMap =>
-          val state        = curState.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any]]
-          val nested       = state.value
-          val continuation = state.continue
+          val zPure        = curZPure.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any]]
+          val nested       = zPure.value
+          val continuation = zPure.continue
 
           (nested.tag: @switch) match {
             case Tags.Succeed =>
-              val state2 = nested.asInstanceOf[Succeed[Any]]
-              curState = continuation(state2.value)
+              val zPure2 = nested.asInstanceOf[Succeed[Any]]
+              curZPure = continuation(zPure2.value)
 
             case Tags.Modify =>
-              val state2 = nested.asInstanceOf[Modify[Any, Any, Any, Any]]
+              val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any, Any]]
 
-              val updated = state2.run(s0)
+              val updated = zPure2.run(s0)
               s0 = updated._1
               a = updated._2
-              curState = continuation(a)
+              curZPure = continuation(a)
 
             case _ =>
-              curState = nested
+              curZPure = nested
               stack.push(continuation)
           }
 
         case Tags.Succeed =>
-          val state = curState.asInstanceOf[Succeed[Any]]
-          a = state.value
+          val zPure = curZPure.asInstanceOf[Succeed[Any]]
+          a = zPure.value
           val nextInstr = stack.pop()
-          if (nextInstr eq null) curState = null else curState = nextInstr(a)
+          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
         case Tags.Fail =>
-          val state = curState.asInstanceOf[Fail[Any]]
+          val zPure = curZPure.asInstanceOf[Fail[Any]]
           findNextErrorHandler()
           val nextInstr = stack.pop()
           if (nextInstr eq null) {
             failed = true
-            a = state.error
-            curState = null
+            a = zPure.error
+            curZPure = null
           } else {
-            curState = nextInstr(state.error)
+            curZPure = nextInstr(zPure.error)
           }
 
         case Tags.Fold =>
-          val state = curState.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any]]
-          curState = state.value
-          stack.push(state)
+          val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any]]
+          curZPure = zPure.value
+          stack.push(zPure)
         case Tags.Access =>
-          val state = curState.asInstanceOf[Access[Any, Any, Any, Any, Any]]
-          curState = state.access(r)
+          val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any]]
+          curZPure = zPure.access(r)
         case Tags.Provide =>
-          val state = curState.asInstanceOf[Provide[Any, Any, Any, Any, Any]]
-          r = state.r
-          curState = state.continue
+          val zPure = curZPure.asInstanceOf[Provide[Any, Any, Any, Any, Any]]
+          r = zPure.r
+          curZPure = zPure.continue
         case Tags.Modify =>
-          val state   = curState.asInstanceOf[Modify[Any, Any, Any, Any]]
-          val updated = state.run(s0)
+          val zPure   = curZPure.asInstanceOf[Modify[Any, Any, Any, Any]]
+          val updated = zPure.run(s0)
           s0 = updated._1
           a = updated._2
           val nextInstr = stack.pop()
-          if (nextInstr eq null) curState = null else curState = nextInstr(a)
+          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
       }
     }
     if (failed) Left(a.asInstanceOf[E])
