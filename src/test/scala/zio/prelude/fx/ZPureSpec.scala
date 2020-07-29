@@ -4,7 +4,7 @@ import zio.prelude._
 import zio.random.Random
 import zio.test._
 
-object ZStateSpec extends DefaultRunnableSpec {
+object ZPureSpec extends DefaultRunnableSpec {
 
   lazy val genInt: Gen[Random, Int] =
     Gen.anyInt
@@ -28,7 +28,7 @@ object ZStateSpec extends DefaultRunnableSpec {
     Gens.state(genInt, genState)
 
   def spec =
-    suite("ZStateSpec")(
+    suite("ZPureSpec")(
       suite("methods")(
         testM("contramap") {
           check(genState, genIntToInt, genInt) { (fa, f, s) =>

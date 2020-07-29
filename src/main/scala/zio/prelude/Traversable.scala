@@ -6,7 +6,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
 
   def fold[S, A](fa: F[A])(s: S)(f: (S, A) => S): S = {
     type StateS[+A] = State[S, A]
-    foreach[StateS, A, Any](fa)((a: A) => State((s: S) => (f(s, a), ()))).runState(s)
+    foreach[StateS, A, Any](fa)((a: A) => State.modify((s: S) => (f(s, a), ()))).runState(s)
   }
 
   def foldMap[A, B: Identity](fa: F[A])(f: A => B): B =
@@ -35,7 +35,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
   def toChunk[A](fa: F[A]): Chunk[A] = foldMap(fa)(Chunk(_))
 
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
-    foreach(fa)(a => State((n: Int) => (n + 1, (a, n)))).runResult(0)
+    foreach(fa)(a => State.modify((n: Int) => (n + 1, (a, n)))).runResult(0)
 }
 
 object Traversable {
