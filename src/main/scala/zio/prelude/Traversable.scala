@@ -235,6 +235,15 @@ object Traversable extends TraversableVersionSpecific {
     }
 
   /**
+   * The `Traversable` instance for `Either`.
+   */
+  implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] =
+    new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] {
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
+        either.fold(Left(_).succeed, f(_).map(Right(_)))
+    }
+
+  /**
    * The `Traversable` instance for `List`.
    */
   implicit val ListTraversable: Traversable[List] =
@@ -254,6 +263,15 @@ object Traversable extends TraversableVersionSpecific {
           case (map, (k, v)) =>
             map.zipWith(f(v))((map, v2) => map + (k -> v2))
         }
+    }
+
+  /**
+   * The `Traversable` instance for `Option`.
+   */
+  implicit val OptionTraversable: Traversable[Option] =
+    new Traversable[Option] {
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
+        option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
     }
 
   /**
