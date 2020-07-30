@@ -1168,6 +1168,38 @@ trait AssociativeBothSyntax {
   implicit class AssociativeBothCovariantOps[F[+_], A](fa: => F[A]) {
 
     /**
+     * A symbolic alias for `zipLeft`.
+     */
+    def <*[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[A] =
+      zipLeft(fb)
+
+    /**
+     * A symbolic alias for `zipRight`.
+     */
+    def *>[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[B] =
+      zipRight(fb)
+
+    /**
+     * Combines an `F[A]` value with itself using `zipRight` forever.
+     */
+    def forever(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[A] =
+      fa *> forever
+
+    /**
+     * Combines two values of types `F[A]` and `F[B]` to produce an
+     * `F[(A, B)]`, keeping only the left value.
+     */
+    def zipLeft[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[A] =
+      zipWith(fb)((a, _) => a)
+
+    /**
+     * Combines two values of types `F[A]` and `F[B]` to produce an
+     * `F[(A, B)]`, keeping only the right value.
+     */
+    def zipRight[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[B] =
+      zipWith(fb)((_, b) => b)
+
+    /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]` and then maps the result with the specified function.
      */
