@@ -34,7 +34,7 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * comparing those.
  */
 trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F] {
-  final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] = 
+  final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] =
     contramap(f)
 
   /**
