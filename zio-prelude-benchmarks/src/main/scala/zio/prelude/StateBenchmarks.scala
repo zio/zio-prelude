@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import org.openjdk.jmh.annotations.{ State => BenchmarkState, _ }
 
-import cats.data.{ State => CatsState }
+import cats.data.{ EitherT, Kleisli, State => CatsState, StateT }
 import cats.instances.list._
 import cats.syntax.traverse._
 
@@ -15,17 +15,62 @@ class StateBenchmarks {
 
   var list: List[Int] = _
 
-  @Param(Array("1000", "10000", "100000", "1000000"))
+  @Param(Array("100000"))
   var size: Int = _
 
   @Setup(Level.Trial)
   def setup() =
     list = (1 to size).toList
 
-  type CatsIntState[A] = CatsState[Int, A]
+  type CatsIntState[A]       = CatsState[Int, A]
+  type CatsEitherIntState[A] = EitherT[CatsIntState, Nothing, A]
+
+  type CatsStack[A] = Kleisli[CatsEitherIntState, Any, A]
+  object CatsStack {
+    def get: CatsStack[Int] = {
+      val eitherT: CatsEitherIntState[Int] =
+        EitherT.liftF[CatsIntState, Nothing, Int](CatsState.get)
+      Kleisli.liftF(eitherT)
+    }
+    def pure[A](a: A): CatsStack[A] =
+      Kleisli.pure(a)
+    def runState[A](fa: CatsStack[A])(s: Int): Int =
+      fa.run(()).merge.runS(s).value
+    def set(n: Int): CatsStack[Unit] = {
+      val eitherT: CatsEitherIntState[Unit] =
+        EitherT.liftF[CatsIntState, Nothing, Unit](CatsState.set(n))
+      Kleisli.liftF(eitherT)
+    }
+  }
 
   @Benchmark
-  def catsLeftAssociatedBind(): Int = {
+  def catsStackLeftAssociatedBind(): Int = {
+    def loop(i: Int): CatsStack[Int] =
+      if (i > size) CatsStack.pure(i)
+      else CatsStack.pure(i + 1).flatMap(loop)
+
+    CatsStack.runState(loop(0))(0)
+  }
+
+  @Benchmark
+  def catsStackGetSet(): Int = {
+    def loop(i: Int, acc: CatsStack[Int]): CatsStack[Int] =
+      if (i > size) acc.flatMap(_ => CatsStack.set(i)).flatMap(_ => CatsStack.get)
+      else loop(i + 1, acc.flatMap(_ => CatsStack.set(i)).flatMap(_ => CatsStack.get))
+
+    CatsStack.runState(loop(0, CatsStack.pure(0)))(0)
+  }
+
+  @Benchmark
+  def catsStackEffectfulTraversal(): Int =
+    CatsStack.runState(
+      list.traverse[CatsStack, Unit] { el =>
+        CatsStack.get.flatMap(s => CatsStack.set(s + el))
+      }
+    )(0)
+
+  @Benchmark
+  def catsStateLeftAssociatedBind(): Int = {
     def loop(i: Int): CatsState[Int, Int] =
       if (i > size) CatsState.pure(i)
       else CatsState.pure(i + 1).flatMap(loop)
@@ -34,7 +79,7 @@ class StateBenchmarks {
   }
 
   @Benchmark
-  def catsGetSet(): Int = {
+  def catsStateGetSet(): Int = {
     def loop(i: Int, acc: CatsState[Int, Int]): CatsState[Int, Int] =
       if (i > size) acc.flatMap(_ => CatsState.set(i)).flatMap(_ => CatsState.get)
       else loop(i + 1, acc.flatMap(_ => CatsState.set(i)).flatMap(_ => CatsState.get))
@@ -43,7 +88,7 @@ class StateBenchmarks {
   }
 
   @Benchmark
-  def catsEffectfulTraversal(): Int =
+  def catsStateEffectfulTraversal(): Int =
     list
       .traverse[CatsIntState, Unit] { el =>
         CatsState.get[Int].flatMap(s => CatsState.set(s + el))
@@ -52,7 +97,7 @@ class StateBenchmarks {
       .value
 
   @Benchmark
-  def zioLeftAssociatedBindTailRec(): Int = {
+  def zioLeftAssociatedBind(): Int = {
     def loop(i: Int): State[Int, Int] =
       if (i > size) State.succeed(i)
       else State.succeed(i + 1).flatMap(loop)
@@ -61,7 +106,7 @@ class StateBenchmarks {
   }
 
   @Benchmark
-  def zioGetSetTailRec(): Int = {
+  def zioGetSet(): Int = {
     def loop(i: Int, acc: State[Int, Int]): State[Int, Int] =
       if (i > size) acc.flatMap(_ => State.set(i)).flatMap(_ => State.get)
       else loop(i + 1, acc.flatMap(_ => State.set(i)).flatMap(_ => State.get))
@@ -70,7 +115,7 @@ class StateBenchmarks {
   }
 
   @Benchmark
-  def zioEffectfulTraversalTailRec(): Int =
+  def zioEffectfulTraversal(): Int =
     State
       .foreach(list) { el =>
         State.get[Int].flatMap(s => State.set(s + el))
