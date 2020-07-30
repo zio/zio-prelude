@@ -113,6 +113,15 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
     }
 
   /**
+   * The `AssociativeFlatten` instance for `Map`
+   */
+  implicit def MapAssociativeFlatten[K]: AssociativeFlatten[({ type lambda[+v] = Map[K, v] })#lambda] =
+    new AssociativeFlatten[({ type lambda[+v] = Map[K, v] })#lambda] {
+      def flatten[V](ffa: Map[K, Map[K, V]]): Map[K, V] =
+        ffa.foldLeft[Map[K, V]](Map.empty) { case (l, (_, r)) => r.foldLeft(l)(_ + _) }
+    }
+
+  /**
    * The `AssociativeFlatten` instance for `NonEmptyChunk`.
    */
   implicit val NonEmptyChunkAssociativeFlatten: AssociativeFlatten[NonEmptyChunk] =
