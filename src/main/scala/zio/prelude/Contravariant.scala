@@ -6,6 +6,10 @@ import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
 
+trait ContravariantSubset[F[-_], Subset[_]] {
+  def contramapSubset[A, B: Subset](f: B => A): F[A] => F[B]
+}
+
 /**
  * `Contravariant[F]` provides implicit evidence that `F[-_]` is a
  * contravariant endofunctor in the category of Scala objects.
@@ -29,7 +33,9 @@ import zio.test.laws._
  * compares strings by computing their lengths with the provided function and
  * comparing those.
  */
-trait Contravariant[F[-_]] extends Invariant[F] {
+trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F] {
+  final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] = 
+    contramap(f)
 
   /**
    * Lift a function from `B` to `A` to a function from `F[A]` to `F[B]`.

@@ -57,18 +57,18 @@ package object prelude
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Associative[A] with Commutative[A]
-    type Monoid[A]               = Associative[A] with Identity[A]
-    type CommutativeMonoid[A]    = Associative[A] with Commutative[A] with Identity[A]
-    type Group[A]                = Associative[A] with Identity[A] with Inverse[A]
-    type AbelianGroup[A]         = Associative[A] with Commutative[A] with Identity[A] with Inverse[A]
+    type Monoid[A]               = Identity[A]
+    type CommutativeMonoid[A]    = Commutative[A] with Identity[A]
+    type Group[A]                = Identity[A] with Inverse[A]
+    type AbelianGroup[A]         = Commutative[A] with Identity[A] with Inverse[A]
 
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
     type Alternative[F[+_]] =
-      Covariant[F] with AssociativeBoth[F] with IdentityBoth[F] with AssociativeEither[F] with IdentityEither[F]
+      Covariant[F] with IdentityBoth[F] with IdentityEither[F]
     type InvariantAlt[F[_]] =
-      Invariant[F] with AssociativeBoth[F] with IdentityBoth[F] with AssociativeEither[F] with IdentityEither[F]
+      Invariant[F] with IdentityBoth[F] with IdentityEither[F]
 
     type InvariantSemigroupal[F[_]]      = Invariant[F] with AssociativeBoth[F]
     type Semigroupal[F[+_]]              = Covariant[F] with AssociativeBoth[F]
@@ -77,20 +77,20 @@ package object prelude
     type SemigroupK[F[_]] = AssociativeEither[F]
     type MonoidK[F[_]]    = AssociativeEither[F] with IdentityEither[F]
 
-    type ContravariantMonoidal[F[-_]] = Contravariant[F] with AssociativeBoth[F] with IdentityBoth[F]
-    type InvariantMonoidal[F[_]]      = Invariant[F] with AssociativeBoth[F] with IdentityBoth[F]
+    type ContravariantMonoidal[F[-_]] = Contravariant[F] with IdentityBoth[F]
+    type InvariantMonoidal[F[_]]      = Invariant[F] with IdentityBoth[F]
 
     type FlatMap[F[+_]] = Covariant[F] with AssociativeFlatten[F]
     type Monad[F[+_]]   = Covariant[F] with IdentityFlatten[F]
 
     type Divide[F[-_]]    = Contravariant[F] with AssociativeBoth[F]
-    type Divisible[F[-_]] = Contravariant[F] with AssociativeBoth[F] with IdentityBoth[F]
+    type Divisible[F[-_]] = Contravariant[F] with IdentityBoth[F]
     type Decidable[F[-_]] =
-      Contravariant[F] with AssociativeBoth[F] with IdentityBoth[F] with AssociativeEither[F] with IdentityEither[F]
+      Contravariant[F] with IdentityBoth[F] with IdentityEither[F]
 
     type Apply[F[+_]]               = Covariant[F] with AssociativeBoth[F]
-    type Applicative[F[+_]]         = Covariant[F] with AssociativeBoth[F] with IdentityBoth[F]
-    type InvariantApplicative[F[_]] = Invariant[F] with AssociativeBoth[F] with IdentityBoth[F]
+    type Applicative[F[+_]]         = Covariant[F] with IdentityBoth[F]
+    type InvariantApplicative[F[_]] = Invariant[F] with IdentityBoth[F]
 
     type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
     type Profunctor[:=>[-_, +_]] = Divariant[:=>]

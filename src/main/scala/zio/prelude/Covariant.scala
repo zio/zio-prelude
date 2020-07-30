@@ -10,6 +10,10 @@ import zio.test.laws._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
+trait CovariantSubset[F[+_], Subset[_]] {
+  def mapSubset[A, B: Subset](f: A => B): F[A] => F[B]
+}
+
 /**
  * `Covariant[F]` provides implicit evidence that `F[+_]` is a covariant
  * endofunctor in the category of Scala objects.
@@ -32,7 +36,8 @@ import scala.util.Try
  * `String => Int` that returns the length of a string, then we can construct
  * a `List[Int]` with the length of each string.
  */
-trait Covariant[F[+_]] extends Invariant[F] {
+trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] {
+  final def mapSubset[A, B: AnyType](f: A => B): F[A] => F[B] = map(f)
 
   /**
    * Lift a function from `A` to `B` to a function from `F[A]` to `F[B]`.
