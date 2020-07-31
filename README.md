@@ -1,16 +1,41 @@
-# zio-prelude
+# ZIO Prelude
 
 | CI | Release | Snapshot | Discord |
 | --- | --- | --- | --- |
 | [![Build Status][Badge-Circle]][Link-Circle] | [![Release Artifacts][Badge-SonatypeReleases]][Link-SonatypeReleases] | [![Snapshot Artifacts][Badge-SonatypeSnapshots]][Link-SonatypeSnapshots] | [![Badge-Discord]][Link-Discord] |
 
 # Summary
-TODO: Tagline
+
+ZIO Prelude is a radically new approach to functional abstractions in Scala, which throws out the 
+classic functor hierarchy in favor of a modular algebraic approach that is smaller, easier 
+to understand and teach, and more expressive.
+
+ZIO Prelude is an alternative to libraries like Scalaz and Cats, which imported the Haskell type 
+class hierarchy into Scala without making significant changes.
+
+ZIO Prelude has three key areas of focus:
+
+— Data structures, and type classes that for traversing them. ZIO Prelude embraces the collections
+in the Scala standard library, and extends them with new instances and new useful additions.
+- Patterns of composition for types. ZIO Prelude provides a small catalog of patterns for binary 
+operators, which combine two values into another value of the same type. These patterns are named 
+after the algebraic laws they satisfy: associativity, commutativity, and identity.
+- Patterns of composition for type constructors. ZIO Prelude provides a catalog of patterns for 
+binary operators on type constructors (things like `Future`, `Option`, ZIO `Task`). These patterns 
+are named after the algebraic laws they satisfy (associativity, commutativity, and identity) and the 
+structure they produce, whether a tuple or an either. 
+
+The library has a small research-stage package (`zio.prelude.fx`) that provides abstraction over 
+expressive effect types like ZIO and `ZPure`.
 
 # Documentation
+
+The ZIO Prelude Microsite is currently under development.
+
 [ZIO Prelude Microsite](https://zio.github.io/zio-prelude/)
 
 # Contributing
+
 [Documentation for contributors](https://zio.github.io/zio-prelude/docs/about/about_contributing)
 
 ## Code of Conduct
@@ -21,8 +46,8 @@ See the [Code of Conduct](https://zio.github.io/zio-prelude/docs/about/about_coc
 
 Come chat with us on [![Badge-Discord]][Link-Discord].
 
-
 # License
+
 [License](LICENSE)
 
 [Badge-SonatypeReleases]: https://img.shields.io/nexus/r/https/oss.sonatype.org/dev.zio/zio-prelude_2.12.svg "Sonatype Releases"
