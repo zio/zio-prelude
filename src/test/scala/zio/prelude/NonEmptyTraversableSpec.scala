@@ -2,6 +2,7 @@ package zio.prelude
 
 import zio.random.Random
 import zio.test._
+import zio.test.laws._
 
 object NonEmptyTraversableSpec extends DefaultRunnableSpec {
 
@@ -18,6 +19,9 @@ object NonEmptyTraversableSpec extends DefaultRunnableSpec {
     Gen.function2(genInt)
 
   def spec = suite("NonEmptyTraversableSpec")(
+    suite("instances")(
+      testM("nonEmptyChunk")(checkAllLaws(NonEmptyTraversable)(GenFs.nonEmptyChunk, Gen.anyInt))
+    ),
     suite("combinators")(
       testM("max") {
         check(genNonEmptyList) { (as) =>
