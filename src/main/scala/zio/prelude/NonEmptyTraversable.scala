@@ -1,7 +1,9 @@
 package zio.prelude
 
 import zio.{ ChunkBuilder, NonEmptyChunk }
+import zio.prelude.coherent.DeriveEqualNonEmptyTraversable
 import zio.prelude.newtypes.{ Max, Min }
+import zio.test.laws._
 
 /**
  * A `NonEmptyTraversable` describes a `Traversable` that is guaranteed to
@@ -126,7 +128,13 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
   def toNonEmptyList[A](fa: F[A]): NonEmptyList[A] =
     reduceMapLeft(fa)(NonEmptyList.single)((as, a) => NonEmptyList.cons(a, as)).reverse
 }
-object NonEmptyTraversable {
+object NonEmptyTraversable extends LawfulF.Covariant[DeriveEqualNonEmptyTraversable, Equal] {
+
+  /**
+   * The set of all laws that instances of `NonEmptyTraversable` must satisfy.
+   */
+  val laws: LawsF.Covariant[DeriveEqualNonEmptyTraversable, Equal] =
+    Traversable.laws
 
   /**
    * Summons an implicit `NonEmptyTraversable`.

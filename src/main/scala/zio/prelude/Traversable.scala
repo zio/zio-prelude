@@ -1,7 +1,9 @@
 package zio.prelude
 
 import zio.{ Chunk, ChunkBuilder }
+import zio.prelude.coherent.DeriveEqualTraversable
 import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
+import zio.test.laws._
 
 /**
  * `Traversable` is an abstraction that describes the ability to iterate over
@@ -217,7 +219,13 @@ trait Traversable[F[+_]] extends Covariant[F] {
     foreach(fa)(a => State.modify((n: Int) => (n + 1, (a, n)))).runResult(0)
 }
 
-object Traversable extends TraversableVersionSpecific {
+object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] with TraversableVersionSpecific {
+
+  /**
+   * The set of all laws that instances of `Traversable` must satisfy.
+   */
+  val laws: LawsF.Covariant[DeriveEqualTraversable, Equal] =
+    Covariant.laws
 
   /**
    * Summons an implicit `Traversable`.
