@@ -404,7 +404,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
   /**
    * The `DeriveEqual` instance for `NonEmptyList`.
    */
-  implicit def NonEmptyListDeriveEqual: DeriveEqual[NonEmptyList] =
+  implicit val NonEmptyListDeriveEqual: DeriveEqual[NonEmptyList] =
     new DeriveEqual[NonEmptyList] {
       def derive[A: Equal]: Equal[NonEmptyList[A]] =
         NonEmptyListEqual

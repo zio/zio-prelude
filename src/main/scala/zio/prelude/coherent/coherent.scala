@@ -201,6 +201,36 @@ object DeriveEqualIdentityEitherInvariant {
     }
 }
 
+trait DeriveEqualNonEmptyTraversable[F[+_]] extends DeriveEqualTraversable[F] with NonEmptyTraversable[F]
+
+object DeriveEqualNonEmptyTraversable {
+  implicit def derive[F[+_]](
+    implicit deriveEqual0: DeriveEqual[F],
+    nonEmptyTraversable0: NonEmptyTraversable[F]
+  ): DeriveEqualNonEmptyTraversable[F] =
+    new DeriveEqualNonEmptyTraversable[F] {
+      def derive[A: Equal]: Equal[F[A]] =
+        deriveEqual0.derive
+      def foreach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+        nonEmptyTraversable0.foreach1(fa)(f)
+    }
+}
+
+trait DeriveEqualTraversable[F[+_]] extends CovariantDeriveEqual[F] with Traversable[F]
+
+object DeriveEqualTraversable {
+  implicit def derive[F[+_]](
+    implicit deriveEqual0: DeriveEqual[F],
+    traversable0: Traversable[F]
+  ): DeriveEqualTraversable[F] =
+    new DeriveEqualTraversable[F] {
+      def derive[A: Equal]: Equal[F[A]] =
+        deriveEqual0.derive
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+        traversable0.foreach(fa)(f)
+    }
+}
+
 trait EqualIdentity[A] extends ClosureEqual[A] with Identity[A]
 
 object EqualIdentity {

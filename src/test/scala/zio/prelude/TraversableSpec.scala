@@ -3,6 +3,7 @@ package zio.prelude
 import zio.Chunk
 import zio.random.Random
 import zio.test._
+import zio.test.laws._
 
 object TraversableSpec extends DefaultRunnableSpec {
 
@@ -31,6 +32,14 @@ object TraversableSpec extends DefaultRunnableSpec {
     Gen.function2(genInt <*> genInt)
 
   def spec = suite("TraversableSpec")(
+    suite("instances")(
+      testM("chunk")(checkAllLaws(Traversable)(GenF.chunk, Gen.anyInt)),
+      testM("either")(checkAllLaws(Traversable)(GenFs.either(Gen.anyInt), Gen.anyInt)),
+      testM("list")(checkAllLaws(Traversable)(GenF.list, Gen.anyInt)),
+      testM("map")(checkAllLaws(Traversable)(GenFs.map(Gen.anyInt), Gen.anyInt)),
+      testM("option")(checkAllLaws(Traversable)(GenF.option, Gen.anyInt)),
+      testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt))
+    ),
     suite("combinators")(
       testM("count") {
         check(genList, genBooleanFunction) { (as, f) =>
