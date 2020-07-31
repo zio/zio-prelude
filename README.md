@@ -15,7 +15,7 @@ class hierarchy into Scala without making significant changes.
 
 ZIO Prelude has three key areas of focus:
 
-— Data structures, and type classes that for traversing them. ZIO Prelude embraces the collections
+- Data structures, and type classes that for traversing them. ZIO Prelude embraces the collections
 in the Scala standard library, and extends them with new instances and new useful additions.
 - Patterns of composition for types. ZIO Prelude provides a small catalog of patterns for binary 
 operators, which combine two values into another value of the same type. These patterns are named 
