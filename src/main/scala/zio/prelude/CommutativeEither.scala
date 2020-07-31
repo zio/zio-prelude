@@ -68,9 +68,10 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
   /**
    * The `CommutativeEither` instance for `ZSink`.
    */
-  implicit def ZSinkCommutativeEither[R, E, I]: CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] =
-    new CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] {
-      def either[A, B](fa: => ZSink[R, E, I, A], fb: => ZSink[R, E, I, B]): ZSink[R, E, I, Either[A, B]] =
+  implicit def ZSinkCommutativeEither[R, E, I, L]
+    : CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
+      def either[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, Either[A, B]] =
         fa.raceBoth(fb)
     }
 

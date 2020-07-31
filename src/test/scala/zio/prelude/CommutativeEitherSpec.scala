@@ -16,7 +16,7 @@ object CommutativeEitherSpec extends DefaultRunnableSpec {
         r <- ZIO.fromFuture { implicit ec =>
               Future.never <|> Future.unit
             }
-      } yield assert(l.swap)(equalTo(r))
+      } yield assert(l.merge)(equalTo(r.merge))
     }
   )
 }
