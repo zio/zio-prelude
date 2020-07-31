@@ -1118,9 +1118,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkAssociativeBoth[R, E, I]: AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, A], fb: => ZSink[R, E, I, B]): ZSink[R, E, I, (A, B)] = fa zip fb
+  implicit def ZSinkAssociativeBoth[R, E, I]: AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, I, a] })#lambda] =
+    new AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, I, a] })#lambda] {
+      def both[A, B](fa: => ZSink[R, E, I, I, A], fb: => ZSink[R, E, I, I, B]): ZSink[R, E, I, I, (A, B)] = fa zip fb
     }
 
   /**
