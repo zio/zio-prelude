@@ -1,5 +1,7 @@
 package zio.prelude
 
+import scala.concurrent.{ ExecutionContext, Future, Promise }
+
 import zio.ZIO
 import zio.prelude.coherent.CommutativeEitherDeriveEqualInvariant
 import zio.stream.{ ZSink, ZStream }
@@ -44,6 +46,15 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
    */
   val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
     commutativeLaw
+
+  /**
+   * The `CommutativeEither` instance for `Future`.
+   */
+  implicit def FutureCommutativeEither(implicit ec: ExecutionContext): CommutativeEither[Future] =
+    new CommutativeEither[Future] {
+      def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
+        Promise[Either[A, B]].completeWith(fa.map(Left(_))).completeWith(fb.map(Right(_))).future
+    }
 
   /**
    * The `CommutativeEither` instance for `ZIO`.
