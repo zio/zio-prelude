@@ -25,9 +25,9 @@ trait CovariantSubset[F[+_], Subset[_]] {
  * which may not already exists, such as with a `Function0[A]` that produces
  * `A` values when invoked.
  *
- * Common examples of covariant instances in ZIO includes effects effects with
- * respect to their error and value types, sinks with respect to their error
- * and output types, and queues and references with respect to their error and
+ * Common examples of covariant instances in ZIO includes effects with respect
+ * to their error and value types, sinks with respect to their error and output
+ * types, and queues and references with respect to their error and
  * output types.
  *
  * `Covariant` instances support a `map` operation which allows transforming
