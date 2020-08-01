@@ -190,9 +190,9 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `CommutativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkCommutativeBoth[R, E, I]: CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, A], fb: => ZSink[R, E, I, B]): ZSink[R, E, I, (A, B)] = fa zipPar fb
+  implicit def ZSinkCommutativeBoth[R, E, I, L]: CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
+    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
+      def both[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, (A, B)] = fa zipPar fb
     }
 
   /**
