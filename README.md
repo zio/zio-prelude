@@ -6,12 +6,9 @@
 
 # Summary
 
-ZIO Prelude is a radically new approach to functional abstractions in Scala, which throws out the 
+ZIO Prelude is an alternative approach to functional abstractions in Scala, which throws out the 
 classic functor hierarchy in favor of a modular algebraic approach that is smaller, easier 
 to understand and teach, and more expressive.
-
-ZIO Prelude is an alternative to libraries like Scalaz and Cats, which imported the Haskell type 
-class hierarchy into Scala without making significant changes.
 
 ZIO Prelude has three key areas of focus:
 
