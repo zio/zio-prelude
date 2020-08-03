@@ -55,7 +55,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
   /**
    * Summons an implicit `AssociativeEither[F]`.
    */
-  def apply[F[+_]](implicit associativeEither: AssociativeEither[F]): AssociativeEither[F] =
+  def apply[F[_]](implicit associativeEither: AssociativeEither[F]): AssociativeEither[F] =
     associativeEither
 
   /**

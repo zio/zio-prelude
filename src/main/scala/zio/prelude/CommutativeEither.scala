@@ -87,7 +87,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
   /**
    * Summons an implicit `CommutativeEither[F]`.
    */
-  def apply[F[+_]](implicit commutativeEither: CommutativeEither[F]): CommutativeEither[F] =
+  def apply[F[_]](implicit commutativeEither: CommutativeEither[F]): CommutativeEither[F] =
     commutativeEither
 }
 

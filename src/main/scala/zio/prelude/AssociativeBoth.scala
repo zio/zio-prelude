@@ -30,7 +30,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Summons an implicit `AssociativeBoth[F]`.
    */
-  def apply[F[+_]](implicit associativeBoth: AssociativeBoth[F]): AssociativeBoth[F] =
+  def apply[F[_]](implicit associativeBoth: AssociativeBoth[F]): AssociativeBoth[F] =
     associativeBoth
 
   /**
