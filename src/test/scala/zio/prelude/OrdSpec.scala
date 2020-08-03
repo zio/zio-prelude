@@ -10,7 +10,8 @@ object OrdSpec extends DefaultRunnableSpec {
     gen: Gen[R, A]
   )(implicit ord: scala.math.Ordering[A]): ZIO[R, Nothing, TestResult] =
     check(gen, gen) { (a1, a2) =>
-      assert(a1 =?= a2)(equalTo(Ordering.fromCompare(ord.compare(a1, a2))))
+      assert(a1 =?= a2)(equalTo(Ordering.fromCompare(ord.compare(a1, a2)))) &&
+      assert(Ord[A].toScalaOrdering.compare(a1, a2).signum)(equalTo(ord.compare(a1, a2).signum))
     }
 
   /*
