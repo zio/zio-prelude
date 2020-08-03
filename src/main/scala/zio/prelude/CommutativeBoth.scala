@@ -47,7 +47,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * Summons an implicit `CommutativeBoth[F]`.
    */
-  def apply[F[+_]](implicit commutativeBoth: CommutativeBoth[F]): CommutativeBoth[F] =
+  def apply[F[_]](implicit commutativeBoth: CommutativeBoth[F]): CommutativeBoth[F] =
     commutativeBoth
 
   /**
