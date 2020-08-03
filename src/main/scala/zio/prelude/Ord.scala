@@ -101,7 +101,7 @@ trait Ord[-A] extends Equal[A] { self =>
         self.compare(l, r) match {
           case Ordering.LessThan    => -1
           case Ordering.Equals      => 0
-          case Ordering.GreaterThan => 0
+          case Ordering.GreaterThan => 1
         }
     }
 }
