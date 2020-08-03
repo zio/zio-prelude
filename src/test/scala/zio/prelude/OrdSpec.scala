@@ -6,12 +6,15 @@ import zio.ZIO
 
 object OrdSpec extends DefaultRunnableSpec {
 
-  final def scalaOrderingConsistency[R, A: Ord](
+  def sign(n: Int): Int =
+    if (n > 0) 1 else if (n < 0) -1 else 0
+
+  def scalaOrderingConsistency[R, A: Ord](
     gen: Gen[R, A]
   )(implicit ord: scala.math.Ordering[A]): ZIO[R, Nothing, TestResult] =
     check(gen, gen) { (a1, a2) =>
       assert(a1 =?= a2)(equalTo(Ordering.fromCompare(ord.compare(a1, a2)))) &&
-      assert(Ord[A].toScalaOrdering.compare(a1, a2).signum)(equalTo(ord.compare(a1, a2).signum))
+      assert(sign(Ord[A].toScalaOrdering.compare(a1, a2)))(equalTo(sign(ord.compare(a1, a2))))
     }
 
   /*
