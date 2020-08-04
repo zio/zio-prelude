@@ -811,14 +811,14 @@ trait AssociativeSyntax {
   implicit class AssociativeOps[A](l: A) {
 
     /**
-      * A symbolic alias for `combine`.
-      */
+     * A symbolic alias for `combine`.
+     */
     def <>(r: => A)(implicit associative: Associative[A]): A =
       associative.combine(l, r)
 
     /**
-      * Associatively combine this value with the specified value
-      */
+     * Associatively combine this value with the specified value
+     */
     def combine(r: => A)(implicit associative: Associative[A]): A =
       associative.combine(l, r)
   }
