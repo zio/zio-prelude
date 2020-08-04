@@ -822,5 +822,4 @@ trait AssociativeSyntax {
     def combine(r: => A)(implicit associative: Associative[A]): A =
       associative.combine(l, r)
   }
-
 }
