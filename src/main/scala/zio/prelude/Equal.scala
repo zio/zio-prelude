@@ -258,10 +258,7 @@ object Equal extends Lawful[Equal] {
    * return `true`, which is different from the behavior of `Double#equals`.
    */
   implicit val DoubleEqual: Equal[Double] =
-    make { (n1, n2) =>
-      if (n1.isNaN && n2.isNaN) true
-      else n1 == n2
-    }
+    make((n1, n2) => java.lang.Double.doubleToRawLongBits(n1) == java.lang.Double.doubleToRawLongBits(n2))
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
@@ -275,10 +272,7 @@ object Equal extends Lawful[Equal] {
    * return `true`, which is different from the behavior of `Float#equals`.
    */
   implicit val FloatEqual: Equal[Float] =
-    make { (n1, n2) =>
-      if (n1.isNaN && n2.isNaN) true
-      else n1 == n2
-    }
+    make((n1, n2) => java.lang.Float.floatToRawIntBits(n1) == java.lang.Float.floatToRawIntBits(n2))
 
   /**
    * Equality for `Int` values.
