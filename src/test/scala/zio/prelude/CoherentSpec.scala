@@ -20,12 +20,6 @@ object CoherentSpec extends DefaultRunnableSpec {
       assert(instance.combine("a", "b"))(equalTo("ab")) &&
       assert(instance.equal("a", "a"))(isTrue)
     },
-    test("ClosureEqual") {
-      val instance = implicitly[ClosureEqual[String]]
-
-      assert(instance.combine("a", "b"))(equalTo("ab")) &&
-      assert(instance.equal("a", "a"))(isTrue)
-    },
     test("AssociativeEqual") {
       val instance = implicitly[AssociativeEqual[String]]
 

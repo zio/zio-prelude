@@ -25,7 +25,7 @@ object Identity extends Lawful[EqualIdentity] {
     }
 
   val laws: Laws[EqualIdentity] =
-    leftIdentityLaw + rightIdentityLaw + Closure.laws
+    leftIdentityLaw + rightIdentityLaw
 
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 

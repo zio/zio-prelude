@@ -81,7 +81,7 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
    * Reduces the collection to a summary value using the binary function `f`.
    */
   def reduce[A](fa: F[A])(f: (A, A) => A): A = {
-    implicit val closure = Closure.make(f)
+    implicit val associative = Associative.make(f)
     reduceMap(fa)(identity)
   }
 
@@ -90,8 +90,8 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
    * operation is defined using the function `f` and then reduces those values
    * to a single summary using the combine operation.
    */
-  def reduceMap[A, B: Closure](fa: F[A])(f: A => B): B =
-    reduceMapLeft(fa)(f)((b, a) => Closure[B].combine(b, f(a)))
+  def reduceMap[A, B: Associative](fa: F[A])(f: A => B): B =
+    reduceMapLeft(fa)(f)((b, a) => Associative[B].combine(b, f(a)))
 
   /**
    * Reduces the elements of this collection from left to right using the
@@ -173,7 +173,7 @@ trait NonEmptyTraversableSyntax {
       F.foreach1_(self)(f)
     def reduce(f: (A, A) => A)(implicit F: NonEmptyTraversable[F]): A =
       F.reduce(self)(f)
-    def reduceMap[B: Closure](f: A => B)(implicit F: NonEmptyTraversable[F]): B =
+    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyTraversable[F]): B =
       F.reduceMap(self)(f)
     def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyTraversable[F]): B =
       F.reduceMapLeft(self)(map)(reduce)

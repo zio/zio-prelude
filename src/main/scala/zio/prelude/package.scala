@@ -4,10 +4,10 @@ import zio.test.{ assert, TestResult }
 
 package object prelude
     extends Assertions
+    with AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeEitherSyntax
     with AssociativeFlattenSyntax
-    with ClosureSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with CovariantSyntax
@@ -45,7 +45,6 @@ package object prelude
   val MultiSet: ZSet.type = ZSet
 
   type DeriveAssociative[F[_]] = Derive[F, Associative]
-  type DeriveClosure[F[_]]     = Derive[F, Closure]
   type DeriveCommutative[F[_]] = Derive[F, Commutative]
   type DeriveDebug[F[_]]       = Derive[F, Debug]
   type DeriveEqual[F[_]]       = Derive[F, Equal]
