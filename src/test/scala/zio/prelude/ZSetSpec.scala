@@ -4,6 +4,7 @@ import zio.Chunk
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._
+import zio.test.Assertion._
 import zio.test.laws._
 
 object ZSetSpec extends DefaultRunnableSpec {
@@ -15,7 +16,7 @@ object ZSetSpec extends DefaultRunnableSpec {
     }
 
   def genZSet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
-    Gen.mapOf(a, b).map(ZSet(_))
+    Gen.mapOf(a, b).map(ZSet.fromMap)
 
   val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
@@ -72,6 +73,23 @@ object ZSetSpec extends DefaultRunnableSpec {
         }
       }
     ),
-    suite("constructors")()
+    suite("constructors")(
+      test("fromMap") {
+        import scala.collection.immutable.SortedMap
+        trait Unordered
+        trait Ordered extends Unordered
+        object Ordered {
+          implicit val ord: scala.math.Ordering[Ordered] =
+            new scala.math.Ordering[Ordered] {
+              def compare(l: Ordered, r: Ordered): Int = 0
+            }
+        }
+        val unordered = new Unordered {}
+        val ordered   = new Ordered {}
+        val sortedMap = SortedMap(ordered -> true)
+        val set       = ZSet.fromMap(sortedMap)
+        assert(set(unordered))(isFalse)
+      }
+    )
   )
 }
