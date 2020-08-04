@@ -272,10 +272,7 @@ object Equal extends Lawful[Equal] {
    * return `true`, which is different from the behavior of `Float#equals`.
    */
   implicit val FloatEqual: Equal[Float] =
-    make { (n1, n2) =>
-      if (n1.isNaN && n2.isNaN) true
-      else n1 == n2
-    }
+    make((n1, n2) => Float.doubleToRawLongBits(n1) == Float.doubleToRawLongBits(n2))
 
   /**
    * Equality for `Int` values.
