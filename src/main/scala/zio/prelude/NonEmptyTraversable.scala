@@ -149,15 +149,10 @@ object NonEmptyTraversable extends LawfulF.Covariant[DeriveEqualNonEmptyTraversa
     new NonEmptyTraversable[NonEmptyChunk] {
       def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](
         nonEmptyChunk: NonEmptyChunk[A]
-      )(f: A => F[B]): F[NonEmptyChunk[B]] = {
-        val iterator                = nonEmptyChunk.iterator
-        var fbs: F[ChunkBuilder[B]] = null.asInstanceOf[F[ChunkBuilder[B]]]
-        while (iterator.hasNext) {
-          val a = iterator.next()
-          if (fbs == null) fbs = f(a).map(ChunkBuilder.make() += _) else fbs = fbs.zipWith(f(a))(_ += _)
-        }
-        fbs.map(bs => NonEmptyChunk.nonEmpty(bs.result()))
-      }
+      )(f: A => F[B]): F[NonEmptyChunk[B]] =
+        nonEmptyChunk
+          .reduceMapLeft(f(_).map(ChunkBuilder.make() += _))((bs, a) => bs.zipWith(f(a))(_ += _))
+          .map(bs => NonEmptyChunk.nonEmpty(bs.result()))
     }
 }
 
