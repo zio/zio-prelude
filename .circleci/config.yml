@@ -12,8 +12,8 @@ scala_213: &scala_213
 jdk_8: &jdk_8
   JDK_VERSION: 8
 
-# jdk_11: &jdk_11
-#   JDK_VERSION: 11
+jdk_11: &jdk_11
+  JDK_VERSION: 11
 
 machine_ubuntu: &machine_ubuntu
   machine:
@@ -231,19 +231,19 @@ jobs:
   #     - <<: *scala_dotty
   #     - <<: *jdk_8
 
-  # test_212_jdk11_jvm:
-  #   <<: *test
-  #   <<: *machine_ubuntu
-  #   environment:
-  #     - <<: *scala_212
-  #     - <<: *jdk_11
+  test_212_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_11
 
-  # test_213_jdk11_jvm:
-  #   <<: *test
-  #   <<: *machine_ubuntu
-  #   environment:
-  #     - <<: *scala_213
-  #     - <<: *jdk_11
+  test_213_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_11
 
   # test_dotty_jdk11_jvm:
   #   <<: *test
@@ -288,16 +288,16 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
-      # - test_212_jdk11_jvm:
-      #     requires:
-      #       - lint
-      #     filters:
-      #       <<: *filter_tags
-      # - test_213_jdk11_jvm:
-      #     requires:
-      #       - lint
-      #     filters:
-      #       <<: *filter_tags
+      - test_212_jdk11_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_213_jdk11_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
       # - release:
       #     context: Sonatype2
       #     requires:
