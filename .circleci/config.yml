@@ -12,8 +12,8 @@ scala_213: &scala_213
 jdk_8: &jdk_8
   JDK_VERSION: 8
 
-# jdk_11: &jdk_11
-#   JDK_VERSION: 11
+jdk_11: &jdk_11
+  JDK_VERSION: 11
 
 machine_ubuntu: &machine_ubuntu
   machine:
@@ -130,35 +130,35 @@ test: &test
         command: ./sbt ++${SCALA_VERSION}! test
     - <<: *save_cache
 
-# release: &release
-#   steps:
-#       - checkout
-#       - run:
-#           name: Fetch git tags
-#           command: git fetch --tags
-#       - <<: *load_cache
-#       - run: 
-#           name: Write sonatype credentials
-#           command: echo "credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", \"${SONATYPE_USER}\", \"${SONATYPE_PASSWORD}\")" > ~/.sbt/1.0/sonatype.sbt
-#       - run:
-#           name: Write PGP public key
-#           command: echo -n "${PGP_PUBLIC}" | base64 -di > /tmp/public.asc
-#       - run:
-#           name: Write PGP secret key
-#           command: echo -n "${PGP_SECRET}" | base64 -di > /tmp/secret.asc
-#       - run:
-#           name: Release artifacts
-#           command: |
-#             mkdir -p $HOME/bin
-#             sudo apt-get update && sudo apt-get -y install gnupg2
-#             echo pinentry-mode loopback >> ~/.gnupg/gpg.conf
-#             echo allow-loopback-pinentry >> ~/.gnupg/gpg-agent.conf
-#             chmod 600 ~/.gnupg/*
-#             ln -s /usr/bin/gpg2 $HOME/bin/gpg
-#             $HOME/bin/gpg --version
-#             echo RELOADAGENT | gpg-connect-agent
-#             echo $PGP_SECRET | base64 -di | gpg2 --import --no-tty --batch --yes
-#             PATH=$HOME/bin:$PATH ./sbt ++${SCALA_VERSION}! clean ci-release
+release: &release
+  steps:
+      - checkout
+      - run:
+          name: Fetch git tags
+          command: git fetch --tags
+      - <<: *load_cache
+      - run: 
+          name: Write sonatype credentials
+          command: echo "credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", \"${SONATYPE_USER}\", \"${SONATYPE_PASSWORD}\")" > ~/.sbt/1.0/sonatype.sbt
+      - run:
+          name: Write PGP public key
+          command: echo -n "${PGP_PUBLIC}" | base64 -di > /tmp/public.asc
+      - run:
+          name: Write PGP secret key
+          command: echo -n "${PGP_SECRET}" | base64 -di > /tmp/secret.asc
+      - run:
+          name: Release artifacts
+          command: |
+            mkdir -p $HOME/bin
+            sudo apt-get update && sudo apt-get -y install gnupg2
+            echo pinentry-mode loopback >> ~/.gnupg/gpg.conf
+            echo allow-loopback-pinentry >> ~/.gnupg/gpg-agent.conf
+            chmod 600 ~/.gnupg/*
+            ln -s /usr/bin/gpg2 $HOME/bin/gpg
+            $HOME/bin/gpg --version
+            echo RELOADAGENT | gpg-connect-agent
+            echo $PGP_SECRET | base64 -di | gpg2 --import --no-tty --batch --yes
+            PATH=$HOME/bin:$PATH ./sbt ++${SCALA_VERSION}! clean ci-release
 
 # microsite: &microsite
 #   steps:
@@ -231,19 +231,19 @@ jobs:
   #     - <<: *scala_dotty
   #     - <<: *jdk_8
 
-  # test_212_jdk11_jvm:
-  #   <<: *test
-  #   <<: *machine_ubuntu
-  #   environment:
-  #     - <<: *scala_212
-  #     - <<: *jdk_11
+  test_212_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_11
 
-  # test_213_jdk11_jvm:
-  #   <<: *test
-  #   <<: *machine_ubuntu
-  #   environment:
-  #     - <<: *scala_213
-  #     - <<: *jdk_11
+  test_213_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_11
 
   # test_dotty_jdk11_jvm:
   #   <<: *test
@@ -252,12 +252,12 @@ jobs:
   #     - <<: *scala_dotty
   #     - <<: *jdk_11
 
-  # release:
-  #   <<: *release
-  #   <<: *machine_ubuntu
-  #   environment:
-  #     - <<: *scala_213
-  #     - <<: *jdk_8
+  release:
+    <<: *release
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_8
 
   # microsite:
   #   <<: *microsite
@@ -288,29 +288,29 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
-      # - test_212_jdk11_jvm:
-      #     requires:
-      #       - lint
-      #     filters:
-      #       <<: *filter_tags
-      # - test_213_jdk11_jvm:
-      #     requires:
-      #       - lint
-      #     filters:
-      #       <<: *filter_tags
-      # - release:
-      #     context: Sonatype2
-      #     requires:
-      #       - test_212_jdk8_jvm
-      #       - test_212_jdk11_jvm
-      #       - test_213_jdk8_jvm
-      #       - test_213_jdk11_jvm
-      #       - mdoc
-      #     filters:
-      #       <<: *filter_tags
-      #       branches:
-      #         only:
-      #           - master
+      - test_212_jdk11_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_213_jdk11_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - release:
+          context: Sonatype2
+          requires:
+            - test_212_jdk8_jvm
+            - test_212_jdk11_jvm
+            - test_213_jdk8_jvm
+            - test_213_jdk11_jvm
+            - mdoc
+          filters:
+            <<: *filter_tags
+            branches:
+              only:
+                - master
       # - microsite:
       #     context: Website
       #     requires:
