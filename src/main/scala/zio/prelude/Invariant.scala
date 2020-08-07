@@ -34,15 +34,6 @@ object Invariant {
         Equivalence(_.map(f.to), _.map(f.from))
     }
 
-  implicit val ClosureInvariant: Invariant[Closure] =
-    new Invariant[Closure] {
-      def invmap[A, B](f: A <=> B): Closure[A] <=> Closure[B] =
-        Equivalence(
-          (a: Closure[A]) => Closure.make[B]((l, r) => f.to(a.combine(f.from(l), f.from(r)))),
-          (b: Closure[B]) => Closure.make[A]((l, r) => f.from(b.combine(f.to(l), f.to(r))))
-        )
-    }
-
   implicit val CommutativeInvariant: Invariant[Commutative] =
     new Invariant[Commutative] {
       def invmap[A, B](f: A <=> B): Commutative[A] <=> Commutative[B] =

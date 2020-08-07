@@ -11,7 +11,9 @@ import zio.test.laws.{ Lawful, Laws }
  * for a type `A`. For example, addition for integers, and string
  * concatenation for strings.
  */
-trait Associative[A] extends Closure[A]
+trait Associative[A] {
+  def combine(l: => A, r: => A): A
+}
 
 object Associative extends Lawful[AssociativeEqual] {
 
@@ -30,7 +32,7 @@ object Associative extends Lawful[AssociativeEqual] {
     }
 
   val laws: Laws[AssociativeEqual] =
-    associativityLaw + Closure.laws
+    associativityLaw
 
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 
@@ -798,4 +800,26 @@ object Associative extends Lawful[AssociativeEqual] {
           v1 <> v2
         )
     }
+}
+
+trait AssociativeSyntax {
+
+  /**
+   * Provides infix syntax for combining two values with an associative
+   * operation.
+   */
+  implicit class AssociativeOps[A](l: A) {
+
+    /**
+     * A symbolic alias for `combine`.
+     */
+    def <>(r: => A)(implicit associative: Associative[A]): A =
+      associative.combine(l, r)
+
+    /**
+     * Associatively combine this value with the specified value
+     */
+    def combine(r: => A)(implicit associative: Associative[A]): A =
+      associative.combine(l, r)
+  }
 }

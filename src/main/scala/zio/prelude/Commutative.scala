@@ -19,7 +19,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     }
 
   val laws: Laws[CommutativeEqual] =
-    commutativeLaw + Closure.laws
+    commutativeLaw
 
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 

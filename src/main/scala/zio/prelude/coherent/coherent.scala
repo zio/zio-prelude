@@ -70,16 +70,6 @@ object AssociativeIdentity {
     }
 }
 
-trait ClosureEqual[A] extends Closure[A] with Equal[A]
-
-object ClosureEqual {
-  implicit def derive[A](implicit closure0: Closure[A], equal0: Equal[A]): ClosureEqual[A] =
-    new ClosureEqual[A] {
-      def combine(l: => A, r: => A): A              = closure0.combine(l, r)
-      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
-    }
-}
-
 trait CommutativeBothDeriveEqualInvariant[F[_]] extends CommutativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
 object CommutativeBothDeriveEqualInvariant {
@@ -110,7 +100,7 @@ object CommutativeEitherDeriveEqualInvariant {
     }
 }
 
-trait CommutativeEqual[A] extends ClosureEqual[A] with Commutative[A]
+trait CommutativeEqual[A] extends Commutative[A] with Equal[A]
 
 object CommutativeEqual {
   implicit def derive[A](implicit commutative0: Commutative[A], equal0: Equal[A]): CommutativeEqual[A] =
@@ -231,7 +221,7 @@ object DeriveEqualTraversable {
     }
 }
 
-trait EqualIdentity[A] extends ClosureEqual[A] with Identity[A]
+trait EqualIdentity[A] extends Equal[A] with Identity[A]
 
 object EqualIdentity {
   implicit def derive[A](implicit identity0: Identity[A], equal0: Equal[A]): EqualIdentity[A] =
