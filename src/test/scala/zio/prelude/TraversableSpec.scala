@@ -41,6 +41,13 @@ object TraversableSpec extends DefaultRunnableSpec {
       testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt))
     ),
     suite("combinators")(
+      testM("contains") {
+        check(genList, genInt) { (as, a) =>
+          val actual   = Traversable[List].contains(as)(a)
+          val expected = as.contains(a)
+          assert(actual)(equalTo(expected))
+        }
+      },
       testM("count") {
         check(genList, genBooleanFunction) { (as, f) =>
           val actual   = Traversable[List].count(as)(f)

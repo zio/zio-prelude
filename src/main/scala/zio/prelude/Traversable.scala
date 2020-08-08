@@ -25,6 +25,12 @@ trait Traversable[F[+_]] extends Covariant[F] {
   def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
 
   /**
+   * Returns whether the collection contains the specified element.
+   */
+  def contains[A: Equal](fa: F[A])(element: A): Boolean =
+    exists(fa)(_ === element)
+
+  /**
    * Returns the number of elements in the collection that satisfy the
    * specified prediate.
    */
@@ -300,6 +306,8 @@ trait TraversableSyntax {
   implicit class TraversableOps[F[+_], A](private val self: F[A]) {
     def foreach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: Traversable[F]): G[F[B]] =
       F.foreach(self)(f)
+    def contains(element: A)(implicit E: Equal[A], F: Traversable[F]): Boolean =
+      F.contains(self)(element)
     def count(f: A => Boolean)(implicit F: Traversable[F]): Int =
       F.count(self)(f)
     def exists(f: A => Boolean)(implicit F: Traversable[F]): Boolean =
