@@ -55,6 +55,12 @@ sealed trait NonEmptyList[+A] { self =>
     foldLeft(0)((n, a) => if (f(a)) n + 1 else n)
 
   /**
+    * Removes duplicate elements from this `NonEmptyList`.
+    */
+  final def distinct(implicit A: Equal[A]): NonEmptyList[A] =
+    reduceMapLeft(single)((as, a) => if (as.contains(a)) as else cons(a, as)).reverse
+
+  /**
    * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
    * equal to each other.
    */
