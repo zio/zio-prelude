@@ -71,6 +71,11 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
           NonEmptyList.fromCons(as).count(f) <-> as.count(f)
         }
       },
+      testM("distinct") {
+        check(genCons) { as =>
+          NonEmptyList.fromCons(as).distinct.toCons <-> as.distinct
+        }
+      },
       testM("exists") {
         check(genCons, genBooleanFunction) { (as, f) =>
           NonEmptyList.fromCons(as).exists(f) <-> as.exists(f)
