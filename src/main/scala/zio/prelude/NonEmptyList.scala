@@ -55,6 +55,35 @@ sealed trait NonEmptyList[+A] { self =>
     foldLeft(0)((n, a) => if (f(a)) n + 1 else n)
 
   /**
+   * Drops the first `n` elements from this `NonEmptyList` returning a `List`.
+   */
+  @tailrec
+  final def drop(n: Int): List[A] =
+    if (n <= 0) self
+    else
+      self match {
+        case Cons(_, t) => t.drop(n - 1)
+        case Single(_)  => Nil
+      }
+
+  /**
+   * Drops the last `n` elements from this `NonEmptyList` returning a `List`.
+   */
+  final def dropRight(n: Int): List[A] =
+    reverse.drop(n).reverse
+
+  /**
+   * Drops elements from the start of this `NonEmptyList` that satisfy the
+   * specified predicate returning a `List`.
+   */
+  @tailrec
+  final def dropWhile(f: A => Boolean): List[A] =
+    self match {
+      case Cons(h, t) => if (f(h)) t.dropWhile(f) else h :: t
+      case Single(h)  => if (f(h)) Nil else single(h)
+    }
+
+  /**
    * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
    * equal to each other.
    */
@@ -299,6 +328,42 @@ sealed trait NonEmptyList[+A] { self =>
   final def tails: NonEmptyList[NonEmptyList[A]] =
     unfold(self)(identity)(_.tailOption)
 
+  @tailrec
+  private def takeHelper[A](n1: Int, nel: NonEmptyList[A], taken: List[A]): List[A] =
+    if (n1 <= 0) taken
+    else
+      nel match {
+        case Cons(h, t) => takeHelper(n1 - 1, t, h :: taken)
+        case Single(h)  => h :: taken
+      }
+
+  /**
+   * Takes the first `n` elements from this `NonEmptyList` returning a `List`.
+   */
+  final def take(n: Int): List[A] =
+    takeHelper(n, self, Nil).reverse
+
+  /**
+   * Takes the last `n` elements from this `NonEmptyList` returning a `List`.
+   */
+  final def takeRight(n: Int): List[A] =
+    takeHelper(n, self.reverse, Nil)
+
+  /**
+   * Takes elements from the start of this `NonEmptyList` that satisfy the
+   * specified predicate returning a `List`.
+   */
+  final def takeWhile(f: A => Boolean): List[A] = {
+    @tailrec
+    def loop(nel: NonEmptyList[A], taken: List[A]): List[A] =
+      nel match {
+        case Cons(h, t) => if (f(h)) loop(t, h :: taken) else taken
+        case Single(h)  => if (f(h)) h :: taken else taken
+      }
+
+    loop(self, Nil).reverse
+  }
+
   /**
    * Converts this `NonEmptyList` to the `::` case of a `List`.
    */
@@ -471,7 +536,16 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
 
   /**
-   * Constructs a `NonEmptyList` from an `Iterable`.
+   * Constructs a `NonEmptyList` from an `Iterable` or `None` otherwise.
+   */
+  def fromIterable[A](iterable: Iterable[A]): Option[NonEmptyList[A]] =
+    iterable.toList match {
+      case Nil    => None
+      case h :: t => Some(fromCons(::(h, t)))
+    }
+
+  /**
+   * Constructs a `NonEmptyList` from an element and `Iterable`.
    */
   def fromIterable[A](head: A, tail: Iterable[A]): NonEmptyList[A] =
     fromCons(::(head, tail.toList))
