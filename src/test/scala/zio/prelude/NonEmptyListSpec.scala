@@ -77,6 +77,11 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
           NonEmptyList.fromCons(as).count(f) <-> as.count(f)
         }
       },
+      testM("distinct") {
+        check(genCons) { as =>
+          NonEmptyList.fromCons(as).distinct.toCons <-> as.distinct
+        }
+      },
       testM("drop") {
         check(genConsWithIndex) {
           case (as, i) =>
@@ -92,6 +97,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
       testM("dropWhile") {
         check(genCons, genBooleanFunction) { (as, f) =>
           NonEmptyList.fromCons(as).dropWhile(f) <-> as.dropWhile(f)
+
         }
       },
       testM("exists") {
