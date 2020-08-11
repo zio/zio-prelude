@@ -239,7 +239,7 @@ object ZSet {
    * the `Map` and the measure of how many times a value occurs will be the
    */
   def fromMap[A, B](map: Map[A, B]): ZSet[A, B] =
-    new ZSet(map)
+    new ZSet(map.foldLeft(Map.empty[A, B])(_ + _))
 
   /**
    * Derives a `Commutative[ZSet[A, B]]` given a `Commutative[B]`.
