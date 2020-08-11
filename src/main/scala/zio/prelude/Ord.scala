@@ -1,10 +1,11 @@
 package zio.prelude
 
-import scala.annotation.{ implicitNotFound, tailrec }
-
-import zio.{ Chunk, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
+import zio.{ Chunk, NonEmptyChunk }
+
+import scala.annotation.{ implicitNotFound, tailrec }
+import scala.{ math => sm }
 
 /**
  * `Ord[A]` provides implicit evidence that values of type `A` have a total
@@ -95,15 +96,11 @@ trait Ord[-A] extends Equal[A] { self =>
   final def reverse: Ord[A] =
     mapOrdering(_.opposite)
 
-  final def toScalaOrdering[A1 <: A]: scala.math.Ordering[A1] =
-    new scala.math.Ordering[A1] {
-      def compare(l: A1, r: A1): Int =
-        self.compare(l, r) match {
-          case Ordering.LessThan    => -1
-          case Ordering.Equals      => 0
-          case Ordering.GreaterThan => 1
-        }
-    }
+  override def toScala[A1 <: A]: sm.Ordering[A1] = self.compare(_, _) match {
+    case Ordering.LessThan    => -1
+    case Ordering.Equals      => 0
+    case Ordering.GreaterThan => 1
+  }
 }
 
 object Ord extends Lawful[Ord] {
@@ -190,6 +187,9 @@ object Ord extends Lawful[Ord] {
       connexityLaw2 +
       complementLaw +
       Equal.laws
+
+  def fromScala[A](implicit ordering: sm.Ordering[A]): Ord[A] =
+    (l: A, r: A) => Ordering.fromCompare(ordering.compare(l, r))
 
   /**
    * The `AssociativeBoth` instance for `Ord`.
