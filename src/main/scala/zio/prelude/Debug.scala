@@ -9,38 +9,41 @@ trait Debug[-A] {
 object Debug {
   type Renderer = Repr => String
   object Renderer {
-    val Scala: Renderer = _ match {
+    val Scala: Renderer = {
       case Repr.Float(v)       => v.toString
       case Repr.Long(v)        => v.toString
-      case Repr.String(v)      => v.toString
+      case Repr.Char(v)        => v.toString
+      case Repr.String(v)      => v
       case Repr.KeyValue(k, v) => s"${k.render(Scala)} -> ${v.render(Scala)}"
       case Repr.Object(_, n)   => n
       case Repr.Constructor(_, n, reprs) =>
         s"$n(${reprs.map(kv => kv._2.render(Scala)).mkString(",")})"
       case Repr.VConstructor(_, n, reprs) if List("List", "Vector", "Map").contains(n) =>
         s"$n(${reprs.map(_.render(Scala)).mkString(", ")})"
-      case Repr.VConstructor(_, n, reprs) if n.startsWith("Tuple") =>
+      case Repr.VConstructor(List("scala"), n, reprs) if n.matches("^Tuple\\d+$") =>
         s"(${reprs.map(_.render(Scala)).mkString(",")})"
       case Repr.VConstructor(_, n, reprs) => s"$n(${reprs.map(_.render(Scala)).mkString(",")})"
       case any                            => Simple(any)
     }
 
-    val Simple: Renderer = _ match {
+    val Simple: Renderer = {
       case Repr.Int(v)         => v.toString
       case Repr.Double(v)      => v.toString
       case Repr.Float(v)       => s"${v}f"
       case Repr.Long(v)        => s"${v}L"
       case Repr.Byte(v)        => v.toString
-      case Repr.Char(v)        => v.toString
+      case Repr.Char(v)        => s"'$v'"
       case Repr.String(v)      => s""""$v""""
       case Repr.KeyValue(k, v) => s"${k.render(Simple)} -> ${v.render(Simple)}"
       case Repr.Object(_, n)   => n
       case Repr.Constructor(_, n, reprs) =>
         s"$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render(Simple)}").mkString(", ")})"
+      case Repr.VConstructor(List("scala"), n, reprs) if n.matches("^Tuple\\d+$") =>
+        s"(${reprs.map(_.render(Simple)).mkString(", ")})"
       case Repr.VConstructor(_, n, reprs) => s"$n(${reprs.map(_.render(Simple)).mkString(", ")})"
     }
 
-    val Full: Renderer = _ match {
+    val Full: Renderer = {
       case Repr.KeyValue(k, v) => s"key: ${k.render(Full)} -> value: ${v.render(Full)}"
       case Repr.Object(ns, n)  => (ns :+ n).mkString(".")
       case Repr.Constructor(ns, n, reprs) =>
