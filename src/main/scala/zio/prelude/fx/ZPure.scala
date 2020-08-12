@@ -217,7 +217,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     flatMap(ev)
 
   /**
-   * Swaps the error and success ttpes of this computation.
+   * Swaps the error and success types of this computation.
    */
   final def flip[S3 >: S2 <: S1]: ZPure[S3, S3, R, A, E] =
     foldM(succeed, fail)
