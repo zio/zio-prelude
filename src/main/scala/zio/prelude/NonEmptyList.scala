@@ -80,7 +80,7 @@ sealed trait NonEmptyList[+A] { self =>
    * Drops the last `n` elements from this `NonEmptyList` returning a `List`.
    */
   final def dropRight(n: Int): List[A] =
-    reverse.drop(n).reverse
+    take(length - n)
 
   /**
    * Drops elements from the start of this `NonEmptyList` that satisfy the
@@ -338,26 +338,27 @@ sealed trait NonEmptyList[+A] { self =>
   final def tails: NonEmptyList[NonEmptyList[A]] =
     unfold(self)(identity)(_.tailOption)
 
-  @tailrec
-  private def takeHelper[A](n1: Int, nel: NonEmptyList[A], taken: List[A]): List[A] =
-    if (n1 <= 0) taken
-    else
-      nel match {
-        case Cons(h, t) => takeHelper(n1 - 1, t, h :: taken)
-        case Single(h)  => h :: taken
-      }
-
   /**
    * Takes the first `n` elements from this `NonEmptyList` returning a `List`.
    */
-  final def take(n: Int): List[A] =
-    takeHelper(n, self, Nil).reverse
+  final def take(n: Int): List[A] = {
+    @tailrec
+    def loop[A](n1: Int, nel: NonEmptyList[A], taken: List[A]): List[A] =
+      if (n1 <= 0) taken
+      else
+        nel match {
+          case Cons(h, t) => loop(n1 - 1, t, h :: taken)
+          case Single(h)  => h :: taken
+        }
+
+    loop(n, self, Nil).reverse
+  }
 
   /**
    * Takes the last `n` elements from this `NonEmptyList` returning a `List`.
    */
   final def takeRight(n: Int): List[A] =
-    takeHelper(n, self.reverse, Nil)
+    drop(length - n)
 
   /**
    * Takes elements from the start of this `NonEmptyList` that satisfy the
@@ -548,7 +549,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
   /**
    * Constructs a `NonEmptyList` from an `Iterable` or `None` otherwise.
    */
-  def fromIterable[A](iterable: Iterable[A]): Option[NonEmptyList[A]] =
+  def fromIterableOption[A](iterable: Iterable[A]): Option[NonEmptyList[A]] =
     iterable.toList match {
       case Nil    => None
       case h :: t => Some(fromCons(::(h, t)))
