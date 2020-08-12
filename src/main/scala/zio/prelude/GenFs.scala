@@ -1,10 +1,14 @@
 package zio.prelude
 
 import zio.prelude.newtypes.Failure
-import zio.{ Cause, Exit, NonEmptyChunk }
 import zio.random.Random
+import zio.test.Gen.oneOf
 import zio.test._
 import zio.test.laws.GenF
+import zio.{ Cause, Exit, NonEmptyChunk }
+
+import scala.concurrent.Future
+import scala.util.Try
 
 /**
  * Provides higher kinded generators.
@@ -18,6 +22,15 @@ object GenFs {
     new GenF[Random with Sized, Cause] {
       def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Cause[A]] =
         Gen.causes(gen, Gen.throwable)
+    }
+
+  /**
+   * A generator of `Option` values.
+   */
+  val option: GenF[Random with Sized, Option] =
+    new GenF[Random with Sized, Option] {
+      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Option[A]] =
+        Gen.option(gen)
     }
 
   def either[R <: Random with Sized, E](e: Gen[R, E]): GenF[R, ({ type lambda[+a] = Either[E, a] })#lambda] =
@@ -36,6 +49,15 @@ object GenFs {
           case Left(cause)    => Exit.halt(cause)
           case Right(success) => Exit.succeed(success)
         }
+    }
+
+  /**
+   * A generator of `Future` values.
+   */
+  val future: GenF[Random with Sized, Future] =
+    new GenF[Random with Sized, Future] {
+      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Future[A]] =
+        oneOf(Gen.throwable.map(Future.failed), gen.map(Future.successful))
     }
 
   def map[R <: Random with Sized, K](k: Gen[R, K]): GenF[R, ({ type lambda[+v] = Map[K, v] })#lambda] =
@@ -57,6 +79,15 @@ object GenFs {
     new GenF[Random with Sized, NonEmptyList] {
       def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, NonEmptyList[A]] =
         Gens.nonEmptyListOf(gen)
+    }
+
+  /**
+   * A generator of `Try` values.
+   */
+  val tryScala: GenF[Random with Sized, Try] =
+    new GenF[Random with Sized, Try] {
+      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Try[A]] =
+        oneOf(Gen.throwable.map(scala.util.Failure(_)), gen.map(scala.util.Success(_)))
     }
 
   def tuple2[R <: Random with Sized, A](a: Gen[R, A]): GenF[R, ({ type lambda[+x] = (A, x) })#lambda] =
