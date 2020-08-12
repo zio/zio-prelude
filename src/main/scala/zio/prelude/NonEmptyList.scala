@@ -5,10 +5,8 @@ import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
 import scala.annotation.tailrec
-import scala.collection.immutable.SortedSet
 import scala.language.implicitConversions
 import scala.util.hashing.MurmurHash3
-import scala.{ math => sm }
 
 /**
  * A `NonEmptyList[A]` is a list of one or more values of type A. Unlike a
@@ -59,13 +57,11 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Removes duplicate elements from this `NonEmptyList`.
    */
-  final def distinct(implicit A: Ord[A]): NonEmptyList[A] = {
-    implicit val ordering: sm.Ordering[A] = A.toScala
-    reduceMapLeft(a => (single(a), SortedSet(a))) {
+  final def distinct: NonEmptyList[A] =
+    reduceMapLeft(a => (single(a), Set(a))) {
       case ((as, seen), a) =>
         if (seen(a)) (as, seen) else (cons(a, as), seen + a)
     }._1.reverse
-  }
 
   /**
    * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
