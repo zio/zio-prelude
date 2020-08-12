@@ -1,10 +1,13 @@
 package zio.prelude
 
 import scala.annotation.implicitNotFound
-
 import zio.prelude.coherent.DeriveEqualIdentityBothInvariant
+import zio.prelude.newtypes.Failure
 import zio.test.TestResult
 import zio.test.laws._
+
+import scala.concurrent.Future
+import scala.util.{ Success, Try }
 
 /**
  * A binary operator that combines two values of types `F[A]` and `F[B]` to
@@ -66,6 +69,43 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
     identityBoth
 
   /**
+   * The `IdentityBoth` instance for `Either`.
+   */
+  implicit def EitherIdentityBoth[L]: IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] =
+    new IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] {
+      val any: Either[L, Any] = Right(())
+
+      def both[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, (A, B)] =
+        fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
+   * The `IdentityBoth` instance for a failed `Either`
+   */
+  implicit def EitherFailedIdentityBoth[R]: IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+    new IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
+      val any: Failure[Either[Any, R]] = Failure.wrap(Left(()))
+
+      def both[A, B](fa: => Failure[Either[A, R]], fb: => Failure[Either[B, R]]): Failure[Either[(A, B), R]] =
+        Failure.wrap {
+          Failure
+            .unwrap(fa)
+            .left
+            .flatMap(a => Failure.unwrap(fb).left.map(b => (a, b)))
+        }
+    }
+
+  /**
+   * The `IdentityBoth` instance for `Future`.
+   */
+  implicit val FutureIdentityBoth: IdentityBoth[Future] =
+    new IdentityBoth[Future] {
+      val any: Future[Any] = Future.unit
+
+      def both[A, B](fa: => Future[A], fb: => Future[B]): Future[(A, B)] = fa zip fb
+    }
+
+  /**
    * The `IdentityBoth` instance for `Option`.
    */
   implicit val OptionIdentityBoth: IdentityBoth[Option] =
@@ -98,6 +138,16 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
 
       def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] =
         Id(Id.unwrap(fa) -> Id.unwrap(fb))
+    }
+
+  /**
+   * The `IdentityBoth` instance for `Try`.
+   */
+  implicit val TryIdentityBoth: IdentityBoth[Try] =
+    new IdentityBoth[Try] {
+      val any: Try[Any] = Success(())
+
+      def both[A, B](fa: => Try[A], fb: => Try[B]): Try[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 }
 
