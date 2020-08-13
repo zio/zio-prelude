@@ -37,7 +37,7 @@ object Debug {
       case Repr.KeyValue(k, v) => s"${k.render(Simple)} -> ${v.render(Simple)}"
       case Repr.Object(_, n)   => n
       case Repr.Constructor(_, n, reprs) =>
-        s"$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render(Simple)}").mkString(", ")})"
+        s"$n(${reprs.map(kv => s"${kv._1} = ${kv._2.render(Simple)}").mkString(", ")})"
       case Repr.VConstructor(List("scala"), n, reprs) if n.matches("^Tuple\\d+$") =>
         s"(${reprs.map(_.render(Simple)).mkString(", ")})"
       case Repr.VConstructor(_, n, reprs) => s"$n(${reprs.map(_.render(Simple)).mkString(", ")})"
@@ -47,7 +47,7 @@ object Debug {
       case Repr.KeyValue(k, v) => s"key: ${k.render(Full)} -> value: ${v.render(Full)}"
       case Repr.Object(ns, n)  => (ns :+ n).mkString(".")
       case Repr.Constructor(ns, n, reprs) =>
-        (ns :+ s"$n(${reprs.map(kv => s"${kv._1} -> ${kv._2.render(Full)}").mkString(", ")})").mkString(".")
+        (ns :+ s"$n(${reprs.map(kv => s"${kv._1} = ${kv._2.render(Full)}").mkString(", ")})").mkString(".")
       case Repr.VConstructor(ns, n, reprs) =>
         (ns :+ n).mkString(".") + s"(${reprs.map(_.render(Full)).mkString(", ")})"
       case any => Simple(any)
@@ -61,6 +61,7 @@ object Debug {
   sealed trait Repr { self =>
     def render(renderer: Renderer): String = renderer(self)
     def render: String                     = render(Renderer.Simple)
+    override def toString: String          = render // to show a nice view in IDEs, REPL, etc
   }
 
   object Repr {
