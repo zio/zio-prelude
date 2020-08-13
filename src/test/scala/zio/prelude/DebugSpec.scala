@@ -115,7 +115,7 @@ object DebugSpec extends DefaultRunnableSpec {
           check(genTestCase)(c =>
             assert(c.debug.render(Renderer.Simple)) {
               val str = s""""${c.string}""""
-              equalTo(s"TestCase(string -> $str, number -> ${c.number}, list -> ${c.list})")
+              equalTo(s"TestCase(string = $str, number = ${c.number}, list = ${c.list})")
             }
           )
         ),
@@ -180,7 +180,7 @@ object DebugSpec extends DefaultRunnableSpec {
           check(genTestCase)(c =>
             assert(c.debug.render(Renderer.Full)) {
               val str = s""""${c.string}""""
-              equalTo(s"DebugSpec.TestCase(string -> $str, number -> ${c.number}, list -> scala.${c.list})")
+              equalTo(s"DebugSpec.TestCase(string = $str, number = ${c.number}, list = scala.${c.list})")
             }
           )
         ),
