@@ -1,12 +1,12 @@
 package zio.prelude
 
-import scala.annotation.tailrec
-import scala.language.implicitConversions
-import scala.util.hashing.MurmurHash3
-
 import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
+
+import scala.annotation.tailrec
+import scala.language.implicitConversions
+import scala.util.hashing.MurmurHash3
 
 /**
  * A `NonEmptyList[A]` is a list of one or more values of type A. Unlike a
@@ -57,11 +57,10 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Removes duplicate elements from this `NonEmptyList`.
    */
-  final def distinct(implicit A: Hash[A]): NonEmptyList[A] =
-    reduceMapLeft(a => (single(a), Set(a.hash))) {
+  final def distinct: NonEmptyList[A] =
+    reduceMapLeft(a => (single(a), Set(a))) {
       case ((as, seen), a) =>
-        val hash = a.hash
-        if (seen(hash)) (as, seen) else (cons(a, as), seen + hash)
+        if (seen(a)) (as, seen) else (cons(a, as), seen + a)
     }._1.reverse
 
   /**

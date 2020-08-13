@@ -1,10 +1,12 @@
 package zio.prelude
 
 import zio.Exit.{ Failure, Success }
-import scala.annotation.implicitNotFound
-import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
+import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
+
+import scala.annotation.implicitNotFound
+import scala.{ math => sm }
 
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be
@@ -81,6 +83,8 @@ trait Equal[-A] { self =>
    */
   final def notEqual(l: A, r: A): Boolean =
     !equal(l, r)
+
+  def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
 object Equal extends Lawful[Equal] {
@@ -119,6 +123,8 @@ object Equal extends Lawful[Equal] {
    */
   val laws: Laws[Equal] =
     reflexiveLaw + symmetryLaw + transitivityLaw
+
+  def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
   /**
    * The `AssociativeBoth` instance for `Equal`.
