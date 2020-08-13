@@ -237,6 +237,7 @@ object ZSet {
   /**
    * Constructs a set from the specified `Map`. The values will be the keys in
    * the `Map` and the measure of how many times a value occurs will be the
+   * keys value.
    */
   def fromMap[A, B](map: Map[A, B]): ZSet[A, B] =
     new ZSet(map.foldLeft(Map.empty[A, B])(_ + _))
