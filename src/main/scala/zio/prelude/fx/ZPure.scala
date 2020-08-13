@@ -195,13 +195,6 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
-   * Returns a computation that ignores errors and runs repeatedly until it
-   * eventually succeeds.
-   */
-  final def eventually: ZPure[S1, S2, R, Nothing, A] =
-    self orElse eventually
-
-  /**
    * Extends this computation with another computation that depends on the
    * result of this computation by running the first computation, using its
    * result to generate a second computation, and running that computation.
