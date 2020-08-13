@@ -33,6 +33,12 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
   lazy val genString: Gen[Random with Sized, String] =
     Gen.alphaNumericString
 
+  lazy val genConsWithIndex: Gen[Random with Sized, (::[Int], Int)] =
+    for {
+      cons  <- genCons
+      index <- Gen.int(-2, cons.length + 2)
+    } yield (cons, index)
+
   def spec = suite("NonEmptyListSpec")(
     suite("laws")(
       testM("associative")(checkAllLaws(Associative)(genNonEmptyList)),
@@ -74,6 +80,24 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
       testM("distinct") {
         check(genCons) { as =>
           NonEmptyList.fromCons(as).distinct.toCons <-> as.distinct
+        }
+      },
+      testM("drop") {
+        check(genConsWithIndex) {
+          case (as, i) =>
+            NonEmptyList.fromCons(as).drop(i) <-> as.drop(i)
+        }
+      },
+      testM("dropRight") {
+        check(genConsWithIndex) {
+          case (as, i) =>
+            NonEmptyList.fromCons(as).dropRight(i) <-> as.dropRight(i)
+        }
+      },
+      testM("dropWhile") {
+        check(genCons, genBooleanFunction) { (as, f) =>
+          NonEmptyList.fromCons(as).dropWhile(f) <-> as.dropWhile(f)
+
         }
       },
       testM("exists") {
@@ -183,6 +207,23 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
       testM("tails") {
         check(genCons) { as =>
           NonEmptyList.fromCons(as).tails.map(_.toCons).toCons <-> as.tails.toList.init
+        }
+      },
+      testM("take") {
+        check(genConsWithIndex) {
+          case (as, i) =>
+            NonEmptyList.fromCons(as).take(i) <-> as.take(i)
+        }
+      },
+      testM("takeRight") {
+        check(genConsWithIndex) {
+          case (as, i) =>
+            NonEmptyList.fromCons(as).takeRight(i) <-> as.takeRight(i)
+        }
+      },
+      testM("takeWhile") {
+        check(genCons, genBooleanFunction) { (as, f) =>
+          NonEmptyList.fromCons(as).takeWhile(f) <-> as.takeWhile(f)
         }
       },
       testM("toCons") {
