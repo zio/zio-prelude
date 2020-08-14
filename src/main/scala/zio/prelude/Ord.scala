@@ -313,24 +313,10 @@ object Ord extends Lawful[Ord] {
     derive.derive(ord)
 
   /**
-   * Ordering for `Double` values. Note that to honor the contract of a total
-   * ordering, `Double.NaN` will be treated as greater than any other number.
-   */
-  implicit val DoubleOrd: Ord[Double] =
-    make((n1, n2) => Ordering.fromCompare(java.lang.Double.compare(n1, n2)))
-
-  /**
    * Derives an `Ord[Either[A, B]]` given an `Ord[A]` and an `Ord[B]`.
    */
   implicit def EitherOrd[A: Ord, B: Ord]: Ord[Either[A, B]] =
     Ord[A] either Ord[B]
-
-  /**
-   * Ordering for `Float` values. Note that to honor the contract of a total
-   * ordering, `Flat.NaN` will be treated as greater than any other number.
-   */
-  implicit val FloatOrd: Ord[Float] =
-    make((n1, n2) => Ordering.fromCompare(java.lang.Float.compare(n1, n2)))
 
   /**
    * Ordering for `Int` values.

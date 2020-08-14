@@ -259,12 +259,23 @@ object Equal extends Lawful[Equal] {
     Derive[F, Equal].derive(Equal[A])
 
   /**
-   * Equality for `Double` values. Note that to honor the contract that a
-   * value is always equal to itself, comparing `Double.NaN` with itself will
-   * return `true`, which is different from the behavior of `Double#equals`.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Double` values.
+   *
+   * Note that to honor the contract
+   *
+   *   * that a value is always equal to itself,
+   * comparing `Double.NaN` with itself will return `true`.
+   *
+   *   * of a total ordering,
+   * `Double.NaN` will be treated as greater than any other number.
    */
-  implicit val DoubleEqual: Equal[Double] =
-    make((n1, n2) => java.lang.Double.doubleToLongBits(n1) == java.lang.Double.doubleToLongBits(n2)) // because Double.compare (in Ord instance) uses doubleToLongBits
+  implicit val DoubleHashOrd: Hash[Double] with Ord[Double] = new coherent.HashOrd[Double] {
+
+    override protected def checkCompare(l: Double, r: Double): Ordering =
+      Ordering.fromCompare(java.lang.Double.compare(l, r))
+
+    override def hash(a: Double): Int = a.hashCode()
+  }
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
@@ -273,12 +284,23 @@ object Equal extends Lawful[Equal] {
     Equal[A] either Equal[B]
 
   /**
-   * Equality for `Float` values. Note that to honor the contract that a
-   * value is always equal to itself, comparing `Float.NaN` with itself will
-   * return `true`, which is different from the behavior of `Float#equals`.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Float` values.
+   *
+   * Note that to honor the contract
+   *
+   *   * that a value is always equal to itself,
+   * comparing `Float.NaN` with itself will return `true`.
+   *
+   *   * of a total ordering,
+   * `Float.NaN` will be treated as greater than any other number.
    */
-  implicit val FloatEqual: Equal[Float] =
-    make((n1, n2) => java.lang.Float.floatToIntBits(n1) == java.lang.Float.floatToIntBits(n2)) // because Float.compare (in Ord instance) uses floatToIntBits
+  implicit val FloatHashOrd: Hash[Float] with Ord[Float] = new coherent.HashOrd[Float] {
+
+    override protected def checkCompare(l: Float, r: Float): Ordering =
+      Ordering.fromCompare(java.lang.Float.compare(l, r))
+
+    override def hash(a: Float): Int = a.hashCode()
+  }
 
   /**
    * Equality for `Int` values.

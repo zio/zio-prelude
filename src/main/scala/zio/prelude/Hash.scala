@@ -163,22 +163,10 @@ object Hash extends Lawful[Hash] {
     derive.derive(hash)
 
   /**
-   * Hashing for `Double` values.
-   */
-  implicit val DoubleHash: Hash[Double] =
-    default
-
-  /**
    * Derives a `Hash[Either[A, B]]` given a `Hash[A]` and a `Hash[B]`.
    */
   implicit def EitherHash[A: Hash, B: Hash]: Hash[Either[A, B]] =
     Hash[A] either Hash[B]
-
-  /**
-   * Hashing for `Float` values.
-   */
-  implicit val FloatHash: Hash[Float] =
-    default
 
   /**
    * Hashing for `Int` values.
