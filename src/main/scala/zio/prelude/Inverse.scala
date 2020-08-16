@@ -20,7 +20,7 @@ object Inverse extends Lawful[EqualInverse] {
   val rightInverseLaw: Laws[EqualInverse] =
     new Laws.Law1[EqualInverse]("rightInverseLaw") {
       def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
-        I.inverse(I.combine(I.identity, a), a) <-> I.identity
+        I.inverse(a, a) <-> I.identity
     }
 
   val laws: Laws[EqualInverse] =
