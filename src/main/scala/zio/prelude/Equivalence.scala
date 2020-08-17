@@ -65,7 +65,7 @@ object Equivalence extends Lawful2[Equivalence, Equal, Equal] {
    * Constructs the identity equivalence, which just says that any type is
    * equivalent to itself and is trivially true.
    */
-  def identity[A]: Equivalence[A, A] = Equivalence(Predef.identity[A](_), Predef.identity[A](_))
+  def identity[A]: Equivalence[A, A] = Equivalence(Predef.identity[A], Predef.identity[A])
 
   /**
    * Constructs an equivalence between a right-associated nested tuple, and a

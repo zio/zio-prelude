@@ -46,7 +46,7 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
    * Contramapping with the identity function must be an identity function.
    */
   def identityLaw[A](fa: F[A])(implicit equal: Equal[F[A]]): Boolean =
-    contramap(identity[A](_))(fa) === fa
+    contramap(identity[A])(fa) === fa
 
   /**
    * Contramapping by `f` followed by `g` must be the same as contramapping

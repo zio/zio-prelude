@@ -18,11 +18,6 @@ trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
    * produce an `F[(A, B)]`.
    */
   def any: F[Any]
-
-  /**
-   * Combines two values of types `F[A]` and `F[B]` to produce an `F[(A, B)]`.
-   */
-  def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
 object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, Equal] {

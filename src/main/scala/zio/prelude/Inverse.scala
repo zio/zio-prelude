@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.EqualInverse
-import zio.prelude.newtypes.{ Sum }
+import zio.prelude.newtypes.Sum
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -38,8 +38,8 @@ object Inverse extends Lawful[EqualInverse] {
   implicit val BooleanSumInverse: Inverse[Sum[Boolean]] =
     Inverse.make(
       Sum(false),
-      (l: Sum[Boolean], r: Sum[Boolean]) => Sum((l || r)),
-      (l: Sum[Boolean], r: Sum[Boolean]) => Sum((l && !r))
+      (l: Sum[Boolean], r: Sum[Boolean]) => Sum(l || r),
+      (l: Sum[Boolean], r: Sum[Boolean]) => Sum(l && !r)
     )
 
   implicit val ByteSumInverse: Inverse[Sum[Byte]] =

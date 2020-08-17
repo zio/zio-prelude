@@ -14,12 +14,6 @@ import zio.test.laws._
 trait IdentityEither[F[_]] extends AssociativeEither[F] {
 
   /**
-   * Combines two values of types `F[A]` and `F[B]` to produce an
-   * `F[Either[A, B]]`.
-   */
-  def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
-
-  /**
    * The identity for combining two values of types `F[A]` and `F[B]` to
    * produce an `F[Either[A, B]]`.
    */
@@ -45,7 +39,7 @@ object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvaria
    * For all `fa`, `either(fa, identity)` is equivalent to `fa`.
    */
   val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
-    new LawsF.Invariant.Law1[DeriveEqualIdentityEitherInvariant, Equal]("rightOdentityLaw") {
+    new LawsF.Invariant.Law1[DeriveEqualIdentityEitherInvariant, Equal]("rightIdentityLaw") {
       def apply[F[_]: DeriveEqualIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityEither[F].either[A, Nothing](fa, IdentityEither[F].none)
         val right = fa
