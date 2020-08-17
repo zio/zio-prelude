@@ -174,12 +174,10 @@ object Validation extends LowPriorityValidationImplicits {
   /**
    * Derives a `Debug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
    */
-  implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] =
-    validation =>
-      validation match {
-        case Failure(es) => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Failure", List(es.debug))
-        case Success(a)  => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Success", List(a.debug))
-      }
+  implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] = {
+    case Failure(es) => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Failure", List(es.debug))
+    case Success(a)  => Debug.Repr.VConstructor(List("zio", "prelude"), "Validation.Success", List(a.debug))
+  }
 
   /**
    * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an

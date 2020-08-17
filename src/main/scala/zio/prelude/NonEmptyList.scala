@@ -42,9 +42,9 @@ sealed trait NonEmptyList[+A] { self =>
   @tailrec
   final def corresponds[B](that: NonEmptyList[B])(f: (A, B) => Boolean): Boolean =
     (self, that) match {
-      case (Cons(h1, t1), Cons(h2, t2)) if (f(h1, h2)) => t1.corresponds(t2)(f)
-      case (Single(h1), Single(h2))                    => f(h1, h2)
-      case _                                           => false
+      case (Cons(h1, t1), Cons(h2, t2)) if f(h1, h2) => t1.corresponds(t2)(f)
+      case (Single(h1), Single(h2))                  => f(h1, h2)
+      case _                                         => false
     }
 
   /**
@@ -215,7 +215,7 @@ sealed trait NonEmptyList[+A] { self =>
    * is defined on.
    */
   final def maxBy[B](f: A => B)(implicit B: Ord[B]): A = {
-    implicit val A = B.contramap(f)
+    implicit val A: Ord[A] = B.contramap(f)
     reduceMap(Max[A])
   }
 
@@ -231,7 +231,7 @@ sealed trait NonEmptyList[+A] { self =>
    * is defined on.
    */
   final def minBy[B](f: A => B)(implicit B: Ord[B]): A = {
-    implicit val A = B.contramap(f)
+    implicit val A: Ord[A] = B.contramap(f)
     reduceMap(Min[A])
   }
 
@@ -342,7 +342,7 @@ sealed trait NonEmptyList[+A] { self =>
    */
   final def take(n: Int): List[A] = {
     @tailrec
-    def loop[A](n1: Int, nel: NonEmptyList[A], taken: List[A]): List[A] =
+    def loop(n1: Int, nel: NonEmptyList[A], taken: List[A]): List[A] =
       if (n1 <= 0) taken
       else
         nel match {
@@ -511,7 +511,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
   implicit def NonEmptyListOrd[A: Ord]: Ord[NonEmptyList[A]] = {
 
     @tailrec
-    def loop[A: Ord](left: NonEmptyList[A], right: NonEmptyList[A]): Ordering =
+    def loop(left: NonEmptyList[A], right: NonEmptyList[A]): Ordering =
       (left, right) match {
         case (Single(h1), Single(h2))  => Ord[A].compare(h1, h2)
         case (Single(h1), Cons(h2, _)) => Ord[A].compare(h1, h2) <> Ordering.LessThan

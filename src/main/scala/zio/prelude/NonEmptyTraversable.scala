@@ -31,7 +31,7 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
    * a collection of elements in the context of an effect.
    */
   def flip1[G[+_]: AssociativeBoth: Covariant, A](fa: F[G[A]]): G[F[A]] =
-    foreach1(fa)(identity(_))
+    foreach1(fa)(identity)
 
   override def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
     foreach1(fa)(f)
@@ -81,7 +81,7 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
    * Reduces the collection to a summary value using the binary function `f`.
    */
   def reduce[A](fa: F[A])(f: (A, A) => A): A = {
-    implicit val associative = Associative.make(f)
+    implicit val associative: Associative[A] = Associative.make(f)
     reduceMap(fa)(identity)
   }
 

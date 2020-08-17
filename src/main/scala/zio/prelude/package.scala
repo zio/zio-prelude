@@ -74,7 +74,7 @@ package object prelude
     type ContravariantSemigroupal[F[-_]] = Contravariant[F] with AssociativeBoth[F]
 
     type SemigroupK[F[_]] = AssociativeEither[F]
-    type MonoidK[F[_]]    = AssociativeEither[F] with IdentityEither[F]
+    type MonoidK[F[_]]    = IdentityEither[F]
 
     type ContravariantMonoidal[F[-_]] = Contravariant[F] with IdentityBoth[F]
     type InvariantMonoidal[F[_]]      = Invariant[F] with IdentityBoth[F]

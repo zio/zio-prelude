@@ -25,7 +25,7 @@ package object newtypes {
   object And extends Subtype[Boolean]
 
   /**
-   * A newtype represeting logical conjunction.
+   * A newtype representing logical conjunction.
    */
   type And = And.Type
 

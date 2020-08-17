@@ -127,6 +127,22 @@ object Equal extends Lawful[Equal] {
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
   /**
+   * Equality for `Any` values. Note that since values of type `Any` contain
+   * no information, all values of type `Any` can be treated as equal to each
+   * other.
+   */
+  val AnyEqual: Equal[Any] =
+    make((_, _) => true)
+
+  /**
+   * Equality for `Nothing` values. Note that since there are not values of
+   * type `Nothing` the `equals` method of this instance can never be called
+   * but it can be useful in deriving instances for more complex types.
+   */
+  implicit val NothingEqual: Equal[Nothing] =
+    default
+
+  /**
    * The `AssociativeBoth` instance for `Equal`.
    */
   implicit val EqualAssociativeBoth: AssociativeBoth[Equal] =
@@ -213,14 +229,6 @@ object Equal extends Lawful[Equal] {
    */
   def default[A]: Equal[A] =
     make(_ == _)
-
-  /**
-   * Equality for `Any` values. Note that since values of type `Any` contain
-   * no information, all values of type `Any` can be treated as equal to each
-   * other.
-   */
-  val AnyEqual: Equal[Any] =
-    make((_, _) => true)
 
   /**
    * Equality for `Boolean` values.
@@ -335,14 +343,6 @@ object Equal extends Lawful[Equal] {
    */
   implicit def NonEmptyChunkEqual[A: Equal]: Equal[NonEmptyChunk[A]] =
     Equal[Chunk[A]].contramap(_.toChunk)
-
-  /**
-   * Equality for `Nothing` values. Note that since there are not values of
-   * type `Nothing` the `equals` method of this instance can never be called
-   * but it can be useful in deriving instances for more complex types.
-   */
-  implicit val NothingEqual: Equal[Nothing] =
-    default
 
   /**
    * Derives an `Equal[Option[A]]` given an `Equal[A]`.

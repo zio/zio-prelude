@@ -110,7 +110,7 @@ final class ZSet[+A, +B] private (private val map: Map[A @uncheckedVariance, B])
   /**
    * Returns the hash code of this set.
    */
-  override final def hashCode: Int =
+  override def hashCode: Int =
     map.hashCode
 
   /**

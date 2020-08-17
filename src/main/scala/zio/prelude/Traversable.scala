@@ -56,7 +56,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * a collection of elements in the context of an effect.
    */
   def flip[G[+_]: IdentityBoth: Covariant, A](fa: F[G[A]]): G[F[A]] =
-    foreach(fa)(identity(_))
+    foreach(fa)(identity)
 
   /**
    * Folds over the elements of this collection using an associative operation
@@ -182,7 +182,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * returning `None` if the collection is empty.
    */
   def reduceOption[A](fa: F[A])(f: (A, A) => A): Option[A] = {
-    implicit val associative = Associative.make(f)
+    implicit val associative: Associative[A] = Associative.make(f)
     reduceMapOption(fa)(identity)
   }
 

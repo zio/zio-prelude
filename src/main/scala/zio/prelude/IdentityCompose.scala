@@ -3,8 +3,6 @@ package zio.prelude
 trait IdentityCompose[:=>[-_, +_]] extends AssociativeCompose[:=>] {
   def identity[A]: A :=> A
 
-  def compose[A, B, C](bc: B :=> C, ab: A :=> B): A :=> C
-
   def identityCompose[A, B](
     ab: A :=> B
   )(implicit eq: Equal[A :=> B]): Boolean = {

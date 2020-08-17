@@ -96,7 +96,7 @@ object GenFs {
         a.zip(b)
     }
 
-  def tuple3[R <: Random with Sized, A, B, C](
+  def tuple3[R <: Random with Sized, A, B](
     a: Gen[R, A],
     b: Gen[R, B]
   ): GenF[R, ({ type lambda[+c] = (A, B, c) })#lambda] =

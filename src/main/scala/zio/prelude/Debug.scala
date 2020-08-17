@@ -106,22 +106,18 @@ object Debug {
   implicit def DeriveDebug[F[_], A](implicit derive: Derive[F, Debug], debug: Debug[A]): Debug[F[A]] =
     derive.derive(debug)
 
-  implicit def EitherDebug[E: Debug, A: Debug]: Debug[Either[E, A]] =
-    either =>
-      either match {
-        case Left(e)  => Repr.VConstructor(List("scala"), "Left", List(e.debug))
-        case Right(a) => Repr.VConstructor(List("scala"), "Right", List(a.debug))
-      }
+  implicit def EitherDebug[E: Debug, A: Debug]: Debug[Either[E, A]] = {
+    case Left(e)  => Repr.VConstructor(List("scala"), "Left", List(e.debug))
+    case Right(a) => Repr.VConstructor(List("scala"), "Right", List(a.debug))
+  }
 
   implicit def NonEmptyChunkDebug[A: Debug]: Debug[NonEmptyChunk[A]] =
     nonEmptyChunk => Repr.VConstructor(List("zio"), "NonEmptyChunk", nonEmptyChunk.map(_.debug).toList)
 
-  implicit def OptionDebug[A: Debug]: Debug[Option[A]] =
-    option =>
-      option match {
-        case None    => Repr.Object(List("scala"), "None")
-        case Some(a) => Repr.VConstructor(List("scala"), "Some", List(a.debug))
-      }
+  implicit def OptionDebug[A: Debug]: Debug[Option[A]] = {
+    case None    => Repr.Object(List("scala"), "None")
+    case Some(a) => Repr.VConstructor(List("scala"), "Some", List(a.debug))
+  }
 
   implicit def ListDebug[A: Debug]: Debug[List[A]] =
     list => Repr.VConstructor(List("scala"), "List", list.map(_.debug))
