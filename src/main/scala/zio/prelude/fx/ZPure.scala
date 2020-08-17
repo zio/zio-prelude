@@ -160,7 +160,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * defined for the given input.
    */
   final def collect[E1 >: E, B](e: => E1)(pf: PartialFunction[A, B]): ZPure[S1, S2, R, E1, B] =
-    collectM(e)(pf.andThen(succeed))
+    collectM(e)(pf.andThen(succeed(_)))
 
   /**
    * Transforms the result of this computation with the specified partial

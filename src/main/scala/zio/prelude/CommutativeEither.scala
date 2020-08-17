@@ -16,13 +16,6 @@ import scala.annotation.implicitNotFound
  */
 @implicitNotFound("No implicit CommutativeEither defined for ${F}.")
 trait CommutativeEither[F[_]] extends AssociativeEither[F] {
-
-  /**
-   * Combines two values of types `F[A]` and `F[B]` to produce an
-   * `F[Either[A, B]]`.
-   */
-  def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
-
   // def eitherPar[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
 }
 
