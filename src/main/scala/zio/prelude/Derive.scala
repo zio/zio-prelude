@@ -2,6 +2,8 @@ package zio.prelude
 
 import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
 
+import scala.util.Try
+
 /**
  * `Derive[F, Typeclass]` represents a universally quantified function from
  * `Typeclass[A]` to `Typeclass[F[A]]` for some `F[_]`. You can think of
@@ -89,6 +91,15 @@ object Derive {
     new DeriveEqual[({ type lambda[x] = Set[A] })#lambda] {
       def derive[B: Equal]: Equal[Set[A]] =
         Equal.SetEqual
+    }
+
+  /**
+   * The `DeriveEqual` instance for `Try`.
+   */
+  implicit val TryDeriveEqual: DeriveEqual[Try] =
+    new DeriveEqual[Try] {
+      def derive[A: Equal]: Equal[Try[A]] =
+        Equal.TryEqual
     }
 
   /**

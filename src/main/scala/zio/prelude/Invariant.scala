@@ -2,6 +2,9 @@ package zio.prelude
 
 import zio.Chunk
 
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
+
 trait Invariant[F[_]] {
 
   def invmap[A, B](f: A <=> B): F[A] <=> F[B]
@@ -46,6 +49,12 @@ object Invariant {
   implicit def EitherInvariant[L]: Invariant[({ type lambda[r] = Either[L, r] })#lambda] =
     new Invariant[({ type lambda[r] = Either[L, r] })#lambda] {
       def invmap[A, B](f: A <=> B): Either[L, A] <=> Either[L, B] =
+        Equivalence(_.map(f.to), _.map(f.from))
+    }
+
+  implicit def FutureInvariant(implicit ec: ExecutionContext): Invariant[Future] =
+    new Invariant[Future] {
+      def invmap[A, B](f: A <=> B): Future[A] <=> Future[B] =
         Equivalence(_.map(f.to), _.map(f.from))
     }
 
@@ -102,6 +111,12 @@ object Invariant {
     new Invariant[Set] {
       def invmap[A, B](f: A <=> B): Set[A] <=> Set[B] =
         Equivalence(setA => setA.map(f.to), setB => setB.map(f.from))
+    }
+
+  implicit val TryInvariant: Invariant[Try] =
+    new Invariant[Try] {
+      def invmap[A, B](f: A <=> B): Try[A] <=> Try[B] =
+        Equivalence(_.map(f.to), _.map(f.from))
     }
 
   implicit val VectorInvariant: Invariant[Vector] =

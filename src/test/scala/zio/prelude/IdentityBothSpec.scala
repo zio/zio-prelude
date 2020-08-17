@@ -7,8 +7,10 @@ object IdentityBothSpec extends DefaultRunnableSpec {
 
   def spec = suite("IdentityBothSpec")(
     suite("laws")(
+      testM("either")(checkAllLaws(IdentityBoth)(GenF.either(Gen.anyInt), Gen.anyInt)),
+      testM("list")(checkAllLaws(IdentityBoth)(GenF.list, Gen.anyInt)),
       testM("option")(checkAllLaws(IdentityBoth)(GenF.option, Gen.anyInt)),
-      testM("list")(checkAllLaws(IdentityBoth)(GenF.list, Gen.anyInt))
+      testM("try")(checkAllLaws(IdentityBoth)(GenFs.tryScala, Gen.anyInt))
     )
   )
 }

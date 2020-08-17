@@ -24,15 +24,6 @@ object GenFs {
         Gen.causes(gen, Gen.throwable)
     }
 
-  /**
-   * A generator of `Option` values.
-   */
-  val option: GenF[Random with Sized, Option] =
-    new GenF[Random with Sized, Option] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Option[A]] =
-        Gen.option(gen)
-    }
-
   def either[R <: Random with Sized, E](e: Gen[R, E]): GenF[R, ({ type lambda[+a] = Either[E, a] })#lambda] =
     new GenF[R, ({ type lambda[+a] = Either[E, a] })#lambda] {
       def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, Either[E, A]] =

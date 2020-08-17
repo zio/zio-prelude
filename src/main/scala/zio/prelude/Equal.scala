@@ -6,6 +6,7 @@ import zio.test.laws.{ Lawful, Laws }
 import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
 
 import scala.annotation.implicitNotFound
+import scala.util.Try
 import scala.{ math => sm }
 
 /**
@@ -366,6 +367,16 @@ object Equal extends Lawful[Equal] {
    */
   implicit val StringEqual: Equal[String] =
     default
+
+  /**
+   * Derives an `Equal[Try[A]]` given an `Equal[A]`.
+   */
+  implicit def TryEqual[A: Equal]: Equal[Try[A]] =
+    make {
+      case (scala.util.Success(a1), scala.util.Success(a2)) => a1 === a2
+      case (scala.util.Failure(e1), scala.util.Failure(e2)) => e1 === e2
+      case _                                                => false
+    }
 
   /**
    * Derives an `Equal` for a product type given an `Equal` for each element of
@@ -823,6 +834,15 @@ object Equal extends Lawful[Equal] {
           (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
           ) =>
         a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2 && v1 === v2
+    }
+
+  /**
+   * Equality for `Throwable` values.
+   * Comparison is based on: Class, message and cause (stack trace is ignored).
+   */
+  implicit val ThrowableEqual: Equal[Throwable] =
+    make { (l, r) =>
+      l.getClass == r.getClass && l.getMessage == r.getMessage && l.getCause === r.getCause
     }
 
   /**
