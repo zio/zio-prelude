@@ -1,5 +1,8 @@
 version: 2.1
 
+scala_211: &scala_211
+  SCALA_VERSION: 2.11.12
+
 scala_212: &scala_212
   SCALA_VERSION: 2.12.10
 
@@ -210,6 +213,13 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_8
 
+  test_211_jdk8_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_211
+      - <<: *jdk_8
+
   test_212_jdk8_jvm:
     <<: *test
     <<: *machine_ubuntu
@@ -278,6 +288,11 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
+      - test_211_jdk8_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
       - test_212_jdk8_jvm:
           requires:
             - lint
@@ -301,6 +316,7 @@ workflows:
       - release:
           context: Sonatype2
           requires:
+            - test_211_jdk8_jvm
             - test_212_jdk8_jvm
             - test_212_jdk11_jvm
             - test_213_jdk8_jvm
