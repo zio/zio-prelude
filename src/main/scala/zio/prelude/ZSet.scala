@@ -243,10 +243,7 @@ object ZSet {
   def fromMap[A, B](map: Map[A, B]): ZSet[A, B] = fromMap {
     map match {
       case map: HashMap[A, B] => map
-      case _ =>
-        val builder = HashMap.canBuildFrom[A, B]()
-        for (kv <- map) { builder += kv }
-        builder.result()
+      case _                  => map.foldLeft(HashMap.empty[A, B])(_ + _)
     }
   }
 
