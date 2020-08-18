@@ -34,7 +34,10 @@ object ValidationSpec extends DefaultRunnableSpec {
           ({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda,
           Int
         ](Covariant)(genFValidationFailure, Gen.anyInt)(
-          CovariantDeriveEqual.derive(ValidationFailureCovariant, ValidationFailureDeriveEqual(IntEqual)),
+          CovariantDeriveEqual.derive[({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda](
+            ValidationFailureCovariant,
+            ValidationFailureDeriveEqual(IntEqual)
+          ),
           IntEqual
         )
       ),

@@ -39,7 +39,10 @@ object ZSetSpec extends DefaultRunnableSpec {
           ({ type lambda[+x] = ZSet[x, Int] })#lambda,
           Int
         ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
-          CovariantDeriveEqual.derive(ZSetCovariant(IntSumCommutative), ZSetDeriveEqual(IntEqual)),
+          CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
+            ZSetCovariant(IntSumCommutative),
+            ZSetDeriveEqual(IntEqual)
+          ),
           IntEqual
         )
       ),
