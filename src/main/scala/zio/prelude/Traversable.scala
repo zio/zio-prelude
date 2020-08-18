@@ -70,7 +70,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * summary value, maintaining some internal state along the way.
    */
   def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S =
-    foreach(fa)(a => State.update(f(_, a))).runState(s)
+    foreach(fa)(a => State.update((s: S) => f(s, a))).runState(s)
 
   /**
    * Maps each element of the collection to a type `B` for which an `Identity`
@@ -121,7 +121,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * collection.
    */
   def mapAccum[S, A, B](fa: F[A])(s: S)(f: (S, A) => (S, B)): (S, F[B]) =
-    foreach(fa)(a => State.modify(f(_, a))).run(s)
+    foreach(fa)(a => State.modify((s: S) => f(s, a))).run(s)
 
   /**
    * Returns the largest value in the collection if one exists or `None`

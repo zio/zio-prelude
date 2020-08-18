@@ -71,7 +71,10 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
       val any: Either[L, Any] = Right(())
 
       def both[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, (A, B)] =
-        fa.flatMap(a => fb.map(b => (a, b)))
+        fa.fold(
+          l => Left(l),
+          a => fb.map(b => (a, b))
+        )
     }
 
   /**
@@ -95,7 +98,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
    */
   implicit val FutureIdentityBoth: IdentityBoth[Future] =
     new IdentityBoth[Future] {
-      val any: Future[Any] = Future.unit
+      val any: Future[Any] = Future.successful(())
 
       def both[A, B](fa: => Future[A], fb: => Future[B]): Future[(A, B)] = fa zip fb
     }
