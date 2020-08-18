@@ -1,15 +1,12 @@
 package zio.prelude
 
 import zio.Chunk
+import zio.prelude.coherent._
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._
 import zio.test.Assertion._
 import zio.test.laws._
-import zio.prelude.Equal._
-import zio.prelude.ZSet._
-import zio.prelude.Commutative._
-import zio.prelude.coherent.CovariantDeriveEqual
 
 object ZSetSpec extends DefaultRunnableSpec {
 
@@ -38,13 +35,7 @@ object ZSetSpec extends DefaultRunnableSpec {
           Random with Sized,
           ({ type lambda[+x] = ZSet[x, Int] })#lambda,
           Int
-        ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
-          CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
-            ZSetCovariant(IntSumCommutative),
-            ZSetDeriveEqual(IntEqual)
-          ),
-          IntEqual
-        )
+        ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)
       ),
       testM("equal")(checkAllLaws(Equal)(genZSet(Gen.anyInt, Gen.anyInt))),
       testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt))),
