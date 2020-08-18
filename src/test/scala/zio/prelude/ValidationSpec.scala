@@ -1,5 +1,7 @@
 package zio.prelude
 
+import zio.prelude.Equal._
+import zio.prelude.Validation._
 import zio.prelude.coherent._
 import zio.random.Random
 import zio.test._
@@ -31,7 +33,13 @@ object ValidationSpec extends DefaultRunnableSpec {
           Random with Sized,
           ({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda,
           Int
-        ](Covariant)(genFValidationFailure, Gen.anyInt)
+        ](Covariant)(genFValidationFailure, Gen.anyInt)(
+          CovariantDeriveEqual.derive[({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda](
+            ValidationFailureCovariant,
+            ValidationFailureDeriveEqual(IntEqual)
+          ),
+          IntEqual
+        )
       ),
       testM("hash")(checkAllLaws(Hash)(genValidation)),
       testM("identityBoth")(checkAllLaws(IdentityBoth)(genFValidation, Gen.anyInt)),
