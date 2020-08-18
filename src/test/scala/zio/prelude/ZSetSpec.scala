@@ -31,7 +31,14 @@ object ZSetSpec extends DefaultRunnableSpec {
         checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
       ),
       testM("covariant")(
-        checkAllLaws(Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
+        checkAllLaws[
+          CovariantDeriveEqual,
+          Equal,
+          Any,
+          Random with Sized,
+          ({ type lambda[+x] = ZSet[x, Int] })#lambda,
+          Int
+        ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
           CovariantDeriveEqual.derive(ZSetCovariant(IntSumCommutative), ZSetDeriveEqual(IntEqual)),
           IntEqual
         )

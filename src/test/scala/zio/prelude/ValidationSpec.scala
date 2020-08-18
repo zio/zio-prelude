@@ -26,7 +26,14 @@ object ValidationSpec extends DefaultRunnableSpec {
       testM("covariant")(checkAllLaws(Covariant)(genFValidation, Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genValidation)),
       testM("failureCovariant")(
-        checkAllLaws(Covariant)(genFValidationFailure, Gen.anyInt)(
+        checkAllLaws[
+          CovariantDeriveEqual,
+          Equal,
+          Any,
+          Random with Sized,
+          ({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda,
+          Int
+        ](Covariant)(genFValidationFailure, Gen.anyInt)(
           CovariantDeriveEqual.derive(ValidationFailureCovariant, ValidationFailureDeriveEqual(IntEqual)),
           IntEqual
         )
