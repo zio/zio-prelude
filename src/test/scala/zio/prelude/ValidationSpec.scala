@@ -1,5 +1,8 @@
 package zio.prelude
 
+import zio.prelude.Equal._
+import zio.prelude.Validation._
+import zio.prelude.coherent._
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -22,7 +25,12 @@ object ValidationSpec extends DefaultRunnableSpec {
       testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(genFValidation, Gen.anyInt)),
       testM("covariant")(checkAllLaws(Covariant)(genFValidation, Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genValidation)),
-      testM("failureCovariant")(checkAllLaws(Covariant)(genFValidationFailure, Gen.anyInt)),
+      testM("failureCovariant")(
+        checkAllLaws(Covariant)(genFValidationFailure, Gen.anyInt)(
+          CovariantDeriveEqual.derive(ValidationFailureCovariant, ValidationFailureDeriveEqual(IntEqual)),
+          IntEqual
+        )
+      ),
       testM("hash")(checkAllLaws(Hash)(genValidation)),
       testM("identityBoth")(checkAllLaws(IdentityBoth)(genFValidation, Gen.anyInt)),
       testM("ord")(checkAllLaws(Ord)(genValidation))

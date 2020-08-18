@@ -6,6 +6,10 @@ import zio.random.Random
 import zio.test._
 import zio.test.Assertion._
 import zio.test.laws._
+import zio.prelude.Equal._
+import zio.prelude.ZSet._
+import zio.prelude.Commutative._
+import zio.prelude.coherent.CovariantDeriveEqual
 
 object ZSetSpec extends DefaultRunnableSpec {
 
@@ -25,6 +29,12 @@ object ZSetSpec extends DefaultRunnableSpec {
     suite("laws")(
       testM("combine commutative")(
         checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
+      ),
+      testM("covariant")(
+        checkAllLaws(Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
+          CovariantDeriveEqual.derive(ZSetCovariant(IntSumCommutative), ZSetDeriveEqual(IntEqual)),
+          IntEqual
+        )
       ),
       testM("covariant")(checkAllLaws(Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genZSet(Gen.anyInt, Gen.anyInt))),
