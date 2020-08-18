@@ -36,7 +36,6 @@ object ZSetSpec extends DefaultRunnableSpec {
           IntEqual
         )
       ),
-      testM("covariant")(checkAllLaws(Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)),
       testM("equal")(checkAllLaws(Equal)(genZSet(Gen.anyInt, Gen.anyInt))),
       testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt))),
       testM("intersect commutative")(
