@@ -10,10 +10,10 @@ object CommutativeEitherSpec extends DefaultRunnableSpec {
     testM("FutureCommutativeEither returns the first future that is completed") {
       for {
         l <- ZIO.fromFuture { implicit ec =>
-              Future.successful(()) <|> Future { blocking(Thread.sleep(60 * 1000)) }
+              Future.successful("immediate") <|> Future { blocking { Thread.sleep(60 * 1000); "long 1" } }
             }
         r <- ZIO.fromFuture { implicit ec =>
-              Future { blocking(Thread.sleep(60 * 1000)) } <|> Future.successful(())
+              Future { blocking { Thread.sleep(60 * 1000); "long 2" } } <|> Future.successful("immediate")
             }
       } yield assert(l.merge)(equalTo(r.merge))
     }
