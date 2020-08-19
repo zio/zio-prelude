@@ -34,7 +34,7 @@ object ValidationSpec extends DefaultRunnableSpec {
           ({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda,
           Int
         ](Covariant)(genFValidationFailure, Gen.anyInt)(
-          // Scala 2.11 doesn't seem to be able to infer the type parameters for CovariantDeriveEqual.derive
+          // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
           CovariantDeriveEqual.derive[({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda](
             ValidationFailureCovariant,
             ValidationFailureDeriveEqual(IntEqual)
