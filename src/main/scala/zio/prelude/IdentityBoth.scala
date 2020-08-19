@@ -71,10 +71,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
       val any: Either[L, Any] = Right(())
 
       def both[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, (A, B)] =
-        fa.fold(
-          l => Left(l),
-          a => fb.map(b => (a, b))
-        )
+        fa.fold(Left(_), a => fb.map(b => (a, b)))
     }
 
   /**
