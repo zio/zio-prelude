@@ -39,6 +39,7 @@ object ZSetSpec extends DefaultRunnableSpec {
           ({ type lambda[+x] = ZSet[x, Int] })#lambda,
           Int
         ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
+          // Scala 2.11 doesn't seem to be able to infer the type parameters for CovariantDeriveEqual.derive
           CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
             ZSetCovariant(IntSumCommutative),
             ZSetDeriveEqual(IntEqual)
