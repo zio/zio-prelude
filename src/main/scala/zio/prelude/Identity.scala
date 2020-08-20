@@ -1,67 +1,78 @@
 package zio.prelude
 
-import zio.Chunk
 import zio.prelude.coherent.EqualIdentity
-import zio.prelude.newtypes.{ And, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
+/**
+ * The `Identity` type class describes an associative binary operator for a
+ * type `A` that also has an identity element. Combining any value with the
+ * identity element on either the left or the right must return the original
+ * value unchanged. For example, zero is an identity element for integer
+ * addition and the empty string is an identity element for string
+ * concatenation.
+ *
+ * Operators with an identity element are useful because the identity element
+ * provides a sensible default value when combining values of a type and no
+ * values exist.
+ */
 trait Identity[A] extends Associative[A] {
+
+  /**
+   * The identity element.
+   */
   def identity: A
 }
 
 object Identity extends Lawful[EqualIdentity] {
 
+  /**
+   * The left identity law states that for some binary operator `*`, for all
+   * values `a`, the following must hold:
+   *
+   * {{{
+   * identity * a === a
+   * }}}
+   */
   val leftIdentityLaw: Laws[EqualIdentity] =
     new Laws.Law1[EqualIdentity]("leftIdentityLaw") {
       def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
         (I.identity <> a) <-> a
     }
 
+  /**
+   * The left identity law states that for some binary operator `*`, for all
+   * values `a`, the following must hold:
+   *
+   * {{{
+   * a * identity === a
+   * }}}
+   */
   val rightIdentityLaw: Laws[EqualIdentity] =
     new Laws.Law1[EqualIdentity]("rightIdentityLaw") {
       def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
         (a <> I.identity) <-> a
     }
 
+  /**
+   * The set of all laws that instances of `Associative` must satisfy.
+   */
   val laws: Laws[EqualIdentity] =
     leftIdentityLaw + rightIdentityLaw
 
+  /**
+   * Summons an implicit `Identity[A]`.
+   */
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 
+  /**
+   * Constructs an `Identity` instance from a function and an identity element.
+   */
   def make[A](identity0: A, op: (A, A) => A): Identity[A] =
     new Identity[A] {
-      def identity: A = identity0
-
+      def identity: A                  = identity0
       def combine(l: => A, r: => A): A = op(l, r)
     }
-
-  implicit val BooleanConjunctionIdentity: Identity[And] =
-    Identity.make(And(true), (l, r) => And(l && r))
-
-  implicit val BooleanDisjunctionIdentity: Identity[Or] =
-    Identity.make(Or(false), (l, r: Or) => Or(l || r))
-
-  implicit val BooleanProdIdentity: Identity[Prod[Boolean]] =
-    Identity.make(Prod(true), (l, r) => Prod(l && r))
-
-  implicit val BooleanSumIdentity: Identity[Sum[Boolean]] =
-    Identity.make(Sum(false), (l, r) => Sum(l || r))
-
-  implicit val ByteProdIdentity: Identity[Prod[Byte]] =
-    Identity.make(Prod(1), (l: Prod[Byte], r: Prod[Byte]) => Prod((l * r).toByte))
-
-  implicit val ByteSumIdentity: Identity[Sum[Byte]] =
-    Identity.make(Sum(0), (l: Sum[Byte], r: Sum[Byte]) => Sum((l + r).toByte))
-
-  implicit val CharProdIdentity: Identity[Prod[Char]] =
-    Identity.make(Prod('\u0001'), (l, r) => Prod((l * r).toChar))
-
-  implicit val CharSumIdentity: Identity[Sum[Char]] =
-    Identity.make(Sum('\u0000'), (l, r) => Sum((l + r).toChar))
-
-  implicit def ChunkIdentity[A]: Identity[Chunk[A]] =
-    Identity.make(Chunk.empty, _ ++ _)
 
   /**
    * Derives an `Identity[F[A]]` given a `Derive[F, Identity]` and an
@@ -70,16 +81,12 @@ object Identity extends Lawful[EqualIdentity] {
   implicit def DeriveIdentity[F[_], A](implicit derive: Derive[F, Identity], identity: Identity[A]): Identity[F[A]] =
     derive.derive(identity)
 
-  implicit val DoubleProdIdentity: Identity[Prod[Double]] =
-    Identity.make(Prod(1), (l: Prod[Double], r: Prod[Double]) => Prod(l * r))
-
-  implicit val DoubleSumIdentity: Identity[Sum[Double]] =
-    Identity.make(Sum(0), (l: Sum[Double], r: Sum[Double]) => Sum(l + r))
-
+  /**
+   * Derives an `Identity[Either[E, A]]` given an `Identity[A]`.
+   */
   implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
     new Identity[Either[E, A]] {
       def identity: Either[E, A] = Right(Identity[A].identity)
-
       def combine(l: => Either[E, A], r: => Either[E, A]): Either[E, A] =
         (l, r) match {
           case (Left(l), _)         => Left(l)
@@ -88,84 +95,37 @@ object Identity extends Lawful[EqualIdentity] {
         }
     }
 
-  implicit val FloatProdIdentity: Identity[Prod[Float]] =
-    Identity.make(Prod(1), (l, r) => Prod(l * r))
-
-  implicit val FloatSumIdentity: Identity[Sum[Float]] =
-    Identity.make(Sum(0), (l, r) => Sum(l + r))
-
-  implicit val IntProdIdentity: Identity[Prod[Int]] =
-    Identity.make(Prod(1), (l, r) => Prod(l * r))
-
-  implicit val IntSumIdentity: Identity[Sum[Int]] =
-    Identity.make(Sum(0), (l, r) => Sum(l + r))
-
-  implicit def ListIdentity[A]: Identity[List[A]] =
-    Identity.make[List[A]](Nil, _ ++ _)
-
-  implicit val LongProdIdentity: Identity[Prod[Long]] =
-    Identity.make(Prod(1L), (l, r) => Prod(l * r))
-
-  implicit val LongSumIdentity: Identity[Sum[Long]] =
-    Identity.make(Sum(0L), (l, r) => Sum(l + r))
-
-  implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
-    new Identity[Map[K, V]] {
-      def identity: Map[K, V] = Map()
-
-      def combine(l: => Map[K, V], r: => Map[K, V]): Map[K, V] =
-        r.foldLeft(l) {
-          case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
-        }
-    }
-
-  implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
-    new Identity[Option[A]] {
-      def identity: Option[A] = None
-
-      def combine(l: => Option[A], r: => Option[A]): Option[A] =
-        (l, r) match {
-          case (Some(l), Some(r)) => Some(l <> r)
-          case (Some(l), None)    => Some(l)
-          case (None, Some(r))    => Some(r)
-          case _                  => None
-        }
-    }
-
-  implicit def SetIdentity[A]: Identity[Set[A]] =
-    Identity.make(Set.empty, _ | _)
-
-  implicit val ShortProdIdentity: Identity[Prod[Short]] =
-    Identity.make(Prod(1), (l: Prod[Short], r: Prod[Short]) => Prod((l * r).toShort))
-
-  implicit val ShortSumIdentity: Identity[Sum[Short]] =
-    Identity.make(Sum(0), (l: Sum[Short], r: Sum[Short]) => Sum((l + r).toShort))
-
-  implicit val StringIdentity: Identity[String] =
-    Identity.make("", _ + _)
-
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
     new Identity[(A, B)] {
       def identity: (A, B) = (Identity[A].identity, Identity[B].identity)
-
       def combine(l: => (A, B), r: => (A, B)): (A, B) =
         (l._1 <> r._1, l._2 <> r._2)
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple3Identity[A: Identity, B: Identity, C: Identity]: Identity[(A, B, C)] =
     new Identity[(A, B, C)] {
       def identity: (A, B, C) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity)
-
       def combine(l: => (A, B, C), r: => (A, B, C)): (A, B, C) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3)
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple4Identity[A: Identity, B: Identity, C: Identity, D: Identity]: Identity[(A, B, C, D)] =
     new Identity[(A, B, C, D)] {
       def identity: (A, B, C, D) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity)
-
       def combine(l: => (A, B, C, D), r: => (A, B, C, D)): (A, B, C, D) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4)
     }
@@ -175,11 +135,14 @@ object Identity extends Lawful[EqualIdentity] {
     new Identity[(A, B, C, D, E)] {
       def identity: (A, B, C, D, E) =
         (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity, Identity[E].identity)
-
       def combine(l: => (A, B, C, D, E), r: => (A, B, C, D, E)): (A, B, C, D, E) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5)
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple6Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity]
     : Identity[(A, B, C, D, E, F)] =
     new Identity[(A, B, C, D, E, F)] {
@@ -192,11 +155,14 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[E].identity,
           Identity[F].identity
         )
-
       def combine(l: => (A, B, C, D, E, F), r: => (A, B, C, D, E, F)): (A, B, C, D, E, F) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6)
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple7Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity, G: Identity]
     : Identity[(A, B, C, D, E, F, G)] =
     new Identity[(A, B, C, D, E, F, G)] {
@@ -210,11 +176,14 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[F].identity,
           Identity[G].identity
         )
-
       def combine(l: => (A, B, C, D, E, F, G), r: => (A, B, C, D, E, F, G)): (A, B, C, D, E, F, G) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7)
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple8Identity[
     A: Identity,
     B: Identity,
@@ -237,7 +206,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[G].identity,
           Identity[H].identity
         )
-
       def combine(l: => (A, B, C, D, E, F, G, H), r: => (A, B, C, D, E, F, G, H)): (A, B, C, D, E, F, G, H) =
         (
           l._1 <> r._1,
@@ -251,6 +219,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple9Identity[
     A: Identity,
     B: Identity,
@@ -275,7 +247,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[H].identity,
           Identity[I].identity
         )
-
       def combine(l: => (A, B, C, D, E, F, G, H, I), r: => (A, B, C, D, E, F, G, H, I)): (A, B, C, D, E, F, G, H, I) =
         (
           l._1 <> r._1,
@@ -290,6 +261,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple10Identity[
     A: Identity,
     B: Identity,
@@ -316,7 +291,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[I].identity,
           Identity[J].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J),
         r: => (A, B, C, D, E, F, G, H, I, J)
@@ -335,6 +309,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple11Identity[
     A: Identity,
     B: Identity,
@@ -363,7 +341,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[J].identity,
           Identity[K].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K),
         r: => (A, B, C, D, E, F, G, H, I, J, K)
@@ -383,6 +360,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple12Identity[
     A: Identity,
     B: Identity,
@@ -413,7 +394,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[K].identity,
           Identity[L].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L)
@@ -434,6 +414,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple13Identity[
     A: Identity,
     B: Identity,
@@ -466,7 +450,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[L].identity,
           Identity[M].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M)
@@ -488,6 +471,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple14Identity[
     A: Identity,
     B: Identity,
@@ -522,7 +509,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[M].identity,
           Identity[N].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
@@ -545,6 +531,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple15Identity[
     A: Identity,
     B: Identity,
@@ -581,7 +571,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[N].identity,
           Identity[O].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
@@ -605,6 +594,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple16Identity[
     A: Identity,
     B: Identity,
@@ -643,7 +636,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[O].identity,
           Identity[P].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
@@ -668,6 +660,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple17Identity[
     A: Identity,
     B: Identity,
@@ -708,7 +704,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[P].identity,
           Identity[Q].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
@@ -734,6 +729,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple18Identity[
     A: Identity,
     B: Identity,
@@ -776,7 +775,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[Q].identity,
           Identity[R].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
@@ -803,6 +801,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple19Identity[
     A: Identity,
     B: Identity,
@@ -847,7 +849,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[R].identity,
           Identity[S].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
@@ -875,6 +876,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple20Identity[
     A: Identity,
     B: Identity,
@@ -921,7 +926,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[S].identity,
           Identity[T].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
@@ -950,6 +954,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple21Identity[
     A: Identity,
     B: Identity,
@@ -998,7 +1006,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[T].identity,
           Identity[U].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
@@ -1028,6 +1035,10 @@ object Identity extends Lawful[EqualIdentity] {
         )
     }
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple22Identity[
     A: Identity,
     B: Identity,
@@ -1078,7 +1089,6 @@ object Identity extends Lawful[EqualIdentity] {
           Identity[U].identity,
           Identity[V].identity
         )
-
       def combine(
         l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V),
         r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
@@ -1108,15 +1118,20 @@ object Identity extends Lawful[EqualIdentity] {
           l._22 <> r._22
         )
     }
-
-  implicit def VectorIdentity[A]: Identity[Vector[A]] =
-    Identity.make(Vector.empty, _ ++ _)
 }
 
 trait IdentitySyntax {
+
+  /**
+   * Provides infix syntax for combining two values with an associative
+   * operation.
+   */
   implicit class IdentityOps[A](l: A) {
 
-    def identity(implicit id: Identity[A]): A = id.identity
-
+    /**
+     * Returns the identity element associated with values of this type.
+     */
+    def identity(implicit id: Identity[A]): A =
+      id.identity
   }
 }

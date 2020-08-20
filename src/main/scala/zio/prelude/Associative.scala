@@ -10,6 +10,24 @@ import zio.test.laws.{ Lawful, Laws }
  * The `Associative[A]` type class describes an associative binary operator
  * for a type `A`. For example, addition for integers, and string
  * concatenation for strings.
+ *
+ * `Associative` is at the top of the hierarchy for abstracting over operations
+ * to combine types because while there are some operations that are not
+ * associative but do obey other laws, it is generally difficult to combine
+ * more than two values in interesting ways with these operators, and thus to
+ * build solutions to more complicated problems out of solutions to simpler
+ * ones.
+ *
+ * For example, the mean of two numbers is an operation that is commutative but
+ * not associative. However, the lack of associativity is an indication that we
+ * can't combine the means of multiple values in an interesting way with this
+ * definition. If we attempt to take the mean of three values we always place
+ * twice as much weight on one number as the others, which is rarely what we
+ * want.
+ *
+ * If we instead define this operation using a `StatsCounter` object then means
+ * can be combined in ways that are associative, commutative, and have an
+ * identity element, supporting much more interesting modes of composition.
  */
 trait Associative[A] {
   def combine(l: => A, r: => A): A
@@ -31,40 +49,104 @@ object Associative extends Lawful[AssociativeEqual] {
         (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
     }
 
+  /**
+   * The set of all laws that instances of `Associative` must satisfy.
+   */
   val laws: Laws[AssociativeEqual] =
     associativityLaw
 
+  /**
+   * Summons an implicit `Associative[A]`.
+   */
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 
+  /**
+   * Constructs an `Associative` instance from a function.
+   */
   def make[A](f: (A, A) => A): Associative[A] =
     (l, r) => f(l, r)
 
-  implicit val BooleanConjunctionAssociative: Associative[And] =
-    make[And]((l, r) => And(l && r))
+  /**
+   * The `Commutative` and `Identity` instance for the conjunction of `Boolean`
+   * values.
+   */
+  implicit val BooleanConjunctionCommutativeIdentity: Commutative[And] with Identity[And] =
+    new Commutative[And] with Identity[And] {
+      def combine(l: => And, r: => And): And = And(l && r)
+      val identity: And                      = And(true)
+    }
 
-  implicit val BooleanDisjunctionAssociative: Associative[Or] =
-    make[Or]((l, r) => Or(l || r))
+  /**
+   * The `Commutative` and `Identity` instance for the disjunction of `Boolean` values.
+   */
+  implicit val BooleanDisjunctionCommutativeIdentity: Commutative[Or] with Identity[Or] =
+    new Commutative[Or] with Identity[Or] {
+      def combine(l: => Or, r: => Or): Or = Or(l | r)
+      val identity: Or                    = Or(false)
+    }
 
-  implicit val BooleanProdAssociative: Associative[Prod[Boolean]] =
-    make[Prod[Boolean]]((l, r) => Prod(l && r))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Boolean`
+   * values.
+   */
+  implicit val BooleanProdCommutativeIdentity: Commutative[Prod[Boolean]] with Identity[Prod[Boolean]] =
+    new Commutative[Prod[Boolean]] with Identity[Prod[Boolean]] {
+      def combine(l: => Prod[Boolean], r: => Prod[Boolean]): Prod[Boolean] = Prod(l && r)
+      val identity: Prod[Boolean]                                          = Prod(true)
+    }
 
-  implicit val BooleanSumAssociative: Associative[Sum[Boolean]] =
-    make[Sum[Boolean]]((l, r) => Sum(l || r))
+  /**
+   * The `Commutative` and `Identity` instance for the sum of `Boolean` values.
+   */
+  implicit val BooleanSumCommutativeIdentity: Commutative[Sum[Boolean]] with Identity[Sum[Boolean]] =
+    new Commutative[Sum[Boolean]] with Identity[Sum[Boolean]] {
+      def combine(l: => Sum[Boolean], r: => Sum[Boolean]): Sum[Boolean] = Sum(l || r)
+      val identity: Sum[Boolean]                                        = Sum(false)
+    }
 
-  implicit val ByteProdAssociative: Associative[Prod[Byte]] =
-    make[Prod[Byte]]((l, r) => Prod((l * r).toByte))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Byte`
+   * values.
+   */
+  implicit val ByteProdCommutativeIdentity: Commutative[Prod[Byte]] with Identity[Prod[Byte]] =
+    new Commutative[Prod[Byte]] with Identity[Prod[Byte]] {
+      def combine(l: => Prod[Byte], r: => Prod[Byte]): Prod[Byte] = Prod((l * r).toByte)
+      val identity: Prod[Byte]                                    = Prod(1)
+    }
 
-  implicit val ByteSumAssociative: Associative[Sum[Byte]] =
-    make[Sum[Byte]]((l, r) => Sum((l + r).toByte))
+  /**
+   * The `Commutative` and `Identity` instance for the sum of `Byte` values.
+   */
+  implicit val ByteSumCommutativeIdentity: Commutative[Sum[Byte]] with Identity[Sum[Byte]] =
+    new Commutative[Sum[Byte]] with Identity[Sum[Byte]] {
+      def combine(l: => Sum[Byte], r: => Sum[Byte]): Sum[Byte] = Sum((l + r).toByte)
+      val identity: Sum[Byte]                                  = Sum(0)
+    }
 
-  implicit val CharProdAssociative: Associative[Prod[Char]] =
-    make((l, r) => Prod((l * r).toChar))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Char`
+   * values.
+   */
+  implicit val CharProdCommutativeIdentity: Commutative[Prod[Char]] with Identity[Prod[Char]] =
+    new Commutative[Prod[Char]] with Identity[Prod[Char]] {
+      def combine(l: => Prod[Char], r: => Prod[Char]): Prod[Char] = Prod((l * r).toChar)
+      val identity: Prod[Char]                                    = Prod(1)
+    }
 
-  implicit val CharSumIdentity: Associative[Sum[Char]] =
-    make((l, r) => Sum((l + r).toChar))
+  /**
+   * The `Commutative` and `Identity` instance for the sum of `Char` values.
+   */
+  implicit val CharSumCommutativeIdentity: Commutative[Sum[Char]] with Identity[Sum[Char]] =
+    new Commutative[Sum[Char]] with Identity[Sum[Char]] {
+      def combine(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l + r).toChar)
+      val identity: Sum[Char]                                  = Sum(0)
+    }
 
-  implicit def ChunkAssociative[A]: Associative[Chunk[A]] =
-    make(_ ++ _)
+  /**
+   * The `Identity` instance for the concatenation of `Chunk[A]` values.
+   */
+  implicit def ChunkIdentity[A]: Identity[Chunk[A]] =
+    Identity.make(Chunk.empty, _ ++ _)
 
   /**
    * Derives an `Associative[F[A]]` given a `Derive[F, Associative]` and an
@@ -76,102 +158,228 @@ object Associative extends Lawful[AssociativeEqual] {
   ): Associative[F[A]] =
     derive.derive(associative)
 
-  implicit val DoubleProdAssociative: Associative[Prod[Double]] =
-    make[Prod[Double]]((l, r) => Prod(l * r))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Double`
+   * values.
+   */
+  implicit val DoubleProdCommutativeIdentity: Commutative[Prod[Double]] with Identity[Prod[Double]] =
+    new Commutative[Prod[Double]] with Identity[Prod[Double]] {
+      def combine(l: => Prod[Double], r: => Prod[Double]): Prod[Double] = Prod(l * r)
+      val identity: Prod[Double]                                        = Prod(1)
+    }
 
-  implicit val DoubleSumAssociative: Associative[Sum[Double]] =
-    make[Sum[Double]]((l, r) => Sum(l + r))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Double`
+   * values.
+   */
+  implicit val DoubleSumCommutativeIdentity: Commutative[Sum[Double]] with Identity[Sum[Double]] =
+    new Commutative[Sum[Double]] with Identity[Sum[Double]] {
+      def combine(l: => Sum[Double], r: => Sum[Double]): Sum[Double] = Sum(l + r)
+      val identity: Sum[Double]                                      = Sum(0)
+    }
 
+  /**
+   * The `Associative` instance for the first of `A` values.
+   */
   implicit def firstAssociative[A]: Associative[First[A]] =
     make((l: First[A], _: First[A]) => l)
 
-  implicit val FloatProdAssociative: Associative[Prod[Float]] =
-    make[Prod[Float]]((l, r) => Prod(l * r))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Float`
+   * values.
+   */
+  implicit val FloatProdCommutativeIdentity: Commutative[Prod[Float]] with Identity[Prod[Float]] =
+    new Commutative[Prod[Float]] with Identity[Prod[Float]] {
+      def combine(l: => Prod[Float], r: => Prod[Float]): Prod[Float] = Prod(l * r)
+      val identity: Prod[Float]                                      = Prod(1)
+    }
 
-  implicit val FloatSumAssociative: Associative[Sum[Float]] =
-    make[Sum[Float]]((l, r) => Sum(l + r))
+  /**
+   * The `Commutative` and `Identity` instance for the sum of `Float`
+   * values.
+   */
+  implicit val FloatSumCommutativeIdentity: Commutative[Sum[Float]] with Identity[Sum[Float]] =
+    new Commutative[Sum[Float]] with Identity[Sum[Float]] {
+      def combine(l: => Sum[Float], r: => Sum[Float]): Sum[Float] = Sum(l + r)
+      val identity: Sum[Float]                                    = Sum(0)
+    }
 
-  implicit val IntProdAssociative: Associative[Prod[Int]] =
-    make[Prod[Int]]((l, r) => Prod(l * r))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Int` values.
+   */
+  implicit val IntProdCommutativeIdentity: Commutative[Prod[Int]] with Identity[Prod[Int]] =
+    new Commutative[Prod[Int]] with Identity[Prod[Int]] {
+      def combine(l: => Prod[Int], r: => Prod[Int]): Prod[Int] = Prod(l * r)
+      val identity: Prod[Int]                                  = Prod(1)
+    }
 
-  implicit val IntSumAssociative: Associative[Sum[Int]] =
-    make[Sum[Int]]((l, r) => Sum(l + r))
+  /**
+   * The `Commutative` and `Identity` instance for the sum of `Int` values.
+   */
+  implicit val IntSumCommutativeIdentity: Commutative[Sum[Int]] with Identity[Sum[Int]] =
+    new Commutative[Sum[Int]] with Identity[Sum[Int]] {
+      def combine(l: => Sum[Int], r: => Sum[Int]): Sum[Int] = Sum(l + r)
+      val identity: Sum[Int]                                = Sum(0)
+    }
 
-  implicit def lastAssociative[A]: Associative[Last[A]] =
+  /**
+   * The `Associative` instance for the last of `A` values.
+   */
+  implicit def LastAssociative[A]: Associative[Last[A]] =
     make((_: Last[A], r: Last[A]) => r)
 
-  implicit def ListAssociative[A]: Associative[List[A]] =
-    make[List[A]]((l, r) => l ++ r)
+  /**
+   * The `Identity` instance for the concatenation of `List[A]` values.
+   */
+  implicit def ListIdentity[A]: Identity[List[A]] =
+    Identity.make[List[A]](Nil, _ ++ _)
 
-  implicit val LongProdAssociative: Associative[Prod[Long]] =
-    make[Prod[Long]]((l, r) => Prod(l * r))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Long`
+   * values.
+   */
+  implicit val LongProdCommutativeIdentity: Commutative[Prod[Long]] with Identity[Prod[Long]] =
+    new Commutative[Prod[Long]] with Identity[Prod[Long]] {
+      def combine(l: => Prod[Long], r: => Prod[Long]): Prod[Long] = Prod(l * r)
+      val identity: Prod[Long]                                    = Prod(1)
+    }
 
-  implicit val LongSumAssociative: Associative[Sum[Long]] =
-    make[Sum[Long]]((l, r) => Sum(l + r))
+  /**
+   * The `Commutative` and `Identity` instance for the sum of `Long` values.
+   */
+  implicit val LongSumCommutativeIdentity: Commutative[Sum[Long]] with Identity[Sum[Long]] =
+    new Commutative[Sum[Long]] with Identity[Sum[Long]] {
+      def combine(l: => Sum[Long], r: => Sum[Long]): Sum[Long] = Sum(l + r)
+      val identity: Sum[Long]                                  = Sum(0)
+    }
 
-  implicit def MapAssociative[K, V: Associative]: Associative[Map[K, V]] =
-    make[Map[K, V]]((l, r) =>
-      r.foldLeft(l) {
-        case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
-      }
-    )
+  /**
+   * Derives an `Identity[Map[K, V]]` given an `Associative[V]`.
+   */
+  implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
+    new Identity[Map[K, V]] {
+      def identity: Map[K, V] = Map()
 
-  implicit def MaxAssociative[A: Ord]: Associative[Max[A]] =
-    make((l: Max[A], r: Max[A]) => if (l >= r) l else r)
+      def combine(l: => Map[K, V], r: => Map[K, V]): Map[K, V] =
+        r.foldLeft(l) {
+          case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
+        }
+    }
 
-  implicit def MinAssociative[A: Ord]: Associative[Min[A]] =
-    make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
+  /**
+   * The `Commutative` instance for the maximum of `A` values for which an
+   * `Ord` is defined.
+   */
+  implicit def MaxCommutative[A: Ord]: Commutative[Max[A]] =
+    Commutative.make((l: Max[A], r: Max[A]) => if (l >= r) l else r)
 
+  /**
+   * The `Commutative` instance for the minimum of `A` values for which an
+   * `Ord` is defined.
+   */
+  implicit def MinCommutative[A: Ord]: Commutative[Min[A]] =
+    Commutative.make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
+
+  /**
+   * The `Associative` instance for the concatenation of `NonEmptyChunk[A]`
+   * values.
+   */
   implicit def NonEmptyChunkAssociative[A]: Associative[NonEmptyChunk[A]] =
     make(_ ++ _)
 
-  implicit def OptionAssociative[A: Associative]: Associative[Option[A]] =
-    make[Option[A]]((l, r) =>
-      (l, r) match {
-        case (Some(l), Some(r)) => Some(l <> r)
-        case (Some(l), None)    => Some(l)
-        case (None, Some(r))    => Some(r)
-        case _                  => None
-      }
-    )
+  /**
+   * Derives an `Identity[Option[A]]` given an `Associative[A]`.
+   */
+  implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
+    new Identity[Option[A]] {
+      def identity: Option[A] = None
 
-  implicit def SetAssociative[A]: Associative[Set[A]] =
-    make[Set[A]]((l, r) => l | r)
+      def combine(l: => Option[A], r: => Option[A]): Option[A] =
+        (l, r) match {
+          case (Some(l), Some(r)) => Some(l <> r)
+          case (Some(l), None)    => Some(l)
+          case (None, Some(r))    => Some(r)
+          case _                  => None
+        }
+    }
 
-  implicit val ShortProdAssociative: Associative[Prod[Short]] =
-    make[Prod[Short]]((l, r) => Prod((l * r).toShort))
+  /**
+   * The `Commutative` and `Identity` instance for the union of `Set[A]`
+   * values.
+   */
+  implicit def SetCommutativeIdentity[A]: Commutative[Set[A]] with Identity[Set[A]] =
+    new Commutative[Set[A]] with Identity[Set[A]] {
+      def combine(l: => Set[A], r: => Set[A]): Set[A] = l | r
+      val identity: Set[A]                            = Set.empty
+    }
 
-  implicit val ShortSumAssociative: Associative[Sum[Short]] =
-    make[Sum[Short]]((l, r) => Sum((l + r).toShort))
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Short`
+   * values.
+   */
+  implicit val ShortProdCommutativeIdentity: Commutative[Prod[Short]] with Identity[Prod[Short]] =
+    new Commutative[Prod[Short]] with Identity[Prod[Short]] {
+      def combine(l: => Prod[Short], r: => Prod[Short]): Prod[Short] = Prod((l * r).toShort)
+      val identity: Prod[Short]                                      = Prod(1)
+    }
 
-  implicit val StringAssociative: Associative[String] =
-    make[String]((l, r) => l + r)
+  /**
+   * The `Commutative` and `Identity` instance for the sum of `Short` values.
+   */
+  implicit val ShortSumCommutativeIdentity: Commutative[Sum[Short]] with Identity[Sum[Short]] =
+    new Commutative[Sum[Short]] with Identity[Sum[Short]] {
+      def combine(l: => Sum[Short], r: => Sum[Short]): Sum[Short] = Sum((l + r).toShort)
+      val identity: Sum[Short]                                    = Sum(0)
+    }
 
-  implicit def VectorAssociative[A]: Associative[Vector[A]] =
-    make[Vector[A]]((l, r) => l ++ r)
+  /**
+   * The `Identity` instance for the concatenation of `String` values.
+   */
+  implicit val StringIdentity: Identity[String] =
+    Identity.make("", _ + _)
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple2Associative[A: Associative, B: Associative]: Associative[(A, B)] =
     make {
       case ((a1, b1), (a2, b2)) => (a1 <> a2, b1 <> b2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple3Associative[A: Associative, B: Associative, C: Associative]: Associative[(A, B, C)] =
     make {
       case ((a1, b1, c1), (a2, b2, c2)) => (a1 <> a2, b1 <> b2, c1 <> c2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple4Associative[A: Associative, B: Associative, C: Associative, D: Associative]
     : Associative[(A, B, C, D)] =
     make {
       case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple5Associative[A: Associative, B: Associative, C: Associative, D: Associative, E: Associative]
     : Associative[(A, B, C, D, E)] =
     make {
       case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) => (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple6Associative[
     A: Associative,
     B: Associative,
@@ -188,6 +396,10 @@ object Associative extends Lawful[AssociativeEqual] {
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple7Associative[
     A: Associative,
     B: Associative,
@@ -205,6 +417,10 @@ object Associative extends Lawful[AssociativeEqual] {
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2, g1 <> g2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple8Associative[
     A: Associative,
     B: Associative,
@@ -223,6 +439,10 @@ object Associative extends Lawful[AssociativeEqual] {
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2, g1 <> g2, h1 <> h2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple9Associative[
     A: Associative,
     B: Associative,
@@ -242,6 +462,10 @@ object Associative extends Lawful[AssociativeEqual] {
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2, g1 <> g2, h1 <> h2, i1 <> i2)
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple10Associative[
     A: Associative,
     B: Associative,
@@ -273,6 +497,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple11Associative[
     A: Associative,
     B: Associative,
@@ -306,6 +534,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple12Associative[
     A: Associative,
     B: Associative,
@@ -341,6 +573,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple13Associative[
     A: Associative,
     B: Associative,
@@ -378,6 +614,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple14Associative[
     A: Associative,
     B: Associative,
@@ -417,6 +657,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple15Associative[
     A: Associative,
     B: Associative,
@@ -458,6 +702,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple16Associative[
     A: Associative,
     B: Associative,
@@ -501,6 +749,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple17Associative[
     A: Associative,
     B: Associative,
@@ -546,6 +798,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple18Associative[
     A: Associative,
     B: Associative,
@@ -593,6 +849,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple19Associative[
     A: Associative,
     B: Associative,
@@ -642,6 +902,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple20Associative[
     A: Associative,
     B: Associative,
@@ -693,6 +957,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple21Associative[
     A: Associative,
     B: Associative,
@@ -746,6 +1014,10 @@ object Associative extends Lawful[AssociativeEqual] {
         )
     }
 
+  /**
+   * Derives an `Associative` for a product type given an `Associative` for
+   * each element of the product type.
+   */
   implicit def Tuple22Associative[
     A: Associative,
     B: Associative,
@@ -800,6 +1072,12 @@ object Associative extends Lawful[AssociativeEqual] {
           v1 <> v2
         )
     }
+
+  /**
+   * The `Identity` instance for the concatenation of `Vector[A]` values.
+   */
+  implicit def VectorIdentity[A]: Identity[Vector[A]] =
+    Identity.make(Vector.empty, _ ++ _)
 }
 
 trait AssociativeSyntax {
@@ -817,7 +1095,7 @@ trait AssociativeSyntax {
       associative.combine(l, r)
 
     /**
-     * Associatively combine this value with the specified value
+     * Associatively combines this value with the specified value
      */
     def combine(r: => A)(implicit associative: Associative[A]): A =
       associative.combine(l, r)
