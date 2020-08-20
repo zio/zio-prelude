@@ -102,7 +102,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
   def foreach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     foreach(fa)(f).as(())
 
-  def groupBy[K, V](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] = foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) {
+  def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] = foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) {
     (m, v) =>
       val k = f(v)
       m.get(k) match {
@@ -110,6 +110,17 @@ trait Traversable[F[+_]] extends Covariant[F] {
         case None     => m + (k -> NonEmptyChunk(v))
       }
   }
+
+  def groupByM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
+    foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]].succeed) { (m, v) =>
+      val k = f(v)
+      AssociativeBoth.mapN(m, k) { (m, k) =>
+        m.get(k) match {
+          case Some(vs) => m + (k -> (vs :+ v))
+          case None     => m + (k -> NonEmptyChunk(v))
+        }
+      }
+    }
 
   /**
    * Returns whether the collection is empty.

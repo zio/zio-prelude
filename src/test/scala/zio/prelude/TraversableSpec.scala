@@ -93,7 +93,14 @@ object TraversableSpec extends DefaultRunnableSpec {
       testM("groupBy") {
         check(genList, genIntFunction) { (as, f) =>
           val actual   = Traversable[List].groupBy(as)(f)
-          val expected = as.groupBy(f).mapValues(l => NonEmptyChunk.fromIterable(l.head, l.tail))
+          val expected = as.groupBy(f).mapValues(l => NonEmptyChunk.fromIterable(l.head, l.tail)).toMap // .toMap because Scala 2.13 collections
+          assert(actual)(equalTo(expected))
+        }
+      },
+      testM("groupByM") {
+        check(genList, genIntFunction) { (as, f) =>
+          val actual   = Traversable[List].groupByM(as)(f.map(Option(_)))
+          val expected = Option(as.groupBy(f).mapValues(l => NonEmptyChunk.fromIterable(l.head, l.tail)).toMap) // .toMap because Scala 2.13 collections
           assert(actual)(equalTo(expected))
         }
       },
