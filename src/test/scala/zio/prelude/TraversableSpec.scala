@@ -1,9 +1,9 @@
 package zio.prelude
 
-import zio.Chunk
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
+import zio.{ Chunk, NonEmptyChunk }
 
 object TraversableSpec extends DefaultRunnableSpec {
 
@@ -87,6 +87,29 @@ object TraversableSpec extends DefaultRunnableSpec {
         check(genList, genBooleanFunction) { (as, f) =>
           val actual   = Traversable[List].forall(as)(f)
           val expected = as.forall(f)
+          assert(actual)(equalTo(expected))
+        }
+      },
+      testM("groupBy") {
+        check(genList, genIntFunction) { (as, f) =>
+          val actual = Traversable[List].groupBy(as)(f)
+          val expected = as
+            .groupBy(f)
+            .toList
+            .map { case (k, v) => (k, NonEmptyChunk.fromIterable(v.head, v.tail)) }
+            .toMap // .toList .toMap because Scala 2.13 collections
+          assert(actual)(equalTo(expected))
+        }
+      },
+      testM("groupByM") {
+        check(genList, genIntFunction) { (as, f) =>
+          val actual = Traversable[List].groupByM(as)(f.map(Option(_)))
+          val expected = Option(
+            as.groupBy(f)
+              .toList
+              .map { case (k, v) => (k, NonEmptyChunk.fromIterable(v.head, v.tail)) }
+              .toMap // .toList .toMap because Scala 2.13 collections
+          )
           assert(actual)(equalTo(expected))
         }
       },
