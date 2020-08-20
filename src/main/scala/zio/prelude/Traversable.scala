@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Chunk, ChunkBuilder }
+import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
 import zio.prelude.coherent.DeriveEqualTraversable
 import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
 import zio.test.laws._
@@ -101,6 +101,15 @@ trait Traversable[F[+_]] extends Covariant[F] {
    */
   def foreach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     foreach(fa)(f).as(())
+
+  def groupBy[K, V](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] = foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) {
+    (m, v) =>
+      val k = f(v)
+      m.get(k) match {
+        case Some(vs) => m + (k -> (vs :+ v))
+        case None     => m + (k -> NonEmptyChunk(v))
+      }
+  }
 
   /**
    * Returns whether the collection is empty.
