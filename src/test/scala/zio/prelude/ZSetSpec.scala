@@ -16,7 +16,7 @@ object ZSetSpec extends DefaultRunnableSpec {
     }
 
   def genZSet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
-    Gen.mapOf(a, b).map(ZSet.fromMap(_: Map[A, B]))
+    Gen.mapOf(a, b).map(ZSet.fromMap)
 
   val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))

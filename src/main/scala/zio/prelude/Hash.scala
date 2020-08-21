@@ -1,11 +1,10 @@
 package zio.prelude
 
+import scala.annotation.implicitNotFound
+
+import zio.{ Chunk, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
-import zio.{ Chunk, NonEmptyChunk }
-
-import scala.annotation.implicitNotFound
-import scala.collection.immutable.SortedMap
 
 /**
  * `Hash[A]` provides implicit evidence that a value of type `A` can be hashed.
@@ -231,17 +230,6 @@ object Hash extends Lawful[Hash] {
    */
   implicit def SetHash[A]: Hash[Set[A]] =
     default
-
-  /**
-   * Derives a `Hash[SortedMap[A, B]]` given a `Hash[A]` and `Hash[B]`.
-   */
-  implicit def SortedMapHash[A: Hash, B: Hash]: Hash[SortedMap[A, B]] =
-    make(
-      _.toList.hash,
-      (map1, map2) =>
-        map1.size == map2.size &&
-          map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
-    )
 
   /**
    * Hashing for `String` values.

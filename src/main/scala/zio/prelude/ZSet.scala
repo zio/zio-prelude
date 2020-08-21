@@ -240,20 +240,12 @@ object ZSet {
    * the `Map` and the measure of how many times a value occurs will be the
    * keys value.
    */
-  def fromMap[A, B](map: Map[A, B]): ZSet[A, B] = fromMap {
+  def fromMap[A, B](map: Map[A, B]): ZSet[A, B] = new ZSet(
     map match {
       case map: HashMap[A, B] => map
       case _                  => map.foldLeft(HashMap.empty[A, B])(_ + _)
     }
-  }
-
-  /**
-   * Constructs a set from the specified `HashMap`. The values will be the keys in
-   * the `Map` and the measure of how many times a value occurs will be the
-   * keys value.
-   */
-  def fromMap[A, B](map: HashMap[A, B]): ZSet[A, B] =
-    new ZSet(map)
+  )
 
   /**
    * Derives a `Commutative[ZSet[A, B]]` given a `Commutative[B]`.
