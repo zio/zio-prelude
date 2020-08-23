@@ -115,9 +115,20 @@ package object prelude
       assert(self)(isLessThanEqualTo(that))
   }
 
-  implicit class AnySyntax[A](private val self: A) extends AnyVal {
+  implicit class AnySyntax[A](private val a: A) extends AnyVal {
+
     @silent("side-effecting nullary methods are discouraged")
-    def ignore: Unit        = ()
-    def |>[B](f: A => B): B = f(self)
+    /** Ignores the value, if you explicitly want to do so and avoids "Unused value" compiler warnings. */
+    def ignore: Unit = ()
+
+    /** Applies function `f` to a value `a`, like `f(a)`, but in flipped order and doesn't need parentheses. Can be chained, like `x |> f |> g`. */
+    def |>[B](f: A => B): B = f(a)
+
+    /** Applies the function `f` to the value `a`, ignores the result, and returns the original value `a`. Practical for debugging, like `x.someMethod.tee(println(_)).someOtherMethod...` . Similar to the `tee` UNIX command. */
+    def tee[B](f: A => B): A = {
+      val _ = f(a)
+      a
+    }
+
   }
 }
