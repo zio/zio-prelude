@@ -117,7 +117,7 @@ package object prelude
 
   implicit class AnySyntax[A](private val a: A) extends AnyVal {
 
-    @silent("side-effecting nullary methods are discouraged")
+    @silent
     /** Ignores the value, if you explicitly want to do so and avoids "Unused value" compiler warnings. */
     def ignore: Unit = ()
 
