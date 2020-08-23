@@ -1,11 +1,13 @@
 package zio
 
+import com.github.ghik.silencer.silent
 import zio.test.{ assert, TestResult }
 
 package object prelude
     extends Assertions
     with AssociativeSyntax
     with AssociativeBothSyntax
+    with AssociativeComposeSyntax
     with AssociativeEitherSyntax
     with AssociativeFlattenSyntax
     with CommutativeBothSyntax
@@ -111,5 +113,11 @@ package object prelude
       assert(self)(isLessThan(that))
     def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isLessThanEqualTo(that))
+  }
+
+  implicit class AnySyntax[A](private val self: A) extends AnyVal {
+    @silent("side-effecting nullary methods are discouraged")
+    def ignore: Unit        = ()
+    def |>[B](f: A => B): B = f(self)
   }
 }
