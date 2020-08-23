@@ -117,8 +117,8 @@ package object prelude
 
   implicit class AnySyntax[A](private val a: A) extends AnyVal {
 
-    @silent
-    /** Ignores the value, if you explicitly want to do so and avoids "Unused value" compiler warnings. */
+    @silent("side-effecting nullary methods are discouraged")
+    /* Ignores the value, if you explicitly want to do so and avoids "Unused value" compiler warnings. */
     def ignore: Unit = ()
 
     /** Applies function `f` to a value `a`, like `f(a)`, but in flipped order and doesn't need parentheses. Can be chained, like `x |> f |> g`. */
