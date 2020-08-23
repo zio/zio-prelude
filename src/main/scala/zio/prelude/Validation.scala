@@ -59,9 +59,9 @@ sealed trait Validation[+E, +A] { self =>
    * Transforms the value of this `Validation` with the specified effectual
    * function if it is a success or returns the value unchanged otherwise.
    */
-  final def foreach[F[+_]: IdentityBoth: Covariant, B](f: A => F[B]): F[Validation[E, B]] =
+  final def foreach[F[+_], B](f: A => F[B])(implicit ib: IdentityBoth[F], c: Covariant[F]): F[Validation[E, B]] =
     self match {
-      case Failure(es) => Failure(es).succeed
+      case Failure(es) => Failure(es).succeed(ib, c)
       case Success(a)  => f(a).map(Success(_))
     }
 
