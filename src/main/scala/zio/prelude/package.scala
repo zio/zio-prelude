@@ -125,7 +125,7 @@ package object prelude
     def |>[B](f: A => B): B = f(a)
 
     /** Applies the function `f` to the value `a`, ignores the result, and returns the original value `a`. Practical for debugging, like `x.someMethod.tee(println(_)).someOtherMethod...` . Similar to the `tee` UNIX command. */
-    def tee[B](f: A => B): A = {
+    def tap(f: A => Any): A = {
       val _ = f(a)
       a
     }
