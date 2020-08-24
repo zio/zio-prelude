@@ -1,11 +1,12 @@
 package zio.prelude
 
-import scala.annotation.implicitNotFound
+import com.github.ghik.silencer.silent
 import zio.prelude.coherent.DeriveEqualIdentityBothInvariant
 import zio.prelude.newtypes.Failure
 import zio.test.TestResult
 import zio.test.laws._
 
+import scala.annotation.implicitNotFound
 import scala.concurrent.Future
 import scala.util.{ Success, Try }
 
@@ -23,7 +24,9 @@ trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
   def any: F[Any]
 }
 
+@silent("Unused import")
 object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, Equal] {
+  import zio._ // for zio.EitherCompat
 
   /**
    * For all `fa`, `both(identity, fa)` is equivalent to `fa`.
@@ -95,7 +98,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
    */
   implicit val FutureIdentityBoth: IdentityBoth[Future] =
     new IdentityBoth[Future] {
-      val any: Future[Any] = Future.unit
+      val any: Future[Any] = Future.successful(())
 
       def both[A, B](fa: => Future[A], fb: => Future[B]): Future[(A, B)] = fa zip fb
     }

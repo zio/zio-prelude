@@ -1,7 +1,6 @@
 package zio.prelude
 
-import scala.concurrent.Future
-
+import scala.concurrent.{ blocking, Future }
 import zio.ZIO
 import zio.test._
 
@@ -11,10 +10,10 @@ object CommutativeEitherSpec extends DefaultRunnableSpec {
     testM("FutureCommutativeEither returns the first future that is completed") {
       for {
         l <- ZIO.fromFuture { implicit ec =>
-              Future.unit <|> Future.never
+              Future.successful("immediate") <|> Future { blocking { Thread.sleep(60 * 1000); "long 1" } }
             }
         r <- ZIO.fromFuture { implicit ec =>
-              Future.never <|> Future.unit
+              Future { blocking { Thread.sleep(60 * 1000); "long 2" } } <|> Future.successful("immediate")
             }
       } yield assert(l.merge)(equalTo(r.merge))
     }

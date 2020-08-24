@@ -1,10 +1,14 @@
 package zio.prelude
 
 import zio.Chunk
+import zio.prelude.Commutative._
+import zio.prelude.Equal._
+import zio.prelude.ZSet._
+import zio.prelude.coherent.CovariantDeriveEqual
 import zio.prelude.newtypes._
 import zio.random.Random
-import zio.test._
 import zio.test.Assertion._
+import zio.test._
 import zio.test.laws._
 
 object ZSetSpec extends DefaultRunnableSpec {
@@ -26,7 +30,23 @@ object ZSetSpec extends DefaultRunnableSpec {
       testM("combine commutative")(
         checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
       ),
-      testM("covariant")(checkAllLaws(Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)),
+      testM("covariant")(
+        checkAllLaws[
+          CovariantDeriveEqual,
+          Equal,
+          Any,
+          Random with Sized,
+          ({ type lambda[+x] = ZSet[x, Int] })#lambda,
+          Int
+        ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
+          // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
+          CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
+            ZSetCovariant(IntSumCommutative),
+            ZSetDeriveEqual(IntEqual)
+          ),
+          IntEqual
+        )
+      ),
       testM("equal")(checkAllLaws(Equal)(genZSet(Gen.anyInt, Gen.anyInt))),
       testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt))),
       testM("intersect commutative")(
