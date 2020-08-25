@@ -114,12 +114,4 @@ package object prelude
     def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isLessThanEqualTo(that))
   }
-
-  implicit class AnySyntax[A](private val a: A) extends AnyVal {
-
-    @silent("side-effecting nullary methods are discouraged")
-    /* Ignores the value, if you explicitly want to do so and avoids "Unused value" compiler warnings. */
-    def ignore: Unit = ()
-
-  }
 }
