@@ -1,7 +1,6 @@
 package zio.prelude
 
 import zio.NonEmptyChunk
-import zio.prelude.coherent.AssociativeIdentity
 import zio.prelude.newtypes._
 import zio.test._
 import zio.test.Assertion._
@@ -62,7 +61,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
       Meter.wrap(Meter.unwrap(self) + Meter.unwrap(that))
   }
 
-  def foldMap[A, B](as: List[A])(f: A => B)(implicit B: AssociativeIdentity[B]) =
+  def foldMap[A, B](as: List[A])(f: A => B)(implicit B: Identity[B]) =
     as.foldLeft(B.identity)((b, a) => B.combine(b, f(a)))
 
   def exists[A](as: List[A])(f: A => Boolean): Boolean =
@@ -80,6 +79,6 @@ object NewtypeSpec extends DefaultRunnableSpec {
   object IntMult extends Newtype[Int]
   type IntMult = IntMult.Type
 
-  def sum[A](as: List[A])(implicit A: AssociativeIdentity[Sum[A]]): A =
+  def sum[A](as: List[A])(implicit A: Identity[Sum[A]]): A =
     Sum.unwrap(Sum.wrapAll(as).foldLeft(A.identity)((b, a) => A.combine(b, a)))
 }
