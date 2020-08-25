@@ -21,3 +21,16 @@ object AssociativeCompose {
         bc.compose(ab)
     }
 }
+
+trait AssociativeComposeSyntax {
+  implicit class AssociativeComposeOps[:=>[-_, +_], A, B](private val ab: A :=> B) {
+
+    /** Composes `A -> B` with `B -> C` to form `A -> C`. */
+    def >>>[C](bc: B :=> C)(implicit ev: AssociativeCompose[:=>]): A :=> C =
+      ev.compose(bc, ab)
+
+    /** Composes `B <- A` with `A <- Z` to form `B <- Z`. */
+    def <<<[Z](za: Z :=> A)(implicit ev: AssociativeCompose[:=>]): Z :=> B =
+      ev.compose(ab, za)
+  }
+}
