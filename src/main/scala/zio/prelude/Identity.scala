@@ -55,7 +55,7 @@ object Identity extends Lawful[EqualIdentity] {
     }
 
   /**
-   * The set of all laws that instances of `Associative` must satisfy.
+   * The set of all laws that instances of `Identity` must satisfy.
    */
   val laws: Laws[EqualIdentity] =
     leftIdentityLaw + rightIdentityLaw
@@ -66,7 +66,8 @@ object Identity extends Lawful[EqualIdentity] {
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 
   /**
-   * Constructs an `Identity` instance from a function and an identity element.
+   * Constructs an `Identity` instance from an associative binary operator and
+   * an identity element.
    */
   def make[A](identity0: A, op: (A, A) => A): Identity[A] =
     new Identity[A] {
@@ -80,20 +81,6 @@ object Identity extends Lawful[EqualIdentity] {
    */
   implicit def DeriveIdentity[F[_], A](implicit derive: Derive[F, Identity], identity: Identity[A]): Identity[F[A]] =
     derive.derive(identity)
-
-  /**
-   * Derives an `Identity[Either[E, A]]` given an `Identity[A]`.
-   */
-  implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
-    new Identity[Either[E, A]] {
-      def identity: Either[E, A] = Right(Identity[A].identity)
-      def combine(l: => Either[E, A], r: => Either[E, A]): Either[E, A] =
-        (l, r) match {
-          case (Left(l), _)         => Left(l)
-          case (_, Left(r))         => Left(r)
-          case (Right(l), Right(r)) => Right(l <> r)
-        }
-    }
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each

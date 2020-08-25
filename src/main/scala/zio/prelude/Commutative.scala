@@ -56,7 +56,7 @@ object Commutative extends Lawful[CommutativeEqual] {
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 
   /**
-   * Constructs a `Commutative` instance from a function.
+   * Constructs a `Commutative` instance from a commutative binary operator.
    */
   def make[A](f: (A, A) => A): Commutative[A] =
     (l, r) => f(l, r)

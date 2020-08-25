@@ -61,85 +61,92 @@ object Associative extends Lawful[AssociativeEqual] {
   def apply[A](implicit associative: Associative[A]): Associative[A] = associative
 
   /**
-   * Constructs an `Associative` instance from a function.
+   * Constructs an `Associative` instance from an associative binary operator.
    */
   def make[A](f: (A, A) => A): Associative[A] =
     (l, r) => f(l, r)
 
   /**
-   * The `Commutative` and `Identity` instance for the conjunction of `Boolean`
+   * The `Commutative` and `Inverse` instance for the conjunction of `Boolean`
    * values.
    */
-  implicit val BooleanConjunctionCommutativeIdentity: Commutative[And] with Identity[And] =
-    new Commutative[And] with Identity[And] {
+  implicit val BooleanConjunctionCommutativeInverse: Commutative[And] with Inverse[And] =
+    new Commutative[And] with Inverse[And] {
       def combine(l: => And, r: => And): And = And(l && r)
       val identity: And                      = And(true)
+      def inverse(l: => And, r: => And): And = And(l || !r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the disjunction of `Boolean` values.
-   */
-  implicit val BooleanDisjunctionCommutativeIdentity: Commutative[Or] with Identity[Or] =
-    new Commutative[Or] with Identity[Or] {
-      def combine(l: => Or, r: => Or): Or = Or(l | r)
-      val identity: Or                    = Or(false)
-    }
-
-  /**
-   * The `Commutative` and `Identity` instance for the product of `Boolean`
+   * The `Commutative` and `Inverse` instance for the disjunction of `Boolean`
    * values.
    */
-  implicit val BooleanProdCommutativeIdentity: Commutative[Prod[Boolean]] with Identity[Prod[Boolean]] =
-    new Commutative[Prod[Boolean]] with Identity[Prod[Boolean]] {
+  implicit val BooleanDisjunctionCommutativeInverse: Commutative[Or] with Inverse[Or] =
+    new Commutative[Or] with Inverse[Or] {
+      def combine(l: => Or, r: => Or): Or = Or(l || r)
+      val identity: Or                    = Or(false)
+      def inverse(l: => Or, r: => Or): Or = Or(l && !r)
+    }
+
+  /**
+   * The `Commutative` and `Inverse` instance for the product of `Boolean`
+   * values.
+   */
+  implicit val BooleanProdCommutativeInverse: Commutative[Prod[Boolean]] with Identity[Prod[Boolean]] =
+    new Commutative[Prod[Boolean]] with Inverse[Prod[Boolean]] {
       def combine(l: => Prod[Boolean], r: => Prod[Boolean]): Prod[Boolean] = Prod(l && r)
       val identity: Prod[Boolean]                                          = Prod(true)
+      def inverse(l: => Prod[Boolean], r: => Prod[Boolean]): Prod[Boolean] = Prod(l || !r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the sum of `Boolean` values.
+   * The `Commutative` and `Inverse` instance for the sum of `Boolean` values.
    */
-  implicit val BooleanSumCommutativeIdentity: Commutative[Sum[Boolean]] with Identity[Sum[Boolean]] =
-    new Commutative[Sum[Boolean]] with Identity[Sum[Boolean]] {
+  implicit val BooleanSumCommutativeInverse: Commutative[Sum[Boolean]] with Inverse[Sum[Boolean]] =
+    new Commutative[Sum[Boolean]] with Inverse[Sum[Boolean]] {
       def combine(l: => Sum[Boolean], r: => Sum[Boolean]): Sum[Boolean] = Sum(l || r)
       val identity: Sum[Boolean]                                        = Sum(false)
+      def inverse(l: => Sum[Boolean], r: => Sum[Boolean]): Sum[Boolean] = Sum(l && !r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Byte`
-   * values.
+   * The `Commutative` and `Inverse` instance for the product of `Byte` values.
    */
-  implicit val ByteProdCommutativeIdentity: Commutative[Prod[Byte]] with Identity[Prod[Byte]] =
-    new Commutative[Prod[Byte]] with Identity[Prod[Byte]] {
+  implicit val ByteProdCommutativeInverse: Commutative[Prod[Byte]] with Inverse[Prod[Byte]] =
+    new Commutative[Prod[Byte]] with Inverse[Prod[Byte]] {
       def combine(l: => Prod[Byte], r: => Prod[Byte]): Prod[Byte] = Prod((l * r).toByte)
       val identity: Prod[Byte]                                    = Prod(1)
+      def inverse(l: => Prod[Byte], r: => Prod[Byte]): Prod[Byte] = Prod((l / r).toByte)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the sum of `Byte` values.
+   * The `Commutative` and `Inverse` instance for the sum of `Byte` values.
    */
-  implicit val ByteSumCommutativeIdentity: Commutative[Sum[Byte]] with Identity[Sum[Byte]] =
-    new Commutative[Sum[Byte]] with Identity[Sum[Byte]] {
+  implicit val ByteSumCommutativeInverse: Commutative[Sum[Byte]] with Inverse[Sum[Byte]] =
+    new Commutative[Sum[Byte]] with Inverse[Sum[Byte]] {
       def combine(l: => Sum[Byte], r: => Sum[Byte]): Sum[Byte] = Sum((l + r).toByte)
       val identity: Sum[Byte]                                  = Sum(0)
+      def inverse(l: => Sum[Byte], r: => Sum[Byte]): Sum[Byte] = Sum((l - r).toByte)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Char`
-   * values.
+   * The `Commutative` and `Inverse` instance for the product of `Char` values.
    */
-  implicit val CharProdCommutativeIdentity: Commutative[Prod[Char]] with Identity[Prod[Char]] =
-    new Commutative[Prod[Char]] with Identity[Prod[Char]] {
+  implicit val CharProdCommutativeInverse: Commutative[Prod[Char]] with Inverse[Prod[Char]] =
+    new Commutative[Prod[Char]] with Inverse[Prod[Char]] {
       def combine(l: => Prod[Char], r: => Prod[Char]): Prod[Char] = Prod((l * r).toChar)
       val identity: Prod[Char]                                    = Prod(1)
+      def inverse(l: => Prod[Char], r: => Prod[Char]): Prod[Char] = Prod((l / r).toChar)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the sum of `Char` values.
+   * The `Commutative` and `Inverse` instance for the sum of `Char` values.
    */
-  implicit val CharSumCommutativeIdentity: Commutative[Sum[Char]] with Identity[Sum[Char]] =
-    new Commutative[Sum[Char]] with Identity[Sum[Char]] {
+  implicit val CharSumCommutativeInverse: Commutative[Sum[Char]] with Inverse[Sum[Char]] =
+    new Commutative[Sum[Char]] with Inverse[Sum[Char]] {
       def combine(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l + r).toChar)
       val identity: Sum[Char]                                  = Sum(0)
+      def inverse(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l - r).toChar)
     }
 
   /**
@@ -159,67 +166,83 @@ object Associative extends Lawful[AssociativeEqual] {
     derive.derive(associative)
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Double`
+   * The `Commutative` and `Inverse` instance for the product of `Double`
    * values.
    */
-  implicit val DoubleProdCommutativeIdentity: Commutative[Prod[Double]] with Identity[Prod[Double]] =
-    new Commutative[Prod[Double]] with Identity[Prod[Double]] {
+  implicit val DoubleProdCommutativeInverse: Commutative[Prod[Double]] with Inverse[Prod[Double]] =
+    new Commutative[Prod[Double]] with Inverse[Prod[Double]] {
       def combine(l: => Prod[Double], r: => Prod[Double]): Prod[Double] = Prod(l * r)
       val identity: Prod[Double]                                        = Prod(1)
+      def inverse(l: => Prod[Double], r: => Prod[Double]): Prod[Double] = Prod(l / r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Double`
-   * values.
+   * The `Commutative` and `Inverse` instance for the sum of `Double` values.
    */
-  implicit val DoubleSumCommutativeIdentity: Commutative[Sum[Double]] with Identity[Sum[Double]] =
-    new Commutative[Sum[Double]] with Identity[Sum[Double]] {
+  implicit val DoubleSumCommutativeInverse: Commutative[Sum[Double]] with Inverse[Sum[Double]] =
+    new Commutative[Sum[Double]] with Inverse[Sum[Double]] {
       def combine(l: => Sum[Double], r: => Sum[Double]): Sum[Double] = Sum(l + r)
       val identity: Sum[Double]                                      = Sum(0)
+      def inverse(l: => Sum[Double], r: => Sum[Double]): Sum[Double] = Sum(l - r)
     }
+
+  /**
+   * Derives an `Identity[Either[E, A]]` given an `Identity[A]`.
+   */
+  implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
+    Identity.make(
+      Right(Identity[A].identity), {
+        case (Left(l), _)         => Left(l)
+        case (_, Left(r))         => Left(r)
+        case (Right(l), Right(r)) => Right(l <> r)
+      }
+    )
 
   /**
    * The `Associative` instance for the first of `A` values.
    */
-  implicit def firstAssociative[A]: Associative[First[A]] =
+  implicit def FirstAssociative[A]: Associative[First[A]] =
     make((l: First[A], _: First[A]) => l)
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Float`
+   * The `Commutative` and `Inverse` instance for the product of `Float`
    * values.
    */
-  implicit val FloatProdCommutativeIdentity: Commutative[Prod[Float]] with Identity[Prod[Float]] =
-    new Commutative[Prod[Float]] with Identity[Prod[Float]] {
+  implicit val FloatProdCommutativeInverse: Commutative[Prod[Float]] with Inverse[Prod[Float]] =
+    new Commutative[Prod[Float]] with Inverse[Prod[Float]] {
       def combine(l: => Prod[Float], r: => Prod[Float]): Prod[Float] = Prod(l * r)
       val identity: Prod[Float]                                      = Prod(1)
+      def inverse(l: => Prod[Float], r: => Prod[Float]): Prod[Float] = Prod(l / r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the sum of `Float`
-   * values.
+   * The `Commutative` and `Inverse` instance for the sum of `Float` values.
    */
-  implicit val FloatSumCommutativeIdentity: Commutative[Sum[Float]] with Identity[Sum[Float]] =
-    new Commutative[Sum[Float]] with Identity[Sum[Float]] {
+  implicit val FloatSumCommutativeInverse: Commutative[Sum[Float]] with Inverse[Sum[Float]] =
+    new Commutative[Sum[Float]] with Inverse[Sum[Float]] {
       def combine(l: => Sum[Float], r: => Sum[Float]): Sum[Float] = Sum(l + r)
       val identity: Sum[Float]                                    = Sum(0)
+      def inverse(l: => Sum[Float], r: => Sum[Float]): Sum[Float] = Sum(l - r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Int` values.
+   * The `Commutative` and `Inverse` instance for the product of `Int` values.
    */
-  implicit val IntProdCommutativeIdentity: Commutative[Prod[Int]] with Identity[Prod[Int]] =
-    new Commutative[Prod[Int]] with Identity[Prod[Int]] {
+  implicit val IntProdCommutativeInverse: Commutative[Prod[Int]] with Inverse[Prod[Int]] =
+    new Commutative[Prod[Int]] with Inverse[Prod[Int]] {
       def combine(l: => Prod[Int], r: => Prod[Int]): Prod[Int] = Prod(l * r)
       val identity: Prod[Int]                                  = Prod(1)
+      def inverse(l: => Prod[Int], r: => Prod[Int]): Prod[Int] = Prod(l / r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the sum of `Int` values.
+   * The `Commutative` and `Inverse` instance for the sum of `Int` values.
    */
-  implicit val IntSumCommutativeIdentity: Commutative[Sum[Int]] with Identity[Sum[Int]] =
-    new Commutative[Sum[Int]] with Identity[Sum[Int]] {
+  implicit val IntSumCommutativeInverse: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
+    new Commutative[Sum[Int]] with Inverse[Sum[Int]] {
       def combine(l: => Sum[Int], r: => Sum[Int]): Sum[Int] = Sum(l + r)
       val identity: Sum[Int]                                = Sum(0)
+      def inverse(l: => Sum[Int], r: => Sum[Int]): Sum[Int] = Sum(l - r)
     }
 
   /**
@@ -235,22 +258,23 @@ object Associative extends Lawful[AssociativeEqual] {
     Identity.make[List[A]](Nil, _ ++ _)
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Long`
-   * values.
+   * The `Commutative` and `Inverse` instance for the product of `Long` values.
    */
-  implicit val LongProdCommutativeIdentity: Commutative[Prod[Long]] with Identity[Prod[Long]] =
-    new Commutative[Prod[Long]] with Identity[Prod[Long]] {
+  implicit val LongProdCommutativeInverse: Commutative[Prod[Long]] with Inverse[Prod[Long]] =
+    new Commutative[Prod[Long]] with Inverse[Prod[Long]] {
       def combine(l: => Prod[Long], r: => Prod[Long]): Prod[Long] = Prod(l * r)
       val identity: Prod[Long]                                    = Prod(1)
+      def inverse(l: => Prod[Long], r: => Prod[Long]): Prod[Long] = Prod(l / r)
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the sum of `Long` values.
+   * The `Commutative` and `Inverse` instance for the sum of `Long` values.
    */
-  implicit val LongSumCommutativeIdentity: Commutative[Sum[Long]] with Identity[Sum[Long]] =
-    new Commutative[Sum[Long]] with Identity[Sum[Long]] {
+  implicit val LongSumCommutativeInverse: Commutative[Sum[Long]] with Inverse[Sum[Long]] =
+    new Commutative[Sum[Long]] with Inverse[Sum[Long]] {
       def combine(l: => Sum[Long], r: => Sum[Long]): Sum[Long] = Sum(l + r)
       val identity: Sum[Long]                                  = Sum(0)
+      def inverse(l: => Sum[Long], r: => Sum[Long]): Sum[Long] = Sum(l - r)
     }
 
   /**
@@ -291,45 +315,45 @@ object Associative extends Lawful[AssociativeEqual] {
    * Derives an `Identity[Option[A]]` given an `Associative[A]`.
    */
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
-    new Identity[Option[A]] {
-      def identity: Option[A] = None
-
-      def combine(l: => Option[A], r: => Option[A]): Option[A] =
-        (l, r) match {
-          case (Some(l), Some(r)) => Some(l <> r)
-          case (Some(l), None)    => Some(l)
-          case (None, Some(r))    => Some(r)
-          case _                  => None
-        }
-    }
+    Identity.make(
+      None, {
+        case (Some(l), Some(r)) => Some(l <> r)
+        case (Some(l), None)    => Some(l)
+        case (None, Some(r))    => Some(r)
+        case _                  => None
+      }
+    )
 
   /**
-   * The `Commutative` and `Identity` instance for the union of `Set[A]`
+   * The `Commutative` and `Inverse` instance for the union of `Set[A]`
    * values.
    */
-  implicit def SetCommutativeIdentity[A]: Commutative[Set[A]] with Identity[Set[A]] =
-    new Commutative[Set[A]] with Identity[Set[A]] {
+  implicit def SetCommutativeInverse[A]: Commutative[Set[A]] with Inverse[Set[A]] =
+    new Commutative[Set[A]] with Inverse[Set[A]] {
       def combine(l: => Set[A], r: => Set[A]): Set[A] = l | r
       val identity: Set[A]                            = Set.empty
+      def inverse(l: => Set[A], r: => Set[A]): Set[A] = l &~ r
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Short`
+   * The `Commutative` and `Inverse` instance for the product of `Short`
    * values.
    */
-  implicit val ShortProdCommutativeIdentity: Commutative[Prod[Short]] with Identity[Prod[Short]] =
-    new Commutative[Prod[Short]] with Identity[Prod[Short]] {
+  implicit val ShortProdCommutativeInverse: Commutative[Prod[Short]] with Inverse[Prod[Short]] =
+    new Commutative[Prod[Short]] with Inverse[Prod[Short]] {
       def combine(l: => Prod[Short], r: => Prod[Short]): Prod[Short] = Prod((l * r).toShort)
       val identity: Prod[Short]                                      = Prod(1)
+      def inverse(l: => Prod[Short], r: => Prod[Short]): Prod[Short] = Prod((l / r).toShort)
     }
 
   /**
    * The `Commutative` and `Identity` instance for the sum of `Short` values.
    */
-  implicit val ShortSumCommutativeIdentity: Commutative[Sum[Short]] with Identity[Sum[Short]] =
-    new Commutative[Sum[Short]] with Identity[Sum[Short]] {
+  implicit val ShortSumCommutativeIdentity: Commutative[Sum[Short]] with Inverse[Sum[Short]] =
+    new Commutative[Sum[Short]] with Inverse[Sum[Short]] {
       def combine(l: => Sum[Short], r: => Sum[Short]): Sum[Short] = Sum((l + r).toShort)
       val identity: Sum[Short]                                    = Sum(0)
+      def inverse(l: => Sum[Short], r: => Sum[Short]): Sum[Short] = Sum((l - r).toShort)
     }
 
   /**
