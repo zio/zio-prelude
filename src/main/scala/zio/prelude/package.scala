@@ -1,5 +1,6 @@
 package zio
 
+import com.github.ghik.silencer.silent
 import zio.test.{ assert, TestResult }
 
 package object prelude
@@ -112,4 +113,22 @@ package object prelude
     def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
       assert(self)(isLessThanEqualTo(that))
   }
+
+  implicit class AnySyntax[A](private val a: A) extends AnyVal {
+
+    @silent("side-effecting nullary methods are discouraged")
+    /* Ignores the value, if you explicitly want to do so and avoids "Unused value" compiler warnings. */
+    def ignore: Unit = ()
+
+    /** Applies function `f` to a value `a`, like `f(a)`, but in flipped order and doesn't need parentheses. Can be chained, like `x |> f |> g`. */
+    def |>[B](f: A => B): B = f(a)
+
+    /** Applies the function `f` to the value `a`, ignores the result, and returns the original value `a`. Practical for debugging, like `x.someMethod.tee(println(_)).someOtherMethod...` . Similar to the `tee` UNIX command. */
+    def tap(f: A => Any): A = {
+      val _ = f(a)
+      a
+    }
+
+  }
+
 }
