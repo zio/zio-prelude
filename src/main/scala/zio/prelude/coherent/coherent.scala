@@ -60,16 +60,6 @@ object AssociativeFlattenCovariantDeriveEqual {
     }
 }
 
-trait AssociativeIdentity[A] extends Associative[A] with Identity[A]
-
-object AssociativeIdentity {
-  implicit def derive[A](implicit associative0: Associative[A], identity0: Identity[A]): AssociativeIdentity[A] =
-    new AssociativeIdentity[A] {
-      def combine(l: => A, r: => A): A = associative0.combine(l, r)
-      def identity: A                  = identity0.identity
-    }
-}
-
 trait CommutativeBothDeriveEqualInvariant[F[_]] extends CommutativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
 object CommutativeBothDeriveEqualInvariant {
