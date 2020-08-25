@@ -1,6 +1,5 @@
 package zio
 
-import com.github.ghik.silencer.silent
 import zio.test.{ assert, TestResult }
 
 package object prelude
