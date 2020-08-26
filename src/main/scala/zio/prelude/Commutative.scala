@@ -1,50 +1,65 @@
 package zio.prelude
 
 import zio.prelude.coherent.CommutativeEqual
-import zio.prelude.newtypes.{ And, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Commutative[A] extends Associative[A] {
-  self =>
+/**
+ * The `Commutative` type class describes a binary operator for a type `A` that
+ * is both associative and commutative. This means that `a1 <> a2` is equal to
+ * `a2 <> a1` for all values `a1` and `a2`. Examples of commutative operations
+ * include addition for integers, but not concatenation for strings.
+ *
+ * Commutative operators are useful because combining values with a commutative
+ * operation results in the same value regardless of the order in which values
+ * are combined, allowing us to combine values in the order that is most
+ * efficient and allowing us to return determinate values even when the order
+ * of original values is indeterminate.
+ */
+trait Commutative[A] extends Associative[A] { self =>
+
+  /**
+   * Returns a new `Commutative` instance that describes the same binary
+   * operator but applied in reverse order. Since the operation is commutative
+   * this instance is guaranteed to return the same results as the original
+   * instance but one order of combination or the other may be more efficient
+   * in certain cases.
+   */
   final def commute: Commutative[A] = Commutative((l, r) => self.combine(r, l))
 }
 
 object Commutative extends Lawful[CommutativeEqual] {
 
+  /**
+   * The commutative law states that for some binary operator `*`, for all
+   * values `a1` and `a2`, the following must hold:
+   *
+   * {{{
+   * a1 * a2 === a2 * a1
+   * }}}
+   */
   val commutativeLaw: Laws[CommutativeEqual] =
     new Laws.Law2[CommutativeEqual]("commutativeLaw") {
       def apply[A: CommutativeEqual](a1: A, a2: A): TestResult =
         (a1 <> a2) <-> (a2 <> a1)
     }
 
+  /**
+   * The set of all laws that instances of `Commutative` must satisfy.
+   */
   val laws: Laws[CommutativeEqual] =
     commutativeLaw
 
+  /**
+   * Summons an implicit `Commutative[A]`.
+   */
   def apply[A](implicit commutative: Commutative[A]): Commutative[A] = commutative
 
+  /**
+   * Constructs a `Commutative` instance from a commutative binary operator.
+   */
   def make[A](f: (A, A) => A): Commutative[A] =
     (l, r) => f(l, r)
-
-  implicit val BooleanConjunctionCommutative: Commutative[And] = Commutative.make((l, r) => And(l && r))
-
-  implicit val BooleanDisjunctionCommutative: Commutative[Or] = Commutative.make((l, r) => Or(l || r))
-
-  implicit val BooleanProdCommutative: Commutative[Prod[Boolean]] =
-    Commutative.make((l, r) => Prod(l && r))
-
-  implicit val BooleanSumCommutative: Commutative[Sum[Boolean]] =
-    Commutative.make((l, r) => Sum(l || r))
-
-  implicit val ByteProdCommutative: Commutative[Prod[Byte]] =
-    Commutative.make((l, r) => Prod((l * r).toByte))
-
-  implicit val ByteSumCommutative: Commutative[Sum[Byte]] =
-    Commutative.make((l, r) => Sum((l + r).toByte))
-
-  implicit val CharProdCommutative: Commutative[Prod[Char]] = Commutative.make((l, r) => Prod((l * r).toChar))
-
-  implicit val CharSumCommutative: Commutative[Sum[Char]] = Commutative.make((l, r) => Sum((l + r).toChar))
 
   /**
    * Derives a `Commutative[F[A]]` given a `Derive[F, Commutative]` and a
@@ -56,12 +71,10 @@ object Commutative extends Lawful[CommutativeEqual] {
   ): Commutative[F[A]] =
     derive.derive(commutative)
 
-  implicit val DoubleProdCommutative: Commutative[Prod[Double]] =
-    Commutative.make((l, r) => Prod(l * r))
-
-  implicit val DoubleSumCommutative: Commutative[Sum[Double]] =
-    Commutative.make((l, r) => Sum(l + r))
-
+  /**
+   * Derives a `Commutative[Either[E, A]]` given a `Commutative[E]` and a
+   * `Commutative[A]`.
+   */
   implicit def EitherCommutative[E: Commutative, A: Commutative]: Commutative[Either[E, A]] =
     new Commutative[Either[E, A]] {
       def combine(l: => Either[E, A], r: => Either[E, A]): Either[E, A] =
@@ -73,24 +86,9 @@ object Commutative extends Lawful[CommutativeEqual] {
         }
     }
 
-  implicit val FloatProdCommutative: Commutative[Prod[Float]] =
-    Commutative.make((l, r) => Prod(l * r))
-
-  implicit val FloatSumCommutative: Commutative[Sum[Float]] =
-    Commutative.make((l, r) => Sum(l + r))
-
-  implicit val IntProdCommutative: Commutative[Prod[Int]] =
-    Commutative.make((l, r) => Prod(l * r))
-
-  implicit val IntSumCommutative: Commutative[Sum[Int]] =
-    Commutative.make((l, r) => Sum(l + r))
-
-  implicit val LongProdCommutative: Commutative[Prod[Long]] =
-    Commutative.make((l, r) => Prod(l * r))
-
-  implicit val LongSumCommutative: Commutative[Sum[Long]] =
-    Commutative.make((l, r) => Sum(l + r))
-
+  /**
+   * Derives a `Commutative[Map[K, V]]` given a `Commutative[V]`.
+   */
   implicit def MapCommutative[K, V: Commutative]: Commutative[Map[K, V]] =
     new Commutative[Map[K, V]] {
 
@@ -100,12 +98,9 @@ object Commutative extends Lawful[CommutativeEqual] {
         }
     }
 
-  implicit def MaxCommutative[A: Ord]: Commutative[Max[A]] =
-    make((l: Max[A], r: Max[A]) => if (l >= r) l else r)
-
-  implicit def MinCommutative[A: Ord]: Commutative[Min[A]] =
-    make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
-
+  /**
+   * Derives a `Commutative[Option[A]]` given a `Commutative[A]`
+   */
   implicit def OptionCommutative[A: Commutative]: Commutative[Option[A]] =
     new Commutative[Option[A]] {
       def combine(l: => Option[A], r: => Option[A]): Option[A] =
@@ -117,26 +112,30 @@ object Commutative extends Lawful[CommutativeEqual] {
         }
     }
 
-  implicit def SetCommutative[A]: Commutative[Set[A]] = Commutative.make(_ | _)
-
-  implicit val ShortProdCommutative: Commutative[Prod[Short]] =
-    Commutative.make((l, r) => Prod((l * r).toShort))
-
-  implicit val ShortSumCommutative: Commutative[Sum[Short]] =
-    Commutative.make((l, r) => Sum((l + r).toShort))
-
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple2Commutative[A: Commutative, B: Commutative]: Commutative[(A, B)] =
     new Commutative[(A, B)] {
       def combine(l: => (A, B), r: => (A, B)): (A, B) =
         (l._1 <> r._1, l._2 <> r._2)
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple3Commutative[A: Commutative, B: Commutative, C: Commutative]: Commutative[(A, B, C)] =
     new Commutative[(A, B, C)] {
       def combine(l: => (A, B, C), r: => (A, B, C)): (A, B, C) =
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3)
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple4Commutative[A: Commutative, B: Commutative, C: Commutative, D: Commutative]
     : Commutative[(A, B, C, D)] =
     new Commutative[(A, B, C, D)] {
@@ -144,6 +143,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4)
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple5Commutative[A: Commutative, B: Commutative, C: Commutative, D: Commutative, E: Commutative]
     : Commutative[(A, B, C, D, E)] =
     new Commutative[(A, B, C, D, E)] {
@@ -151,6 +154,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5)
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple6Commutative[
     A: Commutative,
     B: Commutative,
@@ -164,6 +171,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6)
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple7Commutative[
     A: Commutative,
     B: Commutative,
@@ -178,6 +189,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7)
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple8Commutative[
     A: Commutative,
     B: Commutative,
@@ -193,6 +208,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7, l._8 <> r._8)
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple9Commutative[
     A: Commutative,
     B: Commutative,
@@ -219,6 +238,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple10Commutative[
     A: Commutative,
     B: Commutative,
@@ -250,6 +273,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple11Commutative[
     A: Commutative,
     B: Commutative,
@@ -283,6 +310,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple12Commutative[
     A: Commutative,
     B: Commutative,
@@ -318,6 +349,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple13Commutative[
     A: Commutative,
     B: Commutative,
@@ -355,6 +390,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple14Commutative[
     A: Commutative,
     B: Commutative,
@@ -394,6 +433,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple15Commutative[
     A: Commutative,
     B: Commutative,
@@ -435,6 +478,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple16Commutative[
     A: Commutative,
     B: Commutative,
@@ -478,6 +525,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple17Commutative[
     A: Commutative,
     B: Commutative,
@@ -523,6 +574,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple18Commutative[
     A: Commutative,
     B: Commutative,
@@ -570,6 +625,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple19Commutative[
     A: Commutative,
     B: Commutative,
@@ -619,6 +678,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple20Commutative[
     A: Commutative,
     B: Commutative,
@@ -670,6 +733,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple21Commutative[
     A: Commutative,
     B: Commutative,
@@ -723,6 +790,10 @@ object Commutative extends Lawful[CommutativeEqual] {
         )
     }
 
+  /**
+   * Derives a `Commutative` for a product type given a `Commutative` for each
+   * element of the product type.
+   */
   implicit def Tuple22Commutative[
     A: Commutative,
     B: Commutative,
