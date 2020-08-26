@@ -199,6 +199,15 @@ sealed trait These[+A, +B] { self =>
     fold(a => Validation.fail(a), b => Validation.succeed(b), (_, b) => Validation.succeed(b))
 
   /**
+   * Converts this value to a validation success if this value contains a
+   * success or a validation failure otherwise, submerging multiple errors into
+   * the structure of the validation and discarding information about any
+   * errors in the case of success.
+   */
+  final def toValidationNonEmptyChunk[A1](implicit ev: A <:< NonEmptyChunk[A1]): Validation[A1, B] =
+    fold(a => Validation.Failure(ev(a)), b => Validation.succeed(b), (_, b) => Validation.succeed(b))
+
+  /**
    * Combines this computation sequentially with that computation, combining
    * their results into a tuple. If this computation does not return a success
    * that computation will not be performed. If both computations are performed
@@ -411,10 +420,19 @@ object These {
     }
 
   /**
-   * Constucts a `Both` value.
+   * Constucts a `Both` with an `A` value and a `B` value.
    */
   def both[A, B](a: A, b: B): These[A, B] =
     Both(a, b)
+
+  /**
+   * Constructs a `Both` with an `A` value and a `B` value, wrapping the `A`
+   * value in a `NonEmptyChunk`. This is useful when using `These` to model
+   * computations that may both succeed and fail to use the `Associative`
+   * instance for `NonEmptyChunk` to accumulate all errors.
+   */
+  def bothNonEmptyChunk[A, B](a: A, b: B): These[NonEmptyChunk[A], B] =
+    both(NonEmptyChunk(a), b)
 
   /**
    * Constructs a `These` from an `Either` value.
@@ -435,13 +453,22 @@ object These {
     validation.fold(left, right)
 
   /**
-   * Constructs a `Left` value.
+   * Constructs a `Left` with an `A` value.
    */
   def left[A](a: A): These[A, Nothing] =
     Left(a)
 
   /**
-   * Constructs a `Right` value.
+   * Constructs a `Left` with an `A` value, wrapping the `A` value in a
+   * `NonEmptyChunk`. This is useful when using `These` to model computations
+   * that may both succeed and fail to use the `Associative` instance for
+   * `NonEmptyChunk` to accumulate multiple errors.
+   */
+  def leftNonEmptyChunk[A](a: A): These[NonEmptyChunk[A], Nothing] =
+    left(NonEmptyChunk(a))
+
+  /**
+   * Constructs a `Right` with an `A` value.
    */
   def right[A](a: A): These[Nothing, A] =
     Right(a)
