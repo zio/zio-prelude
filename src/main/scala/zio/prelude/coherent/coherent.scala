@@ -211,7 +211,7 @@ object DeriveEqualTraversable {
     }
 }
 
-trait EqualIdentity[A] extends Equal[A] with Identity[A]
+trait EqualIdentity[A] extends AssociativeEqual[A] with Identity[A]
 
 object EqualIdentity {
   implicit def derive[A](implicit identity0: Identity[A], equal0: Equal[A]): EqualIdentity[A] =

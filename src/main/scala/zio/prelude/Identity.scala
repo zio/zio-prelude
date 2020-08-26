@@ -58,7 +58,7 @@ object Identity extends Lawful[EqualIdentity] {
    * The set of all laws that instances of `Identity` must satisfy.
    */
   val laws: Laws[EqualIdentity] =
-    leftIdentityLaw + rightIdentityLaw
+    leftIdentityLaw + rightIdentityLaw + Associative.laws
 
   /**
    * Summons an implicit `Identity[A]`.
@@ -76,6 +76,13 @@ object Identity extends Lawful[EqualIdentity] {
     }
 
   /**
+   * Constructs an `Identity` instance from an associative instance and
+   * an identity element.
+   */
+  def makeFrom[A](identity0: A, associative: Associative[A]): Identity[A] =
+    make(identity0, (l, r) => associative.combine(l, r))
+
+  /**
    * Derives an `Identity[F[A]]` given a `Derive[F, Identity]` and an
    * `Identity[A]`.
    */
@@ -83,48 +90,50 @@ object Identity extends Lawful[EqualIdentity] {
     derive.derive(identity)
 
   /**
+   * Derives an `Identity[Either[E, A]]` given an `Identity[A]`.
+   */
+  implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
+    makeFrom(
+      Right(Identity[A].identity),
+      Associative.EitherAssociative
+    )
+
+  /**
    * Derives an `Identity` for a product type given an `Identity` for each
    * element of the product type.
    */
   implicit def Tuple2Identity[A: Identity, B: Identity]: Identity[(A, B)] =
-    new Identity[(A, B)] {
-      def identity: (A, B) = (Identity[A].identity, Identity[B].identity)
-      def combine(l: => (A, B), r: => (A, B)): (A, B) =
-        (l._1 <> r._1, l._2 <> r._2)
-    }
+    makeFrom(
+      (Identity[A].identity, Identity[B].identity),
+      Associative.Tuple2Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
    * element of the product type.
    */
   implicit def Tuple3Identity[A: Identity, B: Identity, C: Identity]: Identity[(A, B, C)] =
-    new Identity[(A, B, C)] {
-      def identity: (A, B, C) =
-        (Identity[A].identity, Identity[B].identity, Identity[C].identity)
-      def combine(l: => (A, B, C), r: => (A, B, C)): (A, B, C) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3)
-    }
+    makeFrom(
+      (Identity[A].identity, Identity[B].identity, Identity[C].identity),
+      Associative.Tuple3Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
    * element of the product type.
    */
   implicit def Tuple4Identity[A: Identity, B: Identity, C: Identity, D: Identity]: Identity[(A, B, C, D)] =
-    new Identity[(A, B, C, D)] {
-      def identity: (A, B, C, D) =
-        (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity)
-      def combine(l: => (A, B, C, D), r: => (A, B, C, D)): (A, B, C, D) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4)
-    }
+    makeFrom(
+      (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity),
+      Associative.Tuple4Associative
+    )
 
   implicit def Tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]
     : Identity[(A, B, C, D, E)] =
-    new Identity[(A, B, C, D, E)] {
-      def identity: (A, B, C, D, E) =
-        (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity, Identity[E].identity)
-      def combine(l: => (A, B, C, D, E), r: => (A, B, C, D, E)): (A, B, C, D, E) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5)
-    }
+    makeFrom(
+      (Identity[A].identity, Identity[B].identity, Identity[C].identity, Identity[D].identity, Identity[E].identity),
+      Associative.Tuple5Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -132,19 +141,17 @@ object Identity extends Lawful[EqualIdentity] {
    */
   implicit def Tuple6Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity]
     : Identity[(A, B, C, D, E, F)] =
-    new Identity[(A, B, C, D, E, F)] {
-      def identity: (A, B, C, D, E, F) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity
-        )
-      def combine(l: => (A, B, C, D, E, F), r: => (A, B, C, D, E, F)): (A, B, C, D, E, F) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6)
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity
+      ),
+      Associative.Tuple6Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -152,20 +159,18 @@ object Identity extends Lawful[EqualIdentity] {
    */
   implicit def Tuple7Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity, F: Identity, G: Identity]
     : Identity[(A, B, C, D, E, F, G)] =
-    new Identity[(A, B, C, D, E, F, G)] {
-      def identity: (A, B, C, D, E, F, G) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity
-        )
-      def combine(l: => (A, B, C, D, E, F, G), r: => (A, B, C, D, E, F, G)): (A, B, C, D, E, F, G) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7)
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity
+      ),
+      Associative.Tuple7Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -181,30 +186,19 @@ object Identity extends Lawful[EqualIdentity] {
     G: Identity,
     H: Identity
   ]: Identity[(A, B, C, D, E, F, G, H)] =
-    new Identity[(A, B, C, D, E, F, G, H)] {
-      def identity: (A, B, C, D, E, F, G, H) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity
-        )
-      def combine(l: => (A, B, C, D, E, F, G, H), r: => (A, B, C, D, E, F, G, H)): (A, B, C, D, E, F, G, H) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity
+      ),
+      Associative.Tuple8Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -221,32 +215,20 @@ object Identity extends Lawful[EqualIdentity] {
     H: Identity,
     I: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I)] =
-    new Identity[(A, B, C, D, E, F, G, H, I)] {
-      def identity: (A, B, C, D, E, F, G, H, I) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity
-        )
-      def combine(l: => (A, B, C, D, E, F, G, H, I), r: => (A, B, C, D, E, F, G, H, I)): (A, B, C, D, E, F, G, H, I) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity
+      ),
+      Associative.Tuple9Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -264,37 +246,21 @@ object Identity extends Lawful[EqualIdentity] {
     I: Identity,
     J: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J),
-        r: => (A, B, C, D, E, F, G, H, I, J)
-      ): (A, B, C, D, E, F, G, H, I, J) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity
+      ),
+      Associative.Tuple10Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -313,39 +279,22 @@ object Identity extends Lawful[EqualIdentity] {
     J: Identity,
     K: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K),
-        r: => (A, B, C, D, E, F, G, H, I, J, K)
-      ): (A, B, C, D, E, F, G, H, I, J, K) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity
+      ),
+      Associative.Tuple11Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -365,41 +314,23 @@ object Identity extends Lawful[EqualIdentity] {
     K: Identity,
     L: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity
+      ),
+      Associative.Tuple12Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -420,43 +351,24 @@ object Identity extends Lawful[EqualIdentity] {
     L: Identity,
     M: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity
+      ),
+      Associative.Tuple13Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -478,45 +390,25 @@ object Identity extends Lawful[EqualIdentity] {
     M: Identity,
     N: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity
+      ),
+      Associative.Tuple14Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -539,47 +431,26 @@ object Identity extends Lawful[EqualIdentity] {
     N: Identity,
     O: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity
+      ),
+      Associative.Tuple15Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -603,49 +474,27 @@ object Identity extends Lawful[EqualIdentity] {
     O: Identity,
     P: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity,
-          Identity[P].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity,
+        Identity[P].identity
+      ),
+      Associative.Tuple16Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -670,51 +519,28 @@ object Identity extends Lawful[EqualIdentity] {
     P: Identity,
     Q: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity,
-          Identity[P].identity,
-          Identity[Q].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity,
+        Identity[P].identity,
+        Identity[Q].identity
+      ),
+      Associative.Tuple17Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -740,53 +566,29 @@ object Identity extends Lawful[EqualIdentity] {
     Q: Identity,
     R: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity,
-          Identity[P].identity,
-          Identity[Q].identity,
-          Identity[R].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity,
+        Identity[P].identity,
+        Identity[Q].identity,
+        Identity[R].identity
+      ),
+      Associative.Tuple18Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -813,55 +615,30 @@ object Identity extends Lawful[EqualIdentity] {
     R: Identity,
     S: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity,
-          Identity[P].identity,
-          Identity[Q].identity,
-          Identity[R].identity,
-          Identity[S].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity,
+        Identity[P].identity,
+        Identity[Q].identity,
+        Identity[R].identity,
+        Identity[S].identity
+      ),
+      Associative.Tuple19Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -889,57 +666,31 @@ object Identity extends Lawful[EqualIdentity] {
     S: Identity,
     T: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity,
-          Identity[P].identity,
-          Identity[Q].identity,
-          Identity[R].identity,
-          Identity[S].identity,
-          Identity[T].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19,
-          l._20 <> r._20
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity,
+        Identity[P].identity,
+        Identity[Q].identity,
+        Identity[R].identity,
+        Identity[S].identity,
+        Identity[T].identity
+      ),
+      Associative.Tuple20Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -968,59 +719,32 @@ object Identity extends Lawful[EqualIdentity] {
     T: Identity,
     U: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity,
-          Identity[P].identity,
-          Identity[Q].identity,
-          Identity[R].identity,
-          Identity[S].identity,
-          Identity[T].identity,
-          Identity[U].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19,
-          l._20 <> r._20,
-          l._21 <> r._21
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity,
+        Identity[P].identity,
+        Identity[Q].identity,
+        Identity[R].identity,
+        Identity[S].identity,
+        Identity[T].identity,
+        Identity[U].identity
+      ),
+      Associative.Tuple21Associative
+    )
 
   /**
    * Derives an `Identity` for a product type given an `Identity` for each
@@ -1050,61 +774,33 @@ object Identity extends Lawful[EqualIdentity] {
     U: Identity,
     V: Identity
   ]: Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
-    new Identity[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] {
-      def identity: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) =
-        (
-          Identity[A].identity,
-          Identity[B].identity,
-          Identity[C].identity,
-          Identity[D].identity,
-          Identity[E].identity,
-          Identity[F].identity,
-          Identity[G].identity,
-          Identity[H].identity,
-          Identity[I].identity,
-          Identity[J].identity,
-          Identity[K].identity,
-          Identity[L].identity,
-          Identity[M].identity,
-          Identity[N].identity,
-          Identity[O].identity,
-          Identity[P].identity,
-          Identity[Q].identity,
-          Identity[R].identity,
-          Identity[S].identity,
-          Identity[T].identity,
-          Identity[U].identity,
-          Identity[V].identity
-        )
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19,
-          l._20 <> r._20,
-          l._21 <> r._21,
-          l._22 <> r._22
-        )
-    }
+    makeFrom(
+      (
+        Identity[A].identity,
+        Identity[B].identity,
+        Identity[C].identity,
+        Identity[D].identity,
+        Identity[E].identity,
+        Identity[F].identity,
+        Identity[G].identity,
+        Identity[H].identity,
+        Identity[I].identity,
+        Identity[J].identity,
+        Identity[K].identity,
+        Identity[L].identity,
+        Identity[M].identity,
+        Identity[N].identity,
+        Identity[O].identity,
+        Identity[P].identity,
+        Identity[Q].identity,
+        Identity[R].identity,
+        Identity[S].identity,
+        Identity[T].identity,
+        Identity[U].identity,
+        Identity[V].identity
+      ),
+      Associative.Tuple22Associative
+    )
 }
 
 trait IdentitySyntax {
