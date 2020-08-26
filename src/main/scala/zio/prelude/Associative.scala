@@ -808,18 +808,18 @@ trait AssociativeSyntax {
    * Provides infix syntax for combining two values with an associative
    * operation.
    */
-  implicit class AssociativeOps[A](l: A) {
+  implicit class AssociativeOps[+A](l: A) {
 
     /**
      * A symbolic alias for `combine`.
      */
-    def <>(r: => A)(implicit associative: Associative[A]): A =
+    def <>[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
      * Associatively combine this value with the specified value
      */
-    def combine(r: => A)(implicit associative: Associative[A]): A =
+    def combine[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
   }
 }
