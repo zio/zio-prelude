@@ -22,8 +22,8 @@ trait Assertions {
    */
   def isFailureV[E](assertion: Assertion[NonEmptyChunk[E]]): Assertion[Validation[E, Any]] =
     Assertion.assertionRec("isFailureV")(param(assertion))(assertion) {
-      case Validation.Failure(es) => Some(es)
-      case _                      => None
+      case Validation.Failure(_, e) => Some(e)
+      case _                        => None
     }
 
   /**
@@ -60,7 +60,7 @@ trait Assertions {
    */
   def isSuccessV[A](assertion: Assertion[A]): Assertion[Validation[Any, A]] =
     Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) {
-      case Validation.Success(a) => Some(a)
-      case _                     => None
+      case Validation.Success(_, a) => Some(a)
+      case _                        => None
     }
 }

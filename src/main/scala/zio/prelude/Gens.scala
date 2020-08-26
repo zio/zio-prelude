@@ -23,9 +23,15 @@ object Gens {
   /**
    * A generator of `Validation` values.
    */
-  def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
-    Gen.either(Gen.chunkOf1(e), a).map {
-      case Left(es) => Validation.Failure(es)
-      case Right(a) => Validation.Success(a)
+  def validation[R <: Random with Sized, W, E, A](
+    w: Gen[R, W],
+    e: Gen[R, E],
+    a: Gen[R, A]
+  ): Gen[R, ZValidation[W, E, A]] =
+    Gen.chunkOf(w).flatMap { w =>
+      Gen.either(Gen.chunkOf1(e), a).map {
+        case Left(e)  => Validation.Failure(w, e)
+        case Right(a) => Validation.Success(w, a)
+      }
     }
 }

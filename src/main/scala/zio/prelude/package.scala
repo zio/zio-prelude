@@ -47,6 +47,9 @@ package object prelude
   type MultiSet[+A] = ZSet[A, Int]
   val MultiSet: ZSet.type = ZSet
 
+  type Validation[+E, +A] = ZValidation[Nothing, E, A]
+  val Validation: ZValidation.type = ZValidation
+
   type DeriveAssociative[F[_]] = Derive[F, Associative]
   type DeriveCommutative[F[_]] = Derive[F, Commutative]
   type DeriveDebug[F[_]]       = Derive[F, Debug]
