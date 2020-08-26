@@ -21,6 +21,7 @@ package object prelude
     with IdentitySyntax
     with IdentityBothSyntax
     with IdentityEitherSyntax
+    with InverseSyntax
     with NewtypeExports
     with NewtypeFExports
     with NonEmptyTraversableSyntax
@@ -57,11 +58,11 @@ package object prelude
 
   object classic {
     type Semigroup[A]            = Associative[A]
-    type CommutativeSemigroup[A] = Associative[A] with Commutative[A]
+    type CommutativeSemigroup[A] = Commutative[A]
     type Monoid[A]               = Identity[A]
     type CommutativeMonoid[A]    = Commutative[A] with Identity[A]
-    type Group[A]                = Identity[A] with Inverse[A]
-    type AbelianGroup[A]         = Commutative[A] with Identity[A] with Inverse[A]
+    type Group[A]                = Inverse[A]
+    type AbelianGroup[A]         = Commutative[A] with Inverse[A]
 
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]

@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.Chunk
-import zio.prelude.Commutative._
+import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZSet._
 import zio.prelude.coherent.CovariantDeriveEqual
@@ -41,7 +41,7 @@ object ZSetSpec extends DefaultRunnableSpec {
         ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
           // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
           CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
-            ZSetCovariant(IntSumCommutative),
+            ZSetCovariant(IntSumCommutativeInverse),
             ZSetDeriveEqual(IntEqual)
           ),
           IntEqual

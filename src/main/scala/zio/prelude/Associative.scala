@@ -187,16 +187,14 @@ object Associative extends Lawful[AssociativeEqual] {
     }
 
   /**
-   * Derives an `Identity[Either[E, A]]` given an `Identity[A]`.
+   * Derives an `Associative[Either[E, A]]` given an `Associative[A]`.
    */
-  implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
-    Identity.make(
-      Right(Identity[A].identity), {
-        case (Left(l), _)         => Left(l)
-        case (_, Left(r))         => Left(r)
-        case (Right(l), Right(r)) => Right(l <> r)
-      }
-    )
+  implicit def EitherAssociative[E, A: Associative]: Associative[Either[E, A]] =
+    make {
+      case (Left(l), _)         => Left(l)
+      case (_, Left(r))         => Left(r)
+      case (Right(l), Right(r)) => Right(l <> r)
+    }
 
   /**
    * The `Associative` instance for the first of `A` values.
