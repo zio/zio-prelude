@@ -21,13 +21,13 @@ object CoherentSpec extends DefaultRunnableSpec {
       assert(instance.equal("a", "a"))(isTrue)
     },
     test("AssociativeEqual") {
-      val instance = implicitly[AssociativeEqual[String]]
+      val instance = implicitly[EqualAssociative[String]]
 
       assert(instance.combine("a", "b"))(equalTo("ab")) &&
       assert(instance.equal("a", "a"))(isTrue)
     },
     test("CommutativeEqual") {
-      val instance = implicitly[CommutativeEqual[Sum[Int]]]
+      val instance = implicitly[EqualCommutative[Sum[Int]]]
 
       assert(instance.combine(Sum(1), Sum(5)))(equalTo(Sum(6))) &&
       assert(instance.equal(Sum(5), Sum(5)))(isTrue)

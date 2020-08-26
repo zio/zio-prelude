@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.coherent.CommutativeEqual
+import zio.prelude.coherent.EqualCommutative
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -28,7 +28,7 @@ trait Commutative[A] extends Associative[A] { self =>
   final def commute: Commutative[A] = Commutative((l, r) => self.combine(r, l))
 }
 
-object Commutative extends Lawful[CommutativeEqual] {
+object Commutative extends Lawful[EqualCommutative] {
 
   /**
    * The commutative law states that for some binary operator `*`, for all
@@ -38,17 +38,17 @@ object Commutative extends Lawful[CommutativeEqual] {
    * a1 * a2 === a2 * a1
    * }}}
    */
-  val commutativeLaw: Laws[CommutativeEqual] =
-    new Laws.Law2[CommutativeEqual]("commutativeLaw") {
-      def apply[A: CommutativeEqual](a1: A, a2: A): TestResult =
+  val commutativeLaw: Laws[EqualCommutative] =
+    new Laws.Law2[EqualCommutative]("commutativeLaw") {
+      def apply[A: EqualCommutative](a1: A, a2: A): TestResult =
         (a1 <> a2) <-> (a2 <> a1)
     }
 
   /**
    * The set of all laws that instances of `Commutative` must satisfy.
    */
-  val laws: Laws[CommutativeEqual] =
-    commutativeLaw
+  val laws: Laws[EqualCommutative] =
+    commutativeLaw + Associative.laws
 
   /**
    * Summons an implicit `Commutative[A]`.
