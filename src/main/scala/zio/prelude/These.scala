@@ -63,6 +63,12 @@ sealed trait These[+A, +B] { self =>
     zip(that)
 
   /**
+   * A symbolic alias for `orElseEither`.
+   */
+  final def <+>[A1 >: A: Associative, C](that: => These[A1, C]): These[A1, Either[B, C]] =
+    orElseEither(that)
+
+  /**
    * A symbolic alias for `flatMap`.
    */
   final def >>=[A1 >: A: Associative, C](f: B => These[A1, C]): These[A1, C] =
@@ -172,6 +178,21 @@ sealed trait These[+A, +B] { self =>
       case Left(a)    => left(f(a))
       case Right(b)   => right(b)
       case Both(a, b) => both(f(a), b)
+    }
+
+  final def orElse[A1 >: A: Associative, B1 >: B](that: => These[A1, B1]): These[A1, B1] =
+    orElseEither(that).map(_.merge)
+
+  final def orElseEither[A1 >: A: Associative, C](that: => These[A1, C]): These[A1, Either[B, C]] =
+    self match {
+      case Left(a) =>
+        that match {
+          case Left(a1)    => left(a <> a1)
+          case Right(c)    => both(a, scala.util.Right(c))
+          case Both(a1, c) => both(a <> a1, scala.util.Right(c))
+        }
+      case Right(b)   => right(scala.util.Left(b))
+      case Both(a, b) => both(a, scala.util.Left(b))
     }
 
   /**
@@ -310,6 +331,15 @@ object These {
       case (Both(a, b), Left(a1))     => both(a <> a1, b)
       case (Both(a, b), Right(b1))    => both(a, b <> b1)
       case (Both(a, b), Both(a1, b1)) => both(a <> a1, b <> b1)
+    }
+
+  /**
+   * The `AssociativeEither` instance for `These`.
+   */
+  implicit def TheseAssociativeEither[A: Associative]: AssociativeEither[({ type lambda[+b] = These[A, b] })#lambda] =
+    new AssociativeEither[({ type lambda[+b] = These[A, b] })#lambda] {
+      def either[B, C](fa: => These[A, B], fb: => These[A, C]): These[A, Either[B, C]] =
+        fa.orElseEither(fb)
     }
 
   /**

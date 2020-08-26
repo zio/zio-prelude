@@ -8,6 +8,7 @@ object TheseSpec extends DefaultRunnableSpec {
   def spec = suite("TheseSpec")(
     suite("laws")(
       testM("associative")(checkAllLaws(Associative)(Gens.these(Gen.chunkOf(Gen.anyInt), Gen.chunkOf(Gen.anyInt)))),
+      testM("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.these(Gen.chunkOf(Gen.anyInt)), Gen.anyInt)),
       testM("commutative")(checkAllLaws(Commutative)(Gens.these(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)))),
       testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(GenFs.these(Gen.setOf(Gen.anyInt)), Gen.anyInt)),
       testM("covariant")(checkAllLaws(Covariant)(GenFs.these(Gen.anyInt), Gen.anyInt)),
