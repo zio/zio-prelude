@@ -3,7 +3,7 @@ package zio.prelude
 import scala.util.Try
 
 import zio.{ Chunk, IO, NonEmptyChunk, ZIO }
-import zio.prelude.Validation._
+import zio.prelude.ZValidation._
 import zio.test.Assertion
 
 /**
@@ -343,7 +343,10 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Constructs a `ZValidation` from a `Try`.
    */
   def fromTry[A](value: => Try[A]): Validation[Throwable, A] =
-    value.fold(fail, succeed)
+    value match {
+      case scala.util.Failure(e) => fail(e)
+      case scala.util.Success(a) => succeed(a)
+    }
 
   /**
    * Constructs a `ZValidation` that succeeds with the `Unit` value with a log
