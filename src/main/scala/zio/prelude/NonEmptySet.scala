@@ -5,10 +5,12 @@ import scala.language.implicitConversions
 final class NonEmptySet[A] private (val toSet: Set[A]) {
   def destruct: (A, Set[A])                            = (toSet.head, toSet.tail)
   def toNonEmptyList: NonEmptyList[A]                  = destruct match { case (head, tail) => NonEmptyList.fromIterable(head, tail) }
+  def add(elem: A): NonEmptySet[A]                     = new NonEmptySet(toSet + elem)
   def +(elem: A): NonEmptySet[A]                       = new NonEmptySet(toSet + elem)
   def +(elem1: A, elem2: A, elems: A*): NonEmptySet[A] = new NonEmptySet(toSet + elem1 + elem2 ++ elems)
   def union(that: Set[A]): NonEmptySet[A]              = new NonEmptySet(toSet.union(that))
   def ++(that: Set[A]): NonEmptySet[A]                 = new NonEmptySet(toSet ++ that)
+  def remove(elem: A): Set[A]                          = toSet - elem
 
   /**
    * Flattens a `NonEmptySet` of `NonEmptySet` values into a single
