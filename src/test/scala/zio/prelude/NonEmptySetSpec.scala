@@ -26,14 +26,14 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
     suite("methods")(
       testM("+") {
         check(genSet, genSet) { (as, bs) =>
-          val actual   = (NonEmptySet.fromSetOption(as).get + NonEmptySet.fromSetOption(bs).get).toSet
+          val actual   = (NonEmptySet.fromSetOption(as).get ++ NonEmptySet.fromSetOption(bs).get).toSet
           val expected = as ++ bs
           actual <-> expected
         }
       },
       testM("-") {
         check(genSet, genSet) { (as, bs) =>
-          val actual   = (NonEmptySet.fromSetOption(as).get - NonEmptySet.fromSetOption(bs).get).toSet
+          val actual   = (NonEmptySet.fromSetOption(as).get -- NonEmptySet.fromSetOption(bs).get).toSet
           val expected = as -- bs
           actual <-> expected
         }
@@ -52,14 +52,14 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
       },
       testM("add") {
         check(genSet, genInt) { (as, a) =>
-          val actual   = NonEmptySet.fromSetOption(as).get.add(a).toSet
+          val actual   = (NonEmptySet.fromSetOption(as).get + a).toSet
           val expected = as + a
           actual <-> expected
         }
       },
       testM("remove") {
         check(genSet, genInt) { (as, a) =>
-          val actual   = NonEmptySet.fromSetOption(as).get.remove(a)
+          val actual   = NonEmptySet.fromSetOption(as).get - a
           val expected = as - a
           actual <-> expected
         }
