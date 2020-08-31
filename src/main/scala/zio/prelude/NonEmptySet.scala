@@ -68,12 +68,7 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
    * `NonEmptySet`.
    */
   def flatten[B](implicit ev: A <:< NonEmptySet[B]): NonEmptySet[B] =
-    destruct match {
-      case (head, tail) =>
-        tail.foldLeft(ev(head)) { (b, a) =>
-          b ++ ev(a)
-        }
-    }
+    new NonEmptySet[B](set.foldLeft[Set[B]](Set.empty)((b, a) => b union ev(a)))
 
   override def hashCode: Int = set.hashCode()
 
