@@ -37,9 +37,9 @@ object ValidationSpec extends DefaultRunnableSpec {
           // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
           CovariantDeriveEqual.derive[({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda](
             ValidationFailureCovariant,
-            ValidationFailureDeriveEqual(IntEqual)
+            ValidationFailureDeriveEqual(IntHashOrd)
           ),
-          IntEqual
+          IntHashOrd
         )
       ),
       testM("hash")(checkAllLaws(Hash)(genValidation)),

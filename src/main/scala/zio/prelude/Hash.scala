@@ -133,24 +133,6 @@ object Hash extends Lawful[Hash] {
     make(_.hashCode(), _ == _)
 
   /**
-   * Hashing for `Boolean` values.
-   */
-  implicit val BooleanHash: Hash[Boolean] =
-    default
-
-  /**
-   * Hashing for `Byte` values.
-   */
-  implicit val ByteHas: Hash[Byte] =
-    default
-
-  /**
-   * Hashing for `Char` values.
-   */
-  implicit val CharHash: Hash[Char] =
-    default
-
-  /**
    * Derives a `Hash[Chunk[A]]` given a `Hash[A]`.
    */
   implicit def ChunkHash[A: Hash]: Hash[Chunk[A]] =
@@ -169,22 +151,10 @@ object Hash extends Lawful[Hash] {
     Hash[A] either Hash[B]
 
   /**
-   * Hashing for `Int` values.
-   */
-  implicit val IntHash: Hash[Int] =
-    default
-
-  /**
    * Derives a `Hash[List[A]]` given a `Hash[A]`.
    */
   implicit def ListHash[A: Hash]: Hash[List[A]] =
     make(_.map(Hash[A].hash).hashCode, _.corresponds(_)(_ === _))
-
-  /**
-   * Hashing for `Long` values.
-   */
-  implicit val LongHash: Hash[Long] =
-    default
 
   /**
    * Derives a `Hash[Map[A, B]]` given a `Hash[B]`. Due to the limitations of
@@ -205,14 +175,6 @@ object Hash extends Lawful[Hash] {
     Hash[Chunk[A]].contramap(_.toChunk)
 
   /**
-   * Hashing for `Nothing` values. Note that since there are not values of type
-   * `Nothing` the `hash` method of this instance can never be called but it
-   * can be useful in deriving instances for more complex types.
-   */
-  implicit val NothingHash: Hash[Nothing] =
-    default
-
-  /**
    * Derives a `Hash[Option[A]]` given a `Hash[A]`.
    */
   implicit def OptionHash[A: Hash]: Hash[Option[A]] =
@@ -223,19 +185,6 @@ object Hash extends Lawful[Hash] {
         case _                    => false
       }
     )
-
-  /**
-   * Hashing for `Set[A]` values. Due to the limitations of Scala's `Set`,
-   * this uses object equality and hash code on the elements.
-   */
-  implicit def SetHash[A]: Hash[Set[A]] =
-    default
-
-  /**
-   * Hashing for `String` values.
-   */
-  implicit val StringHash: Hash[String] =
-    default
 
   /**
    * Derives a `Hash` for a product type given a `Hash` for each element of the
@@ -945,13 +894,6 @@ object Hash extends Lawful[Hash] {
           a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2 && v1 === v2
       }
     )
-
-  /**
-   * Hashing for `Unit` values. Since there is only one `Unit` value all values
-   * have the same hash.
-   */
-  implicit val UnitHash: Hash[Unit] =
-    default
 
   /**
    * Derives a `Hash[Vector[A]]` given a `Hash[A]`.

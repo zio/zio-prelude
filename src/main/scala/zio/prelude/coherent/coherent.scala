@@ -235,7 +235,7 @@ object EqualInverse {
 }
 
 trait HashOrd[-A] extends Hash[A] with Ord[A] { self =>
-  final override def contramap[B](f: B => A): HashOrd[B] =
+  final override def contramap[B](f: B => A): Hash[B] with Ord[B] =
     new HashOrd[B] {
       def hash(b: B): Int                                    = self.hash(f(b))
       protected def checkCompare(l: B, r: B): Ordering       = self.compare(f(l), f(r))
@@ -250,4 +250,34 @@ object HashOrd {
       protected def checkCompare(l: A, r: A): Ordering       = ord0.compare(l, r)
       override protected def checkEqual(l: A, r: A): Boolean = ord0.equal(l, r)
     }
+
+  /**
+   * Constructs an instance from a `hash0` function, an `ord`` function and a `equal0` function.
+   * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
+   */
+  def make[A](hash0: A => Int, ord: (A, A) => Ordering, equal0: (A, A) => Boolean): Hash[A] with Ord[A] =
+    new HashOrd[A] {
+      def hash(a: A): Int                                       = hash0(a)
+      override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean    = equal0(l, r)
+    }
+
+  /**
+   * Constructs an instance from a hash function, equal function and ord function.
+   * Checking equality is delegated to `ord`, so short-circuiting the equality check (failing fast) is not possible.
+   */
+  def make[A](hash0: A => Int, ord: (A, A) => Ordering): Hash[A] with Ord[A] =
+    new HashOrd[A] {
+      def hash(a: A): Int                                       = hash0(a)
+      override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean    = ord(l, r).isEqual
+    }
+
+  /**
+   * Constructs a `Hash[A] with Ord[A]` that uses the default notion of hashing embodied in
+   * the implementation of `hashCode` for values of type `A` and ordering from [[scala.math.Ordering]].
+   */
+  def default[A](implicit ord: scala.math.Ordering[A]): Hash[A] with Ord[A] =
+    make(_.hashCode(), (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
+
 }

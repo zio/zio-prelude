@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.Exit.{ Failure, Success }
+import zio.prelude.coherent.HashOrd
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
@@ -128,20 +129,22 @@ object Equal extends Lawful[Equal] {
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
   /**
-   * Equality for `Any` values. Note that since values of type `Any` contain
-   * no information, all values of type `Any` can be treated as equal to each
-   * other.
+   * `Ord` (and thus also `Equal`) instance for `Any` values.
+   * Note that since values of type `Any` contain no information,
+   * all values of type `Any` can be treated as equal to each other.
    */
-  val AnyEqual: Equal[Any] =
-    make((_, _) => true)
+  val AnyHashOrd: Hash[Any] with Ord[Any] =
+    HashOrd.make(_ => 0, (_, _) => Ordering.Equals, (_, _) => true)
 
   /**
-   * Equality for `Nothing` values. Note that since there are not values of
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Nothing` values.
+   * Note that since there are not values of
    * type `Nothing` the `equals` method of this instance can never be called
    * but it can be useful in deriving instances for more complex types.
    */
-  implicit val NothingEqual: Equal[Nothing] =
-    default
+  implicit val NothingHashOrd: Hash[Nothing] with Ord[Nothing] =
+    HashOrd
+      .make[Nothing]((_: Nothing) => 0, (_: Nothing, _: Nothing) => Ordering.Equals, (_: Nothing, _: Nothing) => false)
 
   /**
    * The `AssociativeBoth` instance for `Equal`.
@@ -194,7 +197,7 @@ object Equal extends Lawful[Equal] {
   implicit val EqualIdentityBoth: IdentityBoth[Equal] =
     new IdentityBoth[Equal] {
       val any: Equal[Any] =
-        AnyEqual
+        AnyHashOrd
       def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
         fa.both(fb)
     }
@@ -207,7 +210,7 @@ object Equal extends Lawful[Equal] {
       def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
         fa.either(fb)
       val none: Equal[Nothing] =
-        NothingEqual
+        NothingHashOrd
     }
 
   /**
@@ -232,28 +235,28 @@ object Equal extends Lawful[Equal] {
     make(_ == _)
 
   /**
-   * Equality for `Boolean` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
    */
-  implicit val BooleanEqual: Equal[Boolean] =
-    default
+  implicit val BooleanHashOrd: Hash[Boolean] with Ord[Boolean] =
+    HashOrd.default
 
   /**
-   * Equality for `Byte` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Byte` values.
    */
-  implicit val ByteEqual: Equal[Byte] =
-    default
+  implicit val ByteHashOrd: Hash[Byte] with Ord[Byte] =
+    HashOrd.default
 
   /**
-   * Equality for `Short` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Short` values.
    */
-  implicit val ShortEqual: Equal[Short] =
-    default
+  implicit val ShortHashOrd: Hash[Short] with Ord[Short] =
+    HashOrd.default
 
   /**
-   * Equality for `Char` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Char` values.
    */
-  implicit val CharEqual: Equal[Char] =
-    default
+  implicit val CharHashOrd: Hash[Char] with Ord[Char] =
+    HashOrd.default
 
   /**
    * Derives an `Equal[Chunk[A]]` given an `Equal[A]`.
@@ -278,13 +281,8 @@ object Equal extends Lawful[Equal] {
    *   * of a total ordering,
    * `Double.NaN` will be treated as greater than any other number.
    */
-  implicit val DoubleHashOrd: Hash[Double] with Ord[Double] = new coherent.HashOrd[Double] {
-
-    override protected def checkCompare(l: Double, r: Double): Ordering =
-      Ordering.fromCompare(java.lang.Double.compare(l, r))
-
-    override def hash(a: Double): Int = a.hashCode()
-  }
+  implicit val DoubleHashOrd: Hash[Double] with Ord[Double] =
+    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
@@ -303,19 +301,14 @@ object Equal extends Lawful[Equal] {
    *   * of a total ordering,
    * `Float.NaN` will be treated as greater than any other number.
    */
-  implicit val FloatHashOrd: Hash[Float] with Ord[Float] = new coherent.HashOrd[Float] {
-
-    override protected def checkCompare(l: Float, r: Float): Ordering =
-      Ordering.fromCompare(java.lang.Float.compare(l, r))
-
-    override def hash(a: Float): Int = a.hashCode()
-  }
+  implicit val FloatHashOrd: Hash[Float] with Ord[Float] =
+    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
-   * Equality for `Int` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
    */
-  implicit val IntEqual: Equal[Int] =
-    default
+  implicit val IntHashOrd: Hash[Int] with Ord[Int] =
+    HashOrd.default
 
   /**
    * Derives an `Equal[List[A]]` given an `Equal[A]`.
@@ -324,10 +317,10 @@ object Equal extends Lawful[Equal] {
     make(_.corresponds(_)(_ === _))
 
   /**
-   * Equality for `Long` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Long` values.
    */
-  implicit val LongEqual: Equal[Long] =
-    default
+  implicit val LongHashOrd: Hash[Long] with Ord[Long] =
+    HashOrd.default
 
   /**
    * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations
@@ -356,17 +349,18 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * Equality for `Set[A]` values. Due to the limitations of Scala's `Set`,
+   * `Hash` (and thus also `Equal`) instance for `Set[A]` values.
+   * Due to the limitations of Scala's `Set`,
    * this uses object equality and hash code on the elements.
    */
-  implicit def SetEqual[A]: Equal[Set[A]] =
-    default
+  implicit def SetHash[A]: Hash[Set[A]] =
+    Hash.default
 
   /**
-   * Equality for `String` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `String` values.
    */
-  implicit val StringEqual: Equal[String] =
-    default
+  implicit val StringHashOrd: Hash[String] with Ord[String] =
+    HashOrd.default
 
   /**
    * Derives an `Equal[Try[A]]` given an `Equal[A]`.
@@ -846,11 +840,11 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * Equality for `Unit` values. Since there is only one `Unit` value all
-   * equality comparisons will always be true.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Unit` values.
+   * Since there is only one `Unit` value all equality comparisons will always be true.
    */
-  implicit val UnitEqual: Equal[Unit] =
-    make((_, _) => true)
+  implicit val UnitHashOrd: Hash[Unit] with Ord[Unit] =
+    HashOrd.make(_.hashCode, (_, _) => Ordering.Equals, (_, _) => true)
 
   /**
    * Derives an `Equal[Vector[A]]` given an `Equal[A]`.

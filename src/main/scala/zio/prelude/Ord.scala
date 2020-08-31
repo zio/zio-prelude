@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.Equal._
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
@@ -224,7 +225,7 @@ object Ord extends Lawful[Ord] {
   implicit val OrdIdentityBoth: IdentityBoth[Ord] =
     new IdentityBoth[Ord] {
       val any: Ord[Any] =
-        AnyOrd
+        AnyHashOrd
       def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
         fa.both(fb)
     }
@@ -237,7 +238,7 @@ object Ord extends Lawful[Ord] {
       def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
         fa.either(fb)
       val none: Ord[Nothing] =
-        NothingOrd
+        NothingHashOrd
     }
 
   /**
@@ -255,36 +256,20 @@ object Ord extends Lawful[Ord] {
     (l, r) => if (Equal.refEq(l, r)) Ordering.Equals else ord(l, r)
 
   /**
+   * Constructs an instance from an `ord` function and a `equal0` function.
+   * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
+   */
+  def make[A](ord: (A, A) => Ordering, equal0: (A, A) => Boolean): Ord[A] =
+    new Ord[A] {
+      override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean    = equal0(l, r)
+    }
+
+  /**
    * Constructs an `Ord[A]` from a [[scala.math.Ordering]].
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
     make((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)))
-
-  /**
-   * Ordering for `Any` values. Note that since values of type `Any` contain
-   * no information, all values of type `Any` can be treated as equal to each
-   * other.
-   */
-  val AnyOrd: Ord[Any] =
-    make((_, _) => Ordering.Equals)
-
-  /**
-   * Ordering for `Boolean` values.
-   */
-  implicit val BoolOrd: Ord[Boolean] =
-    default
-
-  /**
-   * Ordering for `Byte` values.
-   */
-  implicit val ByteOrd: Ord[Byte] =
-    default
-
-  /**
-   * Ordering for `Char` values.
-   */
-  implicit val CharOrd: Ord[Char] =
-    default
 
   /**
    * Derives an `Ord[Chunk[A]]` given an `Ord[A]`.
@@ -319,12 +304,6 @@ object Ord extends Lawful[Ord] {
     Ord[A] either Ord[B]
 
   /**
-   * Ordering for `Int` values.
-   */
-  implicit val IntOrd: Ord[Int] =
-    default
-
-  /**
    * Derives an `Ord[List[A]]` given an `Ord[A]`.
    */
   implicit def ListOrd[A: Ord]: Ord[List[A]] = {
@@ -344,24 +323,10 @@ object Ord extends Lawful[Ord] {
   }
 
   /**
-   * Ordering for `Long` values.
-   */
-  implicit val LongOrd: Ord[Long] =
-    default
-
-  /**
    * Derives an `Ord[NonEmptyChunk[A]]` given an `Ord[A]`.
    */
   implicit def NonEmptyChunkOrd[A: Ord]: Ord[NonEmptyChunk[A]] =
     Ord[Chunk[A]].contramap(_.toChunk)
-
-  /**
-   * Ordering for `Nothing` values. Note that since there are not values of
-   * type `Nothing` the `ord` method of this instance can never be called
-   * but it can be useful in deriving instances for more complex types.
-   */
-  implicit val NothingOrd: Ord[Nothing] =
-    make[Nothing]((l: Nothing, _: Nothing) => l)
 
   /**
    * Derives an `Ord[Option[A]]` given an `Ord[A]`. `None` will be treated as
@@ -372,12 +337,6 @@ object Ord extends Lawful[Ord] {
       case None    => Left(())
       case Some(a) => Right(a)
     }
-
-  /**
-   * Ordering for `String` values.
-   */
-  implicit val StringOrd: Ord[String] =
-    default
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -836,13 +795,6 @@ object Ord extends Lawful[Ord] {
           ) =>
         (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2) <> (v1 =?= v2)
     }
-
-  /**
-   * Equality for `Unit` values. Since there is only one `Unit` value all
-   * values will be equal.
-   */
-  implicit val UnitOrd: Ord[Unit] =
-    make((_, _) => Ordering.Equals)
 
   /**
    * Derives an `Ord[Vector[A]]` given an `Ord[A]`.

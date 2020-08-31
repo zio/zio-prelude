@@ -42,9 +42,9 @@ object ZSetSpec extends DefaultRunnableSpec {
           // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
           CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
             ZSetCovariant(IntSumCommutativeInverse),
-            ZSetDeriveEqual(IntEqual)
+            ZSetDeriveEqual(IntHashOrd)
           ),
-          IntEqual
+          IntHashOrd
         )
       ),
       testM("equal")(checkAllLaws(Equal)(genZSet(Gen.anyInt, Gen.anyInt))),
