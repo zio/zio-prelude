@@ -90,7 +90,7 @@ object CommutativeEitherDeriveEqualInvariant {
     }
 }
 
-trait CommutativeEqual[A] extends Commutative[A] with Equal[A]
+trait CommutativeEqual[A] extends AssociativeEqual[A] with Commutative[A]
 
 object CommutativeEqual {
   implicit def derive[A](implicit commutative0: Commutative[A], equal0: Equal[A]): CommutativeEqual[A] =

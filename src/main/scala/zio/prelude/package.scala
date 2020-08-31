@@ -24,6 +24,7 @@ package object prelude
     with InverseSyntax
     with NewtypeExports
     with NewtypeFExports
+    with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
     with TraversableSyntax {

@@ -48,7 +48,7 @@ object Commutative extends Lawful[CommutativeEqual] {
    * The set of all laws that instances of `Commutative` must satisfy.
    */
   val laws: Laws[CommutativeEqual] =
-    commutativeLaw
+    commutativeLaw + Associative.laws
 
   /**
    * Summons an implicit `Commutative[A]`.
