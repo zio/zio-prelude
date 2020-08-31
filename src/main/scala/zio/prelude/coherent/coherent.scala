@@ -32,6 +32,16 @@ object AssociativeEitherDeriveEqualInvariant {
     }
 }
 
+trait AssociativeEqual[A] extends Associative[A] with Equal[A]
+
+object AssociativeEqual {
+  implicit def derive[A](implicit associative0: Associative[A], equal0: Equal[A]): AssociativeEqual[A] =
+    new AssociativeEqual[A] {
+      def combine(l: => A, r: => A): A              = associative0.combine(l, r)
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+    }
+}
+
 trait AssociativeFlattenCovariantDeriveEqual[F[+_]] extends AssociativeFlatten[F] with Covariant[F] with DeriveEqual[F]
 
 object AssociativeFlattenCovariantDeriveEqual {
@@ -77,6 +87,16 @@ object CommutativeEitherDeriveEqualInvariant {
       def derive[A: Equal]: Equal[F[A]]                           = deriveEqual0.derive
       def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]] = commutativeEither0.either(fa, fb)
       def invmap[A, B](f: A <=> B): F[A] <=> F[B]                 = invariant0.invmap(f)
+    }
+}
+
+trait CommutativeEqual[A] extends AssociativeEqual[A] with Commutative[A]
+
+object CommutativeEqual {
+  implicit def derive[A](implicit commutative0: Commutative[A], equal0: Equal[A]): CommutativeEqual[A] =
+    new CommutativeEqual[A] {
+      def combine(l: => A, r: => A): A              = commutative0.combine(l, r)
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }
 
@@ -191,27 +211,7 @@ object DeriveEqualTraversable {
     }
 }
 
-trait EqualAssociative[A] extends Equal[A] with Associative[A]
-
-object EqualAssociative {
-  implicit def derive[A](implicit associative0: Associative[A], equal0: Equal[A]): EqualAssociative[A] =
-    new EqualAssociative[A] {
-      def combine(l: => A, r: => A): A              = associative0.combine(l, r)
-      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
-    }
-}
-
-trait EqualCommutative[A] extends EqualAssociative[A] with Commutative[A]
-
-object EqualCommutative {
-  implicit def derive[A](implicit commutative0: Commutative[A], equal0: Equal[A]): EqualCommutative[A] =
-    new EqualCommutative[A] {
-      def combine(l: => A, r: => A): A              = commutative0.combine(l, r)
-      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
-    }
-}
-
-trait EqualIdentity[A] extends EqualAssociative[A] with Identity[A]
+trait EqualIdentity[A] extends AssociativeEqual[A] with Identity[A]
 
 object EqualIdentity {
   implicit def derive[A](implicit identity0: Identity[A], equal0: Equal[A]): EqualIdentity[A] =

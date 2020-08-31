@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.{ Chunk, NonEmptyChunk }
-import zio.prelude.coherent.EqualAssociative
+import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{ And, First, Last, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
@@ -33,7 +33,7 @@ trait Associative[A] {
   def combine(l: => A, r: => A): A
 }
 
-object Associative extends Lawful[EqualAssociative] {
+object Associative extends Lawful[AssociativeEqual] {
 
   /**
    * The associativity law states that for some binary operator `*`, for all
@@ -43,16 +43,16 @@ object Associative extends Lawful[EqualAssociative] {
    * (a1 * a2) * a3 === a1 * (a2 * a3)
    * }}}
    */
-  val associativityLaw: Laws[EqualAssociative] =
-    new Laws.Law3[EqualAssociative]("associativityLaw") {
-      def apply[A: EqualAssociative](a1: A, a2: A, a3: A): TestResult =
+  val associativityLaw: Laws[AssociativeEqual] =
+    new Laws.Law3[AssociativeEqual]("associativityLaw") {
+      def apply[A: AssociativeEqual](a1: A, a2: A, a3: A): TestResult =
         (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
     }
 
   /**
    * The set of all laws that instances of `Associative` must satisfy.
    */
-  val laws: Laws[EqualAssociative] =
+  val laws: Laws[AssociativeEqual] =
     associativityLaw
 
   /**
