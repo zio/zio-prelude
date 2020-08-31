@@ -97,6 +97,16 @@ object NonEmptySet {
   def unapply[A](arg: NonEmptySet[A]): Some[(A, Set[A])] = Some(arg.destruct)
 
   /**
+   * Constructs a `NonEmptyChunk` from a `NonEmptyList`.
+   */
+  def fromNonEmptyChunk[A](elems: NonEmptyChunk[A]): NonEmptySet[A] = apply(elems.head, elems.tail.toSet)
+
+  /**
+   * Constructs a `NonEmptySet` from a `NonEmptyList`.
+   */
+  def fromNonEmptyList[A](elems: NonEmptyList[A]): NonEmptySet[A] = apply(elems.head, elems.tail.toSet)
+
+  /**
    * Constructs a `NonEmptySet` from an element and `Set`.
    */
   def fromSet[A](elem: A, others: Set[A]): NonEmptySet[A] = apply(elem, others)
@@ -162,29 +172,11 @@ object NonEmptySet {
 }
 
 trait NonEmptySetSyntax {
-  implicit class SetOps[A](private val set: Set[A]) {
+  implicit class IterableOps[A](private val iterable: Iterable[A]) {
 
-    /** Creates a new `NonEmptySet` by adding all elements contained in another collection to this set, omitting duplicates.
-     *
-     * This method takes a collection of elements and adds all elements, omitting duplicates, into `NonEmptySet`.
-     *
-     * Example:
-     *  {{{
-     *    scala> val a = Set(1, 2) ++ NonEmptySet(2, "a")
-     *    a: zio.prelude.NonEmptySet[Any] = NonEmptySet(1, 2, a)
-     *  }}}
-     *
-     *  @param elems     the `NonEmptySet` containing the elements to add.
-     *  @return a new `NonEmptySet` with the given elements added, omitting duplicates.
+    /**
+     * Constructs a `NonEmptySet` from an `Iterable` or `None` otherwise.
      */
-    def ++(elems: NonEmptySet[A]): NonEmptySet[A] = NonEmptySet.union(set, elems)
-
-    /** Computes the union between of set and another `NonEmptySet`.
-     *
-     *  @param   that  the `NonEmptySet` to form the union with.
-     *  @return  a new `NonEmptySet` consisting of all elements that are in this
-     *  set or in the given `NonEmptySet` `that`.
-     */
-    def union(that: NonEmptySet[A]): NonEmptySet[A] = NonEmptySet.union(set, that)
+    def toNonEmptySet: Option[NonEmptySet[A]] = NonEmptySet.fromIterableOption(iterable)
   }
 }
