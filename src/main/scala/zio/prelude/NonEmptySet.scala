@@ -4,13 +4,16 @@ import zio.NonEmptyChunk
 
 import scala.language.implicitConversions
 
-final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
+final class NonEmptySet[A] private (private val set: Set[A]) { self =>
+
+  /** Converts this `NonEmptySet` to a `Set`. */
+  def toSet: Set[A] = set
 
   /**
    * Returns an element of this `NonEmptySet` and the remainder, which is a (possibly empty) `Set`.
    */
   @inline
-  def destruct: (A, Set[A]) = (toSet.head, toSet.tail)
+  def destruct: (A, Set[A]) = (set.head, set.tail)
 
   /**
    * Converts this `NonEmptySet` to a `NonEmptyChunk`.
@@ -29,7 +32,7 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
    *  @return a new set that contains all elements of this set and that also
    *          contains `elem`.
    */
-  def +(elem: A): NonEmptySet[A] = new NonEmptySet(toSet + elem)
+  def +(elem: A): NonEmptySet[A] = new NonEmptySet(set + elem)
 
   /** Computes the union between of `NonEmptySet` and another set.
    *
@@ -37,7 +40,7 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
    *  @return  a new `NonEmptySet` consisting of all elements that are in this
    *  set or in the given set `that`.
    */
-  def union(that: Set[A]): NonEmptySet[A] = new NonEmptySet(toSet.union(that))
+  def union(that: Set[A]): NonEmptySet[A] = new NonEmptySet(set.union(that))
 
   /** Creates a new `NonEmptySet` by adding all elements contained in another collection to this `NonEmptySet`, omitting duplicates.
    *
@@ -52,13 +55,13 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
    *  @param elems     the collection containing the elements to add.
    *  @return a new `NonEmptySet` with the given elements added, omitting duplicates.
    */
-  def ++(elems: Iterable[A]): NonEmptySet[A] = new NonEmptySet(toSet ++ elems)
+  def ++(elems: Iterable[A]): NonEmptySet[A] = new NonEmptySet(set ++ elems)
 
   /** Adds the `elem` to this `NonEmptySet`. Alias for `+`. */
   def add(elem: A): NonEmptySet[A] = self + elem
 
   /** Removes the `elem` from this `NonEmptySet`. Alias for `-`. */
-  def remove(elem: A): Set[A] = toSet - elem
+  def remove(elem: A): Set[A] = set - elem
 
   /**
    * Flattens a `NonEmptySet` of `NonEmptySet` values into a single
@@ -72,15 +75,15 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
         }
     }
 
-  override def hashCode: Int = toSet.hashCode()
+  override def hashCode: Int = set.hashCode()
 
   override def equals(that: Any): Boolean = that match {
     case that: AnyRef if self.eq(that) => true
-    case that: NonEmptySet[A]          => self.toSet == that.toSet
+    case that: NonEmptySet[A]          => self.set == that.toSet
     case _                             => false
   }
 
-  override def toString: String = s"NonEmpty$toSet"
+  override def toString: String = s"NonEmpty$set"
 }
 
 object NonEmptySet {
