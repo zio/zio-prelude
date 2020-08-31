@@ -62,6 +62,12 @@ object Commutative extends Lawful[CommutativeEqual] {
     (l, r) => f(l, r)
 
   /**
+   * Constructs an `Commutative` instance from an associative instance.
+   */
+  def makeFrom[A](associative: Associative[A]): Commutative[A] =
+    make((l, r) => associative.combine(l, r))
+
+  /**
    * Derives a `Commutative[F[A]]` given a `Derive[F, Commutative]` and a
    * `Commutative[A]`.
    */
@@ -90,47 +96,27 @@ object Commutative extends Lawful[CommutativeEqual] {
    * Derives a `Commutative[Map[K, V]]` given a `Commutative[V]`.
    */
   implicit def MapCommutative[K, V: Commutative]: Commutative[Map[K, V]] =
-    new Commutative[Map[K, V]] {
-
-      def combine(l: => Map[K, V], r: => Map[K, V]): Map[K, V] =
-        r.foldLeft(l) {
-          case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
-        }
-    }
+    makeFrom(Associative.MapIdentity)
 
   /**
    * Derives a `Commutative[Option[A]]` given a `Commutative[A]`
    */
   implicit def OptionCommutative[A: Commutative]: Commutative[Option[A]] =
-    new Commutative[Option[A]] {
-      def combine(l: => Option[A], r: => Option[A]): Option[A] =
-        (l, r) match {
-          case (Some(l), Some(r)) => Some(l <> r)
-          case (Some(l), None)    => Some(l)
-          case (None, Some(r))    => Some(r)
-          case _                  => None
-        }
-    }
+    makeFrom(Associative.OptionIdentity)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
    * element of the product type.
    */
   implicit def Tuple2Commutative[A: Commutative, B: Commutative]: Commutative[(A, B)] =
-    new Commutative[(A, B)] {
-      def combine(l: => (A, B), r: => (A, B)): (A, B) =
-        (l._1 <> r._1, l._2 <> r._2)
-    }
+    makeFrom(Associative.Tuple2Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
    * element of the product type.
    */
   implicit def Tuple3Commutative[A: Commutative, B: Commutative, C: Commutative]: Commutative[(A, B, C)] =
-    new Commutative[(A, B, C)] {
-      def combine(l: => (A, B, C), r: => (A, B, C)): (A, B, C) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3)
-    }
+    makeFrom(Associative.Tuple3Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -138,10 +124,7 @@ object Commutative extends Lawful[CommutativeEqual] {
    */
   implicit def Tuple4Commutative[A: Commutative, B: Commutative, C: Commutative, D: Commutative]
     : Commutative[(A, B, C, D)] =
-    new Commutative[(A, B, C, D)] {
-      def combine(l: => (A, B, C, D), r: => (A, B, C, D)): (A, B, C, D) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4)
-    }
+    makeFrom(Associative.Tuple4Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -149,10 +132,7 @@ object Commutative extends Lawful[CommutativeEqual] {
    */
   implicit def Tuple5Commutative[A: Commutative, B: Commutative, C: Commutative, D: Commutative, E: Commutative]
     : Commutative[(A, B, C, D, E)] =
-    new Commutative[(A, B, C, D, E)] {
-      def combine(l: => (A, B, C, D, E), r: => (A, B, C, D, E)): (A, B, C, D, E) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5)
-    }
+    makeFrom(Associative.Tuple5Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -166,10 +146,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     E: Commutative,
     F: Commutative
   ]: Commutative[(A, B, C, D, E, F)] =
-    new Commutative[(A, B, C, D, E, F)] {
-      def combine(l: => (A, B, C, D, E, F), r: => (A, B, C, D, E, F)): (A, B, C, D, E, F) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6)
-    }
+    makeFrom(Associative.Tuple6Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -184,10 +161,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     F: Commutative,
     G: Commutative
   ]: Commutative[(A, B, C, D, E, F, G)] =
-    new Commutative[(A, B, C, D, E, F, G)] {
-      def combine(l: => (A, B, C, D, E, F, G), r: => (A, B, C, D, E, F, G)): (A, B, C, D, E, F, G) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7)
-    }
+    makeFrom(Associative.Tuple7Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -203,10 +177,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     G: Commutative,
     H: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H)] =
-    new Commutative[(A, B, C, D, E, F, G, H)] {
-      def combine(l: => (A, B, C, D, E, F, G, H), r: => (A, B, C, D, E, F, G, H)): (A, B, C, D, E, F, G, H) =
-        (l._1 <> r._1, l._2 <> r._2, l._3 <> r._3, l._4 <> r._4, l._5 <> r._5, l._6 <> r._6, l._7 <> r._7, l._8 <> r._8)
-    }
+    makeFrom(Associative.Tuple8Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -223,20 +194,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     H: Commutative,
     I: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I)] {
-      def combine(l: => (A, B, C, D, E, F, G, H, I), r: => (A, B, C, D, E, F, G, H, I)): (A, B, C, D, E, F, G, H, I) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9
-        )
-    }
+    makeFrom(Associative.Tuple9Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -254,24 +212,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     I: Commutative,
     J: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J),
-        r: => (A, B, C, D, E, F, G, H, I, J)
-      ): (A, B, C, D, E, F, G, H, I, J) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10
-        )
-    }
+    makeFrom(Associative.Tuple10Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -290,25 +231,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     J: Commutative,
     K: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K),
-        r: => (A, B, C, D, E, F, G, H, I, J, K)
-      ): (A, B, C, D, E, F, G, H, I, J, K) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11
-        )
-    }
+    makeFrom(Associative.Tuple11Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -328,26 +251,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     K: Commutative,
     L: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12
-        )
-    }
+    makeFrom(Associative.Tuple12Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -368,27 +272,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     L: Commutative,
     M: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13
-        )
-    }
+    makeFrom(Associative.Tuple13Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -410,28 +294,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     M: Commutative,
     N: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14
-        )
-    }
+    makeFrom(Associative.Tuple14Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -454,29 +317,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     N: Commutative,
     O: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15
-        )
-    }
+    makeFrom(Associative.Tuple15Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -500,30 +341,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     O: Commutative,
     P: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16
-        )
-    }
+    makeFrom(Associative.Tuple16Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -548,31 +366,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     P: Commutative,
     Q: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17
-        )
-    }
+    makeFrom(Associative.Tuple17Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -598,32 +392,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     Q: Commutative,
     R: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18
-        )
-    }
+    makeFrom(Associative.Tuple18Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -650,33 +419,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     R: Commutative,
     S: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19
-        )
-    }
+    makeFrom(Associative.Tuple19Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -704,34 +447,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     S: Commutative,
     T: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19,
-          l._20 <> r._20
-        )
-    }
+    makeFrom(Associative.Tuple20Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -760,35 +476,7 @@ object Commutative extends Lawful[CommutativeEqual] {
     T: Commutative,
     U: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19,
-          l._20 <> r._20,
-          l._21 <> r._21
-        )
-    }
+    makeFrom(Associative.Tuple21Associative)
 
   /**
    * Derives a `Commutative` for a product type given a `Commutative` for each
@@ -818,34 +506,5 @@ object Commutative extends Lawful[CommutativeEqual] {
     U: Commutative,
     V: Commutative
   ]: Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
-    new Commutative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] {
-      def combine(
-        l: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V),
-        r: => (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)
-      ): (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) =
-        (
-          l._1 <> r._1,
-          l._2 <> r._2,
-          l._3 <> r._3,
-          l._4 <> r._4,
-          l._5 <> r._5,
-          l._6 <> r._6,
-          l._7 <> r._7,
-          l._8 <> r._8,
-          l._9 <> r._9,
-          l._10 <> r._10,
-          l._11 <> r._11,
-          l._12 <> r._12,
-          l._13 <> r._13,
-          l._14 <> r._14,
-          l._15 <> r._15,
-          l._16 <> r._16,
-          l._17 <> r._17,
-          l._18 <> r._18,
-          l._19 <> r._19,
-          l._20 <> r._20,
-          l._21 <> r._21,
-          l._22 <> r._22
-        )
-    }
+    makeFrom(Associative.Tuple22Associative)
 }

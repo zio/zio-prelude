@@ -28,7 +28,9 @@ object CommutativeSpec extends DefaultRunnableSpec {
       testM("set")(checkAllLaws(Commutative)(Gen.setOf(anySumInt))),
       testM("map")(checkAllLaws(Commutative)(Gen.mapOf(anySumInt, anySumInt))),
       testM("tuple2")(checkAllLaws(Commutative)(anySumInt.zip(anySumInt))),
-      testM("tuple3")(checkAllLaws(Commutative)(anySumInt.zip(anySumInt).zip(anySumInt)))
+      testM("tuple3")(
+        checkAllLaws(Commutative)(anySumInt.zip(anySumInt).zip(anySumInt).map { case ((x, y), z) => (x, y, z) })
+      )
     )
   )
 }
