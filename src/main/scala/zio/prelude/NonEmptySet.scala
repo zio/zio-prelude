@@ -2,7 +2,6 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 
-import scala.collection.{ GenSet, GenTraversableOnce }
 import scala.language.implicitConversions
 
 final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
@@ -55,7 +54,7 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
    *  @return  a new `NonEmptySet` consisting of all elements that are in this
    *  set or in the given set `that`.
    */
-  def union(that: GenSet[A]): NonEmptySet[A] = new NonEmptySet(toSet.union(that))
+  def union(that: Set[A]): NonEmptySet[A] = new NonEmptySet(toSet.union(that))
 
   /** Creates a new `NonEmptySet` by adding all elements contained in another collection to this `NonEmptySet`, omitting duplicates.
    *
@@ -70,7 +69,7 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
    *  @param elems     the collection containing the elements to add.
    *  @return a new `NonEmptySet` with the given elements added, omitting duplicates.
    */
-  def ++(elems: GenTraversableOnce[A]): NonEmptySet[A] = new NonEmptySet(toSet ++ elems)
+  def ++(elems: Iterable[A]): NonEmptySet[A] = new NonEmptySet(toSet ++ elems)
 
   /** Adds the `elem` to this `NonEmptySet`. Alias for `+`. */
   def add(elem: A): NonEmptySet[A] = self + elem
@@ -142,11 +141,13 @@ object NonEmptySet {
   def single[A](head: A): NonEmptySet[A] =
     NonEmptySet(head)
 
+  /** Creates a `NonEmptySet` containing elements from `l` and `r` */
   def union[A](l: NonEmptySet[A], r: Set[A]): NonEmptySet[A] = {
     val (head, tail) = l.destruct
     NonEmptySet.fromSet(head, tail.union(r))
   }
 
+  /** Creates a `NonEmptySet` containing elements from `l` and `r` */
   def union[A](l: Set[A], r: NonEmptySet[A]): NonEmptySet[A] =
     union(r, l)
 
