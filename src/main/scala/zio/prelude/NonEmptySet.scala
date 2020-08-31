@@ -9,6 +9,7 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
   /**
    * Returns an element of this `NonEmptySet` and the remainder, which is a (possibly empty) `Set`.
    */
+  @inline
   def destruct: (A, Set[A]) = (toSet.head, toSet.tail)
 
   /**
@@ -29,24 +30,6 @@ final class NonEmptySet[A] private (val toSet: Set[A]) { self =>
    *          contains `elem`.
    */
   def +(elem: A): NonEmptySet[A] = new NonEmptySet(toSet + elem)
-
-  /** Creates a new `NonEmptySet` with additional elements, omitting duplicates.
-   *
-   *  This method takes two or more elements to be added. Elements that already exist in the `NonEmptySet` will
-   *  not be added. Another overloaded variant of this method handles the case where a single element is added.
-   *
-   *  Example:
-   *   {{{
-   *    scala> val a = NonEmptySet(1, 3) + 2 + 3
-   *    a: zio.prelude.NonEmptySet[Int] = NonEmptySet(1, 3, 2)
-   *   }}}
-   *
-   *  @param elem1 the first element to add.
-   *  @param elem2 the second element to add.
-   *  @param elems the remaining elements to add.
-   *  @return   a new `NonEmptySet` with the given elements added, omitting duplicates.
-   */
-  def +(elem1: A, elem2: A, elems: A*): NonEmptySet[A] = new NonEmptySet(toSet + elem1 + elem2 ++ elems)
 
   /** Computes the union between of `NonEmptySet` and another set.
    *
