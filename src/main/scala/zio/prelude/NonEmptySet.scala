@@ -70,7 +70,8 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   def flatten[B](implicit ev: A <:< NonEmptySet[B]): NonEmptySet[B] =
     new NonEmptySet[B](set.foldLeft[Set[B]](Set.empty)((b, a) => b union ev(a)))
 
-  override def hashCode: Int = set.hashCode ^ getClass.hashCode
+  private lazy val hashCodeLazy: Int = set.hashCode ^ getClass.hashCode
+  override def hashCode: Int         = hashCodeLazy
 
   override def equals(that: Any): Boolean = that match {
     case that: AnyRef if self.eq(that) => true
