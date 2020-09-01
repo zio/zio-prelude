@@ -144,7 +144,11 @@ object Equal extends Lawful[Equal] {
    */
   implicit val NothingHashOrd: Hash[Nothing] with Ord[Nothing] =
     HashOrd
-      .make[Nothing]((_: Nothing) => 0, (_: Nothing, _: Nothing) => Ordering.Equals, (_: Nothing, _: Nothing) => false)
+      .make[Nothing](
+        (_: Nothing) => sys.error("nothing.hash"),
+        (_: Nothing, _: Nothing) => sys.error("nothing.ord"),
+        (_: Nothing, _: Nothing) => sys.error("nothing.equal")
+      )
 
   /**
    * The `AssociativeBoth` instance for `Equal`.
@@ -262,7 +266,7 @@ object Equal extends Lawful[Equal] {
    * Derives an `Equal[Chunk[A]]` given an `Equal[A]`.
    */
   implicit def ChunkEqual[A: Equal]: Equal[Chunk[A]] =
-    make(_.corresponds(_)(_ === _))
+    make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
 
   /**
    * Derives an `Equal[F[A]]` given a `Derive[F, Equal]` and an `Equal[A]`.
@@ -328,7 +332,7 @@ object Equal extends Lawful[Equal] {
    */
   implicit def MapEqual[A, B: Equal]: Equal[Map[A, B]] =
     make { (map1, map2) =>
-      map1.size == map2.size &&
+      map1.size === map2.size &&
       map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
     }
 
@@ -850,7 +854,7 @@ object Equal extends Lawful[Equal] {
    * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
    */
   implicit def VectorEqual[A: Equal]: Equal[Vector[A]] =
-    make(_.corresponds(_)(_ === _))
+    make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
 
   /**
    * Derives an `Equal[Cause[A]]` given an `Equal[A]`.
