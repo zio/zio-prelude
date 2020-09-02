@@ -40,7 +40,7 @@ sealed trait Validation[+E, +A] { self =>
    */
   override final def equals(that: Any): Boolean =
     (self, that) match {
-      case (Failure(es), Failure(e1s)) => es.toList.toSet == e1s.toList.toSet
+      case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
       case (Success(a), Success(a1))   => a == a1
       case _                           => false
     }
@@ -185,7 +185,7 @@ object Validation extends LowPriorityValidationImplicits {
    */
   implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
     Equal.make {
-      case (Failure(es), Failure(e1s)) => es.toList.toSet === e1s.toList.toSet
+      case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
       case (Success(a), Success(a1))   => a === a1
       case _                           => false
     }
