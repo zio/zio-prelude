@@ -126,6 +126,12 @@ object Hash extends Lawful[Hash] {
     }
 
   /**
+   * Constructs an instance from a hash function and an `Equal` instance.
+   */
+  def makeFrom[A](hash0: A => Int, equal0: Equal[A]): Hash[A] =
+    make(hash0, (l, r) => equal0.equal(l, r))
+
+  /**
    * Constructs a `Hash[A]` that uses the default notion of hashing embodied in
    * the implementation of `hashCode` for values of type `A`.
    */
@@ -133,28 +139,10 @@ object Hash extends Lawful[Hash] {
     make(_.hashCode(), _ == _)
 
   /**
-   * Hashing for `Boolean` values.
-   */
-  implicit val BooleanHash: Hash[Boolean] =
-    default
-
-  /**
-   * Hashing for `Byte` values.
-   */
-  implicit val ByteHas: Hash[Byte] =
-    default
-
-  /**
-   * Hashing for `Char` values.
-   */
-  implicit val CharHash: Hash[Char] =
-    default
-
-  /**
    * Derives a `Hash[Chunk[A]]` given a `Hash[A]`.
    */
   implicit def ChunkHash[A: Hash]: Hash[Chunk[A]] =
-    make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
+    makeFrom(_.map(_.hash).hashCode, Equal.ChunkEqual)
 
   /**
    * Derives a `Hash[F[A]]` given a `Derive[F, Hash]` and a `Hash[A]`.
@@ -166,37 +154,23 @@ object Hash extends Lawful[Hash] {
    * Derives a `Hash[Either[A, B]]` given a `Hash[A]` and a `Hash[B]`.
    */
   implicit def EitherHash[A: Hash, B: Hash]: Hash[Either[A, B]] =
-    Hash[A] either Hash[B]
-
-  /**
-   * Hashing for `Int` values.
-   */
-  implicit val IntHash: Hash[Int] =
-    default
+    makeFrom({
+      case Left(a)  => Left(a.hash).hashCode
+      case Right(b) => Right(b.hash).hashCode
+    }, Equal.EitherEqual)
 
   /**
    * Derives a `Hash[List[A]]` given a `Hash[A]`.
    */
   implicit def ListHash[A: Hash]: Hash[List[A]] =
-    make(_.map(Hash[A].hash).hashCode, _.corresponds(_)(_ === _))
-
-  /**
-   * Hashing for `Long` values.
-   */
-  implicit val LongHash: Hash[Long] =
-    default
+    makeFrom(_.map(Hash[A].hash).hashCode, Equal.ListEqual)
 
   /**
    * Derives a `Hash[Map[A, B]]` given a `Hash[B]`. Due to the limitations of
    * Scala's `Map`, this uses object equality and hash code on the keys.
    */
   implicit def MapHash[A, B: Hash]: Hash[Map[A, B]] =
-    make(
-      _.transform((_, v) => v.hash).hashCode,
-      (map1, map2) =>
-        map1.size == map2.size &&
-          map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
-    )
+    makeFrom(_.transform((_, v) => v.hash).hashCode, Equal.MapEqual)
 
   /**
    * Derives a `Hash[NonEmptyChunk[A]]` given a `Hash[A]`.
@@ -205,75 +179,40 @@ object Hash extends Lawful[Hash] {
     Hash[Chunk[A]].contramap(_.toChunk)
 
   /**
-   * Hashing for `Nothing` values. Note that since there are not values of type
-   * `Nothing` the `hash` method of this instance can never be called but it
-   * can be useful in deriving instances for more complex types.
-   */
-  implicit val NothingHash: Hash[Nothing] =
-    default
-
-  /**
    * Derives a `Hash[Option[A]]` given a `Hash[A]`.
    */
   implicit def OptionHash[A: Hash]: Hash[Option[A]] =
-    make(
-      _.map(_.hash).hashCode, {
-        case (None, None)         => true
-        case (Some(a1), Some(a2)) => a1 === a2
-        case _                    => false
-      }
-    )
-
-  /**
-   * Hashing for `Set[A]` values. Due to the limitations of Scala's `Set`,
-   * this uses object equality and hash code on the elements.
-   */
-  implicit def SetHash[A]: Hash[Set[A]] =
-    default
-
-  /**
-   * Hashing for `String` values.
-   */
-  implicit val StringHash: Hash[String] =
-    default
+    makeFrom(_.map(_.hash).hashCode, Equal.OptionEqual)
 
   /**
    * Derives a `Hash` for a product type given a `Hash` for each element of the
    * product type.
    */
   implicit def Tuple2Hash[A: Hash, B: Hash]: Hash[(A, B)] =
-    Hash[A] both Hash[B]
+    makeFrom({ case (a, b) => (a.hash, b.hash).hashCode }, Equal.Tuple2Equal)
 
   /**
    * Derives an `Hash` for a product type given an `Hash` for each element of
    * the product type.
    */
   implicit def Tuple3Hash[A: Hash, B: Hash, C: Hash]: Hash[(A, B, C)] =
-    make(
-      { case (a, b, c)                    => (a.hash, b.hash, c.hash).hashCode },
-      { case ((a1, b1, c1), (a2, b2, c2)) => a1 === a2 && b1 === b2 && c1 === c2 }
-    )
+    makeFrom({ case (a, b, c) => (a.hash, b.hash, c.hash).hashCode }, Equal.Tuple3Equal)
 
   /**
    * Derives an `Hash` for a product type given an `Hash` for each element of
    * the product type.
    */
   implicit def Tuple4Hash[A: Hash, B: Hash, C: Hash, D: Hash]: Hash[(A, B, C, D)] =
-    make(
-      { case (a, b, c, d)                         => (a.hash, b.hash, c.hash, d.hash).hashCode },
-      { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 }
-    )
+    makeFrom({ case (a, b, c, d) => (a.hash, b.hash, c.hash, d.hash).hashCode }, Equal.Tuple4Equal)
 
   /**
    * Derives an `Hash` for a product type given an `Hash` for each element of
    * the product type.
    */
   implicit def Tuple5Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash]: Hash[(A, B, C, D, E)] =
-    make(
-      { case (a, b, c, d, e) => (a.hash, b.hash, c.hash, d.hash, e.hash).hashCode }, {
-        case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2
-      }
+    makeFrom(
+      { case (a, b, c, d, e) => (a.hash, b.hash, c.hash, d.hash, e.hash).hashCode },
+      Equal.Tuple5Equal
     )
 
   /**
@@ -281,11 +220,9 @@ object Hash extends Lawful[Hash] {
    * the product type.
    */
   implicit def Tuple6Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash]: Hash[(A, B, C, D, E, F)] =
-    make(
-      { case (a, b, c, d, e, f) => (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash).hashCode }, {
-        case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2
-      }
+    makeFrom(
+      { case (a, b, c, d, e, f) => (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash).hashCode },
+      Equal.Tuple6Equal
     )
 
   /**
@@ -293,11 +230,9 @@ object Hash extends Lawful[Hash] {
    * the product type.
    */
   implicit def Tuple7Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash, G: Hash]: Hash[(A, B, C, D, E, F, G)] =
-    make(
-      { case (a, b, c, d, e, f, g) => (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash).hashCode }, {
-        case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2
-      }
+    makeFrom(
+      { case (a, b, c, d, e, f, g) => (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash).hashCode },
+      Equal.Tuple7Equal
     )
 
   /**
@@ -306,11 +241,9 @@ object Hash extends Lawful[Hash] {
    */
   implicit def Tuple8Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash, G: Hash, H: Hash]
     : Hash[(A, B, C, D, E, F, G, H)] =
-    make(
-      { case (a, b, c, d, e, f, g, h) => (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash).hashCode }, {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2
-      }
+    makeFrom(
+      { case (a, b, c, d, e, f, g, h) => (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash).hashCode },
+      Equal.Tuple8Equal
     )
 
   /**
@@ -319,14 +252,12 @@ object Hash extends Lawful[Hash] {
    */
   implicit def Tuple9Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash, G: Hash, H: Hash, I: Hash]
     : Hash[(A, B, C, D, E, F, G, H, I)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i) =>
           (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash).hashCode
-      }, {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2
-      }
+      },
+      Equal.Tuple9Equal
     )
 
   /**
@@ -345,14 +276,12 @@ object Hash extends Lawful[Hash] {
     I: Hash,
     J: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j) =>
           (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash).hashCode
-      }, {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2
-      }
+      },
+      Equal.Tuple10Equal
     )
 
   /**
@@ -372,14 +301,12 @@ object Hash extends Lawful[Hash] {
     J: Hash,
     K: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k) =>
           (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash, k.hash).hashCode
-      }, {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2
-      }
+      },
+      Equal.Tuple11Equal
     )
 
   /**
@@ -400,14 +327,12 @@ object Hash extends Lawful[Hash] {
     K: Hash,
     L: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l) =>
           (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash, k.hash, l.hash).hashCode
-      }, {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2
-      }
+      },
+      Equal.Tuple12Equal
     )
 
   /**
@@ -429,17 +354,12 @@ object Hash extends Lawful[Hash] {
     L: Hash,
     M: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m) =>
           (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash, k.hash, l.hash, m.hash).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2
-      }
+      },
+      Equal.Tuple13Equal
     )
 
   /**
@@ -462,7 +382,7 @@ object Hash extends Lawful[Hash] {
     M: Hash,
     N: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n) =>
           (
@@ -481,13 +401,8 @@ object Hash extends Lawful[Hash] {
             m.hash,
             n.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2
-      }
+      },
+      Equal.Tuple14Equal
     )
 
   /**
@@ -511,7 +426,7 @@ object Hash extends Lawful[Hash] {
     N: Hash,
     O: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) =>
           (
@@ -531,13 +446,8 @@ object Hash extends Lawful[Hash] {
             n.hash,
             o.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2
-      }
+      },
+      Equal.Tuple15Equal
     )
 
   /**
@@ -562,7 +472,7 @@ object Hash extends Lawful[Hash] {
     O: Hash,
     P: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
           (
@@ -583,13 +493,8 @@ object Hash extends Lawful[Hash] {
             o.hash,
             p.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2
-      }
+      },
+      Equal.Tuple16Equal
     )
 
   /**
@@ -615,7 +520,7 @@ object Hash extends Lawful[Hash] {
     P: Hash,
     Q: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
           (
@@ -637,13 +542,8 @@ object Hash extends Lawful[Hash] {
             p.hash,
             q.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2
-      }
+      },
+      Equal.Tuple17Equal
     )
 
   /**
@@ -670,7 +570,7 @@ object Hash extends Lawful[Hash] {
     Q: Hash,
     R: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
           (
@@ -693,13 +593,8 @@ object Hash extends Lawful[Hash] {
             q.hash,
             r.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2
-      }
+      },
+      Equal.Tuple18Equal
     )
 
   /**
@@ -727,7 +622,7 @@ object Hash extends Lawful[Hash] {
     R: Hash,
     S: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
           (
@@ -751,13 +646,8 @@ object Hash extends Lawful[Hash] {
             r.hash,
             s.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2
-      }
+      },
+      Equal.Tuple19Equal
     )
 
   /**
@@ -786,7 +676,7 @@ object Hash extends Lawful[Hash] {
     S: Hash,
     T: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
           (
@@ -811,13 +701,8 @@ object Hash extends Lawful[Hash] {
             s.hash,
             t.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2
-      }
+      },
+      Equal.Tuple20Equal
     )
 
   /**
@@ -847,7 +732,7 @@ object Hash extends Lawful[Hash] {
     T: Hash,
     U: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
           (
@@ -873,13 +758,8 @@ object Hash extends Lawful[Hash] {
             t.hash,
             u.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2
-      }
+      },
+      Equal.Tuple21Equal
     )
 
   /**
@@ -910,7 +790,7 @@ object Hash extends Lawful[Hash] {
     U: Hash,
     V: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
-    make(
+    makeFrom(
       {
         case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
           (
@@ -937,27 +817,15 @@ object Hash extends Lawful[Hash] {
             u.hash,
             v.hash
           ).hashCode
-      }, {
-        case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
-            ) =>
-          a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2 && m1 === m2 && n1 === n2 && o1 === o2 && p1 === p2 && q1 === q2 && r1 === r2 && s1 === s2 && t1 === t2 && u1 === u2 && v1 === v2
-      }
+      },
+      Equal.Tuple22Equal
     )
-
-  /**
-   * Hashing for `Unit` values. Since there is only one `Unit` value all values
-   * have the same hash.
-   */
-  implicit val UnitHash: Hash[Unit] =
-    default
 
   /**
    * Derives a `Hash[Vector[A]]` given a `Hash[A]`.
    */
   implicit def VectorHash[A: Hash]: Hash[Vector[A]] =
-    make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
+    makeFrom(_.map(_.hash).hashCode, Equal.VectorEqual)
 }
 
 trait HashSyntax {

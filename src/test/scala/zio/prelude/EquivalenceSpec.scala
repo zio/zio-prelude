@@ -32,7 +32,7 @@ object EquivalenceSpec extends DefaultRunnableSpec {
         checkAllLaws(Equivalence)(left, right)
       },
       testM("tupleAny") {
-        implicit val equal       = Equal.AnyEqual
+        implicit val equal       = Equal.AnyHashOrd
         implicit val equivalence = Equivalence.tupleAny[Int]
         val left                 = Gen.anyInt <*> genAny
         val right                = Gen.anyInt
@@ -51,7 +51,7 @@ object EquivalenceSpec extends DefaultRunnableSpec {
         checkAllLaws(Equivalence)(left, right)
       },
       testM("eitherNothing") {
-        implicit val equal       = Equal.EitherEqual[Int, Nothing](Equal.IntEqual, Equal.NothingEqual)
+        implicit val equal       = Equal.EitherEqual[Int, Nothing](Equal.IntHashOrd, Equal.NothingHashOrd)
         implicit val equivalence = Equivalence.eitherNothing[Int]
         val left                 = Gen.either(Gen.anyInt, genNothing)
         val right                = Gen.anyInt
