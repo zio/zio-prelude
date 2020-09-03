@@ -205,6 +205,21 @@ object ZNonEmptySet {
     new ZNonEmptySet(tail.foldLeft(HashMap((head, 1)))((map, a) => map + (a -> map.get(a).fold(1)(_ + 1))))
 
   /**
+   * Constructs a set from the specified `Iterable`. The measure of how many
+   * times a value occurs in the set will be an integer representing how many
+   * times the value occurred in the specified `Iterable`. Returns `None` if empty.
+   */
+  def fromIterableOption[A](elems: Iterable[A]): Option[NonEmptyMultiSet[A]] =
+    if (elems.isEmpty)
+      None
+    else
+      Some(
+        new ZNonEmptySet(
+          elems.tail.foldLeft(HashMap((elems.head, 1)))((map, a) => map + (a -> map.get(a).fold(1)(_ + 1)))
+        )
+      )
+
+  /**
    * Constructs a set from the specified `Set`. The measure of how many times
    * a value occurs in the set will be a boolean representing whether a value
    * occurs at all.
@@ -215,7 +230,7 @@ object ZNonEmptySet {
   /**
    * Constructs a set from the specified `Map`. The values will be the keys in
    * the `Map` and the measure of how many times a value occurs will be the
-   * keys value.
+   * keys value. Returns `None` if empty.
    */
   def fromMapOption[A, B](map: Map[A, B]): Option[ZNonEmptySet[A, B]] =
     if (map.isEmpty)
@@ -230,11 +245,15 @@ object ZNonEmptySet {
         )
       )
 
+  /** Constructs a `NonEmptyMultiSet`, where, by definition, each element is present exactly once.
+   * Returns `None` if empty.
+   */
   def fromSetOption[A](set: Set[A]): Option[NonEmptyMultiSet[A]] =
-    if (set.isEmpty) None
+    if (set.isEmpty)
+      None
     else
       Some(
-        new ZNonEmptySet(HashMap[A, Int](set.map((_, 1)).toSeq: _*))
+        new ZNonEmptySet(HashMap[A, Int](set.toSeq.map((_, 1)): _*))
       )
 
   /**
