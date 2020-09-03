@@ -27,6 +27,7 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
+    with PartialOrdSyntax
     with TraversableSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
@@ -107,13 +108,13 @@ package object prelude
       equal(that)
     def equal[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
       assert(self)(equalTo(that))
-    def greater(that: A)(implicit ord: Ord[A]): TestResult =
+    def greater(that: A)(implicit ord: PartialOrd[A]): TestResult =
       assert(self)(isGreaterThan(that))
-    def greaterOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
+    def greaterOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult =
       assert(self)(isGreaterThanEqualTo(that))
-    def less(that: A)(implicit ord: Ord[A]): TestResult =
+    def less(that: A)(implicit ord: PartialOrd[A]): TestResult =
       assert(self)(isLessThan(that))
-    def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult =
+    def lessOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult =
       assert(self)(isLessThanEqualTo(that))
   }
 

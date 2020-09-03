@@ -13,12 +13,12 @@ import scala.{ math => sm }
  * ordering.
  */
 @implicitNotFound("No implicit Ord defined for ${A}.")
-trait Ord[-A] extends Equal[A] { self =>
+trait Ord[-A] extends PartialOrd[A] { self =>
 
   /**
    * Returns the result of comparing two values of type `A`.
    */
-  final def compare(l: A, r: A): Ordering =
+  final override def compare(l: A, r: A): Ordering =
     if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
 
   /**
@@ -94,7 +94,7 @@ trait Ord[-A] extends Equal[A] { self =>
   /**
    * Returns a new ordering that is the reverse of this one.
    */
-  final def reverse: Ord[A] =
+  final override def reverse: Ord[A] =
     mapOrdering(_.opposite)
 
   override def toScala[A1 <: A]: sm.Ordering[A1] = self.compare(_, _) match {
@@ -105,46 +105,6 @@ trait Ord[-A] extends Equal[A] { self =>
 }
 
 object Ord extends Lawful[Ord] {
-
-  /**
-   * For all values `a1`, `a2`, and `a3`, if `a1` is less than `a2` and `a2` is
-   * less than `a3` then `a1` is less than `a3`.
-   */
-  val transitivityLaw1: Laws[Ord] =
-    new Laws.Law3[Ord]("transitivityLaw1") {
-      def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-        ((a1 less a2) && (a2 less a3)) ==> (a1 less a3)
-    }
-
-  /**
-   * For all values `a1`, `a2`, and `a3`, if `a1` is greater than `a2` and `a2`
-   * is greater than `a3` then `a1` is greater than `a3`.
-   */
-  val transitivityLaw2: Laws[Ord] =
-    new Laws.Law3[Ord]("transitivityLaw2") {
-      def apply[A: Ord](a1: A, a2: A, a3: A): TestResult =
-        ((a1 greater a2) && (a2 greater a3)) ==> (a1 greater a3)
-    }
-
-  /**
-   * For all values `a1` and `a2`, if `a1` is less than or equal to `a2` and
-   * `a2` is less than or equal to `a1` then `a1` is equal to `a2`.
-   */
-  val antisymmetryLaw1: Laws[Ord] =
-    new Laws.Law2[Ord]("antisymmetryLaw1") {
-      def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equal a2)
-    }
-
-  /**
-   * For all values `a1` and `a2`, if `a1` is greater than or equal to `a2` and
-   * `a2` is greater than or equal to `a1` then `a1` is equal to `a2`.
-   */
-  val antisymmetryLaw2: Laws[Ord] =
-    new Laws.Law2[Ord]("antisymmetryLaw2") {
-      def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equal a2)
-    }
 
   /**
    * For all values `a1` and `a2`, `a1` is less than or equal to `a2` or `a2`
@@ -177,17 +137,13 @@ object Ord extends Lawful[Ord] {
     }
 
   /**
-   * The set of all laws that instances of `Ord` must satify.
+   * The set of all laws that instances of `Ord` must satisfy.
    */
   val laws: Laws[Ord] =
-    transitivityLaw1 +
-      transitivityLaw2 +
-      antisymmetryLaw1 +
-      antisymmetryLaw2 +
-      connexityLaw1 +
+    connexityLaw1 +
       connexityLaw2 +
       complementLaw +
-      Equal.laws
+      PartialOrd.laws
 
   def fromScala[A](implicit ordering: sm.Ordering[A]): Ord[A] =
     (l: A, r: A) => Ordering.fromCompare(ordering.compare(l, r))
@@ -259,10 +215,10 @@ object Ord extends Lawful[Ord] {
    * Constructs an instance from an `ord` function and a `equal0` function.
    * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
    */
-  def makeFrom[A](ord: (A, A) => Ordering, equal0: Equal[A]): Ord[A] =
+  def makeFrom[A](ord: (A, A) => Ordering, partialOrd: PartialOrd[A]): Ord[A] =
     new Ord[A] {
       override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
-      override protected def checkEqual(l: A, r: A): Boolean    = equal0.equal(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean    = partialOrd.equal(l, r)
     }
 
   /**
@@ -292,7 +248,7 @@ object Ord extends Lawful[Ord] {
 
         loop(0)
       },
-      Equal.ChunkEqual
+      PartialOrd.ChunkPartialOrd
     )
 
   /**
@@ -312,7 +268,7 @@ object Ord extends Lawful[Ord] {
         case (Right(_), Left(_))    => Ordering.GreaterThan
         case (Right(b1), Right(b2)) => b1 =?= b2
       },
-      Equal.EitherEqual
+      PartialOrd.EitherPartialOrd
     )
 
   /**
@@ -331,7 +287,7 @@ object Ord extends Lawful[Ord] {
           if (compare.isEqual) loop(t1, t2) else compare
       }
 
-    makeFrom((l, r) => loop(l, r), Equal.ListEqual)
+    makeFrom((l, r) => loop(l, r), PartialOrd.ListPartialOrd)
   }
 
   /**
@@ -357,7 +313,7 @@ object Ord extends Lawful[Ord] {
   implicit def Tuple2Ord[A: Ord, B: Ord]: Ord[(A, B)] =
     makeFrom({
       case ((a1, b1), (a2, b2)) => (a1 =?= a2) <> (b1 =?= b2)
-    }, Equal.Tuple2Equal)
+    }, PartialOrd.Tuple2PartialOrd)
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -366,7 +322,7 @@ object Ord extends Lawful[Ord] {
   implicit def Tuple3Ord[A: Ord, B: Ord, C: Ord]: Ord[(A, B, C)] =
     makeFrom({
       case ((a1, b1, c1), (a2, b2, c2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2)
-    }, Equal.Tuple3Equal)
+    }, PartialOrd.Tuple3PartialOrd)
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -375,7 +331,7 @@ object Ord extends Lawful[Ord] {
   implicit def Tuple4Ord[A: Ord, B: Ord, C: Ord, D: Ord]: Ord[(A, B, C, D)] =
     makeFrom({
       case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2)
-    }, Equal.Tuple4Equal)
+    }, PartialOrd.Tuple4PartialOrd)
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -385,7 +341,7 @@ object Ord extends Lawful[Ord] {
     makeFrom({
       case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
         (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2)
-    }, Equal.Tuple5Equal)
+    }, PartialOrd.Tuple5PartialOrd)
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -395,17 +351,20 @@ object Ord extends Lawful[Ord] {
     makeFrom({
       case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
         (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2)
-    }, Equal.Tuple6Equal)
+    }, PartialOrd.Tuple6PartialOrd)
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
    * the product type.
    */
   implicit def Tuple7Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord, G: Ord]: Ord[(A, B, C, D, E, F, G)] =
-    makeFrom({
-      case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
-        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2)
-    }, Equal.Tuple7Equal)
+    makeFrom(
+      {
+        case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
+          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2)
+      },
+      PartialOrd.Tuple7PartialOrd
+    )
 
   /**
    * Derives an `Ord` for a product type given an `Ord` for each element of
@@ -418,7 +377,7 @@ object Ord extends Lawful[Ord] {
         case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2)
       },
-      Equal.Tuple8Equal
+      PartialOrd.Tuple8PartialOrd
     )
 
   /**
@@ -432,7 +391,7 @@ object Ord extends Lawful[Ord] {
         case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2)
       },
-      Equal.Tuple9Equal
+      PartialOrd.Tuple9PartialOrd
     )
 
   /**
@@ -456,7 +415,7 @@ object Ord extends Lawful[Ord] {
         case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2)
       },
-      Equal.Tuple10Equal
+      PartialOrd.Tuple10PartialOrd
     )
 
   /**
@@ -481,7 +440,7 @@ object Ord extends Lawful[Ord] {
         case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2)
       },
-      Equal.Tuple11Equal
+      PartialOrd.Tuple11PartialOrd
     )
 
   /**
@@ -507,7 +466,7 @@ object Ord extends Lawful[Ord] {
         case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2)
       },
-      Equal.Tuple12Equal
+      PartialOrd.Tuple12PartialOrd
     )
 
   /**
@@ -537,7 +496,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2)
       },
-      Equal.Tuple13Equal
+      PartialOrd.Tuple13PartialOrd
     )
 
   /**
@@ -568,7 +527,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2)
       },
-      Equal.Tuple14Equal
+      PartialOrd.Tuple14PartialOrd
     )
 
   /**
@@ -600,7 +559,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2)
       },
-      Equal.Tuple15Equal
+      PartialOrd.Tuple15PartialOrd
     )
 
   /**
@@ -633,7 +592,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2)
       },
-      Equal.Tuple16Equal
+      PartialOrd.Tuple16PartialOrd
     )
 
   /**
@@ -667,7 +626,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2)
       },
-      Equal.Tuple17Equal
+      PartialOrd.Tuple17PartialOrd
     )
 
   /**
@@ -702,7 +661,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2)
       },
-      Equal.Tuple18Equal
+      PartialOrd.Tuple18PartialOrd
     )
 
   /**
@@ -738,7 +697,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2)
       },
-      Equal.Tuple19Equal
+      PartialOrd.Tuple19PartialOrd
     )
 
   /**
@@ -775,7 +734,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2)
       },
-      Equal.Tuple20Equal
+      PartialOrd.Tuple20PartialOrd
     )
 
   /**
@@ -813,7 +772,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2)
       },
-      Equal.Tuple21Equal
+      PartialOrd.Tuple21PartialOrd
     )
 
   /**
@@ -852,7 +811,7 @@ object Ord extends Lawful[Ord] {
             ) =>
           (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2) <> (m1 =?= m2) <> (n1 =?= n2) <> (o1 =?= o2) <> (p1 =?= p2) <> (q1 =?= q2) <> (r1 =?= r2) <> (s1 =?= s2) <> (t1 =?= t2) <> (u1 =?= u2) <> (v1 =?= v2)
       },
-      Equal.Tuple22Equal
+      PartialOrd.Tuple22PartialOrd
     )
 
   /**
@@ -884,49 +843,19 @@ trait OrdSyntax {
   implicit class OrdOps[A](val l: A) {
 
     /**
-     * Returns whether this value is greater than the specified value.
-     */
-    def >[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
-      ord.compare(l, r) === Ordering.GreaterThan
-
-    /**
-     * Returns whether this value is greater than or equal to the specified
-     * value.
-     */
-    def >=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
-      (l > r) || (l === r)
-
-    /**
-     * Returns whether this value is less than the specified value.
-     */
-    def <[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
-      ord.compare(l, r) === Ordering.LessThan
-
-    /**
-     * Returns whether this value is less than or equal to the specified
-     * value.
-     */
-    def <=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Boolean =
-      (l < r) || (l === r)
-
-    /**
      * Returns the result of comparing this value with the specified value.
      */
     def =?=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Ordering = ord.compare(l, r)
   }
 }
 
-/**
- * An `Ordering` is the result of comparing two values. The result may be
- * `LessThan`, `Equals`, or `GreaterThan`.
- */
-sealed trait Ordering { self =>
+sealed trait PartialOrdering { self =>
 
   /**
    * A symbolic alias for `orElse`.
    */
-  final def <>(that: => Ordering): Ordering =
-    self orElse that
+  final def <>?(that: => PartialOrdering): PartialOrdering =
+    self orElsePartial that
 
   /**
    * Returns whether this `Ordering` is `Ordering.Equals`.
@@ -953,15 +882,60 @@ sealed trait Ordering { self =>
   }
 
   /**
+   * Returns this ordering, but if this ordering is equal returns the
+   * specified ordering.
+   */
+  final def orElsePartial(that: => PartialOrdering): PartialOrdering = self match {
+    case Ordering.Equals => that
+    case ordering        => ordering
+  }
+
+  /**
    * Converts this `Ordering` to an ordinal representation, with `0`
    * representing `LessThan`, `1` representing `Equals` and `2` representing
    * `GreaterThan`.
    */
   final def ordinal: Int = self match {
-    case Ordering.LessThan    => 0
-    case Ordering.Equals      => 1
-    case Ordering.GreaterThan => 2
+    case PartialOrdering.NoOrder => -1
+    case Ordering.LessThan       => 0
+    case Ordering.Equals         => 1
+    case Ordering.GreaterThan    => 2
   }
+
+  /**
+   * Returns the opposite of this `Ordering`, with `LessThan` converted to
+   * `GreaterThan` and `GreaterThan` converted to `LessThan`.
+   */
+  def opposite: PartialOrdering = self match {
+    case PartialOrdering.NoOrder => PartialOrdering.NoOrder
+    case Ordering.LessThan       => Ordering.GreaterThan
+    case Ordering.Equals         => Ordering.Equals
+    case Ordering.GreaterThan    => Ordering.LessThan
+  }
+
+}
+
+object PartialOrdering {
+  case object NoOrder extends PartialOrdering
+
+  /**
+   * Ordering for `PartialOrdering` values.
+   */
+  implicit val orderingPartialOrdering: Ord[PartialOrdering] =
+    Ord((l: PartialOrdering, r: PartialOrdering) => Ord[Int].compare(l.ordinal, r.ordinal))
+}
+
+/**
+ * An `Ordering` is the result of comparing two values. The result may be
+ * `LessThan`, `Equals`, or `GreaterThan`.
+ */
+sealed trait Ordering extends PartialOrdering { self =>
+
+  /**
+   * A symbolic alias for `orElse`.
+   */
+  final def <>(that: => Ordering): Ordering =
+    self orElse that
 
   /**
    * Returns this ordering, but if this ordering is equal returns the
@@ -976,7 +950,7 @@ sealed trait Ordering { self =>
    * Returns the opposite of this `Ordering`, with `LessThan` converted to
    * `GreaterThan` and `GreaterThan` converted to `LessThan`.
    */
-  final def opposite: Ordering = self match {
+  final override def opposite: Ordering = self match {
     case Ordering.LessThan    => Ordering.GreaterThan
     case Ordering.Equals      => Ordering.Equals
     case Ordering.GreaterThan => Ordering.LessThan
@@ -996,10 +970,4 @@ object Ordering {
     if (n < 0) LessThan
     else if (n > 0) GreaterThan
     else Equals
-
-  /**
-   * Ordering for `Ordering` values.
-   */
-  implicit val orderingOrdering: Ord[Ordering] =
-    Ord((l: Ordering, r: Ordering) => Ord[Int].compare(l.ordinal, r.ordinal))
 }

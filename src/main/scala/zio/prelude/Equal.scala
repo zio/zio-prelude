@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.Exit.{ Failure, Success }
-import zio.prelude.coherent.HashOrd
+import zio.prelude.coherent.{ HashOrd, HashPartialOrd }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
@@ -353,12 +353,19 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * `Hash` (and thus also `Equal`) instance for `Set[A]` values.
+   * `PartialOrd` and `Hash` (and thus also `Equal`) instance for `Set[A]` values.
    * Due to the limitations of Scala's `Set`,
    * this uses object equality and hash code on the elements.
    */
-  implicit def SetHash[A]: Hash[Set[A]] =
-    Hash.default
+  implicit def SetHashPartialOrd[A]: Hash[Set[A]] with PartialOrd[Set[A]] =
+    HashPartialOrd.make(
+      _.hashCode,
+      (l, r) =>
+        if (l == r) Ordering.Equals
+        else if (l.subsetOf(r)) Ordering.LessThan
+        else if (r.subsetOf(l)) Ordering.GreaterThan
+        else PartialOrdering.NoOrder
+    )
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `String` values.
