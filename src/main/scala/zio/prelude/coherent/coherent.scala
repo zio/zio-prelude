@@ -222,6 +222,17 @@ object EqualIdentity {
     }
 }
 
+trait EqualIdempotent[A] extends CommutativeEqual[A] with EqualIdentity[A]
+
+object EqualIdempotent {
+  implicit def derive[A](implicit idempotent: Idempotent[A], equal0: Equal[A]): EqualIdempotent[A] =
+    new EqualIdempotent[A] {
+      def combine(l: => A, r: => A): A              = idempotent.combine(l, r)
+      def identity: A                               = idempotent.identity
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+    }
+}
+
 trait EqualInverse[A] extends EqualIdentity[A] with Inverse[A]
 
 object EqualInverse {

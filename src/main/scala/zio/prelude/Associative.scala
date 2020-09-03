@@ -67,22 +67,22 @@ object Associative extends Lawful[AssociativeEqual] {
     (l, r) => f(l, r)
 
   /**
-   * The `Commutative` and `Inverse` instance for the conjunction of `Boolean`
+   * The `Idempotent` and `Inverse` instance for the conjunction of `Boolean`
    * values.
    */
-  implicit val BooleanConjunctionCommutativeInverse: Commutative[And] with Inverse[And] =
-    new Commutative[And] with Inverse[And] {
+  implicit val BooleanConjunctionIdempotentInverse: Idempotent[And] with Inverse[And] =
+    new Idempotent[And] with Inverse[And] {
       def combine(l: => And, r: => And): And = And(l && r)
       val identity: And                      = And(true)
       def inverse(l: => And, r: => And): And = And(l || !r)
     }
 
   /**
-   * The `Commutative` and `Inverse` instance for the disjunction of `Boolean`
+   * The `Idempotent` and `Inverse` instance for the disjunction of `Boolean`
    * values.
    */
-  implicit val BooleanDisjunctionCommutativeInverse: Commutative[Or] with Inverse[Or] =
-    new Commutative[Or] with Inverse[Or] {
+  implicit val BooleanDisjunctionIdempotentInverse: Idempotent[Or] with Inverse[Or] =
+    new Idempotent[Or] with Inverse[Or] {
       def combine(l: => Or, r: => Or): Or = Or(l || r)
       val identity: Or                    = Or(false)
       def inverse(l: => Or, r: => Or): Or = Or(l && !r)
@@ -110,6 +110,24 @@ object Associative extends Lawful[AssociativeEqual] {
     }
 
   /**
+   * The `Idempotent` instance for the max of `Byte` values.
+   */
+  implicit val ByteMaxIdempotent: Idempotent[Max[Byte]] =
+    new Idempotent[Max[Byte]] {
+      def combine(l: => Max[Byte], r: => Max[Byte]): Max[Byte] = Max(l max r)
+      val identity: Max[Byte]                                  = Max(Byte.MinValue)
+    }
+
+  /**
+   * The `Idempotent` instance for the min of `Byte` values.
+   */
+  implicit val ByteMinIdempotent: Idempotent[Min[Byte]] =
+    new Idempotent[Min[Byte]] {
+      def combine(l: => Min[Byte], r: => Min[Byte]): Min[Byte] = Min(l min r)
+      val identity: Min[Byte]                                  = Min(Byte.MaxValue)
+    }
+
+  /**
    * The `Commutative` and `Inverse` instance for the product of `Byte` values.
    */
   implicit val ByteProdCommutativeInverse: Commutative[Prod[Byte]] with Inverse[Prod[Byte]] =
@@ -127,6 +145,24 @@ object Associative extends Lawful[AssociativeEqual] {
       def combine(l: => Sum[Byte], r: => Sum[Byte]): Sum[Byte] = Sum((l + r).toByte)
       val identity: Sum[Byte]                                  = Sum(0)
       def inverse(l: => Sum[Byte], r: => Sum[Byte]): Sum[Byte] = Sum((l - r).toByte)
+    }
+
+  /**
+   * The `Idempotent` instance for the max of `Char` values.
+   */
+  implicit val CharMaxIdempotent: Idempotent[Max[Char]] =
+    new Idempotent[Max[Char]] {
+      def combine(l: => Max[Char], r: => Max[Char]): Max[Char] = Max(l max r)
+      val identity: Max[Char]                                  = Max(Char.MinValue)
+    }
+
+  /**
+   * The `Idempotent` instance for the min of `Char` values.
+   */
+  implicit val CharMinIdempotent: Idempotent[Min[Char]] =
+    new Idempotent[Min[Char]] {
+      def combine(l: => Min[Char], r: => Min[Char]): Min[Char] = Min(l min r)
+      val identity: Min[Char]                                  = Min(Char.MaxValue)
     }
 
   /**
@@ -166,6 +202,24 @@ object Associative extends Lawful[AssociativeEqual] {
     derive.derive(associative)
 
   /**
+   * The `Idempotent` instance for the max of `Double` values.
+   */
+  implicit val DoubleMaxIdempotent: Idempotent[Max[Double]] =
+    new Idempotent[Max[Double]] {
+      def combine(l: => Max[Double], r: => Max[Double]): Max[Double] = Max(l max r)
+      val identity: Max[Double]                                      = Max(Double.MinValue)
+    }
+
+  /**
+   * The `Idempotent` instance for the min of `Double` values.
+   */
+  implicit val DoubleMinIdempotent: Idempotent[Min[Double]] =
+    new Idempotent[Min[Double]] {
+      def combine(l: => Min[Double], r: => Min[Double]): Min[Double] = Min(l min r)
+      val identity: Min[Double]                                      = Min(Double.MaxValue)
+    }
+
+  /**
    * The `Commutative` and `Inverse` instance for the product of `Double`
    * values.
    */
@@ -203,6 +257,24 @@ object Associative extends Lawful[AssociativeEqual] {
     make((l: First[A], _: First[A]) => l)
 
   /**
+   * The `Idempotent` instance for the max of `Float` values.
+   */
+  implicit val FloatMaxIdempotent: Idempotent[Max[Float]] =
+    new Idempotent[Max[Float]] {
+      def combine(l: => Max[Float], r: => Max[Float]): Max[Float] = Max(l max r)
+      val identity: Max[Float]                                    = Max(Float.MinValue)
+    }
+
+  /**
+   * The `Idempotent` instance for the min of `Float` values.
+   */
+  implicit val FloatMinIdempotent: Idempotent[Min[Float]] =
+    new Idempotent[Min[Float]] {
+      def combine(l: => Min[Float], r: => Min[Float]): Min[Float] = Min(l min r)
+      val identity: Min[Float]                                    = Min(Float.MaxValue)
+    }
+
+  /**
    * The `Commutative` and `Inverse` instance for the product of `Float`
    * values.
    */
@@ -221,6 +293,24 @@ object Associative extends Lawful[AssociativeEqual] {
       def combine(l: => Sum[Float], r: => Sum[Float]): Sum[Float] = Sum(l + r)
       val identity: Sum[Float]                                    = Sum(0)
       def inverse(l: => Sum[Float], r: => Sum[Float]): Sum[Float] = Sum(l - r)
+    }
+
+  /**
+   * The `Idempotent` instance for the max of `Int` values.
+   */
+  implicit val IntMaxIdempotent: Idempotent[Max[Int]] =
+    new Idempotent[Max[Int]] {
+      def combine(l: => Max[Int], r: => Max[Int]): Max[Int] = Max(l max r)
+      val identity: Max[Int]                                = Max(Int.MinValue)
+    }
+
+  /**
+   * The `Idempotent` instance for the min of `Int` values.
+   */
+  implicit val IntMinIdempotent: Idempotent[Min[Int]] =
+    new Idempotent[Min[Int]] {
+      def combine(l: => Min[Int], r: => Min[Int]): Min[Int] = Min(l min r)
+      val identity: Min[Int]                                = Min(Int.MaxValue)
     }
 
   /**
@@ -254,6 +344,24 @@ object Associative extends Lawful[AssociativeEqual] {
    */
   implicit def ListIdentity[A]: Identity[List[A]] =
     Identity.make[List[A]](Nil, _ ++ _)
+
+  /**
+   * The `Idempotent` instance for the max of `Long` values.
+   */
+  implicit val LongMaxIdempotent: Idempotent[Max[Long]] =
+    new Idempotent[Max[Long]] {
+      def combine(l: => Max[Long], r: => Max[Long]): Max[Long] = Max(l max r)
+      val identity: Max[Long]                                  = Max(Long.MinValue)
+    }
+
+  /**
+   * The `Idempotent` instance for the min of `Long` values.
+   */
+  implicit val LongMinIdempotent: Idempotent[Min[Long]] =
+    new Idempotent[Min[Long]] {
+      def combine(l: => Min[Long], r: => Min[Long]): Min[Long] = Min(l min r)
+      val identity: Min[Long]                                  = Min(Long.MaxValue)
+    }
 
   /**
    * The `Commutative` and `Inverse` instance for the product of `Long` values.
@@ -323,14 +431,32 @@ object Associative extends Lawful[AssociativeEqual] {
     )
 
   /**
-   * The `Commutative` and `Inverse` instance for the union of `Set[A]`
+   * The `Idempotent` and `Inverse` instance for the union of `Set[A]`
    * values.
    */
-  implicit def SetCommutativeInverse[A]: Commutative[Set[A]] with Inverse[Set[A]] =
-    new Commutative[Set[A]] with Inverse[Set[A]] {
+  implicit def SetIdempotentInverse[A]: Idempotent[Set[A]] with Inverse[Set[A]] =
+    new Idempotent[Set[A]] with Inverse[Set[A]] {
       def combine(l: => Set[A], r: => Set[A]): Set[A] = l | r
       val identity: Set[A]                            = Set.empty
       def inverse(l: => Set[A], r: => Set[A]): Set[A] = l &~ r
+    }
+
+  /**
+   * The `Idempotent` instance for the max of `Short` values.
+   */
+  implicit val ShortMaxIdempotent: Idempotent[Max[Short]] =
+    new Idempotent[Max[Short]] {
+      def combine(l: => Max[Short], r: => Max[Short]): Max[Short] = Max(l max r)
+      val identity: Max[Short]                                    = Max(Short.MinValue)
+    }
+
+  /**
+   * The `Idempotent` instance for the min of `Short` values.
+   */
+  implicit val ShortMinIdempotent: Idempotent[Min[Short]] =
+    new Idempotent[Min[Short]] {
+      def combine(l: => Min[Short], r: => Min[Short]): Min[Short] = Min(l min r)
+      val identity: Min[Short]                                    = Min(Short.MaxValue)
     }
 
   /**
