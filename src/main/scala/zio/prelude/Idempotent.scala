@@ -6,15 +6,15 @@ import zio.test.laws.{ Lawful, Laws }
 
 /**
  * The `Idempotent` type class describes a binary operator for a type `A` that
- * is both commutative and also has an identity element. This means that `a <> a` is equal to
- * `a` for all values `a`. Examples of idempotent operations
- * include union of sets, but not addition of integers.
+ * is both commutative and produces the same value when combining two identical values.
+ * This means that `a <> a` is equal to `a` for all values `a`.
+ * Examples of idempotent operations include union of sets, but not addition of integers.
  *
  * Idempotent operators are useful because combining  the values with an idempotent
  * operation results in the same value regardless of the number of values
  * are combined, allowing us to optimize out unnecessary combinations of the same values.
  */
-trait Idempotent[A] extends Commutative[A] with Identity[A] { self =>
+trait Idempotent[A] extends Commutative[A] { self =>
   def optimize(elems: Iterable[A]): Set[A] = elems.toSet
 }
 
@@ -38,7 +38,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
    * The set of all laws that instances of `Idempotent` must satisfy.
    */
   val laws: Laws[EqualIdempotent] =
-    idempotentLaw + Commutative.laws + Identity.laws
+    idempotentLaw + Commutative.laws
 
   /**
    * Summons an implicit `Idempotent[A]`.
@@ -46,18 +46,17 @@ object Idempotent extends Lawful[EqualIdempotent] {
   def apply[A](implicit idempotent: Idempotent[A]): Idempotent[A] = idempotent
 
   /**
-   * Constructs a `Idempotent` instance from a commutative binary operator and identity element.
+   * Constructs an `Idempotent` instance from a commutative binary operator.
    */
-  def make[A](f: (A, A) => A, identity0: A): Idempotent[A] = new Idempotent[A] {
-    override def identity: A                  = identity0
+  def make[A](f: (A, A) => A): Idempotent[A] = new Idempotent[A] {
     override def combine(l: => A, r: => A): A = f(l, r)
   }
 
   /**
-   * Constructs an `Idempotent` instance from an identity instance.
+   * Constructs an `Idempotent` instance from a commutative instance.
    */
-  def makeFrom[A](identity: Identity[A]): Idempotent[A] =
-    make((l, r) => identity.combine(l, r), identity.identity)
+  def makeFrom[A](commutative: Commutative[A]): Idempotent[A] =
+    make((l, r) => commutative.combine(l, r))
 
   /**
    * Derives a `Idempotent[F[A]]` given a `Derive[F, Idempotent]` and a
@@ -73,34 +72,34 @@ object Idempotent extends Lawful[EqualIdempotent] {
    * Derives a `Idempotent[Map[K, V]]` given a `Idempotent[V]`.
    */
   implicit def MapIdempotent[K, V: Idempotent]: Idempotent[Map[K, V]] =
-    makeFrom(Associative.MapIdentity)
+    makeFrom(Commutative.MapCommutative)
 
   /**
    * Derives a `Idempotent[Option[A]]` given a `Idempotent[A]`
    */
   implicit def OptionIdempotent[A: Idempotent]: Idempotent[Option[A]] =
-    makeFrom(Associative.OptionIdentity)
+    makeFrom(Commutative.OptionCommutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
    * element of the product type.
    */
   implicit def Tuple2Idempotent[A: Idempotent, B: Idempotent]: Idempotent[(A, B)] =
-    makeFrom(Identity.Tuple2Identity)
+    makeFrom(Commutative.Tuple2Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
    * element of the product type.
    */
   implicit def Tuple3Idempotent[A: Idempotent, B: Idempotent, C: Idempotent]: Idempotent[(A, B, C)] =
-    makeFrom(Identity.Tuple3Identity)
+    makeFrom(Commutative.Tuple3Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
    * element of the product type.
    */
   implicit def Tuple4Idempotent[A: Idempotent, B: Idempotent, C: Idempotent, D: Idempotent]: Idempotent[(A, B, C, D)] =
-    makeFrom(Identity.Tuple4Identity)
+    makeFrom(Commutative.Tuple4Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -108,7 +107,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
    */
   implicit def Tuple5Idempotent[A: Idempotent, B: Idempotent, C: Idempotent, D: Idempotent, E: Idempotent]
     : Idempotent[(A, B, C, D, E)] =
-    makeFrom(Identity.Tuple5Identity)
+    makeFrom(Commutative.Tuple5Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -122,7 +121,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     E: Idempotent,
     F: Idempotent
   ]: Idempotent[(A, B, C, D, E, F)] =
-    makeFrom(Identity.Tuple6Identity)
+    makeFrom(Commutative.Tuple6Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -137,7 +136,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     F: Idempotent,
     G: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G)] =
-    makeFrom(Identity.Tuple7Identity)
+    makeFrom(Commutative.Tuple7Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -153,7 +152,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     G: Idempotent,
     H: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H)] =
-    makeFrom(Identity.Tuple8Identity)
+    makeFrom(Commutative.Tuple8Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -170,7 +169,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     H: Idempotent,
     I: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I)] =
-    makeFrom(Identity.Tuple9Identity)
+    makeFrom(Commutative.Tuple9Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -188,7 +187,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     I: Idempotent,
     J: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J)] =
-    makeFrom(Identity.Tuple10Identity)
+    makeFrom(Commutative.Tuple10Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -207,7 +206,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     J: Idempotent,
     K: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K)] =
-    makeFrom(Identity.Tuple11Identity)
+    makeFrom(Commutative.Tuple11Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -227,7 +226,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     K: Idempotent,
     L: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    makeFrom(Identity.Tuple12Identity)
+    makeFrom(Commutative.Tuple12Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -248,7 +247,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     L: Idempotent,
     M: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
-    makeFrom(Identity.Tuple13Identity)
+    makeFrom(Commutative.Tuple13Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -270,7 +269,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     M: Idempotent,
     N: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
-    makeFrom(Identity.Tuple14Identity)
+    makeFrom(Commutative.Tuple14Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -293,7 +292,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     N: Idempotent,
     O: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
-    makeFrom(Identity.Tuple15Identity)
+    makeFrom(Commutative.Tuple15Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -317,7 +316,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     O: Idempotent,
     P: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
-    makeFrom(Identity.Tuple16Identity)
+    makeFrom(Commutative.Tuple16Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -342,7 +341,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     P: Idempotent,
     Q: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
-    makeFrom(Identity.Tuple17Identity)
+    makeFrom(Commutative.Tuple17Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -368,7 +367,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     Q: Idempotent,
     R: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
-    makeFrom(Identity.Tuple18Identity)
+    makeFrom(Commutative.Tuple18Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -395,7 +394,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     R: Idempotent,
     S: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
-    makeFrom(Identity.Tuple19Identity)
+    makeFrom(Commutative.Tuple19Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -423,7 +422,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     S: Idempotent,
     T: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
-    makeFrom(Identity.Tuple20Identity)
+    makeFrom(Commutative.Tuple20Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -452,7 +451,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
     T: Idempotent,
     U: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
-    makeFrom(Identity.Tuple21Identity)
+    makeFrom(Commutative.Tuple21Commutative)
 
   /**
    * Derives a `Idempotent` for a product type given a `Idempotent` for each
@@ -482,5 +481,5 @@ object Idempotent extends Lawful[EqualIdempotent] {
     U: Idempotent,
     V: Idempotent
   ]: Idempotent[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
-    makeFrom(Identity.Tuple22Identity)
+    makeFrom(Commutative.Tuple22Commutative)
 }
