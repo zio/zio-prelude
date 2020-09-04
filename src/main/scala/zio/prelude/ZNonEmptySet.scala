@@ -1,9 +1,7 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
+import zio.prelude.newtypes.{ Max, Prod, Sum }
 
-import scala.annotation.unchecked.uncheckedVariance
-import scala.collection.immutable.HashMap
 import scala.language.implicitConversions
 
 /**
@@ -13,7 +11,7 @@ import scala.language.implicitConversions
  * probability associated with an element in the set if `B` is a rational
  * number, or even whether an element appears at all if `B` is a boolean.
  */
-final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedVariance, B]) { self =>
+final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =>
 
   /**
    * A symbolic alias for `zip`.
@@ -41,7 +39,7 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
    * Returns the number of times the specified element appears in the set.
    */
   def apply[A1 >: A, B1 >: B](a: A1)(implicit ev: Identity[Sum[B1]]): B1 =
-    map.asInstanceOf[Map[A1, B1]].getOrElse(a, ev.identity)
+    zset[A1, B1](a)(ev)
 
   /**
    * Combines this set with the specified set to produce a new set where the
@@ -49,13 +47,7 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
    * appears in this set and the specified set.
    */
   def combine[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Commutative[Sum[B1]]): ZNonEmptySet[A1, B1] =
-    new ZNonEmptySet(that.toMap.foldLeft(self.map.asInstanceOf[HashMap[A1, B1]]) {
-      case (map, (a, b1)) =>
-        map.get(a) match {
-          case Some(b) => map + (a -> ev.combine(Sum(b), Sum(b1)))
-          case None    => map + (a -> b1)
-        }
-    })
+    new ZNonEmptySet(zset.combine(that))
 
   /**
    * Returns whether this set is equal to the specified set, meaning that the
@@ -63,8 +55,9 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
    */
   override def equals(that: Any): Boolean =
     that match {
-      case that: ZNonEmptySet[_, _] => self.map == that.map
-      case _                        => false
+      case that: AnyRef if self.eq(that) => true
+      case that: ZNonEmptySet[_, _]      => self.zset == that.toZSet
+      case _                             => false
     }
 
   /**
@@ -76,31 +69,13 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
   def flatMap[B1 >: B, C](
     f: A => ZNonEmptySet[C, B1]
   )(implicit ev1: Commutative[Sum[B1]], ev2: Commutative[Prod[B1]]): ZNonEmptySet[C, B1] =
-    map.tail.foldLeft[ZNonEmptySet[C, B1]](map.head match {
-      case (a, b) => f(a).transform(b1 => ev2.combine(Prod(b), Prod(b1)))
-    }) {
-      case (set, (a, b)) =>
-        set <> f(a).transform(b1 => ev2.combine(Prod(b), Prod(b1)))
-    }
+    new ZNonEmptySet[C, B1](zset.flatMap(f(_).toZSet))
 
   /**
    * Returns the hash code of this set.
    */
   override def hashCode: Int =
-    map.hashCode
-
-  /**
-   * Combines this set with the specified set to produce a new set where the
-   * number of times each element appears is the minimum of the number of times
-   * it appears in this set and the specified set.
-   */
-  def intersect[A1 >: A, B1 >: B](
-    that: ZNonEmptySet[A1, B1]
-  )(implicit ev1: Commutative[Min[B1]], ev2: Identity[Sum[B1]]): ZNonEmptySet[A1, B1] =
-    new ZNonEmptySet((self.map.toVector ++ that.map.toVector).foldLeft(HashMap.empty[A1, B1]) {
-      case (map, (a, b)) =>
-        map + (a -> ev1.combine(Min(map.getOrElse(a, ev2.identity)), Min(b)))
-    })
+    zset.hashCode
 
   /**
    * Transforms the elements in the set using the specified function. If this
@@ -109,35 +84,28 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
    * times each of the old values appeared in the set.
    */
   def map[B1 >: B, C](f: A => C)(implicit ev: Commutative[Sum[B1]]): ZNonEmptySet[C, B1] =
-    new ZNonEmptySet(map.foldLeft[HashMap[C, B1]](HashMap.empty) {
-      case (map, (a, b1)) =>
-        val c = f(a)
-        map.get(c) match {
-          case Some(b) => map + (c -> ev.combine(Sum(b), Sum(b1)))
-          case None    => map + (c -> b1)
-        }
-    })
+    new ZNonEmptySet(zset.map[B1, C](f)(ev))
 
   /**
    * Transforms the representation of how many times each element appears in
    * the set with the specified function.
    */
   def transform[C](f: B => C): ZNonEmptySet[A, C] =
-    new ZNonEmptySet(map.map { case (a, b) => (a, f(b)) })
+    new ZNonEmptySet(zset.transform(f))
 
   /**
    * Converts this set to a `Map` from elements to how many times they appear
    * in the set.
    */
   def toMap[A1 >: A]: Map[A1, B] =
-    map.asInstanceOf[Map[A1, B]]
+    zset.toMap
 
   /**
    * Converts this set to a `Set`, discarding information about how many times
    * an element appears in the set beyond whether it appears at all.
    */
   def toNonEmptySet[A1 >: A, B1 >: B](implicit ev1: Equal[B1], ev2: Identity[Sum[B1]]): NonEmptySet[A1] =
-    map.tail.foldLeft(NonEmptySet.single[A1](map.head._1)) {
+    toMap.tail.foldLeft(NonEmptySet.single[A1](toMap.head._1)) {
       case (set, (a, b)) =>
         if (ev1.notEqual(b, ev2.identity)) set + a else set
     }
@@ -146,9 +114,9 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
    * Returns a meaningful string representation of this set.
    */
   override def toString: String =
-    map.mkString("ZNonEmptySet(", ", ", ")")
+    toMap.mkString("ZNonEmptySet(", ", ", ")")
 
-  def toZSet: ZSet[A, B] = ZSet.fromMap(map)
+  def toZSet: ZSet[A, B] = zset
 
   /**
    * Combines this set with the specified set to produce a new set where the
@@ -158,10 +126,7 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
   def union[A1 >: A, B1 >: B](
     that: ZSet[A1, B1]
   )(implicit ev1: Commutative[Max[B1]], ev2: Identity[Sum[B1]]): ZNonEmptySet[A1, B1] =
-    new ZNonEmptySet((self.map.toVector ++ that.toMap.toVector).foldLeft(HashMap.empty[A1, B1]) {
-      case (map, (a, b)) =>
-        map + (a -> ev1.combine(Max(map.getOrElse(a, ev2.identity)), Max(b)))
-    })
+    new ZNonEmptySet(zset.union(that))
 
   /**
    * Combines this set with the specified set to produce their cartesian
@@ -179,7 +144,7 @@ final class ZNonEmptySet[+A, +B] private (private val map: HashMap[A @uncheckedV
   def zipWith[B1 >: B, C, D](
     that: ZNonEmptySet[C, B1]
   )(f: (A, C) => D)(implicit ev1: Commutative[Sum[B1]], ev2: Commutative[Prod[B1]]): ZNonEmptySet[D, B1] =
-    self.flatMap(a => that.map(c => f(a, c)))
+    new ZNonEmptySet(zset.zipWith(that)(f))
 }
 
 object ZNonEmptySet {
@@ -191,18 +156,12 @@ object ZNonEmptySet {
     fromIterable(a, as)
 
   /**
-   * The singleton set.
-   */
-  def single[A](a: A): NonEmptyMultiSet[A] =
-    new ZNonEmptySet(HashMap((a, 1)))
-
-  /**
    * Constructs a set from the specified `Iterable`. The measure of how many
    * times a value occurs in the set will be an integer representing how many
    * times the value occurred in the specified `Iterable`.
    */
   def fromIterable[A](head: A, tail: Iterable[A]): NonEmptyMultiSet[A] =
-    new ZNonEmptySet(tail.foldLeft(HashMap((head, 1)))((map, a) => map + (a -> map.get(a).fold(1)(_ + 1))))
+    new ZNonEmptySet(ZSet.fromIterable(Iterable(head) ++ tail))
 
   /**
    * Constructs a set from the specified `Iterable`. The measure of how many
@@ -210,14 +169,8 @@ object ZNonEmptySet {
    * times the value occurred in the specified `Iterable`. Returns `None` if empty.
    */
   def fromIterableOption[A](elems: Iterable[A]): Option[NonEmptyMultiSet[A]] =
-    if (elems.isEmpty)
-      None
-    else
-      Some(
-        new ZNonEmptySet(
-          elems.tail.foldLeft(HashMap((elems.head, 1)))((map, a) => map + (a -> map.get(a).fold(1)(_ + 1)))
-        )
-      )
+    if (elems.isEmpty) None
+    else Some(new ZNonEmptySet(ZSet.fromIterable(elems)))
 
   /**
    * Constructs a set from the specified `Set`. The measure of how many times
@@ -225,7 +178,7 @@ object ZNonEmptySet {
    * occurs at all.
    */
   def fromNonEmptySet[A](set: NonEmptySet[A]): ZNonEmptySet[A, Boolean] =
-    new ZNonEmptySet(set.toSet.foldLeft(HashMap.empty[A, Boolean])((map, a) => map + (a -> true)))
+    new ZNonEmptySet(ZSet.fromSet(set.toSet))
 
   /**
    * Constructs a set from the specified `Map`. The values will be the keys in
@@ -233,28 +186,15 @@ object ZNonEmptySet {
    * keys value. Returns `None` if empty.
    */
   def fromMapOption[A, B](map: Map[A, B]): Option[ZNonEmptySet[A, B]] =
-    if (map.isEmpty)
-      None
-    else
-      Some(
-        new ZNonEmptySet(
-          map match {
-            case map: HashMap[A, B] => map
-            case _                  => map.foldLeft(HashMap.empty[A, B])(_ + _)
-          }
-        )
-      )
+    if (map.isEmpty) None
+    else Some(new ZNonEmptySet(ZSet.fromMap(map)))
 
   /** Constructs a `NonEmptyMultiSet`, where, by definition, each element is present exactly once.
    * Returns `None` if empty.
    */
-  def fromSetOption[A](set: Set[A]): Option[NonEmptyMultiSet[A]] =
-    if (set.isEmpty)
-      None
-    else
-      Some(
-        new ZNonEmptySet(HashMap[A, Int](set.toSeq.map((_, 1)): _*))
-      )
+  def fromSetOption[A](set: Set[A]): Option[ZNonEmptySet[A, Boolean]] =
+    if (set.isEmpty) None
+    else Some(new ZNonEmptySet(ZSet.fromSet(set)))
 
   /**
    * Derives a `Commutative[ZNonEmptySet[A, B]]` given a `Commutative[B]`.
@@ -262,13 +202,7 @@ object ZNonEmptySet {
   implicit def ZNonEmptySetCommutative[A, B: Commutative]: Commutative[ZNonEmptySet[A, B]] =
     new Commutative[ZNonEmptySet[A, B]] {
       def combine(left: => ZNonEmptySet[A, B], right: => ZNonEmptySet[A, B]): ZNonEmptySet[A, B] =
-        new ZNonEmptySet(right.map.foldLeft(left.map) {
-          case (map, (a, b1)) =>
-            map.get(a) match {
-              case Some(b) => map + (a -> (b <> b1))
-              case None    => map + (a -> b1)
-            }
-        })
+        new ZNonEmptySet(ZSet.ZSetCommutative[A, B].combine(left.toZSet, right.toZSet))
     }
 
   /**
@@ -276,7 +210,7 @@ object ZNonEmptySet {
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def ZNonEmptySetEqual[A, B: Equal]: Equal[ZNonEmptySet[A, B]] =
-    Equal[HashMap[A, B]].contramap(_.map)
+    Equal[ZSet[A, B]].contramap(_.toZSet)
 
   /**
    * The `EqualF` instance for `ZNonEmptySet`.
@@ -301,15 +235,13 @@ object ZNonEmptySet {
   /**
    * The `IdentityFlatten` instance for `ZNonEmptySet`.
    */
-  implicit def ZNonEmptySetIdentityFlatten[B](
+  implicit def ZNonEmptySetFlatten[B](
     implicit ev1: Commutative[Sum[B]],
     ev2: Commutative[Prod[B]]
-  ): IdentityFlatten[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
-    new IdentityFlatten[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
+  ): AssociativeFlatten[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
+    new AssociativeFlatten[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
       def flatten[A](ffa: ZNonEmptySet[ZNonEmptySet[A, B], B]): ZNonEmptySet[A, B] =
         ffa.flatMap(identity)
-      def any: ZNonEmptySet[Any, B] = ???
-
     }
 
   /**
@@ -317,7 +249,7 @@ object ZNonEmptySet {
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def ZNonEmptySetHash[A, B: Hash]: Hash[ZNonEmptySet[A, B]] =
-    Hash[HashMap[A, B]].contramap(_.map)
+    Hash[ZSet[A, B]].contramap(_.zset)
 
   /**
    * Provides an implicit conversion from `NonEmptySet` to the `Set`
