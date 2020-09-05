@@ -2,12 +2,12 @@ package zio.prelude
 
 import zio.prelude.coherent._
 import zio.prelude.newtypes.Sum
-import zio.test._
 import zio.test.Assertion.{ isEmptyString, isTrue }
+import zio.test._
 
 object CoherentSpec extends DefaultRunnableSpec {
 
-  def spec = suite("CoherentSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("CoherentSpec")(
     test("HashOrd") {
       val instance = implicitly[HashOrd[Double]].contramap[Int](_.toDouble)
       assert(instance.hash(0))(equalTo(0)) &&

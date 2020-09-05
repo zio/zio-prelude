@@ -1,10 +1,10 @@
 package zio.prelude
 
-import scala.util.Try
-
-import zio.{ IO, NonEmptyChunk, ZIO }
 import zio.prelude.Validation._
 import zio.test.Assertion
+import zio.{ IO, NonEmptyChunk, ZIO }
+
+import scala.util.Try
 
 /**
  * `Validation` represents either a successful value of type `A` or a
@@ -38,6 +38,7 @@ sealed trait Validation[+E, +A] { self =>
    * Returns whether this `Validation` and the specified `Validation` are equal
    * to each other.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override final def equals(that: Any): Boolean =
     (self, that) match {
       case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
@@ -183,9 +184,9 @@ object Validation extends LowPriorityValidationImplicits {
    * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an
    * `Equal[A]`.
    */
-  implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
+  implicit def ValidationEqual[E: Equal, A: Equal]: Equal[Validation[E, A]] =
     Equal.make {
-      case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
+      case (Failure(es), Failure(e1s)) => es.groupBy(identity) === e1s.groupBy(identity)
       case (Success(a), Success(a1))   => a === a1
       case _                           => false
     }
@@ -249,6 +250,7 @@ object Validation extends LowPriorityValidationImplicits {
    * Attempts to evaluate the specified value, catching any error that occurs
    * during evaluation and capturing it as a failure.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.throw"))
   def apply[A](a: => A): Validation[Throwable, A] =
     try {
       succeed(a)

@@ -134,6 +134,7 @@ private[prelude] object NewtypeModuleF {
         }
     }
 }
+@SuppressWarnings(Array("scalafix:MissingFinal.class"))
 trait NewtypeFExports {
   import NewtypeModuleF._
 

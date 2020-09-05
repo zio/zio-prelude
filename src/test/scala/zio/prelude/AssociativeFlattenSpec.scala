@@ -5,7 +5,7 @@ import zio.test.laws._
 
 object AssociativeFlattenSpec extends DefaultRunnableSpec {
 
-  def spec = suite("AssociativeFlattenSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("AssociativeFlattenSpec")(
     suite("laws")(
       testM("chunk")(checkAllLaws(AssociativeFlatten)(GenF.chunk, Gen.chunkOf(Gen.anyString))),
       testM("either")(checkAllLaws(AssociativeFlatten)(GenFs.either(Gen.anyInt), Gen.anyInt)),

@@ -5,7 +5,7 @@ import zio.test.laws._
 
 object CovariantSpec extends DefaultRunnableSpec {
 
-  def spec = suite("CovariantSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("CovariantSpec")(
     suite("laws")(
       testM("option")(checkAllLaws(Covariant)(GenF.option, Gen.anyInt)),
       testM("list")(checkAllLaws(Covariant)(GenF.list, Gen.anyInt)),

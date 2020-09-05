@@ -1,8 +1,8 @@
 package zio.prelude
 
+import zio.ZIO
 import zio.test._
 import zio.test.laws._
-import zio.ZIO
 
 object OrdSpec extends DefaultRunnableSpec {
 
@@ -25,20 +25,21 @@ object OrdSpec extends DefaultRunnableSpec {
     implicit ord: scala.math.Ordering[A]
   ): scala.math.Ordering[CC[A]] =
     new scala.math.Ordering[CC[A]] {
+      @SuppressWarnings(Array("scalafix:DisableSyntax.while", "scalafix:DisableSyntax.return"))
       def compare(x: CC[A], y: CC[A]): Int = {
         val xit = x.iterator
         val yit = y.iterator
 
         while (xit.hasNext && yit.hasNext) {
           val res = ord.compare(xit.next(), yit.next())
-          if (res != 0) return res
+          if (res !== 0) return res
         }
 
         scala.math.Ordering[Boolean].compare(xit.hasNext, yit.hasNext)
       }
     }
 
-  def spec = suite("OrdSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("OrdSpec")(
     suite("laws")(
       testM("unit")(checkAllLaws(Equal)(Gen.unit)),
       testM("boolean")(checkAllLaws(Equal)(Gen.boolean)),

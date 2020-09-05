@@ -1,12 +1,11 @@
 package zio.prelude
 
 import zio.prelude.newtypes.{ Sum }
-import zio.test._
 import zio.test.laws._
-import zio.test.DefaultRunnableSpec
+import zio.test.{ DefaultRunnableSpec, _ }
 
 object InverseSpec extends DefaultRunnableSpec {
-  def spec = suite("InverseSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("InverseSpec")(
     suite("laws")(
       testM("char addition")(checkAllLaws(Inverse)(Gen.anyChar.map(Sum(_)))),
       testM("byte addition")(checkAllLaws(Inverse)(Gen.anyByte.map(Sum(_)))),

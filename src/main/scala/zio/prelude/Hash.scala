@@ -1,10 +1,10 @@
 package zio.prelude
 
-import scala.annotation.implicitNotFound
-
-import zio.{ Chunk, NonEmptyChunk }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
+import zio.{ Chunk, NonEmptyChunk }
+
+import scala.annotation.implicitNotFound
 
 /**
  * `Hash[A]` provides implicit evidence that a value of type `A` can be hashed.
@@ -135,6 +135,7 @@ object Hash extends Lawful[Hash] {
    * Constructs a `Hash[A]` that uses the default notion of hashing embodied in
    * the implementation of `hashCode` for values of type `A`.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   def default[A]: Hash[A] =
     make(_.hashCode(), _ == _)
 

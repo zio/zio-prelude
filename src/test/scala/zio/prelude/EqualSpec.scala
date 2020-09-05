@@ -6,7 +6,7 @@ import zio.test.laws._
 
 object EqualSpec extends DefaultRunnableSpec {
 
-  def spec = suite("EqualSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("EqualSpec")(
     suite("laws")(
       testM("unit")(checkAllLaws(Equal)(Gen.unit)),
       testM("boolean")(checkAllLaws(Equal)(Gen.boolean)),

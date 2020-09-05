@@ -1,7 +1,8 @@
-import sbt._
 import sbt.Keys._
+import sbt._
+import sbtbuildinfo.BuildInfoKeys._
 import sbtbuildinfo._
-import BuildInfoKeys._
+import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
   private val Scala211        = "2.11.12"
@@ -82,6 +83,19 @@ object BuildHelper {
         compilerPlugin(("com.github.ghik" % "silencer-plugin" % SilencerVersion).cross(CrossVersion.full)),
         compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
       ),
-    incOptions ~= (_.withLogRecompileOnMacro(false))
+    incOptions ~= (_.withLogRecompileOnMacro(false)),
+    semanticdbEnabled := true,                        // enable SemanticDB
+    semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+    ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+    ThisBuild / scalafixDependencies ++= List(
+      "com.github.liancheng" %% "organize-imports" % "0.4.0",
+      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.12"
+    ),
+    scalacOptions --= {
+      if (!sys.env.contains("CI"))
+        List("-Xfatal-warnings") // to enable Scalafix
+      else
+        List()
+    }
   )
 }

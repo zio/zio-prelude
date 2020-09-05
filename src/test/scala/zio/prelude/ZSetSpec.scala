@@ -25,7 +25,7 @@ object ZSetSpec extends DefaultRunnableSpec {
   val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  def spec = suite("ZSetSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("ZSetSpec")(
     suite("laws")(
       testM("combine commutative")(
         checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))

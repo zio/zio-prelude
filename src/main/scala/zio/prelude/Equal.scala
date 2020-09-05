@@ -4,7 +4,7 @@ import zio.Exit.{ Failure, Success }
 import zio.prelude.coherent.HashOrd
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
-import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
+import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace }
 
 import scala.annotation.implicitNotFound
 import scala.util.Try
@@ -235,6 +235,7 @@ object Equal extends Lawful[Equal] {
    * Constructs an `Equal[A]` that uses the default notion of equality
    * embodied in the implementation of `equals` for values of type `A`.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   def default[A]: Equal[A] =
     make(_ == _)
 
@@ -267,6 +268,12 @@ object Equal extends Lawful[Equal] {
    */
   implicit def ChunkEqual[A: Equal]: Equal[Chunk[A]] =
     make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
+
+  /**
+   * Equality for `Class` values.
+   */
+  implicit val ClassEqual: Equal[Class[_]] =
+    default
 
   /**
    * Derives an `Equal[F[A]]` given a `Derive[F, Equal]` and an `Equal[A]`.
@@ -307,6 +314,15 @@ object Equal extends Lawful[Equal] {
    */
   implicit val FloatHashOrd: Hash[Float] with Ord[Float] =
     HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
+
+  /**
+   * Equality for `Fiber.Id` values.
+   */
+  implicit val FiberIdEqual: Equal[Fiber.Id] =
+    (l: Fiber.Id, r: Fiber.Id) =>
+      (l, r) match {
+        case (Fiber.Id(stm1, sn1), Fiber.Id(stm2, sn2)) => stm1 === stm2 && sn1 === sn2
+      }
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
@@ -840,7 +856,7 @@ object Equal extends Lawful[Equal] {
    */
   implicit val ThrowableEqual: Equal[Throwable] =
     make { (l, r) =>
-      l.getClass == r.getClass && l.getMessage == r.getMessage && l.getCause === r.getCause
+      l.getClass === r.getClass && l.getMessage === r.getMessage && Option(l.getCause) === Option(r.getCause)
     }
 
   /**
@@ -859,8 +875,18 @@ object Equal extends Lawful[Equal] {
   /**
    * Derives an `Equal[Cause[A]]` given an `Equal[A]`.
    */
-  implicit def CauseEqual[A]: Equal[Cause[A]] =
-    default
+  implicit def CauseEqual[A: Equal]: Equal[Cause[A]] =
+    (l: Cause[A], r: Cause[A]) =>
+      (l, r) match {
+        case (Cause.Both(l1, r1), Cause.Both(l2, r2))       => l1 === l2 && r1 === r2
+        case (Cause.Die(t1), Cause.Die(t2))                 => t1 === t2
+        case (Cause.Interrupt(fid1), Cause.Interrupt(fid2)) => fid1 === fid2
+        case (Cause.Then(l1, r1), Cause.Then(l2, r2))       => l1 === l2 && r1 === r2
+        case (Cause.Fail(v1), Cause.Fail(v2))               => v1 === v2
+        case (Cause.Traced(c1, t1), Cause.Traced(c2, t2))   => c1 === c2 && t1 === t2
+        case (Cause.Empty(), Cause.Empty())                 => true
+        case _                                              => false
+      }
 
   /**
    * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.
@@ -873,8 +899,15 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
+   * Equality for `ZTrace` values.
+   */
+  implicit val ZTraceEqual: Equal[ZTrace] =
+    default
+
+  /**
    * Returns whether two values refer to the same location in memory.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
   private[prelude] def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
 }

@@ -282,9 +282,9 @@ object Ord extends Lawful[Ord] {
 
         @tailrec
         def loop(i: Int): Ordering =
-          if (i == j && i == k) Ordering.Equals
-          else if (i == j) Ordering.LessThan
-          else if (i == k) Ordering.GreaterThan
+          if (i === j && i === k) Ordering.Equals
+          else if (i === j) Ordering.LessThan
+          else if (i === k) Ordering.GreaterThan
           else {
             val compare = Ord[A].compare(l(i), r(i))
             if (compare.isEqual) loop(i + 1) else compare
@@ -864,9 +864,9 @@ object Ord extends Lawful[Ord] {
       val k = r.length
 
       def loop(i: Int): Ordering =
-        if (i == j && i == k) Ordering.Equals
-        else if (i == j) Ordering.LessThan
-        else if (i == k) Ordering.GreaterThan
+        if (i === j && i === k) Ordering.Equals
+        else if (i === j) Ordering.LessThan
+        else if (i === k) Ordering.GreaterThan
         else {
           val compare = Ord[A].compare(l(i), r(i))
           if (compare.isEqual) loop(i + 1) else compare

@@ -96,6 +96,7 @@ sealed trait NonEmptyList[+A] { self =>
    * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
    * equal to each other.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override final def equals(that: Any): Boolean =
     that match {
       case that: NonEmptyList[_] => self.corresponds(that)(_ == _)
@@ -577,6 +578,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    * Provides an implicit conversion from `NonEmptyList` to the `::` case of
    * `List` for interoperability with Scala's collection library.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.implicitConversion"))
   implicit def toCons[A](nonEmptyList: NonEmptyList[A]): ::[A] =
     nonEmptyList.toCons
 

@@ -2,8 +2,8 @@ package zio.prelude.fx
 
 import zio.prelude._
 import zio.random.Random
-import zio.test._
 import zio.test.Assertion.isLeft
+import zio.test._
 
 object ZPureSpec extends DefaultRunnableSpec {
 
@@ -28,7 +28,7 @@ object ZPureSpec extends DefaultRunnableSpec {
   lazy val genStateState: Gen[Random, State[Int, State[Int, Int]]] =
     Gens.state(genInt, genState)
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("ZPureSpec")(
       suite("context")(
         suite("constructors")(
@@ -181,7 +181,7 @@ object ZPureSpec extends DefaultRunnableSpec {
           suite("foldM")(
             test("failure") {
               val failing =
-                ZPure.succeed[Int, Int](1).flatMap(n => if (n % 2 != 0) ZPure.fail("fail") else ZPure.succeed(n))
+                ZPure.succeed[Int, Int](1).flatMap(n => if (n % 2 !== 0) ZPure.fail("fail") else ZPure.succeed(n))
               val result = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
@@ -190,7 +190,7 @@ object ZPureSpec extends DefaultRunnableSpec {
             },
             test("success") {
               val failing =
-                ZPure.succeed[Int, Int](2).flatMap(n => if (n % 2 != 0) ZPure.fail("fail") else ZPure.succeed(n))
+                ZPure.succeed[Int, Int](2).flatMap(n => if (n % 2 !== 0) ZPure.fail("fail") else ZPure.succeed(n))
               val result = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)

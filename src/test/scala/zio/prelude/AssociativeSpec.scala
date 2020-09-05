@@ -1,12 +1,12 @@
 package zio.prelude
 
 import zio.prelude.newtypes.{ And, Or, Prod, Sum }
-import zio.test.{ testM, _ }
 import zio.test.laws._
+import zio.test.{ testM, _ }
 
 object AssociativeSpec extends DefaultRunnableSpec {
 
-  def spec = suite("AssociativeSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("AssociativeSpec")(
     suite("laws")(
       testM("char addition")(checkAllLaws(Associative)(Gen.anyChar.map(Sum(_)))),
       testM("char multiplication")(checkAllLaws(Associative)(Gen.anyChar.map(Prod(_)))),

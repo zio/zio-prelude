@@ -20,6 +20,7 @@ trait TraversableVersionSpecific {
   object DeriveCanBuildFrom {
     implicit def default[F[+_]](implicit bf: CanBuildFrom[F[Any], Any, F[Any]]): DeriveCanBuildFrom[F] =
       new DeriveCanBuildFrom[F] {
+        @SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
         def derive[A]: CanBuildFrom[F[Any], A, F[A]] =
           bf.asInstanceOf[CanBuildFrom[F[Any], A, F[A]]]
       }

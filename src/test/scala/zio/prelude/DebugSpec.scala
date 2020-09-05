@@ -1,26 +1,27 @@
 package zio.prelude
 
-import zio.prelude.Debug.{ Renderer, Repr }
-import zio.prelude.Debug._
-import zio.test._
+import zio.prelude.Debug.{ Renderer, Repr, _ }
+import zio.random.Random
+import zio.test.{ TestResult, _ }
 
+@SuppressWarnings(Array("scalafix:DisableSyntax.defaultArgs"))
 object DebugSpec extends DefaultRunnableSpec {
 
-  def primitiveTest[A: Debug](renderer: Renderer)(a: A, exp: Option[String] = None) =
+  def primitiveTest[A: Debug](renderer: Renderer)(a: A, exp: Option[String] = None): TestResult =
     assert(a.debug.render(renderer))(equalTo(exp.getOrElse(a.toString)))
 
-  def primScalaTest[A: Debug](a: A)                              = primitiveTest[A](Renderer.Scala)(a)
-  def primSimpleTest[A: Debug](a: A, exp: Option[String] = None) = primitiveTest[A](Renderer.Simple)(a, exp)
-  def primFullTest[A: Debug](a: A, exp: Option[String] = None)   = primitiveTest[A](Renderer.Full)(a, exp)
+  def primScalaTest[A: Debug](a: A): TestResult                              = primitiveTest[A](Renderer.Scala)(a)
+  def primSimpleTest[A: Debug](a: A, exp: Option[String] = None): TestResult = primitiveTest[A](Renderer.Simple)(a, exp)
+  def primFullTest[A: Debug](a: A, exp: Option[String] = None): TestResult   = primitiveTest[A](Renderer.Full)(a, exp)
 
-  case class TestCase(string: String, number: Int, list: List[Double])
-  val genTestCase = for {
+  final case class TestCase(string: String, number: Int, list: List[Double])
+  val genTestCase: Gen[Random with Sized, TestCase] = for {
     str    <- Gen.anyString
     number <- Gen.anyInt
     list   <- Gen.listOf(Gen.anyDouble)
   } yield TestCase(str, number, list)
 
-  implicit val DebugTestCase = Debug.make[TestCase](a =>
+  implicit val DebugTestCase: Debug[TestCase] = Debug.make[TestCase](a =>
     Repr.Constructor(
       List("DebugSpec"),
       "TestCase",
@@ -37,12 +38,12 @@ object DebugSpec extends DefaultRunnableSpec {
     case TestObject2 => Repr.Object(List("DebugSpec"), "TestObject2")
   }
 
-  val genTestTrait = Gen.elements(List[TestTrait](TestObject1, TestObject2): _*)
+  val genTestTrait: Gen[Random, TestTrait] = Gen.elements(List[TestTrait](TestObject1, TestObject2): _*)
 
   def expectedTupleFull(n: Int)(v: Int): String   = s"scala.Tuple$n(${List.fill(n)(v).mkString(", ")})"
   def expectedTupleSimple(n: Int)(v: Int): String = s"(${List.fill(n)(v).mkString(", ")})"
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("DebugSpec")(
       suite("ScalaRenderer")(
         testM("unit")(check(Gen.unit)(primScalaTest(_))),

@@ -1,9 +1,9 @@
 package zio.prelude.fx
 
-import scala.annotation.switch
-
 import zio.internal.Stack
 import zio.prelude._
+
+import scala.annotation.switch
 
 /**
  * `ZPure[S1, S2, R, E, A]` is a purely functional description of a computation
@@ -12,6 +12,15 @@ import zio.prelude._
  * of its polymorphism `ZPure` can be used to model a variety of effects
  * including context, state, and failure.
  */
+
+@SuppressWarnings(
+  Array(
+    "scalafix:DisableSyntax.var",
+    "scalafix:DisableSyntax.null",
+    "scalafix:DisableSyntax.asInstanceOf",
+    "scalafix:DisableSyntax.while"
+  )
+)
 sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 

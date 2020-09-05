@@ -11,7 +11,7 @@ object EquivalenceSpec extends DefaultRunnableSpec {
 
   val genNothing: Gen[Any, Nothing] =
     Gen(ZStream.empty)
-  def spec = suite("EquivalenceSpec")(
+  def spec: ZSpec[Environment, Failure] = suite("EquivalenceSpec")(
     suite("laws")(
       testM("identity") {
         implicit val equivalence = Equivalence.identity[Int]
