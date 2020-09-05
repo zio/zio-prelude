@@ -189,7 +189,8 @@ object ZNonEmptySet {
     if (map.isEmpty) None
     else Some(new ZNonEmptySet(ZSet.fromMap(map)))
 
-  /** Constructs a `NonEmptyMultiSet`, where, by definition, each element is present exactly once.
+  /**
+   * Constructs a `NonEmptyMultiSet`, where, by definition, each element is present exactly once.
    * Returns `None` if empty.
    */
   def fromSetOption[A](set: Set[A]): Option[ZNonEmptySet[A, Boolean]] =
@@ -224,8 +225,8 @@ object ZNonEmptySet {
   /**
    * The `Covariant` instance for `ZNonEmptySet`.
    */
-  implicit def ZNonEmptySetCovariant[B](
-    implicit ev: Commutative[Sum[B]]
+  implicit def ZNonEmptySetCovariant[B](implicit
+    ev: Commutative[Sum[B]]
   ): Covariant[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new Covariant[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
       def map[A, C](f: A => C): ZNonEmptySet[A, B] => ZNonEmptySet[C, B] =
@@ -235,8 +236,8 @@ object ZNonEmptySet {
   /**
    * The `IdentityFlatten` instance for `ZNonEmptySet`.
    */
-  implicit def ZNonEmptySetFlatten[B](
-    implicit ev1: Commutative[Sum[B]],
+  implicit def ZNonEmptySetFlatten[B](implicit
+    ev1: Commutative[Sum[B]],
     ev2: Commutative[Prod[B]]
   ): AssociativeFlatten[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new AssociativeFlatten[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {

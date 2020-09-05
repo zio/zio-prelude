@@ -26,59 +26,60 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
   val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  def spec = suite("ZNonEmptySetSpec")(
-    suite("laws")(
-      testM("combine commutative")(
-        checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
-      ),
-      testM("covariant")(
-        checkAllLaws[
-          CovariantDeriveEqual,
-          Equal,
-          Any,
-          Random with Sized,
-          ({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda,
-          Int
-        ](Covariant)(genFZNonEmptySet(Gen.anyInt), Gen.anyInt)(
-          // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
-          CovariantDeriveEqual.derive[({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda](
-            ZNonEmptySetCovariant(IntSumCommutativeInverse),
-            ZNonEmptySetDeriveEqual(IntHashOrd)
-          ),
-          IntHashOrd
+  def spec =
+    suite("ZNonEmptySetSpec")(
+      suite("laws")(
+        testM("combine commutative")(
+          checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
+        ),
+        testM("covariant")(
+          checkAllLaws[
+            CovariantDeriveEqual,
+            Equal,
+            Any,
+            Random with Sized,
+            ({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda,
+            Int
+          ](Covariant)(genFZNonEmptySet(Gen.anyInt), Gen.anyInt)(
+            // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
+            CovariantDeriveEqual.derive[({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda](
+              ZNonEmptySetCovariant(IntSumCommutativeInverse),
+              ZNonEmptySetDeriveEqual(IntHashOrd)
+            ),
+            IntHashOrd
+          )
+        ),
+        testM("equal")(checkAllLaws(Equal)(genZNonEmptySet(Gen.anyInt, Gen.anyInt))),
+        testM("hash")(checkAllLaws(Hash)(genZNonEmptySet(Gen.anyInt, Gen.anyInt))),
+        testM("intersect commutative")(
+          checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))
+        ),
+        testM("union commutative")(
+          checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Max(_))))
         )
       ),
-      testM("equal")(checkAllLaws(Equal)(genZNonEmptySet(Gen.anyInt, Gen.anyInt))),
-      testM("hash")(checkAllLaws(Hash)(genZNonEmptySet(Gen.anyInt, Gen.anyInt))),
-      testM("intersect commutative")(
-        checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))
+      suite("methods")(
+        test("zipWith") {
+          val die  = ZNonEmptySet(1, 2, 3, 4, 5, 6)
+          val pair = die.zipWith(die)(_ + _)
+          assert(pair(7))(equalTo(6))
+        }
       ),
-      testM("union commutative")(
-        checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Max(_))))
+      suite("set")(
+        testM("flatMap") {
+          check(Gen.setOf1(Gen.anyInt), Gen.function(Gen.setOf1(Gen.anyInt))) { (as, f) =>
+            val actual   = ZNonEmptySet.fromSetOption(as).get.flatMap(a => ZNonEmptySet.fromSetOption(f(a)).get).toSet
+            val expected = as.flatMap(f)
+            assert(actual)(equalTo(expected))
+          }
+        },
+        testM("union") {
+          check(Gen.setOf1(Gen.anyInt), Gen.setOf1(Gen.anyInt)) { (l, r) =>
+            val actual   = (ZNonEmptySet.fromSetOption(l).get | ZNonEmptySet.fromSetOption(r).get).toSet
+            val expected = l | r
+            assert(actual)(equalTo(expected))
+          }
+        }
       )
-    ),
-    suite("methods")(
-      test("zipWith") {
-        val die  = ZNonEmptySet(1, 2, 3, 4, 5, 6)
-        val pair = die.zipWith(die)(_ + _)
-        assert(pair(7))(equalTo(6))
-      }
-    ),
-    suite("set")(
-      testM("flatMap") {
-        check(Gen.setOf1(Gen.anyInt), Gen.function(Gen.setOf1(Gen.anyInt))) { (as, f) =>
-          val actual   = ZNonEmptySet.fromSetOption(as).get.flatMap(a => ZNonEmptySet.fromSetOption(f(a)).get).toSet
-          val expected = as.flatMap(f)
-          assert(actual)(equalTo(expected))
-        }
-      },
-      testM("union") {
-        check(Gen.setOf1(Gen.anyInt), Gen.setOf1(Gen.anyInt)) { (l, r) =>
-          val actual   = (ZNonEmptySet.fromSetOption(l).get | ZNonEmptySet.fromSetOption(r).get).toSet
-          val expected = l | r
-          assert(actual)(equalTo(expected))
-        }
-      }
     )
-  )
 }
