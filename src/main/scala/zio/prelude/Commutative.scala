@@ -71,8 +71,8 @@ object Commutative extends Lawful[CommutativeEqual] {
    * Derives a `Commutative[F[A]]` given a `Derive[F, Commutative]` and a
    * `Commutative[A]`.
    */
-  implicit def DeriveCommutative[F[_], A](
-    implicit derive: Derive[F, Commutative],
+  implicit def DeriveCommutative[F[_], A](implicit
+    derive: Derive[F, Commutative],
     commutative: Commutative[A]
   ): Commutative[F[A]] =
     derive.derive(commutative)

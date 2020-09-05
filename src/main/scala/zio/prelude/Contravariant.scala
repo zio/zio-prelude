@@ -33,7 +33,7 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * compares strings by computing their lengths with the provided function and
  * comparing those.
  */
-trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F] {
+trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F]      {
   final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] =
     contramap(f)
 
@@ -58,7 +58,7 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
-object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
+object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
 
   /**
    * Contramapping with the identity function must not change the structure.
@@ -318,7 +318,9 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
    */
   implicit def Function20Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#lambda] =
-    new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#lambda] {
+    new Contravariant[
+      ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#lambda
+    ] {
       def contramap[A, V](function: V => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U
       ) => ((V, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U) =

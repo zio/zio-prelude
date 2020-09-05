@@ -25,7 +25,8 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
    */
   def toNonEmptyList: NonEmptyList[A] = destruct match { case (head, tail) => NonEmptyList.fromIterable(head, tail) }
 
-  /** Creates a new `NonEmptySet` with an additional element, unless the element is
+  /**
+   * Creates a new `NonEmptySet` with an additional element, unless the element is
    *  already present.
    *
    *  @param elem the element to be added
@@ -34,7 +35,8 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
    */
   def +(elem: A): NonEmptySet[A] = new NonEmptySet(set + elem)
 
-  /** Computes the union between of `NonEmptySet` and another set.
+  /**
+   * Computes the union between of `NonEmptySet` and another set.
    *
    *  @param   that  the set to form the union with.
    *  @return  a new `NonEmptySet` consisting of all elements that are in this
@@ -42,7 +44,8 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
    */
   def union(that: Set[A]): NonEmptySet[A] = new NonEmptySet(set.union(that))
 
-  /** Creates a new `NonEmptySet` by adding all elements contained in another collection to this `NonEmptySet`, omitting duplicates.
+  /**
+   * Creates a new `NonEmptySet` by adding all elements contained in another collection to this `NonEmptySet`, omitting duplicates.
    *
    * This method takes a collection of elements and adds all elements, omitting duplicates, into `NonEmptySet`.
    *
@@ -73,11 +76,12 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   override def hashCode: Int = set.hashCode ^ NonEmptySet.NonEmptySetSeed
 
   @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
-  override def equals(that: Any): Boolean = that match {
-    case that: AnyRef if self.eq(that) => true
-    case that: NonEmptySet[A]          => self.set == that.toSet
-    case _                             => false
-  }
+  override def equals(that: Any): Boolean =
+    that match {
+      case that: AnyRef if self.eq(that) => true
+      case that: NonEmptySet[A]          => self.set == that.toSet
+      case _                             => false
+    }
 
   override def toString: String = s"NonEmpty$set"
 }
@@ -85,7 +89,8 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
 object NonEmptySet {
   private def apply[A](elem: A, others: Set[A]): NonEmptySet[A] = new NonEmptySet(others + elem)
 
-  /** Creates a `NonEmptySet` with the specified elements.
+  /**
+   * Creates a `NonEmptySet` with the specified elements.
    *  @tparam A      the type of the `NonEmptySet`'s elements
    *  @param elem    an element of the created `NonEmptySet`
    *  @param others  the remaining elements of the created `NonEmptySet`

@@ -225,7 +225,7 @@ object Validation extends LowPriorityValidationImplicits {
    */
   implicit def ValidationIdentityBoth[E]: IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
     new IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
-      val any: Validation[Nothing, Any] =
+      val any: Validation[Nothing, Any]                                                       =
         Validation.unit
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
@@ -252,9 +252,8 @@ object Validation extends LowPriorityValidationImplicits {
    */
   @SuppressWarnings(Array("scalafix:DisableSyntax.throw"))
   def apply[A](a: => A): Validation[Throwable, A] =
-    try {
-      succeed(a)
-    } catch {
+    try succeed(a)
+    catch {
       case e: VirtualMachineError => throw e
       case e: Throwable           => fail(e)
     }
@@ -664,8 +663,8 @@ object Validation extends LowPriorityValidationImplicits {
   ): Validation[E, B] =
     (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17).map {
       case (
-          ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-          a17
+            ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
+            a17
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)
     }
@@ -699,11 +698,11 @@ object Validation extends LowPriorityValidationImplicits {
   ): Validation[E, B] =
     (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18).map {
       case (
-          (
-            ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-            a17
-          ),
-          a18
+            (
+              ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
+              a17
+            ),
+            a18
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)
     }
@@ -738,14 +737,17 @@ object Validation extends LowPriorityValidationImplicits {
   ): Validation[E, B] =
     (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19).map {
       case (
-          (
             (
-              ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-              a17
+              (
+                (
+                  (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
+                  a16
+                ),
+                a17
+              ),
+              a18
             ),
-            a18
-          ),
-          a19
+            a19
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)
     }
@@ -781,20 +783,20 @@ object Validation extends LowPriorityValidationImplicits {
   ): Validation[E, B] =
     (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20).map {
       case (
-          (
             (
               (
                 (
-                  (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
-                  a16
+                  (
+                    (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
+                    a16
+                  ),
+                  a17
                 ),
-                a17
+                a18
               ),
-              a18
+              a19
             ),
-            a19
-          ),
-          a20
+            a20
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)
     }
@@ -831,23 +833,26 @@ object Validation extends LowPriorityValidationImplicits {
   ): Validation[E, B] =
     (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20 <&> a21).map {
       case (
-          (
             (
               (
                 (
                   (
-                    (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
-                    a16
+                    (
+                      (
+                        ((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14),
+                        a15
+                      ),
+                      a16
+                    ),
+                    a17
                   ),
-                  a17
+                  a18
                 ),
-                a18
+                a19
               ),
-              a19
+              a20
             ),
-            a20
-          ),
-          a21
+            a21
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21)
     }

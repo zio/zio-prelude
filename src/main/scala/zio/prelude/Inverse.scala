@@ -81,36 +81,48 @@ object Inverse extends Lawful[EqualInverse] {
    * each element of the product type.
    */
   implicit def Tuple2Inverse[A: Inverse, B: Inverse]: Inverse[(A, B)] =
-    makeFrom(Identity.Tuple2Identity, {
-      case ((a1, b1), (a2, b2)) => (a1 ~~ a2, b1 ~~ b2)
-    })
+    makeFrom(
+      Identity.Tuple2Identity,
+      {
+        case ((a1, b1), (a2, b2)) => (a1 ~~ a2, b1 ~~ b2)
+      }
+    )
 
   /**
    * Derives an `Inverse` for a product type given an `Inverse` for
    * each element of the product type.
    */
   implicit def Tuple3Inverse[A: Inverse, B: Inverse, C: Inverse]: Inverse[(A, B, C)] =
-    makeFrom(Identity.Tuple3Identity, {
-      case ((a1, b1, c1), (a2, b2, c2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2)
-    })
+    makeFrom(
+      Identity.Tuple3Identity,
+      {
+        case ((a1, b1, c1), (a2, b2, c2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2)
+      }
+    )
 
   /**
    * Derives an `Inverse` for a product type given an `Inverse` for
    * each element of the product type.
    */
   implicit def Tuple4Inverse[A: Inverse, B: Inverse, C: Inverse, D: Inverse]: Inverse[(A, B, C, D)] =
-    makeFrom(Identity.Tuple4Identity, {
-      case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2)
-    })
+    makeFrom(
+      Identity.Tuple4Identity,
+      {
+        case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2)
+      }
+    )
 
   /**
    * Derives an `Inverse` for a product type given an `Inverse` for
    * each element of the product type.
    */
   implicit def Tuple5Inverse[A: Inverse, B: Inverse, C: Inverse, D: Inverse, E: Inverse]: Inverse[(A, B, C, D, E)] =
-    makeFrom(Identity.Tuple5Identity, {
-      case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2)
-    })
+    makeFrom(
+      Identity.Tuple5Identity,
+      {
+        case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2)
+      }
+    )
 
   /**
    * Derives an `Inverse` for a product type given an `Inverse` for
@@ -124,13 +136,16 @@ object Inverse extends Lawful[EqualInverse] {
     E: Inverse,
     F: Inverse
   ]: Inverse[(A, B, C, D, E, F)] =
-    makeFrom(Identity.Tuple6Identity, {
-      case (
-          (a1, b1, c1, d1, e1, f1),
-          (a2, b2, c2, d2, e2, f2)
-          ) =>
-        (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2, f1 ~~ f2)
-    })
+    makeFrom(
+      Identity.Tuple6Identity,
+      {
+        case (
+              (a1, b1, c1, d1, e1, f1),
+              (a2, b2, c2, d2, e2, f2)
+            ) =>
+          (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2, f1 ~~ f2)
+      }
+    )
 
   /**
    * Derives an `Inverse` for a product type given an `Inverse` for
@@ -145,13 +160,16 @@ object Inverse extends Lawful[EqualInverse] {
     F: Inverse,
     G: Inverse
   ]: Inverse[(A, B, C, D, E, F, G)] =
-    makeFrom(Identity.Tuple7Identity, {
-      case (
-          (a1, b1, c1, d1, e1, f1, g1),
-          (a2, b2, c2, d2, e2, f2, g2)
-          ) =>
-        (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2, f1 ~~ f2, g1 ~~ g2)
-    })
+    makeFrom(
+      Identity.Tuple7Identity,
+      {
+        case (
+              (a1, b1, c1, d1, e1, f1, g1),
+              (a2, b2, c2, d2, e2, f2, g2)
+            ) =>
+          (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2, f1 ~~ f2, g1 ~~ g2)
+      }
+    )
 
   /**
    * Derives an `Inverse` for a product type given an `Inverse` for
@@ -167,13 +185,16 @@ object Inverse extends Lawful[EqualInverse] {
     G: Inverse,
     H: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H)] =
-    makeFrom(Identity.Tuple8Identity, {
-      case (
-          (a1, b1, c1, d1, e1, f1, g1, h1),
-          (a2, b2, c2, d2, e2, f2, g2, h2)
-          ) =>
-        (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2, f1 ~~ f2, g1 ~~ g2, h1 ~~ h2)
-    })
+    makeFrom(
+      Identity.Tuple8Identity,
+      {
+        case (
+              (a1, b1, c1, d1, e1, f1, g1, h1),
+              (a2, b2, c2, d2, e2, f2, g2, h2)
+            ) =>
+          (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2, f1 ~~ f2, g1 ~~ g2, h1 ~~ h2)
+      }
+    )
 
   /**
    * Derives an `Inverse` for a product type given an `Inverse` for
@@ -191,10 +212,11 @@ object Inverse extends Lawful[EqualInverse] {
     I: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I)] =
     makeFrom(
-      Identity.Tuple9Identity, {
+      Identity.Tuple9Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2)
             ) =>
           (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2, f1 ~~ f2, g1 ~~ g2, h1 ~~ h2, i1 ~~ i2)
       }
@@ -217,10 +239,11 @@ object Inverse extends Lawful[EqualInverse] {
     J: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J)] =
     makeFrom(
-      Identity.Tuple10Identity, {
+      Identity.Tuple10Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)
             ) =>
           (
             a1 ~~ a2,
@@ -255,10 +278,11 @@ object Inverse extends Lawful[EqualInverse] {
     K: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K)] =
     makeFrom(
-      Identity.Tuple11Identity, {
+      Identity.Tuple11Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)
             ) =>
           (
             a1 ~~ a2,
@@ -295,10 +319,11 @@ object Inverse extends Lawful[EqualInverse] {
     L: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L)] =
     makeFrom(
-      Identity.Tuple12Identity, {
+      Identity.Tuple12Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)
             ) =>
           (
             a1 ~~ a2,
@@ -337,10 +362,11 @@ object Inverse extends Lawful[EqualInverse] {
     M: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
     makeFrom(
-      Identity.Tuple13Identity, {
+      Identity.Tuple13Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
             ) =>
           (
             a1 ~~ a2,
@@ -381,10 +407,11 @@ object Inverse extends Lawful[EqualInverse] {
     N: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
     makeFrom(
-      Identity.Tuple14Identity, {
+      Identity.Tuple14Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
             ) =>
           (
             a1 ~~ a2,
@@ -427,10 +454,11 @@ object Inverse extends Lawful[EqualInverse] {
     O: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
     makeFrom(
-      Identity.Tuple15Identity, {
+      Identity.Tuple15Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
             ) =>
           (
             a1 ~~ a2,
@@ -475,10 +503,11 @@ object Inverse extends Lawful[EqualInverse] {
     P: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
     makeFrom(
-      Identity.Tuple16Identity, {
+      Identity.Tuple16Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
             ) =>
           (
             a1 ~~ a2,
@@ -525,10 +554,11 @@ object Inverse extends Lawful[EqualInverse] {
     Q: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
     makeFrom(
-      Identity.Tuple17Identity, {
+      Identity.Tuple17Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
             ) =>
           (
             a1 ~~ a2,
@@ -577,10 +607,11 @@ object Inverse extends Lawful[EqualInverse] {
     R: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
     makeFrom(
-      Identity.Tuple18Identity, {
+      Identity.Tuple18Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
             ) =>
           (
             a1 ~~ a2,
@@ -631,10 +662,11 @@ object Inverse extends Lawful[EqualInverse] {
     S: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
     makeFrom(
-      Identity.Tuple19Identity, {
+      Identity.Tuple19Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
             ) =>
           (
             a1 ~~ a2,
@@ -687,10 +719,11 @@ object Inverse extends Lawful[EqualInverse] {
     T: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
     makeFrom(
-      Identity.Tuple20Identity, {
+      Identity.Tuple20Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
             ) =>
           (
             a1 ~~ a2,
@@ -745,10 +778,11 @@ object Inverse extends Lawful[EqualInverse] {
     U: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
     makeFrom(
-      Identity.Tuple21Identity, {
+      Identity.Tuple21Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
             ) =>
           (
             a1 ~~ a2,
@@ -805,10 +839,11 @@ object Inverse extends Lawful[EqualInverse] {
     V: Inverse
   ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
     makeFrom(
-      Identity.Tuple22Identity, {
+      Identity.Tuple22Identity,
+      {
         case (
-            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
-            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
+              (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
+              (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
             ) =>
           (
             a1 ~~ a2,

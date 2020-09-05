@@ -308,17 +308,16 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
 
     def findNextErrorHandler(): Unit = {
       var unwinding = true
-      while (unwinding) {
+      while (unwinding)
         stack.pop() match {
           case value: Fold[_, _, _, _, _, _, _, _] =>
             val continuation = value.failure
             stack.push(continuation.asInstanceOf[Any => ZPure[Any, Any, Any, Any, Any]])
             unwinding = false
-          case null =>
+          case null                                =>
             unwinding = false
-          case _ =>
+          case _                                   =>
         }
-      }
     }
 
     while (curZPure ne null) {
@@ -334,7 +333,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
               val zPure2 = nested.asInstanceOf[Succeed[Any]]
               curZPure = continuation(zPure2.value)
 
-            case Tags.Modify =>
+            case Tags.Modify  =>
               val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any, Any]]
 
               val updated = zPure2.run(s0)
@@ -342,42 +341,41 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
               a = updated._2
               curZPure = continuation(a)
 
-            case _ =>
+            case _            =>
               curZPure = nested
               stack.push(continuation)
           }
 
         case Tags.Succeed =>
-          val zPure = curZPure.asInstanceOf[Succeed[Any]]
+          val zPure     = curZPure.asInstanceOf[Succeed[Any]]
           a = zPure.value
           val nextInstr = stack.pop()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Fail =>
-          val zPure = curZPure.asInstanceOf[Fail[Any]]
+        case Tags.Fail    =>
+          val zPure     = curZPure.asInstanceOf[Fail[Any]]
           findNextErrorHandler()
           val nextInstr = stack.pop()
           if (nextInstr eq null) {
             failed = true
             a = zPure.error
             curZPure = null
-          } else {
+          } else
             curZPure = nextInstr(zPure.error)
-          }
 
-        case Tags.Fold =>
+        case Tags.Fold    =>
           val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any]]
           curZPure = zPure.value
           stack.push(zPure)
-        case Tags.Access =>
+        case Tags.Access  =>
           val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any]]
           curZPure = zPure.access(r)
         case Tags.Provide =>
           val zPure = curZPure.asInstanceOf[Provide[Any, Any, Any, Any, Any]]
           r = zPure.r
           curZPure = zPure.continue
-        case Tags.Modify =>
-          val zPure   = curZPure.asInstanceOf[Modify[Any, Any, Any, Any]]
-          val updated = zPure.run(s0)
+        case Tags.Modify  =>
+          val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any, Any]]
+          val updated   = zPure.run(s0)
           s0 = updated._1
           a = updated._2
           val nextInstr = stack.pop()
@@ -558,7 +556,7 @@ object ZPure {
    */
   implicit def ZPureIdentityBoth[S, R, E]: IdentityBoth[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] =
     new IdentityBoth[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] {
-      def any: ZPure[S, S, Any, Nothing, Any] =
+      def any: ZPure[S, S, Any, Nothing, Any]                                                             =
         ZPure.unit
       def both[A, B](fa: => ZPure[S, S, R, E, A], fb: => ZPure[S, S, R, E, B]): ZPure[S, S, R, E, (A, B)] =
         fa.zip(fb)
@@ -569,7 +567,7 @@ object ZPure {
    */
   implicit def ZPureIdentityFlatten[S, R, E]: IdentityFlatten[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] =
     new IdentityFlatten[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] {
-      def any: ZPure[S, S, Any, Nothing, Any] =
+      def any: ZPure[S, S, Any, Nothing, Any]                                            =
         ZPure.unit
       def flatten[A](ffa: ZPure[S, S, R, E, ZPure[S, S, R, E, A]]): ZPure[S, S, R, E, A] =
         ffa.flatten
@@ -585,28 +583,28 @@ object ZPure {
     final val Modify  = 6
   }
 
-  private final case class Succeed[+A](value: A) extends ZPure[Any, Nothing, Any, Nothing, A] {
+  private final case class Succeed[+A](value: A)                        extends ZPure[Any, Nothing, Any, Nothing, A] {
     override def tag: Int = Tags.Succeed
   }
-  private final case class Fail[+E](error: E) extends ZPure[Any, Nothing, Any, E, Nothing] {
+  private final case class Fail[+E](error: E)                           extends ZPure[Any, Nothing, Any, E, Nothing] {
     override def tag: Int = Tags.Fail
   }
-  private final case class Modify[-S1, +S2, +E, +A](run: S1 => (S2, A)) extends ZPure[S1, S2, Any, E, A] {
+  private final case class Modify[-S1, +S2, +E, +A](run: S1 => (S2, A)) extends ZPure[S1, S2, Any, E, A]             {
     override def tag: Int = Tags.Modify
   }
   private final case class FlatMap[-S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[S1, S2, R, E, A],
     continue: A => ZPure[S2, S3, R, E, B]
-  ) extends ZPure[S1, S3, R, E, B] {
+  )                                                                     extends ZPure[S1, S3, R, E, B]               {
     override def tag: Int = Tags.FlatMap
   }
   private final case class Fold[-S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[S1, S2, R, E1, A],
     failure: E1 => ZPure[S1, S3, R, E2, B],
     success: A => ZPure[S2, S3, R, E2, B]
-  ) extends ZPure[S1, S3, R, E2, B]
+  )                                                                     extends ZPure[S1, S3, R, E2, B]
       with Function[A, ZPure[S2, S3, R, E2, B]] {
-    override def tag: Int = Tags.Fold
+    override def tag: Int                             = Tags.Fold
     override def apply(a: A): ZPure[S2, S3, R, E2, B] =
       success(a)
   }
@@ -614,7 +612,7 @@ object ZPure {
     override def tag: Int = Tags.Access
   }
   private final case class Provide[S1, S2, R, E, A](r: R, continue: ZPure[S1, S2, R, E, A])
-      extends ZPure[S1, S2, Any, E, A] {
+      extends ZPure[S1, S2, Any, E, A]          {
     override def tag: Int = Tags.Provide
   }
 }

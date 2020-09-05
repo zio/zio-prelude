@@ -18,79 +18,80 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
   private lazy val genNonEmptySet: Gen[Random with Sized, NonEmptySet[Int]] =
     genSet.map(NonEmptySet.fromSetOption(_).get)
 
-  def spec: ZSpec[Environment, Failure] = suite("NonEmptySetSpec")(
-    suite("laws")(
-      testM("commutative")(checkAllLaws(Commutative)(genNonEmptySet)),
-      testM("hash")(checkAllLaws(Hash)(genNonEmptySet))
-    ),
-    suite("methods")(
-      testM("++") {
-        check(genSet, genSet) { (as, bs) =>
-          val actual   = (NonEmptySet.fromSetOption(as).get ++ NonEmptySet.fromSetOption(bs).get).toSet
-          val expected = as ++ bs
-          actual <-> expected
+  def spec: ZSpec[Environment, Failure] =
+    suite("NonEmptySetSpec")(
+      suite("laws")(
+        testM("commutative")(checkAllLaws(Commutative)(genNonEmptySet)),
+        testM("hash")(checkAllLaws(Hash)(genNonEmptySet))
+      ),
+      suite("methods")(
+        testM("++") {
+          check(genSet, genSet) { (as, bs) =>
+            val actual   = (NonEmptySet.fromSetOption(as).get ++ NonEmptySet.fromSetOption(bs).get).toSet
+            val expected = as ++ bs
+            actual <-> expected
+          }
+        },
+        testM("--") {
+          check(genSet, genSet) { (as, bs) =>
+            val actual   = (NonEmptySet.fromSetOption(as).get -- NonEmptySet.fromSetOption(bs).get).toSet
+            val expected = as -- bs
+            actual <-> expected
+          }
+        },
+        testM("&") {
+          check(genSet, genSet) { (as, bs) =>
+            val actual   = (NonEmptySet.fromSetOption(as).get & NonEmptySet.fromSetOption(bs).get).toSet
+            val expected = as & bs
+            actual <-> expected
+          }
+        },
+        testM("contains") {
+          check(genSet, genInt) { (as, a) =>
+            NonEmptySet.fromSetOption(as).get.contains(a) <-> as.contains(a)
+          }
+        },
+        testM("+") {
+          check(genSet, genInt) { (as, a) =>
+            val actual   = (NonEmptySet.fromSetOption(as).get + a).toSet
+            val expected = as + a
+            actual <-> expected
+          }
+        },
+        testM("-") {
+          check(genSet, genInt) { (as, a) =>
+            val actual   = NonEmptySet.fromSetOption(as).get - a
+            val expected = as - a
+            actual <-> expected
+          }
+        },
+        testM("size") {
+          check(genSet) { as =>
+            val actual   = NonEmptySet.fromSetOption(as).get.size
+            val expected = as.size
+            actual <-> expected
+          }
+        },
+        testM("flatten") {
+          check(genSet, genSetFunction) { (as, f) =>
+            val actual   = NonEmptySet
+              .fromIterableOption(as.toList.map(a => NonEmptySet.fromSetOption(f(a)).get))
+              .get
+              .flatten
+              .toSet
+            val expected = as.map(f).flatten
+            actual <-> expected
+          }
         }
-      },
-      testM("--") {
-        check(genSet, genSet) { (as, bs) =>
-          val actual   = (NonEmptySet.fromSetOption(as).get -- NonEmptySet.fromSetOption(bs).get).toSet
-          val expected = as -- bs
-          actual <-> expected
+      ),
+      suite("constructors")(
+        testM("fromSetOption") {
+          check(genSet) { as =>
+            val nonEmptySet = NonEmptySet.fromSetOption(as).get
+            val set         = nonEmptySet.toSet
+            assert(set)(equalTo(as))
+          }
         }
-      },
-      testM("&") {
-        check(genSet, genSet) { (as, bs) =>
-          val actual   = (NonEmptySet.fromSetOption(as).get & NonEmptySet.fromSetOption(bs).get).toSet
-          val expected = as & bs
-          actual <-> expected
-        }
-      },
-      testM("contains") {
-        check(genSet, genInt) { (as, a) =>
-          NonEmptySet.fromSetOption(as).get.contains(a) <-> as.contains(a)
-        }
-      },
-      testM("+") {
-        check(genSet, genInt) { (as, a) =>
-          val actual   = (NonEmptySet.fromSetOption(as).get + a).toSet
-          val expected = as + a
-          actual <-> expected
-        }
-      },
-      testM("-") {
-        check(genSet, genInt) { (as, a) =>
-          val actual   = NonEmptySet.fromSetOption(as).get - a
-          val expected = as - a
-          actual <-> expected
-        }
-      },
-      testM("size") {
-        check(genSet) { as =>
-          val actual   = NonEmptySet.fromSetOption(as).get.size
-          val expected = as.size
-          actual <-> expected
-        }
-      },
-      testM("flatten") {
-        check(genSet, genSetFunction) { (as, f) =>
-          val actual = NonEmptySet
-            .fromIterableOption(as.toList.map(a => NonEmptySet.fromSetOption(f(a)).get))
-            .get
-            .flatten
-            .toSet
-          val expected = as.map(f).flatten
-          actual <-> expected
-        }
-      }
-    ),
-    suite("constructors")(
-      testM("fromSetOption") {
-        check(genSet) { as =>
-          val nonEmptySet = NonEmptySet.fromSetOption(as).get
-          val set         = nonEmptySet.toSet
-          assert(set)(equalTo(as))
-        }
-      }
+      )
     )
-  )
 }

@@ -166,17 +166,17 @@ trait NonEmptyTraversableSyntax {
       F.foreach1(self)(f)
     def foreach1_[G[+_]: AssociativeBoth: Covariant](f: A => G[Any])(implicit F: NonEmptyTraversable[F]): G[Unit] =
       F.foreach1_(self)(f)
-    def reduce(f: (A, A) => A)(implicit F: NonEmptyTraversable[F]): A =
+    def reduce(f: (A, A) => A)(implicit F: NonEmptyTraversable[F]): A                                             =
       F.reduce(self)(f)
-    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyTraversable[F]): B =
+    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyTraversable[F]): B                               =
       F.reduceMap(self)(f)
-    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyTraversable[F]): B =
+    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyTraversable[F]): B                 =
       F.reduceMapLeft(self)(map)(reduce)
-    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyTraversable[F]): B =
+    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyTraversable[F]): B                =
       F.reduceMapRight(self)(map)(reduce)
-    def toNonEmptyChunk(implicit F: NonEmptyTraversable[F]): NonEmptyChunk[A] =
+    def toNonEmptyChunk(implicit F: NonEmptyTraversable[F]): NonEmptyChunk[A]                                     =
       F.toNonEmptyChunk(self)
-    def toNonEmptyList(implicit F: NonEmptyTraversable[F]): NonEmptyList[A] =
+    def toNonEmptyList(implicit F: NonEmptyTraversable[F]): NonEmptyList[A]                                       =
       F.toNonEmptyList(self)
   }
 
@@ -184,8 +184,8 @@ trait NonEmptyTraversableSyntax {
    * Provides infix syntax for flip1.
    */
   implicit class Flip1Ops[F[+_], G[+_], A](private val self: F[G[A]]) {
-    def flip1[B](
-      implicit nonEmptyTraversable: NonEmptyTraversable[F],
+    def flip1[B](implicit
+      nonEmptyTraversable: NonEmptyTraversable[F],
       associativeBoth: AssociativeBoth[G],
       covariant: Covariant[G]
     ): G[F[A]] =

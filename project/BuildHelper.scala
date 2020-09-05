@@ -60,7 +60,7 @@ object BuildHelper {
           "-opt:l:inline",
           "-opt-inline-from:<source>"
         ) ++ stdOptsUpto212
-      case _ =>
+      case _             =>
         Seq("-Xexperimental") ++ stdOptsUpto212
     }
 
@@ -71,31 +71,32 @@ object BuildHelper {
       buildInfoObject := "BuildInfo"
     )
 
-  def stdSettings(prjName: String) = Seq(
-    name := s"$prjName",
-    crossScalaVersions := Seq(Scala211, Scala212, Scala213),
-    scalaVersion in ThisBuild := Scala212,
-    scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-    libraryDependencies ++=
-      Seq(
-        ("com.github.ghik" % "silencer-lib" % SilencerVersion % Provided)
-          .cross(CrossVersion.full),
-        compilerPlugin(("com.github.ghik" % "silencer-plugin" % SilencerVersion).cross(CrossVersion.full)),
-        compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
+  def stdSettings(prjName: String) =
+    Seq(
+      name := s"$prjName",
+      crossScalaVersions := Seq(Scala211, Scala212, Scala213),
+      scalaVersion in ThisBuild := Scala212,
+      scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
+      libraryDependencies ++=
+        Seq(
+          ("com.github.ghik"                % "silencer-lib"    % SilencerVersion % Provided)
+            .cross(CrossVersion.full),
+          compilerPlugin(("com.github.ghik" % "silencer-plugin" % SilencerVersion).cross(CrossVersion.full)),
+          compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
+        ),
+      incOptions ~= (_.withLogRecompileOnMacro(false)),
+      semanticdbEnabled := true, // enable SemanticDB
+      semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+      ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+      ThisBuild / scalafixDependencies ++= List(
+        "com.github.liancheng" %% "organize-imports" % "0.4.0",
+        "com.github.vovapolu"  %% "scaluzzi"         % "0.1.12"
       ),
-    incOptions ~= (_.withLogRecompileOnMacro(false)),
-    semanticdbEnabled := true,                        // enable SemanticDB
-    semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
-    ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
-    ThisBuild / scalafixDependencies ++= List(
-      "com.github.liancheng" %% "organize-imports" % "0.4.0",
-      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.12"
-    ),
-    scalacOptions --= {
-      if (!sys.env.contains("CI"))
-        List("-Xfatal-warnings") // to enable Scalafix
-      else
-        List()
-    }
-  )
+      scalacOptions --= {
+        if (!sys.env.contains("CI"))
+          List("-Xfatal-warnings") // to enable Scalafix
+        else
+          List()
+      }
+    )
 }

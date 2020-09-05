@@ -182,7 +182,7 @@ object ZPureSpec extends DefaultRunnableSpec {
             test("failure") {
               val failing =
                 ZPure.succeed[Int, Int](1).flatMap(n => if (n % 2 !== 0) ZPure.fail("fail") else ZPure.succeed(n))
-              val result = failing.foldM(
+              val result  = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
               )
@@ -191,7 +191,7 @@ object ZPureSpec extends DefaultRunnableSpec {
             test("success") {
               val failing =
                 ZPure.succeed[Int, Int](2).flatMap(n => if (n % 2 !== 0) ZPure.fail("fail") else ZPure.succeed(n))
-              val result = failing.foldM(
+              val result  = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
               )

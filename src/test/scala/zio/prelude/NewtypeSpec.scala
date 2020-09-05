@@ -17,41 +17,42 @@ object NewtypeSpec extends DefaultRunnableSpec {
 
   implicitly[Dummy[Age]]
 
-  def spec = suite("NewtypeSpec")(
-    suite("NewtypeSmart")(
-      test("valid values") {
-        assert(Natural.make(0))(isSuccessV(anything))
-      },
-      test("invalid values") {
-        val expected = NonEmptyChunk("-1 did not satisfy isGreaterThanEqualTo(0)")
-        assert(Natural.make(-1))(isFailureV(equalTo(expected)))
-      }
-    ),
-    suite("examples from documentation")(
-      test("meter") {
-        val x = Meter(3.4)
-        val y = Meter(4.3)
-        val z = x + y
-        assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
-      },
-      test("exists") {
-        assert(exists(List(true, false))(identity))(isTrue)
-      },
-      test("forall") {
-        assert(forall(List(true, false))(identity))(isFalse)
-      },
-      test("sumInt") {
-        val actual   = sum(List(1, 2, 3))
-        val expected = 6
-        assert(actual)(equalTo(expected))
-      },
-      test("sumLong") {
-        val actual   = sum(List(1L, 2L, 3L))
-        val expected = 6L
-        assert(actual)(equalTo(expected))
-      }
+  def spec =
+    suite("NewtypeSpec")(
+      suite("NewtypeSmart")(
+        test("valid values") {
+          assert(Natural.make(0))(isSuccessV(anything))
+        },
+        test("invalid values") {
+          val expected = NonEmptyChunk("-1 did not satisfy isGreaterThanEqualTo(0)")
+          assert(Natural.make(-1))(isFailureV(equalTo(expected)))
+        }
+      ),
+      suite("examples from documentation")(
+        test("meter") {
+          val x = Meter(3.4)
+          val y = Meter(4.3)
+          val z = x + y
+          assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
+        },
+        test("exists") {
+          assert(exists(List(true, false))(identity))(isTrue)
+        },
+        test("forall") {
+          assert(forall(List(true, false))(identity))(isFalse)
+        },
+        test("sumInt") {
+          val actual   = sum(List(1, 2, 3))
+          val expected = 6
+          assert(actual)(equalTo(expected))
+        },
+        test("sumLong") {
+          val actual   = sum(List(1L, 2L, 3L))
+          val expected = 6L
+          assert(actual)(equalTo(expected))
+        }
+      )
     )
-  )
 
   object Meter extends Newtype[Double]
   type Meter = Meter.Type
