@@ -10,47 +10,47 @@ object Debug {
   type Renderer = Repr => String
   object Renderer {
     val Scala: Renderer = {
-      case Repr.Float(v)       => v.toString
-      case Repr.Long(v)        => v.toString
-      case Repr.Char(v)        => v.toString
-      case Repr.String(v)      => v
-      case Repr.KeyValue(k, v) => s"${k.render(Scala)} -> ${v.render(Scala)}"
-      case Repr.Object(_, n)   => n
-      case Repr.Constructor(_, n, reprs) =>
+      case Repr.Float(v)                                                               => v.toString
+      case Repr.Long(v)                                                                => v.toString
+      case Repr.Char(v)                                                                => v.toString
+      case Repr.String(v)                                                              => v
+      case Repr.KeyValue(k, v)                                                         => s"${k.render(Scala)} -> ${v.render(Scala)}"
+      case Repr.Object(_, n)                                                           => n
+      case Repr.Constructor(_, n, reprs)                                               =>
         s"$n(${reprs.map(kv => kv._2.render(Scala)).mkString(",")})"
       case Repr.VConstructor(_, n, reprs) if List("List", "Vector", "Map").contains(n) =>
         s"$n(${reprs.map(_.render(Scala)).mkString(", ")})"
-      case Repr.VConstructor(List("scala"), n, reprs) if n.matches("^Tuple\\d+$") =>
+      case Repr.VConstructor(List("scala"), n, reprs) if n.matches("^Tuple\\d+$")      =>
         s"(${reprs.map(_.render(Scala)).mkString(",")})"
-      case Repr.VConstructor(_, n, reprs) => s"$n(${reprs.map(_.render(Scala)).mkString(",")})"
-      case any                            => Simple(any)
+      case Repr.VConstructor(_, n, reprs)                                              => s"$n(${reprs.map(_.render(Scala)).mkString(",")})"
+      case any                                                                         => Simple(any)
     }
 
     val Simple: Renderer = {
-      case Repr.Int(v)         => v.toString
-      case Repr.Double(v)      => v.toString
-      case Repr.Float(v)       => s"${v}f"
-      case Repr.Long(v)        => s"${v}L"
-      case Repr.Byte(v)        => v.toString
-      case Repr.Char(v)        => s"'$v'"
-      case Repr.String(v)      => s""""$v""""
-      case Repr.KeyValue(k, v) => s"${k.render(Simple)} -> ${v.render(Simple)}"
-      case Repr.Object(_, n)   => n
-      case Repr.Constructor(_, n, reprs) =>
+      case Repr.Int(v)                                                            => v.toString
+      case Repr.Double(v)                                                         => v.toString
+      case Repr.Float(v)                                                          => s"${v}f"
+      case Repr.Long(v)                                                           => s"${v}L"
+      case Repr.Byte(v)                                                           => v.toString
+      case Repr.Char(v)                                                           => s"'$v'"
+      case Repr.String(v)                                                         => s""""$v""""
+      case Repr.KeyValue(k, v)                                                    => s"${k.render(Simple)} -> ${v.render(Simple)}"
+      case Repr.Object(_, n)                                                      => n
+      case Repr.Constructor(_, n, reprs)                                          =>
         s"$n(${reprs.map(kv => s"${kv._1} = ${kv._2.render(Simple)}").mkString(", ")})"
       case Repr.VConstructor(List("scala"), n, reprs) if n.matches("^Tuple\\d+$") =>
         s"(${reprs.map(_.render(Simple)).mkString(", ")})"
-      case Repr.VConstructor(_, n, reprs) => s"$n(${reprs.map(_.render(Simple)).mkString(", ")})"
+      case Repr.VConstructor(_, n, reprs)                                         => s"$n(${reprs.map(_.render(Simple)).mkString(", ")})"
     }
 
     val Full: Renderer = {
-      case Repr.KeyValue(k, v) => s"key: ${k.render(Full)} -> value: ${v.render(Full)}"
-      case Repr.Object(ns, n)  => (ns :+ n).mkString(".")
-      case Repr.Constructor(ns, n, reprs) =>
+      case Repr.KeyValue(k, v)             => s"key: ${k.render(Full)} -> value: ${v.render(Full)}"
+      case Repr.Object(ns, n)              => (ns :+ n).mkString(".")
+      case Repr.Constructor(ns, n, reprs)  =>
         (ns :+ s"$n(${reprs.map(kv => s"${kv._1} = ${kv._2.render(Full)}").mkString(", ")})").mkString(".")
       case Repr.VConstructor(ns, n, reprs) =>
         (ns :+ n).mkString(".") + s"(${reprs.map(_.render(Full)).mkString(", ")})"
-      case any => Simple(any)
+      case any                             => Simple(any)
     }
   }
 

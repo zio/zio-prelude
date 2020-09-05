@@ -5,8 +5,8 @@ import zio.prelude._
 trait AssociativeBothDeriveEqualInvariant[F[_]] extends AssociativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
 object AssociativeBothDeriveEqualInvariant {
-  implicit def derive[F[_]](
-    implicit associativeBoth0: AssociativeBoth[F],
+  implicit def derive[F[_]](implicit
+    associativeBoth0: AssociativeBoth[F],
     deriveEqual0: DeriveEqual[F],
     invariant0: Invariant[F]
   ): AssociativeBothDeriveEqualInvariant[F] =
@@ -20,8 +20,8 @@ object AssociativeBothDeriveEqualInvariant {
 trait AssociativeEitherDeriveEqualInvariant[F[_]] extends AssociativeEither[F] with DeriveEqual[F] with Invariant[F]
 
 object AssociativeEitherDeriveEqualInvariant {
-  implicit def derive[F[_]](
-    implicit associativeEither0: AssociativeEither[F],
+  implicit def derive[F[_]](implicit
+    associativeEither0: AssociativeEither[F],
     deriveEqual0: DeriveEqual[F],
     invariant0: Invariant[F]
   ): AssociativeEitherDeriveEqualInvariant[F] =
@@ -45,15 +45,15 @@ object AssociativeEqual {
 trait AssociativeFlattenCovariantDeriveEqual[F[+_]] extends AssociativeFlatten[F] with Covariant[F] with DeriveEqual[F]
 
 object AssociativeFlattenCovariantDeriveEqual {
-  implicit def derive[F[+_]](
-    implicit associativeFlatten0: AssociativeFlatten[F],
+  implicit def derive[F[+_]](implicit
+    associativeFlatten0: AssociativeFlatten[F],
     covariant0: Covariant[F],
     deriveEqual0: DeriveEqual[F]
   ): AssociativeFlattenCovariantDeriveEqual[F] =
     new AssociativeFlattenCovariantDeriveEqual[F] {
-      def derive[A: Equal]: Equal[F[A]] =
+      def derive[A: Equal]: Equal[F[A]]      =
         deriveEqual0.derive
-      def flatten[A](ffa: F[F[A]]): F[A] =
+      def flatten[A](ffa: F[F[A]]): F[A]     =
         associativeFlatten0.flatten(ffa)
       def map[A, B](f: A => B): F[A] => F[B] =
         covariant0.map(f)
@@ -63,8 +63,8 @@ object AssociativeFlattenCovariantDeriveEqual {
 trait CommutativeBothDeriveEqualInvariant[F[_]] extends CommutativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
 object CommutativeBothDeriveEqualInvariant {
-  implicit def derive[F[_]](
-    implicit commutativeBoth0: CommutativeBoth[F],
+  implicit def derive[F[_]](implicit
+    commutativeBoth0: CommutativeBoth[F],
     deriveEqual0: DeriveEqual[F],
     invariant0: Invariant[F]
   ): CommutativeBothDeriveEqualInvariant[F] =
@@ -78,8 +78,8 @@ object CommutativeBothDeriveEqualInvariant {
 trait CommutativeEitherDeriveEqualInvariant[F[_]] extends CommutativeEither[F] with DeriveEqual[F] with Invariant[F]
 
 object CommutativeEitherDeriveEqualInvariant {
-  implicit def derive[F[_]](
-    implicit commutativeEither0: CommutativeEither[F],
+  implicit def derive[F[_]](implicit
+    commutativeEither0: CommutativeEither[F],
     deriveEqual0: DeriveEqual[F],
     invariant0: Invariant[F]
   ): CommutativeEitherDeriveEqualInvariant[F] =
@@ -105,7 +105,7 @@ trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 object CovariantDeriveEqual {
   implicit def derive[F[+_]](implicit covariant0: Covariant[F], deriveEqual0: DeriveEqual[F]): CovariantDeriveEqual[F] =
     new CovariantDeriveEqual[F] {
-      def derive[A: Equal]: Equal[F[A]] =
+      def derive[A: Equal]: Equal[F[A]]      =
         deriveEqual0.derive
       def map[A, B](f: A => B): F[A] => F[B] =
         covariant0.map(f)
@@ -115,12 +115,12 @@ object CovariantDeriveEqual {
 trait ContravariantDeriveEqual[F[-_]] extends Contravariant[F] with DeriveEqual[F]
 
 object ContravariantDeriveEqual {
-  implicit def derive[F[-_]](
-    implicit contravariant0: Contravariant[F],
+  implicit def derive[F[-_]](implicit
+    contravariant0: Contravariant[F],
     deriveEqual0: DeriveEqual[F]
   ): ContravariantDeriveEqual[F] =
     new ContravariantDeriveEqual[F] {
-      def derive[A: Equal]: Equal[F[A]] =
+      def derive[A: Equal]: Equal[F[A]]            =
         deriveEqual0.derive
       def contramap[A, B](f: B => A): F[A] => F[B] =
         contravariant0.contramap(f)
@@ -132,17 +132,17 @@ trait CovariantDeriveEqualIdentityFlatten[F[+_]]
     with AssociativeFlattenCovariantDeriveEqual[F]
 
 object CovariantDeriveEqualIdentityFlatten {
-  implicit def derive[F[+_]](
-    implicit covariant0: Covariant[F],
+  implicit def derive[F[+_]](implicit
+    covariant0: Covariant[F],
     deriveEqual0: DeriveEqual[F],
     identityFlatten0: IdentityFlatten[F]
   ): CovariantDeriveEqualIdentityFlatten[F] =
     new CovariantDeriveEqualIdentityFlatten[F] {
-      def any: F[Any] =
+      def any: F[Any]                        =
         identityFlatten0.any
-      def derive[A: Equal]: Equal[F[A]] =
+      def derive[A: Equal]: Equal[F[A]]      =
         deriveEqual0.derive
-      def flatten[A](ffa: F[F[A]]): F[A] =
+      def flatten[A](ffa: F[F[A]]): F[A]     =
         identityFlatten0.flatten(ffa)
       def map[A, B](f: A => B): F[A] => F[B] =
         covariant0.map(f)
@@ -152,8 +152,8 @@ object CovariantDeriveEqualIdentityFlatten {
 trait DeriveEqualIdentityBothInvariant[F[_]] extends DeriveEqual[F] with IdentityBoth[F] with Invariant[F]
 
 object DeriveEqualIdentityBothInvariant {
-  implicit def derive[F[_]](
-    implicit deriveEqual0: DeriveEqual[F],
+  implicit def derive[F[_]](implicit
+    deriveEqual0: DeriveEqual[F],
     identityBoth0: IdentityBoth[F],
     invariant0: Invariant[F]
   ): DeriveEqualIdentityBothInvariant[F] =
@@ -168,8 +168,8 @@ object DeriveEqualIdentityBothInvariant {
 trait DeriveEqualIdentityEitherInvariant[F[_]] extends DeriveEqual[F] with IdentityEither[F] with Invariant[F]
 
 object DeriveEqualIdentityEitherInvariant {
-  implicit def derive[F[_]](
-    implicit deriveEqual0: DeriveEqual[F],
+  implicit def derive[F[_]](implicit
+    deriveEqual0: DeriveEqual[F],
     identityEither0: IdentityEither[F],
     invariant0: Invariant[F]
   ): DeriveEqualIdentityEitherInvariant[F] =
@@ -184,12 +184,12 @@ object DeriveEqualIdentityEitherInvariant {
 trait DeriveEqualNonEmptyTraversable[F[+_]] extends DeriveEqualTraversable[F] with NonEmptyTraversable[F]
 
 object DeriveEqualNonEmptyTraversable {
-  implicit def derive[F[+_]](
-    implicit deriveEqual0: DeriveEqual[F],
+  implicit def derive[F[+_]](implicit
+    deriveEqual0: DeriveEqual[F],
     nonEmptyTraversable0: NonEmptyTraversable[F]
   ): DeriveEqualNonEmptyTraversable[F] =
     new DeriveEqualNonEmptyTraversable[F] {
-      def derive[A: Equal]: Equal[F[A]] =
+      def derive[A: Equal]: Equal[F[A]]                                                      =
         deriveEqual0.derive
       def foreach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         nonEmptyTraversable0.foreach1(fa)(f)
@@ -199,12 +199,12 @@ object DeriveEqualNonEmptyTraversable {
 trait DeriveEqualTraversable[F[+_]] extends CovariantDeriveEqual[F] with Traversable[F]
 
 object DeriveEqualTraversable {
-  implicit def derive[F[+_]](
-    implicit deriveEqual0: DeriveEqual[F],
+  implicit def derive[F[+_]](implicit
+    deriveEqual0: DeriveEqual[F],
     traversable0: Traversable[F]
   ): DeriveEqualTraversable[F] =
     new DeriveEqualTraversable[F] {
-      def derive[A: Equal]: Equal[F[A]] =
+      def derive[A: Equal]: Equal[F[A]]                                                  =
         deriveEqual0.derive
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         traversable0.foreach(fa)(f)

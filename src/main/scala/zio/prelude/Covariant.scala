@@ -296,7 +296,9 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => x })#lambda] {
       override def map[A, B](
         f: A => B
-      ): ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => A) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => B) =
+      ): (
+        (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => A
+      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => B) =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) => f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11))
     }
@@ -412,10 +414,14 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    */
   implicit def Function18Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
     : Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => x })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => x
+      })#lambda
     ] =
     new Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => x })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => x
+      })#lambda
     ] {
       override def map[A, B](
         f: A => B
@@ -432,10 +438,14 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    */
   implicit def Function19Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
     : Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => x })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => x
+      })#lambda
     ] =
     new Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => x })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => x
+      })#lambda
     ] {
       override def map[A, B](
         f: A => B
@@ -892,7 +902,9 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    */
   implicit def Tuple16Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, x) })#lambda] =
-    new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, x) })#lambda] {
+    new Covariant[
+      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, x) })#lambda
+    ] {
       override def map[A, B](
         f: A => B
       ): (
@@ -997,10 +1009,14 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    */
   implicit def Tuple19Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
     : Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, x) })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, x)
+      })#lambda
     ] =
     new Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, x) })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, x)
+      })#lambda
     ] {
       override def map[A, B](
         f: A => B
@@ -1036,10 +1052,14 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    */
   implicit def Tuple20Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
     : Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, x) })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, x)
+      })#lambda
     ] =
     new Covariant[
-      ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, x) })#lambda
+      ({
+        type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, x)
+      })#lambda
     ] {
       override def map[A, B](
         f: A => B
@@ -1320,11 +1340,12 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
   /**
    * The `Covariant` instance for `Cause`
    */
-  implicit def CauseCovariant: Covariant[Cause] = new Covariant[Cause] {
-    override def map[A, B](f: A => B): Cause[A] => Cause[B] = { cause =>
-      cause.map(f)
+  implicit def CauseCovariant: Covariant[Cause] =
+    new Covariant[Cause] {
+      override def map[A, B](f: A => B): Cause[A] => Cause[B] = { cause =>
+        cause.map(f)
+      }
     }
-  }
 
   /**
    * The `Covariant` instance for `Exit`
