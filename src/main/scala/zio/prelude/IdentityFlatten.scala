@@ -87,11 +87,12 @@ object IdentityFlatten extends LawfulF.Covariant[CovariantDeriveEqualIdentityFla
     new IdentityFlatten[({ type lambda[+a] = Either[E, a] })#lambda] {
       def any: Either[E, Any] = Right(())
 
-      def flatten[A](ffa: Either[E, Either[E, A]]): Either[E, A] = ffa match {
-        case Left(e)         => Left(e)
-        case Right(Left(e))  => Left(e)
-        case Right(Right(a)) => Right(a)
-      }
+      def flatten[A](ffa: Either[E, Either[E, A]]): Either[E, A] =
+        ffa match {
+          case Left(e)         => Left(e)
+          case Right(Left(e))  => Left(e)
+          case Right(Right(a)) => Right(a)
+        }
     }
 
   /**

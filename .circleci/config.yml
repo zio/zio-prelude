@@ -101,6 +101,7 @@ compile: &compile
     - run:
         name: Compile code
         command: ./sbt ++${SCALA_VERSION}! compile
+    - <<: *clean_cache
     - <<: *save_cache
 
 lint: &lint
@@ -110,6 +111,7 @@ lint: &lint
     - run:
         name: Lint code
         command: ./sbt ++${SCALA_VERSION}! check
+    - <<: *clean_cache
     - <<: *save_cache
 
 mdoc: &mdoc
@@ -121,6 +123,7 @@ mdoc: &mdoc
         command: |
           ./sbt doc
           ./sbt ++${SCALA_VERSION}! docs/mdoc
+    - <<: *clean_cache
     - <<: *save_cache
 
 test: &test
@@ -131,6 +134,7 @@ test: &test
     - run:
         name: Run tests
         command: ./sbt ++${SCALA_VERSION}! test
+    - <<: *clean_cache
     - <<: *save_cache
 
 release: &release

@@ -154,7 +154,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * Converts this set to a `Map` from elements to how many times they appear
    * in the set.
    */
-  def toMap[A1 >: A]: Map[A1, B] =
+  def toMap[A1 >: A]: Map[A1, B]          =
     map.asInstanceOf[Map[A1, B]]
 
   /**
@@ -232,7 +232,7 @@ object ZSet {
    * a value occurs in the set will be a boolean representing whether a value
    * occurs at all.
    */
-  def fromSet[A](set: Set[A]): ZSet[A, Boolean] =
+  def fromSet[A](set: Set[A]): ZSet[A, Boolean]            =
     new ZSet(set.foldLeft(HashMap.empty[A, Boolean])((map, a) => map + (a -> true)))
 
   /**
@@ -240,12 +240,13 @@ object ZSet {
    * the `Map` and the measure of how many times a value occurs will be the
    * keys value.
    */
-  def fromMap[A, B](map: Map[A, B]): ZSet[A, B] = new ZSet(
-    map match {
-      case map: HashMap[A, B] => map
-      case _                  => map.foldLeft(HashMap.empty[A, B])(_ + _)
-    }
-  )
+  def fromMap[A, B](map: Map[A, B]): ZSet[A, B]            =
+    new ZSet(
+      map match {
+        case map: HashMap[A, B] => map
+        case _                  => map.foldLeft(HashMap.empty[A, B])(_ + _)
+      }
+    )
 
   /**
    * Derives a `Commutative[ZSet[A, B]]` given a `Commutative[B]`.
@@ -281,8 +282,8 @@ object ZSet {
   /**
    * The `Covariant` instance for `ZSet`.
    */
-  implicit def ZSetCovariant[B](
-    implicit ev: Commutative[Sum[B]]
+  implicit def ZSetCovariant[B](implicit
+    ev: Commutative[Sum[B]]
   ): Covariant[({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new Covariant[({ type lambda[+x] = ZSet[x, B] })#lambda] {
       def map[A, C](f: A => C): ZSet[A, B] => ZSet[C, B] =
@@ -292,8 +293,8 @@ object ZSet {
   /**
    * The `IdentityFlatten` instance for `ZSet`.
    */
-  implicit def ZSetIdentityFlatten[B](
-    implicit ev1: Commutative[Sum[B]],
+  implicit def ZSetIdentityFlatten[B](implicit
+    ev1: Commutative[Sum[B]],
     ev2: Commutative[Prod[B]]
   ): IdentityFlatten[({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new IdentityFlatten[({ type lambda[+x] = ZSet[x, B] })#lambda] {
