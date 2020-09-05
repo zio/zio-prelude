@@ -73,11 +73,12 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
   implicit def EitherAssociativeFlatten[E]: AssociativeFlatten[({ type lambda[+a] = Either[E, a] })#lambda] =
     new AssociativeFlatten[({ type lambda[+a] = Either[E, a] })#lambda] {
 
-      def flatten[A](ffa: Either[E, Either[E, A]]): Either[E, A] = ffa match {
-        case Left(e)         => Left(e)
-        case Right(Left(e))  => Left(e)
-        case Right(Right(a)) => Right(a)
-      }
+      def flatten[A](ffa: Either[E, Either[E, A]]): Either[E, A] =
+        ffa match {
+          case Left(e)         => Left(e)
+          case Right(Left(e))  => Left(e)
+          case Right(Right(a)) => Right(a)
+        }
     }
 
   /**

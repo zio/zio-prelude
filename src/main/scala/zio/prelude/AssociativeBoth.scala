@@ -364,7 +364,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 17 `F` values using the provided function `f`.
    */
-  def mapN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, B](
+  def mapN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, B](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -393,7 +395,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 18 `F` values into a tuple in maps the result with the provided function.
    */
-  def mapN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, B](
+  def mapN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, B](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -417,8 +421,8 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   ): F[B] =
     (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6 <*> a7 <*> a8 <*> a9 <*> a10 <*> a11 <*> a12 <*> a13 <*> a14 <*> a15 <*> a16 <*> a17).map {
       case (
-          ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-          a17
+            ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
+            a17
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)
     }
@@ -426,7 +430,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 19 `F` values using the provided function `f`.
    */
-  def mapN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, B](
+  def mapN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, B](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -451,11 +457,11 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   ): F[B] =
     (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6 <*> a7 <*> a8 <*> a9 <*> a10 <*> a11 <*> a12 <*> a13 <*> a14 <*> a15 <*> a16 <*> a17 <*> a18).map {
       case (
-          (
-            ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-            a17
-          ),
-          a18
+            (
+              ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
+              a17
+            ),
+            a18
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)
     }
@@ -463,7 +469,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 20 `F` values using the provided function `f`.
    */
-  def mapN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, B](
+  def mapN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, B](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -489,14 +497,17 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   ): F[B] =
     (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6 <*> a7 <*> a8 <*> a9 <*> a10 <*> a11 <*> a12 <*> a13 <*> a14 <*> a15 <*> a16 <*> a17 <*> a18 <*> a19).map {
       case (
-          (
             (
-              ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-              a17
+              (
+                (
+                  (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
+                  a16
+                ),
+                a17
+              ),
+              a18
             ),
-            a18
-          ),
-          a19
+            a19
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)
     }
@@ -504,7 +515,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 21 `F` values using the provided function `f`.
    */
-  def mapN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, B](
+  def mapN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, B](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -531,20 +544,20 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   ): F[B] =
     (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6 <*> a7 <*> a8 <*> a9 <*> a10 <*> a11 <*> a12 <*> a13 <*> a14 <*> a15 <*> a16 <*> a17 <*> a18 <*> a19 <*> a20).map {
       case (
-          (
             (
               (
                 (
-                  (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
-                  a16
+                  (
+                    (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
+                    a16
+                  ),
+                  a17
                 ),
-                a17
+                a18
               ),
-              a18
+              a19
             ),
-            a19
-          ),
-          a20
+            a20
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)
     }
@@ -794,7 +807,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 17 `F` values into a tuple.
    */
-  def tupleN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
+  def tupleN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -820,7 +835,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 18 `F` values into a tuple.
    */
-  def tupleN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
+  def tupleN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -847,7 +864,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 19 `F` values into a tuple.
    */
-  def tupleN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
+  def tupleN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -875,7 +894,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 20 `F` values into a tuple.
    */
-  def tupleN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19](
+  def tupleN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -904,7 +925,9 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * Combines 21 `F` values into a tuple.
    */
-  def tupleN[F[+_]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20](
+  def tupleN[F[
+    +_
+  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],

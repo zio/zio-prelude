@@ -108,7 +108,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
    */
   implicit val OptionIdentityBoth: IdentityBoth[Option] =
     new IdentityBoth[Option] {
-      val any: Option[Any] =
+      val any: Option[Any]                                               =
         Some(())
       def both[A, B](fa: => Option[A], fb: => Option[B]): Option[(A, B)] =
         (fa, fb) match {
@@ -122,7 +122,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
    */
   implicit val ListAssociativeIdentityBoth: IdentityBoth[List] =
     new IdentityBoth[List] {
-      val any: List[Any] =
+      val any: List[Any]                                           =
         List(())
       def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
