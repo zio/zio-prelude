@@ -270,10 +270,10 @@ object Equal extends Lawful[Equal] {
     make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
 
   /**
-   * Equality for `Class` values.
+   * `Hash` (and thus also `Equal`) instance for `Class` values.
    */
-  implicit val ClassEqual: Equal[Class[_]] =
-    default
+  implicit val ClassHash: Hash[Class[_]] =
+    Hash.default
 
   /**
    * Derives an `Equal[F[A]]` given a `Derive[F, Equal]` and an `Equal[A]`.
@@ -316,13 +316,10 @@ object Equal extends Lawful[Equal] {
     HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
-   * Equality for `Fiber.Id` values.
+   * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
    */
-  implicit val FiberIdEqual: Equal[Fiber.Id] =
-    (l: Fiber.Id, r: Fiber.Id) =>
-      (l, r) match {
-        case (Fiber.Id(stm1, sn1), Fiber.Id(stm2, sn2)) => stm1 === stm2 && sn1 === sn2
-      }
+  implicit lazy val FiberIdHashOrd: Hash[Fiber.Id] with Ord[Fiber.Id] =
+    HashOrd.derive[(Long, Long)].contramap[Fiber.Id](fid => (fid.startTimeMillis, fid.seqNumber))
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
@@ -851,12 +848,12 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * Equality for `Throwable` values.
+   * `Hash` (and thus also `Equal`) instance for `Throwable` values.
    * Comparison is based on: Class, message and cause (stack trace is ignored).
    */
-  implicit val ThrowableEqual: Equal[Throwable] =
-    make { (l, r) =>
-      l.getClass === r.getClass && l.getMessage === r.getMessage && Option(l.getCause) === Option(r.getCause)
+  implicit def ThrowableHashOrd: Hash[Throwable] =
+    Hash[(Class[_], String, Option[Throwable])].contramap { t =>
+      (t.getClass, t.getMessage, Option(t.getCause))
     }
 
   /**
@@ -899,10 +896,10 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * Equality for `ZTrace` values.
+   * `Hash` (and thus also `Equal`) instance for `ZTrace` values.
    */
-  implicit val ZTraceEqual: Equal[ZTrace] =
-    default
+  implicit val ZTraceHash: Hash[ZTrace] =
+    Hash.default
 
   /**
    * Returns whether two values refer to the same location in memory.
