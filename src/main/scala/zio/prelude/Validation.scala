@@ -250,7 +250,6 @@ object Validation extends LowPriorityValidationImplicits {
    * Attempts to evaluate the specified value, catching any error that occurs
    * during evaluation and capturing it as a failure.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.throw"))
   def apply[A](a: => A): Validation[Throwable, A] =
     try succeed(a)
     catch {

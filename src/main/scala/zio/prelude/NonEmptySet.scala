@@ -170,7 +170,6 @@ object NonEmptySet {
    * Provides an implicit conversion from `NonEmptySet` to the `Set`
    * for interoperability with Scala's collection library.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.implicitConversion"))
   implicit def toSet[A](nonEmptySet: NonEmptySet[A]): Set[A] =
     nonEmptySet.toSet
 

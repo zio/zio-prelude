@@ -12,7 +12,6 @@ import scala.collection.immutable.HashMap
  * probability associated with an element in the set if `B` is a rational
  * number, or even whether an element appears at all if `B` is a boolean.
  */
-@SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
 final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance, B]) { self =>
 
   /**

@@ -905,7 +905,6 @@ object Equal extends Lawful[Equal] {
   /**
    * Returns whether two values refer to the same location in memory.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
   private[prelude] def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
 }

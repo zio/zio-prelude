@@ -13,14 +13,6 @@ import scala.annotation.switch
  * including context, state, and failure.
  */
 
-@SuppressWarnings(
-  Array(
-    "scalafix:DisableSyntax.var",
-    "scalafix:DisableSyntax.null",
-    "scalafix:DisableSyntax.asInstanceOf",
-    "scalafix:DisableSyntax.while"
-  )
-)
 sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 

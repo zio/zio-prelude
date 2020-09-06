@@ -241,7 +241,6 @@ private[prelude] sealed trait NewtypeModule {
   }
 }
 
-@SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf"))
 private[prelude] object NewtypeModule {
   val instance: NewtypeModule =
     new NewtypeModule {
@@ -293,12 +292,7 @@ private[prelude] object NewtypeModule {
     }
 }
 
-@SuppressWarnings(
-  Array(
-    "scalafix:MissingFinal.class",
-    "scalafix:DisableSyntax.asInstanceOf"
-  )
-)
+@SuppressWarnings(Array("scalafix:MissingFinal.class"))
 trait NewtypeExports {
   import NewtypeModule._
 

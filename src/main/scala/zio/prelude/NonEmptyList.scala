@@ -578,7 +578,6 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    * Provides an implicit conversion from `NonEmptyList` to the `::` case of
    * `List` for interoperability with Scala's collection library.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.implicitConversion"))
   implicit def toCons[A](nonEmptyList: NonEmptyList[A]): ::[A] =
     nonEmptyList.toCons
 

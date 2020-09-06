@@ -25,7 +25,6 @@ object OrdSpec extends DefaultRunnableSpec {
     ord: scala.math.Ordering[A]
   ): scala.math.Ordering[CC[A]] =
     new scala.math.Ordering[CC[A]] {
-      @SuppressWarnings(Array("scalafix:DisableSyntax.while", "scalafix:DisableSyntax.return"))
       def compare(x: CC[A], y: CC[A]): Int = {
         val xit = x.iterator
         val yit = y.iterator

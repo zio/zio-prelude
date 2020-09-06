@@ -4,7 +4,6 @@ import zio.prelude.Debug.{ Renderer, Repr, _ }
 import zio.random.Random
 import zio.test.{ TestResult, _ }
 
-@SuppressWarnings(Array("scalafix:DisableSyntax.defaultArgs"))
 object DebugSpec extends DefaultRunnableSpec {
 
   def primitiveTest[A: Debug](renderer: Renderer)(a: A, exp: Option[String] = None): TestResult =

@@ -7,7 +7,6 @@ import scala.concurrent.{ Future, blocking }
 
 object CommutativeEitherSpec extends DefaultRunnableSpec {
 
-  @SuppressWarnings(Array("scalafix:DisableSyntax.noSemicolons"))
   def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
     suite("CommutativeEitherSpec")(
       testM("FutureCommutativeEither returns the first future that is completed") {
