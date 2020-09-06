@@ -1,7 +1,8 @@
 package zio
 
-import com.github.ghik.silencer.silent
 import zio.test.{ TestResult, assert }
+
+import com.github.ghik.silencer.silent
 
 package object prelude
     extends Assertions

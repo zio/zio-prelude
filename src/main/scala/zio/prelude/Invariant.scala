@@ -1,9 +1,9 @@
 package zio.prelude
 
-import zio.Chunk
-
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
+
+import zio.Chunk
 
 trait Invariant[F[_]] {
 

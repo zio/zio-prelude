@@ -1,9 +1,9 @@
 package zio.prelude.fx
 
+import scala.annotation.switch
+
 import zio.internal.Stack
 import zio.prelude._
-
-import scala.annotation.switch
 
 /**
  * `ZPure[S1, S2, R, E, A]` is a purely functional description of a computation

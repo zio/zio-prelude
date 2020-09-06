@@ -1,10 +1,10 @@
 package zio.prelude
 
+import scala.annotation.implicitNotFound
+
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
-
-import scala.annotation.implicitNotFound
 
 /**
  * `Hash[A]` provides implicit evidence that a value of type `A` can be hashed.

@@ -1,10 +1,10 @@
 package zio.prelude
 
+import scala.util.Try
+
 import zio.prelude.Validation._
 import zio.test.Assertion
 import zio.{ IO, NonEmptyChunk, ZIO }
-
-import scala.util.Try
 
 /**
  * `Validation` represents either a successful value of type `A` or a

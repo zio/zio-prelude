@@ -1,14 +1,14 @@
 package zio.prelude
 
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
+
 import zio._
 import zio.prelude.coherent.CovariantDeriveEqual
 import zio.prelude.newtypes.{ Failure, FailureIn, FailureOut }
 import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
-
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Try
 
 trait CovariantSubset[F[+_], Subset[_]] {
   def mapSubset[A, B: Subset](f: A => B): F[A] => F[B]

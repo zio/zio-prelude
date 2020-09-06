@@ -1,10 +1,10 @@
 package zio.prelude
 
+import scala.annotation.implicitNotFound
+
 import zio.prelude.coherent.DeriveEqualIdentityEitherInvariant
 import zio.test.TestResult
 import zio.test.laws._
-
-import scala.annotation.implicitNotFound
 
 /**
  * A binary operator that combines two values of types `F[A]` and `F[B]` to

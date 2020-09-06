@@ -1,9 +1,9 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
-
 import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.immutable.HashMap
+
+import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
 /**
  * A `ZSet[A, B]` is a set of `A` values where `B` represents some notion of
