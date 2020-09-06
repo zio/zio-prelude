@@ -47,6 +47,8 @@ package object prelude
 
   type MultiSet[+A] = ZSet[A, Int]
   val MultiSet: ZSet.type = ZSet
+  type NonEmptyMultiSet[+A] = ZNonEmptySet[A, Int]
+  val NonEmptyMultiSet: ZNonEmptySet.type = ZNonEmptySet
 
   type DeriveAssociative[F[_]] = Derive[F, Associative]
   type DeriveCommutative[F[_]] = Derive[F, Commutative]

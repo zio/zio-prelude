@@ -300,7 +300,7 @@ object ZSet {
     new IdentityFlatten[({ type lambda[+x] = ZSet[x, B] })#lambda] {
       def flatten[A](ffa: ZSet[ZSet[A, B], B]): ZSet[A, B] =
         ffa.flatMap(identity)
-      def any: ZSet[Any, B]                                = ???
+      def any: ZSet[Any, B]                                = ZSet.fromMap(Map.empty)
 
     }
 

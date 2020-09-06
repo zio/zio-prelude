@@ -58,7 +58,7 @@ object ZSetSpec extends DefaultRunnableSpec {
         )
       ),
       suite("methods")(
-        test("flatMap") {
+        test("zipWith") {
           val die  = ZSet(1, 2, 3, 4, 5, 6)
           val pair = die.zipWith(die)(_ + _)
           assert(pair(7))(equalTo(6))
