@@ -282,10 +282,11 @@ object Ord extends Lawful[Ord] {
         val k = r.length
 
         @tailrec
+        @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
         def loop(i: Int): Ordering =
-          if (i === j && i === k) Ordering.Equals
-          else if (i === j) Ordering.LessThan
-          else if (i === k) Ordering.GreaterThan
+          if (i == j && i == k) Ordering.Equals
+          else if (i == j) Ordering.LessThan
+          else if (i == k) Ordering.GreaterThan
           else {
             val compare = Ord[A].compare(l(i), r(i))
             if (compare.isEqual) loop(i + 1) else compare
@@ -882,10 +883,12 @@ object Ord extends Lawful[Ord] {
       val j = l.length
       val k = r.length
 
+      @tailrec
+      @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
       def loop(i: Int): Ordering =
-        if (i === j && i === k) Ordering.Equals
-        else if (i === j) Ordering.LessThan
-        else if (i === k) Ordering.GreaterThan
+        if (i == j && i == k) Ordering.Equals
+        else if (i == j) Ordering.LessThan
+        else if (i == k) Ordering.GreaterThan
         else {
           val compare = Ord[A].compare(l(i), r(i))
           if (compare.isEqual) loop(i + 1) else compare
