@@ -851,10 +851,18 @@ object Equal extends Lawful[Equal] {
    * `Hash` (and thus also `Equal`) instance for `Throwable` values.
    * Comparison is based on: Class, message and cause (stack trace is ignored).
    */
-  implicit def ThrowableHashOrd: Hash[Throwable] =
+  implicit def ThrowableHashOrd: Hash[Throwable] = {
+    implicit val hashOT: Hash[Option[Throwable]] = Hash.OptionHash {
+      // use an indirect instance, so that calling ThrowableHashOrd infinitely doesn't cause stack overflow
+      new Hash[Throwable] {
+        def hash(a: Throwable): Int                                   = ThrowableHashOrd.hash(a)
+        protected def checkEqual(l: Throwable, r: Throwable): Boolean = ThrowableHashOrd.equal(l, r)
+      }
+    }
     Hash[(Class[_], String, Option[Throwable])].contramap { t =>
       (t.getClass, t.getMessage, Option(t.getCause))
     }
+  }
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Unit` values.
@@ -870,20 +878,13 @@ object Equal extends Lawful[Equal] {
     make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
 
   /**
-   * Derives an `Equal[Cause[A]]` given an `Equal[A]`.
+   * `Hash` (and thus also `Equal`) instance for `Cause[A]`.
+   * Note, that it doesn't take `Hash[A]` nor `Equal[A]` into account.
    */
-  implicit def CauseEqual[A: Equal]: Equal[Cause[A]] =
-    (l: Cause[A], r: Cause[A]) =>
-      (l, r) match {
-        case (Cause.Both(l1, r1), Cause.Both(l2, r2))       => l1 === l2 && r1 === r2
-        case (Cause.Die(t1), Cause.Die(t2))                 => t1 === t2
-        case (Cause.Interrupt(fid1), Cause.Interrupt(fid2)) => fid1 === fid2
-        case (Cause.Then(l1, r1), Cause.Then(l2, r2))       => l1 === l2 && r1 === r2
-        case (Cause.Fail(v1), Cause.Fail(v2))               => v1 === v2
-        case (Cause.Traced(c1, t1), Cause.Traced(c2, t2))   => c1 === c2 && t1 === t2
-        case (Cause.Empty(), Cause.Empty())                 => true
-        case _                                              => false
-      }
+  implicit def CauseHash[A]: Hash[Cause[A]] =
+    // we have to resort to equals, because the structure is opaque, namely Cause.Internal.Meta
+    // `Equal` and `Hash` instances will be possible once this PR gets merged: https://github.com/zio/zio/pull/4179
+    Hash.default
 
   /**
    * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.

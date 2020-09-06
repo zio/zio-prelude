@@ -140,23 +140,6 @@ object Hash extends Lawful[Hash] {
     make(_.hashCode(), _ == _)
 
   /**
-   * Derives a `Hash[Cause[A]]` given a `Hash[A]`.
-   */
-  implicit def CauseHash[A: Hash]: Hash[Cause[A]] =
-    makeFrom(
-      {
-        case Cause.Both(l, r)     => (l, r).hash
-        case Cause.Die(t)         => t.hash
-        case Cause.Interrupt(fid) => fid.hash
-        case Cause.Then(l, r)     => (l, r).hash
-        case Cause.Fail(v)        => v.hash
-        case Cause.Traced(c, t)   => (c, t).hash
-        case Cause.Empty()        => ().hash
-      },
-      Equal.CauseEqual
-    )
-
-  /**
    * Derives a `Hash[Chunk[A]]` given a `Hash[A]`.
    */
   implicit def ChunkHash[A: Hash]: Hash[Chunk[A]] =
