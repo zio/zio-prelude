@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
-import zio.{ Cause, Chunk, NonEmptyChunk }
+import zio.{ Chunk, NonEmptyChunk }
 
 import scala.annotation.implicitNotFound
 

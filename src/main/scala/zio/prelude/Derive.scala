@@ -520,7 +520,7 @@ object Derive {
   implicit val CauseDeriveEqual: DeriveEqual[Cause] =
     new DeriveEqual[Cause] {
       def derive[A: Equal]: Equal[Cause[A]] =
-        Equal.CauseEqual
+        Equal.CauseHash
     }
 
   /**
