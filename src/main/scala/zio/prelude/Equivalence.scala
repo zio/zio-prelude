@@ -72,18 +72,24 @@ object Equivalence extends Lawful2[Equivalence, Equal, Equal] {
    * left-associated nested tuple.
    */
   def tuple[A, B, C]: Equivalence[(A, (B, C)), ((A, B), C)] =
-    Equivalence({
-      case (a, (b, c)) => ((a, b), c)
-    }, {
-      case ((a, b), c) => (a, (b, c))
-    })
+    Equivalence(
+      {
+        case (a, (b, c)) => ((a, b), c)
+      },
+      {
+        case ((a, b), c) => (a, (b, c))
+      }
+    )
 
   def tupleFlip[A, B]: Equivalence[(A, B), (B, A)] =
-    Equivalence({
-      case (a, b) => (b, a)
-    }, {
-      case (b, a) => (a, b)
-    })
+    Equivalence(
+      {
+        case (a, b) => (b, a)
+      },
+      {
+        case (b, a) => (a, b)
+      }
+    )
 
   def tupleAny[A]: Equivalence[(A, Any), A] =
     Equivalence(_._1, a => (a, ()))
@@ -98,7 +104,8 @@ object Equivalence extends Lawful2[Equivalence, Equal, Equal] {
         case Left(a)         => Left(Left(a))
         case Right(Left(b))  => Left(Right(b))
         case Right(Right(c)) => Right(c)
-      }, {
+      },
+      {
         case Left(Left(a))  => Left(a)
         case Left(Right(b)) => Right(Left(b))
         case Right(c)       => Right(Right(c))
@@ -110,16 +117,20 @@ object Equivalence extends Lawful2[Equivalence, Equal, Equal] {
       {
         case Left(a)  => Right(a)
         case Right(b) => Left(b)
-      }, {
+      },
+      {
         case Right(a) => Left(a)
         case Left(b)  => Right(b)
       }
     )
 
   def eitherNothing[A]: Equivalence[Either[A, Nothing], A] =
-    Equivalence({
-      case Left(a)        => a
-      case Right(nothing) => nothing
-    }, a => Left(a))
+    Equivalence(
+      {
+        case Left(a)        => a
+        case Right(nothing) => nothing
+      },
+      a => Left(a)
+    )
 
 }
