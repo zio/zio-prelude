@@ -184,9 +184,10 @@ object Validation extends LowPriorityValidationImplicits {
    * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an
    * `Equal[A]`.
    */
-  implicit def ValidationEqual[E: Equal, A: Equal]: Equal[Validation[E, A]] =
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
+  implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
     Equal.make {
-      case (Failure(es), Failure(e1s)) => es.groupBy(identity) === e1s.groupBy(identity)
+      case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
       case (Success(a), Success(a1))   => a === a1
       case _                           => false
     }
