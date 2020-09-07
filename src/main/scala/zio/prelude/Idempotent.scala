@@ -48,9 +48,10 @@ object Idempotent extends Lawful[EqualIdempotent] {
   /**
    * Constructs an `Idempotent` instance from a commutative binary operator.
    */
-  def make[A](f: (A, A) => A): Idempotent[A] = new Idempotent[A] {
-    override def combine(l: => A, r: => A): A = f(l, r)
-  }
+  def make[A](f: (A, A) => A): Idempotent[A] =
+    new Idempotent[A] {
+      override def combine(l: => A, r: => A): A = f(l, r)
+    }
 
   /**
    * Constructs an `Idempotent` instance from a commutative instance.
@@ -62,8 +63,8 @@ object Idempotent extends Lawful[EqualIdempotent] {
    * Derives a `Idempotent[F[A]]` given a `Derive[F, Idempotent]` and a
    * `Idempotent[A]`.
    */
-  implicit def DeriveIdempotent[F[_], A](
-    implicit derive: Derive[F, Idempotent],
+  implicit def DeriveIdempotent[F[_], A](implicit
+    derive: Derive[F, Idempotent],
     idempotent: Idempotent[A]
   ): Idempotent[F[A]] =
     derive.derive(idempotent)
