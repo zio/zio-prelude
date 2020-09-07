@@ -112,7 +112,7 @@ private[prelude] sealed trait NewtypeModuleF {
     type Type[+A] <: A
   }
 }
-private[prelude] object NewtypeModuleF {
+private[prelude] object NewtypeModuleF       {
   val instance: NewtypeModuleF =
     new NewtypeModuleF {
       def newtypeF: NewtypeF =
@@ -134,7 +134,7 @@ private[prelude] object NewtypeModuleF {
         }
     }
 }
-trait NewtypeFExports {
+trait NewtypeFExports                        {
   import NewtypeModuleF._
 
   /**

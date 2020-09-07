@@ -5,9 +5,10 @@ import zio.test.laws._
 
 object IdentityEitherSpec extends DefaultRunnableSpec {
 
-  def spec = suite("IdentityEitherSpec")(
-    suite("laws")(
-      testM("option")(checkAllLaws(IdentityEither)(GenF.option, Gen.anyInt))
+  def spec =
+    suite("IdentityEitherSpec")(
+      suite("laws")(
+        testM("option")(checkAllLaws(IdentityEither)(GenF.option, Gen.anyInt))
+      )
     )
-  )
 }

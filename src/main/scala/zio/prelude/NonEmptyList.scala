@@ -450,7 +450,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    */
   implicit val NonEmptyListIdentityFlatten: IdentityFlatten[NonEmptyList] =
     new IdentityFlatten[NonEmptyList] {
-      val any: NonEmptyList[Any] = single(())
+      val any: NonEmptyList[Any]                                          = single(())
       def flatten[A](ffa: NonEmptyList[NonEmptyList[A]]): NonEmptyList[A] =
         ffa.flatten
     }
@@ -490,7 +490,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    */
   implicit val NonEmptyListIdentityBoth: IdentityBoth[NonEmptyList] =
     new IdentityBoth[NonEmptyList] {
-      val any: NonEmptyList[Any] =
+      val any: NonEmptyList[Any]                                                           =
         single(())
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
@@ -513,9 +513,9 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     @tailrec
     def loop(left: NonEmptyList[A], right: NonEmptyList[A]): Ordering =
       (left, right) match {
-        case (Single(h1), Single(h2))  => Ord[A].compare(h1, h2)
-        case (Single(h1), Cons(h2, _)) => Ord[A].compare(h1, h2) <> Ordering.LessThan
-        case (Cons(h1, _), Single(h2)) => Ord[A].compare(h1, h2) <> Ordering.GreaterThan
+        case (Single(h1), Single(h2))     => Ord[A].compare(h1, h2)
+        case (Single(h1), Cons(h2, _))    => Ord[A].compare(h1, h2) <> Ordering.LessThan
+        case (Cons(h1, _), Single(h2))    => Ord[A].compare(h1, h2) <> Ordering.GreaterThan
         case (Cons(h1, t1), Cons(h2, t2)) =>
           val compare = Ord[A].compare(h1, h2)
           if (compare.isEqual) loop(t1, t2) else compare

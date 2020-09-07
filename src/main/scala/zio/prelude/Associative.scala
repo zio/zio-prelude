@@ -195,8 +195,8 @@ object Associative extends Lawful[AssociativeEqual] {
    * Derives an `Associative[F[A]]` given a `Derive[F, Associative]` and an
    * `Associative[A]`.
    */
-  implicit def DeriveAssociative[F[_], A](
-    implicit derive: Derive[F, Associative],
+  implicit def DeriveAssociative[F[_], A](implicit
+    derive: Derive[F, Associative],
     associative: Associative[A]
   ): Associative[F[A]] =
     derive.derive(associative)
@@ -422,7 +422,8 @@ object Associative extends Lawful[AssociativeEqual] {
    */
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
     Identity.make(
-      None, {
+      None,
+      {
         case (Some(l), Some(r)) => Some(l <> r)
         case (Some(l), None)    => Some(l)
         case (None, Some(r))    => Some(r)
@@ -538,8 +539,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1),
-          (a2, b2, c2, d2, e2, f2)
+            (a1, b1, c1, d1, e1, f1),
+            (a2, b2, c2, d2, e2, f2)
           ) =>
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2)
     }
@@ -559,8 +560,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1),
-          (a2, b2, c2, d2, e2, f2, g2)
+            (a1, b1, c1, d1, e1, f1, g1),
+            (a2, b2, c2, d2, e2, f2, g2)
           ) =>
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2, g1 <> g2)
     }
@@ -581,8 +582,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1),
-          (a2, b2, c2, d2, e2, f2, g2, h2)
+            (a1, b1, c1, d1, e1, f1, g1, h1),
+            (a2, b2, c2, d2, e2, f2, g2, h2)
           ) =>
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2, g1 <> g2, h1 <> h2)
     }
@@ -604,8 +605,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2)
           ) =>
         (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2, f1 <> f2, g1 <> g2, h1 <> h2, i1 <> i2)
     }
@@ -628,8 +629,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)
           ) =>
         (
           a1 <> a2,
@@ -664,8 +665,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)
           ) =>
         (
           a1 <> a2,
@@ -702,8 +703,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)
           ) =>
         (
           a1 <> a2,
@@ -742,8 +743,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
           ) =>
         (
           a1 <> a2,
@@ -784,8 +785,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
           ) =>
         (
           a1 <> a2,
@@ -828,8 +829,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
           ) =>
         (
           a1 <> a2,
@@ -874,8 +875,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
           ) =>
         (
           a1 <> a2,
@@ -922,8 +923,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
           ) =>
         (
           a1 <> a2,
@@ -972,8 +973,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
           ) =>
         (
           a1 <> a2,
@@ -1024,8 +1025,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
           ) =>
         (
           a1 <> a2,
@@ -1078,8 +1079,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
           ) =>
         (
           a1 <> a2,
@@ -1134,8 +1135,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
           ) =>
         (
           a1 <> a2,
@@ -1192,8 +1193,8 @@ object Associative extends Lawful[AssociativeEqual] {
   ]: Associative[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
     make {
       case (
-          (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
-          (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
+            (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
+            (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
           ) =>
         (
           a1 <> a2,

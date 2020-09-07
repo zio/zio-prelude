@@ -102,14 +102,14 @@ trait Traversable[F[+_]] extends Covariant[F] {
   def foreach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     foreach(fa)(f).as(())
 
-  def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] = foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) {
-    (m, v) =>
+  def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
+    foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) { (m, v) =>
       val k = f(v)
       m.get(k) match {
         case Some(vs) => m + (k -> (vs :+ v))
         case None     => m + (k -> NonEmptyChunk(v))
       }
-  }
+    }
 
   def groupByM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]].succeed) { (m, v) =>
@@ -284,7 +284,7 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] with
     new Traversable[List] {
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
         list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
-      override def map[A, B](f: A => B): List[A] => List[B] = _.map(f)
+      override def map[A, B](f: A => B): List[A] => List[B]                                      = _.map(f)
     }
 
   /**
@@ -326,53 +326,53 @@ trait TraversableSyntax {
   implicit class TraversableOps[F[+_], A](private val self: F[A]) {
     def foreach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: Traversable[F]): G[F[B]] =
       F.foreach(self)(f)
-    def contains[A1 >: A](a: A1)(implicit A: Equal[A1], F: Traversable[F]): Boolean =
+    def contains[A1 >: A](a: A1)(implicit A: Equal[A1], F: Traversable[F]): Boolean                   =
       F.contains[A, A1](self)(a)
-    def count(f: A => Boolean)(implicit F: Traversable[F]): Int =
+    def count(f: A => Boolean)(implicit F: Traversable[F]): Int                                       =
       F.count(self)(f)
-    def exists(f: A => Boolean)(implicit F: Traversable[F]): Boolean =
+    def exists(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                  =
       F.exists(self)(f)
-    def find(f: A => Boolean)(implicit F: Traversable[F]): Option[A] =
+    def find(f: A => Boolean)(implicit F: Traversable[F]): Option[A]                                  =
       F.find(self)(f)
-    def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: Traversable[F]): S =
+    def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: Traversable[F]): S                              =
       F.foldLeft(self)(s)(f)
-    def foldMap[B: Identity](f: A => B)(implicit F: Traversable[F]): B =
+    def foldMap[B: Identity](f: A => B)(implicit F: Traversable[F]): B                                =
       F.foldMap(self)(f)
-    def foldRight[S](s: S)(f: (A, S) => S)(implicit F: Traversable[F]): S =
+    def foldRight[S](s: S)(f: (A, S) => S)(implicit F: Traversable[F]): S                             =
       F.foldRight(self)(s)(f)
-    def forall(f: A => Boolean)(implicit F: Traversable[F]): Boolean =
+    def forall(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                  =
       F.forall(self)(f)
     def foreach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: Traversable[F]): G[Unit] =
       F.foreach_(self)(f)
-    def isEmpty(implicit F: Traversable[F]): Boolean =
+    def isEmpty(implicit F: Traversable[F]): Boolean                                                  =
       F.isEmpty(self)
-    def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: Traversable[F]): (S, F[B]) =
+    def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: Traversable[F]): (S, F[B])              =
       F.mapAccum(self)(s)(f)
-    def maxOption(implicit A: Ord[A], F: Traversable[F]): Option[A] =
+    def maxOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                   =
       F.maxOption(self)
-    def maxByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A] =
+    def maxByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                         =
       F.maxByOption(self)(f)
-    def minOption(implicit A: Ord[A], F: Traversable[F]): Option[A] =
+    def minOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                   =
       F.minOption(self)
-    def minByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A] =
+    def minByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                         =
       F.minByOption(self)(f)
-    def nonEmpty(implicit F: Traversable[F]): Boolean =
+    def nonEmpty(implicit F: Traversable[F]): Boolean                                                 =
       F.nonEmpty(self)
-    def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A =
+    def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A                                  =
       F.product(self)
-    def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B] =
+    def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B]             =
       F.reduceMapOption(self)(f)
-    def reduceOption(f: (A, A) => A)(implicit F: Traversable[F]): Option[A] =
+    def reduceOption(f: (A, A) => A)(implicit F: Traversable[F]): Option[A]                           =
       F.reduceOption(self)(f)
-    def reverse(implicit F: Traversable[F]): F[A] =
+    def reverse(implicit F: Traversable[F]): F[A]                                                     =
       F.reverse(self)
-    def size(implicit F: Traversable[F]): Int =
+    def size(implicit F: Traversable[F]): Int                                                         =
       F.size(self)
-    def sum(implicit A: Identity[Sum[A]], F: Traversable[F]): A =
+    def sum(implicit A: Identity[Sum[A]], F: Traversable[F]): A                                       =
       F.sum(self)
-    def toChunk(implicit F: Traversable[F]): Chunk[A] =
+    def toChunk(implicit F: Traversable[F]): Chunk[A]                                                 =
       F.toChunk(self)
-    def zipWithIndex(implicit F: Traversable[F]): F[(A, Int)] =
+    def zipWithIndex(implicit F: Traversable[F]): F[(A, Int)]                                         =
       F.zipWithIndex(self)
   }
 
