@@ -308,8 +308,8 @@ object PartialOrd extends Lawful[PartialOrd] {
    */
   implicit def Tuple2PartialOrd[A: PartialOrd, B: PartialOrd]: PartialOrd[(A, B)] =
     makeFrom(
-      {
-        case ((a1, b1), (a2, b2)) => (a1 =?=? a2) <>? (b1 =?=? b2)
+      { case ((a1, b1), (a2, b2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2)
       },
       Equal.Tuple2Equal
     )
@@ -320,8 +320,8 @@ object PartialOrd extends Lawful[PartialOrd] {
    */
   implicit def Tuple3PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd]: PartialOrd[(A, B, C)] =
     makeFrom(
-      {
-        case ((a1, b1, c1), (a2, b2, c2)) => (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2)
+      { case ((a1, b1, c1), (a2, b2, c2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2)
       },
       Equal.Tuple3Equal
     )
@@ -332,8 +332,8 @@ object PartialOrd extends Lawful[PartialOrd] {
    */
   implicit def Tuple4PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd, D: PartialOrd]: PartialOrd[(A, B, C, D)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2)
+      { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2)
       },
       Equal.Tuple4Equal
     )
@@ -345,9 +345,8 @@ object PartialOrd extends Lawful[PartialOrd] {
   implicit def Tuple5PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd, D: PartialOrd, E: PartialOrd]
     : PartialOrd[(A, B, C, D, E)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2)
+      { case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2)
       },
       Equal.Tuple5Equal
     )
@@ -365,9 +364,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     F: PartialOrd
   ]: PartialOrd[(A, B, C, D, E, F)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2)
+      { case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2)
       },
       Equal.Tuple6Equal
     )
@@ -386,9 +384,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     G: PartialOrd
   ]: PartialOrd[(A, B, C, D, E, F, G)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2)
+      { case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2)
       },
       Equal.Tuple7Equal
     )
@@ -408,9 +405,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     H: PartialOrd
   ]: PartialOrd[(A, B, C, D, E, F, G, H)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2)
       },
       Equal.Tuple8Equal
     )
@@ -431,9 +427,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     I: PartialOrd
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2)
       },
       Equal.Tuple9Equal
     )
@@ -455,9 +450,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     J: PartialOrd
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2) <>? (j1 =?=? j2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2) <>? (j1 =?=? j2)
       },
       Equal.Tuple10Equal
     )
@@ -480,9 +474,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     K: PartialOrd
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2) <>? (j1 =?=? j2) <>? (k1 =?=? k2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2) <>? (j1 =?=? j2) <>? (k1 =?=? k2)
       },
       Equal.Tuple11Equal
     )
@@ -506,9 +499,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     L: PartialOrd
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
-          (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2) <>? (j1 =?=? j2) <>? (k1 =?=? k2) <>? (l1 =?=? l2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
+        (a1 =?=? a2) <>? (b1 =?=? b2) <>? (c1 =?=? c2) <>? (d1 =?=? d2) <>? (e1 =?=? e2) <>? (f1 =?=? f2) <>? (g1 =?=? g2) <>? (h1 =?=? h2) <>? (i1 =?=? i2) <>? (j1 =?=? j2) <>? (k1 =?=? k2) <>? (l1 =?=? l2)
       },
       Equal.Tuple12Equal
     )
