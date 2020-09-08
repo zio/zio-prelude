@@ -235,7 +235,6 @@ object Equal extends Lawful[Equal] {
    * Constructs an `Equal[A]` that uses the default notion of equality
    * embodied in the implementation of `equals` for values of type `A`.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   def default[A]: Equal[A] =
     make(_ == _)
 
