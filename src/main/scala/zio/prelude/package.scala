@@ -1,7 +1,8 @@
 package zio
 
+import zio.test.{ TestResult, assert }
+
 import com.github.ghik.silencer.silent
-import zio.test.{ assert, TestResult }
 
 package object prelude
     extends Assertions
@@ -48,6 +49,8 @@ package object prelude
 
   type MultiSet[+A] = ZSet[A, Int]
   val MultiSet: ZSet.type = ZSet
+  type NonEmptyMultiSet[+A] = ZNonEmptySet[A, Int]
+  val NonEmptyMultiSet: ZNonEmptySet.type = ZNonEmptySet
 
   type DeriveAssociative[F[_]] = Derive[F, Associative]
   type DeriveCommutative[F[_]] = Derive[F, Commutative]

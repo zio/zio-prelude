@@ -39,7 +39,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
       index <- Gen.int(-2, cons.length + 2)
     } yield (cons, index)
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("NonEmptyListSpec")(
       suite("laws")(
         testM("associative")(checkAllLaws(Associative)(genNonEmptyList)),

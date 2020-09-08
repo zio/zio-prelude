@@ -1,14 +1,14 @@
 package zio.prelude
 
+import scala.concurrent.Future
+import scala.util.Try
+
 import zio.prelude.newtypes.Failure
 import zio.random.Random
 import zio.test.Gen.oneOf
 import zio.test._
 import zio.test.laws.GenF
 import zio.{ Cause, Exit, NonEmptyChunk }
-
-import scala.concurrent.Future
-import scala.util.Try
 
 /**
  * Provides higher kinded generators.

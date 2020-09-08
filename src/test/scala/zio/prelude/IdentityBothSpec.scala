@@ -5,7 +5,7 @@ import zio.test.laws._
 
 object IdentityBothSpec extends DefaultRunnableSpec {
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("IdentityBothSpec")(
       suite("laws")(
         testM("either")(checkAllLaws(IdentityBoth)(GenF.either(Gen.anyInt), Gen.anyInt)),

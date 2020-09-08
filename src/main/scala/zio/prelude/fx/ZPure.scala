@@ -12,6 +12,7 @@ import zio.prelude._
  * of its polymorphism `ZPure` can be used to model a variety of effects
  * including context, state, and failure.
  */
+
 sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 

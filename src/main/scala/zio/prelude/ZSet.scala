@@ -1,9 +1,9 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
-
 import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.immutable.HashMap
+
+import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
 /**
  * A `ZSet[A, B]` is a set of `A` values where `B` represents some notion of
@@ -88,6 +88,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override def equals(that: Any): Boolean =
     that match {
       case that: ZSet[_, _] => self.map == that.map
@@ -300,7 +301,7 @@ object ZSet {
     new IdentityFlatten[({ type lambda[+x] = ZSet[x, B] })#lambda] {
       def flatten[A](ffa: ZSet[ZSet[A, B], B]): ZSet[A, B] =
         ffa.flatMap(identity)
-      def any: ZSet[Any, B]                                = ???
+      def any: ZSet[Any, B]                                = ZSet.fromMap(Map.empty)
 
     }
 

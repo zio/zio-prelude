@@ -1,12 +1,13 @@
 package zio.prelude
 
-import scala.concurrent.{ blocking, Future }
+import scala.concurrent.{ Future, blocking }
+
 import zio.ZIO
 import zio.test._
 
 object CommutativeEitherSpec extends DefaultRunnableSpec {
 
-  def spec =
+  def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
     suite("CommutativeEitherSpec")(
       testM("FutureCommutativeEither returns the first future that is completed") {
         for {

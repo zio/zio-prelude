@@ -5,7 +5,7 @@ import zio.test.laws._
 
 object IdentityFlattenSpec extends DefaultRunnableSpec {
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("IdentityFlattenSpec")(
       suite("laws")(
         testM("chunk")(checkAllLaws(IdentityFlatten)(GenF.chunk, Gen.chunkOf(Gen.anyString))),
