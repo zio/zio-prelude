@@ -325,7 +325,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
               val zPure2 = nested.asInstanceOf[Succeed[Any]]
               curZPure = continuation(zPure2.value)
 
-            case Tags.Modify  =>
+            case Tags.Modify =>
               val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any, Any]]
 
               val updated = zPure2.run(s0)
@@ -333,7 +333,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
               a = updated._2
               curZPure = continuation(a)
 
-            case _            =>
+            case _ =>
               curZPure = nested
               stack.push(continuation)
           }

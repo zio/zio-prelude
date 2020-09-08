@@ -58,9 +58,8 @@ sealed trait NonEmptyList[+A] { self =>
    * Removes duplicate elements from this `NonEmptyList`.
    */
   final def distinct: NonEmptyList[A] =
-    reduceMapLeft(a => (single(a), Set(a))) {
-      case ((as, seen), a) =>
-        if (seen(a)) (as, seen) else (cons(a, as), seen + a)
+    reduceMapLeft(a => (single(a), Set(a))) { case ((as, seen), a) =>
+      if (seen(a)) (as, seen) else (cons(a, as), seen + a)
     }._1.reverse
 
   /**
@@ -179,9 +178,8 @@ sealed trait NonEmptyList[+A] { self =>
    * Returns the hashCode of this `NonEmptyList`.
    */
   override final def hashCode: Int = {
-    val (hash, n) = foldLeft((nonEmptyListSeed, 0)) {
-      case ((hash, n), a) =>
-        (MurmurHash3.mix(hash, a.hashCode), n + 1)
+    val (hash, n) = foldLeft((nonEmptyListSeed, 0)) { case ((hash, n), a) =>
+      (MurmurHash3.mix(hash, a.hashCode), n + 1)
     }
     MurmurHash3.finalizeHash(hash, n)
   }
@@ -407,8 +405,8 @@ sealed trait NonEmptyList[+A] { self =>
    * two and elements combined pairwise using the specified function.
    */
   final def zipWith[B, C](that: NonEmptyList[B])(f: (A, B) => C): NonEmptyList[C] =
-    unfold((self, that)) {
-      case (l, r) => f(l.head, r.head)
+    unfold((self, that)) { case (l, r) =>
+      f(l.head, r.head)
     } {
       case (Cons(_, t1), Cons(_, t2)) => Some((t1, t2))
       case _                          => None
@@ -418,8 +416,8 @@ sealed trait NonEmptyList[+A] { self =>
    * Annotates each element of this `NonEmptyList` with its index.
    */
   final def zipWithIndex: NonEmptyList[(A, Int)] =
-    unfold((self, 0)) {
-      case (as, n) => (as.head, n)
+    unfold((self, 0)) { case (as, n) =>
+      (as.head, n)
     } {
       case (Cons(_, t), n) => Some((t, n + 1))
       case _               => None

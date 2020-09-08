@@ -379,8 +379,8 @@ object Validation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6) => B
   ): Validation[E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6).map {
-      case ((((((a0, a1), a2), a3), a4), a5), a6) => f(a0, a1, a2, a3, a4, a5, a6)
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6).map { case ((((((a0, a1), a2), a3), a4), a5), a6) =>
+      f(a0, a1, a2, a3, a4, a5, a6)
     }
 
   /**
@@ -399,8 +399,8 @@ object Validation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7) => B
   ): Validation[E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7).map {
-      case (((((((a0, a1), a2), a3), a4), a5), a6), a7) => f(a0, a1, a2, a3, a4, a5, a6, a7)
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7).map { case (((((((a0, a1), a2), a3), a4), a5), a6), a7) =>
+      f(a0, a1, a2, a3, a4, a5, a6, a7)
     }
 
   /**
