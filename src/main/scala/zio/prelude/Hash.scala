@@ -257,9 +257,8 @@ object Hash extends Lawful[Hash] {
   implicit def Tuple9Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash, G: Hash, H: Hash, I: Hash]
     : Hash[(A, B, C, D, E, F, G, H, I)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i) =>
-          (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash).hashCode
+      { case (a, b, c, d, e, f, g, h, i) =>
+        (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash).hashCode
       },
       Equal.Tuple9Equal
     )
@@ -281,9 +280,8 @@ object Hash extends Lawful[Hash] {
     J: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j) =>
-          (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j) =>
+        (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash).hashCode
       },
       Equal.Tuple10Equal
     )
@@ -306,9 +304,8 @@ object Hash extends Lawful[Hash] {
     K: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k) =>
-          (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash, k.hash).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k) =>
+        (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash, k.hash).hashCode
       },
       Equal.Tuple11Equal
     )
@@ -332,9 +329,8 @@ object Hash extends Lawful[Hash] {
     L: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l) =>
-          (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash, k.hash, l.hash).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l) =>
+        (a.hash, b.hash, c.hash, d.hash, e.hash, f.hash, g.hash, h.hash, i.hash, j.hash, k.hash, l.hash).hashCode
       },
       Equal.Tuple12Equal
     )
@@ -359,23 +355,22 @@ object Hash extends Lawful[Hash] {
     M: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash
+        ).hashCode
       },
       Equal.Tuple13Equal
     )
@@ -401,24 +396,23 @@ object Hash extends Lawful[Hash] {
     N: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash
+        ).hashCode
       },
       Equal.Tuple14Equal
     )
@@ -445,25 +439,24 @@ object Hash extends Lawful[Hash] {
     O: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash
+        ).hashCode
       },
       Equal.Tuple15Equal
     )
@@ -491,26 +484,25 @@ object Hash extends Lawful[Hash] {
     P: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash,
-            p.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash,
+          p.hash
+        ).hashCode
       },
       Equal.Tuple16Equal
     )
@@ -539,27 +531,26 @@ object Hash extends Lawful[Hash] {
     Q: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash,
-            p.hash,
-            q.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash,
+          p.hash,
+          q.hash
+        ).hashCode
       },
       Equal.Tuple17Equal
     )
@@ -589,28 +580,27 @@ object Hash extends Lawful[Hash] {
     R: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash,
-            p.hash,
-            q.hash,
-            r.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash,
+          p.hash,
+          q.hash,
+          r.hash
+        ).hashCode
       },
       Equal.Tuple18Equal
     )
@@ -641,29 +631,28 @@ object Hash extends Lawful[Hash] {
     S: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash,
-            p.hash,
-            q.hash,
-            r.hash,
-            s.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash,
+          p.hash,
+          q.hash,
+          r.hash,
+          s.hash
+        ).hashCode
       },
       Equal.Tuple19Equal
     )
@@ -695,30 +684,29 @@ object Hash extends Lawful[Hash] {
     T: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash,
-            p.hash,
-            q.hash,
-            r.hash,
-            s.hash,
-            t.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash,
+          p.hash,
+          q.hash,
+          r.hash,
+          s.hash,
+          t.hash
+        ).hashCode
       },
       Equal.Tuple20Equal
     )
@@ -751,31 +739,30 @@ object Hash extends Lawful[Hash] {
     U: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash,
-            p.hash,
-            q.hash,
-            r.hash,
-            s.hash,
-            t.hash,
-            u.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash,
+          p.hash,
+          q.hash,
+          r.hash,
+          s.hash,
+          t.hash,
+          u.hash
+        ).hashCode
       },
       Equal.Tuple21Equal
     )
@@ -809,32 +796,31 @@ object Hash extends Lawful[Hash] {
     V: Hash
   ]: Hash[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
     makeFrom(
-      {
-        case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
-          (
-            a.hash,
-            b.hash,
-            c.hash,
-            d.hash,
-            e.hash,
-            f.hash,
-            g.hash,
-            h.hash,
-            i.hash,
-            j.hash,
-            k.hash,
-            l.hash,
-            m.hash,
-            n.hash,
-            o.hash,
-            p.hash,
-            q.hash,
-            r.hash,
-            s.hash,
-            t.hash,
-            u.hash,
-            v.hash
-          ).hashCode
+      { case (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
+        (
+          a.hash,
+          b.hash,
+          c.hash,
+          d.hash,
+          e.hash,
+          f.hash,
+          g.hash,
+          h.hash,
+          i.hash,
+          j.hash,
+          k.hash,
+          l.hash,
+          m.hash,
+          n.hash,
+          o.hash,
+          p.hash,
+          q.hash,
+          r.hash,
+          s.hash,
+          t.hash,
+          u.hash,
+          v.hash
+        ).hashCode
       },
       Equal.Tuple22Equal
     )

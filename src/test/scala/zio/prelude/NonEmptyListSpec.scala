@@ -84,15 +84,13 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
           }
         },
         testM("drop") {
-          check(genConsWithIndex) {
-            case (as, i) =>
-              NonEmptyList.fromCons(as).drop(i) <-> as.drop(i)
+          check(genConsWithIndex) { case (as, i) =>
+            NonEmptyList.fromCons(as).drop(i) <-> as.drop(i)
           }
         },
         testM("dropRight") {
-          check(genConsWithIndex) {
-            case (as, i) =>
-              NonEmptyList.fromCons(as).dropRight(i) <-> as.dropRight(i)
+          check(genConsWithIndex) { case (as, i) =>
+            NonEmptyList.fromCons(as).dropRight(i) <-> as.dropRight(i)
           }
         },
         testM("dropWhile") {
@@ -211,15 +209,13 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
           }
         },
         testM("take") {
-          check(genConsWithIndex) {
-            case (as, i) =>
-              NonEmptyList.fromCons(as).take(i) <-> as.take(i)
+          check(genConsWithIndex) { case (as, i) =>
+            NonEmptyList.fromCons(as).take(i) <-> as.take(i)
           }
         },
         testM("takeRight") {
-          check(genConsWithIndex) {
-            case (as, i) =>
-              NonEmptyList.fromCons(as).takeRight(i) <-> as.takeRight(i)
+          check(genConsWithIndex) { case (as, i) =>
+            NonEmptyList.fromCons(as).takeRight(i) <-> as.takeRight(i)
           }
         },
         testM("takeWhile") {

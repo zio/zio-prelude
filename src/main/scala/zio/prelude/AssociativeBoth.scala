@@ -78,8 +78,8 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   )(
     f: (A0, A1, A2) => B
   ): F[B] =
-    (a0 <*> a1 <*> a2).map {
-      case ((a0, a1), a2) => f(a0, a1, a2)
+    (a0 <*> a1 <*> a2).map { case ((a0, a1), a2) =>
+      f(a0, a1, a2)
     }
 
   /**
@@ -93,8 +93,8 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   )(
     f: (A0, A1, A2, A3) => B
   ): F[B] =
-    (a0 <*> a1 <*> a2 <*> a3).map {
-      case (((a0, a1), a2), a3) => f(a0, a1, a2, a3)
+    (a0 <*> a1 <*> a2 <*> a3).map { case (((a0, a1), a2), a3) =>
+      f(a0, a1, a2, a3)
     }
 
   /**
@@ -109,8 +109,8 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   )(
     f: (A0, A1, A2, A3, A4) => B
   ): F[B] =
-    (a0 <*> a1 <*> a2 <*> a3 <*> a4).map {
-      case ((((a0, a1), a2), a3), a4) => f(a0, a1, a2, a3, a4)
+    (a0 <*> a1 <*> a2 <*> a3 <*> a4).map { case ((((a0, a1), a2), a3), a4) =>
+      f(a0, a1, a2, a3, a4)
     }
 
   /**
@@ -126,8 +126,8 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   )(
     f: (A0, A1, A2, A3, A4, A5) => B
   ): F[B] =
-    (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5).map {
-      case (((((a0, a1), a2), a3), a4), a5) => f(a0, a1, a2, a3, a4, a5)
+    (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5).map { case (((((a0, a1), a2), a3), a4), a5) =>
+      f(a0, a1, a2, a3, a4, a5)
     }
 
   /**
@@ -144,8 +144,8 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   )(
     f: (A0, A1, A2, A3, A4, A5, A6) => B
   ): F[B] =
-    (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6).map {
-      case ((((((a0, a1), a2), a3), a4), a5), a6) => f(a0, a1, a2, a3, a4, a5, a6)
+    (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6).map { case ((((((a0, a1), a2), a3), a4), a5), a6) =>
+      f(a0, a1, a2, a3, a4, a5, a6)
     }
 
   /**
@@ -163,8 +163,8 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7) => B
   ): F[B] =
-    (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6 <*> a7).map {
-      case (((((((a0, a1), a2), a3), a4), a5), a6), a7) => f(a0, a1, a2, a3, a4, a5, a6, a7)
+    (a0 <*> a1 <*> a2 <*> a3 <*> a4 <*> a5 <*> a6 <*> a7).map { case (((((((a0, a1), a2), a3), a4), a5), a6), a7) =>
+      f(a0, a1, a2, a3, a4, a5, a6, a7)
     }
 
   /**
