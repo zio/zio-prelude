@@ -135,7 +135,6 @@ object Hash extends Lawful[Hash] {
    * Constructs a `Hash[A]` that uses the default notion of hashing embodied in
    * the implementation of `hashCode` for values of type `A`.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   def default[A]: Hash[A] =
     make(_.hashCode(), _ == _)
 

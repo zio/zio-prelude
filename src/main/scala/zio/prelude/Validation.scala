@@ -38,7 +38,6 @@ sealed trait Validation[+E, +A] { self =>
    * Returns whether this `Validation` and the specified `Validation` are equal
    * to each other.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override final def equals(that: Any): Boolean =
     (self, that) match {
       case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
@@ -184,7 +183,6 @@ object Validation extends LowPriorityValidationImplicits {
    * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an
    * `Equal[A]`.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
     Equal.make {
       case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)

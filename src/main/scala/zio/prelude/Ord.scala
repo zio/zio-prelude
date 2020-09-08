@@ -282,7 +282,6 @@ object Ord extends Lawful[Ord] {
         val k = r.length
 
         @tailrec
-        @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
         def loop(i: Int): Ordering =
           if (i == j && i == k) Ordering.Equals
           else if (i == j) Ordering.LessThan
@@ -876,7 +875,6 @@ object Ord extends Lawful[Ord] {
       val k = r.length
 
       @tailrec
-      @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
       def loop(i: Int): Ordering =
         if (i == j && i == k) Ordering.Equals
         else if (i == j) Ordering.LessThan

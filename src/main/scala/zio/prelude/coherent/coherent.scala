@@ -277,7 +277,6 @@ object HashOrd {
    * Constructs a `Hash[A] with Ord[A]` that uses the default notion of hashing embodied in
    * the implementation of `hashCode` for values of type `A` and ordering from [[scala.math.Ordering]].
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   def default[A](implicit ord: scala.math.Ordering[A]): Hash[A] with Ord[A] =
     make(_.hashCode(), (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
 

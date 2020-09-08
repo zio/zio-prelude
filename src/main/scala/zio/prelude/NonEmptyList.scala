@@ -95,7 +95,6 @@ sealed trait NonEmptyList[+A] { self =>
    * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
    * equal to each other.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override final def equals(that: Any): Boolean =
     that match {
       case that: NonEmptyList[_] => self.corresponds(that)(_ == _)
