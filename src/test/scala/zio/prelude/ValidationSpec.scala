@@ -30,8 +30,8 @@ object ValidationSpec extends DefaultRunnableSpec {
           checkAllLaws[
             CovariantDeriveEqual,
             Equal,
-            Any,
-            Random with Sized,
+            TestConfig,
+            Random with Sized with TestConfig,
             ({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda,
             Int
           ](Covariant)(genFValidationFailure, Gen.anyInt)(
