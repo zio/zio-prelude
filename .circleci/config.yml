@@ -310,6 +310,16 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
+      - test_dotty_jdk8_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_dotty_jdk11_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
       - release:
           context: Sonatype2
           requires:
