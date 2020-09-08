@@ -9,7 +9,7 @@ object CommutativeSpec extends DefaultRunnableSpec {
 
   val anySumInt: Gen[Random, Sum[Int]] = Gen.anyInt.map(Sum(_))
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("CommutativeSpec")(
       suite("laws")(
         testM("char")(checkAllLaws(Commutative)(Gen.anyChar.map(Sum(_)))),

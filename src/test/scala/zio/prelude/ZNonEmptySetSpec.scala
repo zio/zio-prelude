@@ -36,8 +36,8 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
           checkAllLaws[
             CovariantDeriveEqual,
             Equal,
-            Any,
-            Random with Sized,
+            TestConfig,
+            Random with Sized with TestConfig,
             ({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda,
             Int
           ](Covariant)(genFZNonEmptySet(Gen.anyInt), Gen.anyInt)(

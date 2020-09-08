@@ -1,14 +1,14 @@
 package zio.prelude
 
+import scala.annotation.implicitNotFound
+import scala.concurrent.Future
+import scala.util.Try
+
 import zio._
 import zio.prelude.coherent.AssociativeFlattenCovariantDeriveEqual
 import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
-
-import scala.annotation.implicitNotFound
-import scala.concurrent.Future
-import scala.util.Try
 
 /**
  * `AssociativeFlatten` describes a type that can be "flattened" in an

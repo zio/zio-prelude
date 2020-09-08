@@ -9,9 +9,9 @@ object EquivalenceSpec extends DefaultRunnableSpec {
   val genAny: Gen[Any, Any] =
     Gen.unit
 
-  val genNothing: Gen[Any, Nothing] =
+  val genNothing: Gen[Any, Nothing]     =
     Gen(ZStream.empty)
-  def spec                          =
+  def spec: ZSpec[Environment, Failure] =
     suite("EquivalenceSpec")(
       suite("laws")(
         testM("identity") {

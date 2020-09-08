@@ -18,7 +18,7 @@ object NonEmptyTraversableSpec extends DefaultRunnableSpec {
   val genIntFunction2: Gen[Random, (Int, Int) => Int] =
     Gen.function2(genInt)
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("NonEmptyTraversableSpec")(
       suite("instances")(
         testM("nonEmptyChunk")(checkAllLaws(NonEmptyTraversable)(GenFs.nonEmptyChunk, Gen.anyInt))

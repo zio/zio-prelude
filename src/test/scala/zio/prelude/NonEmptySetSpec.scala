@@ -18,7 +18,7 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
   private lazy val genNonEmptySet: Gen[Random with Sized, NonEmptySet[Int]] =
     genSet.map(NonEmptySet.fromSetOption(_).get)
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("NonEmptySetSpec")(
       suite("laws")(
         testM("commutative")(checkAllLaws(Commutative)(genNonEmptySet)),

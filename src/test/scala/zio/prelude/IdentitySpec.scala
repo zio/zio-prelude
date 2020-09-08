@@ -1,12 +1,11 @@
 package zio.prelude
 
 import zio.prelude.newtypes.{ And, Max, Min, Or, Prod, Sum }
-import zio.test._
 import zio.test.laws._
-import zio.test.DefaultRunnableSpec
+import zio.test.{ DefaultRunnableSpec, _ }
 
 object IdentitySpec extends DefaultRunnableSpec {
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("IdentitySpec")(
       suite("laws")(
         testM("char addition")(checkAllLaws(Identity)(Gen.anyChar.map(Sum(_)))),
