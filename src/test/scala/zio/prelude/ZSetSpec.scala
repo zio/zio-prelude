@@ -35,7 +35,7 @@ object ZSetSpec extends DefaultRunnableSpec {
           checkAllLaws[
             CovariantDeriveEqual,
             Equal,
-            TestConfig,
+            Any,
             Random with Sized with TestConfig,
             ({ type lambda[+x] = ZSet[x, Int] })#lambda,
             Int
