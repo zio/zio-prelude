@@ -843,12 +843,12 @@ object Equal extends Lawful[Equal] {
    * `Hash` (and thus also `Equal`) instance for `Throwable` values.
    * Comparison is based on: Class, message and cause (stack trace is ignored).
    */
-  implicit def ThrowableHashOrd: Hash[Throwable] = {
+  implicit lazy val ThrowableHash: Hash[Throwable] = {
     implicit val hashOT: Hash[Option[Throwable]] = Hash.OptionHash {
-      // use an indirect instance, so that calling ThrowableHashOrd infinitely doesn't cause stack overflow
+      // use an indirect instance, so that calling ThrowableHash infinitely doesn't cause stack overflow
       new Hash[Throwable] {
-        def hash(a: Throwable): Int                                   = ThrowableHashOrd.hash(a)
-        protected def checkEqual(l: Throwable, r: Throwable): Boolean = ThrowableHashOrd.equal(l, r)
+        def hash(a: Throwable): Int                                   = ThrowableHash.hash(a)
+        protected def checkEqual(l: Throwable, r: Throwable): Boolean = ThrowableHash.equal(l, r)
       }
     }
     Hash[(Class[_], String, Option[Throwable])].contramap { t =>

@@ -97,8 +97,9 @@ sealed trait NonEmptyList[+A] { self =>
    */
   override final def equals(that: Any): Boolean =
     that match {
-      case that: NonEmptyList[_] => self.corresponds(that)(_ == _)
-      case _                     => false
+      case that: AnyRef if self.eq(that) => true
+      case that: NonEmptyList[_]         => self.corresponds(that)(_ == _)
+      case _                             => false
     }
 
   /**
