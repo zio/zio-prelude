@@ -36,7 +36,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             CovariantDeriveEqual,
             Equal,
             TestConfig,
-            Random with Sized with TestConfig,
+            Random with Sized,
             ({ type lambda[+x] = ZSet[x, Int] })#lambda,
             Int
           ](Covariant)(genFZSet(Gen.anyInt), Gen.anyInt)(
