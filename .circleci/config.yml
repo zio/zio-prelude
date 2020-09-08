@@ -231,12 +231,12 @@ jobs:
       - <<: *scala_213
       - <<: *jdk_8
 
-   test_dotty_jdk8_jvm:
-     <<: *test
-     <<: *machine_ubuntu
-     environment:
-       - <<: *scala_dotty
-       - <<: *jdk_8
+  test_dotty_jdk8_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_dotty
+      - <<: *jdk_8
 
   test_212_jdk11_jvm:
     <<: *test
@@ -252,12 +252,12 @@ jobs:
       - <<: *scala_213
       - <<: *jdk_11
 
-   test_dotty_jdk11_jvm:
-     <<: *test
-     <<: *machine_ubuntu
-     environment:
-       - <<: *scala_dotty
-       - <<: *jdk_11
+  test_dotty_jdk11_jvm:
+    <<: *test
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_dotty
+      - <<: *jdk_11
 
   release:
     <<: *release
