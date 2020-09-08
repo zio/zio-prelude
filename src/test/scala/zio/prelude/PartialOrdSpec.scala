@@ -5,7 +5,7 @@ import zio.test.laws._
 
 object PartialOrdSpec extends DefaultRunnableSpec {
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("OrdSpec")(
       suite("laws")(
         testM("unit")(checkAllLaws(PartialOrd)(Gen.unit)),
