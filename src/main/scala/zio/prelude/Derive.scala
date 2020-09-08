@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
-
 import scala.util.Try
+
+import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
 
 /**
  * `Derive[F, Typeclass]` represents a universally quantified function from
@@ -520,7 +520,7 @@ object Derive {
   implicit val CauseDeriveEqual: DeriveEqual[Cause] =
     new DeriveEqual[Cause] {
       def derive[A: Equal]: Equal[Cause[A]] =
-        Equal.CauseEqual
+        Equal.CauseHash
     }
 
   /**

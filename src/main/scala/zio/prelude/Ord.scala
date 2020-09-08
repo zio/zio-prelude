@@ -1,12 +1,12 @@
 package zio.prelude
 
+import scala.annotation.{ implicitNotFound, tailrec }
+import scala.{ math => sm }
+
 import zio.prelude.Equal._
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
-
-import scala.annotation.{ implicitNotFound, tailrec }
-import scala.{ math => sm }
 
 /**
  * `Ord[A]` provides implicit evidence that values of type `A` have a total
@@ -282,6 +282,7 @@ object Ord extends Lawful[Ord] {
         val k = r.length
 
         @tailrec
+        @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
         def loop(i: Int): Ordering =
           if (i == j && i == k) Ordering.Equals
           else if (i == j) Ordering.LessThan
@@ -882,6 +883,8 @@ object Ord extends Lawful[Ord] {
       val j = l.length
       val k = r.length
 
+      @tailrec
+      @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
       def loop(i: Int): Ordering =
         if (i == j && i == k) Ordering.Equals
         else if (i == j) Ordering.LessThan

@@ -19,7 +19,7 @@ object ValidationSpec extends DefaultRunnableSpec {
     : GenF[Random with Sized, ({ type lambda[+x] = newtypes.Failure[Validation[x, Int]] })#lambda] =
     GenFs.validationFailure(Gen.anyInt)
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("ValidationSpec")(
       suite("laws")(
         testM("associativeBoth")(checkAllLaws(AssociativeBoth)(genFValidation, Gen.anyInt)),

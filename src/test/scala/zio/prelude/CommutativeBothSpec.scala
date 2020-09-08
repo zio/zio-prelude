@@ -5,7 +5,7 @@ import zio.test.{ testM, _ }
 
 object CommutativeBothSpec extends DefaultRunnableSpec {
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("CommutativeBothSpec")(
       suite("laws")(
         testM("chunk")(checkAllLaws(CommutativeBoth)(GenF.chunk, Gen.chunkOf(Gen.anyString))),

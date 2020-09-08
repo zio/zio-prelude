@@ -2,8 +2,8 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 import zio.prelude.newtypes._
-import zio.test._
 import zio.test.Assertion._
+import zio.test._
 
 object NewtypeSpec extends DefaultRunnableSpec {
   trait Dummy[A]

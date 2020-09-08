@@ -31,7 +31,7 @@ object TraversableSpec extends DefaultRunnableSpec {
   val genIntIntFunction2: Gen[Random, (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("TraversableSpec")(
       suite("instances")(
         testM("chunk")(checkAllLaws(Traversable)(GenF.chunk, Gen.anyInt)),

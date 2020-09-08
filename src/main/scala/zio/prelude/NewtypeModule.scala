@@ -292,6 +292,7 @@ private[prelude] object NewtypeModule {
     }
 }
 
+@SuppressWarnings(Array("scalafix:MissingFinal.class"))
 trait NewtypeExports {
   import NewtypeModule._
 

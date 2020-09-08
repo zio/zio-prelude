@@ -1,8 +1,8 @@
 package zio.prelude
 
+import zio.ZIO
 import zio.test._
 import zio.test.laws._
-import zio.ZIO
 
 object OrdSpec extends DefaultRunnableSpec {
 
@@ -31,14 +31,14 @@ object OrdSpec extends DefaultRunnableSpec {
 
         while (xit.hasNext && yit.hasNext) {
           val res = ord.compare(xit.next(), yit.next())
-          if (res != 0) return res
+          if (res !== 0) return res
         }
 
         scala.math.Ordering[Boolean].compare(xit.hasNext, yit.hasNext)
       }
     }
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("OrdSpec")(
       suite("laws")(
         testM("unit")(checkAllLaws(Equal)(Gen.unit)),

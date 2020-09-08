@@ -1,5 +1,6 @@
 package zio.prelude
 
+import scala.annotation.implicitNotFound
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 
 import zio.ZIO
@@ -7,8 +8,6 @@ import zio.prelude.coherent.CommutativeEitherDeriveEqualInvariant
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
-
-import scala.annotation.implicitNotFound
 
 /**
  * A commutative binary operator that combines two values of types `F[A]` and

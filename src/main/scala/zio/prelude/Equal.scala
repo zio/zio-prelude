@@ -1,14 +1,14 @@
 package zio.prelude
 
+import scala.annotation.implicitNotFound
+import scala.util.Try
+import scala.{ math => sm }
+
 import zio.Exit.{ Failure, Success }
 import zio.prelude.coherent.HashOrd
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
-import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
-
-import scala.annotation.implicitNotFound
-import scala.util.Try
-import scala.{ math => sm }
+import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace }
 
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be
@@ -235,6 +235,7 @@ object Equal extends Lawful[Equal] {
    * Constructs an `Equal[A]` that uses the default notion of equality
    * embodied in the implementation of `equals` for values of type `A`.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   def default[A]: Equal[A] =
     make(_ == _)
 
@@ -267,6 +268,12 @@ object Equal extends Lawful[Equal] {
    */
   implicit def ChunkEqual[A: Equal]: Equal[Chunk[A]] =
     make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
+
+  /**
+   * `Hash` (and thus also `Equal`) instance for `Class` values.
+   */
+  implicit val ClassHash: Hash[Class[_]] =
+    Hash.default
 
   /**
    * Derives an `Equal[F[A]]` given a `Derive[F, Equal]` and an `Equal[A]`.
@@ -307,6 +314,12 @@ object Equal extends Lawful[Equal] {
    */
   implicit val FloatHashOrd: Hash[Float] with Ord[Float] =
     HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
+
+  /**
+   * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
+   */
+  implicit lazy val FiberIdHashOrd: Hash[Fiber.Id] with Ord[Fiber.Id] =
+    HashOrd.derive[(Long, Long)].contramap[Fiber.Id](fid => (fid.startTimeMillis, fid.seqNumber))
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
@@ -835,13 +848,21 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * Equality for `Throwable` values.
+   * `Hash` (and thus also `Equal`) instance for `Throwable` values.
    * Comparison is based on: Class, message and cause (stack trace is ignored).
    */
-  implicit val ThrowableEqual: Equal[Throwable] =
-    make { (l, r) =>
-      l.getClass == r.getClass && l.getMessage == r.getMessage && l.getCause === r.getCause
+  implicit def ThrowableHashOrd: Hash[Throwable] = {
+    implicit val hashOT: Hash[Option[Throwable]] = Hash.OptionHash {
+      // use an indirect instance, so that calling ThrowableHashOrd infinitely doesn't cause stack overflow
+      new Hash[Throwable] {
+        def hash(a: Throwable): Int                                   = ThrowableHashOrd.hash(a)
+        protected def checkEqual(l: Throwable, r: Throwable): Boolean = ThrowableHashOrd.equal(l, r)
+      }
     }
+    Hash[(Class[_], String, Option[Throwable])].contramap { t =>
+      (t.getClass, t.getMessage, Option(t.getCause))
+    }
+  }
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Unit` values.
@@ -857,10 +878,13 @@ object Equal extends Lawful[Equal] {
     make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
 
   /**
-   * Derives an `Equal[Cause[A]]` given an `Equal[A]`.
+   * `Hash` (and thus also `Equal`) instance for `Cause[A]`.
+   * Note, that it doesn't take `Hash[A]` nor `Equal[A]` into account.
    */
-  implicit def CauseEqual[A]: Equal[Cause[A]] =
-    default
+  implicit def CauseHash[A]: Hash[Cause[A]] =
+    // we have to resort to equals, because the structure is opaque, namely Cause.Internal.Meta
+    // `Equal` and `Hash` instances will be possible once this PR gets merged: https://github.com/zio/zio/pull/4179
+    Hash.default
 
   /**
    * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.
@@ -871,6 +895,12 @@ object Equal extends Lawful[Equal] {
       case (Failure(c), Failure(c1)) => c === c1
       case _                         => false
     }
+
+  /**
+   * `Hash` (and thus also `Equal`) instance for `ZTrace` values.
+   */
+  implicit val ZTraceHash: Hash[ZTrace] =
+    Hash.default
 
   /**
    * Returns whether two values refer to the same location in memory.

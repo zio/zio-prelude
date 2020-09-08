@@ -5,7 +5,7 @@ import zio.test.laws._
 
 object AssociativeBothSpec extends DefaultRunnableSpec {
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("AssociativeBothSpec")(
       suite("laws")(
         testM("chunk")(checkAllLaws(AssociativeBoth)(GenF.chunk, Gen.chunkOf(Gen.anyString))),

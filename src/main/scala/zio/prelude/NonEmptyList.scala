@@ -1,12 +1,12 @@
 package zio.prelude
 
-import zio.NonEmptyChunk
-import zio.prelude.NonEmptyList._
-import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
-
 import scala.annotation.tailrec
 import scala.language.implicitConversions
 import scala.util.hashing.MurmurHash3
+
+import zio.NonEmptyChunk
+import zio.prelude.NonEmptyList._
+import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
 
 /**
  * A `NonEmptyList[A]` is a list of one or more values of type A. Unlike a
@@ -96,6 +96,7 @@ sealed trait NonEmptyList[+A] { self =>
    * Returns whether this `NonEmptyList` and the specified `NonEmptyList` are
    * equal to each other.
    */
+  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override final def equals(that: Any): Boolean =
     that match {
       case that: NonEmptyList[_] => self.corresponds(that)(_ == _)

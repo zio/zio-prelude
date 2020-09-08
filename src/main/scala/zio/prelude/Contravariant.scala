@@ -1,10 +1,10 @@
 package zio.prelude
 
 import zio.prelude.coherent.ContravariantDeriveEqual
-import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
+import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
 
 trait ContravariantSubset[F[-_], Subset[_]] {
   def contramapSubset[A, B: Subset](f: B => A): F[A] => F[B]
