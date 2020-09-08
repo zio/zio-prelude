@@ -62,12 +62,11 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * appears in this set and the specified set.
    */
   def combine[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Commutative[Sum[B1]]): ZSet[A1, B1] =
-    new ZSet(that.map.foldLeft(self.map.asInstanceOf[HashMap[A1, B1]]) {
-      case (map, (a, b1)) =>
-        map.get(a) match {
-          case Some(b) => map + (a -> ev.combine(Sum(b), Sum(b1)))
-          case None    => map + (a -> b1)
-        }
+    new ZSet(that.map.foldLeft(self.map.asInstanceOf[HashMap[A1, B1]]) { case (map, (a, b1)) =>
+      map.get(a) match {
+        case Some(b) => map + (a -> ev.combine(Sum(b), Sum(b1)))
+        case None    => map + (a -> b1)
+      }
     })
 
   /**
@@ -76,19 +75,17 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * of times it appears in this set and the specified set.
    */
   def diff[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Inverse[Sum[B1]]): ZSet[A1, B1] =
-    new ZSet(that.map.foldLeft(self.map.asInstanceOf[HashMap[A1, B1]]) {
-      case (map, (a, b1)) =>
-        map.get(a) match {
-          case Some(b) => map + (a -> ev.inverse(Sum(b), Sum(b1)))
-          case None    => map + (a -> ev.inverse(ev.identity, Sum(b1)))
-        }
+    new ZSet(that.map.foldLeft(self.map.asInstanceOf[HashMap[A1, B1]]) { case (map, (a, b1)) =>
+      map.get(a) match {
+        case Some(b) => map + (a -> ev.inverse(Sum(b), Sum(b1)))
+        case None    => map + (a -> ev.inverse(ev.identity, Sum(b1)))
+      }
     })
 
   /**
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override def equals(that: Any): Boolean =
     that match {
       case that: ZSet[_, _] => self.map == that.map
@@ -104,9 +101,8 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   def flatMap[B1 >: B, C](
     f: A => ZSet[C, B1]
   )(implicit ev1: Commutative[Sum[B1]], ev2: Commutative[Prod[B1]]): ZSet[C, B1] =
-    map.foldLeft[ZSet[C, B1]](ZSet.empty) {
-      case (set, (a, b)) =>
-        set <> f(a).transform(b1 => ev2.combine(Prod(b), Prod(b1)))
+    map.foldLeft[ZSet[C, B1]](ZSet.empty) { case (set, (a, b)) =>
+      set <> f(a).transform(b1 => ev2.combine(Prod(b), Prod(b1)))
     }
 
   /**
@@ -123,9 +119,8 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   def intersect[A1 >: A, B1 >: B](
     that: ZSet[A1, B1]
   )(implicit ev1: Commutative[Min[B1]], ev2: Identity[Sum[B1]]): ZSet[A1, B1] =
-    new ZSet((self.map.toVector ++ that.map.toVector).foldLeft(HashMap.empty[A1, B1]) {
-      case (map, (a, b)) =>
-        map + (a -> ev1.combine(Min(map.getOrElse(a, ev2.identity)), Min(b)))
+    new ZSet((self.map.toVector ++ that.map.toVector).foldLeft(HashMap.empty[A1, B1]) { case (map, (a, b)) =>
+      map + (a -> ev1.combine(Min(map.getOrElse(a, ev2.identity)), Min(b)))
     })
 
   /**
@@ -135,13 +130,12 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * times each of the old values appeared in the set.
    */
   def map[B1 >: B, C](f: A => C)(implicit ev: Commutative[Sum[B1]]): ZSet[C, B1] =
-    new ZSet(map.foldLeft[HashMap[C, B1]](HashMap.empty) {
-      case (map, (a, b1)) =>
-        val c = f(a)
-        map.get(c) match {
-          case Some(b) => map + (c -> ev.combine(Sum(b), Sum(b1)))
-          case None    => map + (c -> b1)
-        }
+    new ZSet(map.foldLeft[HashMap[C, B1]](HashMap.empty) { case (map, (a, b1)) =>
+      val c = f(a)
+      map.get(c) match {
+        case Some(b) => map + (c -> ev.combine(Sum(b), Sum(b1)))
+        case None    => map + (c -> b1)
+      }
     })
 
   /**
@@ -163,9 +157,8 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * an element appears in the set beyond whether it appears at all.
    */
   def toSet[A1 >: A, B1 >: B](implicit ev1: Equal[B1], ev2: Identity[Sum[B1]]): Set[A1] =
-    map.foldLeft(Set.empty[A1]) {
-      case (set, (a, b)) =>
-        if (ev1.notEqual(b, ev2.identity)) set + a else set
+    map.foldLeft(Set.empty[A1]) { case (set, (a, b)) =>
+      if (ev1.notEqual(b, ev2.identity)) set + a else set
     }
 
   /**
@@ -182,9 +175,8 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   def union[A1 >: A, B1 >: B](
     that: ZSet[A1, B1]
   )(implicit ev1: Commutative[Max[B1]], ev2: Identity[Sum[B1]]): ZSet[A1, B1] =
-    new ZSet((self.map.toVector ++ that.map.toVector).foldLeft(HashMap.empty[A1, B1]) {
-      case (map, (a, b)) =>
-        map + (a -> ev1.combine(Max(map.getOrElse(a, ev2.identity)), Max(b)))
+    new ZSet((self.map.toVector ++ that.map.toVector).foldLeft(HashMap.empty[A1, B1]) { case (map, (a, b)) =>
+      map + (a -> ev1.combine(Max(map.getOrElse(a, ev2.identity)), Max(b)))
     })
 
   /**
@@ -255,12 +247,11 @@ object ZSet {
   implicit def ZSetCommutative[A, B: Commutative]: Commutative[ZSet[A, B]] =
     new Commutative[ZSet[A, B]] {
       def combine(left: => ZSet[A, B], right: => ZSet[A, B]): ZSet[A, B] =
-        new ZSet(right.map.foldLeft(left.map) {
-          case (map, (a, b1)) =>
-            map.get(a) match {
-              case Some(b) => map + (a -> (b <> b1))
-              case None    => map + (a -> b1)
-            }
+        new ZSet(right.map.foldLeft(left.map) { case (map, (a, b1)) =>
+          map.get(a) match {
+            case Some(b) => map + (a -> (b <> b1))
+            case None    => map + (a -> b1)
+          }
         })
     }
 

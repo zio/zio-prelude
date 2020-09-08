@@ -73,21 +73,21 @@ object Equivalence extends Lawful2[Equivalence, Equal, Equal] {
    */
   def tuple[A, B, C]: Equivalence[(A, (B, C)), ((A, B), C)] =
     Equivalence(
-      {
-        case (a, (b, c)) => ((a, b), c)
+      { case (a, (b, c)) =>
+        ((a, b), c)
       },
-      {
-        case ((a, b), c) => (a, (b, c))
+      { case ((a, b), c) =>
+        (a, (b, c))
       }
     )
 
   def tupleFlip[A, B]: Equivalence[(A, B), (B, A)] =
     Equivalence(
-      {
-        case (a, b) => (b, a)
+      { case (a, b) =>
+        (b, a)
       },
-      {
-        case (b, a) => (a, b)
+      { case (b, a) =>
+        (a, b)
       }
     )
 

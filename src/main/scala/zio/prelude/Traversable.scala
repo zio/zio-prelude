@@ -293,9 +293,8 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] with
   implicit def MapTraversable[K]: Traversable[({ type lambda[+v] = Map[K, v] })#lambda] =
     new Traversable[({ type lambda[+v] = Map[K, v] })#lambda] {
       def foreach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
-        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) {
-          case (map, (k, v)) =>
-            map.zipWith(f(v))((map, v2) => map + (k -> v2))
+        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) { case (map, (k, v)) =>
+          map.zipWith(f(v))((map, v2) => map + (k -> v2))
         }
     }
 

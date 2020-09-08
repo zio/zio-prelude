@@ -105,9 +105,8 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
    * an element appears in the set beyond whether it appears at all.
    */
   def toNonEmptySet[A1 >: A, B1 >: B](implicit ev1: Equal[B1], ev2: Identity[Sum[B1]]): NonEmptySet[A1] =
-    toMap.tail.foldLeft(NonEmptySet.single[A1](toMap.head._1)) {
-      case (set, (a, b)) =>
-        if (ev1.notEqual(b, ev2.identity)) set + a else set
+    toMap.tail.foldLeft(NonEmptySet.single[A1](toMap.head._1)) { case (set, (a, b)) =>
+      if (ev1.notEqual(b, ev2.identity)) set + a else set
     }
 
   /**

@@ -38,7 +38,6 @@ sealed trait Validation[+E, +A] { self =>
    * Returns whether this `Validation` and the specified `Validation` are equal
    * to each other.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override final def equals(that: Any): Boolean =
     (self, that) match {
       case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
@@ -184,7 +183,6 @@ object Validation extends LowPriorityValidationImplicits {
    * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an
    * `Equal[A]`.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
     Equal.make {
       case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
@@ -379,8 +377,8 @@ object Validation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6) => B
   ): Validation[E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6).map {
-      case ((((((a0, a1), a2), a3), a4), a5), a6) => f(a0, a1, a2, a3, a4, a5, a6)
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6).map { case ((((((a0, a1), a2), a3), a4), a5), a6) =>
+      f(a0, a1, a2, a3, a4, a5, a6)
     }
 
   /**
@@ -399,8 +397,8 @@ object Validation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7) => B
   ): Validation[E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7).map {
-      case (((((((a0, a1), a2), a3), a4), a5), a6), a7) => f(a0, a1, a2, a3, a4, a5, a6, a7)
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7).map { case (((((((a0, a1), a2), a3), a4), a5), a6), a7) =>
+      f(a0, a1, a2, a3, a4, a5, a6, a7)
     }
 
   /**
