@@ -6,7 +6,7 @@ import zio.ZIO
 
 object HashSpec extends DefaultRunnableSpec {
 
-  final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R, Nothing, TestResult] =
+  final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R with TestConfig, Nothing, TestResult] =
     check(gen)(a => assert(a.hash)(equalTo(a.hashCode)))
 
   def spec =
