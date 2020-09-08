@@ -9,7 +9,7 @@ object IdempotentSpec extends DefaultRunnableSpec {
 
   val anyMaxInt: Gen[Random, Max[Int]] = Gen.anyInt.map(Max(_))
 
-  def spec =
+  def spec: ZSpec[Environment, Failure] =
     suite("IdempotentSpec")(
       suite("laws")(
         testM("boolean disjunction")(checkAllLaws(Idempotent)(Gen.boolean.map(Or(_)))),
