@@ -282,7 +282,6 @@ object Ord extends Lawful[Ord] {
         val k = r.length
 
         @tailrec
-        @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
         def loop(i: Int): Ordering =
           if (i == j && i == k) Ordering.Equals
           else if (i == j) Ordering.LessThan
@@ -358,8 +357,8 @@ object Ord extends Lawful[Ord] {
    */
   implicit def Tuple2Ord[A: Ord, B: Ord]: Ord[(A, B)] =
     makeFrom(
-      {
-        case ((a1, b1), (a2, b2)) => (a1 =?= a2) <> (b1 =?= b2)
+      { case ((a1, b1), (a2, b2)) =>
+        (a1 =?= a2) <> (b1 =?= b2)
       },
       Equal.Tuple2Equal
     )
@@ -370,8 +369,8 @@ object Ord extends Lawful[Ord] {
    */
   implicit def Tuple3Ord[A: Ord, B: Ord, C: Ord]: Ord[(A, B, C)] =
     makeFrom(
-      {
-        case ((a1, b1, c1), (a2, b2, c2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2)
+      { case ((a1, b1, c1), (a2, b2, c2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2)
       },
       Equal.Tuple3Equal
     )
@@ -382,8 +381,8 @@ object Ord extends Lawful[Ord] {
    */
   implicit def Tuple4Ord[A: Ord, B: Ord, C: Ord, D: Ord]: Ord[(A, B, C, D)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2)
+      { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2)
       },
       Equal.Tuple4Equal
     )
@@ -394,9 +393,8 @@ object Ord extends Lawful[Ord] {
    */
   implicit def Tuple5Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord]: Ord[(A, B, C, D, E)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2)
+      { case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2)
       },
       Equal.Tuple5Equal
     )
@@ -407,9 +405,8 @@ object Ord extends Lawful[Ord] {
    */
   implicit def Tuple6Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord]: Ord[(A, B, C, D, E, F)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2)
+      { case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2)
       },
       Equal.Tuple6Equal
     )
@@ -420,9 +417,8 @@ object Ord extends Lawful[Ord] {
    */
   implicit def Tuple7Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord, G: Ord]: Ord[(A, B, C, D, E, F, G)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2)
+      { case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2)
       },
       Equal.Tuple7Equal
     )
@@ -434,9 +430,8 @@ object Ord extends Lawful[Ord] {
   implicit def Tuple8Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord, G: Ord, H: Ord]
     : Ord[(A, B, C, D, E, F, G, H)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2)
       },
       Equal.Tuple8Equal
     )
@@ -448,9 +443,8 @@ object Ord extends Lawful[Ord] {
   implicit def Tuple9Ord[A: Ord, B: Ord, C: Ord, D: Ord, E: Ord, F: Ord, G: Ord, H: Ord, I: Ord]
     : Ord[(A, B, C, D, E, F, G, H, I)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2)
       },
       Equal.Tuple9Equal
     )
@@ -472,9 +466,8 @@ object Ord extends Lawful[Ord] {
     J: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2)
       },
       Equal.Tuple10Equal
     )
@@ -497,9 +490,8 @@ object Ord extends Lawful[Ord] {
     K: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2)
       },
       Equal.Tuple11Equal
     )
@@ -523,9 +515,8 @@ object Ord extends Lawful[Ord] {
     L: Ord
   ]: Ord[(A, B, C, D, E, F, G, H, I, J, K, L)] =
     makeFrom(
-      {
-        case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
-          (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2)
+      { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
+        (a1 =?= a2) <> (b1 =?= b2) <> (c1 =?= c2) <> (d1 =?= d2) <> (e1 =?= e2) <> (f1 =?= f2) <> (g1 =?= g2) <> (h1 =?= h2) <> (i1 =?= i2) <> (j1 =?= j2) <> (k1 =?= k2) <> (l1 =?= l2)
       },
       Equal.Tuple12Equal
     )
@@ -884,7 +875,6 @@ object Ord extends Lawful[Ord] {
       val k = r.length
 
       @tailrec
-      @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
       def loop(i: Int): Ordering =
         if (i == j && i == k) Ordering.Equals
         else if (i == j) Ordering.LessThan

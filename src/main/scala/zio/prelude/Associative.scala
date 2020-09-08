@@ -391,8 +391,8 @@ object Associative extends Lawful[AssociativeEqual] {
       def identity: Map[K, V] = Map()
 
       def combine(l: => Map[K, V], r: => Map[K, V]): Map[K, V] =
-        r.foldLeft(l) {
-          case (map, (k, v)) => map.updated(k, map.get(k).fold(v)(_ <> v))
+        r.foldLeft(l) { case (map, (k, v)) =>
+          map.updated(k, map.get(k).fold(v)(_ <> v))
         }
     }
 
@@ -492,8 +492,8 @@ object Associative extends Lawful[AssociativeEqual] {
    * each element of the product type.
    */
   implicit def Tuple2Associative[A: Associative, B: Associative]: Associative[(A, B)] =
-    make {
-      case ((a1, b1), (a2, b2)) => (a1 <> a2, b1 <> b2)
+    make { case ((a1, b1), (a2, b2)) =>
+      (a1 <> a2, b1 <> b2)
     }
 
   /**
@@ -501,8 +501,8 @@ object Associative extends Lawful[AssociativeEqual] {
    * each element of the product type.
    */
   implicit def Tuple3Associative[A: Associative, B: Associative, C: Associative]: Associative[(A, B, C)] =
-    make {
-      case ((a1, b1, c1), (a2, b2, c2)) => (a1 <> a2, b1 <> b2, c1 <> c2)
+    make { case ((a1, b1, c1), (a2, b2, c2)) =>
+      (a1 <> a2, b1 <> b2, c1 <> c2)
     }
 
   /**
@@ -511,8 +511,8 @@ object Associative extends Lawful[AssociativeEqual] {
    */
   implicit def Tuple4Associative[A: Associative, B: Associative, C: Associative, D: Associative]
     : Associative[(A, B, C, D)] =
-    make {
-      case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2)
+    make { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) =>
+      (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2)
     }
 
   /**
@@ -521,8 +521,8 @@ object Associative extends Lawful[AssociativeEqual] {
    */
   implicit def Tuple5Associative[A: Associative, B: Associative, C: Associative, D: Associative, E: Associative]
     : Associative[(A, B, C, D, E)] =
-    make {
-      case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) => (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2)
+    make { case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
+      (a1 <> a2, b1 <> b2, c1 <> c2, d1 <> d2, e1 <> e2)
     }
 
   /**

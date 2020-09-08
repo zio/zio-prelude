@@ -52,7 +52,7 @@ lazy val benchmarks = project
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
       "dev.zio"       %% "zio"       % zioVersion,
-      "org.typelevel" %% "cats-core" % "2.2.0-M2"
+      "org.typelevel" %% "cats-core" % "2.2.0"
     )
   )
   .dependsOn(root)

@@ -235,7 +235,6 @@ object Equal extends Lawful[Equal] {
    * Constructs an `Equal[A]` that uses the default notion of equality
    * embodied in the implementation of `equals` for values of type `A`.
    */
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   def default[A]: Equal[A] =
     make(_ == _)
 
@@ -401,8 +400,8 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple3Equal[A: Equal, B: Equal, C: Equal]: Equal[(A, B, C)] =
-    make {
-      case ((a1, b1, c1), (a2, b2, c2)) => a1 === a2 && b1 === b2 && c1 === c2
+    make { case ((a1, b1, c1), (a2, b2, c2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2
     }
 
   /**
@@ -410,8 +409,8 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple4Equal[A: Equal, B: Equal, C: Equal, D: Equal]: Equal[(A, B, C, D)] =
-    make {
-      case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2
+    make { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2
     }
 
   /**
@@ -419,8 +418,8 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple5Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal]: Equal[(A, B, C, D, E)] =
-    make {
-      case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) => a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2
+    make { case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2
     }
 
   /**
@@ -428,9 +427,8 @@ object Equal extends Lawful[Equal] {
    * the product type.
    */
   implicit def Tuple6Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal]: Equal[(A, B, C, D, E, F)] =
-    make {
-      case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
-        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2
+    make { case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2
     }
 
   /**
@@ -439,9 +437,8 @@ object Equal extends Lawful[Equal] {
    */
   implicit def Tuple7Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal, G: Equal]
     : Equal[(A, B, C, D, E, F, G)] =
-    make {
-      case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
-        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2
+    make { case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2
     }
 
   /**
@@ -450,9 +447,8 @@ object Equal extends Lawful[Equal] {
    */
   implicit def Tuple8Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal, G: Equal, H: Equal]
     : Equal[(A, B, C, D, E, F, G, H)] =
-    make {
-      case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
-        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2
+    make { case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2
     }
 
   /**
@@ -461,9 +457,8 @@ object Equal extends Lawful[Equal] {
    */
   implicit def Tuple9Equal[A: Equal, B: Equal, C: Equal, D: Equal, E: Equal, F: Equal, G: Equal, H: Equal, I: Equal]
     : Equal[(A, B, C, D, E, F, G, H, I)] =
-    make {
-      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
-        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2
+    make { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2
     }
 
   /**
@@ -482,9 +477,8 @@ object Equal extends Lawful[Equal] {
     I: Equal,
     J: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J)] =
-    make {
-      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
-        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2
+    make { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2
     }
 
   /**
@@ -504,9 +498,8 @@ object Equal extends Lawful[Equal] {
     J: Equal,
     K: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K)] =
-    make {
-      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
-        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2
+    make { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2
     }
 
   /**
@@ -527,9 +520,8 @@ object Equal extends Lawful[Equal] {
     K: Equal,
     L: Equal
   ]: Equal[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    make {
-      case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
-        a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2
+    make { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
+      a1 === a2 && b1 === b2 && c1 === c2 && d1 === d2 && e1 === e2 && f1 === f2 && g1 === g2 && h1 === h2 && i1 === i2 && j1 === j2 && k1 === k2 && l1 === l2
     }
 
   /**

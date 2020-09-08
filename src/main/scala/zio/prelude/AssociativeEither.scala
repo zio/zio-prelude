@@ -121,8 +121,8 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
   implicit def FutureAssociativeEither(implicit ec: ExecutionContext): AssociativeEither[Future] =
     new AssociativeEither[Future] {
       def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
-        fa.map(Left(_)).recoverWith {
-          case _: Throwable => fb.map(Right(_))
+        fa.map(Left(_)).recoverWith { case _: Throwable =>
+          fb.map(Right(_))
         }
     }
 

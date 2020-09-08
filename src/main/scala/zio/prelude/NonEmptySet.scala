@@ -75,7 +75,6 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
 
   override def hashCode: Int = set.hashCode ^ NonEmptySet.NonEmptySetSeed
 
-  @SuppressWarnings(Array("scalafix:DisableSyntax.=="))
   override def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true

@@ -83,8 +83,8 @@ object Inverse extends Lawful[EqualInverse] {
   implicit def Tuple2Inverse[A: Inverse, B: Inverse]: Inverse[(A, B)] =
     makeFrom(
       Identity.Tuple2Identity,
-      {
-        case ((a1, b1), (a2, b2)) => (a1 ~~ a2, b1 ~~ b2)
+      { case ((a1, b1), (a2, b2)) =>
+        (a1 ~~ a2, b1 ~~ b2)
       }
     )
 
@@ -95,8 +95,8 @@ object Inverse extends Lawful[EqualInverse] {
   implicit def Tuple3Inverse[A: Inverse, B: Inverse, C: Inverse]: Inverse[(A, B, C)] =
     makeFrom(
       Identity.Tuple3Identity,
-      {
-        case ((a1, b1, c1), (a2, b2, c2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2)
+      { case ((a1, b1, c1), (a2, b2, c2)) =>
+        (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2)
       }
     )
 
@@ -107,8 +107,8 @@ object Inverse extends Lawful[EqualInverse] {
   implicit def Tuple4Inverse[A: Inverse, B: Inverse, C: Inverse, D: Inverse]: Inverse[(A, B, C, D)] =
     makeFrom(
       Identity.Tuple4Identity,
-      {
-        case ((a1, b1, c1, d1), (a2, b2, c2, d2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2)
+      { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) =>
+        (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2)
       }
     )
 
@@ -119,8 +119,8 @@ object Inverse extends Lawful[EqualInverse] {
   implicit def Tuple5Inverse[A: Inverse, B: Inverse, C: Inverse, D: Inverse, E: Inverse]: Inverse[(A, B, C, D, E)] =
     makeFrom(
       Identity.Tuple5Identity,
-      {
-        case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) => (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2)
+      { case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
+        (a1 ~~ a2, b1 ~~ b2, c1 ~~ c2, d1 ~~ d2, e1 ~~ e2)
       }
     )
 
