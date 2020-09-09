@@ -1,5 +1,7 @@
 package zio.prelude
 
+import scala.collection.immutable.ListMap
+
 import zio.prelude.Debug.{ Renderer, Repr, _ }
 import zio.random.Random
 import zio.test.{ TestResult, _ }
@@ -24,7 +26,7 @@ object DebugSpec extends DefaultRunnableSpec {
     Repr.Constructor(
       List("DebugSpec"),
       "TestCase",
-      Map("string" -> a.string.debug, "number" -> a.number.debug, "list" -> a.list.debug)
+      ListMap("string" -> a.string.debug, "number" -> a.number.debug, "list" -> a.list.debug)
     )
   )
 
@@ -52,6 +54,7 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("long")(check(Gen.anyLong)(primScalaTest(_))),
         testM("byte")(check(Gen.anyByte)(primScalaTest(_))),
         testM("char")(check(Gen.anyChar)(primScalaTest(_))),
+        testM("short")(check(Gen.anyShort)(primScalaTest(_))),
         testM("string")(check(Gen.anyString)(primScalaTest(_))),
         testM("either")(check(Gen.either(Gen.anyString, Gen.anyInt))(primScalaTest(_))),
         testM("option")(check(Gen.option(Gen.anyInt))(primScalaTest(_))),
@@ -80,6 +83,7 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("long")(check(Gen.anyLong)(l => primSimpleTest(l, Some(s"${l.toString}L")))),
         testM("byte")(check(Gen.anyByte)(primSimpleTest(_))),
         testM("char")(check(Gen.anyChar)(s => primSimpleTest(s, Some(s"'$s'")))),
+        testM("short")(check(Gen.anyShort)(primSimpleTest(_))),
         testM("string")(check(Gen.anyString)(s => primSimpleTest(s, Some(s""""$s"""")))),
         testM("either")(check(Gen.either(Gen.anyInt, Gen.anyInt))(primSimpleTest(_))),
         testM("option")(check(Gen.option(Gen.anyInt))(primSimpleTest(_))),
@@ -131,6 +135,7 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("long")(check(Gen.anyLong)(l => primFullTest(l, Some(s"${l.toString}L")))),
         testM("byte")(check(Gen.anyByte)(primFullTest(_))),
         testM("char")(check(Gen.anyChar)(s => primFullTest(s, Some(s"'$s'")))),
+        testM("short")(check(Gen.anyShort)(primFullTest(_))),
         testM("string")(check(Gen.anyString)(s => primFullTest(s, Some(s""""$s"""")))),
         testM("either")(
           check(Gen.either(Gen.anyInt, Gen.anyInt))(c =>
