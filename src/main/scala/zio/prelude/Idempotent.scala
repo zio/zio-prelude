@@ -20,16 +20,13 @@ trait Idempotent[A] extends Associative[A] { self =>
    * If there are many Equal elements in  sequence, it will remove them all except for the first one.
    * `a a b c c c a` will result in `a b c a`.
    */
-  def optimize(elems: List[A])(implicit A: Equal[A]): List[A] = {
-    def go(current: A, elems: List[A]): List[A] = elems match {
-      case Nil                              => List(current)
-      case head :: tail if current === head => go(current, tail)
-      case head :: tail                     => current :: go(head, tail)
+  def optimize[T[+_]: Traversable](elems: T[A])(implicit A: Equal[A]): List[A] = {
+    def go(list: List[A], elem: A): List[A] = list match {
+      case List()                     => List(elem)
+      case head :: _ if head === elem => list
+      case _                          => elem :: list
     }
-    elems match {
-      case Nil          => Nil
-      case head :: tail => go(head, tail)
-    }
+    elems.foldLeft(List[A]())(go).reverse
   }
 }
 
