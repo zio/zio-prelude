@@ -222,7 +222,7 @@ object EqualIdentity {
     }
 }
 
-trait EqualIdempotent[A] extends CommutativeEqual[A] with Idempotent[A]
+trait EqualIdempotent[A] extends AssociativeEqual[A] with Idempotent[A]
 
 object EqualIdempotent {
   implicit def derive[A](implicit idempotent: Idempotent[A], equal0: Equal[A]): EqualIdempotent[A] =

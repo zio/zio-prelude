@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.coherent._
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._
@@ -21,6 +22,26 @@ object IdempotentSpec extends DefaultRunnableSpec {
         testM("tuple3")(
           checkAllLaws(Idempotent)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt).map { case ((x, y), z) => (x, y, z) })
         )
-      )
+      ),
+      test("Idempotent.optimize") {
+        val instance = implicitly[EqualIdempotent[Max[Int]]]
+
+        assert(instance.optimize(List[Max[Int]]()))(equalTo(List[Max[Int]]())) &&
+        assert(instance.optimize(List(Max(1))))(equalTo(List(Max(1)))) &&
+        assert(instance.optimize(List(Max(1), Max(1))))(equalTo(List(Max(1)))) &&
+        assert(instance.optimize(List(Max(1), Max(2), Max(1))))(equalTo(List(Max(1), Max(2), Max(1)))) &&
+        assert(instance.optimize(List(Max(1), Max(1), Max(2), Max(3), Max(3), Max(3), Max(1))))(
+          equalTo(List(Max(1), Max(2), Max(3), Max(1)))
+        )
+      },
+      testM("Idempotent.optimize's size") {
+        val instance = implicitly[EqualIdempotent[Max[Int]]]
+        check(Gen.listOf(anyMaxInt)) { list =>
+          val actual = instance.optimize(list).size
+
+          assert(actual)(isLessThanEqualTo(list.size)) &&
+          assert(actual)(isGreaterThanEqualTo(list.toSet.size))
+        }
+      }
     )
 }
