@@ -6,8 +6,8 @@ import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
   private val Scala211        = "2.11.12"
-  private val Scala212        = "2.12.10"
-  private val Scala213        = "2.13.1"
+  private val Scala212        = "2.12.12"
+  private val Scala213        = "2.13.3"
   private val SilencerVersion = "1.4.4"
 
   private val stdOptions = Seq(
