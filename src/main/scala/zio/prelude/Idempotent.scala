@@ -8,7 +8,7 @@ import zio.test.laws.{ Lawful, Laws }
  * The `Idempotent` type class describes a binary operator for a type `A` that
  * is both associative and produces the same value when combining two identical values.
  * This means that `a <> a` is equal to `a` for all values `a`.
- * Examples of idempotent operations include union of sets, but not addition of integers.
+ * Example of idempotent operations is union of sets, but not addition of integers.
  *
  * Idempotent operators are useful because combining  the values with an idempotent
  * operation results in the same value regardless of the number of values
