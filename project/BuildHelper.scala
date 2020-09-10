@@ -72,6 +72,20 @@ object BuildHelper {
       buildInfoObject := "BuildInfo"
     )
 
+  private lazy val scalafixSettings =
+    if (isDotty.value)
+      List()
+    else
+      List(
+        semanticdbEnabled := true,                        // enable SemanticDB
+        semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+        ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+        ThisBuild / scalafixDependencies ++= List(
+          "com.github.liancheng" %% "organize-imports" % "0.4.0",
+          "com.github.vovapolu"  %% "scaluzzi"         % "0.1.12"
+        )
+      )
+
   def stdSettings(prjName: String) =
     Seq(
       name := s"$prjName",
@@ -92,18 +106,11 @@ object BuildHelper {
           )
       },
       incOptions ~= (_.withLogRecompileOnMacro(false)),
-      semanticdbEnabled := true, // enable SemanticDB
-      semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
-      ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
-      ThisBuild / scalafixDependencies ++= List(
-        "com.github.liancheng" %% "organize-imports" % "0.4.0",
-        "com.github.vovapolu"  %% "scaluzzi"         % "0.1.12"
-      ),
       scalacOptions --= {
         if (!sys.env.contains("CI"))
           List("-Xfatal-warnings") // to enable Scalafix
         else
           List()
       }
-    )
+    ) ++ scalafixSettings
 }
