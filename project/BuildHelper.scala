@@ -12,43 +12,33 @@ object BuildHelper {
   private val SilencerVersion = "1.7.1"
 
   private val stdOptions = Seq(
+    "-deprecation",
     "-encoding",
     "UTF-8",
-    "-explaintypes",
-    "-Yrangepos",
     "-feature",
-    "-language:higherKinds",
-    "-language:existentials",
-    "-Xlint:_,-type-parameter-shadow",
-    "-Xsource:2.13",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard",
     "-unchecked",
-    "-deprecation",
     "-Xfatal-warnings"
   )
 
-  private val stdOpts213 = Seq(
-    "-Wunused:imports",
-    "-Wvalue-discard",
-    "-Wunused:patvars",
-    "-Wunused:privates",
-    "-Wunused:params",
-    "-Wvalue-discard"
+  private val std2xOptions = Seq(
+    "-language:higherKinds",
+    "-language:existentials",
+    "-explaintypes",
+    "-Yrangepos",
+    "-Xlint:_,-missing-interpolator,-type-parameter-shadow",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-value-discard"
   )
 
-  private val stdOptsUpto212 = Seq(
-    "-Xfuture",
-    "-Ypartial-unification",
-    "-Ywarn-nullary-override",
-    "-Yno-adapted-args",
-    "-Ywarn-infer-any",
-    "-Ywarn-inaccessible",
-    "-Ywarn-nullary-unit",
-    "-Ywarn-unused-import"
-  )
+  private def optimizerOptions(optimize: Boolean) =
+    if (optimize)
+      Seq(
+        "-opt:l:inline",
+        "-opt-inline-from:zio.internal.**"
+      )
+    else Nil
 
-  private def extraOptions(scalaVersion: String) =
+  def extraOptions(scalaVersion: String, optimize: Boolean) =
     CrossVersion.partialVersion(scalaVersion) match {
       case Some((0, _))  =>
         Seq(
@@ -56,18 +46,43 @@ object BuildHelper {
           "-Xignore-scala2-macros"
         )
       case Some((2, 13)) =>
-        stdOpts213
+        Seq(
+          "-Ywarn-unused:params,-implicits"
+        ) ++ std2xOptions ++ optimizerOptions(optimize)
       case Some((2, 12)) =>
         Seq(
           "-opt-warnings",
           "-Ywarn-extra-implicit",
           "-Ywarn-unused:_,imports",
           "-Ywarn-unused:imports",
-          "-opt:l:inline",
-          "-opt-inline-from:<source>"
-        ) ++ stdOptsUpto212
-      case _             =>
-        Seq("-Xexperimental") ++ stdOptsUpto212
+          "-Ypartial-unification",
+          "-Yno-adapted-args",
+          "-Ywarn-inaccessible",
+          "-Ywarn-infer-any",
+          "-Ywarn-nullary-override",
+          "-Ywarn-nullary-unit",
+          "-Ywarn-unused:params,-implicits",
+          "-Xfuture",
+          "-Xsource:2.13",
+          "-Xmax-classfile-name",
+          "242"
+        ) ++ std2xOptions ++ optimizerOptions(optimize)
+      case Some((2, 11)) =>
+        Seq(
+          "-Ypartial-unification",
+          "-Yno-adapted-args",
+          "-Ywarn-inaccessible",
+          "-Ywarn-infer-any",
+          "-Ywarn-nullary-override",
+          "-Ywarn-nullary-unit",
+          "-Xexperimental",
+          "-Ywarn-unused-import",
+          "-Xfuture",
+          "-Xsource:2.13",
+          "-Xmax-classfile-name",
+          "242"
+        ) ++ std2xOptions
+      case _             => Seq.empty
     }
 
   def buildInfoSettings(packageName: String) =
@@ -82,7 +97,7 @@ object BuildHelper {
       name := s"$prjName",
       crossScalaVersions := Seq(Scala211, Scala212, Scala213),
       scalaVersion in ThisBuild := Scala212,
-      scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
+      scalacOptions := stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
       libraryDependencies ++= {
         if (isDotty.value)
           Seq(
