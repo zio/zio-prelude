@@ -87,10 +87,10 @@ object BuildHelper {
         else
           Seq(
             "com.github.ghik" % "silencer-lib" % SilencerVersion % Provided cross CrossVersion.full,
-            compilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full)
+            compilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full),
+            compilerPlugin("org.typelevel"  %% "kind-projector"  % "0.11.0" cross CrossVersion.full)
           )
-      } ++
-        Seq(compilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)),
+      },
       incOptions ~= (_.withLogRecompileOnMacro(false)),
       semanticdbEnabled := true, // enable SemanticDB
       semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
