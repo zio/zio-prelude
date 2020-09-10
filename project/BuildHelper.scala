@@ -72,8 +72,8 @@ object BuildHelper {
       buildInfoObject := "BuildInfo"
     )
 
-  private lazy val scalafixSettings =
-    if (isDotty.value)
+  private def scalafixSettings(isDot: Boolean) =
+    if (isDot)
       List()
     else
       List(
@@ -112,5 +112,5 @@ object BuildHelper {
         else
           List()
       }
-    ) ++ scalafixSettings
+    ) ++ scalafixSettings(isDotty.value)
 }
