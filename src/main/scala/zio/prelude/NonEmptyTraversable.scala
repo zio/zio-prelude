@@ -120,7 +120,7 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
    * Converts the collection to a `NonEmptyChunk`.
    */
   def toNonEmptyChunk[A](fa: F[A]): NonEmptyChunk[A] =
-    NonEmptyChunk.nonEmpty(reduceMapLeft(fa)(ChunkBuilder.make[A] += _)(_ += _).result())
+    NonEmptyChunk.nonEmpty(reduceMapLeft(fa)(ChunkBuilder.make[A]() += _)(_ += _).result())
 
   /**
    * Converts the collection to a `NonEmptyList`.
