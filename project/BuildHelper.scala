@@ -1,3 +1,4 @@
+import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 import sbtbuildinfo.BuildInfoKeys._
@@ -77,13 +78,19 @@ object BuildHelper {
       crossScalaVersions := Seq(Scala211, Scala212, Scala213),
       scalaVersion in ThisBuild := Scala212,
       scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-      libraryDependencies ++=
-        Seq(
-          ("com.github.ghik"                % "silencer-lib"    % SilencerVersion % Provided)
-            .cross(CrossVersion.full),
-          compilerPlugin(("com.github.ghik" % "silencer-plugin" % SilencerVersion).cross(CrossVersion.full)),
-          compilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
-        ),
+      libraryDependencies ++= {
+        if (isDotty.value)
+          Seq(
+            ("com.github.ghik" % s"silencer-lib_$Scala213" % SilencerVersion % Provided)
+              .withDottyCompat(scalaVersion.value)
+          )
+        else
+          Seq(
+            "com.github.ghik" % "silencer-lib" % SilencerVersion % Provided cross CrossVersion.full,
+            compilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full)
+          )
+      } ++
+        Seq(compilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)),
       incOptions ~= (_.withLogRecompileOnMacro(false)),
       semanticdbEnabled := true, // enable SemanticDB
       semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
