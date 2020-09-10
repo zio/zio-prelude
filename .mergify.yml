@@ -11,14 +11,14 @@ pull_request_rules:
     conditions:
       - base=master
       - author=scala-steward
-      - status-success=license/cla
-      - status-success=ci/circleci: lint
-      - status-success=ci/circleci: test_211_jdk8_jvm
-      - status-success=ci/circleci: test_212_jdk8_jvm
-      - status-success=ci/circleci: test_212_jdk11_jvm
-      - status-success=ci/circleci: test_213_jdk8_jvm
-      - status-success=ci/circleci: test_213_jdk11_jvm
-      - status-success=ci/circleci: mdoc
+      - "status-success=license/cla"
+      - "status-success=ci/circleci: lint"
+      - "status-success=ci/circleci: test_211_jdk8_jvm"
+      - "status-success=ci/circleci: test_212_jdk8_jvm"
+      - "status-success=ci/circleci: test_212_jdk11_jvm"
+      - "status-success=ci/circleci: test_213_jdk8_jvm"
+      - "status-success=ci/circleci: test_213_jdk11_jvm"
+      - "status-success=ci/circleci: mdoc"
     actions:
       merge:
         method: merge
