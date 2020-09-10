@@ -1,5 +1,7 @@
 package zio.prelude
 
+import scala.collection.immutable.ListMap
+
 import zio.{ Chunk, NonEmptyChunk }
 
 trait Debug[-A] {
@@ -33,6 +35,8 @@ object Debug {
       case Repr.Long(v)                                                           => s"${v}L"
       case Repr.Byte(v)                                                           => v.toString
       case Repr.Char(v)                                                           => s"'$v'"
+      case Repr.Boolean(v)                                                        => v.toString
+      case Repr.Short(v)                                                          => v.toString
       case Repr.String(v)                                                         => s""""$v""""
       case Repr.KeyValue(k, v)                                                    => s"${k.render(Simple)} -> ${v.render(Simple)}"
       case Repr.Object(_, n)                                                      => n
@@ -65,22 +69,33 @@ object Debug {
   }
 
   object Repr {
-    import scala.{ Int => SInt, Double => SDouble, Float => SFloat, Long => SLong, Char => SChar, Byte => SByte }
+    import scala.{
+      Int => SInt,
+      Boolean => SBoolean,
+      Short => SShort,
+      Double => SDouble,
+      Float => SFloat,
+      Long => SLong,
+      Char => SChar,
+      Byte => SByte
+    }
     import java.lang.{ String => SString }
 
-    final case class Int(value: SInt)                                                                extends Repr
-    final case class Double(value: SDouble)                                                          extends Repr
-    final case class Float(value: SFloat)                                                            extends Repr
-    final case class Long(value: SLong)                                                              extends Repr
-    final case class Byte(value: SByte)                                                              extends Repr
-    final case class Char(value: SChar)                                                              extends Repr
-    final case class String(value: SString)                                                          extends Repr
-    final case class KeyValue(key: Repr, value: Repr)                                                extends Repr
-    final case class Object(namespace: List[SString], name: SString)                                 extends Repr
-    final case class Constructor(namespace: List[SString], name: SString, reprs: Map[SString, Repr]) extends Repr
+    final case class Int(value: SInt)                                                                    extends Repr
+    final case class Double(value: SDouble)                                                              extends Repr
+    final case class Float(value: SFloat)                                                                extends Repr
+    final case class Long(value: SLong)                                                                  extends Repr
+    final case class Byte(value: SByte)                                                                  extends Repr
+    final case class Char(value: SChar)                                                                  extends Repr
+    final case class Boolean(value: SBoolean)                                                            extends Repr
+    final case class Short(value: SShort)                                                                extends Repr
+    final case class String(value: SString)                                                              extends Repr
+    final case class KeyValue(key: Repr, value: Repr)                                                    extends Repr
+    final case class Object(namespace: List[SString], name: SString)                                     extends Repr
+    final case class Constructor(namespace: List[SString], name: SString, reprs: ListMap[SString, Repr]) extends Repr
     object Constructor {
       def apply(namespace: List[SString], name: SString, repr: (SString, Repr), reprs: (SString, Repr)*): Repr =
-        new Constructor(namespace, name, (repr :: reprs.toList).toMap)
+        new Constructor(namespace, name, ListMap(repr :: reprs.toList: _*))
     }
     final case class VConstructor(namespace: List[SString], name: SString, reprs: List[Repr]) extends Repr
   }
@@ -93,6 +108,8 @@ object Debug {
   implicit val LongDebug: Debug[Long]       = Repr.Long(_)
   implicit val ByteDebug: Debug[Byte]       = Repr.Byte(_)
   implicit val CharDebug: Debug[Char]       = Repr.Char(_)
+  implicit val BooleanDebug: Debug[Boolean] = Repr.Boolean(_)
+  implicit val ShortDebug: Debug[Short]     = Repr.Short(_)
   implicit val StringDebug: Debug[String]   = Repr.String(_)
 
   def keyValueDebug[A: Debug, B: Debug]: Debug[(A, B)] = n => Repr.KeyValue(n._1.debug, n._2.debug)
