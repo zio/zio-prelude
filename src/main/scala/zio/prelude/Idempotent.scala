@@ -14,21 +14,7 @@ import zio.test.laws.{ Lawful, Laws }
  * operation results in the same value regardless of the number of values
  * are combined, allowing us to optimize out unnecessary combinations of the same values.
  */
-trait Idempotent[A] extends Associative[A] { self =>
-
-  /**
-   * If there are many Equal elements in  sequence, it will remove them all except for the first one.
-   * `a a b c c c a` will result in `a b c a`.
-   */
-  def optimize[T[+_]: Traversable](elems: T[A])(implicit A: Equal[A]): List[A] = {
-    def go(list: List[A], elem: A): List[A] = list match {
-      case List()                     => List(elem)
-      case head :: _ if head === elem => list
-      case _                          => elem :: list
-    }
-    elems.foldLeft(List[A]())(go).reverse
-  }
-}
+trait Idempotent[A] extends Associative[A]
 
 object Idempotent extends Lawful[EqualIdempotent] {
 

@@ -184,6 +184,19 @@ trait Traversable[F[+_]] extends Covariant[F] {
     !isEmpty(fa)
 
   /**
+   * If there are many Equal elements in  sequence, it will remove them all except for the first one.
+   * `a a b c c c a` will result in `a b c a`.
+   */
+  def dropRedundant[A](elems: F[A])(implicit A: Equal[A]): List[A] = {
+    def go(list: List[A], elem: A): List[A] = list match {
+      case List()                     => List(elem)
+      case head :: _ if head === elem => list
+      case _                          => elem :: list
+    }
+    foldLeft(elems)(List[A]())(go).reverse
+  }
+
+  /**
    * Returns the product of all elements in the collection.
    */
   def product[A](fa: F[A])(implicit ev: Identity[Prod[A]]): A =
@@ -357,6 +370,8 @@ trait TraversableSyntax {
       F.minByOption(self)(f)
     def nonEmpty(implicit F: Traversable[F]): Boolean                                                 =
       F.nonEmpty(self)
+    def dropRedundant(implicit F: Traversable[F], A: Equal[A]): List[A]                               =
+      F.dropRedundant(self)
     def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A                                  =
       F.product(self)
     def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B]             =
