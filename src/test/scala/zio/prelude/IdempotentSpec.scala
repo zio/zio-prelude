@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.prelude.coherent._
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._
@@ -24,20 +23,18 @@ object IdempotentSpec extends DefaultRunnableSpec {
         )
       ),
       test("Idempotent.optimize") {
-        val instance = implicitly[EqualIdempotent[Max[Int]]]
 
-        assert(instance.optimize(List[Max[Int]]()))(equalTo(List[Max[Int]]())) &&
-        assert(instance.optimize(List(Max(1))))(equalTo(List(Max(1)))) &&
-        assert(instance.optimize(List(Max(1), Max(1))))(equalTo(List(Max(1)))) &&
-        assert(instance.optimize(List(Max(1), Max(2), Max(1))))(equalTo(List(Max(1), Max(2), Max(1)))) &&
-        assert(instance.optimize(List(Max(1), Max(1), Max(2), Max(3), Max(3), Max(3), Max(1))))(
+        assert(List[Max[Int]]().dropRedundant)(equalTo(List[Max[Int]]())) &&
+        assert(List(Max(1)).dropRedundant)(equalTo(List(Max(1)))) &&
+        assert(List(Max(1), Max(1)).dropRedundant)(equalTo(List(Max(1)))) &&
+        assert(List(Max(1), Max(2), Max(1)).dropRedundant)(equalTo(List(Max(1), Max(2), Max(1)))) &&
+        assert(List(Max(1), Max(1), Max(2), Max(3), Max(3), Max(3), Max(1)).dropRedundant)(
           equalTo(List(Max(1), Max(2), Max(3), Max(1)))
         )
       },
       testM("Idempotent.optimize's size") {
-        val instance = implicitly[EqualIdempotent[Max[Int]]]
         check(Gen.listOf(anyMaxInt)) { list =>
-          val actual = instance.optimize(list).size
+          val actual = list.dropRedundant.size
 
           assert(actual)(isLessThanEqualTo(list.size)) &&
           assert(actual)(isGreaterThanEqualTo(list.toSet.size))
