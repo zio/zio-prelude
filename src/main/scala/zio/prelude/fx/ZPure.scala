@@ -328,7 +328,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
             case Tags.Modify =>
               val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any]]
 
-              val updated = zPure2.run(s0)
+              val updated = zPure2.run0(s0)
               s0 = updated._1
               a = updated._2
               curZPure = continuation(a)
@@ -367,7 +367,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
           curZPure = zPure.continue
         case Tags.Modify  =>
           val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any]]
-          val updated   = zPure.run(s0)
+          val updated   = zPure.run0(s0)
           s0 = updated._1
           a = updated._2
           val nextInstr = stack.pop()
@@ -575,26 +575,26 @@ object ZPure {
     final val Modify  = 6
   }
 
-  private final case class Succeed[+A](value: A)                    extends ZPure[Any, Nothing, Any, Nothing, A] {
+  private final case class Succeed[+A](value: A)                     extends ZPure[Any, Nothing, Any, Nothing, A] {
     override def tag: Int = Tags.Succeed
   }
-  private final case class Fail[+E](error: E)                       extends ZPure[Any, Nothing, Any, E, Nothing] {
+  private final case class Fail[+E](error: E)                        extends ZPure[Any, Nothing, Any, E, Nothing] {
     override def tag: Int = Tags.Fail
   }
-  private final case class Modify[-S1, +S2, +A](run: S1 => (S2, A)) extends ZPure[S1, S2, Any, Nothing, A]       {
+  private final case class Modify[-S1, +S2, +A](run0: S1 => (S2, A)) extends ZPure[S1, S2, Any, Nothing, A]       {
     override def tag: Int = Tags.Modify
   }
   private final case class FlatMap[-S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[S1, S2, R, E, A],
     continue: A => ZPure[S2, S3, R, E, B]
-  )                                                                 extends ZPure[S1, S3, R, E, B]               {
+  )                                                                  extends ZPure[S1, S3, R, E, B]               {
     override def tag: Int = Tags.FlatMap
   }
   private final case class Fold[-S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[S1, S2, R, E1, A],
     failure: E1 => ZPure[S1, S3, R, E2, B],
     success: A => ZPure[S2, S3, R, E2, B]
-  )                                                                 extends ZPure[S1, S3, R, E2, B]
+  )                                                                  extends ZPure[S1, S3, R, E2, B]
       with Function[A, ZPure[S2, S3, R, E2, B]] {
     override def tag: Int                             = Tags.Fold
     override def apply(a: A): ZPure[S2, S3, R, E2, B] =
