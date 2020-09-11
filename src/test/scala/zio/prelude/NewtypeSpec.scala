@@ -15,7 +15,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
   // Age.newtype.Type with Age.Instances
   type Age = Age.Type
 
-  implicitly[Dummy[Age]]
+  val _ = implicitly[Dummy[Age]]
 
   def spec =
     suite("NewtypeSpec")(

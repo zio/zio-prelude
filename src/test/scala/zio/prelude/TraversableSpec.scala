@@ -104,7 +104,10 @@ object TraversableSpec extends DefaultRunnableSpec {
         },
         testM("groupByM") {
           check(genList, genIntFunction) { (as, f) =>
-            val actual   = Traversable[List].groupByM(as)(f.map(Option(_)))
+            val actual   = Traversable[List].groupByM(as)(f.map(Option(_))(Covariant.Function1Covariant[Int]))(
+              IdentityBoth.OptionIdentityBoth,
+              Covariant.OptionCovariant
+            )
             val expected = Option(
               as.groupBy(f)
                 .toList
