@@ -75,14 +75,16 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
    */
   val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
     new LawsF.Contravariant.ComposeLaw[ContravariantDeriveEqual, Equal]("compositionLaw") {
-      def apply[F[-_]: ContravariantDeriveEqual, A: Equal, B: Equal, C: Equal](
+      def apply[F[-_], A, B, C](
         fa: F[A],
         f: B => A,
         g: C => B
-      ): TestResult =
+      )(implicit F: ContravariantDeriveEqual[F], A: Equal[A], B: Equal[B], C: Equal[C]): TestResult =
         fa.contramap(f)
           .contramap(g)
-          .equal(fa.contramap(f compose g))(Equal.DeriveEqual(ContravariantDeriveEqual.derive, Equal[A]))
+          .equal(fa.contramap(f compose g))(
+            Equal.DeriveEqual[F, C](F, C) // because Dotty doesn't seem to be able to infer this
+          )
     }
 
   /**
