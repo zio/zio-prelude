@@ -16,6 +16,7 @@ package object prelude
     with CovariantSyntax
     with ContravariantSyntax
     with DebugSyntax
+    with DivariantSyntax
     with EqualSyntax
     with HashSyntax
     with IdExports
