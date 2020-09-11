@@ -10,6 +10,10 @@ import scalafix.sbt.ScalafixPlugin.autoImport.scalafixSemanticdb
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
+  private val Scala211        = "2.11.12"
+  private val Scala212        = "2.12.12"
+  private val Scala213        = "2.13.3"
+  private val SilencerVersion = "1.7.1"
 
   private val stdOptions = Seq(
     "-deprecation",
@@ -207,16 +211,19 @@ object BuildHelper {
 
   def stdSettings(prjName: String) = Seq(
     name := s"$prjName",
-    crossScalaVersions := Seq("2.12.12", "2.11.12", "2.13.3"),
-    scalaVersion in ThisBuild := crossScalaVersions.value.head,
+    crossScalaVersions := Seq(Scala211, Scala212, Scala213),
+    scalaVersion in ThisBuild := Scala212,
     scalacOptions := stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
       if (isDotty.value)
-        Seq(("com.github.ghik" % "silencer-lib_2.13.1" % "1.7.1" % Provided).withDottyCompat(scalaVersion.value))
+        Seq(
+          ("com.github.ghik" % s"silencer-lib_$Scala213" % SilencerVersion % Provided)
+            .withDottyCompat(scalaVersion.value)
+        )
       else
         Seq(
-          "com.github.ghik" % "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full,
-          compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.1" cross CrossVersion.full),
+          "com.github.ghik" % "silencer-lib" % SilencerVersion % Provided cross CrossVersion.full,
+          compilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full),
           compilerPlugin("org.typelevel"  %% "kind-projector"  % "0.11.0" cross CrossVersion.full)
         )
     },
