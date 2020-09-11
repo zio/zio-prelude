@@ -22,14 +22,15 @@ trait Divariant[:=>[-_, +_]] { self =>
 object Divariant {
   final case class Join[:=>[-_, +_], A](value: A :=> A)
 
-  implicit val Function1Divariant: Divariant[Function1[-*, +*]] = new Divariant[Function1[-*, +*]] {
-    override def leftMap[A, B, C](c2a: C => A): (A => B) => C => B = { a2b => c =>
-      c |> c2a |> a2b
+  implicit val Function1Divariant: Divariant[({ type lambda[-A, +B] = A => B })#lambda] =
+    new Divariant[({ type lambda[-A, +B] = A => B })#lambda] {
+      override def leftMap[A, B, C](c2a: C => A): (A => B) => C => B = { a2b => c =>
+        c |> c2a |> a2b
+      }
+      override def rightMap[A, B, C](b2c: B => C): (A => B) => A => C = { a2b => a =>
+        a |> a2b |> b2c
+      }
     }
-    override def rightMap[A, B, C](b2c: B => C): (A => B) => A => C = { a2b => a =>
-      a |> a2b |> b2c
-    }
-  }
 }
 
 trait DivariantSyntax {
