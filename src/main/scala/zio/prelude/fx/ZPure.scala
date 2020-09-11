@@ -333,7 +333,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
               a = updated._2
               curZPure = continuation(a)
 
-            case _ =>
+            case Tags.FlatMap | Tags.Fail | Tags.Fold | Tags.Access | Tags.Provide =>
               curZPure = nested
               stack.push(continuation)
           }
