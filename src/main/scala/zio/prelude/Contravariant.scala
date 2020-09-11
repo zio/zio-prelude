@@ -80,7 +80,7 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
         f: B => A,
         g: C => B
       ): TestResult =
-        fa.contramap(f).contramap(g) <-> fa.contramap(f compose g)
+        fa.contramap(f).contramap(g).equal(fa.contramap(f compose g))(Equal.DeriveEqual)
     }
 
   /**
