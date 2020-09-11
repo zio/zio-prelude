@@ -243,6 +243,7 @@ object BuildHelper {
         case Some((2, x)) if x <= 11 =>
           Seq(
             Seq(file(sourceDirectory.value.getPath + "/main/scala-2.11")),
+            Seq(file(sourceDirectory.value.getPath + "/main/scala-2.11-2.12")),
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.11")),
             CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.11")),
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.x")),
@@ -250,6 +251,7 @@ object BuildHelper {
           ).flatten
         case Some((2, x)) if x == 12 =>
           Seq(
+            Seq(file(sourceDirectory.value.getPath + "/main/scala-2.11-2.12")),
             Seq(file(sourceDirectory.value.getPath + "/main/scala-2.12")),
             Seq(file(sourceDirectory.value.getPath + "/main/scala-2.12+")),
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.12+")),
@@ -262,6 +264,7 @@ object BuildHelper {
           Seq(
             Seq(file(sourceDirectory.value.getPath + "/main/scala-2.12")),
             Seq(file(sourceDirectory.value.getPath + "/main/scala-2.12+")),
+            Seq(file(sourceDirectory.value.getPath + "/main/scala-2.13+")),
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.12+")),
             CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.12+")),
             CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.x")),
@@ -273,6 +276,7 @@ object BuildHelper {
             Seq(
               Seq(file(sourceDirectory.value.getPath + "/main/scala-2.12")),
               Seq(file(sourceDirectory.value.getPath + "/main/scala-2.12+")),
+              Seq(file(sourceDirectory.value.getPath + "/main/scala-2.13+")),
               CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-2.12+")),
               CrossType.Full.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + "-2.12+")),
               CrossType.Full.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + "-dotty")),
