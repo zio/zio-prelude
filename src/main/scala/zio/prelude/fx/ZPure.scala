@@ -320,7 +320,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
           val nested       = zPure.value
           val continuation = zPure.continue
 
-          (nested.tag: @switch) match {
+          nested.tag match {
             case Tags.Succeed =>
               val zPure2 = nested.asInstanceOf[Succeed[Any]]
               curZPure = continuation(zPure2.value)
@@ -333,7 +333,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
               a = updated._2
               curZPure = continuation(a)
 
-            case Tags.FlatMap | Tags.Fail | Tags.Fold | Tags.Access | Tags.Provide =>
+            case _ =>
               curZPure = nested
               stack.push(continuation)
           }
