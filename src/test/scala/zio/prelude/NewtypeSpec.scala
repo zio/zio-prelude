@@ -52,7 +52,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
           val expected = 6L
           assert(actual)(equalTo(expected))
         }
-      ) @@ scala2Only
+      ) @@ scala2Only // https://github.com/zio/zio-prelude/issues/272
     )
 
   object Meter extends Newtype[Double]
