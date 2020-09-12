@@ -13,6 +13,7 @@ object BuildHelper {
   private val Scala211        = "2.11.12"
   private val Scala212        = "2.12.12"
   private val Scala213        = "2.13.3"
+  private val ScalaDotty      = "0.26.0"
   private val SilencerVersion = "1.7.1"
 
   private val stdOptions = Seq(
@@ -49,16 +50,14 @@ object BuildHelper {
 
   def buildInfoSettings(packageName: String) =
     Seq(
-      buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, isSnapshot),
+      buildInfoKeys := Seq[BuildInfoKey](organization, moduleName, version, scalaVersion, sbtVersion, isSnapshot),
       buildInfoPackage := packageName,
       buildInfoObject := "BuildInfo"
     )
 
-  val dottyVersion = "0.26.0"
-
   val dottySettings = Seq(
     // Keep this consistent with the version in .circleci/config.yml
-    crossScalaVersions += dottyVersion,
+    crossScalaVersions += ScalaDotty,
     scalacOptions ++= {
       if (isDotty.value)
         Seq("-noindent")
@@ -212,7 +211,7 @@ object BuildHelper {
   def stdSettings(prjName: String) = Seq(
     name := s"$prjName",
     crossScalaVersions := Seq(Scala211, Scala212, Scala213),
-    scalaVersion in ThisBuild := Scala212,
+    scalaVersion in ThisBuild := ScalaDotty,
     scalacOptions := stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
       if (isDotty.value)
