@@ -3,6 +3,7 @@ package zio.prelude
 import zio.NonEmptyChunk
 import zio.prelude.newtypes._
 import zio.test.Assertion._
+import zio.test.TestAspect.scala2Only
 import zio.test._
 
 object NewtypeSpec extends DefaultRunnableSpec {
@@ -51,7 +52,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
           val expected = 6L
           assert(actual)(equalTo(expected))
         }
-      )
+      ) @@ scala2Only
     )
 
   object Meter extends Newtype[Double]
