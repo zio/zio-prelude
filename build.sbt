@@ -36,9 +36,8 @@ testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
 
 lazy val root =
   (project in file("."))
-    .settings(
-      stdSettings("zio-prelude")
-    )
+    .settings(stdSettings("zio-prelude"))
+    .settings(dottySettings)
     .settings(buildInfoSettings("zio.prelude"))
     .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
     .enablePlugins(BuildInfoPlugin)
@@ -51,8 +50,11 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      "dev.zio"       %% "zio"       % zioVersion,
-      "org.typelevel" %% "cats-core" % "2.2.0"
+      "dev.zio" %% "zio" % zioVersion,
+      ("org.typelevel" %% "cats-core" % "2.2.0") match {
+        case cats if isDotty.value => cats.withDottyCompat(scalaVersion.value)
+        case cats                  => cats
+      }
     )
   )
   .dependsOn(root)

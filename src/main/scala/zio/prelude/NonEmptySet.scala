@@ -78,7 +78,7 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   override def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
-      case that: NonEmptySet[A]          => self.set == that.toSet
+      case that: NonEmptySet[_]          => self.set == that.toSet
       case _                             => false
     }
 

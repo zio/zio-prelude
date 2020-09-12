@@ -79,8 +79,11 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
         fa: F[A],
         f: B => A,
         g: C => B
-      ): TestResult =
+      ): TestResult = {
+        // Dotty can't infer this https://github.com/zio/zio-prelude/issues/273
+        implicit val equalFC: Equal[F[C]] = Equal.DeriveEqual[F, C]
         fa.contramap(f).contramap(g) <-> fa.contramap(f compose g)
+      }
     }
 
   /**

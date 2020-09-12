@@ -104,7 +104,8 @@ object TraversableSpec extends DefaultRunnableSpec {
         },
         testM("groupByM") {
           check(genList, genIntFunction) { (as, f) =>
-            val actual   = Traversable[List].groupByM(as)(f.map(Option(_)))
+            // Dotty can't infer Function1Covariant: 'Required: zio.prelude.Covariant[[R] =>> Int => R]'
+            val actual   = Traversable[List].groupByM(as)(f.map(Option(_))(Covariant.Function1Covariant))
             val expected = Option(
               as.groupBy(f)
                 .toList
