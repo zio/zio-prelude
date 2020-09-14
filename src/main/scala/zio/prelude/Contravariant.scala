@@ -42,19 +42,6 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
    */
   def contramap[A, B](f: B => A): F[A] => F[B]
 
-  /**
-   * Contramapping with the identity function must be an identity function.
-   */
-  def identityLaw[A](fa: F[A])(implicit equal: Equal[F[A]]): Boolean =
-    contramap(identity[A])(fa) === fa
-
-  /**
-   * Contramapping by `f` followed by `g` must be the same as contramapping
-   * with the composition of `f` and `g`.
-   */
-  def compositionLaw[A, B, C](fa: F[A], f: C => B, g: B => A)(implicit equal: Equal[F[C]]): Boolean =
-    contramap(f)(contramap(g)(fa)) === contramap(f andThen g)(fa)
-
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
