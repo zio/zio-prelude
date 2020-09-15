@@ -1,6 +1,6 @@
 package zio.prelude
 
-trait Divariant[:=>[-_, +_]] extends RightMap[:=>] { self =>
+trait Divariant[:=>[-_, +_]] extends RightCovariant[:=>] { self =>
 
   def deriveContravariant[B]: Contravariant[({ type lambda[-A] = A :=> B })#lambda] =
     new Contravariant[({ type lambda[-A] = A :=> B })#lambda] {

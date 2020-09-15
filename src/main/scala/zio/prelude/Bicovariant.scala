@@ -1,6 +1,6 @@
 package zio.prelude
 
-trait RightMap[:=>[_,+_]] {
+trait RightCovariant[:=>[_,+_]] {
   def deriveCovariant[A]: Covariant[({ type lambda[+B] = A :=> B })#lambda] =
     new Covariant[({ type lambda[+B] = A :=> B })#lambda] {
       def map[B, C](f: B => C): A :=> B => A :=> C = rightMap(f)
@@ -9,7 +9,7 @@ trait RightMap[:=>[_,+_]] {
   def rightMap[A, B, C](f: B => C): (A :=> B) => (A :=> C)
 }
 
-trait Bicovariant[:=>[+_, +_]] extends RightMap[:=>] {
+trait Bicovariant[:=>[+_, +_]] extends RightCovariant[:=>] {
 
   def bimap[A,B,AA,BB](f: A => AA, g: B => BB): (A :=> B) => (AA :=> BB)
 
