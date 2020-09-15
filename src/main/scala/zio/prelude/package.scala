@@ -101,6 +101,7 @@ package object prelude
 
     type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
     type Profunctor[:=>[-_, +_]] = Divariant[:=>]
+    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
   }
 
   /**
