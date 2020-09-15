@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.AssociativeEither._
 import zio.test._
 import zio.test.laws._
 

@@ -1,7 +1,6 @@
 package zio.prelude
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.Future
 import scala.util.Try
 
 import zio._
@@ -960,53 +959,6 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   implicit def ChunkAssociativeBoth: AssociativeBoth[Chunk] =
     new AssociativeBoth[Chunk] {
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
-    }
-
-  /**
-   * The `AssociativeBoth` instance for `Either`.
-   */
-  implicit def EitherAssociativeBoth[L]: AssociativeBoth[({ type lambda[+r] = Either[L, r] })#lambda] =
-    new AssociativeBoth[({ type lambda[+r] = Either[L, r] })#lambda] {
-      def both[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, (A, B)] =
-        fa.flatMap(a => fb.map(b => (a, b)))
-    }
-
-  /**
-   * The `AssociativeBoth` instance for a failed `Either`
-   */
-  implicit def EitherFailedAssociativeBoth[R]: AssociativeBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
-    new AssociativeBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
-      def both[A, B](fa: => Failure[Either[A, R]], fb: => Failure[Either[B, R]]): Failure[Either[(A, B), R]] =
-        Failure.wrap {
-          Failure
-            .unwrap(fa)
-            .left
-            .flatMap(a => Failure.unwrap(fb).left.map(b => (a, b)))
-        }
-    }
-
-  /**
-   * The `AssociativeBoth` instance for `Exit`.
-   */
-  implicit def ExitAssociativeBoth[E]: AssociativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] {
-      def both[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, (A, B)] = fa zip fb
-    }
-
-  /**
-   * The `AssociativeBoth` instance for `Fiber`.
-   */
-  implicit def FiberAssociativeBoth[E]: AssociativeBoth[({ type lambda[+a] = Fiber[E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = Fiber[E, a] })#lambda] {
-      def both[A, B](fa: => Fiber[E, A], fb: => Fiber[E, B]): Fiber[E, (A, B)] = fa zip fb
-    }
-
-  /**
-   * The `AssociativeBoth` instance for `Future`.
-   */
-  implicit def FutureAssociativeBoth: AssociativeBoth[Future] =
-    new AssociativeBoth[Future] {
-      def both[A, B](fa: => Future[A], fb: => Future[B]): Future[(A, B)] = fa zip fb
     }
 
   /**

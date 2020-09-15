@@ -58,21 +58,35 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
   def apply[F[_]](implicit associativeEither: AssociativeEither[F]): AssociativeEither[F] =
     associativeEither
 
+  trait AssociativeEitherBoth[F[_]] extends AssociativeEither[F] with AssociativeBoth[F]
+
   /**
-   * The `AssociativeEither` instance for `Either`.
+   * The `AssociativeBoth` and `AssociativeEither` instance for `Either`.
    */
-  implicit def EitherAssociativeEither[L]: AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] =
-    new AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] {
+  implicit def EitherAssociativeBothEither[L]: AssociativeEitherBoth[({ type lambda[+r] = Either[L, r] })#lambda] =
+    new AssociativeEitherBoth[({ type lambda[+r] = Either[L, r] })#lambda] {
       def either[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, Either[A, B]] =
         fa.map(Left(_)).left.flatMap(_ => fb.map(Right(_)))
+
+      def both[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, (A, B)] =
+        fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
-   * The `AssociativeEither` instance for a failed `Either`
+   * The `AssociativeEither` and `AssociativeBoth` instance for a failed `Either`
    */
-  implicit def EitherFailedAssociativeEither[R]
-    : AssociativeEither[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
-    new AssociativeEither[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
+  implicit def EitherFailedAssociativeBothEither[R]
+    : AssociativeEitherBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+    new AssociativeEitherBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
+
+      def both[A, B](fa: => Failure[Either[A, R]], fb: => Failure[Either[B, R]]): Failure[Either[(A, B), R]] =
+        Failure.wrap {
+          Failure
+            .unwrap(fa)
+            .left
+            .flatMap(a => Failure.unwrap(fb).left.map(b => (a, b)))
+        }
+
       def either[A, B](fa: => Failure[Either[A, R]], fb: => Failure[Either[B, R]]): Failure[Either[Either[A, B], R]] =
         Failure.wrap {
           Failure
@@ -84,15 +98,17 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
-   * The `AssociativeEither` instance for `Exit`.
+   * The `AssociativeEither` and `AssociativeBoth` instance for `Exit`.
    */
-  implicit def ExitAssociativeEither[E]: AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] =
-    new AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] {
+  implicit def ExitAssociativeEitherBoth[E]: AssociativeEitherBoth[({ type lambda[+a] = Exit[E, a] })#lambda] =
+    new AssociativeEitherBoth[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def either[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, Either[A, B]] =
         fa.map(Left(_)) match {
           case Exit.Failure(_) => fb.map(Right(_))
           case res             => res
         }
+
+      def both[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, (A, B)] = fa zip fb
     }
 
   /**
@@ -107,23 +123,27 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
-   * The `AssociativeEither` instance for `Fiber`.
+   * The `AssociativeEither` and `AssociativeBoth` instance for `Fiber`.
    */
-  implicit def FiberAssociativeEither[E]: AssociativeEither[({ type lambda[+a] = Fiber[E, a] })#lambda] =
-    new AssociativeEither[({ type lambda[+a] = Fiber[E, a] })#lambda] {
+  implicit def FiberAssociativeEitherBoth[E]: AssociativeEitherBoth[({ type lambda[+a] = Fiber[E, a] })#lambda] =
+    new AssociativeEitherBoth[({ type lambda[+a] = Fiber[E, a] })#lambda] {
       def either[A, B](fa: => Fiber[E, A], fb: => Fiber[E, B]): Fiber[E, Either[A, B]] =
         fa.orElseEither(fb)
+
+      def both[A, B](fa: => Fiber[E, A], fb: => Fiber[E, B]): Fiber[E, (A, B)] = fa zip fb
     }
 
   /**
-   * The `AssociativeEither` instance for `Future`.
+   * The `AssociativeEither` and `AssociativeBoth` instance for `Future`.
    */
-  implicit def FutureAssociativeEither(implicit ec: ExecutionContext): AssociativeEither[Future] =
-    new AssociativeEither[Future] {
+  implicit def FutureAssociativeEitherBoth(implicit ec: ExecutionContext): AssociativeEitherBoth[Future] =
+    new AssociativeEitherBoth[Future] {
       def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
         fa.map(Left(_)).recoverWith { case _: Throwable =>
           fb.map(Right(_))
         }
+
+      def both[A, B](fa: => Future[A], fb: => Future[B]): Future[(A, B)] = fa zip fb
     }
 
   /**
