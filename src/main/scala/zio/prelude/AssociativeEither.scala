@@ -127,12 +127,15 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
-   * The `AssociativeEither` instance for `Option`.
+   * The `IdentityEither` (and `AssociativeEither`) instance for `Option`.
    */
-  implicit val OptionAssociativeEither: AssociativeEither[Option] =
-    new AssociativeEither[Option] {
+  implicit val OptionIdentityEither: IdentityEither[Option] =
+    new IdentityEither[Option] {
       def either[A, B](fa: => Option[A], fb: => Option[B]): Option[Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
+
+      val none: Option[Nothing] =
+        None
     }
 
   /**

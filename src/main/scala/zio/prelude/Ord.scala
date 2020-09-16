@@ -194,15 +194,6 @@ object Ord extends Lawful[Ord] {
     (l: A, r: A) => Ordering.fromCompare(ordering.compare(l, r))
 
   /**
-   * The `AssociativeEither` instance for `Ord`.
-   */
-  implicit val OrdAssociativeEither: AssociativeEither[Ord] =
-    new AssociativeEither[Ord] {
-      def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
-        fa.either(fb)
-    }
-
-  /**
    * The `Contravariant` instance for `Ord`.
    */
   implicit val OrdContravariant: Contravariant[Ord] =

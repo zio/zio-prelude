@@ -151,15 +151,6 @@ object Equal extends Lawful[Equal] {
       )
 
   /**
-   * The `AssociativeEither` instance for `Equal`.
-   */
-  implicit val EqualAssociativeEither: AssociativeEither[Equal] =
-    new AssociativeEither[Equal] {
-      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
-        fa.either(fb)
-    }
-
-  /**
    * The `CommutativeBoth` instance for `Equal`.
    */
   implicit val EqualCommutativeBoth: CommutativeBoth[Equal] =

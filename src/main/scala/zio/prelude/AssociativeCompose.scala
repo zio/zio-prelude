@@ -14,9 +14,12 @@ trait AssociativeCompose[:=>[-_, +_]] {
     eq.equal(ad1, ad2)
   }
 }
-object AssociativeCompose             {
-  implicit val FunctionAssociativeCompose: AssociativeCompose[Function] =
-    new AssociativeCompose[Function] {
+
+object AssociativeCompose {
+  implicit val FunctionIdentityCompose: IdentityCompose[Function] =
+    new IdentityCompose[Function] {
+      def identity[A]: A => A = (a: A) => a
+
       def compose[A, B, C](bc: B => C, ab: A => B): A => C =
         bc.compose(ab)
     }
