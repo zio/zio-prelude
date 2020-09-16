@@ -1178,7 +1178,6 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     new AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa cross fb
     }
-
 }
 
 trait AssociativeBothSyntax {
