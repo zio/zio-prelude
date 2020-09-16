@@ -1,11 +1,8 @@
 package zio.prelude
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.Future
-import scala.util.{ Success, Try }
 
 import zio.prelude.coherent.DeriveEqualIdentityBothInvariant
-import zio.prelude.newtypes.Failure
 import zio.test.TestResult
 import zio.test.laws._
 
