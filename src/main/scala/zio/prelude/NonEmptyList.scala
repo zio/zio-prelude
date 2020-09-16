@@ -435,15 +435,6 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Associative.make(_ ++ _)
 
   /**
-   * The `AssociativeBoth` instance for `NonEmptyList`.
-   */
-  implicit val NonEmptyListAssociativeBoth: AssociativeBoth[NonEmptyList] =
-    new AssociativeBoth[NonEmptyList] {
-      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
-        fa.flatMap(a => fb.map(b => (a, b)))
-    }
-
-  /**
    * The `IdentityFlatten` instance for `NonEmptyList`.
    */
   implicit val NonEmptyListIdentityFlatten: IdentityFlatten[NonEmptyList] =
