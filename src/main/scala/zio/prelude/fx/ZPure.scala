@@ -526,15 +526,6 @@ object ZPure {
   }
 
   /**
-   * The `AssociativeBoth` instance for `ZPure`.
-   */
-  implicit def ZPureAssociativeBoth[S, R, E]: AssociativeBoth[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] =
-    new AssociativeBoth[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] {
-      def both[A, B](fa: => ZPure[S, S, R, E, A], fb: => ZPure[S, S, R, E, B]): ZPure[S, S, R, E, (A, B)] =
-        fa.zip(fb)
-    }
-
-  /**
    * The `Covariant` instance for `ZPure`.
    */
   implicit def ZPureCovariant[S1, S2, R, E]: Covariant[({ type lambda[+A] = ZPure[S1, S2, R, E, A] })#lambda] =
