@@ -1,6 +1,8 @@
 package zio.prelude
 
 import scala.annotation.implicitNotFound
+import scala.concurrent.Future
+import scala.util.{ Success, Try }
 
 import zio._
 import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
@@ -961,6 +963,33 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Either`.
+   */
+  implicit def EitherAssociativeBoth[L]: IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] =
+    new IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] {
+      val any: Either[L, Any] = Right(())
+
+      def both[A, B](fa: => Either[L, A], fb: => Either[L, B]): Either[L, (A, B)] =
+        fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for a failed `Either`
+   */
+  implicit def EitherFailedAssociativeBoth[R]: IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+    new IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
+      val any: Failure[Either[Any, R]] = Failure.wrap(Left(()))
+
+      def both[A, B](fa: => Failure[Either[A, R]], fb: => Failure[Either[B, R]]): Failure[Either[(A, B), R]] =
+        Failure.wrap {
+          Failure
+            .unwrap(fa)
+            .left
+            .flatMap(a => Failure.unwrap(fb).left.map(b => (a, b)))
+        }
+    }
+
+  /**
    * The `AssociativeBoth` instance for `Exit`.
    */
   implicit def ExitAssociativeBoth[E]: AssociativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] =
@@ -977,12 +1006,59 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Future`.
+   */
+  implicit val FutureAssociativeBoth: IdentityBoth[Future] =
+    new IdentityBoth[Future] {
+      val any: Future[Any] = Future.successful(())
+
+      def both[A, B](fa: => Future[A], fb: => Future[B]): Future[(A, B)] = fa zip fb
+    }
+
+  /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Id`.
+   */
+  implicit val IdAssociativeBoth: IdentityBoth[Id] =
+    new IdentityBoth[Id] {
+      val any: Id[Any] = Id(())
+
+      def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] =
+        Id(Id.unwrap(fa) -> Id.unwrap(fb))
+    }
+
+  /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `List`.
+   */
+  implicit val ListAssociativeBoth: IdentityBoth[List] =
+    new IdentityBoth[List] {
+      val any: List[Any] =
+        List(())
+
+      def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
    * The `AssociativeBoth` instance for `NonEmptyChunk`.
    */
   implicit def NonEmptyChunkAssociativeBoth: AssociativeBoth[NonEmptyChunk] =
     new AssociativeBoth[NonEmptyChunk] {
       def both[A, B](fa: => NonEmptyChunk[A], fb: => NonEmptyChunk[B]): NonEmptyChunk[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
+   * The `IdentityBoth` (with `AssociativeBoth`) instance for `Option`.
+   */
+  implicit val OptionIdentityBoth: IdentityBoth[Option] =
+    new IdentityBoth[Option] {
+      val any: Option[Any] =
+        Some(())
+
+      def both[A, B](fa: => Option[A], fb: => Option[B]): Option[(A, B)] =
+        (fa, fb) match {
+          case (Some(a), Some(b)) => Some((a, b))
+          case _                  => None
+        }
     }
 
   /**
@@ -1006,6 +1082,16 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
         OrF.wrap {
           OrF.unwrap(fa) || OrF.unwrap(fb)
         }
+    }
+
+  /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Try`.
+   */
+  implicit val TryAssociativeBoth: IdentityBoth[Try] =
+    new IdentityBoth[Try] {
+      val any: Try[Any] = Success(())
+
+      def both[A, B](fa: => Try[A], fb: => Try[B]): Try[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**
