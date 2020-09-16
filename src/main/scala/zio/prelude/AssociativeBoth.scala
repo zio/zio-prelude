@@ -965,7 +965,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `Either`.
    */
-  implicit def EitherAssociativeBoth[L]: IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] =
+  implicit def EitherIdentityBoth[L]: IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] =
     new IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] {
       val any: Either[L, Any] = Right(())
 
@@ -976,7 +976,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for a failed `Either`
    */
-  implicit def EitherFailedAssociativeBoth[R]: IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+  implicit def EitherFailedIdentityBoth[R]: IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
     new IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
       val any: Failure[Either[Any, R]] = Failure.wrap(Left(()))
 
@@ -1008,7 +1008,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `Future`.
    */
-  implicit val FutureAssociativeBoth: IdentityBoth[Future] =
+  implicit val FutureIdentityBoth: IdentityBoth[Future] =
     new IdentityBoth[Future] {
       val any: Future[Any] = Future.successful(())
 
@@ -1018,7 +1018,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `Id`.
    */
-  implicit val IdAssociativeBoth: IdentityBoth[Id] =
+  implicit val IdIdentityBoth: IdentityBoth[Id] =
     new IdentityBoth[Id] {
       val any: Id[Any] = Id(())
 
@@ -1029,7 +1029,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `List`.
    */
-  implicit val ListAssociativeBoth: IdentityBoth[List] =
+  implicit val ListIdentityBoth: IdentityBoth[List] =
     new IdentityBoth[List] {
       val any: List[Any] =
         List(())
@@ -1087,7 +1087,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `Try`.
    */
-  implicit val TryAssociativeBoth: IdentityBoth[Try] =
+  implicit val TryIdentityBoth: IdentityBoth[Try] =
     new IdentityBoth[Try] {
       val any: Try[Any] = Success(())
 
