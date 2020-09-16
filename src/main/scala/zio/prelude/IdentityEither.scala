@@ -67,7 +67,8 @@ object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvaria
     new IdentityEither[Option] {
       def either[A, B](fa: => Option[A], fb: => Option[B]): Option[Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
-      val none: Option[Nothing]                                                  =
+
+      val none: Option[Nothing] =
         None
     }
 }
