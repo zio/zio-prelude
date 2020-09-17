@@ -1,8 +1,6 @@
 package zio.prelude
 
-import zio.stm.ZSTM
-import zio.stream.ZStream
-import zio.{ Exit, ZIO, ZLayer, ZManaged }
+import zio.Exit
 
 trait RightCovariant[:=>[_, +_]] {
   def deriveCovariant[A]: Covariant[({ type lambda[+B] = A :=> B })#lambda] =
@@ -38,40 +36,10 @@ object Bicovariant {
       }
     }
 
-  implicit def ZIOBicovariant[R]: Bicovariant[({ type lambda[+E, +A] = ZIO[R, E, A] })#lambda] =
-    new Bicovariant[({ type lambda[+E, +A] = ZIO[R, E, A] })#lambda] {
-      override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): ZIO[R, A, B] => ZIO[R, AA, BB] =
-        _.bimap(f, g)
-    }
-
-  implicit def ZstreamBicovariant[R]: Bicovariant[({ type lambda[+E, +O] = ZStream[R, E, O] })#lambda] =
-    new Bicovariant[({ type lambda[+E, +O] = ZStream[R, E, O] })#lambda] {
-      override def bimap[A, O, AA, OO](f: A => AA, g: O => OO): ZStream[R, A, O] => ZStream[R, AA, OO] =
-        _.bimap(f, g)
-    }
-
-  implicit def ZManagedBicovariant[R]: Bicovariant[({ type lambda[+E, +O] = ZManaged[R, E, O] })#lambda] =
-    new Bicovariant[({ type lambda[+E, +O] = ZManaged[R, E, O] })#lambda] {
-      override def bimap[A, O, AA, OO](f: A => AA, g: O => OO): ZManaged[R, A, O] => ZManaged[R, AA, OO] =
-        _.bimap(f, g)
-    }
-
-  implicit def ZSTMBicovariant[R]: Bicovariant[({ type lambda[+E, +A] = ZSTM[R, E, A] })#lambda] =
-    new Bicovariant[({ type lambda[+E, +A] = ZSTM[R, E, A] })#lambda] {
-      override def bimap[A, E, AA, EE](f: A => AA, g: E => EE): ZSTM[R, A, E] => ZSTM[R, AA, EE] =
-        _.bimap(f, g)
-    }
-
   implicit val ExitBicovariant: Bicovariant[Exit] =
     new Bicovariant[Exit] {
       override def bimap[A, E, AA, EE](f: A => AA, g: E => EE): Exit[A, E] => Exit[AA, EE] =
         _.bimap(f, g)
-    }
-
-  implicit def ZlayerBicovariant[RIn]: Bicovariant[({ type lambda[+E, +ROut] = ZLayer[RIn, E, ROut] })#lambda] =
-    new Bicovariant[({ type lambda[+E, +ROut] = ZLayer[RIn, E, ROut] })#lambda] {
-      override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): ZLayer[RIn, A, B] => ZLayer[RIn, AA, BB] =
-        _.map(g).mapError(f)
     }
 }
 
