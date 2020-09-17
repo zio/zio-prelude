@@ -392,7 +392,7 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
   /**
    * The contravariant instance for `ZQueue`.
    */
-  implicit def ZQueueContravariant[RA, EA, RB, EB, A, B]
+  implicit def ZQueueContravariant[RA, EA, RB, EB, B]
     : Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] {
       def contramap[A, C](f: C => A): ZQueue[RA, EA, RB, EB, A, B] => ZQueue[RA, EA, RB, EB, C, B] =
