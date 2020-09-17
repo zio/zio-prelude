@@ -1,6 +1,7 @@
 package zio.prelude
 
-trait Divariant[:=>[-_, +_]] { self =>
+trait Divariant[:=>[-_, +_]] {
+
   def deriveCovariant[A]: Covariant[({ type lambda[+B] = A :=> B })#lambda] =
     new Covariant[({ type lambda[+B] = A :=> B })#lambda] {
       def map[B, C](f: B => C): A :=> B => A :=> C = dimap(identity, f)
@@ -12,11 +13,72 @@ trait Divariant[:=>[-_, +_]] { self =>
     }
 
   def dimap[A, B, C, D](f: C => A, g: B => D): (A :=> B) => (C :=> D) =
-    (ab: A :=> B) => rightMap(g)(leftMap(f)(ab))
+    (ab: A :=> B) => rightMap(g)(leftContramap(f)(ab))
 
-  def leftMap[A, B, C](f: C => A): (A :=> B) => (C :=> B)
+  def leftContramap[A, B, C](f: C => A): (A :=> B) => (C :=> B)
 
   def rightMap[A, B, C](f: B => C): (A :=> B) => (A :=> C)
+
+  // laws for leftContramap
+
+  def leftContramapCompose[A, B, A2, A3](
+    ab: A :=> B,
+    f: A2 => A,
+    g: A3 => A2
+  )(implicit eq: Equal[A3 :=> B]): Boolean = {
+    val lhs: A :=> B => A3 :=> B = leftContramap(f compose g)
+    val rhs: A :=> B => A3 :=> B = leftContramap(g) compose leftContramap(f)
+    eq.equal(lhs(ab), rhs(ab))
+  }
+
+  def leftContramapidentity[A, B](
+    ab: A :=> B
+  )(implicit eq: Equal[A :=> B]): Boolean = {
+    val lhs: A :=> B => A :=> B = leftContramap(identity[A])
+    eq.equal(lhs(ab), ab)
+  }
+
+  // laws for dimap
+
+  def dimapCompose[A, B, A2, A3, B2, B3](
+    ab: A :=> B,
+    g: A3 => A2,
+    f: A2 => A,
+    i: B => B2,
+    h: B2 => B3
+  )(implicit eq: Equal[A3 :=> B3]): Boolean = {
+    val fg: A3 => A               = f compose g
+    val hi: B => B3               = h compose i
+    val lhs: A :=> B => A3 :=> B3 = dimap(fg, hi)
+
+    val rhs1: A :=> B => A2 :=> B2   = dimap(f, i)
+    val rhs2: A2 :=> B2 => A3 :=> B3 = dimap(g, h)
+    val rhs3: A :=> B => A3 :=> B3   = rhs2 compose rhs1
+    eq.equal(lhs(ab), rhs3(ab))
+  }
+
+  def dimapIdentity[A, B, B2, B3](
+    ab: A :=> B
+  )(implicit eq: Equal[A :=> B]): Boolean = {
+    val lhs: A :=> B => A :=> B = dimap(identity[A], identity[B])
+    eq.equal(lhs(ab), ab)
+  }
+
+  // dimap must be coherent with leftContramap and rightMap
+
+  def dimapCoherence[A, A2, A3, B, B2, B3](
+    ab: A :=> B,
+    f: A2 => A,
+    g: B => B2
+  )(implicit eq: Equal[A2 :=> B2]): Boolean = {
+    val lhs: A :=> B => A2 :=> B2 = dimap(f, g)
+
+    val rhs1: A :=> B => A :=> B2   = rightMap(g)
+    val rhs2: A :=> B2 => A2 :=> B2 = leftContramap(f)
+    val rhs3: A :=> B => A2 :=> B2  = rhs1 andThen rhs2
+
+    eq.equal(lhs(ab), rhs3(ab))
+  }
 }
 
 object Divariant {
@@ -24,7 +86,7 @@ object Divariant {
 
   implicit val Function1Divariant: Divariant[({ type lambda[-A, +B] = A => B })#lambda] =
     new Divariant[({ type lambda[-A, +B] = A => B })#lambda] {
-      override def leftMap[A, B, C](c2a: C => A): (A => B) => C => B = { a2b => c =>
+      override def leftContramap[A, B, C](c2a: C => A): (A => B) => C => B = { a2b => c =>
         c |> c2a |> a2b
       }
       override def rightMap[A, B, C](b2c: B => C): (A => B) => A => C = { a2b => a =>
@@ -41,11 +103,9 @@ trait DivariantSyntax {
       divariant.dimap(g, h)(f)
 
     def leftMap[C](ca: C => A)(implicit divariant: Divariant[:=>]): C :=> B =
-      divariant.leftMap(ca)(f)
+      divariant.leftContramap(ca)(f)
 
     def rightMap[C](bc: B => C)(implicit divariant: Divariant[:=>]): A :=> C =
       divariant.rightMap(bc)(f)
-
   }
-
 }
