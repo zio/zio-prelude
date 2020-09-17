@@ -40,9 +40,10 @@ sealed trait Validation[+E, +A] { self =>
    */
   override final def equals(that: Any): Boolean =
     (self, that) match {
-      case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
-      case (Success(a), Success(a1))   => a == a1
-      case _                           => false
+      case (self, that: AnyRef) if self.eq(that) => true
+      case (Failure(es), Failure(e1s))           => es.groupBy(identity) == e1s.groupBy(identity)
+      case (Success(a), Success(a1))             => a == a1
+      case _                                     => false
     }
 
   /**

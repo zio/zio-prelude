@@ -86,10 +86,11 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
    */
-  override def equals(that: Any): Boolean =
+  override final def equals(that: Any): Boolean =
     that match {
-      case that: ZSet[_, _] => self.map == that.map
-      case _                => false
+      case that: AnyRef if self.eq(that) => true
+      case that: ZSet[_, _]              => self.map == that.map
+      case _                             => false
     }
 
   /**
@@ -108,7 +109,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   /**
    * Returns the hash code of this set.
    */
-  override def hashCode: Int =
+  override final def hashCode: Int =
     map.hashCode
 
   /**
