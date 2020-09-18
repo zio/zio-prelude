@@ -545,17 +545,6 @@ object ZPure {
         fa.zip(fb)
     }
 
-  /**
-   * The `IdentityFlatten` instance for `ZPure`.
-   */
-  implicit def ZPureIdentityFlatten[S, R, E]: IdentityFlatten[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] =
-    new IdentityFlatten[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] {
-      def any: ZPure[S, S, Any, Nothing, Any]                                            =
-        ZPure.unit
-      def flatten[A](ffa: ZPure[S, S, R, E, ZPure[S, S, R, E, A]]): ZPure[S, S, R, E, A] =
-        ffa.flatten
-    }
-
   object Tags {
     final val FlatMap = 0
     final val Succeed = 1
