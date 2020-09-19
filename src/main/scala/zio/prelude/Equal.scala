@@ -278,7 +278,14 @@ object Equal extends Lawful[Equal] {
    * Derives an `Equal[F[A]]` given a `Derive[F, Equal]` and an `Equal[A]`.
    */
   implicit def DeriveEqual[F[_]: DeriveEqual, A: Equal]: Equal[F[A]] =
-    Derive[F, Equal].derive(Equal[A])
+    Derive[F, Equal, Equal].derive(Equal[A])
+
+  /**
+   * Derives an `Equal[F[A]]` given a `ZDerive[F, Equal, Enumerable]` and an
+   * `Equal[A]`.
+   */
+  implicit def DeriveEqualFromEnumerable[F[_]: DeriveEqualFromEnumerable, A: Enumerable]: Equal[F[A]] =
+    Derive[F, Equal, Enumerable].derive(Enumerable[A])
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Double` values.
@@ -299,6 +306,18 @@ object Equal extends Lawful[Equal] {
    */
   implicit def EitherEqual[A: Equal, B: Equal]: Equal[Either[A, B]] =
     Equal[A] either Equal[B]
+
+  /**
+   * Derives an `Equal[Equal[A]]` given an `Enumerable[A]`.
+   */
+  implicit def EqualEqual[A: Enumerable]: Equal[Equal[A]] =
+    Equal.make { (l, r) =>
+      val pairs = for {
+        a1 <- Enumerable[A].enumerate
+        a2 <- Enumerable[A].enumerate
+      } yield l.equal(a1, a2) == r.equal(a1, a2)
+      pairs.forall(identity)
+    }
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Float` values.
