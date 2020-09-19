@@ -58,7 +58,7 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
-object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqualFromEnumerable, Enumerable] {
+object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqualFromEnumerable, Enumerable] {
 
   /**
    * Contramapping with the identity function must not change the structure.
