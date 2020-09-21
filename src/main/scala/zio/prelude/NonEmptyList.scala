@@ -436,6 +436,16 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Associative.make(_ ++ _)
 
   /**
+   * The `IdentityFlatten` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListIdentityFlatten: IdentityFlatten[NonEmptyList] =
+    new IdentityFlatten[NonEmptyList] {
+      val any: NonEmptyList[Any]                                          = single(())
+      def flatten[A](ffa: NonEmptyList[NonEmptyList[A]]): NonEmptyList[A] =
+        ffa.flatten
+    }
+
+  /**
    * The `Covariant` instance for `NonEmptyList`.
    */
   implicit val NonEmptyListCovariant: Covariant[NonEmptyList] =

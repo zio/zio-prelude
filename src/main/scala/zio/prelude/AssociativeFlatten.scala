@@ -5,9 +5,7 @@ import scala.concurrent.Future
 import scala.util.{ Success, Try }
 
 import zio._
-import zio.prelude.NonEmptyList.single
 import zio.prelude.coherent.AssociativeFlattenCovariantDeriveEqual
-import zio.prelude.fx.ZPure
 import zio.stream.ZStream
 import zio.test.TestResult
 import zio.test.laws._
@@ -205,26 +203,6 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
       def any: ZStream[R, E, Any] = ZStream.unit
 
       def flatten[A](ffa: ZStream[R, E, ZStream[R, E, A]]): ZStream[R, E, A] = ffa.flatten
-    }
-
-  /**
-   * The `AssociativeFlatten` and `IdentityFlatten` instance for `NonEmptyList`.
-   */
-  implicit val NonEmptyListIdentityFlatten: IdentityFlatten[NonEmptyList] =
-    new IdentityFlatten[NonEmptyList] {
-      val any: NonEmptyList[Any] = single(())
-
-      def flatten[A](ffa: NonEmptyList[NonEmptyList[A]]): NonEmptyList[A] = ffa.flatten
-    }
-
-  /**
-   * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZPure`.
-   */
-  implicit def ZPureIdentityFlatten[S, R, E]: IdentityFlatten[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] =
-    new IdentityFlatten[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] {
-      def any: ZPure[S, S, Any, Nothing, Any] = ZPure.unit
-
-      def flatten[A](ffa: ZPure[S, S, R, E, ZPure[S, S, R, E, A]]): ZPure[S, S, R, E, A] = ffa.flatten
     }
 
 }
