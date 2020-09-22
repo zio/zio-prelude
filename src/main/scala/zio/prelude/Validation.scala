@@ -293,9 +293,9 @@ object Validation extends LowPriorityValidationImplicits {
   def fromOption[A](value: Option[A]): Validation[Unit, A] =
     value.fold[Validation[Unit, A]](fail(()))(succeed)
 
-  def fromPredicate[E, A](predicate: Boolean, value: => A, error: => E): Validation[E, A] =
-    if (predicate) succeed(value)
-    else fail(error)
+  def fromPredicate[E, A](error: E, value: A)(f: A => Boolean): Validation[E, A] =
+    if (f(value)) Validation.succeed(value)
+    else Validation.fail(error)
 
   /**
    * Constructs a `Validation` from a `Try`.
