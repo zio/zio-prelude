@@ -237,7 +237,7 @@ private[prelude] sealed trait NewtypeModule {
   }
 
   sealed trait SubtypeSmart[A] extends NewtypeSmart[A] {
-    type Type
+    type Type <: A
   }
 }
 
