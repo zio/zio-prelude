@@ -6,6 +6,11 @@ import zio.{ ZIO, ZLayer, ZManaged }
 
 import scala.Predef.{ identity => id }
 
+/**
+ * Abstract over type constructor with 3 parameters: on first as contravariant
+ * and on second and third as covariant.
+ * @tparam Z
+ */
 trait Zivariant[Z[-_, +_, +_]] {
 
   def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
@@ -61,6 +66,31 @@ trait Zivariant[Z[-_, +_, +_]] {
 
 object Zivariant {
 
+  implicit val FunctionEitherZivariant: Zivariant[({ type lambda[-R, +E, +A] = R => Either[E, A] })#lambda] =
+    new Zivariant[({ type lambda[-R, +E, +A] = R => Either[E, A] })#lambda] {
+      override def zimap[R, E, A, R1, E1, A1](
+        r: R1 => R,
+        e: E => E1,
+        a: A => A1
+      ): (R => Either[E, A]) => R1 => Either[E1, A1] =
+        rea =>
+          r1 =>
+            (r andThen rea)(r1) match {
+              case Right(aa) => Right(a(aa))
+              case Left(ee)  => Left(e(ee))
+            }
+    }
+
+  implicit val FunctionTupleZivariant: Zivariant[({ type lambda[-R, +E, +A] = R => (E, A) })#lambda] =
+    new Zivariant[({ type lambda[-R, +E, +A] = R => (E, A) })#lambda] {
+      override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): (R => (E, A)) => R1 => (E1, A1) =
+        rea =>
+          r1 => {
+            val (ee, aa) = (r andThen rea)(r1)
+            (e(ee), a(aa))
+          }
+    }
+
   implicit val ZioZivariant: Zivariant[ZIO] = new Zivariant[ZIO] {
     override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): ZIO[R, E, A] => ZIO[R1, E1, A1] =
       rea => rea.bimap(e, a).provideSome(r)
@@ -105,10 +135,10 @@ object Zivariant {
 
 trait ZivariantSyntax {
 
-  implicit class ZivariantOps[Z[-_, +_, +_], R, E, A](f: => Z[R,E,A]) {
+  implicit class ZivariantOps[Z[-_, +_, +_], R, E, A](f: => Z[R, E, A]) {
 
     def zimap[R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1)(implicit zivariant: Zivariant[Z]): Z[R1, E1, A1] =
-      zivariant.zimap(r,e,a)(f)
+      zivariant.zimap(r, e, a)(f)
 
     def contramap[R1](r: R1 => R)(implicit zivariant: Zivariant[Z]): Z[R1, E, A] =
       zivariant.contramap(r)(f)
