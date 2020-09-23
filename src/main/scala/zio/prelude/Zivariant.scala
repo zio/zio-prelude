@@ -1,0 +1,128 @@
+package zio.prelude
+
+import zio.stm.ZSTM
+import zio.stream.ZStream
+import zio.{ ZIO, ZLayer, ZManaged }
+
+import scala.Predef.{ identity => id }
+
+trait Zivariant[Z[-_, +_, +_]] {
+
+  def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
+
+  // derived methods
+  def contramap[R, E, A, R1](r: R1 => R): Z[R, E, A] => Z[R1, E, A] =
+    zimap(r, id[E], id[A])
+
+  def mapLeft[R, E, A, E1](e: E => E1): Z[R, E, A] => Z[R, E1, A] =
+    zimap(id[R], e, id[A])
+
+  def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] =
+    zimap(id[R], id[E], a)
+
+  def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1] =
+    zimap(id[R], e, a)
+
+  def dimap[R, E, A, RR, AA](r: RR => R, a: A => AA): Z[R, E, A] => Z[RR, E, AA] =
+    zimap(r, id[E], a)
+
+  // zimap id id id == id
+  def zimapIdentity[R, E, A](rea: Z[R, E, A])(implicit eq: Equal[Z[R, E, A]]): Boolean =
+    zimap(id[R], id[E], id[A])(rea) === rea
+
+  // zimap (r2 andThen r1) (e1 andThen e2) (a1 andThen a2) == zimap (r1 e1 a1) andThen zimap (r2 e2 a2)
+  def zimapComposition[R, E, A, R1, R2, E1, E2, A1, A2](
+    rea: Z[R, E, A],
+    r2: R2 => R1,
+    r1: R1 => R,
+    e1: E => E1,
+    e2: E1 => E2,
+    a1: A => A1,
+    a2: A1 => A2
+  )(implicit eq: Equal[Z[R2, E2, A2]]): Boolean = {
+    val rhs: Z[R2, E2, A2] = zimap(r2 andThen r1, e1 andThen e2, a1 andThen a2)(rea)
+    val lhs: Z[R2, E2, A2] = (zimap(r1, e1, a1) andThen zimap(r2, e2, a2))(rea)
+    lhs === rhs
+  }
+
+  // zimap r e a == contramap(r) andThen map(a) andThen mapLeft(e)
+  def zimapCoherentWithMapAndContramap[R, E, A, R1, E1, A1](
+    rea: Z[R, E, A],
+    r: R1 => R,
+    e: E => E1,
+    a: A => A1
+  )(implicit eq: Equal[Z[R1, E1, A1]]): Boolean = {
+    val lhs: Z[R1, E1, A1]                = zimap(r, e, a)(rea)
+    val rhs1: Z[R, E, A] => Z[R1, E1, A1] = contramap(r) andThen map[R1, E, A, A1](a) andThen mapLeft(e)
+    val rhs2: Z[R1, E1, A1]               = rhs1(rea)
+    lhs === rhs2
+  }
+}
+
+object Zivariant {
+
+  implicit val ZioZivariant: Zivariant[ZIO] = new Zivariant[ZIO] {
+    override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): ZIO[R, E, A] => ZIO[R1, E1, A1] =
+      rea => rea.bimap(e, a).provideSome(r)
+  }
+
+  implicit val ZLayerZivariant: Zivariant[ZLayer] =
+    new Zivariant[ZLayer] {
+      override def zimap[E, A, R, EE, AA, RR](
+        r: EE => E,
+        e: A => AA,
+        a: R => RR
+      ): ZLayer[E, A, R] => ZLayer[EE, AA, RR] =
+        rea => ZLayer.fromFunctionMany(r) >>> rea.map(a).mapError(e)
+    }
+
+  implicit val ZManagedZivariant: Zivariant[ZManaged] =
+    new Zivariant[ZManaged] {
+      override def zimap[E, A, R, EE, AA, RR](
+        r: EE => E,
+        e: A => AA,
+        a: R => RR
+      ): ZManaged[E, A, R] => ZManaged[EE, AA, RR] =
+        rea => rea.bimap(e, a).provideSome(r)
+    }
+
+  implicit val ZStreamZivariant: Zivariant[ZStream] =
+    new Zivariant[ZStream] {
+      override def zimap[E, A, R, EE, AA, RR](
+        r: EE => E,
+        e: A => AA,
+        a: R => RR
+      ): ZStream[E, A, R] => ZStream[EE, AA, RR] =
+        rea => rea.bimap(e, a).provideSome(r)
+    }
+
+  implicit val ZSTMZivariant: Zivariant[ZSTM] =
+    new Zivariant[ZSTM] {
+      override def zimap[E, A, R, EE, AA, RR](r: EE => E, e: A => AA, a: R => RR): ZSTM[E, A, R] => ZSTM[EE, AA, RR] =
+        rea => rea.bimap(e, a).provideSome(r)
+    }
+}
+
+trait ZivariantSyntax {
+
+  implicit class ZivariantOps[Z[-_, +_, +_], R, E, A](f: => Z[R,E,A]) {
+
+    def zimap[R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1)(implicit zivariant: Zivariant[Z]): Z[R1, E1, A1] =
+      zivariant.zimap(r,e,a)(f)
+
+    def contramap[R1](r: R1 => R)(implicit zivariant: Zivariant[Z]): Z[R1, E, A] =
+      zivariant.contramap(r)(f)
+
+    def mapLeft[E1](e: E => E1)(implicit zivariant: Zivariant[Z]): Z[R, E1, A] =
+      zivariant.mapLeft(e)(f)
+
+    def map[A1](a: A => A1)(implicit zivariant: Zivariant[Z]): Z[R, E, A1] =
+      zivariant.map(a)(f)
+
+    def bimap[E1, A1](e: E => E1, a: A => A1)(implicit zivariant: Zivariant[Z]): Z[R, E1, A1] =
+      zivariant.bimap(e, a)(f)
+
+    def dimap[RR, AA](r: RR => R, a: A => AA)(implicit zivariant: Zivariant[Z]): Z[RR, E, AA] =
+      zivariant.dimap(r, a)(f)
+  }
+}
