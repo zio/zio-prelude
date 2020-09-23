@@ -19,6 +19,25 @@ trait Divariant[:=>[-_, +_]] {
 
   def rightMap[A, B, C](f: B => C): (A :=> B) => (A :=> C)
 
+  // laws for rightMap
+
+  def rightMapCompose[A, B, B2, B3](
+    ab: A :=> B,
+    f: B => B2,
+    g: B2 => B3
+  )(implicit eq: Equal[A :=> B3]): Boolean = {
+    val lhs: A :=> B => A :=> B3 = rightMap(g compose f)
+    val rhs: A :=> B => A :=> B3 = rightMap(g) compose rightMap(f)
+    eq.equal(lhs(ab), rhs(ab))
+  }
+
+  def rightMapIdentity[A, B](
+    ab: A :=> B
+  )(implicit eq: Equal[A :=> B]): Boolean = {
+    val lhs: A :=> B => A :=> B = rightMap(identity[B])
+    eq.equal(lhs(ab), ab)
+  }
+
   // laws for leftContramap
 
   def leftContramapCompose[A, B, A2, A3](
