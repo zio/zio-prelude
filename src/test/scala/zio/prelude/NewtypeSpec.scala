@@ -28,6 +28,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
           assert(Natural.make(-1))(isFailureV(equalTo(expected)))
         }
       ),
+      suite("SubtypeSmart")(
+        test("subtypes values") {
+          val _ = implicitly[Natural <:< Int]
+          assert(true)(isTrue)
+        }
+      ),
       suite("examples from documentation")(
         test("meter") {
           val x = Meter(3.4)
