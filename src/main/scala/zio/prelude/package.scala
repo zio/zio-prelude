@@ -29,7 +29,8 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
-    with TraversableSyntax {
+    with TraversableSyntax
+    with BicovariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
 
@@ -103,6 +104,7 @@ package object prelude
 
     type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
     type Profunctor[:=>[-_, +_]] = Divariant[:=>]
+    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
   }
 
   /**
@@ -137,7 +139,5 @@ package object prelude
       val _ = f(a)
       a
     }
-
   }
-
 }
