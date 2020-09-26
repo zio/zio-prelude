@@ -9,9 +9,30 @@ import scala.Predef.{ identity => id }
 /**
  * Abstract over type constructor with 3 parameters: on first as contravariant
  * and on second and third as covariant.
- * @tparam Z
  */
-trait Zivariant[Z[-_, +_, +_]] {
+trait Zivariant[Z[-_, +_, +_]] { self =>
+
+  def deriveCovariant[R, E]: Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] =
+    new Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] {
+      def map[A, A1](f: A => A1): Z[R, E, A] => Z[R, E, A1] = self.map(f)
+    }
+
+  def deriveLeftCovariant[R, A]: Covariant[({ type lambda[+E] = Z[R, E, A] })#lambda] =
+    new Covariant[({ type lambda[+E] = Z[R, E, A] })#lambda] {
+      def map[E, E1](f: E => E1): Z[R, E, A] => Z[R, E1, A] = self.mapLeft(f)
+    }
+
+  def deriveContravariant[E, A]: Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] =
+    new Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] {
+      def contramap[R, R1](f: R1 => R): Z[R, E, A] => Z[R1, E, A] = self.contramap(f)
+    }
+
+  def deriveDivariant[E]: Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] =
+    new Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] {
+      override def dimap[R, A, R1, D](f: R1 => R, g: A => D): Z[R, E, A] => Z[R1, E, D] = self.dimap(f, g)
+      override def leftMap[R, A, R1](f: R1 => R): Z[R, E, A] => Z[R1, E, A]             = self.contramap(f)
+      override def rightMap[R1, A, A1](f: A => A1): Z[R1, E, A] => Z[R1, E, A1]         = self.map(f)
+    }
 
   def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
 
