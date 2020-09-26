@@ -151,16 +151,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for a failed `Either`
    */
   implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
-    new Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
-      override def map[L, L1](f: L => L1): Failure[Either[L, R]] => Failure[Either[L1, R]] = { either =>
-        Failure.wrap {
-          Failure.unwrap(either) match {
-            case Left(l)  => Left[L1, R](f(l))
-            case Right(r) => Right[L1, R](r)
-          }
-        }
-      }
-    }
+    Bicovariant.EitherBicovariant.deriveFailureCovariant
 
   /**
    * The `Covariant` instance for `Try`
@@ -186,10 +177,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `Function1`
    */
   implicit def Function1Covariant[T]: Covariant[({ type lambda[+x] = T => x })#lambda] =
-    new Covariant[({ type lambda[+x] = T => x })#lambda] {
-      override def map[A, B](f: A => B): (T => A) => T => B =
-        function => t => f(function(t))
-    }
+    Divariant.Function1Divariant.deriveCovariant
 
   /**
    * The `Covariant` instance for `Function2`
@@ -1228,11 +1216,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for a failed `ZIO`
    */
   implicit def ZIOFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZIO[R, E, A]] => Failure[ZIO[R, E1, A]] = { zio =>
-        Failure.wrap(Failure.unwrap(zio).mapError(f))
-      }
-    }
+    Zivariant.ZioZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` instance for `ZManaged`
@@ -1244,11 +1228,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for a failed `ZManaged`
    */
   implicit def ZManagedFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZManaged[R, E, A]] => Failure[ZManaged[R, E1, A]] = { zmanaged =>
-        Failure.wrap(Failure.unwrap(zmanaged).mapError(f))
-      }
-    }
+    Zivariant.ZManagedZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` instance for `ZStream`
@@ -1260,11 +1240,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for a failed `ZStream`
    */
   implicit def ZStreamFailureCovariant[R, O]: Covariant[({ type lambda[+e] = Failure[ZStream[R, e, O]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZStream[R, e, O]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZStream[R, E, O]] => Failure[ZStream[R, E1, O]] = { ztream =>
-        Failure.wrap(Failure.unwrap(ztream).mapError(f))
-      }
-    }
+    Zivariant.ZStreamZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` instance for `Schedule`
@@ -1296,11 +1272,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for a failed `ZLayer`
    */
   implicit def ZLayerFailureCovariant[R, Out]: Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZLayer[R, E, Out]] => Failure[ZLayer[R, E1, Out]] = { zlayer =>
-        Failure.wrap(Failure.unwrap(zlayer).mapError(f))
-      }
-    }
+    Zivariant.ZLayerZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` instance for `ZQueue`
@@ -1337,11 +1309,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for a failed `Exit`
    */
   implicit def ExitFailureCovariant[A]: Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
-      override def map[E, E1](f: E => E1): Failure[Exit[E, A]] => Failure[Exit[E1, A]] = { exit =>
-        Failure.wrap(Failure.unwrap(exit).mapError(f))
-      }
-    }
+    Bicovariant.ExitBicovariant.deriveFailureCovariant
 
   /**
    * The `Covariant` instance for `ZRef`
