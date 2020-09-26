@@ -366,28 +366,19 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
    * The contravariant instance for `ZIO`.
    */
   implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZIO[R, E, A] => ZIO[R0, E, A] =
-        zio => zio.provideSome(f)
-    }
+    Zivariant.ZioZivariant.deriveContravariant[E, A]
 
   /**
    * The contravariant instance for `ZLayer`.
    */
   implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] {
-      def contramap[RIn, RIn0](f: RIn0 => RIn): ZLayer[RIn, E, ROut] => ZLayer[RIn0, E, ROut] =
-        layer => ZLayer.fromFunctionMany(f) >>> layer
-    }
+    Zivariant.ZLayerZivariant.deriveContravariant[E, ROut]
 
   /**
    * The contravariant instance for `ZManaged`.
    */
   implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZManaged[R, E, A] => ZManaged[R0, E, A] =
-        managed => managed.provideSome(f)
-    }
+    Zivariant.ZManagedZivariant.deriveContravariant[E, A]
 
   /**
    * The contravariant instance for `ZQueue`.
@@ -431,10 +422,7 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
    * The contravariant instance for `ZStream`.
    */
   implicit def ZStreamContravariant[E, A]: Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZStream[R, E, A] => ZStream[R0, E, A] =
-        stream => stream.provideSome(f)
-    }
+    Zivariant.ZStreamZivariant.deriveContravariant[E, A]
 }
 
 trait ContravariantSyntax {
