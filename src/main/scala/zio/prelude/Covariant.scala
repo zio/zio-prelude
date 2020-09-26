@@ -1210,7 +1210,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZIO`
    */
   implicit def ZIOCovariant[R, E]: Covariant[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    Zivariant.ZioZivariant.deriveCovariant[R, E]
+    Zivariant.ZioZivariant.deriveCovariant
 
   /**
    * The `Covariant` instance for a failed `ZIO`
@@ -1222,7 +1222,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZManaged`
    */
   implicit def ZManagedCovariant[R, E]: Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    Zivariant.ZManagedZivariant.deriveCovariant[R, E]
+    Zivariant.ZManagedZivariant.deriveCovariant
 
   /**
    * The `Covariant` instance for a failed `ZManaged`
@@ -1234,7 +1234,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZStream`
    */
   implicit def ZStreamCovariant[R, E]: Covariant[({ type lambda[+o] = ZStream[R, E, o] })#lambda] =
-    Zivariant.ZStreamZivariant.deriveCovariant[R, E]
+    Zivariant.ZStreamZivariant.deriveCovariant
 
   /**
    * The `Covariant` instance for a failed `ZStream`
@@ -1266,7 +1266,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZLayer`
    */
   implicit def ZLayerCovariant[R, E]: Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] =
-    Zivariant.ZLayerZivariant.deriveCovariant[R, E]
+    Zivariant.ZLayerZivariant.deriveCovariant
 
   /**
    * The `Covariant` instance for a failed `ZLayer`
@@ -1299,11 +1299,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `Exit`
    */
   implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
-    new Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] {
-      override def map[A, B](f: A => B): Exit[E, A] => Exit[E, B] = { exit =>
-        exit.map(f)
-      }
-    }
+    Bicovariant.ExitBicovariant.deriveCovariant
 
   /**
    * The `Covariant` instance for a failed `Exit`
