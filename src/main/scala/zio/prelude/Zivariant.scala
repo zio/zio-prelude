@@ -1,10 +1,10 @@
 package zio.prelude
 
+import scala.Predef.{ identity => id }
+
 import zio.stm.ZSTM
 import zio.stream.ZStream
 import zio.{ ZIO, ZLayer, ZManaged }
-
-import scala.Predef.{ identity => id }
 
 /**
  * Abstract over type constructor with 3 parameters: on first as contravariant
