@@ -145,7 +145,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `Either`
    */
   implicit def EitherCovariant[L]: Covariant[({ type lambda[+r] = Either[L, r] })#lambda] =
-    Bicovariant.EitherBicovariant.deriveCovariant[L]
+    Bicovariant.EitherBicovariant.deriveCovariant
 
   /**
    * The `Covariant` instance for a failed `Either`
@@ -656,7 +656,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `Tuple2`
    */
   implicit def Tuple2Covariant[T1]: Covariant[({ type lambda[+x] = (T1, x) })#lambda] =
-    Bicovariant.Tuple2Bicovariant.deriveCovariant[T1]
+    Bicovariant.Tuple2Bicovariant.deriveCovariant
 
   /**
    * The `Covariant` instance for `Tuple3`

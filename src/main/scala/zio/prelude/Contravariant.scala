@@ -366,19 +366,19 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
    * The contravariant instance for `ZIO`.
    */
   implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
-    Zivariant.ZioZivariant.deriveContravariant[E, A]
+    Zivariant.ZioZivariant.deriveContravariant
 
   /**
    * The contravariant instance for `ZLayer`.
    */
   implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
-    Zivariant.ZLayerZivariant.deriveContravariant[E, ROut]
+    Zivariant.ZLayerZivariant.deriveContravariant
 
   /**
    * The contravariant instance for `ZManaged`.
    */
   implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
-    Zivariant.ZManagedZivariant.deriveContravariant[E, A]
+    Zivariant.ZManagedZivariant.deriveContravariant
 
   /**
    * The contravariant instance for `ZQueue`.

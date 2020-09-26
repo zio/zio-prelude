@@ -62,7 +62,8 @@ package object prelude
   type DeriveInverse[F[_]]     = Derive[F, Inverse]
   type DeriveOrd[F[_]]         = Derive[F, Ord]
 
-  type Divariant[:=>[-_, +_]] = Zivariant[({ type lambda[-R, +E, +A] = R :=> A })#lambda]
+  type Divariant[:=>[-_, +_]]   = Zivariant[({ type lambda[-R, +E, +A] = R :=> A })#lambda]
+  type Bicovariant[:=>[+_, +_]] = Zivariant[({ type lambda[-R, +E, +A] = E :=> A })#lambda]
 
   object classic {
     type Semigroup[A]            = Associative[A]

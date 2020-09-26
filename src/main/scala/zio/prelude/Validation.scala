@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.util.Try
 
+import zio.prelude.Bicovariant.BicovariantInstance
 import zio.prelude.Validation._
 import zio.test.Assertion
 import zio.{ IO, NonEmptyChunk, ZIO }
@@ -164,20 +165,11 @@ object Validation extends LowPriorityValidationImplicits {
   final case class Success[+A](value: A)                 extends Validation[Nothing, A]
 
   /**
-   * The `Covariant` instance for `Validation`.
-   */
-  implicit def ValidationCovariant[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
-    new Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] {
-      def map[A, B](f: A => B): Validation[E, A] => Validation[E, B] =
-        _.map(f)
-    }
-
-  /**
    * The `Bicovariant` instance for `Validation`.
    */
-  implicit def ValidationBicovariant[E]: Bicovariant[Validation] =
-    new Bicovariant[Validation] {
-      override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Validation[A, B] => Validation[AA, BB] =
+  implicit val ValidationBicovariant: Bicovariant[Validation] =
+    new BicovariantInstance[Validation] {
+      override def bimap[R, E, A, E1, A1](f: E => E1, g: A => A1): Validation[E, A] => Validation[E1, A1] =
         _.map(g).mapError(f)
     }
 
