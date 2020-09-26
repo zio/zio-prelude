@@ -103,8 +103,8 @@ trait Divariant[:=>[-_, +_]] {
 object Divariant {
   final case class Join[:=>[-_, +_], A](value: A :=> A)
 
-  implicit val Function1Divariant: Divariant[({ type lambda[-A, +B] = A => B })#lambda] =
-    new Divariant[({ type lambda[-A, +B] = A => B })#lambda] {
+  implicit val Function1Divariant: Divariant[Function1] =
+    new Divariant[Function1] {
       override def leftContramap[A, B, C](c2a: C => A): (A => B) => C => B = { a2b => c =>
         c |> c2a |> a2b
       }
