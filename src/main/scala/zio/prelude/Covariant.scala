@@ -1230,11 +1230,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZIO`
    */
   implicit def ZIOCovariant[R, E]: Covariant[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new Covariant[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      def map[A, B](f: A => B): ZIO[R, E, A] => ZIO[R, E, B] = { zio =>
-        zio.map(f)
-      }
-    }
+    Zivariant.ZioZivariant.deriveCovariant[R, E]
 
   /**
    * The `Covariant` instance for a failed `ZIO`
@@ -1250,11 +1246,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZManaged`
    */
   implicit def ZManagedCovariant[R, E]: Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def map[A, B](f: A => B): ZManaged[R, E, A] => ZManaged[R, E, B] = { zmanaged =>
-        zmanaged.map(f)
-      }
-    }
+    Zivariant.ZManagedZivariant.deriveCovariant[R, E]
 
   /**
    * The `Covariant` instance for a failed `ZManaged`
@@ -1270,11 +1262,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZStream`
    */
   implicit def ZStreamCovariant[R, E]: Covariant[({ type lambda[+o] = ZStream[R, E, o] })#lambda] =
-    new Covariant[({ type lambda[+o] = ZStream[R, E, o] })#lambda] {
-      def map[A, B](f: A => B): ZStream[R, E, A] => ZStream[R, E, B] = { ztream =>
-        ztream.map(f)
-      }
-    }
+    Zivariant.ZStreamZivariant.deriveCovariant[R, E]
 
   /**
    * The `Covariant` instance for a failed `ZStream`
@@ -1310,11 +1298,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `ZLayer`
    */
   implicit def ZLayerCovariant[R, E]: Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] =
-    new Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] {
-      def map[A, B](f: A => B): ZLayer[R, E, A] => ZLayer[R, E, B] = { zlayer =>
-        zlayer.map(f)
-      }
-    }
+    Zivariant.ZLayerZivariant.deriveCovariant[R, E]
 
   /**
    * The `Covariant` instance for a failed `ZLayer`
