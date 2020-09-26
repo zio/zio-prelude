@@ -104,32 +104,23 @@ object Zivariant {
       zimap(r, e, id[A])
   }
 
-  implicit val FunctionEitherZivariant: Zivariant[({ type lambda[-R, +E, +A] = R => Either[E, A] })#lambda] =
-    new ZimapZivariant[({ type lambda[-R, +E, +A] = R => Either[E, A] })#lambda] {
+  def fromFunctionBicovariant[B[+_, +_]](implicit
+    ev: Bicovariant[B]
+  ): Zivariant[({ type lambda[-R, +E, +A] = R => B[E, A] })#lambda] =
+    new ZimapZivariant[({ type lambda[-R, +E, +A] = R => B[E, A] })#lambda] {
       override def zimap[R, E, A, R1, E1, A1](
         r: R1 => R,
         e: E => E1,
         a: A => A1
-      ): (R => Either[E, A]) => R1 => Either[E1, A1] =
-        rea =>
-          r1 =>
-            (r andThen rea)(r1) match {
-              case Right(aa) => Right(a(aa))
-              case Left(ee)  => Left(e(ee))
-            }
+      ): (R => B[E, A]) => R1 => B[E1, A1] =
+        rea => r1 => (r andThen rea)(r1).bimap(e, a)
     }
+
+  implicit val FunctionEitherZivariant: Zivariant[({ type lambda[-R, +E, +A] = R => Either[E, A] })#lambda] =
+    fromFunctionBicovariant(Bicovariant.EitherBicovariant)
 
   implicit val FunctionTupleZivariant: Zivariant[({ type lambda[-R, +E, +A] = R => (E, A) })#lambda] =
-    new ZimapZivariant[({ type lambda[-R, +E, +A] = R => (E, A) })#lambda] {
-      override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): (R => (E, A)) => R1 => (E1, A1) =
-        rea =>
-          r1 => {
-            val (ee, aa) = (r andThen rea)(r1)
-            (e(ee), a(aa))
-          }
-    }
-
-  // TODO Zivariant from function to Bifunctor
+    fromFunctionBicovariant(Bicovariant.Tuple2Bicovariant)
 
   implicit val ZioZivariant: Zivariant[ZIO] = new ZimapZivariant[ZIO] {
     override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): ZIO[R, E, A] => ZIO[R1, E1, A1] =
