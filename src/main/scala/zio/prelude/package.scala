@@ -61,6 +61,8 @@ package object prelude
   type DeriveInverse[F[_]]     = Derive[F, Inverse]
   type DeriveOrd[F[_]]         = Derive[F, Ord]
 
+  type Divariant[:=>[-_, +_]] = Zivariant[({ type lambda[-R, +E, +A] = R :=> A })#lambda]
+
   object classic {
     type Semigroup[A]            = Associative[A]
     type CommutativeSemigroup[A] = Commutative[A]

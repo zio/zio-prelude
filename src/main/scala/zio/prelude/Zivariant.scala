@@ -14,43 +14,37 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
 
   def deriveCovariant[R, E]: Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] =
     new Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] {
-      def map[A, A1](f: A => A1): Z[R, E, A] => Z[R, E, A1] = self.map(f)
+      def map[A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] = self.map(a)
     }
 
   def deriveLeftCovariant[R, A]: Covariant[({ type lambda[+E] = Z[R, E, A] })#lambda] =
     new Covariant[({ type lambda[+E] = Z[R, E, A] })#lambda] {
-      def map[E, E1](f: E => E1): Z[R, E, A] => Z[R, E1, A] = self.mapLeft(f)
+      def map[E, E1](e: E => E1): Z[R, E, A] => Z[R, E1, A] = self.mapLeft(e)
     }
 
   def deriveContravariant[E, A]: Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] =
     new Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] {
-      def contramap[R, R1](f: R1 => R): Z[R, E, A] => Z[R1, E, A] = self.contramap(f)
+      def contramap[R, R1](r: R1 => R): Z[R, E, A] => Z[R1, E, A] = self.contramap(r)
     }
 
   def deriveDivariant[E]: Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] =
-    new Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] {
-      override def dimap[R, A, R1, D](f: R1 => R, g: A => D): Z[R, E, A] => Z[R1, E, D] = self.dimap(f, g)
-      override def leftMap[R, A, R1](f: R1 => R): Z[R, E, A] => Z[R1, E, A]             = self.contramap(f)
-      override def rightMap[R1, A, A1](f: A => A1): Z[R1, E, A] => Z[R1, E, A1]         = self.map(f)
-    }
+    self.asInstanceOf[Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda]]
 
-  def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
-
-  // derived methods
-  def contramap[R, E, A, R1](r: R1 => R): Z[R, E, A] => Z[R1, E, A] =
-    zimap(r, id[E], id[A])
-
-  def mapLeft[R, E, A, E1](e: E => E1): Z[R, E, A] => Z[R, E1, A] =
-    zimap(id[R], e, id[A])
-
-  def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] =
-    zimap(id[R], id[E], a)
+  def contramap[R, E, A, R1](r: R1 => R): Z[R, E, A] => Z[R1, E, A] = zimap(r, id[E], id[A])
+  def mapLeft[R, E, A, E1](e: E => E1): Z[R, E, A] => Z[R, E1, A]   = zimap(id[R], e, id[A])
+  def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1]       = zimap(id[R], id[E], a)
 
   def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1] =
     zimap(id[R], e, a)
 
-  def dimap[R, E, A, RR, AA](r: RR => R, a: A => AA): Z[R, E, A] => Z[RR, E, AA] =
+  def dimap[R, E, A, R1, AA](r: R1 => R, a: A => AA): Z[R, E, A] => Z[R1, E, AA] =
     zimap(r, id[E], a)
+
+  def dimapLeft[R, E, A, R1, E1](r: R1 => R, e: E => E1): Z[R, E, A] => Z[R1, E1, A] =
+    zimap(r, e, id[A])
+
+  def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
+  // = contramap(r) andThen map[R1, E, A, A1](a) andThen mapLeft(e)
 
   // zimap id id id == id
   def zimapIdentity[R, E, A](rea: Z[R, E, A])(implicit eq: Equal[Z[R, E, A]]): Boolean =
@@ -111,6 +105,8 @@ object Zivariant {
             (e(ee), a(aa))
           }
     }
+
+  // TODO Zivariant from function to Bifunctor
 
   implicit val ZioZivariant: Zivariant[ZIO] = new Zivariant[ZIO] {
     override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): ZIO[R, E, A] => ZIO[R1, E1, A1] =
