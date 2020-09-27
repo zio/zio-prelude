@@ -245,7 +245,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
     foreach(fa)(a => State.modify((n: Int) => (n + 1, (a, n)))).runResult(0)
 }
 
-object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] with TraversableVersionSpecific {
+object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
 
   /**
    * The set of all laws that instances of `Traversable` must satisfy.
@@ -258,15 +258,6 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] with
    */
   def apply[F[+_]](implicit traversable: Traversable[F]): Traversable[F] =
     traversable
-
-  /**
-   * The `Traversable` instance for `Chunk`.
-   */
-  implicit val ChunkTraversable: Traversable[Chunk] =
-    new Traversable[Chunk] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
-        chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
-    }
 
   /**
    * The `Traversable` instance for `Either`.

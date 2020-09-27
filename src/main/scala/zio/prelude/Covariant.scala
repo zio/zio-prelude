@@ -82,16 +82,6 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     covariant
 
   /**
-   * The `Covariant` instance for `Chunk`
-   */
-  implicit val ChunkCovariant: Covariant[Chunk] =
-    new Covariant[Chunk] {
-      def map[A, B](f: A => B): Chunk[A] => Chunk[B] = { chunk =>
-        chunk.map(f)
-      }
-    }
-
-  /**
    * The `Covariant` instance for `Option`.
    */
   implicit val OptionCovariant: Covariant[Option] =

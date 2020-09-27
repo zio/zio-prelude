@@ -2,8 +2,7 @@ package zio.prelude
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
-
-import zio.Chunk
+import zio.{ Chunk, ChunkBuilder }
 
 trait Invariant[F[_]] {
 
@@ -17,7 +16,7 @@ trait Invariant[F[_]] {
 
 }
 
-object Invariant {
+object Invariant /* extends InvariantVersionSpecific */ {
 
   def apply[F[_]](implicit invariant: Invariant[F]): Invariant[F] =
     invariant
@@ -31,10 +30,13 @@ object Invariant {
         )
     }
 
-  implicit val ChunkInvariant: Invariant[Chunk] =
-    new Invariant[Chunk] {
-      def invmap[A, B](f: A <=> B): Chunk[A] <=> Chunk[B] =
-        Equivalence(_.map(f.to), _.map(f.from))
+  /**
+   * The `Traversable` instance for `Chunk`.
+   */
+  implicit val ChunkTraversable: Traversable[Chunk] =
+    new Traversable[Chunk] {
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
+        chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
     }
 
   implicit val CommutativeInvariant: Invariant[Commutative] =
