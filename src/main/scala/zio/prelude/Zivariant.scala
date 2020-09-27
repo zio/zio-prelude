@@ -104,15 +104,15 @@ object Zivariant {
       zimap(r, e, id[A])
   }
 
-  def fromFunctionBicovariant[B[+_, +_]](implicit
-    ev: Bicovariant[B]
-  ): Zivariant[({ type lambda[-R, +E, +A] = R => B[E, A] })#lambda] =
-    new ZimapZivariant[({ type lambda[-R, +E, +A] = R => B[E, A] })#lambda] {
+  def fromFunctionBicovariant[<=>[+_, +_]](implicit
+    ev: Bicovariant[<=>]
+  ): Zivariant[({ type lambda[-R, +E, +A] = R => E <=> A })#lambda] =
+    new ZimapZivariant[({ type lambda[-R, +E, +A] = R => E <=> A })#lambda] {
       override def zimap[R, E, A, R1, E1, A1](
         r: R1 => R,
         e: E => E1,
         a: A => A1
-      ): (R => B[E, A]) => R1 => B[E1, A1] =
+      ): (R => <=>[E, A]) => R1 => <=>[E1, A1] =
         rea => r1 => (r andThen rea)(r1).bimap(e, a)
     }
 

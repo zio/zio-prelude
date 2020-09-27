@@ -63,7 +63,7 @@ package object prelude
   type DeriveOrd[F[_]]         = Derive[F, Ord]
 
   type Divariant[:=>[-_, +_]]   = Zivariant[({ type lambda[-R, +E, +A] = R :=> A })#lambda]
-  type Bicovariant[:=>[+_, +_]] = Zivariant[({ type lambda[-R, +E, +A] = E :=> A })#lambda]
+  type Bicovariant[<=>[+_, +_]] = Zivariant[({ type lambda[-R, +E, +A] = E <=> A })#lambda]
 
   object classic {
     type Semigroup[A]            = Associative[A]
@@ -105,7 +105,7 @@ package object prelude
 
     type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
     type Profunctor[:=>[-_, +_]] = Divariant[:=>]
-    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
+    type Bifunctor[<=>[+_, +_]]  = Bicovariant[<=>]
   }
 
   /**

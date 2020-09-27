@@ -6,24 +6,24 @@ import zio.Exit
 
 object Bicovariant {
 
-  trait BicovariantInstance[:=>[+_, +_]] extends Bicovariant[:=>] {
+  trait BicovariantInstance[<=>[+_, +_]] extends Bicovariant[<=>] {
 
-    override def contramap[R, E, A, R1](r: R1 => R): E :=> A => E :=> A =
-      id[E :=> A]
+    override def contramap[R, E, A, R1](r: R1 => R): E <=> A => E <=> A =
+      id[E <=> A]
 
-    override def mapLeft[R, E, A, E1](e: E => E1): E :=> A => E1 :=> A =
+    override def mapLeft[R, E, A, E1](e: E => E1): E <=> A => E1 <=> A =
       bimap(e, id[A])
 
-    override def map[R, E, A, A1](a: A => A1): E :=> A => E :=> A1 =
+    override def map[R, E, A, A1](a: A => A1): E <=> A => E <=> A1 =
       bimap(id[E], a)
 
-    override def dimap[R, E, A, R1, A1](r: R1 => R, a: A => A1): E :=> A => E :=> A1 =
+    override def dimap[R, E, A, R1, A1](r: R1 => R, a: A => A1): E <=> A => E <=> A1 =
       map(a)
 
-    override def dimapLeft[R, E, A, R1, E1](r: R1 => R, e: E => E1): E :=> A => E1 :=> A =
+    override def dimapLeft[R, E, A, R1, E1](r: R1 => R, e: E => E1): E <=> A => E1 <=> A =
       mapLeft(e)
 
-    override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): E :=> A => E1 :=> A1 =
+    override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): E <=> A => E1 <=> A1 =
       bimap(e, a)
   }
 
@@ -54,15 +54,15 @@ object Bicovariant {
 
 trait BicovariantSyntax {
 
-  implicit class BicovariantOps[:=>[+_, +_], A, B](f: => A :=> B) {
+  implicit class BicovariantOps[<=>[+_, +_], A, B](f: => A <=> B) {
 
-    def bimap[C, D](g: A => C, h: B => D)(implicit bicovariant: Bicovariant[:=>]): C :=> D =
+    def bimap[C, D](g: A => C, h: B => D)(implicit bicovariant: Bicovariant[<=>]): C <=> D =
       bicovariant.bimap(g, h)(f)
 
-    def leftMap[C](ac: A => C)(implicit bicovariant: Bicovariant[:=>]): C :=> B =
+    def leftMap[C](ac: A => C)(implicit bicovariant: Bicovariant[<=>]): C <=> B =
       bicovariant.mapLeft(ac)(f)
 
-    def rightMap[C](bc: B => C)(implicit bicovariant: Bicovariant[:=>]): A :=> C =
+    def rightMap[C](bc: B => C)(implicit bicovariant: Bicovariant[<=>]): A <=> C =
       bicovariant.map(bc)(f)
   }
 }
