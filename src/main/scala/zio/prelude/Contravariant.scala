@@ -1,10 +1,8 @@
 package zio.prelude
 
 import zio.prelude.coherent.ContravariantDeriveEqual
-import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
-import zio.{ Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef, ZRefM }
 
 trait ContravariantSubset[F[-_], Subset[_]] {
   def contramapSubset[A, B: Subset](f: B => A): F[A] => F[B]
@@ -85,88 +83,6 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
   def apply[F[-_]](implicit contravariant: Contravariant[F]): Contravariant[F] =
     contravariant
 
-  /**
-   * The contravariant instance for `Schedule`.
-   */
-  implicit def ScheduleContravariant[R, B]: Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] {
-      def contramap[A, A0](f: A0 => A): Schedule[R, A, B] => Schedule[R, A0, B] =
-        schedule => schedule.contramap(f)
-    }
-
-  /**
-   * The contravariant instance for `ZIO`.
-   */
-  implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZIO[R, E, A] => ZIO[R0, E, A] =
-        zio => zio.provideSome(f)
-    }
-
-  /**
-   * The contravariant instance for `ZLayer`.
-   */
-  implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] {
-      def contramap[RIn, RIn0](f: RIn0 => RIn): ZLayer[RIn, E, ROut] => ZLayer[RIn0, E, ROut] =
-        layer => ZLayer.fromFunctionMany(f) >>> layer
-    }
-
-  /**
-   * The contravariant instance for `ZManaged`.
-   */
-  implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZManaged[R, E, A] => ZManaged[R0, E, A] =
-        managed => managed.provideSome(f)
-    }
-
-  /**
-   * The contravariant instance for `ZQueue`.
-   */
-  implicit def ZQueueContravariant[RA, EA, RB, EB, B]
-    : Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZQueue[RA, EA, RB, EB, A, B] => ZQueue[RA, EA, RB, EB, C, B] =
-        queue => queue.contramap(f)
-    }
-
-  /**
-   * The contravariant instance for `ZRef`.
-   */
-  implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRef[EA, EB, A, B] => ZRef[EA, EB, C, B] =
-        ref => ref.contramap(f)
-    }
-
-  /**
-   * The contravariant instance for `ZRefM`.
-   */
-  implicit def ZRefMContravariant[RA, RB, EA, EB, B]
-    : Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, C, B] =
-        ref => ref.contramap(f)
-    }
-
-  /**
-   * The contravariant instance for `ZSink`.
-   */
-  implicit def ZSinkContravariant[R, E, L, Z]: Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] {
-      def contramap[A, C](f: C => A): ZSink[R, E, A, L, Z] => ZSink[R, E, C, L, Z] =
-        sink => sink.contramap(f)
-    }
-
-  /**
-   * The contravariant instance for `ZStream`.
-   */
-  implicit def ZStreamContravariant[E, A]: Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZStream[R, E, A] => ZStream[R0, E, A] =
-        stream => stream.provideSome(f)
-    }
 }
 
 trait ContravariantSyntax {

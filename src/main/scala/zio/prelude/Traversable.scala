@@ -258,15 +258,6 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
    */
   def apply[F[+_]](implicit traversable: Traversable[F]): Traversable[F] =
     traversable
-
-  /**
-   * The `Traversable` instance for `Vector`.
-   */
-  implicit val VectorTraversable: Traversable[Vector] =
-    new Traversable[Vector] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]] =
-        vector.foldLeft[G[Vector[B]]](Vector.empty.succeed)((bs, a) => bs.zipWith(f(a))(_ :+ _))
-    }
 }
 
 trait TraversableSyntax {
