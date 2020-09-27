@@ -28,42 +28,42 @@ object NonEmptyTraversableSpec extends DefaultRunnableSpec {
           check(genNonEmptyList) { (as) =>
             val actual   = NonEmptyTraversable[NonEmptyList].max(as)
             val expected = as.max
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("maxBy") {
           check(genNonEmptyList, genIntFunction) { (as, f) =>
             val actual   = NonEmptyTraversable[NonEmptyList].maxBy(as)(f)
             val expected = as.maxBy(f)
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("min") {
           check(genNonEmptyList) { (as) =>
             val actual   = NonEmptyTraversable[NonEmptyList].min(as)
             val expected = as.min
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("minBy") {
           check(genNonEmptyList, genIntFunction) { (as, f) =>
             val actual   = NonEmptyTraversable[NonEmptyList].minBy(as)(f)
             val expected = as.minBy(f)
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("reduce") {
           check(genNonEmptyList, genIntFunction2) { (as, f) =>
             val actual   = NonEmptyTraversable[NonEmptyList].reduce(as)(f)
             val expected = as.reduce(Associative.make(f))
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("toNonEmptyChunk") {
           check(genNonEmptyList) { (as) =>
             val actual   = NonEmptyTraversable[NonEmptyList].toNonEmptyChunk(as)
             val expected = as.toNonEmptyChunk
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         }
       )

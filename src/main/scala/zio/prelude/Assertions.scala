@@ -13,7 +13,7 @@ trait Assertions {
   /**
    * Makes a new assertion that requires a value equal the specified value.
    */
-  def equalTo[A: Equal](expected: A): Assertion[A] =
+  def isEqualTo[A: Equal](expected: A): Assertion[A] =
     Assertion.assertion("equalTo")(param(expected))(_ === expected)
 
   /**

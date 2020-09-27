@@ -134,7 +134,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw1: Laws[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equal a2)
+        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equalTo a2)
     }
 
   /**
@@ -144,7 +144,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw2: Laws[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equal a2)
+        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equalTo a2)
     }
 
   /**

@@ -36,12 +36,12 @@ object ZPureSpec extends DefaultRunnableSpec {
             check(genIntToInt, genInt, genInt) { (f, r, s) =>
               val actual   = ZPure.access(f).provide(r).run(s)
               val expected = (s, f(r))
-              assert(actual)(equalTo(expected))
+              assert(actual)(isEqualTo(expected))
             }
           },
           test("accessM") {
             val zPure = ZPure.accessM[Int](n => State.update[Int, Int](_ + n))
-            assert(zPure.provide(2).runState(3))(equalTo(5))
+            assert(zPure.provide(2).runState(3))(isEqualTo(5))
           }
         )
       ),
@@ -50,108 +50,108 @@ object ZPureSpec extends DefaultRunnableSpec {
           testM("contramap") {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
-              assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
+              assert(fa.mapState(f).run(s))(isEqualTo((f(s1), a1)))
             }
           },
           testM("flatMap") {
             check(genState, genIntToState, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
               val (s2, a2) = f(a1).run(s1)
-              assert(fa.flatMap(f).run(s))(equalTo((s2, a2)))
+              assert(fa.flatMap(f).run(s))(isEqualTo((s2, a2)))
             }
           },
           testM("flatten") {
             check(genStateState, genInt) { (ffa, s) =>
               val (s1, fa) = ffa.run(s)
               val (s2, b)  = fa.run(s1)
-              assert(ffa.flatten.run(s))(equalTo((s2, b)))
+              assert(ffa.flatten.run(s))(isEqualTo((s2, b)))
             }
           },
           testM("map") {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
-              assert(fa.map(f).run(s))(equalTo((s1, f(a1))))
+              assert(fa.map(f).run(s))(isEqualTo((s1, f(a1))))
             }
           },
           testM("mapState") {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
-              assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
+              assert(fa.mapState(f).run(s))(isEqualTo((f(s1), a1)))
             }
           },
           testM("run") {
             check(genIntToIntInt, genInt) { (f, s) =>
-              assert(State.modify(f).run(s))(equalTo(f(s)))
+              assert(State.modify(f).run(s))(isEqualTo(f(s)))
             }
           },
           testM("runResult") {
             check(genIntToIntInt, genInt) { (f, s) =>
-              assert(State.modify(f).runResult(s))(equalTo(f(s)._2))
+              assert(State.modify(f).runResult(s))(isEqualTo(f(s)._2))
             }
           },
           testM("runState") {
             check(genIntToIntInt, genInt) { (f, s) =>
-              assert(State.modify(f).runState(s))(equalTo(f(s)._1))
+              assert(State.modify(f).runState(s))(isEqualTo(f(s)._1))
             }
           },
           testM("zip") {
             check(genState, genState, genInt) { (fa, fb, s) =>
               val (s1, a) = fa.run(s)
               val (s2, b) = fb.run(s1)
-              assert(fa.zip(fb).run(s))(equalTo((s2, (a, b))))
+              assert(fa.zip(fb).run(s))(isEqualTo((s2, (a, b))))
             }
           },
           testM("zipLeft") {
             check(genState, genState, genInt) { (fa, fb, s) =>
               val (s1, a) = fa.run(s)
               val (s2, _) = fb.run(s1)
-              assert(fa.zipLeft(fb).run(s))(equalTo((s2, a)))
+              assert(fa.zipLeft(fb).run(s))(isEqualTo((s2, a)))
             }
           },
           testM("zipRight") {
             check(genState, genState, genInt) { (fa, fb, s) =>
               val (s1, _) = fa.run(s)
               val (s2, b) = fb.run(s1)
-              assert(fa.zipRight(fb).run(s))(equalTo((s2, b)))
+              assert(fa.zipRight(fb).run(s))(isEqualTo((s2, b)))
             }
           },
           testM("zipWith") {
             check(genState, genState, genIntIntToInt, genInt) { (fa, fb, f, s) =>
               val (s1, a) = fa.run(s)
               val (s2, b) = fb.run(s1)
-              assert(fa.zipWith(fb)(f).run(s))(equalTo((s2, f(a, b))))
+              assert(fa.zipWith(fb)(f).run(s))(isEqualTo((s2, f(a, b))))
             }
           }
         ),
         suite("constructors")(
           testM("get") {
             check(genInt) { s =>
-              assert(State.get.run(s))(equalTo((s, s)))
+              assert(State.get.run(s))(isEqualTo((s, s)))
             }
           },
           testM("modify") {
             check(Gen.anyInt, genIntToIntInt) { (s, f) =>
-              assert(State.modify(f).run(s))(equalTo(f(s)))
+              assert(State.modify(f).run(s))(isEqualTo(f(s)))
             }
           },
           testM("set") {
             check(genInt, genInt) { (s1, s2) =>
-              assert(State.set(s2).run(s1))(equalTo((s2, ())))
+              assert(State.set(s2).run(s1))(isEqualTo((s2, ())))
             }
           },
           testM("succeed") {
             check(genInt, genInt) { (s, a) =>
-              assert(State.succeed(a).run(s))(equalTo((s, a)))
+              assert(State.succeed(a).run(s))(isEqualTo((s, a)))
             }
           },
           testM("unit") {
             check(genInt) { s =>
-              assert(State.unit.run(s))(equalTo((s, ())))
+              assert(State.unit.run(s))(isEqualTo((s, ())))
             }
           },
           testM("update") {
             check(genInt, genIntToInt) { (s, f) =>
-              assert(State.update(f).run(s))(equalTo((f(s), ())))
+              assert(State.update(f).run(s))(isEqualTo((f(s), ())))
             }
           }
         )
@@ -161,20 +161,20 @@ object ZPureSpec extends DefaultRunnableSpec {
           testM("either") {
             check(genInt, genInt) { (s1, e) =>
               val (s2, a) = ZPure.fail(e).either.run(s1)
-              assert(s2)(equalTo(s1)) && assert(a)(isLeft(equalTo(e)))
+              assert(s2)(isEqualTo(s1)) && assert(a)(isLeft(isEqualTo(e)))
             }
           },
           suite("fold")(
             testM("failure") {
               check(genInt, genInt, genIntToInt, genIntToInt) { (s1, e, failure, success) =>
                 val (s2, a) = ZPure.fail(e).fold(failure, success).run(s1)
-                assert(s2)(equalTo(s1)) && assert(a)(equalTo(failure(e)))
+                assert(s2)(isEqualTo(s1)) && assert(a)(isEqualTo(failure(e)))
               }
             },
             testM("success") {
               check(genInt, genInt, genIntToInt, genIntToInt) { (s1, a1, failure, success) =>
                 val (s2, a2) = ZPure.succeed[Int, Int](a1).fold(failure, success).run(s1)
-                assert(s2)(equalTo(s1)) && assert(a2)(equalTo(success(a1)))
+                assert(s2)(isEqualTo(s1)) && assert(a2)(isEqualTo(success(a1)))
               }
             }
           ),
@@ -186,7 +186,7 @@ object ZPureSpec extends DefaultRunnableSpec {
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
               )
-              assert(result.run(10))(equalTo((11, 0)))
+              assert(result.run(10))(isEqualTo((11, 0)))
             },
             test("success") {
               val failing =
@@ -195,14 +195,14 @@ object ZPureSpec extends DefaultRunnableSpec {
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
               )
-              assert(result.run(10))(equalTo((12, 2)))
+              assert(result.run(10))(isEqualTo((12, 2)))
             }
           )
         ),
         suite("constructors")(
           testM("fail") {
             check(genInt) { e =>
-              assert(ZPure.fail(e).runEither(()))(isLeft(equalTo(e)))
+              assert(ZPure.fail(e).runEither(()))(isLeft(isEqualTo(e)))
             }
           }
         )

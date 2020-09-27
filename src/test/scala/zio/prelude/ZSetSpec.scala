@@ -61,7 +61,7 @@ object ZSetSpec extends DefaultRunnableSpec {
         test("zipWith") {
           val die  = ZSet(1, 2, 3, 4, 5, 6)
           val pair = die.zipWith(die)(_ + _)
-          assert(pair(7))(equalTo(6))
+          assert(pair(7))(isEqualTo(6))
         }
       ),
       suite("set")(
@@ -69,28 +69,28 @@ object ZSetSpec extends DefaultRunnableSpec {
           check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) &~ ZSet.fromSet(r)).toSet
             val expected = l &~ r
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("flatMap") {
           check(Gen.setOf(Gen.anyInt), Gen.function(Gen.setOf(Gen.anyInt))) { (as, f) =>
             val actual   = ZSet.fromSet(as).flatMap(a => ZSet.fromSet(f(a))).toSet
             val expected = as.flatMap(f)
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("intersect") {
           check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) & ZSet.fromSet(r)).toSet
             val expected = l & r
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         },
         testM("union") {
           check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) | ZSet.fromSet(r)).toSet
             val expected = l | r
-            assert(actual)(equalTo(expected))
+            assert(actual)(isEqualTo(expected))
           }
         }
       ),

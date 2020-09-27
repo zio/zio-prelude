@@ -89,7 +89,7 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
           check(genSet) { as =>
             val nonEmptySet = NonEmptySet.fromSetOption(as).get
             val set         = nonEmptySet.toSet
-            assert(set)(equalTo(as))
+            assert(set)(isEqualTo(as))
           }
         }
       )

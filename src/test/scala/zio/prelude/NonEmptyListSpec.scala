@@ -227,7 +227,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
           check(genNonEmptyList) { as =>
             val cons         = as.toCons
             val nonEmptyList = NonEmptyList.fromCons(cons)
-            assert(nonEmptyList)(equalTo(as))
+            assert(nonEmptyList)(isEqualTo(as))
           }
         },
         testM("toString") {
@@ -255,7 +255,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
           check(genCons) { as =>
             val nonEmptyList = NonEmptyList.fromCons(as)
             val cons         = nonEmptyList.toCons
-            assert(cons)(equalTo(as))
+            assert(cons)(isEqualTo(as))
           }
         }
       )
