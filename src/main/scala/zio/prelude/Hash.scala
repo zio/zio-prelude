@@ -135,7 +135,7 @@ object Hash extends Lawful[Hash] {
    * Constructs a `Hash[A]` that uses the default notion of hashing embodied in
    * the implementation of `hashCode` for values of type `A`.
    */
-  def default[A]: Hash[A] =
+  def default: Hash[Any] =
     make(_.hashCode(), _ == _)
 
   /**

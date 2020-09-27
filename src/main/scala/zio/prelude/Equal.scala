@@ -214,10 +214,10 @@ object Equal extends Lawful[Equal] {
     (l, r) => refEq(l, r) || equal(l, r)
 
   /**
-   * Constructs an `Equal[A]` that uses the default notion of equality
-   * embodied in the implementation of `equals` for values of type `A`.
+   * Constructs an `Equal[Any]` that uses the default notion of equality
+   * embodied in the implementation of `equals`.
    */
-  def default[A]: Equal[A] =
+  def default: Equal[Any] =
     make(_ == _)
 
   /**
@@ -852,10 +852,10 @@ object Equal extends Lawful[Equal] {
     make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
 
   /**
-   * `Hash` (and thus also `Equal`) instance for `Cause[A]`.
-   * Note, that it doesn't take `Hash[A]` nor `Equal[A]` into account.
+   * `Hash` (and thus also `Equal`) instance for `Cause[Any]`.
+   * Note, that it doesn't take `Hash` nor `Equal` into account.
    */
-  implicit def CauseHash[A]: Hash[Cause[A]] =
+  implicit def CauseHash: Hash[Cause[Any]] =
     // we have to resort to equals, because the structure is opaque, namely Cause.Internal.Meta
     // `Equal` and `Hash` instances will be possible once this PR gets merged: https://github.com/zio/zio/pull/4179
     Hash.default
