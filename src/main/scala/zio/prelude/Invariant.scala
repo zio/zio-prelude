@@ -3,7 +3,7 @@ package zio.prelude
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
-import zio.{ Chunk, ChunkBuilder }
+import zio.{ Cause, Chunk, ChunkBuilder }
 
 trait Invariant[F[_]] {
 
@@ -29,6 +29,16 @@ object Invariant /* extends InvariantVersionSpecific */ {
           (a: Associative[A]) => Associative.make[B]((l, r) => f.to(a.combine(f.from(l), f.from(r)))),
           (b: Associative[B]) => Associative.make[A]((l, r) => f.from(b.combine(f.to(l), f.to(r))))
         )
+    }
+
+  /**
+   * The `Covariant` instance for `Cause`
+   */
+  implicit def CauseCovariant: Covariant[Cause] =
+    new Covariant[Cause] {
+      override def map[A, B](f: A => B): Cause[A] => Cause[B] = { cause =>
+        cause.map(f)
+      }
     }
 
   /**

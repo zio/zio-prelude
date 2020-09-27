@@ -1318,16 +1318,6 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     }
 
   /**
-   * The `Covariant` instance for `Cause`
-   */
-  implicit def CauseCovariant: Covariant[Cause] =
-    new Covariant[Cause] {
-      override def map[A, B](f: A => B): Cause[A] => Cause[B] = { cause =>
-        cause.map(f)
-      }
-    }
-
-  /**
    * The `Covariant` instance for `Exit`
    */
   implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
