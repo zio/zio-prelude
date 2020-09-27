@@ -3,6 +3,7 @@ package zio.prelude
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
+import zio.prelude.newtypes.Failure
 import zio.{ Cause, Chunk, ChunkBuilder }
 
 trait Invariant[F[_]] {
@@ -57,6 +58,21 @@ object Invariant /* extends InvariantVersionSpecific */ {
           (a: Commutative[A]) => Commutative.make[B]((l, r) => f.to(a.combine(f.from(l), f.from(r)))),
           (b: Commutative[B]) => Commutative.make[A]((l, r) => f.from(b.combine(f.to(l), f.to(r))))
         )
+    }
+
+  /**
+   * The `Covariant` instance for a failed `Either`
+   */
+  implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
+    new Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
+      override def map[L, L1](f: L => L1): Failure[Either[L, R]] => Failure[Either[L1, R]] = { either =>
+        Failure.wrap {
+          Failure.unwrap(either) match {
+            case Left(l)  => Left[L1, R](f(l))
+            case Right(r) => Right[L1, R](r)
+          }
+        }
+      }
     }
 
   /**
