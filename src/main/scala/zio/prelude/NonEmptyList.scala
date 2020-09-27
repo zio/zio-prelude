@@ -476,10 +476,16 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
 
   /**
-   * The `IdentityBoth` instance for `NonEmptyList`.
+   * Derives a `Hash[NonEmptyList[A]]` given a `Hash[A]`.
    */
-  implicit val NonEmptyListIdentityBoth: IdentityBoth[NonEmptyList] =
-    new IdentityBoth[NonEmptyList] {
+  implicit def NonEmptyListHash[A: Hash]: Hash[NonEmptyList[A]] =
+    Hash.make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
+
+  /**
+   * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListIdentityBoth: CommutativeBoth[NonEmptyList] with IdentityBoth[NonEmptyList] =
+    new CommutativeBoth[NonEmptyList] with IdentityBoth[NonEmptyList] {
       val any: NonEmptyList[Any]                                                           =
         single(())
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
@@ -494,25 +500,6 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
       def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
         fa.foreach(f)
     }
-
-  /**
-   * Derives an `Ord[NonEmptyList[A]]` given an `Ord[A]`.
-   */
-  implicit def NonEmptyListOrd[A: Ord]: Ord[NonEmptyList[A]] = {
-
-    @tailrec
-    def loop(left: NonEmptyList[A], right: NonEmptyList[A]): Ordering =
-      (left, right) match {
-        case (Single(h1), Single(h2))     => Ord[A].compare(h1, h2)
-        case (Single(h1), Cons(h2, _))    => Ord[A].compare(h1, h2) <> Ordering.LessThan
-        case (Cons(h1, _), Single(h2))    => Ord[A].compare(h1, h2) <> Ordering.GreaterThan
-        case (Cons(h1, t1), Cons(h2, t2)) =>
-          val compare = Ord[A].compare(h1, h2)
-          if (compare.isEqual) loop(t1, t2) else compare
-      }
-
-    Ord.make((l, r) => loop(l, r))
-  }
 
   /**
    * Constructs a `NonEmptyList` from one or more values.
@@ -597,17 +584,21 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
 trait LowPriorityNonEmptyListImplicits {
 
   /**
-   * The `CommutativeBoth` instance for `NonEmptyList`.
+   * Derives an `Ord[NonEmptyList[A]]` given an `Ord[A]`.
    */
-  implicit val NonEmptyListCommutativeBoth: CommutativeBoth[NonEmptyList] =
-    new CommutativeBoth[NonEmptyList] {
-      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
-        fa.zip(fb)
-    }
+  implicit def NonEmptyListOrd[A: Ord]: Ord[NonEmptyList[A]] = {
 
-  /**
-   * Derives a `Hash[NonEmptyList[A]]` given a `Hash[A]`.
-   */
-  implicit def NonEmptyListHash[A: Hash]: Hash[NonEmptyList[A]] =
-    Hash.make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
+    @tailrec
+    def loop(left: NonEmptyList[A], right: NonEmptyList[A]): Ordering =
+      (left, right) match {
+        case (Single(h1), Single(h2))     => Ord[A].compare(h1, h2)
+        case (Single(h1), Cons(h2, _))    => Ord[A].compare(h1, h2) <> Ordering.LessThan
+        case (Cons(h1, _), Single(h2))    => Ord[A].compare(h1, h2) <> Ordering.GreaterThan
+        case (Cons(h1, t1), Cons(h2, t2)) =>
+          val compare = Ord[A].compare(h1, h2)
+          if (compare.isEqual) loop(t1, t2) else compare
+      }
+
+    Ord.make((l, r) => loop(l, r))
+  }
 }
