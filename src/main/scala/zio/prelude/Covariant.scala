@@ -1262,16 +1262,6 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     }
 
   /**
-   * The `Covariant` instance for `Fiber`
-   */
-  implicit def FiberCovariant[E]: Covariant[({ type lambda[+a] = Fiber[E, a] })#lambda] =
-    new Covariant[({ type lambda[+a] = Fiber[E, a] })#lambda] {
-      def map[A, B](f: A => B): Fiber[E, A] => Fiber[E, B] = { fiber =>
-        fiber.map(f)
-      }
-    }
-
-  /**
    * The `Covariant` instance for `ZLayer`
    */
   implicit def ZLayerCovariant[R, E]: Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] =
@@ -1299,26 +1289,6 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     new Covariant[({ type lambda[+b] = ZQueue[RA, RB, EA, EB, A, b] })#lambda] {
       override def map[B, B1](f: B => B1): ZQueue[RA, RB, EA, EB, A, B] => ZQueue[RA, RB, EA, EB, A, B1] = { zqueue =>
         zqueue.map(f)
-      }
-    }
-
-  /**
-   * The `Covariant` instance for `Exit`
-   */
-  implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
-    new Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] {
-      override def map[A, B](f: A => B): Exit[E, A] => Exit[E, B] = { exit =>
-        exit.map(f)
-      }
-    }
-
-  /**
-   * The `Covariant` instance for a failed `Exit`
-   */
-  implicit def ExitFailureCovariant[A]: Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
-      override def map[E, E1](f: E => E1): Failure[Exit[E, A]] => Failure[Exit[E1, A]] = { exit =>
-        Failure.wrap(Failure.unwrap(exit).mapError(f))
       }
     }
 

@@ -4,7 +4,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 import zio.prelude.newtypes.Failure
-import zio.{ Cause, Chunk, ChunkBuilder }
+import zio.{ Cause, Chunk, ChunkBuilder, Exit, Fiber }
 
 trait Invariant[F[_]] {
 
@@ -82,6 +82,36 @@ object Invariant /* extends InvariantVersionSpecific */ {
     new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] {
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
         either.fold(Left(_).succeed, f(_).map(Right(_)))
+    }
+
+  /**
+   * The `Covariant` instance for `Exit`
+   */
+  implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
+    new Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] {
+      override def map[A, B](f: A => B): Exit[E, A] => Exit[E, B] = { exit =>
+        exit.map(f)
+      }
+    }
+
+  /**
+   * The `Covariant` instance for a failed `Exit`
+   */
+  implicit def ExitFailureCovariant[A]: Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] =
+    new Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
+      override def map[E, E1](f: E => E1): Failure[Exit[E, A]] => Failure[Exit[E1, A]] = { exit =>
+        Failure.wrap(Failure.unwrap(exit).mapError(f))
+      }
+    }
+
+  /**
+   * The `Covariant` instance for `Fiber`
+   */
+  implicit def FiberCovariant[E]: Covariant[({ type lambda[+a] = Fiber[E, a] })#lambda] =
+    new Covariant[({ type lambda[+a] = Fiber[E, a] })#lambda] {
+      def map[A, B](f: A => B): Fiber[E, A] => Fiber[E, B] = { fiber =>
+        fiber.map(f)
+      }
     }
 
   implicit def FutureInvariant(implicit ec: ExecutionContext): Invariant[Future] =
