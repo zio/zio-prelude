@@ -482,10 +482,10 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Hash.make(_.map(_.hash).hashCode, _.corresponds(_)(_ === _))
 
   /**
-   * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for `NonEmptyList`.
+   * The `IdentityBoth` (and thus `AssociativeBoth`) instance for `NonEmptyList`.
    */
-  implicit val NonEmptyListCommutativeIdentityBoth: CommutativeBoth[NonEmptyList] with IdentityBoth[NonEmptyList] =
-    new CommutativeBoth[NonEmptyList] with IdentityBoth[NonEmptyList] {
+  implicit val NonEmptyListIdentityBoth: IdentityBoth[NonEmptyList] =
+    new IdentityBoth[NonEmptyList] {
       val any: NonEmptyList[Any]                                                           =
         single(())
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
@@ -582,6 +582,15 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
 }
 
 trait LowPriorityNonEmptyListImplicits {
+
+  /**
+   * The `CommutativeBoth` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListCommutativeBoth: CommutativeBoth[NonEmptyList] =
+    new CommutativeBoth[NonEmptyList] {
+      def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
+        fa.zip(fb)
+    }
 
   /**
    * Derives an `Ord[NonEmptyList[A]]` given an `Ord[A]`.
