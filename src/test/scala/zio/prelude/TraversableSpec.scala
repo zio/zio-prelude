@@ -217,7 +217,7 @@ object TraversableSpec extends DefaultRunnableSpec {
       test("zipWithIndex is stacks safe") {
         val as       = (1 to 100000).toList
         val expected = as.zipWithIndex
-        val actual   = Traversable.ListTraversable.zipWithIndex(as)
+        val actual   = Invariant.ListTraversable.zipWithIndex(as)
         assert(actual)(equalTo(expected))
       }
 //      testM("Traversable can be derived from Iterable") {

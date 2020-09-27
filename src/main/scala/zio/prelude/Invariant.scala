@@ -4,7 +4,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 import zio.prelude.newtypes.Failure
-import zio.{ Cause, Chunk, ChunkBuilder, Exit, Fiber }
+import zio.{ Cause, Chunk, ChunkBuilder, Exit, Fiber, NonEmptyChunk }
 
 trait Invariant[F[_]] {
 
@@ -575,10 +575,24 @@ object Invariant extends LowPriorityInvariantImplicits /* with InvariantVersionS
             )
     }
 
-  implicit def FutureInvariant(implicit ec: ExecutionContext): Invariant[Future] =
-    new Invariant[Future] {
-      def invmap[A, B](f: A <=> B): Future[A] <=> Future[B] =
-        Equivalence(_.map(f.to), _.map(f.from))
+  /**
+   * The `Covariant` (and thus `Invariant`) instance for `Future`
+   */
+  implicit def FutureCovariant(implicit ec: ExecutionContext): Covariant[Future] =
+    new Covariant[Future] {
+      def map[A, B](f: A => B): Future[A] => Future[B] = { future =>
+        future.map(f)
+      }
+    }
+
+  /**
+   * The `Covariant` (and thus `Invariant`) instance for `Id`.
+   */
+  implicit val IdCovariant: Covariant[Id] =
+    new Covariant[Id] {
+      def map[A, B](f: A => B): Id[A] => Id[B] = { id =>
+        Id(f(Id.unwrap(id)))
+      }
     }
 
   implicit val IdentityInvariant: Invariant[Identity] =
@@ -609,25 +623,47 @@ object Invariant extends LowPriorityInvariantImplicits /* with InvariantVersionS
         )
     }
 
-  implicit def MapInvariant[V]: Invariant[({ type lambda[x] = Map[x, V] })#lambda] =
-    new Invariant[({ type lambda[x] = Map[x, V] })#lambda] {
-      def invmap[A, B](f: A <=> B): Map[A, V] <=> Map[B, V] =
-        Equivalence(
-          mapA => mapA.map { case (k, v) => (f.to(k), v) },
-          mapB => mapB.map { case (k, v) => (f.from(k), v) }
-        )
+  /**
+   * The `Traversable` (and thus `Covariant` and `Invariant`) instance for `List`.
+   */
+  implicit val ListTraversable: Traversable[List] =
+    new Traversable[List] {
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
+        list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
+      override def map[A, B](f: A => B): List[A] => List[B]                                      = _.map(f)
     }
 
-  implicit val ListInvariant: Invariant[List] =
-    new Invariant[List] {
-      def invmap[A, B](f: A <=> B): List[A] <=> List[B] =
-        Equivalence(_.map(f.to), _.map(f.from))
+  /**
+   * The `Traversable` (and thus `Covariant` and `Invariant`) instance for `Map`.
+   */
+  implicit def MapTraversable[K]: Traversable[({ type lambda[+v] = Map[K, v] })#lambda] =
+    new Traversable[({ type lambda[+v] = Map[K, v] })#lambda] {
+      def foreach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
+        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) { case (map, (k, v)) =>
+          map.zipWith(f(v))((map, v2) => map + (k -> v2))
+        }
     }
 
-  implicit val OptionInvariant: Invariant[Option] =
-    new Invariant[Option] {
-      def invmap[A, B](f: A <=> B): Option[A] <=> Option[B] =
-        Equivalence(_.map(f.to), _.map(f.from))
+  /**
+   * The `NonEmptyTraversable` (and thus `Traversable`, `Covariant` and `Invariant`) instance for `NonEmptyChunk`.
+   */
+  implicit val NonEmptyChunkNonEmptyTraversable: NonEmptyTraversable[NonEmptyChunk] =
+    new NonEmptyTraversable[NonEmptyChunk] {
+      def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](
+        nonEmptyChunk: NonEmptyChunk[A]
+      )(f: A => F[B]): F[NonEmptyChunk[B]] =
+        nonEmptyChunk
+          .reduceMapLeft(f(_).map(ChunkBuilder.make() += _))((bs, a) => bs.zipWith(f(a))(_ += _))
+          .map(bs => NonEmptyChunk.nonEmpty(bs.result()))
+    }
+
+  /**
+   * The `Traversable` (and thus `Covariant` and `Invariant`) instance for `Option`.
+   */
+  implicit val OptionTraversable: Traversable[Option] =
+    new Traversable[Option] {
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
+        option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
     }
 
   implicit val SetInvariant: Invariant[Set] =

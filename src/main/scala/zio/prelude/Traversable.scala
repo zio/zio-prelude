@@ -260,36 +260,6 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
     traversable
 
   /**
-   * The `Traversable` instance for `List`.
-   */
-  implicit val ListTraversable: Traversable[List] =
-    new Traversable[List] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
-        list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
-      override def map[A, B](f: A => B): List[A] => List[B]                                      = _.map(f)
-    }
-
-  /**
-   * The `Traversable` instance for `Map`.
-   */
-  implicit def MapTraversable[K]: Traversable[({ type lambda[+v] = Map[K, v] })#lambda] =
-    new Traversable[({ type lambda[+v] = Map[K, v] })#lambda] {
-      def foreach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
-        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) { case (map, (k, v)) =>
-          map.zipWith(f(v))((map, v2) => map + (k -> v2))
-        }
-    }
-
-  /**
-   * The `Traversable` instance for `Option`.
-   */
-  implicit val OptionTraversable: Traversable[Option] =
-    new Traversable[Option] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
-        option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
-    }
-
-  /**
    * The `Traversable` instance for `Vector`.
    */
   implicit val VectorTraversable: Traversable[Vector] =

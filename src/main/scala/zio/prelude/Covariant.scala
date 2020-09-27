@@ -1,6 +1,5 @@
 package zio.prelude
 
-import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 import zio._
@@ -82,52 +81,12 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     covariant
 
   /**
-   * The `Covariant` instance for `Option`.
-   */
-  implicit val OptionCovariant: Covariant[Option] =
-    new Covariant[Option] {
-      def map[A, B](f: A => B): Option[A] => Option[B] = { option =>
-        option.map(f)
-      }
-    }
-
-  /**
-   * The `Covariant` instance for `Id`.
-   */
-  implicit val IdCovariant: Covariant[Id] =
-    new Covariant[Id] {
-      def map[A, B](f: A => B): Id[A] => Id[B] = { id =>
-        Id(f(Id.unwrap(id)))
-      }
-    }
-
-  /**
-   * The `Covariant` instance for `List`
-   */
-  implicit val ListCovariant: Covariant[List] =
-    new Covariant[List] {
-      def map[A, B](f: A => B): List[A] => List[B] = { list =>
-        list.map(f)
-      }
-    }
-
-  /**
    * The `Covariant` instance for `Vector`
    */
   implicit val VectorCovariant: Covariant[Vector] =
     new Covariant[Vector] {
       def map[A, B](f: A => B): Vector[A] => Vector[B] = { vector =>
         vector.map(f)
-      }
-    }
-
-  /**
-   * The `Covariant` instance for `Map`
-   */
-  implicit def MapCovariant[K]: Covariant[({ type lambda[+v] = Map[K, v] })#lambda] =
-    new Covariant[({ type lambda[+v] = Map[K, v] })#lambda] {
-      override def map[A, B](f: A => B): Map[K, A] => Map[K, B] = { map =>
-        map.map(entry => (entry._1, f(entry._2)))
       }
     }
 
@@ -140,25 +99,6 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
         tryA.map(f)
       }
     }
-
-  /**
-   * The `Covariant` instance for `Future`
-   */
-  implicit def FutureCovariant(implicit ec: ExecutionContext): Covariant[Future] =
-    new Covariant[Future] {
-      def map[A, B](f: A => B): Future[A] => Future[B] = { future =>
-        future.map(f)
-      }
-    }
-
-  /**
-   * Covariant instance for `NonEmptyChunk`.
-   */
-  implicit val NonEmptyChunkCovariant: Covariant[NonEmptyChunk] = new Covariant[NonEmptyChunk] {
-    override def map[A, B](f: A => B): NonEmptyChunk[A] => NonEmptyChunk[B] = { chunk =>
-      chunk.map(f)
-    }
-  }
 
   /**
    * The `Covariant` instance for `Tuple2`
