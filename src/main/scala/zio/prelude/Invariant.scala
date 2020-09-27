@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
+
 import zio.{ Chunk, ChunkBuilder }
 
 trait Invariant[F[_]] {
@@ -48,10 +49,13 @@ object Invariant /* extends InvariantVersionSpecific */ {
         )
     }
 
-  implicit def EitherInvariant[L]: Invariant[({ type lambda[r] = Either[L, r] })#lambda] =
-    new Invariant[({ type lambda[r] = Either[L, r] })#lambda] {
-      def invmap[A, B](f: A <=> B): Either[L, A] <=> Either[L, B] =
-        Equivalence(_.map(f.to), _.map(f.from))
+  /**
+   * The `Traversable` instance for `Either`.
+   */
+  implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] =
+    new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] {
+      def foreach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
+        either.fold(Left(_).succeed, f(_).map(Right(_)))
     }
 
   implicit def FutureInvariant(implicit ec: ExecutionContext): Invariant[Future] =

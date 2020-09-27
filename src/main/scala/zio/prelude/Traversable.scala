@@ -260,15 +260,6 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
     traversable
 
   /**
-   * The `Traversable` instance for `Either`.
-   */
-  implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] =
-    new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
-        either.fold(Left(_).succeed, f(_).map(Right(_)))
-    }
-
-  /**
    * The `Traversable` instance for `List`.
    */
   implicit val ListTraversable: Traversable[List] =

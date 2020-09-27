@@ -132,16 +132,6 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     }
 
   /**
-   * The `Covariant` instance for `Either`
-   */
-  implicit def EitherCovariant[L]: Covariant[({ type lambda[+r] = Either[L, r] })#lambda] =
-    new Covariant[({ type lambda[+r] = Either[L, r] })#lambda] {
-      override def map[A, B](f: A => B): Either[L, A] => Either[L, B] = { either =>
-        either.map(f)
-      }
-    }
-
-  /**
    * The `Covariant` instance for a failed `Either`
    */
   implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
