@@ -229,7 +229,7 @@ object Validation extends LowPriorityValidationImplicits {
   /**
    * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for Validation.
    */
-  implicit def ValidationIdentityBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda]
+  implicit def ValidationCommutativeIdentityBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda]
     with IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
     new CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda]
       with IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] {

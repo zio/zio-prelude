@@ -484,7 +484,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
   /**
    * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for `NonEmptyList`.
    */
-  implicit val NonEmptyListIdentityBoth: CommutativeBoth[NonEmptyList] with IdentityBoth[NonEmptyList] =
+  implicit val NonEmptyListCommutativeIdentityBoth: CommutativeBoth[NonEmptyList] with IdentityBoth[NonEmptyList] =
     new CommutativeBoth[NonEmptyList] with IdentityBoth[NonEmptyList] {
       val any: NonEmptyList[Any]                                                           =
         single(())
