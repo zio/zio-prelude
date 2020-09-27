@@ -48,7 +48,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Cause`
+   * The `Covariant` (and thus `Invariant`) for `Cause`
    */
   implicit def CauseCovariant: Covariant[Cause] =
     new Covariant[Cause] {
@@ -58,7 +58,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Traversable` instance for `Chunk`.
+   * The `Traversable` (and thus `Covariant` and `Invariant`) for `Chunk`.
    */
   implicit val ChunkTraversable: Traversable[Chunk] =
     new Traversable[Chunk] {
@@ -76,7 +76,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `Either`
+   * The `Covariant` (and thus `Invariant`) for a failed `Either`
    */
   implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
     new Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
@@ -91,7 +91,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Traversable` instance for `Either`.
+   * The `Traversable` (and thus `Covariant` and `Invariant`) for `Either`.
    */
   implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] =
     new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] {
@@ -100,7 +100,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Exit`
+   * The `Covariant` (and thus `Invariant`) for `Exit`
    */
   implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] {
@@ -110,7 +110,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `Exit`
+   * The `Covariant` (and thus `Invariant`) for a failed `Exit`
    */
   implicit def ExitFailureCovariant[A]: Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] =
     new Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
@@ -120,7 +120,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Fiber`
+   * The `Covariant` (and thus `Invariant`) for `Fiber`
    */
   implicit def FiberCovariant[E]: Covariant[({ type lambda[+a] = Fiber[E, a] })#lambda] =
     new Covariant[({ type lambda[+a] = Fiber[E, a] })#lambda] {
@@ -130,7 +130,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function1`
+   * The `Covariant` (and thus `Invariant`) for `Function1`
    */
   implicit def Function1Covariant[T]: Covariant[({ type lambda[+x] = T => x })#lambda] =
     new Covariant[({ type lambda[+x] = T => x })#lambda] {
@@ -139,7 +139,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function2`
+   * The `Covariant` (and thus `Invariant`) for `Function2`
    */
   implicit def Function2Covariant[T1, T2]: Covariant[({ type lambda[+x] = (T1, T2) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2) => x })#lambda] {
@@ -148,7 +148,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function3`
+   * The `Covariant` (and thus `Invariant`) for `Function3`
    */
   implicit def Function3Covariant[T1, T2, T3]: Covariant[({ type lambda[+x] = (T1, T2, T3) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3) => x })#lambda] {
@@ -157,7 +157,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function4`
+   * The `Covariant` (and thus `Invariant`) for `Function4`
    */
   implicit def Function4Covariant[T1, T2, T3, T4]: Covariant[({ type lambda[+x] = (T1, T2, T3, T4) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4) => x })#lambda] {
@@ -166,7 +166,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function5`
+   * The `Covariant` (and thus `Invariant`) for `Function5`
    */
   implicit def Function5Covariant[T1, T2, T3, T4, T5]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5) => x })#lambda] =
@@ -176,7 +176,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function6`
+   * The `Covariant` (and thus `Invariant`) for `Function6`
    */
   implicit def Function6Covariant[T1, T2, T3, T4, T5, T6]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6) => x })#lambda] =
@@ -186,7 +186,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function7`
+   * The `Covariant` (and thus `Invariant`) for `Function7`
    */
   implicit def Function7Covariant[T1, T2, T3, T4, T5, T6, T7]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7) => x })#lambda] =
@@ -196,7 +196,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function8`
+   * The `Covariant` (and thus `Invariant`) for `Function8`
    */
   implicit def Function8Covariant[T1, T2, T3, T4, T5, T6, T7, T8]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8) => x })#lambda] =
@@ -208,7 +208,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function9`
+   * The `Covariant` (and thus `Invariant`) for `Function9`
    */
   implicit def Function9Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9) => x })#lambda] =
@@ -220,7 +220,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function10`
+   * The `Covariant` (and thus `Invariant`) for `Function10`
    */
   implicit def Function10Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => x })#lambda] =
@@ -232,7 +232,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function11`
+   * The `Covariant` (and thus `Invariant`) for `Function11`
    */
   implicit def Function11Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => x })#lambda] =
@@ -247,7 +247,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function12`
+   * The `Covariant` (and thus `Invariant`) for `Function12`
    */
   implicit def Function12Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) => x })#lambda] =
@@ -263,7 +263,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function13`
+   * The `Covariant` (and thus `Invariant`) for `Function13`
    */
   implicit def Function13Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) => x })#lambda] =
@@ -279,7 +279,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function14`
+   * The `Covariant` (and thus `Invariant`) for `Function14`
    */
   implicit def Function14Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) => x })#lambda] =
@@ -295,7 +295,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function15`
+   * The `Covariant` (and thus `Invariant`) for `Function15`
    */
   implicit def Function15Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]: Covariant[
     ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) => x })#lambda
@@ -314,7 +314,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function16`
+   * The `Covariant` (and thus `Invariant`) for `Function16`
    */
   implicit def Function16Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]: Covariant[
     ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) => x })#lambda
@@ -333,7 +333,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function17`
+   * The `Covariant` (and thus `Invariant`) for `Function17`
    */
   implicit def Function17Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]
     : Covariant[
@@ -353,7 +353,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function18`
+   * The `Covariant` (and thus `Invariant`) for `Function18`
    */
   implicit def Function18Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
     : Covariant[
@@ -377,7 +377,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function19`
+   * The `Covariant` (and thus `Invariant`) for `Function19`
    */
   implicit def Function19Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
     : Covariant[
@@ -401,7 +401,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function20`
+   * The `Covariant` (and thus `Invariant`) for `Function20`
    */
   implicit def Function20Covariant[
     T1,
@@ -446,7 +446,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function21`
+   * The `Covariant` (and thus `Invariant`) for `Function21`
    */
   implicit def Function21Covariant[
     T1,
@@ -493,7 +493,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Function22`
+   * The `Covariant` (and thus `Invariant`) for `Function22`
    */
   implicit def Function22Covariant[
     T1,
@@ -708,7 +708,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple2`
+   * The `Covariant` (and thus `Invariant`) for `Tuple2`
    */
   implicit def Tuple2Covariant[T1]: Covariant[({ type lambda[+x] = (T1, x) })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, x) })#lambda] {
@@ -718,7 +718,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple3`
+   * The `Covariant` (and thus `Invariant`) for `Tuple3`
    */
   implicit def Tuple3Covariant[T1, T2]: Covariant[({ type lambda[+x] = (T1, T2, x) })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, x) })#lambda] {
@@ -728,7 +728,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple4`
+   * The `Covariant` (and thus `Invariant`) for `Tuple4`
    */
   implicit def Tuple4Covariant[T1, T2, T3]: Covariant[({ type lambda[+x] = (T1, T2, T3, x) })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, x) })#lambda] {
@@ -738,7 +738,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple5`
+   * The `Covariant` (and thus `Invariant`) for `Tuple5`
    */
   implicit def Tuple5Covariant[T1, T2, T3, T4]: Covariant[({ type lambda[+x] = (T1, T2, T3, T4, x) })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, x) })#lambda] {
@@ -748,7 +748,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple6`
+   * The `Covariant` (and thus `Invariant`) for `Tuple6`
    */
   implicit def Tuple6Covariant[T1, T2, T3, T4, T5]: Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, x) })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, x) })#lambda] {
@@ -758,7 +758,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple7`
+   * The `Covariant` (and thus `Invariant`) for `Tuple7`
    */
   implicit def Tuple7Covariant[T1, T2, T3, T4, T5, T6]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, x) })#lambda] =
@@ -769,7 +769,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple8`
+   * The `Covariant` (and thus `Invariant`) for `Tuple8`
    */
   implicit def Tuple8Covariant[T1, T2, T3, T4, T5, T6, T7]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, x) })#lambda] =
@@ -781,7 +781,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple9`
+   * The `Covariant` (and thus `Invariant`) for `Tuple9`
    */
   implicit def Tuple9Covariant[T1, T2, T3, T4, T5, T6, T7, T8]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, x) })#lambda] =
@@ -794,7 +794,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple10`
+   * The `Covariant` (and thus `Invariant`) for `Tuple10`
    */
   implicit def Tuple10Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, x) })#lambda] =
@@ -807,7 +807,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple11`
+   * The `Covariant` (and thus `Invariant`) for `Tuple11`
    */
   implicit def Tuple11Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, x) })#lambda] =
@@ -832,7 +832,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple12`
+   * The `Covariant` (and thus `Invariant`) for `Tuple12`
    */
   implicit def Tuple12Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, x) })#lambda] =
@@ -859,7 +859,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple13`
+   * The `Covariant` (and thus `Invariant`) for `Tuple13`
    */
   implicit def Tuple13Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, x) })#lambda] =
@@ -888,7 +888,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple14`
+   * The `Covariant` (and thus `Invariant`) for `Tuple14`
    */
   implicit def Tuple14Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, x) })#lambda] =
@@ -918,7 +918,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple15`
+   * The `Covariant` (and thus `Invariant`) for `Tuple15`
    */
   implicit def Tuple15Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, x) })#lambda] =
@@ -949,7 +949,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple16`
+   * The `Covariant` (and thus `Invariant`) for `Tuple16`
    */
   implicit def Tuple16Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, x) })#lambda] =
@@ -983,7 +983,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple17`
+   * The `Covariant` (and thus `Invariant`) for `Tuple17`
    */
   implicit def Tuple17Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]: Covariant[
     ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, x) })#lambda
@@ -1019,7 +1019,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple18`
+   * The `Covariant` (and thus `Invariant`) for `Tuple18`
    */
   implicit def Tuple18Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]: Covariant[
     ({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, x) })#lambda
@@ -1056,7 +1056,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple19`
+   * The `Covariant` (and thus `Invariant`) for `Tuple19`
    */
   implicit def Tuple19Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]
     : Covariant[
@@ -1099,7 +1099,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple20`
+   * The `Covariant` (and thus `Invariant`) for `Tuple20`
    */
   implicit def Tuple20Covariant[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
     : Covariant[
@@ -1143,7 +1143,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple21`
+   * The `Covariant` (and thus `Invariant`) for `Tuple21`
    */
   implicit def Tuple21Covariant[
     T1,
@@ -1208,7 +1208,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `Tuple22`
+   * The `Covariant` (and thus `Invariant`) for `Tuple22`
    */
   implicit def Tuple22Covariant[
     T1,
@@ -1287,7 +1287,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `ZIO`
+   * The `Covariant` (and thus `Invariant`) for `ZIO`
    */
   implicit def ZIOCovariant[R, E]: Covariant[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
     new Covariant[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
@@ -1297,7 +1297,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZIO`
+   * The `Covariant` (and thus `Invariant`) for a failed `ZIO`
    */
   implicit def ZIOFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
     new Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
@@ -1307,7 +1307,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `ZLayer`
+   * The `Covariant` (and thus `Invariant`) for `ZLayer`
    */
   implicit def ZLayerCovariant[R, E]: Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] =
     new Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] {
@@ -1317,7 +1317,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZLayer`
+   * The `Covariant` (and thus `Invariant`) for a failed `ZLayer`
    */
   implicit def ZLayerFailureCovariant[R, Out]: Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] =
     new Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] {
@@ -1327,7 +1327,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `ZManaged`
+   * The `Covariant` (and thus `Invariant`) for `ZManaged`
    */
   implicit def ZManagedCovariant[R, E]: Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
     new Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
@@ -1337,7 +1337,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZManaged`
+   * The `Covariant` (and thus `Invariant`) for a failed `ZManaged`
    */
   implicit def ZManagedFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
     new Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
@@ -1347,7 +1347,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `ZQueue`
+   * The `Covariant` (and thus `Invariant`) for `ZQueue`
    */
   implicit def ZQueueCovariant[RA, RB, EA, EB, A]
     : Covariant[({ type lambda[+b] = ZQueue[RA, RB, EA, EB, A, b] })#lambda] =
@@ -1358,7 +1358,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `ZRef`
+   * The `Covariant` (and thus `Invariant`) for `ZRef`
    */
   implicit def ZRefCovariant[EA, EB, A]: Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] =
     new Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] {
@@ -1368,7 +1368,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRef` on its input
+   * The `Covariant` (and thus `Invariant`) for a failed `ZRef` on its input
    */
   implicit def ZRefFailureInCovariant[EB, A, B]
     : Covariant[({ type lambda[+ea] = FailureIn[ZRef[ea, EB, A, B]] })#lambda] =
@@ -1379,7 +1379,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRef` on its output
+   * The `Covariant` (and thus `Invariant`) for a failed `ZRef` on its output
    */
   implicit def ZRefFailureOutCovariant[EA, A, B]
     : Covariant[({ type lambda[+eb] = FailureOut[ZRef[EA, eb, A, B]] })#lambda] =
@@ -1390,7 +1390,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `ZRefM`
+   * The `Covariant` (and thus `Invariant`) for `ZRefM`
    */
   implicit def ZRefMCovariant[RA, RB, EA, EB, A]
     : Covariant[({ type lambda[+b] = ZRefM[RA, RB, EA, EB, A, b] })#lambda] =
@@ -1401,7 +1401,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRefM` on its input
+   * The `Covariant` (and thus `Invariant`) for a failed `ZRefM` on its input
    */
   implicit def ZRefMFailureInACovariant[RA, RB, EB, A, B]
     : Covariant[({ type lambda[+ea] = FailureIn[ZRefM[RA, RB, ea, EB, A, B]] })#lambda] =
@@ -1414,7 +1414,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZRefM` on its output
+   * The `Covariant` (and thus `Invariant`) for a failed `ZRefM` on its output
    */
   implicit def ZRefMFailureOutCovariant[RA, RB, EA, A, B]
     : Covariant[({ type lambda[+eb] = FailureOut[ZRefM[RA, RB, EA, eb, A, B]] })#lambda] =
@@ -1427,7 +1427,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for `ZStream`
+   * The `Covariant` (and thus `Invariant`) for `ZStream`
    */
   implicit def ZStreamCovariant[R, E]: Covariant[({ type lambda[+o] = ZStream[R, E, o] })#lambda] =
     new Covariant[({ type lambda[+o] = ZStream[R, E, o] })#lambda] {
@@ -1437,7 +1437,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` instance for a failed `ZStream`
+   * The `Covariant` (and thus `Invariant`) for a failed `ZStream`
    */
   implicit def ZStreamFailureCovariant[R, O]: Covariant[({ type lambda[+e] = Failure[ZStream[R, e, O]] })#lambda] =
     new Covariant[({ type lambda[+e] = Failure[ZStream[R, e, O]] })#lambda] {
@@ -1450,7 +1450,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
 trait LowPriorityInvariantImplicits {
 
   /**
-   * The contravariant instance for `Function1[-A, +B] : [*, *] => *`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function1[-A, +B] : [*, *] => *`.
    */
   implicit def Function1Contravariant[B]: Contravariant[({ type lambda[-x] = x => B })#lambda] = {
     type Function1B[-A] = Function1[A, B]
@@ -1462,7 +1462,7 @@ trait LowPriorityInvariantImplicits {
   }
 
   /**
-   * The contravariant instance for `Function2`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function2`.
    */
   implicit def Function2Contravariant[B, C]: Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] {
@@ -1471,7 +1471,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function3`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function3`.
    */
   implicit def Function3Contravariant[B, C, D]: Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] {
@@ -1480,7 +1480,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function4`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function4`.
    */
   implicit def Function4Contravariant[B, C, D, E]: Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] {
@@ -1489,7 +1489,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function5`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function5`.
    */
   implicit def Function5Contravariant[B, C, D, E, F]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] =
@@ -1499,7 +1499,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function6`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function6`.
    */
   implicit def Function6Contravariant[B, C, D, E, F, G]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] =
@@ -1509,7 +1509,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function7`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function7`.
    */
   implicit def Function7Contravariant[B, C, D, E, F, G, H]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] =
@@ -1519,7 +1519,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function8`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function8`.
    */
   implicit def Function8Contravariant[B, C, D, E, F, G, H, I]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] =
@@ -1529,7 +1529,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function9`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function9`.
    */
   implicit def Function9Contravariant[B, C, D, E, F, G, H, I, J]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] =
@@ -1539,7 +1539,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function10`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function10`.
    */
   implicit def Function10Contravariant[B, C, D, E, F, G, H, I, J, K]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J) => K })#lambda] =
@@ -1551,7 +1551,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function11`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function11`.
    */
   implicit def Function11Contravariant[B, C, D, E, F, G, H, I, J, K, L]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K) => L })#lambda] =
@@ -1563,7 +1563,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function12`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function12`.
    */
   implicit def Function12Contravariant[B, C, D, E, F, G, H, I, J, K, L, M]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L) => M })#lambda] =
@@ -1575,7 +1575,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function13`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function13`.
    */
   implicit def Function13Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M) => N })#lambda] =
@@ -1587,7 +1587,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function14`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function14`.
    */
   implicit def Function14Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#lambda] =
@@ -1599,7 +1599,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function15`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function15`.
    */
   implicit def Function15Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#lambda] =
@@ -1612,7 +1612,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function16`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function16`.
    */
   implicit def Function16Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#lambda] =
@@ -1626,7 +1626,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function17`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function17`.
    */
   implicit def Function17Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#lambda] =
@@ -1640,7 +1640,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function18`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function18`.
    */
   implicit def Function18Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#lambda] =
@@ -1654,7 +1654,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function10`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function10`.
    */
   implicit def Function19Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#lambda] =
@@ -1668,7 +1668,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function20`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function20`.
    */
   implicit def Function20Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#lambda] =
@@ -1684,7 +1684,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function21`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function21`.
    */
   implicit def Function21Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]: Contravariant[
     ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V })#lambda
@@ -1701,7 +1701,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Function22`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Function22`.
    */
   implicit def Function22Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W]: Contravariant[
     ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W })#lambda
@@ -1718,7 +1718,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `Schedule`.
+   * The `Contravariant` (and thus `Invariant`) instance for `Schedule`.
    */
   implicit def ScheduleContravariant[R, B]: Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] =
     new Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] {
@@ -1727,7 +1727,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZIO`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZIO`.
    */
   implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] {
@@ -1736,7 +1736,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZLayer`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZLayer`.
    */
   implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] {
@@ -1745,7 +1745,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZManaged`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZManaged`.
    */
   implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] {
@@ -1754,7 +1754,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZQueue`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZQueue`.
    */
   implicit def ZQueueContravariant[RA, EA, RB, EB, B]
     : Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] =
@@ -1764,7 +1764,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZRef`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZRef`.
    */
   implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] {
@@ -1773,7 +1773,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZRefM`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZRefM`.
    */
   implicit def ZRefMContravariant[RA, RB, EA, EB, B]
     : Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] =
@@ -1783,7 +1783,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZSink`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZSink`.
    */
   implicit def ZSinkContravariant[R, E, L, Z]: Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] {
@@ -1792,7 +1792,7 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The contravariant instance for `ZStream`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZStream`.
    */
   implicit def ZStreamContravariant[E, A]: Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] {
