@@ -52,6 +52,9 @@ package object prelude
   type NonEmptyMultiSet[+A] = ZNonEmptySet[A, Int]
   val NonEmptyMultiSet: ZNonEmptySet.type = ZNonEmptySet
 
+  type Derive[F[_], Typeclass[_]] = ZDerive[F, Typeclass, Typeclass]
+  val Derive: ZDerive.type = ZDerive
+
   type DeriveAssociative[F[_]] = Derive[F, Associative]
   type DeriveCommutative[F[_]] = Derive[F, Commutative]
   type DeriveDebug[F[_]]       = Derive[F, Debug]
@@ -60,6 +63,8 @@ package object prelude
   type DeriveIdentity[F[_]]    = Derive[F, Identity]
   type DeriveInverse[F[_]]     = Derive[F, Inverse]
   type DeriveOrd[F[_]]         = Derive[F, Ord]
+
+  type DeriveEqualFromEnumerable[F[_]] = ZDerive[F, Equal, Enumerable]
 
   object classic {
     type Semigroup[A]            = Associative[A]

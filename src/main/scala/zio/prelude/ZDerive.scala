@@ -19,16 +19,18 @@ import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
  * This is used by the library to derive typeclass instances for higher kinded
  * types given typeclass instances for the type they are parameterized on.
  */
-trait Derive[F[_], Typeclass[_]] {
-  def derive[A: Typeclass]: Typeclass[F[A]]
+trait ZDerive[F[_], TypeclassF[_], Typeclass[_]] {
+  def derive[A: Typeclass]: TypeclassF[F[A]]
 }
 
-object Derive {
+object ZDerive {
 
   /**
    * Summon an implicit `Derive[F, Typeclass]`
    */
-  def apply[F[_], Typeclass[_]](implicit derive: Derive[F, Typeclass]): Derive[F, Typeclass] =
+  def apply[F[_], TypeclassF[_], Typeclass[_]](implicit
+    derive: ZDerive[F, TypeclassF, Typeclass]
+  ): ZDerive[F, TypeclassF, Typeclass] =
     derive
 
   /**
@@ -38,6 +40,15 @@ object Derive {
     new Derive[Chunk, Equal] {
       def derive[A: Equal]: Equal[Chunk[A]] =
         Equal.ChunkEqual
+    }
+
+  /**
+   * The `DeriveEqual` instance for `Chunk`.
+   */
+  implicit val EqualDeriveEqual: ZDerive[Equal, Equal, Enumerable] =
+    new ZDerive[Equal, Equal, Enumerable] {
+      def derive[A: Enumerable]: Equal[Equal[A]] =
+        Equal.DeriveEqualFromEnumerable
     }
 
   /**

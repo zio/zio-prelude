@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.coherent.ContravariantDeriveEqual
+import zio.prelude.coherent.ContravariantDeriveEqualFromEnumerable
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
@@ -33,7 +33,7 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * compares strings by computing their lengths with the provided function and
  * comparing those.
  */
-trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F]      {
+trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F]                         {
   final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] =
     contramap(f)
 
@@ -45,14 +45,14 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
-object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
+object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqualFromEnumerable, Enumerable] {
 
   /**
    * Contramapping with the identity function must not change the structure.
    */
-  val identityLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
-    new LawsF.Contravariant.Law1[ContravariantDeriveEqual, Equal]("identityLaw") {
-      def apply[F[-_]: ContravariantDeriveEqual, A: Equal](fa: F[A]): TestResult =
+  val identityLaw: LawsF.Contravariant[ContravariantDeriveEqualFromEnumerable, Enumerable] =
+    new LawsF.Contravariant.Law1[ContravariantDeriveEqualFromEnumerable, Enumerable]("identityLaw") {
+      def apply[F[-_]: ContravariantDeriveEqualFromEnumerable, A: Enumerable](fa: F[A]): TestResult =
         fa.contramap(identity[A]) <-> fa
     }
 
@@ -60,9 +60,9 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
    * Contramapping by `f` followed by `g` must be the same as contramapping
    * with the composition of `f` and `g`.
    */
-  val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
-    new LawsF.Contravariant.ComposeLaw[ContravariantDeriveEqual, Equal]("compositionLaw") {
-      def apply[F[-_]: ContravariantDeriveEqual, A: Equal, B: Equal, C: Equal](
+  val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqualFromEnumerable, Enumerable] =
+    new LawsF.Contravariant.ComposeLaw[ContravariantDeriveEqualFromEnumerable, Enumerable]("compositionLaw") {
+      def apply[F[-_]: ContravariantDeriveEqualFromEnumerable, A: Enumerable, B: Enumerable, C: Enumerable](
         fa: F[A],
         f: B => A,
         g: C => B
@@ -76,7 +76,7 @@ object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqua
   /**
    * The set of all laws that instances of `Contravariant` must satisfy.
    */
-  val laws: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
+  val laws: LawsF.Contravariant[ContravariantDeriveEqualFromEnumerable, Enumerable] =
     identityLaw + compositionLaw
 
   /**

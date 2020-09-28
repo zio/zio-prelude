@@ -112,16 +112,16 @@ object CovariantDeriveEqual {
     }
 }
 
-trait ContravariantDeriveEqual[F[-_]] extends Contravariant[F] with DeriveEqual[F]
+trait ContravariantDeriveEqualFromEnumerable[F[-_]] extends Contravariant[F] with DeriveEqualFromEnumerable[F]
 
-object ContravariantDeriveEqual {
+object ContravariantDeriveEqualFromEnumerable {
   implicit def derive[F[-_]](implicit
     contravariant0: Contravariant[F],
-    deriveEqual0: DeriveEqual[F]
-  ): ContravariantDeriveEqual[F] =
-    new ContravariantDeriveEqual[F] {
-      def derive[A: Equal]: Equal[F[A]]            =
-        deriveEqual0.derive
+    deriveEqualFromEnumerable0: DeriveEqualFromEnumerable[F]
+  ): ContravariantDeriveEqualFromEnumerable[F] =
+    new ContravariantDeriveEqualFromEnumerable[F] {
+      def derive[A: Enumerable]: Equal[F[A]]       =
+        deriveEqualFromEnumerable0.derive
       def contramap[A, B](f: B => A): F[A] => F[B] =
         contravariant0.contramap(f)
     }
