@@ -31,7 +31,7 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * compares strings by computing their lengths with the provided function and
  * comparing those.
  */
-trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F]      {
+trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F] {
   final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] =
     contramap(f)
 
@@ -43,7 +43,8 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 }
-object Contravariant       extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
+
+object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
 
   /**
    * Contramapping with the identity function must not change the structure.
