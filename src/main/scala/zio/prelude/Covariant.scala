@@ -186,10 +186,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `Function1`
    */
   implicit def Function1Covariant[T]: Covariant[({ type lambda[+x] = T => x })#lambda] =
-    new Covariant[({ type lambda[+x] = T => x })#lambda] {
-      override def map[A, B](f: A => B): (T => A) => T => B =
-        function => t => f(function(t))
-    }
+    Divariant.Function1Divariant.deriveCovariant[T]
 
   /**
    * The `Covariant` instance for `Function2`
