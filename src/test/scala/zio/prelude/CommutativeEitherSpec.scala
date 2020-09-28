@@ -17,7 +17,7 @@ object CommutativeEitherSpec extends DefaultRunnableSpec {
           r <- ZIO.fromFuture { implicit ec =>
                  Future(blocking { Thread.sleep(60 * 1000); "long 2" }) <|> Future.successful("immediate")
                }
-        } yield assert(l.merge)(isEqualTo(r.merge))
+        } yield assert(l.merge)(equalTo(r.merge))
       }
     )
 }

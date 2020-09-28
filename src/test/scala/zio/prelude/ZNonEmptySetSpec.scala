@@ -62,7 +62,7 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
         test("zipWith") {
           val die  = ZNonEmptySet(1, 2, 3, 4, 5, 6)
           val pair = die.zipWith(die)(_ + _)
-          assert(pair(7))(isEqualTo(6))
+          assert(pair(7))(equalTo(6))
         }
       ),
       suite("set")(
@@ -70,14 +70,14 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
           check(Gen.setOf1(Gen.anyInt), Gen.function(Gen.setOf1(Gen.anyInt))) { (as, f) =>
             val actual   = ZNonEmptySet.fromSetOption(as).get.flatMap(a => ZNonEmptySet.fromSetOption(f(a)).get).toSet
             val expected = as.flatMap(f)
-            assert(actual)(isEqualTo(expected))
+            assert(actual)(equalTo(expected))
           }
         },
         testM("union") {
           check(Gen.setOf1(Gen.anyInt), Gen.setOf1(Gen.anyInt)) { (l, r) =>
             val actual   = (ZNonEmptySet.fromSetOption(l).get | ZNonEmptySet.fromSetOption(r).get).toSet
             val expected = l | r
-            assert(actual)(isEqualTo(expected))
+            assert(actual)(equalTo(expected))
           }
         }
       )

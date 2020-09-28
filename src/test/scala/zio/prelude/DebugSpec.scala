@@ -9,7 +9,7 @@ import zio.test.{ TestResult, _ }
 object DebugSpec extends DefaultRunnableSpec {
 
   def primitiveTest[A: Debug](renderer: Renderer)(a: A, exp: Option[String] = None): TestResult =
-    assert(a.debug.render(renderer))(isEqualTo(exp.getOrElse(a.toString)))
+    assert(a.debug.render(renderer))(equalTo(exp.getOrElse(a.toString)))
 
   def primScalaTest[A: Debug](a: A): TestResult                              = primitiveTest[A](Renderer.Scala)(a)
   def primSimpleTest[A: Debug](a: A, exp: Option[String] = None): TestResult = primitiveTest[A](Renderer.Simple)(a, exp)
@@ -95,25 +95,23 @@ object DebugSpec extends DefaultRunnableSpec {
         ),
         testM("list")(check(Gen.listOf(Gen.anyInt))(primSimpleTest(_))),
         testM("tuple2")(
-          check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Simple))(isEqualTo(expectedTupleSimple(2)(i))))
+          check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Simple))(equalTo(expectedTupleSimple(2)(i))))
         ),
         testM("tuple3")(
-          check(Gen.anyInt)(i => assert((i, i, i).debug.render(Renderer.Simple))(isEqualTo(expectedTupleSimple(3)(i))))
+          check(Gen.anyInt)(i => assert((i, i, i).debug.render(Renderer.Simple))(equalTo(expectedTupleSimple(3)(i))))
         ),
         testM("tuple4")(
-          check(Gen.anyInt)(i =>
-            assert((i, i, i, i).debug.render(Renderer.Simple))(isEqualTo(expectedTupleSimple(4)(i)))
-          )
+          check(Gen.anyInt)(i => assert((i, i, i, i).debug.render(Renderer.Simple))(equalTo(expectedTupleSimple(4)(i))))
         ),
         testM("tuple10")(
           check(Gen.anyInt)(i =>
-            assert((i, i, i, i, i, i, i, i, i, i).debug.render(Renderer.Simple))(isEqualTo(expectedTupleSimple(10)(i)))
+            assert((i, i, i, i, i, i, i, i, i, i).debug.render(Renderer.Simple))(equalTo(expectedTupleSimple(10)(i)))
           )
         ),
         testM("tuple22")(
           check(Gen.anyInt)(i =>
             assert((i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i).debug.render(Renderer.Simple))(
-              isEqualTo(expectedTupleSimple(22)(i))
+              equalTo(expectedTupleSimple(22)(i))
             )
           )
         ),
@@ -121,12 +119,12 @@ object DebugSpec extends DefaultRunnableSpec {
           check(genTestCase)(c =>
             assert(c.debug.render(Renderer.Simple)) {
               val str = s""""${c.string}""""
-              isEqualTo(s"TestCase(string = $str, number = ${c.number}, list = ${c.list})")
+              equalTo(s"TestCase(string = $str, number = ${c.number}, list = ${c.list})")
             }
           )
         ),
         testM("testTrait")(check(genTestTrait) { c =>
-          assert(c.debug.render(Renderer.Simple))(isEqualTo(s"${c.getClass.getSimpleName.init}"))
+          assert(c.debug.render(Renderer.Simple))(equalTo(s"${c.getClass.getSimpleName.init}"))
         })
       ),
       suite("FullRenderer")(
@@ -141,45 +139,45 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("string")(check(Gen.anyString)(s => primFullTest(s, Some(s""""$s"""")))),
         testM("either")(
           check(Gen.either(Gen.anyInt, Gen.anyInt))(c =>
-            assert(c.debug.render(Renderer.Full))(isEqualTo(s"scala.${c.toString}"))
+            assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}"))
           )
         ),
         testM("option")(
-          check(Gen.option(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(isEqualTo(s"scala.${c.toString}")))
+          check(Gen.option(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}")))
         ),
         testM("vector")(
-          check(Gen.vectorOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(isEqualTo(s"scala.${c.toString}")))
+          check(Gen.vectorOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}")))
         ),
         testM("list")(
-          check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(isEqualTo(s"scala.${c.toString}")))
+          check(Gen.listOf(Gen.anyInt))(c => assert(c.debug.render(Renderer.Full))(equalTo(s"scala.${c.toString}")))
         ),
         testM("map")(
           check(Gen.mapOf(Gen.anyInt, Gen.anyInt))((c: Map[Int, Int]) =>
             assert(c.debug.render(Renderer.Full))(
-              isEqualTo(
+              equalTo(
                 s"scala.Map(${c.map(kv => s"key: ${kv._1} -> value: ${kv._2}").mkString(", ")})"
               )
             )
           )
         ),
         testM("tuple2")(
-          check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Full))(isEqualTo(expectedTupleFull(2)(i))))
+          check(Gen.anyInt)(i => assert((i, i).debug.render(Renderer.Full))(equalTo(expectedTupleFull(2)(i))))
         ),
         testM("tuple3")(
-          check(Gen.anyInt)(i => assert((i, i, i).debug.render(Renderer.Full))(isEqualTo(expectedTupleFull(3)(i))))
+          check(Gen.anyInt)(i => assert((i, i, i).debug.render(Renderer.Full))(equalTo(expectedTupleFull(3)(i))))
         ),
         testM("tuple4")(
-          check(Gen.anyInt)(i => assert((i, i, i, i).debug.render(Renderer.Full))(isEqualTo(expectedTupleFull(4)(i))))
+          check(Gen.anyInt)(i => assert((i, i, i, i).debug.render(Renderer.Full))(equalTo(expectedTupleFull(4)(i))))
         ),
         testM("tuple10")(
           check(Gen.anyInt)(i =>
-            assert((i, i, i, i, i, i, i, i, i, i).debug.render(Renderer.Full))(isEqualTo(expectedTupleFull(10)(i)))
+            assert((i, i, i, i, i, i, i, i, i, i).debug.render(Renderer.Full))(equalTo(expectedTupleFull(10)(i)))
           )
         ),
         testM("tuple22")(
           check(Gen.anyInt)(i =>
             assert((i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i, i).debug.render(Renderer.Full))(
-              isEqualTo(expectedTupleFull(22)(i))
+              equalTo(expectedTupleFull(22)(i))
             )
           )
         ),
@@ -187,12 +185,12 @@ object DebugSpec extends DefaultRunnableSpec {
           check(genTestCase)(c =>
             assert(c.debug.render(Renderer.Full)) {
               val str = s""""${c.string}""""
-              isEqualTo(s"DebugSpec.TestCase(string = $str, number = ${c.number}, list = scala.${c.list})")
+              equalTo(s"DebugSpec.TestCase(string = $str, number = ${c.number}, list = scala.${c.list})")
             }
           )
         ),
         testM("testTrait")(check(genTestTrait) { c =>
-          assert(c.debug.render(Renderer.Full))(isEqualTo(s"DebugSpec.${c.getClass.getSimpleName.init}"))
+          assert(c.debug.render(Renderer.Full))(equalTo(s"DebugSpec.${c.getClass.getSimpleName.init}"))
         })
       )
     )
