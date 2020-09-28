@@ -133,10 +133,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    * The `Covariant` (and thus `Invariant`) for `Function1`
    */
   implicit def Function1Covariant[T]: Covariant[({ type lambda[+x] = T => x })#lambda] =
-    new Covariant[({ type lambda[+x] = T => x })#lambda] {
-      override def map[A, B](f: A => B): (T => A) => T => B =
-        function => t => f(function(t))
-    }
+    Divariant.Function1Divariant.deriveCovariant[T]
 
   /**
    * The `Covariant` (and thus `Invariant`) for `Function2`
@@ -1452,14 +1449,8 @@ trait LowPriorityInvariantImplicits {
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `Function1[-A, +B] : [*, *] => *`.
    */
-  implicit def Function1Contravariant[B]: Contravariant[({ type lambda[-x] = x => B })#lambda] = {
-    type Function1B[-A] = Function1[A, B]
-
-    new Contravariant[Function1B] {
-      def contramap[A, C](function: C => A): (A => B) => (C => B) =
-        apply => c => apply(function(c))
-    }
-  }
+  implicit def Function1Contravariant[B]: Contravariant[({ type lambda[-x] = x => B })#lambda] =
+    Divariant.Function1Divariant.deriveContravariant[B]
 
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `Function2`.
