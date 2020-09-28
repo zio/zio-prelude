@@ -183,7 +183,7 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
 trait AssociativeFlattenSyntax {
 
   /**
-   * Provides infix syntax for flattening covariant types..
+   * Provides infix syntax for flattening types.
    */
   implicit class AssociativeFlattenOps[F[+_], A](ffa: F[F[A]]) {
 
@@ -192,5 +192,18 @@ trait AssociativeFlattenSyntax {
      */
     def flatten(implicit flatten: AssociativeFlatten[F]): F[A] =
       flatten.flatten(ffa)
+  }
+
+  /**
+   * Provides infix syntax for flattening covariant types.
+   */
+  implicit class AssociativeFlattenCovariantOps[F[+_], A](fa: F[A]) {
+
+    /**
+     * Maps a function `A => F[B]` over an `F[A]` value and then flattens the
+     * resulting `F[F[B]]`.
+     */
+    def flatMap[B](f: A => F[B])(implicit flatten: AssociativeFlatten[F], covariant: Covariant[F]): F[B] =
+      flatten.flatten(covariant.map(f)(fa))
   }
 }
