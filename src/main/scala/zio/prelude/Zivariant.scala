@@ -91,11 +91,6 @@ trait TriBivariant[Z[_, +_, +_]] extends TriCovariant[Z] with TriLeftCovariant[Z
   def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1]
 }
 
-///**
-// * Covariant functor + Divariant trifunctor
-// */
-//type CovariantDivariant[Z[-_, -_, +_]] = Zivariant[Z]
-
 /**
  * Abstract over type constructor with 3 parameters: on first as contravariant
  * and on second and third as covariant.
@@ -267,13 +262,8 @@ trait TriRightContravariant[Z[_, -_, _]] extends Trinvarint[Z] { self =>
  * Covariant trifunctor == 3 x Covariant
  */
 trait TriContravariantDivariant[Z[-_, -_, +_]] extends TriRightContravariant[Z] with TriDivariant[Z] {
-  def nimap[R, E, A, R1, E1, A1](r: R1 => R, e: E1 => E, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
 
-  // instances:
-  // Function2
-  // zio.Schedule
-  // Ord[A] = TCD[A,A,EQ | GT | LT]
-  // Equal[A] = TCD[A,A,Boolean]
+  def nimap[R, E, A, R1, E1, A1](r: R1 => R, e: E1 => E, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
 }
 
 trait TriContravariantDivariantInstance[Z[-_, -_, +_]] extends TriContravariantDivariant[Z] {
@@ -288,10 +278,16 @@ trait TriContravariantDivariantInstance[Z[-_, -_, +_]] extends TriContravariantD
 }
 
 object TriContravariantDivariant {
-  // instances:
-  // TODO Function2
-  // TODO Ord[A] = TCD[A,A,EQ | GT | LT]
-  // TODO Equal[A] = TCD[A,A,Boolean]
+
+  implicit val Function2Trivariant: TriContravariantDivariant[Function2] =
+    new TriContravariantDivariantInstance[Function2] {
+      override def nimap[R, E, A, R1, E1, A1](r: R1 => R, e: E1 => E, a: A => A1): ((R, E) => A) => (R1, E1) => A1 =
+        rea => { case (r1, e1) =>
+          val fr: R = r(r1)
+          val fe: E = e(e1)
+          a(rea(fr, fe))
+        }
+    }
 
   implicit val ScheduleTriContravariantDivariant: TriContravariantDivariant[Schedule] =
     new TriContravariantDivariantInstance[Schedule] {
