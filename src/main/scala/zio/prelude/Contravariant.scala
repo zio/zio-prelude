@@ -1,5 +1,7 @@
 package zio.prelude
 
+// import scala.Predef.{ identity => id }
+
 import zio.prelude.coherent.ContravariantDeriveEqual
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
@@ -33,17 +35,24 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * compares strings by computing their lengths with the provided function and
  * comparing those.
  */
-trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F] {
-  final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] =
+trait ContravariantInstance[F[-_]] extends Contravariant[F] with ContravariantSubset[F, AnyType] with Invariant[F] {
+  final def contramapSubset[A, A1: AnyType](f: A1 => A): F[A] => F[A1] =
     contramap(f)
 
-  /**
-   * Lift a function from `B` to `A` to a function from `F[A]` to `F[B]`.
-   */
-  def contramap[A, B](f: B => A): F[A] => F[B]
+  final def invmap[A, A1](f: A <=> A1): F[A] <=> F[A1] =
+    Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[A1]) => contramap(f.to)(fb))
 
-  final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
-    Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
+  override def contramap[R, E, A, R1](r: R1 => R): F[R] => F[R1] = contramap(r)
+}
+
+trait ContravariantLeftInstance[F[-_]] extends Contravariant[F] with ContravariantSubset[F, AnyType] with Invariant[F] {
+  final def contramapSubset[A, A1: AnyType](f: A1 => A): F[A] => F[A1] =
+    contramap(f)
+
+  final def invmap[A, A1](f: A <=> A1): F[A] <=> F[A1] =
+    Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[A1]) => contramap(f.to)(fb))
+
+  override def contramap[R, E, A, R1](r: R1 => R): F[R] => F[R1] = contramap(r)
 }
 
 object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
@@ -97,7 +106,8 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
    */
   implicit def Function2Contravariant[B, C]: Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] {
-      def contramap[A, D](function: D => A): ((A, B) => C) => ((D, B) => C) =
+
+      override def contramap[R, E, A, R1](function: R1 => R): ((R, B) => C) => (R1, B) => C =
         apply => (d, b) => apply(function(d), b)
     }
 
@@ -106,7 +116,8 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
    */
   implicit def Function3Contravariant[B, C, D]: Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] {
-      def contramap[A, E](function: E => A): ((A, B, C) => D) => ((E, B, C) => D) =
+
+      override def contramap[R, E, A, R1](function: R1 => R): ((R, B, C) => D) => (R1, B, C) => D =
         apply => (e, b, c) => apply(function(e), b, c)
     }
 
@@ -115,7 +126,8 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
    */
   implicit def Function4Contravariant[B, C, D, E]: Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] {
-      def contramap[A, F](function: F => A): ((A, B, C, D) => E) => ((F, B, C, D) => E) =
+
+      override def contramap[R, EE, A, R1](function: R1 => R): ((R, B, C, D) => E) => (R1, B, C, D) => E =
         apply => (f, b, c, d) => apply(function(f), b, c, d)
     }
 
@@ -125,7 +137,8 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function5Contravariant[B, C, D, E, F]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] {
-      def contramap[A, G](function: G => A): ((A, B, C, D, E) => F) => ((G, B, C, D, E) => F) =
+
+      override def contramap[R, E2, A, R1](function: R1 => R): ((R, B, C, D, E) => F) => (R1, B, C, D, E) => F =
         apply => (g, b, c, d, e) => apply(function(g), b, c, d, e)
     }
 
@@ -135,7 +148,8 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function6Contravariant[B, C, D, E, F, G]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] {
-      def contramap[A, H](function: H => A): ((A, B, C, D, E, F) => G) => ((H, B, C, D, E, F) => G) =
+
+      override def contramap[R, E2, A, R1](function: R1 => R): ((R, B, C, D, E, F) => G) => (R1, B, C, D, E, F) => G =
         apply => (h, b, c, d, e, f) => apply(function(h), b, c, d, e, f)
     }
 
@@ -145,7 +159,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function7Contravariant[B, C, D, E, F, G, H]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] {
-      def contramap[A, I](function: I => A): ((A, B, C, D, E, F, G) => H) => ((I, B, C, D, E, F, G) => H) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G) => H) => (R1, B, C, D, E, F, G) => H =
         apply => (i, b, c, d, e, f, g) => apply(function(i), b, c, d, e, f, g)
     }
 
@@ -155,7 +172,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function8Contravariant[B, C, D, E, F, G, H, I]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] {
-      def contramap[A, J](function: J => A): ((A, B, C, D, E, F, G, H) => I) => ((J, B, C, D, E, F, G, H) => I) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H) => I) => (R1, B, C, D, E, F, G, H) => I =
         apply => (j, b, c, d, e, f, g, h) => apply(function(j), b, c, d, e, f, g, h)
     }
 
@@ -165,7 +185,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function9Contravariant[B, C, D, E, F, G, H, I, J]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] {
-      def contramap[A, K](function: K => A): ((A, B, C, D, E, F, G, H, I) => J) => ((K, B, C, D, E, F, G, H, I) => J) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H, I) => J) => (R1, B, C, D, E, F, G, H, I) => J =
         apply => (k, b, c, d, e, f, g, h, i) => apply(function(k), b, c, d, e, f, g, h, i)
     }
 
@@ -175,9 +198,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function10Contravariant[B, C, D, E, F, G, H, I, J, K]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J) => K })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J) => K })#lambda] {
-      def contramap[A, L](
-        function: L => A
-      ): ((A, B, C, D, E, F, G, H, I, J) => K) => ((L, B, C, D, E, F, G, H, I, J) => K) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H, I, J) => K) => (R1, B, C, D, E, F, G, H, I, J) => K =
         apply => (l, b, c, d, e, f, g, h, i, j) => apply(function(l), b, c, d, e, f, g, h, i, j)
     }
 
@@ -187,9 +211,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function11Contravariant[B, C, D, E, F, G, H, I, J, K, L]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K) => L })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K) => L })#lambda] {
-      def contramap[A, M](
-        function: M => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K) => L) => ((M, B, C, D, E, F, G, H, I, J, K) => L) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H, I, J, K) => L) => (R1, B, C, D, E, F, G, H, I, J, K) => L =
         apply => (m, b, c, d, e, f, g, h, i, j, k) => apply(function(m), b, c, d, e, f, g, h, i, j, k)
     }
 
@@ -199,9 +224,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function12Contravariant[B, C, D, E, F, G, H, I, J, K, L, M]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L) => M })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L) => M })#lambda] {
-      def contramap[A, N](
-        function: N => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L) => M) => ((N, B, C, D, E, F, G, H, I, J, K, L) => M) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H, I, J, K, L) => M) => (R1, B, C, D, E, F, G, H, I, J, K, L) => M =
         apply => (n, b, c, d, e, f, g, h, i, j, k, l) => apply(function(n), b, c, d, e, f, g, h, i, j, k, l)
     }
 
@@ -211,9 +237,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function13Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M) => N })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M) => N })#lambda] {
-      def contramap[A, O](
-        function: O => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M) => N) => ((O, B, C, D, E, F, G, H, I, J, K, L, M) => N) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H, I, J, K, L, M) => N) => (R1, B, C, D, E, F, G, H, I, J, K, L, M) => N =
         apply => (o, b, c, d, e, f, g, h, i, j, k, l, m) => apply(function(o), b, c, d, e, f, g, h, i, j, k, l, m)
     }
 
@@ -223,9 +250,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function14Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#lambda] {
-      def contramap[A, P](
-        function: P => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) => ((P, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N) => O =
         apply => (p, b, c, d, e, f, g, h, i, j, k, l, m, n) => apply(function(p), b, c, d, e, f, g, h, i, j, k, l, m, n)
     }
 
@@ -235,9 +263,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function15Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#lambda] {
-      def contramap[A, Q](
-        function: Q => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) => ((Q, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) =
+
+      override def contramap[R, E2, A, R1](
+        function: R1 => R
+      ): ((R, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P =
         apply =>
           (q, b, c, d, e, f, g, h, i, j, k, l, m, n, o) => apply(function(q), b, c, d, e, f, g, h, i, j, k, l, m, n, o)
     }
@@ -248,9 +277,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function16Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#lambda] {
-      def contramap[A, R](function: R => A): (
-        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q
-      ) => ((R, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q) =
+
+      override def contramap[R, E2, A, R1](function: R1 => R): (
+        (R, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q
+      ) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q =
         apply =>
           (r, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
             apply(function(r), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
@@ -262,9 +292,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function17Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#lambda] {
-      def contramap[A, S](function: S => A): (
-        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R
-      ) => ((S, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R) =
+
+      override def contramap[R2, E2, A, R1](function: R1 => R2): (
+        (R2, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R
+      ) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R =
         apply =>
           (s, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
             apply(function(s), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
@@ -276,9 +307,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function18Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#lambda] {
-      def contramap[A, T](function: T => A): (
-        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S
-      ) => ((T, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S) =
+
+      override def contramap[R2, E2, A, R1](function: R1 => R2): (
+        (R2, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S
+      ) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S =
         apply =>
           (t, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
             apply(function(t), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
@@ -290,9 +322,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def Function19Contravariant[B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#lambda] {
-      def contramap[A, U](function: U => A): (
-        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T
-      ) => ((U, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T) =
+
+      override def contramap[R2, E2, A, R1](function: R1 => R2): (
+        (R2, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T
+      ) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T =
         apply =>
           (u, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
             apply(function(u), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
@@ -306,9 +339,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
     new Contravariant[
       ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U })#lambda
     ] {
-      def contramap[A, V](function: V => A): (
-        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U
-      ) => ((V, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U) =
+
+      override def contramap[R2, E2, A, R1](function: R1 => R2): (
+        (R2, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U
+      ) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U =
         apply =>
           (v, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
             apply(function(v), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
@@ -323,9 +357,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
     new Contravariant[
       ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V })#lambda
     ] {
-      def contramap[A, W](function: W => A): (
-        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V
-      ) => ((W, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V) =
+
+      override def contramap[R2, E2, A, R1](function: R1 => R2): (
+        (R2, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V
+      ) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V =
         apply =>
           (w, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
             apply(function(w), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
@@ -340,9 +375,10 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
     new Contravariant[
       ({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W })#lambda
     ] {
-      def contramap[A, X](function: X => A): (
-        (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W
-      ) => ((X, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W) =
+
+      override def contramap[R2, E2, A, R1](function: R1 => R2): (
+        (R2, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W
+      ) => (R1, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W =
         apply =>
           (x, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
             apply(function(x), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
@@ -351,11 +387,8 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   /**
    * The contravariant instance for `Schedule`.
    */
-  implicit def ScheduleContravariant[R, B]: Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = Schedule[R, x, B] })#lambda] {
-      def contramap[A, A0](f: A0 => A): Schedule[R, A, B] => Schedule[R, A0, B] =
-        schedule => schedule.contramap(f)
-    }
+  implicit def ScheduleContravariant[R, B]: ContravariantRight[({ type lambda[-x] = Schedule[R, x, B] })#lambda] =
+    TriContravariantDivariant.ScheduleTriContravariantDivariant.deriveLeftContravariant
 
   /**
    * The contravariant instance for `ZIO`.
@@ -381,8 +414,9 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def ZQueueContravariant[RA, EA, RB, EB, B]
     : Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZQueue[RA, EA, RB, EB, A, B] => ZQueue[RA, EA, RB, EB, C, B] =
-        queue => queue.contramap(f)
+
+      override def contramap[R, E2, A, R1](r: R1 => R): ZQueue[RA, EA, RB, EB, R, B] => ZQueue[RA, EA, RB, EB, R1, B] =
+        queue => queue.contramap(r)
     }
 
   /**
@@ -390,8 +424,9 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
    */
   implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRef[EA, EB, A, B] => ZRef[EA, EB, C, B] =
-        ref => ref.contramap(f)
+
+      override def contramap[R, E2, A, R1](r: R1 => R): ZRef[EA, EB, R, B] => ZRef[EA, EB, R1, B] =
+        ref => ref.contramap(r)
     }
 
   /**
@@ -400,17 +435,19 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   implicit def ZRefMContravariant[RA, RB, EA, EB, B]
     : Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] =
     new Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, C, B] =
-        ref => ref.contramap(f)
+
+      override def contramap[R, E2, A, R1](r: R1 => R): ZRefM[RA, RB, EA, EB, R, B] => ZRefM[RA, RB, EA, EB, R1, B] =
+        ref => ref.contramap(r)
     }
 
   /**
    * The contravariant instance for `ZSink`.
    */
-  implicit def ZSinkContravariant[R, E, L, Z]: Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] {
-      def contramap[A, C](f: C => A): ZSink[R, E, A, L, Z] => ZSink[R, E, C, L, Z] =
-        sink => sink.contramap(f)
+  implicit def ZSinkContravariant[R2, E, L, Z]: Contravariant[({ type lambda[-x] = ZSink[R2, E, x, L, Z] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZSink[R2, E, x, L, Z] })#lambda] {
+
+      override def contramap[R, E2, A, R1](r: R1 => R): ZSink[R2, E, R, L, Z] => ZSink[R2, E, R1, L, Z] =
+        sink => sink.contramap(r)
     }
 
   /**

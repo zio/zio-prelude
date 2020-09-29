@@ -198,7 +198,7 @@ object Ord extends Lawful[Ord] {
    */
   implicit val OrdContravariant: Contravariant[Ord] =
     new Contravariant[Ord] {
-      def contramap[A, B](f: B => A): Ord[A] => Ord[B] =
+      override def contramap[R, E, A, R1](f: R1 => R): Ord[R] => Ord[R1] =
         _.contramap(f)
     }
 

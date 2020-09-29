@@ -650,11 +650,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
    * The `Covariant` instance for `Tuple3`
    */
   implicit def Tuple3Covariant[T1, T2]: Covariant[({ type lambda[+x] = (T1, T2, x) })#lambda] =
-    new Covariant[({ type lambda[+x] = (T1, T2, x) })#lambda] {
-      override def map[A, B](f: A => B): ((T1, T2, A)) => (T1, T2, B) = { tuple =>
-        (tuple._1, tuple._2, f(tuple._3))
-      }
-    }
+    TriFullCovariant.tuple3TriCovariant.deriveCovariant
 
   /**
    * The `Covariant` instance for `Tuple4`

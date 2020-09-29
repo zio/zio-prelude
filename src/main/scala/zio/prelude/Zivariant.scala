@@ -6,19 +6,46 @@ import zio.prelude.Divariant.DivariantInstance
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.ZStream
-import zio.{ ZIO, ZLayer, ZManaged }
+import zio.{ Schedule, ZIO, ZLayer, ZManaged }
+
+// TODO in this way I would need 2 different Invariant one for functor and one for contravariant
+// TODO need to think it through ....
+// TODO but if you have a functor you don't need invariant,
+///**
+// * Invariant trifunctor
+// */
+//trait Trinvarint[Z[_, _, _]] { self =>
+//  def invmap[R, E, A, R1](f: R <=> R1): Z[R,E,A] <=> Z[R1,E,A]
+//
+//  def identityLaw1[A](fa: F[A])(implicit equal: Equal[F[A]]): Boolean =
+//    invmap(Equivalence.identity[A]).to(fa) === fa
+//
+//  def compositionLaw[A, B, C](fa: F[A], f: A <=> B, g: B <=> C)(implicit equal: Equal[F[C]]): Boolean =
+//    (invmap(f) >>> invmap(g)).to(fa) === invmap(f andThen g).to(fa)
+//}
 
 /**
- * Abstract over type constructor with 3 parameters: on first as contravariant
- * and on second and third as covariant.
+ * Invariant trifunctor
  */
-trait Zivariant[Z[-_, +_, +_]] { self =>
+trait Trinvarint[Z[_, _, _]] { self => }
 
-  def deriveCovariant[R, E]: Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] =
-    new Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] {
-      def map[A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] = self.map(a)
-    }
+/**
+ * Contravariant functor encoded on Trifunctor = Bard
+ */
+trait TriContravariant[Z[-_, _, _]] extends Trinvarint[Z] { self =>
+  def deriveContravariant[EE, AA]: Contravariant[({ type lambda[-R] = Z[R, EE, AA] })#lambda] =
+    new ContravariantInstance[({ type lambda[-R] = Z[R, EE, AA] })#lambda] {
 
+      override def contramap[R, E, A, R1](r: R1 => R): Z[R, EE, AA] => Z[R1, EE, AA] = self.contramap(r)
+    } // TODO no need to derive
+
+  def contramap[R, E2, A, R1](r: R1 => R): Z[R, E2, A] => Z[R1, E2, A]
+}
+
+/**
+ * Covariant functor encoded on 2nd param of Trifunctor = Clown
+ */
+trait TriLeftCovariant[Z[_, +_, _]] extends Trinvarint[Z] { self =>
   def deriveFailureCovariant[R, A]: Covariant[({ type lambda[+E] = Failure[Z[R, E, A]] })#lambda] =
     new Covariant[({ type lambda[+E] = Failure[Z[R, E, A]] })#lambda] {
       type FZ[X] = Failure[Z[R, X, A]]
@@ -26,28 +53,63 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
         val fz2: Z[R, E, A] => Z[R, E1, A] = self.mapLeft(e)
         Failure.wrap(fz2(Failure.unwrap(fz)))
       }
-    }
+    } // TODO no need to derive
 
-  def deriveContravariant[E, A]: Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] {
-      def contramap[R, R1](r: R1 => R): Z[R, E, A] => Z[R1, E, A] = self.contramap(r)
-    }
+  def mapLeft[R, E, A, E1](e: E => E1): Z[R, E, A] => Z[R, E1, A]
+}
+
+/**
+ * Covariant functor encoded on 2nd param of Trifunctor = Joker
+ */
+trait TriCovariant[Z[_, _, +_]] extends Trinvarint[Z] { self =>
+  def deriveCovariant[R, E]: Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] =
+    new Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] {
+      def map[A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] = self.map(a)
+    } // TODO no need to derive
+
+  def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1]
+}
+
+/**
+ * Covariant functor + Divariant trifunctor
+ */
+trait TriDivariant[Z[-_, _, +_]] extends TriContravariant[Z] with TriCovariant[Z] { self =>
+  def dimap[R, E, A, R1, A1](r: R1 => R, a: A => A1): Z[R, E, A] => Z[R1, E, A1]
+}
+
+/**
+ * Covariant functor + Divariant trifunctor
+ */
+trait TriLeftDivariant[Z[-_, +_, _]] extends TriContravariant[Z] with TriLeftCovariant[Z] { self =>
+  def dimapLeft[R, E, A, R1, E1](r: R1 => R, e: E => E1): Z[R, E, A] => Z[R1, E1, A]
+}
+
+/**
+ * Covariant functor + Divariant trifunctor
+ */
+trait TriBivariant[Z[_, +_, +_]] extends TriCovariant[Z] with TriLeftCovariant[Z] { self =>
+  def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1]
+}
+
+///**
+// * Covariant functor + Divariant trifunctor
+// */
+//type CovariantDivariant[Z[-_, -_, +_]] = Zivariant[Z]
+
+/**
+ * Abstract over type constructor with 3 parameters: on first as contravariant
+ * and on second and third as covariant.
+ */
+trait Zivariant[Z[-_, +_, +_]] // ContravariantBivcovariant[Z[-_, +_, +_]]
+    extends TriBivariant[Z]
+    with TriLeftDivariant[Z]
+    with TriDivariant[Z] { self =>
 
   def deriveDivariant[EE]: Divariant[({ type lambda[-R, +A] = Z[R, EE, A] })#lambda] =
     new DivariantInstance[({ type lambda[-R, +A] = Z[R, EE, A] })#lambda] {
       override def dimap[R, E, A, R1, A1](r: R1 => R, a: A => A1): Z[R, EE, A] => Z[R1, EE, A1] =
         self.dimap(r, a)
-    }
-
-  def contramap[R, E, A, R1](r: R1 => R): Z[R, E, A] => Z[R1, E, A]
-  def mapLeft[R, E, A, E1](e: E => E1): Z[R, E, A] => Z[R, E1, A]
-  def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1]
-
-  def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1]
-
-  def dimap[R, E, A, R1, A1](r: R1 => R, a: A => A1): Z[R, E, A] => Z[R1, E, A1]
-
-  def dimapLeft[R, E, A, R1, E1](r: R1 => R, e: E => E1): Z[R, E, A] => Z[R1, E1, A]
+    } // TODO no need to derive
 
   def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
 
@@ -185,5 +247,95 @@ trait ZivariantSyntax {
 
     def dimap[RR, AA](r: RR => R, a: A => AA)(implicit zivariant: Zivariant[Z]): Z[RR, E, AA] =
       zivariant.dimap(r, a)(f)
+  }
+}
+
+/**
+ * Contravariant functor encoded on Trifunctor = Bard
+ */
+trait TriRightContravariant[Z[_, -_, _]] extends Trinvarint[Z] { self =>
+  def deriveLeftContravariant[RR, AA]: ContravariantRight[({ type lambda[-E] = Z[RR, E, AA] })#lambda] =
+    new ContravariantRight[({ type lambda[-E] = Z[RR, E, AA] })#lambda] {
+
+      override def righContramap[R, E, A, E1](r: E1 => E): Z[RR, E, AA] => Z[RR, E1, AA] = self.righContramap(r)
+    } // TODO no need to derive
+
+  def righContramap[R, E, A, E1](r: E1 => E): Z[R, E, A] => Z[R, E1, A]
+}
+
+/**
+ * Covariant trifunctor == 3 x Covariant
+ */
+trait TriContravariantDivariant[Z[-_, -_, +_]] extends TriRightContravariant[Z] with TriDivariant[Z] {
+  def nimap[R, E, A, R1, E1, A1](r: R1 => R, e: E1 => E, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
+
+  // instances:
+  // Function2
+  // zio.Schedule
+  // Ord[A] = TCD[A,A,EQ | GT | LT]
+  // Equal[A] = TCD[A,A,Boolean]
+}
+
+trait TriContravariantDivariantInstance[Z[-_, -_, +_]] extends TriContravariantDivariant[Z] {
+
+  override def dimap[R, E, A, R1, A1](r: R1 => R, a: A => A1): Z[R, E, A] => Z[R1, E, A1] = nimap(r, id, a)
+
+  override def righContramap[R, E, A, E1](r: E1 => E): Z[R, E, A] => Z[R, E1, A] = nimap(id, r, id)
+
+  override def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] = nimap(id, id, a)
+
+  override def contramap[R, E2, A, R1](r: R1 => R): Z[R, E2, A] => Z[R1, E2, A] = nimap(r, id, id)
+}
+
+object TriContravariantDivariant {
+  // instances:
+  // TODO Function2
+  // TODO Ord[A] = TCD[A,A,EQ | GT | LT]
+  // TODO Equal[A] = TCD[A,A,Boolean]
+
+  implicit val ScheduleTriContravariantDivariant: TriContravariantDivariant[Schedule] =
+    new TriContravariantDivariantInstance[Schedule] {
+
+      override def nimap[R, E, A, R1, E1, A1](
+        r: R1 => R,
+        e: E1 => E,
+        a: A => A1
+      ): Schedule[R, E, A] => Schedule[R1, E1, A1] =
+        s => s.dimap(e, a).provideSome(r)
+    }
+}
+
+trait TriLeftMostCovariant[Z[+_, _, _]] extends Trinvarint[Z] { self =>
+  def mapMostLeft[R, E, A, R1](e: R => R1): Z[R, E, A] => Z[R1, E, A]
+}
+
+/**
+ * Covariant trifunctor == 3 x Covariant
+ */
+
+trait TriFullCovariantInstance[Z[+_, +_, +_]] extends TriFullCovariant[Z] {
+
+  override def mapMostLeft[R, E, A, R1](e: R => R1): Z[R, E, A] => Z[R1, E, A] = trimap(e, id, id)
+
+  override def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1] = trimap(id, e, a)
+
+  override def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] = trimap(id, id, a)
+
+  override def mapLeft[R, E, A, E1](e: E => E1): Z[R, E, A] => Z[R, E1, A] = trimap(id, e, id)
+}
+
+trait TriFullCovariant[Z[+_, +_, +_]] extends TriBivariant[Z] with TriLeftMostCovariant[Z] { self =>
+
+  def trimap[R, E, A, R1, E1, A1](r: R => R1, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
+}
+
+object TriFullCovariant {
+  // instances:
+  // Tuple[Option[A], Option[B]] when you want to map different function on (Some,None), (Some,Some), (None,Some)
+
+  implicit val tuple3TriCovariant: TriFullCovariant[Tuple3] = new TriFullCovariantInstance[Tuple3] {
+    override def trimap[R, E, A, R1, E1, A1](r: R => R1, e: E => E1, a: A => A1): ((R, E, A)) => (R1, E1, A1) = {
+      case (fr, fe, fa) => (r(fr), e(fe), a(fa))
+    }
   }
 }

@@ -173,8 +173,9 @@ object Equal extends Lawful[Equal] {
    */
   implicit val EqualContravariant: Contravariant[Equal] =
     new Contravariant[Equal] {
-      def contramap[A, B](f: B => A): Equal[A] => Equal[B] =
-        _.contramap(f)
+
+      override def contramap[R, E2, A, R1](r: R1 => R): Equal[R] => Equal[R1] =
+        _.contramap(r)
     }
 
   /**

@@ -106,8 +106,9 @@ object Hash extends Lawful[Hash] {
    */
   implicit val HashContravariant: Contravariant[Hash] =
     new Contravariant[Hash] {
-      def contramap[A, B](f: B => A): Hash[A] => Hash[B] =
-        _.contramap(f)
+
+      override def contramap[R, E, A, R1](r: R1 => R): Hash[R] => Hash[R1] =
+        _.contramap(r)
     }
 
   /**

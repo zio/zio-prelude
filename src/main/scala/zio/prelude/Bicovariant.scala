@@ -8,23 +8,11 @@ object Bicovariant {
 
   trait BicovariantInstance[<=>[+_, +_]] extends Bicovariant[<=>] {
 
-    override def contramap[R, E, A, R1](r: R1 => R): E <=> A => E <=> A =
-      id[E <=> A]
-
     override def mapLeft[R, E, A, E1](e: E => E1): E <=> A => E1 <=> A =
       bimap(e, id[A])
 
     override def map[R, E, A, A1](a: A => A1): E <=> A => E <=> A1 =
       bimap(id[E], a)
-
-    override def dimap[R, E, A, R1, A1](r: R1 => R, a: A => A1): E <=> A => E <=> A1 =
-      map(a)
-
-    override def dimapLeft[R, E, A, R1, E1](r: R1 => R, e: E => E1): E <=> A => E1 <=> A =
-      mapLeft(e)
-
-    override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): E <=> A => E1 <=> A1 =
-      bimap(e, a)
   }
 
   implicit val Tuple2Bicovariant: Bicovariant[Tuple2] =

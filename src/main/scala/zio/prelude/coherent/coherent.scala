@@ -107,6 +107,7 @@ object CovariantDeriveEqual {
     new CovariantDeriveEqual[F] {
       def derive[A: Equal]: Equal[F[A]]      =
         deriveEqual0.derive
+
       def map[A, B](f: A => B): F[A] => F[B] =
         covariant0.map(f)
     }
@@ -119,11 +120,12 @@ object ContravariantDeriveEqual {
     contravariant0: Contravariant[F],
     deriveEqual0: DeriveEqual[F]
   ): ContravariantDeriveEqual[F] =
-    new ContravariantDeriveEqual[F] {
-      def derive[A: Equal]: Equal[F[A]]            =
+    new ContravariantDeriveEqual[F] with ContravariantInstance[F] {
+
+      def derive[A: Equal]: Equal[F[A]] =
         deriveEqual0.derive
-      def contramap[A, B](f: B => A): F[A] => F[B] =
-        contravariant0.contramap(f)
+
+      override def contramap[R, E, A, R1](r: R1 => R): F[R] => F[R1] = contravariant0.contramap(r)
     }
 }
 
