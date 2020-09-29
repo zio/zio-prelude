@@ -1,7 +1,5 @@
 package zio.prelude
 
-// import scala.Predef.{ identity => id }
-
 import zio.prelude.coherent.ContravariantDeriveEqual
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
