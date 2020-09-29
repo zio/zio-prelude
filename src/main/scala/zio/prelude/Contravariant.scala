@@ -39,8 +39,6 @@ trait ContravariantInstance[F[-_]] extends Contravariant[F] with ContravariantSu
 
   final def invmap[A, A1](f: A <=> A1): F[A] <=> F[A1] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[A1]) => contramap(f.to)(fb))
-
-  override def contramap[R, E, A, R1](r: R1 => R): F[R] => F[R1] = contramap(r)
 }
 
 trait ContravariantLeftInstance[F[-_]] extends Contravariant[F] with ContravariantSubset[F, AnyType] with Invariant[F] {

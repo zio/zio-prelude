@@ -1,7 +1,5 @@
 package zio.prelude
 
-import zio.prelude.Bicovariant.BicovariantInstance
-
 sealed trait These[+A, +B]
 object These {
   final case class Left[+A](value: A)              extends These[A, Nothing]
@@ -11,7 +9,7 @@ object These {
   /**
    * The `Bicovariant` instance for `These`.
    */
-  val BicovariantThese: Bicovariant[These] = new BicovariantInstance[These] {
+  val BicovariantThese: Bicovariant[These] = new Bicovariant[These] {
 
     override def bimap[R, E, A, E1, A1](f: E => E1, g: A => A1): These[E, A] => These[E1, A1] = {
       case Left(value)       => Left(f(value))

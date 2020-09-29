@@ -1,22 +1,11 @@
 package zio.prelude
 
-import scala.Predef.{ identity => id }
-
 import zio.Exit
 
 object Bicovariant {
 
-  trait BicovariantInstance[<=>[+_, +_]] extends Bicovariant[<=>] {
-
-    override def mapLeft[R, E, A, E1](e: E => E1): E <=> A => E1 <=> A =
-      bimap(e, id[A])
-
-    override def map[R, E, A, A1](a: A => A1): E <=> A => E <=> A1 =
-      bimap(id[E], a)
-  }
-
   implicit val Tuple2Bicovariant: Bicovariant[Tuple2] =
-    new BicovariantInstance[Tuple2] {
+    new Bicovariant[Tuple2] {
 
       override def bimap[R, E, A, E1, A1](f: E => E1, g: A => A1): ((E, A)) => (E1, A1) = { case (a, b) =>
         (f(a), g(b))
@@ -24,7 +13,7 @@ object Bicovariant {
     }
 
   implicit val EitherBicovariant: Bicovariant[Either] =
-    new BicovariantInstance[Either] {
+    new Bicovariant[Either] {
 
       override def bimap[R, E, A, E1, A1](f: E => E1, g: A => A1): Either[E, A] => Either[E1, A1] = {
         case Right(a) => Right(g(a))
@@ -33,7 +22,7 @@ object Bicovariant {
     }
 
   implicit val ExitBicovariant: Bicovariant[Exit] =
-    new BicovariantInstance[Exit] {
+    new Bicovariant[Exit] {
       override def bimap[R, E, A, E1, A1](f: E => E1, g: A => A1): Exit[E, A] => Exit[E1, A1] =
         _.bimap(f, g)
     }
