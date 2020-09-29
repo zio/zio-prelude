@@ -105,7 +105,7 @@ trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 object CovariantDeriveEqual {
   implicit def derive[F[+_]](implicit covariant0: Covariant[F], deriveEqual0: DeriveEqual[F]): CovariantDeriveEqual[F] =
     new CovariantDeriveEqual[F] {
-      def derive[A: Equal]: Equal[F[A]]      =
+      def derive[A: Equal]: Equal[F[A]] =
         deriveEqual0.derive
 
       def map[A, B](f: A => B): F[A] => F[B] =

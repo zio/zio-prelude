@@ -19,9 +19,6 @@ object Divariant {
 
     def dimapLeft[R, E, A, R1, E1](r: R1 => R, e: E => E1): Z[R, A] => Z[R1, A] =
       contramap(r)
-
-    def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, A] => Z[R1, A1] =
-      dimap(r, a)
   }
 
   final case class Join[:=>[-_, +_], A](value: A :=> A)
