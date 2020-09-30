@@ -53,7 +53,7 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
    */
-  override def equals(that: Any): Boolean =
+  override final def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
       case that: ZNonEmptySet[_, _]      => self.zset == that.toZSet
@@ -74,7 +74,7 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   /**
    * Returns the hash code of this set.
    */
-  override def hashCode: Int =
+  override final def hashCode: Int =
     zset.hashCode
 
   /**

@@ -16,6 +16,7 @@ package object prelude
     with CovariantSyntax
     with ContravariantSyntax
     with DebugSyntax
+    with DivariantSyntax
     with EqualSyntax
     with HashSyntax
     with IdExports
@@ -108,8 +109,9 @@ package object prelude
    */
   implicit class AssertionSyntax[A](private val self: A) extends AnyVal {
     def <->[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult       =
-      equal(that)
-    def equal[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult     =
+      isEqualTo(that)
+    // name intentionally different from other methods (`equal`, `equalTo`, etc to avoid confusing compiler errors)
+    def isEqualTo[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
       assert(self)(equalTo(that))
     def greater(that: A)(implicit ord: PartialOrd[A]): TestResult        =
       assert(self)(isGreaterThan(that))

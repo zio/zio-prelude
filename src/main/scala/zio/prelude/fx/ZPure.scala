@@ -320,15 +320,15 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
           val nested       = zPure.value
           val continuation = zPure.continue
 
-          (nested.tag: @switch) match {
+          nested.tag match {
             case Tags.Succeed =>
               val zPure2 = nested.asInstanceOf[Succeed[Any]]
               curZPure = continuation(zPure2.value)
 
             case Tags.Modify =>
-              val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any, Any]]
+              val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any]]
 
-              val updated = zPure2.run(s0)
+              val updated = zPure2.run0(s0)
               s0 = updated._1
               a = updated._2
               curZPure = continuation(a)
@@ -366,8 +366,8 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
           r = zPure.r
           curZPure = zPure.continue
         case Tags.Modify  =>
-          val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any, Any]]
-          val updated   = zPure.run(s0)
+          val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any]]
+          val updated   = zPure.run0(s0)
           s0 = updated._1
           a = updated._2
           val nextInstr = stack.pop()
@@ -526,15 +526,6 @@ object ZPure {
   }
 
   /**
-   * The `AssociativeBoth` instance for `ZPure`.
-   */
-  implicit def ZPureAssociativeBoth[S, R, E]: AssociativeBoth[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] =
-    new AssociativeBoth[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda] {
-      def both[A, B](fa: => ZPure[S, S, R, E, A], fb: => ZPure[S, S, R, E, B]): ZPure[S, S, R, E, (A, B)] =
-        fa.zip(fb)
-    }
-
-  /**
    * The `Covariant` instance for `ZPure`.
    */
   implicit def ZPureCovariant[S1, S2, R, E]: Covariant[({ type lambda[+A] = ZPure[S1, S2, R, E, A] })#lambda] =
@@ -575,26 +566,26 @@ object ZPure {
     final val Modify  = 6
   }
 
-  private final case class Succeed[+A](value: A)                        extends ZPure[Any, Nothing, Any, Nothing, A] {
+  private final case class Succeed[+A](value: A)                     extends ZPure[Any, Nothing, Any, Nothing, A] {
     override def tag: Int = Tags.Succeed
   }
-  private final case class Fail[+E](error: E)                           extends ZPure[Any, Nothing, Any, E, Nothing] {
+  private final case class Fail[+E](error: E)                        extends ZPure[Any, Nothing, Any, E, Nothing] {
     override def tag: Int = Tags.Fail
   }
-  private final case class Modify[-S1, +S2, +E, +A](run: S1 => (S2, A)) extends ZPure[S1, S2, Any, E, A]             {
+  private final case class Modify[-S1, +S2, +A](run0: S1 => (S2, A)) extends ZPure[S1, S2, Any, Nothing, A]       {
     override def tag: Int = Tags.Modify
   }
   private final case class FlatMap[-S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[S1, S2, R, E, A],
     continue: A => ZPure[S2, S3, R, E, B]
-  )                                                                     extends ZPure[S1, S3, R, E, B]               {
+  )                                                                  extends ZPure[S1, S3, R, E, B]               {
     override def tag: Int = Tags.FlatMap
   }
   private final case class Fold[-S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[S1, S2, R, E1, A],
     failure: E1 => ZPure[S1, S3, R, E2, B],
     success: A => ZPure[S2, S3, R, E2, B]
-  )                                                                     extends ZPure[S1, S3, R, E2, B]
+  )                                                                  extends ZPure[S1, S3, R, E2, B]
       with Function[A, ZPure[S2, S3, R, E2, B]] {
     override def tag: Int                             = Tags.Fold
     override def apply(a: A): ZPure[S2, S3, R, E2, B] =

@@ -40,9 +40,10 @@ sealed trait Validation[+E, +A] { self =>
    */
   override final def equals(that: Any): Boolean =
     (self, that) match {
-      case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
-      case (Success(a), Success(a1))   => a == a1
-      case _                           => false
+      case (self, that: AnyRef) if self.eq(that) => true
+      case (Failure(es), Failure(e1s))           => es.groupBy(identity) == e1s.groupBy(identity)
+      case (Success(a), Success(a1))             => a == a1
+      case _                                     => false
     }
 
   /**
@@ -220,21 +221,23 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * The `IdentityBoth` instance for `Validation`.
+   * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
    */
-  implicit def ValidationIdentityBoth[E]: IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
+  implicit def ValidationHash[E: Hash, A: Hash]: Hash[Validation[E, A]] =
+    Hash[NonEmptyChunk[E]].eitherWith(Hash[A])(_.toEither)
+
+  /**
+   * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for Validation.
+   */
+  implicit def ValidationCommutativeIdentityBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda]
+    with IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda]
+      with IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
       val any: Validation[Nothing, Any]                                                       =
         Validation.unit
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
     }
-
-  /**
-   * Derives an `Ord[Validation[E, A]]` given na `Ord[E]` and an `Ord[A]`.
-   */
-  implicit def ValidationOrd[E: Ord, A: Ord]: Ord[Validation[E, A]] =
-    Ord[NonEmptyChunk[E]].eitherWith(Ord[A])(_.toEither)
 
   /**
    * The `Traversable` instance for `Validation`.
@@ -291,6 +294,19 @@ object Validation extends LowPriorityValidationImplicits {
    */
   def fromOption[A](value: Option[A]): Validation[Unit, A] =
     value.fold[Validation[Unit, A]](fail(()))(succeed)
+
+  /**
+   * Constructs a `Validation` from a predicate, failing with None.
+   */
+  def fromPredicate[A](value: A)(f: A => Boolean): Validation[None.type, A] =
+    fromPredicateWith(None, value)(f)
+
+  /**
+   * Constructs a `Validation` from a predicate, failing with the error provided.
+   */
+  def fromPredicateWith[E, A](error: E, value: A)(f: A => Boolean): Validation[E, A] =
+    if (f(value)) Validation.succeed(value)
+    else Validation.fail(error)
 
   /**
    * Constructs a `Validation` from a `Try`.
@@ -1307,17 +1323,8 @@ object Validation extends LowPriorityValidationImplicits {
 trait LowPriorityValidationImplicits {
 
   /**
-   * The `CommutativeBoth` instance for `Validation`.
+   * Derives an `Ord[Validation[E, A]]` given na `Ord[E]` and an `Ord[A]`.
    */
-  implicit def ValidationCommutativeBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
-    new CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
-      def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
-        fa.zipPar(fb)
-    }
-
-  /**
-   * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
-   */
-  implicit def ValidationHash[E: Hash, A: Hash]: Hash[Validation[E, A]] =
-    Hash[NonEmptyChunk[E]].eitherWith(Hash[A])(_.toEither)
+  implicit def ValidationOrd[E: Ord, A: Ord]: Ord[Validation[E, A]] =
+    Ord[NonEmptyChunk[E]].eitherWith(Ord[A])(_.toEither)
 }
