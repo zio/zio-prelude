@@ -184,23 +184,30 @@ trait Traversable[F[+_]] extends Covariant[F] {
     !isEmpty(fa)
 
   /**
-   * If there are many Equal elements in  sequence, it will remove them all except for the first one.
-   * `a a b c c c a` will result in `a b c a`.
-   */
-  def dropRedundant[A](elems: F[A])(implicit A: Equal[A]): List[A] = {
-    def go(list: List[A], elem: A): List[A] = list match {
-      case List()                     => List(elem)
-      case head :: _ if head === elem => list
-      case _                          => elem :: list
-    }
-    foldLeft(elems)(List[A]())(go).reverse
-  }
-
-  /**
    * Returns the product of all elements in the collection.
    */
   def product[A](fa: F[A])(implicit ev: Identity[Prod[A]]): A =
     foldMap(fa)(Prod[A])
+
+  /**
+   * Reduces the collection to a summary value using the associative operation,
+   * returning `None` if the collection is empty.
+   */
+  def reduceAssociative[A: Associative](fa: F[A]): Option[A] =
+    foldMap(fa)(a => Option(a))
+
+  /**
+   * Reduces the collection to a summary value using the idempotent operation,
+   * returning `None` if the collection is empty.
+   */
+  def reduceIdempotent[A: Idempotent: Equal](fa: F[A]): Option[A] =
+    reduceAssociative(fa)(Idempotent[A].idempotent)
+
+  /**
+   * Reduces the collection to a summary value using the associative operation.
+   */
+  def reduceIdentity[A: Identity](fa: F[A]): A =
+    foldMap(fa)(identity[A])
 
   /**
    * Maps each element of the collection to a type `B` for which an
@@ -313,8 +320,12 @@ trait TraversableSyntax {
       F.minByOption(self)(f)
     def nonEmpty(implicit F: Traversable[F]): Boolean                                                 =
       F.nonEmpty(self)
-    def dropRedundant(implicit F: Traversable[F], A: Equal[A]): List[A]                               =
-      F.dropRedundant(self)
+    def reduceAssociative(implicit F: Traversable[F], A: Associative[A]): Option[A]                   =
+      F.reduceAssociative(self)
+    def reduceIdempotent(implicit F: Traversable[F], ia: Idempotent[A], ea: Equal[A]): Option[A]      =
+      F.reduceIdempotent(self)
+    def reduceIdentity(implicit F: Traversable[F], A: Identity[A]): A                                 =
+      F.reduceIdentity(self)
     def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A                                  =
       F.product(self)
     def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B]             =

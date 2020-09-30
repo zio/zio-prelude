@@ -14,7 +14,16 @@ import zio.test.laws.{ Lawful, Laws }
  * operation results in the same value regardless of the number of values
  * are combined, allowing us to optimize out unnecessary combinations of the same values.
  */
-trait Idempotent[A] extends Associative[A]
+trait Idempotent[A] extends Associative[A] {
+
+  final def combineIdempotent(l: => A, r: => A)(implicit A: Equal[A]): A =
+    if (l === r) r else combine(l, r)
+
+  def idempotent(implicit A: Equal[A]): Idempotent[A] = new Idempotent[A] {
+    override def combine(l: => A, r: => A): A = combineIdempotent(l, r)
+  }
+
+}
 
 object Idempotent extends Lawful[EqualIdempotent] {
 

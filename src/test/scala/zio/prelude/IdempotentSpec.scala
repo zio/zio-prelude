@@ -22,23 +22,15 @@ object IdempotentSpec extends DefaultRunnableSpec {
           checkAllLaws(Idempotent)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt).map { case ((x, y), z) => (x, y, z) })
         )
       ),
-      test("Idempotent.optimize") {
+      test("Idempotent.reduceIdempotent") {
 
-        assert(List[Max[Int]]().dropRedundant)(equalTo(List[Max[Int]]())) &&
-        assert(List(Max(1)).dropRedundant)(equalTo(List(Max(1)))) &&
-        assert(List(Max(1), Max(1)).dropRedundant)(equalTo(List(Max(1)))) &&
-        assert(List(Max(1), Max(2), Max(1)).dropRedundant)(equalTo(List(Max(1), Max(2), Max(1)))) &&
-        assert(List(Max(1), Max(1), Max(2), Max(3), Max(3), Max(3), Max(1)).dropRedundant)(
-          equalTo(List(Max(1), Max(2), Max(3), Max(1)))
+        assert(List[Max[Int]]().reduceIdempotent)(equalTo(None)) &&
+        assert(List(Max(1)).reduceIdempotent)(equalTo(Some(Max(1)))) &&
+        assert(List(Max(1), Max(1)).reduceIdempotent)(equalTo(Some(Max(1)))) &&
+        assert(List(Max(1), Max(2), Max(1)).reduceIdempotent)(equalTo(Some(Max(2)))) &&
+        assert(List(Max(1), Max(1), Max(2), Max(3), Max(3), Max(3), Max(1)).reduceIdempotent)(
+          equalTo(Some(Max(3)))
         )
-      },
-      testM("Idempotent.optimize's size") {
-        check(Gen.listOf(anyMaxInt)) { list =>
-          val actual = list.dropRedundant.size
-
-          assert(actual)(isLessThanEqualTo(list.size)) &&
-          assert(actual)(isGreaterThanEqualTo(list.toSet.size))
-        }
       }
     )
 }
