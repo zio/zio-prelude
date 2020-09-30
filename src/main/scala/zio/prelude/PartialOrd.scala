@@ -127,7 +127,7 @@ object PartialOrd extends Lawful[PartialOrd] {
   val antisymmetryLaw1: Laws[PartialOrd] =
     new Laws.Law2[PartialOrd]("antisymmetryLaw1") {
       def apply[A: PartialOrd](a1: A, a2: A): TestResult =
-        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equal a2)
+        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 isEqualTo a2)
     }
 
   /**
@@ -137,7 +137,7 @@ object PartialOrd extends Lawful[PartialOrd] {
   val antisymmetryLaw2: Laws[PartialOrd] =
     new Laws.Law2[PartialOrd]("antisymmetryLaw2") {
       def apply[A: PartialOrd](a1: A, a2: A): TestResult =
-        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equal a2)
+        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 isEqualTo a2)
     }
 
   /**
