@@ -45,7 +45,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
   implicit def FutureCommutativeEither(implicit ec: ExecutionContext): CommutativeEither[Future] =
     new CommutativeEither[Future] {
       def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
-        Promise[Either[A, B]].completeWith(fa.map(Left(_))).completeWith(fb.map(Right(_))).future
+        Promise[Either[A, B]]().completeWith(fa.map(Left(_))).completeWith(fb.map(Right(_))).future
     }
 
   /**

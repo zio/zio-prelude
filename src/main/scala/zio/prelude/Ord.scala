@@ -134,7 +134,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw1: Laws[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 equal a2)
+        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 isEqualTo a2)
     }
 
   /**
@@ -144,7 +144,7 @@ object Ord extends Lawful[Ord] {
   val antisymmetryLaw2: Laws[Ord] =
     new Laws.Law2[Ord]("antisymmetryLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
-        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 equal a2)
+        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 isEqualTo a2)
     }
 
   /**
@@ -192,24 +192,6 @@ object Ord extends Lawful[Ord] {
 
   def fromScala[A](implicit ordering: sm.Ordering[A]): Ord[A] =
     (l: A, r: A) => Ordering.fromCompare(ordering.compare(l, r))
-
-  /**
-   * The `AssociativeBoth` instance for `Ord`.
-   */
-  implicit val OrdAssociativeBoth: AssociativeBoth[Ord] =
-    new AssociativeBoth[Ord] {
-      def both[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[(A, B)] =
-        fa.both(fb)
-    }
-
-  /**
-   * The `AssociativeEither` instance for `Ord`.
-   */
-  implicit val OrdAssociativeEither: AssociativeEither[Ord] =
-    new AssociativeEither[Ord] {
-      def either[A, B](fa: => Ord[A], fb: => Ord[B]): Ord[Either[A, B]] =
-        fa.either(fb)
-    }
 
   /**
    * The `Contravariant` instance for `Ord`.

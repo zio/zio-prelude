@@ -41,22 +41,22 @@ object OrdSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("OrdSpec")(
       suite("laws")(
-        testM("unit")(checkAllLaws(Equal)(Gen.unit)),
-        testM("boolean")(checkAllLaws(Equal)(Gen.boolean)),
-        testM("byte")(checkAllLaws(Equal)(Gen.anyByte)),
-        testM("char")(checkAllLaws(Equal)(Gen.anyChar)),
-        testM("string")(checkAllLaws(Equal)(Gen.anyString)),
-        testM("int")(checkAllLaws(Equal)(Gen.anyInt)),
-        testM("long")(checkAllLaws(Equal)(Gen.anyLong)),
-        testM("float")(checkAllLaws(Equal)(Gen.anyFloat)),
-        testM("double")(checkAllLaws(Equal)(Gen.anyDouble)),
-        testM("option")(checkAllLaws(Equal)(Gen.option(Gen.anyInt))),
-        testM("either")(checkAllLaws(Equal)(Gen.either(Gen.anyInt, Gen.anyInt))),
-        testM("tuple2")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyInt))),
-        testM("tuple3")(checkAllLaws(Equal)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("list")(checkAllLaws(Equal)(Gen.listOf(Gen.anyInt))),
-        testM("vector")(checkAllLaws(Equal)(Gen.vectorOf(Gen.anyInt))),
-        testM("chunk")(checkAllLaws(Equal)(Gen.chunkOf(Gen.anyInt)))
+        testM("unit")(checkAllLaws(Ord)(Gen.unit)),
+        testM("boolean")(checkAllLaws(Ord)(Gen.boolean)),
+        testM("byte")(checkAllLaws(Ord)(Gen.anyByte)),
+        testM("char")(checkAllLaws(Ord)(Gen.anyChar)),
+        testM("string")(checkAllLaws(Ord)(Gen.anyString)),
+        testM("int")(checkAllLaws(Ord)(Gen.anyInt)),
+        testM("long")(checkAllLaws(Ord)(Gen.anyLong)),
+        testM("float")(checkAllLaws(Ord)(Gen.anyFloat)),
+        testM("double")(checkAllLaws(Ord)(Gen.anyDouble)),
+        testM("option")(checkAllLaws(Ord)(Gen.option(Gen.anyInt))),
+        testM("either")(checkAllLaws(Ord)(Gen.either(Gen.anyInt, Gen.anyInt))),
+        testM("tuple2")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt))),
+        testM("tuple3")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
+        testM("list")(checkAllLaws(Ord)(Gen.listOf(Gen.anyInt))),
+        testM("vector")(checkAllLaws(Ord)(Gen.vectorOf(Gen.anyInt))),
+        testM("chunk")(checkAllLaws(Ord)(Gen.chunkOf(Gen.anyInt)))
       ),
       suite("ScalaOrdering consistency")(
         testM("unit")(scalaOrderingConsistency(Gen.unit)),

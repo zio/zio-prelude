@@ -59,17 +59,6 @@ object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvaria
    */
   def apply[F[_]](implicit identityEither: IdentityEither[F]): IdentityEither[F] =
     identityEither
-
-  /**
-   * The `IdentityEither` instance for `Option`.
-   */
-  implicit val OptionIdentityEither: IdentityEither[Option] =
-    new IdentityEither[Option] {
-      def either[A, B](fa: => Option[A], fb: => Option[B]): Option[Either[A, B]] =
-        fa.map(Left(_)) orElse fb.map(Right(_))
-      val none: Option[Nothing]                                                  =
-        None
-    }
 }
 
 trait IdentityEitherSyntax {

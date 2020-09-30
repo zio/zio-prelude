@@ -104,7 +104,8 @@ object TraversableSpec extends DefaultRunnableSpec {
         },
         testM("groupByM") {
           check(genList, genIntFunction) { (as, f) =>
-            val actual   = Traversable[List].groupByM(as)(f.map(Option(_)))
+            // Dotty can't infer Function1Covariant: 'Required: zio.prelude.Covariant[[R] =>> Int => R]'
+            val actual   = Traversable[List].groupByM(as)(f.map(Option(_))(Invariant.Function1Covariant))
             val expected = Option(
               as.groupBy(f)
                 .toList
@@ -216,7 +217,7 @@ object TraversableSpec extends DefaultRunnableSpec {
       test("zipWithIndex is stacks safe") {
         val as       = (1 to 100000).toList
         val expected = as.zipWithIndex
-        val actual   = Traversable.ListTraversable.zipWithIndex(as)
+        val actual   = Invariant.ListTraversable.zipWithIndex(as)
         assert(actual)(equalTo(expected))
       },
       testM("Traversable can be derived from Iterable") {

@@ -237,7 +237,7 @@ private[prelude] sealed trait NewtypeModule {
   }
 
   sealed trait SubtypeSmart[A] extends NewtypeSmart[A] {
-    type Type
+    type Type <: A
   }
 }
 
@@ -308,7 +308,7 @@ trait NewtypeExports {
   abstract class Newtype[A] extends instance.Newtype[A] {
     val newtype: instance.Newtype[A] = instance.newtype[A]
 
-    trait Tag
+    trait Tag extends Any
     type Type = newtype.Type with Tag
 
     def wrapAll[F[_]](value: F[A]): F[Type] = newtype.wrapAll(value).asInstanceOf[F[Type]]
@@ -332,7 +332,7 @@ trait NewtypeExports {
   abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
     val newtype: instance.NewtypeSmart[A] = instance.newtypeSmart[A](assertion)
 
-    trait Tag
+    trait Tag extends Any
     type Type = newtype.Type with Tag
 
     def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =
@@ -358,7 +358,7 @@ trait NewtypeExports {
   abstract class Subtype[A] extends instance.Subtype[A] {
     val subtype: instance.Subtype[A] = instance.subtype[A]
 
-    trait Tag
+    trait Tag extends Any
     type Type = subtype.Type with Tag
 
     def wrapAll[F[_]](value: F[A]): F[Type] = subtype.wrapAll(value).asInstanceOf[F[Type]]
@@ -382,7 +382,7 @@ trait NewtypeExports {
   abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {
     val subtype: instance.SubtypeSmart[A] = instance.subtypeSmart[A](assertion)
 
-    trait Tag
+    trait Tag extends Any
     type Type = subtype.Type with Tag
 
     def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =

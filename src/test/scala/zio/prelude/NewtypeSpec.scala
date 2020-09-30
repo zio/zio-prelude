@@ -15,7 +15,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
   // Age.newtype.Type with Age.Instances
   type Age = Age.Type
 
-  implicitly[Dummy[Age]]
+  val dummy = implicitly[Dummy[Age]]
 
   def spec =
     suite("NewtypeSpec")(
@@ -26,6 +26,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
         test("invalid values") {
           val expected = NonEmptyChunk("-1 did not satisfy isGreaterThanEqualTo(0)")
           assert(Natural.make(-1))(isFailureV(equalTo(expected)))
+        }
+      ),
+      suite("SubtypeSmart")(
+        test("subtypes values") {
+          val two = 2
+          assert(two + Natural.two)(equalTo(2 + 2))
         }
       ),
       suite("examples from documentation")(
@@ -71,7 +77,9 @@ object NewtypeSpec extends DefaultRunnableSpec {
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
     And.unwrap(foldMap(as)(a => And(f(a))))
 
-  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0))
+  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+    val two: Natural = Natural(2)
+  }
   type Natural = Natural.Type
 
   object IntSum extends Newtype[Int]
