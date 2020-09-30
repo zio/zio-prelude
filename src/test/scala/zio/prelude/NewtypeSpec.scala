@@ -3,7 +3,6 @@ package zio.prelude
 import zio.NonEmptyChunk
 import zio.prelude.newtypes._
 import zio.test.Assertion._
-import zio.test.TestAspect.scala2Only
 import zio.test._
 
 object NewtypeSpec extends DefaultRunnableSpec {
@@ -29,6 +28,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
           assert(Natural.make(-1))(isFailureV(equalTo(expected)))
         }
       ),
+      suite("SubtypeSmart")(
+        test("subtypes values") {
+          val two = 2
+          assert(two + Natural.two)(equalTo(2 + 2))
+        }
+      ),
       suite("examples from documentation")(
         test("meter") {
           val x = Meter(3.4)
@@ -52,7 +57,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
           val expected = 6L
           assert(actual)(equalTo(expected))
         }
-      ) @@ scala2Only // https://github.com/zio/zio-prelude/issues/272
+      )
     )
 
   object Meter extends Newtype[Double]
@@ -72,7 +77,9 @@ object NewtypeSpec extends DefaultRunnableSpec {
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
     And.unwrap(foldMap(as)(a => And(f(a))))
 
-  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0))
+  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+    val two: Natural = Natural(2)
+  }
   type Natural = Natural.Type
 
   object IntSum extends Newtype[Int]
