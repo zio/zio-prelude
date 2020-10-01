@@ -69,6 +69,9 @@ package object prelude
     type Group[A]                = Inverse[A]
     type AbelianGroup[A]         = Commutative[A] with Inverse[A]
 
+    type Semilattice[A]        = Commutative[A] with Idempotent[A]
+    type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
+
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
