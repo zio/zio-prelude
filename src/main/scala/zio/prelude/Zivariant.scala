@@ -30,7 +30,7 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
   def deriveDivariant[E]: Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] =
     new Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] {
       def leftContramap[A, B, C](f: C => A): Z[A, E, B] => Z[C, E, B] = self.contramap(f)
-      def rightMap[A, B, C](f: B => C): Z[A, E, B] => Z[A, E, C] = self.map(f)
+      def rightMap[A, B, C](f: B => C): Z[A, E, B] => Z[A, E, C]      = self.map(f)
     }
 
   def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
