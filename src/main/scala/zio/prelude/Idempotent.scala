@@ -16,16 +16,16 @@ import zio.test.laws.{ Lawful, Laws }
  */
 trait Idempotent[A] extends Associative[A] { self =>
 
-  protected def combineNormal(l: => A, r: => A): A = self.combine(l, r)
+  protected def combineNormal(l: => A, r: => A): A = combine(l, r)
 
   final def combineIdempotent(l: => A, r: => A)(implicit A: Equal[A]): A =
-    if (A.equal(l, r)) r else combineNormal(l, r)
+    if (l === r) l else combineNormal(l, r)
 
   def idempotent(implicit A: Equal[A]): Idempotent[A] = new Idempotent[A] {
 
     override protected def combineNormal(l: => A, r: => A): A = self.combineNormal(l, r)
 
-    override def combine(l: => A, r: => A): A = combineIdempotent(l, r)(A)
+    override def combine(l: => A, r: => A): A = combineIdempotent(l, r)
   }
 
 }
