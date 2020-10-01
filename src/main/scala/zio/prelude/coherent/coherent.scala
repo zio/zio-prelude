@@ -225,9 +225,9 @@ object EqualIdentity {
 trait EqualIdempotent[A] extends AssociativeEqual[A] with Idempotent[A]
 
 object EqualIdempotent {
-  implicit def derive[A](implicit idempotent: Idempotent[A], equal0: Equal[A]): EqualIdempotent[A] =
+  implicit def derive[A](implicit idempotent0: Idempotent[A], equal0: Equal[A]): EqualIdempotent[A] =
     new EqualIdempotent[A] {
-      def combine(l: => A, r: => A): A              = idempotent.combine(l, r)
+      def combine(l: => A, r: => A): A              = idempotent0.combine(l, r)
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }
