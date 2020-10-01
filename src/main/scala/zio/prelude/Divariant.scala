@@ -1,42 +1,16 @@
 package zio.prelude
 
-trait Divariant[:=>[-_, +_]] {
-
-  def deriveCovariant[A]: Covariant[({ type lambda[+B] = A :=> B })#lambda] =
-    new Covariant[({ type lambda[+B] = A :=> B })#lambda] {
-      def map[B, C](f: B => C): A :=> B => A :=> C = dimap(identity, f)
-    }
+trait Divariant[:=>[-_, +_]] extends RightCovariant[:=>] { self =>
 
   def deriveContravariant[B]: Contravariant[({ type lambda[-A] = A :=> B })#lambda] =
     new Contravariant[({ type lambda[-A] = A :=> B })#lambda] {
-      def contramap[A, C](f: C => A): A :=> B => C :=> B = dimap(f, identity)
+      def contramap[A, C](f: C => A): A :=> B => C :=> B = leftContramap(f)
     }
 
   def dimap[A, B, C, D](f: C => A, g: B => D): (A :=> B) => (C :=> D) =
     (ab: A :=> B) => rightMap(g)(leftContramap(f)(ab))
 
   def leftContramap[A, B, C](f: C => A): (A :=> B) => (C :=> B)
-
-  def rightMap[A, B, C](f: B => C): (A :=> B) => (A :=> C)
-
-  // laws for rightMap
-
-  def rightMapCompose[A, B, B2, B3](
-    ab: A :=> B,
-    f: B => B2,
-    g: B2 => B3
-  )(implicit eq: Equal[A :=> B3]): Boolean = {
-    val lhs: A :=> B => A :=> B3 = rightMap(g compose f)
-    val rhs: A :=> B => A :=> B3 = rightMap(g) compose rightMap(f)
-    eq.equal(lhs(ab), rhs(ab))
-  }
-
-  def rightMapIdentity[A, B](
-    ab: A :=> B
-  )(implicit eq: Equal[A :=> B]): Boolean = {
-    val lhs: A :=> B => A :=> B = rightMap(identity[B])
-    eq.equal(lhs(ab), ab)
-  }
 
   // laws for leftContramap
 

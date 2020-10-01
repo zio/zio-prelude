@@ -79,24 +79,21 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    * The `Covariant` (and thus `Invariant`) for a failed `Either`
    */
   implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
-    new Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
-      override def map[L, L1](f: L => L1): Failure[Either[L, R]] => Failure[Either[L1, R]] = { either =>
-        Failure.wrap {
-          Failure.unwrap(either) match {
-            case Left(l)  => Left[L1, R](f(l))
-            case Right(r) => Right[L1, R](r)
-          }
-        }
-      }
-    }
+    Bicovariant.EitherBicovariant.deriveFailureCovariant
 
   /**
    * The `Traversable` (and thus `Covariant` and `Invariant`) for `Either`.
    */
-  implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] =
-    new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] {
+  implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] with Bicovariant[Either] =
+    new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] with Bicovariant[Either] {
+
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
         either.fold(Left(_).succeed, f(_).map(Right(_)))
+
+      override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Either[A, B] => Either[AA, BB] = {
+        case Right(a) => Right(g(a))
+        case Left(b)  => Left(f(b))
+      }
     }
 
   /**
@@ -113,11 +110,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    * The `Covariant` (and thus `Invariant`) for a failed `Exit`
    */
   implicit def ExitFailureCovariant[A]: Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
-      override def map[E, E1](f: E => E1): Failure[Exit[E, A]] => Failure[Exit[E1, A]] = { exit =>
-        Failure.wrap(Failure.unwrap(exit).mapError(f))
-      }
-    }
+    Bicovariant.ExitBicovariant.deriveFailureCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for `Fiber`
@@ -708,11 +701,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    * The `Covariant` (and thus `Invariant`) for `Tuple2`
    */
   implicit def Tuple2Covariant[T1]: Covariant[({ type lambda[+x] = (T1, x) })#lambda] =
-    new Covariant[({ type lambda[+x] = (T1, x) })#lambda] {
-      override def map[A, B](f: A => B): ((T1, A)) => (T1, B) = { tuple =>
-        (tuple._1, f(tuple._2))
-      }
-    }
+    Bicovariant.Tuple2Bicovariant.deriveCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for `Tuple3`

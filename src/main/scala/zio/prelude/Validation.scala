@@ -173,6 +173,15 @@ object Validation extends LowPriorityValidationImplicits {
     }
 
   /**
+   * The `Bicovariant` instance for `Validation`.
+   */
+  implicit def ValidationBicovariant[E]: Bicovariant[Validation] =
+    new Bicovariant[Validation] {
+      override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Validation[A, B] => Validation[AA, BB] =
+        _.map(g).mapError(f)
+    }
+
+  /**
    * Derives a `Debug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
    */
   implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] = {
