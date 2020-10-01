@@ -2,6 +2,7 @@ package zio.prelude
 
 import scala.Predef.{ identity => id }
 
+import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.ZStream
 import zio.{ ZIO, ZLayer, ZManaged }
@@ -17,9 +18,10 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
       def map[A, A1](f: A => A1): Z[R, E, A] => Z[R, E, A1] = self.map(f)
     }
 
-  def deriveLeftCovariant[R, A]: Covariant[({ type lambda[+E] = Z[R, E, A] })#lambda] =
-    new Covariant[({ type lambda[+E] = Z[R, E, A] })#lambda] {
-      def map[E, E1](f: E => E1): Z[R, E, A] => Z[R, E1, A] = self.mapLeft(f)
+  def deriveFailureCovariant[R, A]: Covariant[({ type lambda[+E] = Failure[Z[R, E, A]] })#lambda] =
+    new Covariant[({ type lambda[+E] = Failure[Z[R, E, A]] })#lambda] {
+      def map[E, E1](f: E => E1): Failure[Z[R, E, A]] => Failure[Z[R, E1, A]] =
+        fa => Failure.wrap(self.mapLeft(f)(Failure.unwrap(fa)))
     }
 
   def deriveContravariant[E, A]: Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] =
@@ -29,8 +31,10 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
 
   def deriveDivariant[E]: Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] =
     new Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] {
-      def leftContramap[A, B, C](f: C => A): Z[A, E, B] => Z[C, E, B] = self.contramap(f)
-      def rightMap[A, B, C](f: B => C): Z[A, E, B] => Z[A, E, C]      = self.map(f)
+
+      def leftContramap[R, A, RR](f: RR => R): Z[R, E, A] => Z[RR, E, A] = self.contramap(f)
+
+      def rightMap[R, A, AA](f: A => AA): Z[R, E, A] => Z[R, E, AA] = self.map(f)
     }
 
   def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]

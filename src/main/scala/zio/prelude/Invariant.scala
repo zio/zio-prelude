@@ -4,6 +4,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 import zio.prelude.newtypes.{ Failure, FailureIn, FailureOut }
+import zio.stm.ZSTM
 import zio.stream.{ ZSink, ZStream }
 import zio.{
   Cause,
@@ -1276,61 +1277,37 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    * The `Covariant` (and thus `Invariant`) for `ZIO`
    */
   implicit def ZIOCovariant[R, E]: Covariant[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new Covariant[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      def map[A, B](f: A => B): ZIO[R, E, A] => ZIO[R, E, B] = { zio =>
-        zio.map(f)
-      }
-    }
+    Zivariant.ZioZivariant.deriveCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for a failed `ZIO`
    */
   implicit def ZIOFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZIO[R, E, A]] => Failure[ZIO[R, E1, A]] = { zio =>
-        Failure.wrap(Failure.unwrap(zio).mapError(f))
-      }
-    }
+    Zivariant.ZioZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for `ZLayer`
    */
   implicit def ZLayerCovariant[R, E]: Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] =
-    new Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] {
-      def map[A, B](f: A => B): ZLayer[R, E, A] => ZLayer[R, E, B] = { zlayer =>
-        zlayer.map(f)
-      }
-    }
+    Zivariant.ZLayerZivariant.deriveCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for a failed `ZLayer`
    */
   implicit def ZLayerFailureCovariant[R, Out]: Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZLayer[R, E, Out]] => Failure[ZLayer[R, E1, Out]] = { zlayer =>
-        Failure.wrap(Failure.unwrap(zlayer).mapError(f))
-      }
-    }
+    Zivariant.ZLayerZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for `ZManaged`
    */
   implicit def ZManagedCovariant[R, E]: Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def map[A, B](f: A => B): ZManaged[R, E, A] => ZManaged[R, E, B] = { zmanaged =>
-        zmanaged.map(f)
-      }
-    }
+    Zivariant.ZManagedZivariant.deriveCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for a failed `ZManaged`
    */
   implicit def ZManagedFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZManaged[R, E, A]] => Failure[ZManaged[R, E1, A]] = { zmanaged =>
-        Failure.wrap(Failure.unwrap(zmanaged).mapError(f))
-      }
-    }
+    Zivariant.ZManagedZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for `ZQueue`
@@ -1416,21 +1393,25 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    * The `Covariant` (and thus `Invariant`) for `ZStream`
    */
   implicit def ZStreamCovariant[R, E]: Covariant[({ type lambda[+o] = ZStream[R, E, o] })#lambda] =
-    new Covariant[({ type lambda[+o] = ZStream[R, E, o] })#lambda] {
-      def map[A, B](f: A => B): ZStream[R, E, A] => ZStream[R, E, B] = { ztream =>
-        ztream.map(f)
-      }
-    }
+    Zivariant.ZStreamZivariant.deriveCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for a failed `ZStream`
    */
   implicit def ZStreamFailureCovariant[R, O]: Covariant[({ type lambda[+e] = Failure[ZStream[R, e, O]] })#lambda] =
-    new Covariant[({ type lambda[+e] = Failure[ZStream[R, e, O]] })#lambda] {
-      def map[E, E1](f: E => E1): Failure[ZStream[R, E, O]] => Failure[ZStream[R, E1, O]] = { ztream =>
-        Failure.wrap(Failure.unwrap(ztream).mapError(f))
-      }
-    }
+    Zivariant.ZStreamZivariant.deriveFailureCovariant
+
+  /**
+   * The `Covariant` (and thus `Invariant`) for `ZSTM`
+   */
+  implicit def ZSTMZivariantCovariant[R, E]: Covariant[({ type lambda[+o] = ZSTM[R, E, o] })#lambda] =
+    Zivariant.ZSTMZivariant.deriveCovariant
+
+  /**
+   * The `Covariant` (and thus `Invariant`) for a failed `ZSTM`
+   */
+  implicit def ZSTMZivariantFailureCovariant[R, O]: Covariant[({ type lambda[+e] = Failure[ZSTM[R, e, O]] })#lambda] =
+    Zivariant.ZSTMZivariant.deriveFailureCovariant
 }
 
 trait LowPriorityInvariantImplicits {
@@ -1710,28 +1691,19 @@ trait LowPriorityInvariantImplicits {
    * The `Contravariant` (and thus `Invariant`) instance for `ZIO`.
    */
   implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZIO[R, E, A] => ZIO[R0, E, A] =
-        zio => zio.provideSome(f)
-    }
+    Zivariant.ZioZivariant.deriveContravariant
 
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `ZLayer`.
    */
   implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] {
-      def contramap[RIn, RIn0](f: RIn0 => RIn): ZLayer[RIn, E, ROut] => ZLayer[RIn0, E, ROut] =
-        layer => ZLayer.fromFunctionMany(f) >>> layer
-    }
+    Zivariant.ZLayerZivariant.deriveContravariant
 
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `ZManaged`.
    */
   implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZManaged[R, E, A] => ZManaged[R0, E, A] =
-        managed => managed.provideSome(f)
-    }
+    Zivariant.ZManagedZivariant.deriveContravariant
 
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `ZQueue`.
@@ -1775,9 +1747,11 @@ trait LowPriorityInvariantImplicits {
    * The `Contravariant` (and thus `Invariant`) instance for `ZStream`.
    */
   implicit def ZStreamContravariant[E, A]: Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] {
-      def contramap[R, R0](f: R0 => R): ZStream[R, E, A] => ZStream[R0, E, A] =
-        stream => stream.provideSome(f)
-    }
+    Zivariant.ZStreamZivariant.deriveContravariant
 
+  /**
+   * The `Contravariant` (and thus `Invariant`) instance for `ZSTM`.
+   */
+  implicit def ZSTMZivariantContravariant[E, A]: Contravariant[({ type lambda[-x] = ZSTM[x, E, A] })#lambda] =
+    Zivariant.ZSTMZivariant.deriveContravariant
 }
