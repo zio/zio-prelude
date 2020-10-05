@@ -190,6 +190,26 @@ trait Traversable[F[+_]] extends Covariant[F] {
     foldMap(fa)(Prod[A])
 
   /**
+   * Reduces the collection to a summary value using the associative operation,
+   * returning `None` if the collection is empty.
+   */
+  def reduceAssociative[A: Associative](fa: F[A]): Option[A] =
+    foldMap(fa)(a => Option(a))
+
+  /**
+   * Reduces the collection to a summary value using the idempotent operation,
+   * returning `None` if the collection is empty.
+   */
+  def reduceIdempotent[A: Idempotent: Equal](fa: F[A]): Option[A] =
+    reduceAssociative(fa)(Idempotent[A].idempotent)
+
+  /**
+   * Reduces the collection to a summary value using the associative operation.
+   */
+  def reduceIdentity[A: Identity](fa: F[A]): A =
+    foldMap(fa)(identity[A])
+
+  /**
    * Maps each element of the collection to a type `B` for which an
    * associative operation exists and then reduces the values using the
    * associative operation, returning `None` if the collection is empty.
@@ -245,7 +265,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
     foreach(fa)(a => State.modify((n: Int) => (n + 1, (a, n)))).runResult(0)
 }
 
-object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] with TraversableVersionSpecific {
+object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
 
   /**
    * The set of all laws that instances of `Traversable` must satisfy.
@@ -258,63 +278,6 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] with
    */
   def apply[F[+_]](implicit traversable: Traversable[F]): Traversable[F] =
     traversable
-
-  /**
-   * The `Traversable` instance for `Chunk`.
-   */
-  implicit val ChunkTraversable: Traversable[Chunk] =
-    new Traversable[Chunk] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
-        chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
-    }
-
-  /**
-   * The `Traversable` instance for `Either`.
-   */
-  implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] =
-    new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
-        either.fold(Left(_).succeed, f(_).map(Right(_)))
-    }
-
-  /**
-   * The `Traversable` instance for `List`.
-   */
-  implicit val ListTraversable: Traversable[List] =
-    new Traversable[List] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
-        list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
-      override def map[A, B](f: A => B): List[A] => List[B]                                      = _.map(f)
-    }
-
-  /**
-   * The `Traversable` instance for `Map`.
-   */
-  implicit def MapTraversable[K]: Traversable[({ type lambda[+v] = Map[K, v] })#lambda] =
-    new Traversable[({ type lambda[+v] = Map[K, v] })#lambda] {
-      def foreach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
-        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) { case (map, (k, v)) =>
-          map.zipWith(f(v))((map, v2) => map + (k -> v2))
-        }
-    }
-
-  /**
-   * The `Traversable` instance for `Option`.
-   */
-  implicit val OptionTraversable: Traversable[Option] =
-    new Traversable[Option] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
-        option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
-    }
-
-  /**
-   * The `Traversable` instance for `Vector`.
-   */
-  implicit val VectorTraversable: Traversable[Vector] =
-    new Traversable[Vector] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]] =
-        vector.foldLeft[G[Vector[B]]](Vector.empty.succeed)((bs, a) => bs.zipWith(f(a))(_ :+ _))
-    }
 }
 
 trait TraversableSyntax {
@@ -357,6 +320,12 @@ trait TraversableSyntax {
       F.minByOption(self)(f)
     def nonEmpty(implicit F: Traversable[F]): Boolean                                                 =
       F.nonEmpty(self)
+    def reduceAssociative(implicit F: Traversable[F], A: Associative[A]): Option[A]                   =
+      F.reduceAssociative(self)
+    def reduceIdempotent(implicit F: Traversable[F], ia: Idempotent[A], ea: Equal[A]): Option[A]      =
+      F.reduceIdempotent(self)
+    def reduceIdentity(implicit F: Traversable[F], A: Identity[A]): A                                 =
+      F.reduceIdentity(self)
     def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A                                  =
       F.product(self)
     def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B]             =

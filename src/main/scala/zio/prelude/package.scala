@@ -62,10 +62,11 @@ package object prelude
   type DeriveInverse[F[_]]     = Derive[F, Inverse]
   type DeriveOrd[F[_]]         = Derive[F, Ord]
 
-  type Contravariant[F[-_]]      = TriContravariant[({ type lambda[-R, E2, A] = F[R] })#lambda]
-  type ContravariantRight[F[-_]] = TriRightContravariant[({ type lambda[R, -E2, A] = F[E2] })#lambda]
-  type Divariant[:=>[-_, +_]]    = TriDivariant[({ type lambda[-R, E, +A] = R :=> A })#lambda]
-  type Bicovariant[<=>[+_, +_]]  = TriBivariant[({ type lambda[R, +E, +A] = E <=> A })#lambda]
+  type Contravariant[F[-_]]        = TriContravariant[({ type lambda[-R, E2, A] = F[R] })#lambda]
+  type ContravariantRight[F[-_]]   = TriRightContravariant[({ type lambda[R, -E2, A] = F[E2] })#lambda]
+  type Divariant[:=>[-_, +_]]      = TriDivariant[({ type lambda[-R, E, +A] = R :=> A })#lambda]
+  type Bicovariant[<=>[+_, +_]]    = TriBivariant[({ type lambda[R, +E, +A] = E <=> A })#lambda]
+  type RightCovariant[<=>[_, +_]]  = TriCovariant[({ type lambda[R, E, +A] = E <=> A })#lambda]
 
   object classic {
     type Semigroup[A]            = Associative[A]
@@ -75,8 +76,12 @@ package object prelude
     type Group[A]                = Inverse[A]
     type AbelianGroup[A]         = Commutative[A] with Inverse[A]
 
-    type Functor[F[+_]]     = Covariant[F]
-    type Invariant[F[_]]    = zio.prelude.Invariant[F]
+    type Semilattice[A]        = Commutative[A] with Idempotent[A]
+    type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
+
+    type Functor[F[+_]]       = Covariant[F]
+    type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
+    type Invariant[F[_]]      = zio.prelude.Invariant[F]
     type Alternative[F[+_]] =
       Covariant[F] with IdentityBoth[F] with IdentityEither[F]
     type InvariantAlt[F[_]] =

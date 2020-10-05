@@ -86,6 +86,12 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
   }
 
   /**
+   * Reduces the non-empty collection of associative elements.
+   */
+  def reduce1[A: Associative](fa: F[A]): A =
+    reduceMap(fa)(identity)
+
+  /**
    * Maps each element of the collection to a type `B` for which a combine
    * operation is defined using the function `f` and then reduces those values
    * to a single summary using the combine operation.
@@ -141,19 +147,6 @@ object NonEmptyTraversable extends LawfulF.Covariant[DeriveEqualNonEmptyTraversa
    */
   def apply[F[+_]](implicit nonEmptyTraversable: NonEmptyTraversable[F]): NonEmptyTraversable[F] =
     nonEmptyTraversable
-
-  /**
-   * The `NonEmptyTraversable` instance for `NonEmptyChunk`.
-   */
-  implicit val NonChunkListNonEmptyTraversable: NonEmptyTraversable[NonEmptyChunk] =
-    new NonEmptyTraversable[NonEmptyChunk] {
-      def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](
-        nonEmptyChunk: NonEmptyChunk[A]
-      )(f: A => F[B]): F[NonEmptyChunk[B]] =
-        nonEmptyChunk
-          .reduceMapLeft(f(_).map(ChunkBuilder.make() += _))((bs, a) => bs.zipWith(f(a))(_ += _))
-          .map(bs => NonEmptyChunk.nonEmpty(bs.result()))
-    }
 }
 
 trait NonEmptyTraversableSyntax {
@@ -168,6 +161,8 @@ trait NonEmptyTraversableSyntax {
       F.foreach1_(self)(f)
     def reduce(f: (A, A) => A)(implicit F: NonEmptyTraversable[F]): A                                             =
       F.reduce(self)(f)
+    def reduce1(implicit F: NonEmptyTraversable[F], A: Associative[A]): A                                         =
+      F.reduce1(self)
     def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyTraversable[F]): B                               =
       F.reduceMap(self)(f)
     def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyTraversable[F]): B                 =

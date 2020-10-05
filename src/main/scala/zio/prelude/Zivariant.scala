@@ -93,7 +93,7 @@ trait TriLeftDivariant[Z[-_, +_, _]] extends TriContravariant[Z] with TriLeftCov
  * Covariant functor + Divariant trifunctor
  */
 trait TriBivariant[Z[_, +_, +_]] extends TriCovariant[Z] with TriLeftCovariant[Z] { self =>
-  def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1]
+  def bimap[R, E0, A, E1, A1](e: E0 => E1, a: A => A1): Z[R, E0, A] => Z[R, E1, A1] // TODO renam E0 => E
 
   override def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] = bimap(id, a)
 

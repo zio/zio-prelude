@@ -2,7 +2,7 @@ package zio.prelude
 
 import scala.collection.BuildFrom
 
-trait TraversableVersionSpecific {
+trait InvariantVersionSpecific {
 
   /**
    * Derives a `Traverable[F]` from an `Iterable[F]`.
