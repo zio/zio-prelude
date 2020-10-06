@@ -450,7 +450,7 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    */
   implicit val NonEmptyListCovariant: Covariant[NonEmptyList] =
     new Covariant[NonEmptyList] {
-      def map[A, B](f: A => B): NonEmptyList[A] => NonEmptyList[B] =
+      override def map[R, E, A, A1](f: A => A1): NonEmptyList[A] => NonEmptyList[A1] =
         nonEmptyList => nonEmptyList.map(f)
     }
 

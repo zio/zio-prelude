@@ -2,6 +2,7 @@ package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualTraversable
 import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
+import zio.prelude.Invariant.IdCovariant
 import zio.test.laws._
 import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
 
@@ -132,7 +133,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * Lifts a function operating on values to a function that operates on each
    * element of a collection.
    */
-  def map[A, B](f: A => B): F[A] => F[B] =
+  override def map[R, E, A, B](f: A => B): F[A] => F[B] =
     (fa: F[A]) => Id.unwrap(foreach[Id, A, B](fa)((a: A) => Id(f(a))))
 
   /**

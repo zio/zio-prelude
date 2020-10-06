@@ -528,9 +528,9 @@ object ZPure {
   /**
    * The `Covariant` instance for `ZPure`.
    */
-  implicit def ZPureCovariant[S1, S2, R, E]: Covariant[({ type lambda[+A] = ZPure[S1, S2, R, E, A] })#lambda] =
-    new Covariant[({ type lambda[+A] = ZPure[S1, S2, R, E, A] })#lambda] {
-      def map[A, B](f: A => B): ZPure[S1, S2, R, E, A] => ZPure[S1, S2, R, E, B] =
+  implicit def ZPureCovariant[S1, S2, R0, E0]: Covariant[({ type lambda[+A] = ZPure[S1, S2, R0, E0, A] })#lambda] =
+    new Covariant[({ type lambda[+A] = ZPure[S1, S2, R0, E0, A] })#lambda] {
+      override def map[R, E, A, A1](f: A => A1): ZPure[S1, S2, R0, E0, A] => ZPure[S1, S2, R0, E0, A1] =
         _.map(f)
     }
 

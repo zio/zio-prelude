@@ -51,12 +51,15 @@ object AssociativeFlattenCovariantDeriveEqual {
     deriveEqual0: DeriveEqual[F]
   ): AssociativeFlattenCovariantDeriveEqual[F] =
     new AssociativeFlattenCovariantDeriveEqual[F] {
-      def derive[A: Equal]: Equal[F[A]]      =
-        deriveEqual0.derive
-      def flatten[A](ffa: F[F[A]]): F[A]     =
-        associativeFlatten0.flatten(ffa)
-      def map[A, B](f: A => B): F[A] => F[B] =
+
+      override def map[R, E, A, A1](f: A => A1): F[A] => F[A1] =
         covariant0.map(f)
+
+      def derive[A: Equal]: Equal[F[A]] =
+        deriveEqual0.derive
+
+      def flatten[A](ffa: F[F[A]]): F[A] =
+        associativeFlatten0.flatten(ffa)
     }
 }
 
@@ -105,11 +108,12 @@ trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 object CovariantDeriveEqual {
   implicit def derive[F[+_]](implicit covariant0: Covariant[F], deriveEqual0: DeriveEqual[F]): CovariantDeriveEqual[F] =
     new CovariantDeriveEqual[F] {
+
+      override def map[R, E, A, A1](f: A => A1): F[A] => F[A1] =
+        covariant0.map(f)
+
       def derive[A: Equal]: Equal[F[A]] =
         deriveEqual0.derive
-
-      def map[A, B](f: A => B): F[A] => F[B] =
-        covariant0.map(f)
     }
 }
 
@@ -140,13 +144,16 @@ object CovariantDeriveEqualIdentityFlatten {
     identityFlatten0: IdentityFlatten[F]
   ): CovariantDeriveEqualIdentityFlatten[F] =
     new CovariantDeriveEqualIdentityFlatten[F] {
-      def any: F[Any]                        =
+      def any: F[Any] =
         identityFlatten0.any
-      def derive[A: Equal]: Equal[F[A]]      =
+
+      def derive[A: Equal]: Equal[F[A]] =
         deriveEqual0.derive
-      def flatten[A](ffa: F[F[A]]): F[A]     =
+
+      def flatten[A](ffa: F[F[A]]): F[A] =
         identityFlatten0.flatten(ffa)
-      def map[A, B](f: A => B): F[A] => F[B] =
+
+      override def map[R, E, A, A1](f: A => A1): F[A] => F[A1] =
         covariant0.map(f)
     }
 }

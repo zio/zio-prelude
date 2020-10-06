@@ -279,7 +279,7 @@ object ZSet {
     ev: Commutative[Sum[B]]
   ): Covariant[({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new Covariant[({ type lambda[+x] = ZSet[x, B] })#lambda] {
-      def map[A, C](f: A => C): ZSet[A, B] => ZSet[C, B] =
+      override def map[R, E, A, A1](f: A => A1): ZSet[A, B] => ZSet[A1, B] =
         _.map(f)
     }
 

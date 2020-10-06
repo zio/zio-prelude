@@ -228,7 +228,7 @@ object ZNonEmptySet {
     ev: Commutative[Sum[B]]
   ): Covariant[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new Covariant[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
-      def map[A, C](f: A => C): ZNonEmptySet[A, B] => ZNonEmptySet[C, B] =
+      override def map[R, E, A, A1](f: A => A1): ZNonEmptySet[A, B] => ZNonEmptySet[A1, B] =
         _.map(f)
     }
 

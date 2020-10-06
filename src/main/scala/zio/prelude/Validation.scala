@@ -203,10 +203,12 @@ object Validation extends LowPriorityValidationImplicits {
   /**
    * The `Covariant` instance for `Validation` with respect to its error type.
    */
-  implicit def ValidationFailureCovariant[A]
-    : Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] =
-    new Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] {
-      def map[E, E1](f: E => E1): newtypes.Failure[Validation[E, A]] => newtypes.Failure[Validation[E1, A]] =
+  implicit def ValidationFailureCovariant[A0]
+    : Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A0]] })#lambda] =
+    new Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A0]] })#lambda] {
+      override def map[R, E, A, A1](
+        f: A => A1
+      ): newtypes.Failure[Validation[A, A0]] => newtypes.Failure[Validation[A1, A0]] =
         validation => newtypes.Failure.wrap(newtypes.Failure.unwrap(validation).mapError(f))
     }
 

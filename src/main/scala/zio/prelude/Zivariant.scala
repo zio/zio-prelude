@@ -38,11 +38,12 @@ trait TriContravariant[Z[-_, _, _]] extends Trinvarint[Z] { self =>
  * Covariant functor encoded on 2nd param of Trifunctor = Clown
  */
 trait TriLeftCovariant[Z[_, +_, _]] extends Trinvarint[Z] { self =>
-  def deriveFailureCovariant[R, A]: Covariant[({ type lambda[+E] = Failure[Z[R, E, A]] })#lambda] =
-    new Covariant[({ type lambda[+E] = Failure[Z[R, E, A]] })#lambda] {
-      type FZ[X] = Failure[Z[R, X, A]]
-      def map[E, E1](e: E => E1): Failure[Z[R, E, A]] => Failure[Z[R, E1, A]] = fz => {
-        val fz2: Z[R, E, A] => Z[R, E1, A] = self.mapLeft(e)
+  def deriveFailureCovariant[R0, A0]: Covariant[({ type lambda[+E] = Failure[Z[R0, E, A0]] })#lambda] =
+    new Covariant[({ type lambda[+E] = Failure[Z[R0, E, A0]] })#lambda] {
+      type FZ[X] = Failure[Z[R0, X, A0]]
+
+      override def map[R, E, A, A1](a: A => A1): Failure[Z[R0, A, A0]] => Failure[Z[R0, A1, A0]] = fz => {
+        val fz2: Z[R0, A, A0] => Z[R0, A1, A0] = self.mapLeft(a)
         Failure.wrap(fz2(Failure.unwrap(fz)))
       }
     } // TODO no need to derive
@@ -56,12 +57,12 @@ trait TriLeftCovariant[Z[_, +_, _]] extends Trinvarint[Z] { self =>
  * Covariant functor encoded on 2nd param of Trifunctor = Joker
  */
 trait TriCovariant[Z[_, _, +_]] extends Trinvarint[Z] { self =>
-  def deriveCovariant[R, E]: Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] =
-    new Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] {
-      def map[A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1] = self.map(a)
+  def deriveCovariant[R0, E0]: Covariant[({ type lambda[+A] = Z[R0, E0, A] })#lambda] =
+    new Covariant[({ type lambda[+A] = Z[R0, E0, A] })#lambda] {
+      override def map[R, E, A, A1](f: A => A1): Z[R0, E0, A] => Z[R0, E0, A1] = self.map(f)
     } // TODO no need to derive
 
-  def map[R, E, A, A1](a: A => A1): Z[R, E, A] => Z[R, E, A1]
+  def map[R, E, A, A1](f: A => A1): Z[R, E, A] => Z[R, E, A1] // TODO rename f => A
 
   // TODO laws
 }
@@ -119,7 +120,6 @@ trait Zivariant[Z[-_, +_, +_]] // ContravariantBivcovariant[Z[-_, +_, +_]]
     } // TODO no need to derive
 
   def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): Z[R, E, A] => Z[R1, E1, A1]
-
 
   override def bimap[R, E, A, E1, A1](e: E => E1, a: A => A1): Z[R, E, A] => Z[R, E1, A1] = zimap(id, e, a)
 
