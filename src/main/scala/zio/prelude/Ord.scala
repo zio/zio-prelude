@@ -2,8 +2,8 @@ package zio.prelude
 
 import scala.annotation.{ implicitNotFound, tailrec }
 import scala.{ math => sm }
-
 import zio.prelude.Equal._
+import zio.prelude.coherent.HashOrd
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
@@ -998,8 +998,8 @@ object Ordering {
     else Equals
 
   /**
-   * Ordering for `Ordering` values.
+   * `Hash` and `Ord` instance for `Ordering` values.
    */
-  implicit val orderingOrdering: Ord[Ordering] =
-    Ord((l: Ordering, r: Ordering) => Ord[Int].compare(l.ordinal, r.ordinal))
+  implicit val OrderingHashOrd: Hash[Ordering] with Ord[Ordering] =
+    HashOrd.make((x: Ordering) => x.hashCode, (l: Ordering, r: Ordering) => Ord[Int].compare(l.ordinal, r.ordinal))
 }
