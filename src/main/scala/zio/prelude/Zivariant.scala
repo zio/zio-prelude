@@ -16,7 +16,7 @@ import zio.{ Schedule, ZIO, ZLayer, ZManaged }
 /**
  * Invariant trifunctor
  */
-trait Trinvarint[Z[_, _, _]] { self => }
+trait Trinvarint[Z[_, _, _]]
 
 /**
  * Contravariant functor encoded on Trifunctor = Bard

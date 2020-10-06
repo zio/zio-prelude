@@ -63,9 +63,6 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit val ChunkTraversable: Traversable[Chunk] =
     new Traversable[Chunk] {
-
-      override def map[R, E, A, A1](f: A => A1): Chunk[A] => Chunk[A1] = _.map(f)
-
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
         chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
     }
