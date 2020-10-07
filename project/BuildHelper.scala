@@ -13,7 +13,7 @@ object BuildHelper {
   private val Scala211        = "2.11.12"
   private val Scala212        = "2.12.12"
   private val Scala213        = "2.13.3"
-  private val ScalaDotty      = "0.26.0"
+  private val ScalaDotty      = "0.27.0-RC1"
   private val SilencerVersion = "1.7.1"
 
   private val stdOptions = Seq(
@@ -227,6 +227,7 @@ object BuildHelper {
         )
     },
     semanticdbEnabled := !isDotty.value, // enable SemanticDB
+    semanticdbOptions += "-P:semanticdb:synthetics:on",
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
     ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
     ThisBuild / scalafixDependencies ++= List(
