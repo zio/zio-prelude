@@ -45,7 +45,6 @@ package zio.prelude
  *
  * def sum[A](as: List[A])(implicit A: Associative[Sum[A]] with Identity[Sum[A]]): A =
  *   Sum.unwrap(Sum.wrapAll(as).foldLeft(A.identity)((b, a) => A.combine(b, a)))
- * }}}
  *
  * sum(List(1, 2, 3))
  * sum(List(1L, 2L, 3L))

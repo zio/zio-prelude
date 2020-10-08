@@ -60,14 +60,6 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
     }
 
   /**
-   * The `CommutativeBoth` instance for `Id`.
-   */
-  implicit val IdCommutativeBoth: CommutativeBoth[Id] =
-    new CommutativeBoth[Id] {
-      def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] = Id((Id.unwrap(fa), Id.unwrap(fb)))
-    }
-
-  /**
    * The `CommutativeBoth` instance for `List`.
    */
   implicit def ListCommutativeBoth: CommutativeBoth[List] =

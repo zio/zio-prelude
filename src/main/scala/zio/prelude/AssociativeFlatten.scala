@@ -107,16 +107,6 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
     }
 
   /**
-   * The `AssociativeFlatten` and `IdentityFlatten` instance for `Id`.
-   */
-  implicit val IdIdentityFlatten: IdentityFlatten[Id] =
-    new IdentityFlatten[Id] {
-      def any: Id[Any] = Id(())
-
-      def flatten[A](ffa: Id[Id[A]]): Id[A] = Id.unwrap(ffa)
-    }
-
-  /**
    * The `AssociativeFlatten` and `IdentityFlatten` instance for `List`.
    */
   implicit val ListIdentityFlatten: IdentityFlatten[List] =

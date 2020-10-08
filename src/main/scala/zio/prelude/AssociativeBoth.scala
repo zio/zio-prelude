@@ -1016,17 +1016,6 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
-   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Id`.
-   */
-  implicit val IdIdentityBoth: IdentityBoth[Id] =
-    new IdentityBoth[Id] {
-      val any: Id[Any] = Id(())
-
-      def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] =
-        Id(Id.unwrap(fa) -> Id.unwrap(fb))
-    }
-
-  /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `List`.
    */
   implicit val ListIdentityBoth: IdentityBoth[List] =

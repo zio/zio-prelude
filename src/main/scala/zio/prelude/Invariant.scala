@@ -591,16 +591,6 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       }
     }
 
-  /**
-   * The `Covariant` (and thus `Invariant`) instance for `Id`.
-   */
-  implicit val IdCovariant: Covariant[Id] =
-    new Covariant[Id] {
-      def map[A, B](f: A => B): Id[A] => Id[B] = { id =>
-        Id(f(Id.unwrap(id)))
-      }
-    }
-
   implicit val IdentityInvariant: Invariant[Identity] =
     new Invariant[Identity] {
       def invmap[A, B](f: A <=> B): Identity[A] <=> Identity[B] =
