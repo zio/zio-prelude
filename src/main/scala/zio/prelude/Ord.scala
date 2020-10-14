@@ -2,9 +2,8 @@ package zio.prelude
 
 import scala.annotation.{ implicitNotFound, tailrec }
 import scala.{ math => sm }
-
 import zio.prelude.Equal._
-import zio.prelude.coherent.HashOrd
+import zio.prelude.coherent.{ HashOrd, HashPartialOrd }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
@@ -95,7 +94,7 @@ trait Ord[-A] extends PartialOrd[A] { self =>
   /**
    * Returns a new ordering that is the reverse of this one.
    */
-  final override def reverse: Ord[A] =
+  final def reverse: Ord[A] =
     mapOrdering(_.opposite)
 
   override def toScala[A1 <: A]: sm.Ordering[A1] =
@@ -846,7 +845,7 @@ sealed trait PartialOrdering { self =>
   /**
    * A symbolic alias for `orElse`.
    */
-  final def <>?(that: => PartialOrdering): PartialOrdering =
+  def <>(that: => PartialOrdering): PartialOrdering =
     self orElsePartial that
 
   /**
@@ -886,44 +885,35 @@ sealed trait PartialOrdering { self =>
       case ordering        => ordering
     }
 
-  /**
-   * Converts this `Ordering` to an ordinal representation, with `0`
-   * representing `LessThan`, `1` representing `Equals` and `2` representing
-   * `GreaterThan`.
-   */
-  final def ordinal: Int =
-    self match {
-      case PartialOrdering.NoOrder => -1
-      case Ordering.LessThan       => 0
-      case Ordering.Equals         => 1
-      case Ordering.GreaterThan    => 2
-    }
-
-  /**
-   * Returns the opposite of this `Ordering`, with `LessThan` converted to
-   * `GreaterThan` and `GreaterThan` converted to `LessThan`.
-   */
-  def opposite: PartialOrdering =
-    self match {
-      case PartialOrdering.NoOrder => PartialOrdering.NoOrder
-      case Ordering.LessThan       => Ordering.GreaterThan
-      case Ordering.Equals         => Ordering.Equals
-      case Ordering.GreaterThan    => Ordering.LessThan
-    }
-
 }
 
 object PartialOrdering {
   case object NoOrder extends PartialOrdering
 
   /**
-   * `Hash` and `Ord` instance for `PartialOrdering` values.
+   * `Hash` and `PartialOrd` instance for `PartialOrdering` values.
    */
-  implicit val PartialOrderingHashOrd: Hash[PartialOrdering] with Ord[PartialOrdering] =
-    HashOrd.make(
+  implicit val PartialOrderingHashPartialOrd: Hash[PartialOrdering] with PartialOrd[PartialOrdering] =
+    HashPartialOrd.make(
       (x: PartialOrdering) => x.hashCode,
-      (l: PartialOrdering, r: PartialOrdering) => Ord[Int].compare(l.ordinal, r.ordinal)
+      (l: PartialOrdering, r: PartialOrdering) =>
+        (l, r) match {
+          case (l: Ordering, r: Ordering) => Ordering.OrderingHashOrd.compare(l, r)
+          case (NoOrder, NoOrder)         => Ordering.Equals
+          case _                          => NoOrder
+        }
     )
+
+  /**
+   * `Idempotent` instance for `PartialOrdering` values.
+   */
+  implicit val PartialOrderingIdempotent: Idempotent[PartialOrdering] =
+    new Idempotent[PartialOrdering] {
+      override def combine(l: => PartialOrdering, r: => PartialOrdering): PartialOrdering = l match {
+        case Ordering.Equals => r
+        case l               => l
+      }
+    }
 }
 
 /**
@@ -949,10 +939,22 @@ sealed trait Ordering extends PartialOrdering { self =>
     }
 
   /**
+   * Converts this `Ordering` to an ordinal representation, with `0`
+   * representing `LessThan`, `1` representing `Equals` and `2` representing
+   * `GreaterThan`.
+   */
+  final def ordinal: Int =
+    self match {
+      case Ordering.LessThan    => 0
+      case Ordering.Equals      => 1
+      case Ordering.GreaterThan => 2
+    }
+
+  /**
    * Returns the opposite of this `Ordering`, with `LessThan` converted to
    * `GreaterThan` and `GreaterThan` converted to `LessThan`.
    */
-  final override def opposite: Ordering =
+  final def opposite: Ordering =
     self match {
       case Ordering.LessThan    => Ordering.GreaterThan
       case Ordering.Equals      => Ordering.Equals
@@ -973,4 +975,24 @@ object Ordering {
     if (n < 0) LessThan
     else if (n > 0) GreaterThan
     else Equals
+
+  /**
+   * `Hash` and `Ord` instance for `Ordering` values.
+   */
+  implicit val OrderingHashOrd: Hash[Ordering] with Ord[Ordering] =
+    HashOrd.make(
+      (x: Ordering) => x.hashCode,
+      (l: Ordering, r: Ordering) => Ord[Int].compare(l.ordinal, r.ordinal)
+    )
+
+  /**
+   * `Idempotent` instance for `Ordering` values.
+   */
+  implicit val OrderingIdempotent: Idempotent[Ordering] =
+    new Idempotent[Ordering] {
+      override def combine(l: => Ordering, r: => Ordering): Ordering = l match {
+        case Ordering.Equals => r
+        case l               => l
+      }
+    }
 }
