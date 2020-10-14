@@ -4,6 +4,7 @@ import scala.annotation.{ implicitNotFound, tailrec }
 import scala.{ math => sm }
 
 import zio.prelude.Equal._
+import zio.prelude.coherent.HashOrd
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
@@ -916,10 +917,13 @@ object PartialOrdering {
   case object NoOrder extends PartialOrdering
 
   /**
-   * Ordering for `PartialOrdering` values.
+   * `Hash` and `Ord` instance for `PartialOrdering` values.
    */
-  implicit val orderingPartialOrdering: Ord[PartialOrdering] =
-    Ord((l: PartialOrdering, r: PartialOrdering) => Ord[Int].compare(l.ordinal, r.ordinal))
+  implicit val PartialOrderingHashOrd: Hash[PartialOrdering] with Ord[PartialOrdering] =
+    HashOrd.make(
+      (x: PartialOrdering) => x.hashCode,
+      (l: PartialOrdering, r: PartialOrdering) => Ord[Int].compare(l.ordinal, r.ordinal)
+    )
 }
 
 /**

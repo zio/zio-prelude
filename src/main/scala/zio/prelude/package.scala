@@ -11,6 +11,7 @@ package object prelude
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
     with AssociativeFlattenSyntax
+    with BicovariantSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with CovariantSyntax
@@ -70,6 +71,9 @@ package object prelude
     type Group[A]                = Inverse[A]
     type AbelianGroup[A]         = Commutative[A] with Inverse[A]
 
+    type Semilattice[A]        = Commutative[A] with Idempotent[A]
+    type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
+
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
@@ -102,6 +106,7 @@ package object prelude
 
     type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
     type Profunctor[:=>[-_, +_]] = Divariant[:=>]
+    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
   }
 
   /**
@@ -137,7 +142,5 @@ package object prelude
       val _ = f(a)
       a
     }
-
   }
-
 }
