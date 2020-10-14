@@ -1,8 +1,8 @@
 package zio.prelude
 
-import scala.language.implicitConversions
-
 import zio.prelude.newtypes.{ Max, Prod, Sum }
+
+import scala.language.implicitConversions
 
 /**
  * Similar to `ZSet`, a `ZNonEmptySet[A, B]` is a guaranteed non-empty set of `A` values where `B` represents some notion of
@@ -146,7 +146,7 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
     new ZNonEmptySet(zset.zipWith(that)(f))
 }
 
-object ZNonEmptySet {
+object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
 
   /**
    * Constructs a set with the specified elements.
@@ -282,4 +282,15 @@ object ZNonEmptySet {
    */
   implicit def toZSet[A, B](zNonEmptySet: ZNonEmptySet[A, B]): ZSet[A, B] =
     zNonEmptySet.toZSet
+}
+
+trait LowPriorityZNonEmptySetImplicits {
+
+  /**
+   * Derives a `PartialOrd[ZNonEmptySet[A, B]]` given a `PartialOrd[B]`.
+   * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
+   */
+  implicit def ZNonEmptySetPartialOrd[A, B: PartialOrd]: PartialOrd[ZNonEmptySet[A, B]] =
+    PartialOrd[ZSet[A, B]].contramap(_.toZSet)
+
 }

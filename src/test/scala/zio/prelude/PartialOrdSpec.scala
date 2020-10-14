@@ -26,7 +26,21 @@ object PartialOrdSpec extends DefaultRunnableSpec {
         testM("set")(checkAllLaws(PartialOrd)(Gen.setOf(Gen.anyInt))),
         testM("list")(checkAllLaws(PartialOrd)(Gen.listOf(Gen.anyInt))),
         testM("vector")(checkAllLaws(PartialOrd)(Gen.vectorOf(Gen.anyInt))),
-        testM("chunk")(checkAllLaws(PartialOrd)(Gen.chunkOf(Gen.anyInt)))
-      )
+        testM("chunk")(checkAllLaws(PartialOrd)(Gen.chunkOf(Gen.anyInt))),
+        testM("map")(checkAllLaws(PartialOrd)(Gen.mapOf(Gen.anyInt, Gen.anyInt)))
+      ),
+      test("map ord") {
+        assert(Map.empty[Int, Int] =??= Map.empty[Int, Int])(equalTo(Ordering.Equals)) &&
+        assert(Map(1 -> 2) =??= Map.empty[Int, Int])(equalTo(Ordering.GreaterThan)) &&
+        assert(Map.empty[Int, Int] =??= Map(1 -> 2))(equalTo(Ordering.LessThan)) &&
+        assert(Map(1 -> 2) =??= Map(1 -> 2))(equalTo(Ordering.Equals)) &&
+        assert(Map(1 -> 2) =??= Map(1 -> 3))(equalTo(Ordering.LessThan)) &&
+        assert(Map(1 -> 3) =??= Map(1 -> 2))(equalTo(Ordering.GreaterThan)) &&
+        assert(Map(1 -> 2) =??= Map(1 -> 3, 2 -> 4))(equalTo(Ordering.LessThan)) &&
+        assert(Map(1 -> 3, 2 -> 4) =??= Map(1 -> 2))(equalTo(Ordering.GreaterThan)) &&
+        assert(Map(1 -> 2) =??= Map(2 -> 2))(equalTo(PartialOrdering.NoOrder)) &&
+        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 3, 2 -> 2))(equalTo(PartialOrdering.NoOrder)) &&
+        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 1, 2 -> 2))(equalTo(PartialOrdering.NoOrder))
+      }
     )
 }

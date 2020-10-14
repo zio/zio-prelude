@@ -842,13 +842,13 @@ trait OrdSyntax {
   }
 }
 
-sealed trait PartialOrdering { self =>
+sealed trait PartialOrdering extends Product with Serializable { self =>
 
   /**
    * A symbolic alias for `orElse`.
    */
   def <>(that: => PartialOrdering): PartialOrdering =
-    self orElsePartial that
+    self orElse that
 
   /**
    * Returns whether this `Ordering` is `Ordering.Equals`.
@@ -881,15 +881,22 @@ sealed trait PartialOrdering { self =>
    * Returns this ordering, but if this ordering is equal returns the
    * specified ordering.
    */
-  final def orElsePartial(that: => PartialOrdering): PartialOrdering =
+  def orElse(that: => PartialOrdering): PartialOrdering =
     self match {
       case Ordering.Equals => that
       case ordering        => ordering
     }
 
+  def reduce(that: PartialOrdering): PartialOrdering = (self, that) match {
+    case (Ordering.LessThan, Ordering.LessThan)       => Ordering.LessThan
+    case (Ordering.GreaterThan, Ordering.GreaterThan) => Ordering.GreaterThan
+    case (Ordering.Equals, that)                      => that
+    case (self, Ordering.Equals)                      => self
+    case _                                            => PartialOrdering.NoOrder
+  }
 }
 
-sealed trait Comparison
+sealed trait Comparison extends Product with Serializable
 
 object Comparison {
 
@@ -916,14 +923,16 @@ object PartialOrdering {
     )
 
   /**
-   * `Idempotent` instance for `PartialOrdering` values.
+   * `Idempotent`, `Identity` (and thus `Associative`) instance for `PartialOrdering` values.
    */
-  implicit val PartialOrderingIdempotent: Idempotent[PartialOrdering] =
-    new Idempotent[PartialOrdering] {
+  implicit val PartialOrderingIdempotentIdentity: Idempotent[PartialOrdering] with Identity[PartialOrdering] =
+    new Idempotent[PartialOrdering] with Identity[PartialOrdering] {
       override def combine(l: => PartialOrdering, r: => PartialOrdering): PartialOrdering = l match {
         case Ordering.Equals => r
         case l               => l
       }
+
+      override def identity: PartialOrdering = Ordering.Equals
     }
 }
 
@@ -997,13 +1006,15 @@ object Ordering {
     )
 
   /**
-   * `Idempotent` instance for `Ordering` values.
+   * `Idempotent`, `Identity` (and thus `Associative`) instance for `Ordering` values.
    */
-  implicit val OrderingIdempotent: Idempotent[Ordering] =
-    new Idempotent[Ordering] {
+  implicit val OrderingIdempotentIdentity: Idempotent[Ordering] with Identity[Ordering] =
+    new Idempotent[Ordering] with Identity[Ordering] {
       override def combine(l: => Ordering, r: => Ordering): Ordering = l match {
         case Ordering.Equals => r
         case l               => l
       }
+
+      override def identity: Ordering = Ordering.Equals
     }
 }
