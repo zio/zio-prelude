@@ -44,8 +44,7 @@ object ValidationSpec extends DefaultRunnableSpec {
           )
         ),
         testM("hash")(checkAllLaws(Hash)(genValidation)),
-        testM("identityBoth")(checkAllLaws(IdentityBoth)(genFValidation, Gen.anyInt)),
-        testM("ord")(checkAllLaws(Ord)(genValidation))
+        testM("identityBoth")(checkAllLaws(IdentityBoth)(genFValidation, Gen.anyInt))
       )
     )
 }

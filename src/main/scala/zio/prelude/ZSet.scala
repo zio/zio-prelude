@@ -86,7 +86,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
    */
-  override final def equals(that: Any): Boolean =
+  override def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
       case that: ZSet[_, _]              => self.map == that.map
@@ -109,7 +109,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   /**
    * Returns the hash code of this set.
    */
-  override final def hashCode: Int =
+  override def hashCode: Int =
     map.hashCode
 
   /**
@@ -245,16 +245,20 @@ object ZSet {
   /**
    * Derives a `Commutative[ZSet[A, B]]` given a `Commutative[B]`.
    */
-  implicit def ZSetCommutative[A, B: Commutative]: Commutative[ZSet[A, B]] =
-    new Commutative[ZSet[A, B]] {
-      def combine(left: => ZSet[A, B], right: => ZSet[A, B]): ZSet[A, B] =
-        new ZSet(right.map.foldLeft(left.map) { case (map, (a, b1)) =>
-          map.get(a) match {
-            case Some(b) => map + (a -> (b <> b1))
-            case None    => map + (a -> b1)
-          }
-        })
+  implicit def ZSetCommutative[A, B](implicit
+    ev: Commutative[B]
+  ): Commutative[ZSet[A, B]] with Identity[ZSet[A, B]] =
+    new Commutative[ZSet[A, B]] with Identity[ZSet[A, B]] {
+      override def combine(l: => ZSet[A, B], r: => ZSet[A, B]): ZSet[A, B] = ZSetIdentity(ev).combine(l, r)
+
+      override def identity: ZSet[A, B] = ZSetIdentity(ev).identity
     }
+
+  /**
+   * Derives a `Debug[ZSet[A, B]]` given a `Debug[A]` and `Debug[B]`.
+   */
+  implicit def ZSetDebug[A: Debug, B: Debug]: Debug[ZSet[A, B]] =
+    chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "ZSet", chunk.toMap.toList.map((t: (A, B)) => t.debug))
 
   /**
    * Derives an `Equal[ZSet[A, B]]` given an `Equal[B]`. Due to the
@@ -281,6 +285,32 @@ object ZSet {
     new Covariant[({ type lambda[+x] = ZSet[x, B] })#lambda] {
       def map[A, C](f: A => C): ZSet[A, B] => ZSet[C, B] =
         _.map(f)
+    }
+
+  /**
+   * Derives a `Idempotent[ZSet[A, B]]` given a `Idempotent[B]`.
+   */
+  implicit def ZSetIdempotent[A, B](implicit ev: Idempotent[B]): Idempotent[ZSet[A, B]] with Identity[ZSet[A, B]] =
+    new Idempotent[ZSet[A, B]] with Identity[ZSet[A, B]] {
+      override def combine(l: => ZSet[A, B], r: => ZSet[A, B]): ZSet[A, B] = ZSetIdentity(ev).combine(l, r)
+
+      override def identity: ZSet[A, B] = ZSetIdentity(ev).identity
+    }
+
+  /**
+   * Derives a `Identity[ZSet[A, B]]` given a `Identity[B]`.
+   */
+  implicit def ZSetIdentity[A, B](implicit ev: Associative[B]): Identity[ZSet[A, B]] =
+    new Identity[ZSet[A, B]] {
+      override def combine(left: => ZSet[A, B], right: => ZSet[A, B]): ZSet[A, B] =
+        new ZSet(right.map.foldLeft(left.map) { case (map, (a, b1)) =>
+          map.get(a) match {
+            case Some(b) => map + (a -> (b <> b1))
+            case None    => map + (a -> b1)
+          }
+        })
+
+      override def identity: ZSet[A, B] = ZSet.empty
     }
 
   /**
