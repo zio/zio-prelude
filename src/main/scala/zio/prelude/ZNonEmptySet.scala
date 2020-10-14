@@ -53,7 +53,7 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
    */
-  override final def equals(that: Any): Boolean =
+  override def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
       case that: ZNonEmptySet[_, _]      => self.zset == that.toZSet
@@ -74,7 +74,7 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   /**
    * Returns the hash code of this set.
    */
-  override final def hashCode: Int =
+  override def hashCode: Int =
     zset.hashCode
 
   /**
@@ -197,13 +197,29 @@ object ZNonEmptySet {
     else Some(new ZNonEmptySet(ZSet.fromSet(set)))
 
   /**
+   * Derives a `Associative[ZNonEmptySet[A, B]]` given a `Associative[B]`.
+   */
+  implicit def ZNonEmptySetAssociative[A, B](implicit ev: Associative[B]): Associative[ZNonEmptySet[A, B]] =
+    new Idempotent[ZNonEmptySet[A, B]] {
+      override def combine(l: => ZNonEmptySet[A, B], r: => ZNonEmptySet[A, B]): ZNonEmptySet[A, B] =
+        new ZNonEmptySet(ZSet.ZSetIdentity(ev).combine(l, r))
+    }
+
+  /**
    * Derives a `Commutative[ZNonEmptySet[A, B]]` given a `Commutative[B]`.
    */
-  implicit def ZNonEmptySetCommutative[A, B: Commutative]: Commutative[ZNonEmptySet[A, B]] =
+  implicit def ZNonEmptySetCommutative[A, B](implicit ev: Commutative[B]): Commutative[ZNonEmptySet[A, B]] =
     new Commutative[ZNonEmptySet[A, B]] {
       def combine(left: => ZNonEmptySet[A, B], right: => ZNonEmptySet[A, B]): ZNonEmptySet[A, B] =
-        new ZNonEmptySet(ZSet.ZSetCommutative[A, B].combine(left.toZSet, right.toZSet))
+        new ZNonEmptySet(ZSet.ZSetCommutative(ev).combine(left, right))
     }
+
+  /**
+   * Derives a `Debug[ZNonEmptySet[A, B]]` given a `Debug[A]` and `Debug[B]`.
+   */
+  implicit def ZNonEmptySetDebug[A: Debug, B: Debug]: Debug[ZNonEmptySet[A, B]] =
+    chunk =>
+      Debug.Repr.VConstructor(List("zio", "prelude"), "ZNonEmptySet", chunk.toMap.toList.map((t: (A, B)) => t.debug))
 
   /**
    * Derives an `Equal[ZNonEmptySet[A, B]]` given an `Equal[B]`. Due to the
@@ -242,6 +258,15 @@ object ZNonEmptySet {
     new AssociativeFlatten[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
       def flatten[A](ffa: ZNonEmptySet[ZNonEmptySet[A, B], B]): ZNonEmptySet[A, B] =
         ffa.flatMap(identity)
+    }
+
+  /**
+   * Derives a `Idempotent[ZNonEmptySet[A, B]]` given a `Idempotent[B]`.
+   */
+  implicit def ZNonEmptySetIdempotent[A, B](implicit ev: Idempotent[B]): Idempotent[ZNonEmptySet[A, B]] =
+    new Idempotent[ZNonEmptySet[A, B]] {
+      override def combine(l: => ZNonEmptySet[A, B], r: => ZNonEmptySet[A, B]): ZNonEmptySet[A, B] =
+        new ZNonEmptySet(ZSet.ZSetIdempotent(ev).combine(l, r))
     }
 
   /**

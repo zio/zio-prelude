@@ -18,9 +18,14 @@ trait Idempotent[A] extends Associative[A] { self =>
 
   protected def combineNormal(l: => A, r: => A): A = combine(l, r)
 
+  /**
+   * If the values are equal, it doesn't attempt to combine them and promptly returns the first one.
+   * If not equal, the values are combined normally.
+   */
   final def combineIdempotent(l: => A, r: => A)(implicit A: Equal[A]): A =
     if (l === r) l else combineNormal(l, r)
 
+  /** Creates a new instance which internally uses `combineIdempotent` for combining values. */
   def idempotent(implicit A: Equal[A]): Idempotent[A] = new Idempotent[A] {
 
     override protected def combineNormal(l: => A, r: => A): A = self.combineNormal(l, r)

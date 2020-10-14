@@ -4,7 +4,7 @@ import scala.util.Try
 
 import zio.prelude.Validation._
 import zio.test.Assertion
-import zio.{ IO, NonEmptyChunk, ZIO }
+import zio.{ IO, ZIO }
 
 /**
  * `Validation` represents either a successful value of type `A` or a
@@ -34,16 +34,12 @@ sealed trait Validation[+E, +A] { self =>
   final def <&>[E1 >: E, B](that: Validation[E1, B]): Validation[E1, (A, B)] =
     zipPar(that)
 
-  /**
-   * Returns whether this `Validation` and the specified `Validation` are equal
-   * to each other.
-   */
-  override final def equals(that: Any): Boolean =
+  def combine[E1 >: E, A1 >: A](that: Validation[E1, A1])(implicit A1: Associative[A1]): Validation[E1, A1] =
     (self, that) match {
-      case (self, that: AnyRef) if self.eq(that) => true
-      case (Failure(es), Failure(e1s))           => es.groupBy(identity) == e1s.groupBy(identity)
-      case (Success(a), Success(a1))             => a == a1
-      case _                                     => false
+      case (Failure(es1), Failure(es2)) => Failure(es1 <> es2)
+      case (l @ Failure(_), _)          => l
+      case (_, r @ Failure(_))          => r
+      case (Success(a1), Success(a2))   => Success(A1.combine(a1, a2))
     }
 
   /**
@@ -69,7 +65,7 @@ sealed trait Validation[+E, +A] { self =>
   /**
    * Folds over the error and success values of this `Validation`.
    */
-  final def fold[B](failure: NonEmptyChunk[E] => B, success: A => B): B =
+  final def fold[B](failure: NonEmptyMultiSet[E] => B, success: A => B): B =
     self match {
       case Failure(es) => failure(es)
       case Success(a)  => success(a)
@@ -98,7 +94,7 @@ sealed trait Validation[+E, +A] { self =>
   /**
    * Transforms this `Validation` to an `Either`.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+  final def toEither[E1 >: E]: Either[NonEmptyMultiSet[E1], A] =
     fold(Left(_), Right(_))
 
   /**
@@ -112,12 +108,12 @@ sealed trait Validation[+E, +A] { self =>
    * Transforms this `Validation` to a `Try`, discarding all but the first error.
    */
   final def toTry(implicit ev: E <:< Throwable): scala.util.Try[A] =
-    fold(e => scala.util.Failure(ev(e.head)), scala.util.Success(_))
+    fold(e => scala.util.Failure(ev(e.toSet.head)), scala.util.Success(_))
 
   /**
    * Converts this `Validation` into a `ZIO` effect.
    */
-  final def toZIO: IO[NonEmptyChunk[E], A] = ZIO.fromEither(self.toEither)
+  final def toZIO: IO[NonEmptyMultiSet[E], A] = ZIO.fromEither(self.toEither)
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
@@ -151,25 +147,22 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def zipWithPar[E1 >: E, B, C](that: Validation[E1, B])(f: (A, B) => C): Validation[E1, C] =
     (self, that) match {
-      case (Failure(es), Failure(e1s)) => Failure(es ++ e1s)
+      case (Failure(es), Failure(e1s)) => Failure(es | e1s)
       case (failure @ Failure(_), _)   => failure
       case (_, failure @ Failure(_))   => failure
       case (Success(a), Success(b))    => Success(f(a, b))
     }
 }
 
-object Validation extends LowPriorityValidationImplicits {
+object Validation {
 
-  final case class Failure[+E](errors: NonEmptyChunk[E]) extends Validation[E, Nothing]
-  final case class Success[+A](value: A)                 extends Validation[Nothing, A]
+  final case class Failure[+E](errors: NonEmptyMultiSet[E]) extends Validation[E, Nothing]
+  final case class Success[+A](value: A)                    extends Validation[Nothing, A]
 
-  /**
-   * The `Covariant` instance for `Validation`.
-   */
-  implicit def ValidationCovariant[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
-    new Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] {
-      def map[A, B](f: A => B): Validation[E, A] => Validation[E, B] =
-        _.map(f)
+  /** The `Associative` instance for `Validation`. */
+  implicit def ValidationAssociative[E, A: Associative]: Associative[Validation[E, A]] =
+    new Associative[Validation[E, A]] {
+      override def combine(l: => Validation[E, A], r: => Validation[E, A]): Validation[E, A] = l.combine(r)
     }
 
   /**
@@ -179,6 +172,21 @@ object Validation extends LowPriorityValidationImplicits {
     new Bicovariant[Validation] {
       override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Validation[A, B] => Validation[AA, BB] =
         _.map(g).mapError(f)
+    }
+
+  /** The `Commutative` instance for `Validation`. */
+  implicit def ValidationCommutative[E, A: Commutative]: Commutative[Validation[E, A]] =
+    new Commutative[Validation[E, A]] {
+      override def combine(l: => Validation[E, A], r: => Validation[E, A]): Validation[E, A] = l.combine(r)
+    }
+
+  /**
+   * The `Covariant` instance for `Validation`.
+   */
+  implicit def ValidationCovariant[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] {
+      def map[A, B](f: A => B): Validation[E, A] => Validation[E, B] =
+        _.map(f)
     }
 
   /**
@@ -195,7 +203,7 @@ object Validation extends LowPriorityValidationImplicits {
    */
   implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
     Equal.make {
-      case (Failure(es), Failure(e1s)) => es.groupBy(identity) == e1s.groupBy(identity)
+      case (Failure(es), Failure(e1s)) => es === e1s
       case (Success(a), Success(a1))   => a === a1
       case _                           => false
     }
@@ -233,7 +241,20 @@ object Validation extends LowPriorityValidationImplicits {
    * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
    */
   implicit def ValidationHash[E: Hash, A: Hash]: Hash[Validation[E, A]] =
-    Hash[NonEmptyChunk[E]].eitherWith(Hash[A])(_.toEither)
+    Hash[NonEmptyMultiSet[E]].eitherWith(Hash[A])(_.toEither)
+
+  /** The `Idempotent` instance for `Validation`. */
+  implicit def ValidationIdempotent[E, A: Idempotent]: Idempotent[Validation[E, A]] =
+    new Idempotent[Validation[E, A]] {
+      override def combine(l: => Validation[E, A], r: => Validation[E, A]): Validation[E, A] = l.combine(r)
+    }
+
+  /** The `Identity` instance for `Validation`. */
+  implicit def ValidationIdentity[E, A: Identity]: Identity[Validation[E, A]] = new Identity[Validation[E, A]] {
+    override def identity: Validation[E, A] = Success(Identity[A].identity)
+
+    override def combine(l: => Validation[E, A], r: => Validation[E, A]): Validation[E, A] = l.combine(r)
+  }
 
   /**
    * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for Validation.
@@ -280,7 +301,7 @@ object Validation extends LowPriorityValidationImplicits {
    * Constructs a `Validation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(NonEmptyChunk(error))
+    Failure(NonEmptyMultiSet(error))
 
   /**
    * Constructs a `Validation` from a value and an assertion about that value.
@@ -1327,13 +1348,4 @@ object Validation extends LowPriorityValidationImplicits {
    */
   val unit: Validation[Nothing, Unit] =
     succeed(())
-}
-
-trait LowPriorityValidationImplicits {
-
-  /**
-   * Derives an `Ord[Validation[E, A]]` given na `Ord[E]` and an `Ord[A]`.
-   */
-  implicit def ValidationOrd[E: Ord, A: Ord]: Ord[Validation[E, A]] =
-    Ord[NonEmptyChunk[E]].eitherWith(Ord[A])(_.toEither)
 }

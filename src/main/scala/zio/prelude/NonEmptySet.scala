@@ -148,10 +148,12 @@ object NonEmptySet {
     union(r, l)
 
   /**
-   * The `Associative` instance for `NonEmptySet`.
+   * The `Commutative` and `Idempotent` (and thus `Associative`) instance for `NonEmptySet`.
    */
-  implicit def NonEmptySetCommutative[A]: Commutative[NonEmptySet[A]] =
-    Commutative.make(_ ++ _)
+  implicit def NonEmptySetCommutativeIdempotent[A]: Commutative[NonEmptySet[A]] with Idempotent[NonEmptySet[A]] =
+    new Commutative[NonEmptySet[A]] with Idempotent[NonEmptySet[A]] {
+      override def combine(l: => NonEmptySet[A], r: => NonEmptySet[A]): NonEmptySet[A] = l union r
+    }
 
   /**
    * Derives a `Debug[NonEmptySet[A]]` given a `Debug[A]`.
