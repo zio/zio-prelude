@@ -1,11 +1,11 @@
 package zio.prelude
 
+import scala.math.abs
+
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
-
-import scala.math.abs
 
 object IdempotentSpec extends DefaultRunnableSpec {
 
