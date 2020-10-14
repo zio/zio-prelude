@@ -888,8 +888,17 @@ sealed trait PartialOrdering { self =>
 
 }
 
+sealed trait Comparison
+
+object Comparison {
+
+  sealed trait NotEqual extends Comparison
+
+}
+
 object PartialOrdering {
-  case object NoOrder extends PartialOrdering
+
+  case object NoOrder extends PartialOrdering with Comparison.NotEqual
 
   /**
    * `Hash` and `PartialOrd` instance for `PartialOrdering` values.
@@ -964,9 +973,9 @@ sealed trait Ordering extends PartialOrdering { self =>
 }
 
 object Ordering {
-  case object LessThan    extends Ordering
-  case object Equals      extends Ordering
-  case object GreaterThan extends Ordering
+  case object LessThan    extends Ordering with Comparison.NotEqual
+  case object Equals      extends Ordering with Comparison
+  case object GreaterThan extends Ordering with Comparison.NotEqual
 
   /**
    * Converts an integer result from [[scala.math.Ordering.compare]] or
