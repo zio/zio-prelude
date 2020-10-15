@@ -165,8 +165,8 @@ object NonEmptySet {
   /**
    * Derives an `Hash[NonEmptySet[A]]` and `PartialOrd[NonEmptySet[A]]` (and thus `Equal[NonEmptyList[A]]`) instance.
    */
-  implicit def NonEmptySetHash[A]: Hash[NonEmptySet[A]] =
-    HashPartialOrd.make(_.hashCode(), (l, r) => PartialOrd[Set[A]].contramap[NonEmptySet[A]](_.toSet).compare(l, r))
+  implicit def NonEmptySetHashPartialOrd[A]: Hash[NonEmptySet[A]] with PartialOrd[NonEmptySet[A]] =
+    HashPartialOrd.derive[Set[A]].contramap(_.toSet)
 
   /**
    * Provides an implicit conversion from `NonEmptySet` to the `Set`
