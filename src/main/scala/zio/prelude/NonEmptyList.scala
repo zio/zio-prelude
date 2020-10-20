@@ -612,7 +612,7 @@ trait LowPriorityNonEmptyListImplicits {
   }
 
   /**
-   * Derives an `PartialOrd[NonEmptyList[A]]` given an `PartialOrd[A]`.
+   * Derives a `PartialOrd[NonEmptyList[A]]` given a `PartialOrd[A]`.
    */
   implicit def NonEmptyListPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyList[A]] =
     PartialOrd[List[A]].contramap(_.toList)
