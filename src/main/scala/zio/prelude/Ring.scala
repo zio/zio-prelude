@@ -5,17 +5,17 @@ import zio.prelude.newtypes.{ Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Ringoid[A, +AdditionClosure[x] <: Associative[x], +MultiplicationClosure[x] <: Associative[x]] {
+trait Ringoid[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Associative[x]] {
 
   def add(l: => A, r: => A): A =
-    Sum.unwrap(ClosureAddition.combine(Sum(l), Sum(r)))
+    Sum.unwrap(Addition.combine(Sum(l), Sum(r)))
 
   def multiply(l: => A, r: => A): A =
-    Prod.unwrap(ClosureMultiplication.combine(Prod(l), Prod(r)))
+    Prod.unwrap(Multiplication.combine(Prod(l), Prod(r)))
 
-  def ClosureAddition: AdditionClosure[Sum[A]]
+  def Addition: Addition[Sum[A]]
 
-  def ClosureMultiplication: MultiplicationClosure[Prod[A]]
+  def Multiplication: Multiplication[Prod[A]]
 }
 
 object Ringoid {
@@ -27,10 +27,14 @@ object Ringoid {
     : Annihilating[Int, IntAddition, IntMultiplication] with Distributive[Int, IntAddition, IntMultiplication] =
     new Annihilating[Int, IntAddition, IntMultiplication] with Distributive[Int, IntAddition, IntMultiplication] {
 
-      override def ClosureAddition: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
+      override def add(l: => Int, r: => Int): Int = l + r
+
+      override def multiply(l: => Int, r: => Int): Int = l * r
+
+      override def Addition: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
         Associative.IntSumCommutativeInverse
 
-      override def ClosureMultiplication: Commutative[Prod[Int]] with Identity[Prod[Int]] =
+      override def Multiplication: Commutative[Prod[Int]] with Identity[Prod[Int]] =
         Associative.IntProdCommutativeIdentity
     }
 }
@@ -69,8 +73,8 @@ trait RingoidSyntax {
 
 }
 
-trait Annihilating[A, +AdditionClosure[x] <: Identity[x], +MultiplicationClosure[x] <: Associative[x]]
-    extends Ringoid[A, AdditionClosure, MultiplicationClosure]
+trait Annihilating[A, +Addition[x] <: Identity[x], +Multiplication[x] <: Associative[x]]
+    extends Ringoid[A, Addition, Multiplication]
 
 object Annihilating extends Lawful[AnnihilatingEqual] {
 
@@ -85,7 +89,7 @@ object Annihilating extends Lawful[AnnihilatingEqual] {
   val leftAnnihilationLaw: Laws[AnnihilatingEqual] =
     new Laws.Law1[AnnihilatingEqual]("leftAnnihilationLaw") {
       def apply[A](a: A)(implicit A: AnnihilatingEqual[A]): TestResult =
-        (Sum.unwrap(A.ClosureAddition.identity) *** a) <-> Sum.unwrap(A.ClosureAddition.identity)
+        (Sum.unwrap(A.Addition.identity) *** a) <-> Sum.unwrap(A.Addition.identity)
     }
 
   /**
@@ -99,7 +103,7 @@ object Annihilating extends Lawful[AnnihilatingEqual] {
   val rightAnnihilationLaw: Laws[AnnihilatingEqual] =
     new Laws.Law1[AnnihilatingEqual]("rightAnnihilationLaw") {
       def apply[A](a: A)(implicit A: AnnihilatingEqual[A]): TestResult =
-        (a *** Sum.unwrap(A.ClosureAddition.identity)) <-> Sum.unwrap(A.ClosureAddition.identity)
+        (a *** Sum.unwrap(A.Addition.identity)) <-> Sum.unwrap(A.Addition.identity)
     }
 
   /**
@@ -111,14 +115,14 @@ object Annihilating extends Lawful[AnnihilatingEqual] {
   /**
    * Summons an implicit `Annihilating[A]`.
    */
-  def apply[A, Add[x] <: Identity[x], Mult[x] <: Associative[x]](implicit
-    annihilating: Annihilating[A, Add, Mult]
-  ): Annihilating[A, Add, Mult] =
+  def apply[A, Addition[x] <: Identity[x], Multiplication[x] <: Associative[x]](implicit
+    annihilating: Annihilating[A, Addition, Multiplication]
+  ): Annihilating[A, Addition, Multiplication] =
     annihilating
 }
 
-trait Distributive[A, +AdditionClosure[x] <: Associative[x], +MultiplicationClosure[x] <: Associative[x]]
-    extends Ringoid[A, AdditionClosure, MultiplicationClosure]
+trait Distributive[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Associative[x]]
+    extends Ringoid[A, Addition, Multiplication]
 
 object Distributive extends Lawful[DistributiveEqual] {
 
@@ -159,8 +163,8 @@ object Distributive extends Lawful[DistributiveEqual] {
   /**
    * Summons an implicit `Distributive[A]`.
    */
-  def apply[A, Add[x] <: Associative[x], Mult[x] <: Associative[x]](implicit
-    distributive: Distributive[A, Add, Mult]
-  ): Distributive[A, Add, Mult] =
+  def apply[A, Addition[x] <: Associative[x], Multiplication[x] <: Associative[x]](implicit
+    distributive: Distributive[A, Addition, Multiplication]
+  ): Distributive[A, Addition, Multiplication] =
     distributive
 }

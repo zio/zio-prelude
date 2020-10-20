@@ -16,9 +16,9 @@ object AnnihilatingEqual {
 
       override def multiply(l: => A, r: => A): A = annihilating0.multiply(l, r)
 
-      override def ClosureAddition: Identity[Sum[A]] = annihilating0.ClosureAddition
+      override def Addition: Identity[Sum[A]] = annihilating0.Addition
 
-      override def ClosureMultiplication: Associative[Prod[A]] = annihilating0.ClosureMultiplication
+      override def Multiplication: Associative[Prod[A]] = annihilating0.Multiplication
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
@@ -246,9 +246,9 @@ object DistributiveEqual {
 
       override def multiply(l: => A, r: => A): A = distributive0.multiply(l, r)
 
-      override def ClosureAddition: Associative[Sum[A]] = distributive0.ClosureAddition
+      override def Addition: Associative[Sum[A]] = distributive0.Addition
 
-      override def ClosureMultiplication: Associative[Prod[A]] = distributive0.ClosureMultiplication
+      override def Multiplication: Associative[Prod[A]] = distributive0.Multiplication
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
