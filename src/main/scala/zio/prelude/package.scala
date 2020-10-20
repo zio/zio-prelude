@@ -29,6 +29,7 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
+    with RingoidSyntax
     with TraversableSyntax
     with BicovariantSyntax {
 

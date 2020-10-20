@@ -1,6 +1,28 @@
 package zio.prelude.coherent
 
 import zio.prelude._
+import zio.prelude.newtypes.{ Prod, Sum }
+
+trait AnnihilatingEqual[A] extends Annihilating[A, Identity, Associative] with Equal[A]
+
+object AnnihilatingEqual {
+  implicit def derive[A](implicit
+    annihilating0: Annihilating[A, Identity, Associative],
+    equal0: Equal[A]
+  ): AnnihilatingEqual[A] =
+    new AnnihilatingEqual[A] {
+
+      override def add(l: => A, r: => A): A = annihilating0.add(l, r)
+
+      override def multiply(l: => A, r: => A): A = annihilating0.multiply(l, r)
+
+      override def ClosureAddition: Identity[Sum[A]] = annihilating0.ClosureAddition
+
+      override def ClosureMultiplication: Associative[Prod[A]] = annihilating0.ClosureMultiplication
+
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+    }
+}
 
 trait AssociativeBothDeriveEqualInvariant[F[_]] extends AssociativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
@@ -208,6 +230,27 @@ object DeriveEqualTraversable {
         deriveEqual0.derive
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         traversable0.foreach(fa)(f)
+    }
+}
+
+trait DistributiveEqual[A] extends Distributive[A, Associative, Associative] with Equal[A]
+
+object DistributiveEqual {
+  implicit def derive[A](implicit
+    distributive0: Distributive[A, Associative, Associative],
+    equal0: Equal[A]
+  ): DistributiveEqual[A] =
+    new DistributiveEqual[A] {
+
+      override def add(l: => A, r: => A): A = distributive0.add(l, r)
+
+      override def multiply(l: => A, r: => A): A = distributive0.multiply(l, r)
+
+      override def ClosureAddition: Associative[Sum[A]] = distributive0.ClosureAddition
+
+      override def ClosureMultiplication: Associative[Prod[A]] = distributive0.ClosureMultiplication
+
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }
 
