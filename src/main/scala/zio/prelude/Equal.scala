@@ -824,8 +824,11 @@ object Equal extends Lawful[Equal] {
   /**
    * `Hash` (and thus also `Equal`) instance for `Throwable` values.
    * Comparison is based on: Class, message and cause (stack trace is ignored).
+   *
+   * Note: This is intentionally not in the implicit scope, because it would allow
+   * comparing _all_ Throwables across hierarchies defined by users, which would typically be a mistake.
    */
-  implicit lazy val ThrowableHash: Hash[Throwable] = {
+  lazy val ThrowableHash: Hash[Throwable] = {
     implicit val hashOT: Hash[Option[Throwable]] = Hash.OptionHash {
       // use an indirect instance, so that calling ThrowableHash infinitely doesn't cause stack overflow
       new Hash[Throwable] {

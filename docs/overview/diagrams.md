@@ -66,7 +66,6 @@ classDiagram
     Short
     String
     These[A: Hash, B: Hash]
-    Throwable
     ❨T1: Hash, ..., T22: Hash❩
     Unit
     Validation[E: Hash, A: Hash]
