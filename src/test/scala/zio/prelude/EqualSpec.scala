@@ -26,8 +26,10 @@ object EqualSpec extends DefaultRunnableSpec {
         testM("vector")(checkAllLaws(Equal)(Gen.vectorOf(Gen.anyInt))),
         testM("map")(checkAllLaws(Equal)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
         testM("set")(checkAllLaws(Equal)(Gen.setOf(Gen.anyInt))),
-        testM("chunk")(checkAllLaws(Equal)(Gen.chunkOf(Gen.anyInt))),
-        testM("throwable")(checkAllLaws(Equal)(Gen.throwable)),
+        testM("chunk")(checkAllLaws(Equal)(Gen.chunkOf(Gen.anyInt))), {
+          implicit val ThrowableEqual: Equal[Throwable] = Equal.ThrowableHash
+          testM("throwable")(checkAllLaws(Equal)(Gen.throwable))
+        },
         testM("try")(
           checkAllLaws(Equal)(oneOf(Gen.throwable.map(scala.util.Failure(_)), Gen.anyInt.map(scala.util.Success(_))))
         )

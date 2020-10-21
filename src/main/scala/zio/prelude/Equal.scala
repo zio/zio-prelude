@@ -366,7 +366,9 @@ object Equal extends Lawful[Equal] {
   implicit def TryEqual[A: Equal]: Equal[Try[A]] =
     make {
       case (scala.util.Success(a1), scala.util.Success(a2)) => a1 === a2
-      case (scala.util.Failure(e1), scala.util.Failure(e2)) => e1 === e2
+      case (scala.util.Failure(e1), scala.util.Failure(e2)) =>
+        implicit val ThrowableEqual: Equal[Throwable] = ThrowableHash
+        e1 === e2
       case _                                                => false
     }
 
