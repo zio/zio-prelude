@@ -246,9 +246,10 @@ object Associative extends Lawful[AssociativeEqual] {
    * The `Commutative` and `Identity` instance for the product of `Double`
    * values.
    */
-  implicit val DoubleProdCommutativeIdentity: Commutative[Prod[Double]] with Identity[Prod[Double]] =
-    new Commutative[Prod[Double]] with Identity[Prod[Double]] {
+  implicit val DoubleProdCommutativeIdentity: Commutative[Prod[Double]] with InverseNonZero[Prod[Double]] =
+    new Commutative[Prod[Double]] with InverseNonZero[Prod[Double]] {
       def combine(l: => Prod[Double], r: => Prod[Double]): Prod[Double] = Prod(l * r)
+      def inverse(l: => Prod[Double], r: => Prod[Double]): Prod[Double] = Prod(l / r)
       val identity: Prod[Double]                                        = Prod(1)
     }
 

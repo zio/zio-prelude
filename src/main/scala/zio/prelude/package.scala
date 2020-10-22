@@ -5,7 +5,8 @@ import zio.test.{ TestResult, assert }
 import com.github.ghik.silencer.silent
 
 package object prelude
-    extends Assertions
+    extends AddMultiplySyntax
+    with Assertions
     with AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeComposeSyntax
@@ -17,19 +18,20 @@ package object prelude
     with ContravariantSyntax
     with DebugSyntax
     with DivariantSyntax
+    with DivideSyntax
     with EqualSyntax
     with HashSyntax
     with IdExports
     with IdentitySyntax
     with IdentityBothSyntax
     with IdentityEitherSyntax
-    with InverseSyntax
+    with InverseNonZeroSyntax
     with NewtypeExports
     with NewtypeFExports
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
-    with RingoidSyntax
+    with SubstractSyntax
     with TraversableSyntax
     with BicovariantSyntax {
 
@@ -73,6 +75,15 @@ package object prelude
 
     type Semilattice[A]        = Commutative[A] with Idempotent[A]
     type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
+
+    type Semiring[A] =
+      DistributiveMultiply[A, CommutativeMonoid, Identity] with AnnihilatingZero[A, CommutativeMonoid, Identity]
+    type Ring[A]     =
+      DistributiveMultiply[A, AbelianGroup, Identity] with Substract[A, AbelianGroup, Identity]
+    type Field[A]    =
+      DistributiveMultiply[A, AbelianGroup, InverseNonZero]
+        with Substract[A, AbelianGroup, InverseNonZero]
+        with prelude.Divide[A, AbelianGroup, InverseNonZero]
 
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]

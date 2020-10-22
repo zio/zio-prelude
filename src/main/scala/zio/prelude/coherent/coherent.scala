@@ -3,22 +3,22 @@ package zio.prelude.coherent
 import zio.prelude._
 import zio.prelude.newtypes.{ Prod, Sum }
 
-trait AnnihilatingEqual[A] extends Annihilating[A, Identity, Associative] with Equal[A]
+trait AnnihilatingZeroEqual[A] extends AnnihilatingZero[A, Identity, Associative] with Equal[A]
 
-object AnnihilatingEqual {
+object AnnihilatingZeroEqual {
   implicit def derive[A](implicit
-    annihilating0: Annihilating[A, Identity, Associative],
+    annihilatingZero0: AnnihilatingZero[A, Identity, Associative],
     equal0: Equal[A]
-  ): AnnihilatingEqual[A] =
-    new AnnihilatingEqual[A] {
+  ): AnnihilatingZeroEqual[A] =
+    new AnnihilatingZeroEqual[A] {
 
-      override def add(l: => A, r: => A): A = annihilating0.add(l, r)
+      override def add(l: => A, r: => A): A = annihilatingZero0.add(l, r)
 
-      override def multiply(l: => A, r: => A): A = annihilating0.multiply(l, r)
+      override def multiply(l: => A, r: => A): A = annihilatingZero0.multiply(l, r)
 
-      override def Addition: Identity[Sum[A]] = annihilating0.Addition
+      override def Addition: Identity[Sum[A]] = annihilatingZero0.Addition
 
-      override def Multiplication: Associative[Prod[A]] = annihilating0.Multiplication
+      override def Multiplication: Associative[Prod[A]] = annihilatingZero0.Multiplication
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
@@ -233,14 +233,14 @@ object DeriveEqualTraversable {
     }
 }
 
-trait DistributiveEqual[A] extends Distributive[A, Associative, Associative] with Equal[A]
+trait DistributiveMultiplyEqual[A] extends DistributiveMultiply[A, Associative, Associative] with Equal[A]
 
-object DistributiveEqual {
+object DistributiveMultiplyEqual {
   implicit def derive[A](implicit
-    distributive0: Distributive[A, Associative, Associative],
+    distributive0: DistributiveMultiply[A, Associative, Associative],
     equal0: Equal[A]
-  ): DistributiveEqual[A] =
-    new DistributiveEqual[A] {
+  ): DistributiveMultiplyEqual[A] =
+    new DistributiveMultiplyEqual[A] {
 
       override def add(l: => A, r: => A): A = distributive0.add(l, r)
 
@@ -275,11 +275,23 @@ object EqualIdempotent {
     }
 }
 
-trait EqualInverse[A] extends EqualIdentity[A] with Inverse[A]
+trait EqualInverse[A] extends EqualInverseNonZero[A] with Inverse[A]
 
 object EqualInverse {
   implicit def derive[A](implicit equal0: Equal[A], inverse0: Inverse[A]): EqualInverse[A] =
     new EqualInverse[A] {
+      def combine(l: => A, r: => A): A                       = inverse0.combine(l, r)
+      def identity: A                                        = inverse0.identity
+      def inverse(l: => A, r: => A): A                       = inverse0.inverse(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+    }
+}
+
+trait EqualInverseNonZero[A] extends EqualIdentity[A] with InverseNonZero[A]
+
+object EqualInverseNonZero {
+  implicit def derive[A](implicit equal0: Equal[A], inverse0: InverseNonZero[A]): EqualInverseNonZero[A] =
+    new EqualInverseNonZero[A] {
       def combine(l: => A, r: => A): A                       = inverse0.combine(l, r)
       def identity: A                                        = inverse0.identity
       def inverse(l: => A, r: => A): A                       = inverse0.inverse(l, r)

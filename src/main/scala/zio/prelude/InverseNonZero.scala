@@ -1,18 +1,18 @@
 package zio.prelude
 
-import zio.prelude.coherent.EqualInverse
+import zio.prelude.coherent.EqualInverseNonZero
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
 /**
- * The `Inverse` type class describes an associative binary operator for a
+ * The `InverseNonZero` type class describes an associative binary operator for a
  * type `A` that has an identity element and an inverse binary operator.
  * Combining any value with itself with the inverse operator must return the
  * identity element. For example, for integer addition zero is an identty
  * element and subtraction is an inverse operation, because subtracting any
  * value from itself always returns zero.
  *
- * Because `Inverse` defines a binary rather than a unary operator it can be
+ * Because `InverseNonZero` defines a binary rather than a unary operator it can be
  * used to describe inverse operations for types that do not have inverse
  * values. For example, the natural numbers do not have inverses because the
  * set of natural numbers does not include negative numbers. But we can still
@@ -20,67 +20,70 @@ import zio.test.laws.{ Lawful, Laws }
  * natural numbers, since subtracting a number from itself always returns
  * zero.
  */
-trait Inverse[A] extends InverseNonZero[A] {
+trait InverseNonZero[A] extends Identity[A] {
   def inverse(l: => A, r: => A): A
 }
 
-object Inverse extends Lawful[EqualInverse] {
+object InverseNonZero extends Lawful[EqualInverseNonZero] {
 
   /**
    * The inverse law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
+   * values `a`, with the exception of the `zero` element, the following must hold:
    *
    * {{{
    * a * a === identity
    * }}}
    */
-  val inverseLaw: Laws[EqualInverse] =
-    new Laws.Law1[EqualInverse]("rightInverseLaw") {
-      def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
+  val inverseLaw: Laws[EqualInverseNonZero] =
+    new Laws.Law1[EqualInverseNonZero]("rightInverseNonZeroLaw") {
+      def apply[A](a: A)(implicit I: EqualInverseNonZero[A]): TestResult =
         I.inverse(a, a) <-> I.identity
     }
 
   /**
-   * The set of all laws that instances of `Inverse` must satisfy.
+   * The set of all laws that instances of `InverseNonZero` must satisfy.
    */
-  val laws: Laws[EqualInverse] =
-    inverseLaw + InverseNonZero.laws
+  val laws: Laws[EqualInverseNonZero] =
+    inverseLaw + Identity.laws
 
   /**
-   * Summons an implicit `Inverse[A]`.
+   * Summons an implicit `InverseNonZero[A]`.
    */
-  def apply[A](implicit Inverse: Inverse[A]): Inverse[A] = Inverse
+  def apply[A](implicit InverseNonZero: InverseNonZero[A]): InverseNonZero[A] = InverseNonZero
 
   /**
-   * Constructs an `Inverse` instance from an associative binary operator, an
+   * Constructs an `InverseNonZero` instance from an associative binary operator, an
    * identity element, and an inverse binary operator.
    */
-  def make[A](identity0: A, op: (A, A) => A, inv: (A, A) => A): Inverse[A] =
-    new Inverse[A] {
+  def make[A](identity0: A, op: (A, A) => A, inv: (A, A) => A): InverseNonZero[A] =
+    new InverseNonZero[A] {
       def identity: A                  = identity0
       def combine(l: => A, r: => A): A = op(l, r)
       def inverse(l: => A, r: => A): A = inv(l, r)
     }
 
   /**
-   * Constructs an `Inverse` instance from an identity instance and
+   * Constructs an `InverseNonZero` instance from an identity instance and
    * an inverse function.
    */
-  def makeFrom[A](identity: Identity[A], inverse: (A, A) => A): Inverse[A] =
+  def makeFrom[A](identity: Identity[A], inverse: (A, A) => A): InverseNonZero[A] =
     make(identity.identity, (l, r) => identity.combine(l, r), inverse)
 
   /**
-   * Derives an `Inverse[F[A]]` given a `Derive[F, Inverse]` and an
-   * `Inverse[A]`.
+   * Derives an `InverseNonZero[F[A]]` given a `Derive[F, InverseNonZero]` and an
+   * `InverseNonZero[A]`.
    */
-  implicit def DeriveInverse[F[_], A](implicit derive: Derive[F, Inverse], inverse: Inverse[A]): Inverse[F[A]] =
+  implicit def DeriveInverseNonZero[F[_], A](implicit
+    derive: Derive[F, InverseNonZero],
+    inverse: InverseNonZero[A]
+  ): InverseNonZero[F[A]] =
     derive.derive(inverse)
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple2Inverse[A: Inverse, B: Inverse]: Inverse[(A, B)] =
+  implicit def Tuple2InverseNonZero[A: InverseNonZero, B: InverseNonZero]: InverseNonZero[(A, B)] =
     makeFrom(
       Identity.Tuple2Identity,
       { case ((a1, b1), (a2, b2)) =>
@@ -89,10 +92,11 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple3Inverse[A: Inverse, B: Inverse, C: Inverse]: Inverse[(A, B, C)] =
+  implicit def Tuple3InverseNonZero[A: InverseNonZero, B: InverseNonZero, C: InverseNonZero]
+    : InverseNonZero[(A, B, C)] =
     makeFrom(
       Identity.Tuple3Identity,
       { case ((a1, b1, c1), (a2, b2, c2)) =>
@@ -101,10 +105,11 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple4Inverse[A: Inverse, B: Inverse, C: Inverse, D: Inverse]: Inverse[(A, B, C, D)] =
+  implicit def Tuple4InverseNonZero[A: InverseNonZero, B: InverseNonZero, C: InverseNonZero, D: InverseNonZero]
+    : InverseNonZero[(A, B, C, D)] =
     makeFrom(
       Identity.Tuple4Identity,
       { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) =>
@@ -113,10 +118,16 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple5Inverse[A: Inverse, B: Inverse, C: Inverse, D: Inverse, E: Inverse]: Inverse[(A, B, C, D, E)] =
+  implicit def Tuple5InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E)] =
     makeFrom(
       Identity.Tuple5Identity,
       { case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
@@ -125,17 +136,17 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple6Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse
-  ]: Inverse[(A, B, C, D, E, F)] =
+  implicit def Tuple6InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F)] =
     makeFrom(
       Identity.Tuple6Identity,
       {
@@ -148,18 +159,18 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple7Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G)] =
+  implicit def Tuple7InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G)] =
     makeFrom(
       Identity.Tuple7Identity,
       {
@@ -172,19 +183,19 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple8Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H)] =
+  implicit def Tuple8InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H)] =
     makeFrom(
       Identity.Tuple8Identity,
       {
@@ -197,20 +208,20 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple9Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I)] =
+  implicit def Tuple9InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I)] =
     makeFrom(
       Identity.Tuple9Identity,
       {
@@ -223,21 +234,21 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple10Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J)] =
+  implicit def Tuple10InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J)] =
     makeFrom(
       Identity.Tuple10Identity,
       {
@@ -261,22 +272,22 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple11Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K)] =
+  implicit def Tuple11InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K)] =
     makeFrom(
       Identity.Tuple11Identity,
       {
@@ -301,23 +312,23 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple12Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L)] =
+  implicit def Tuple12InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L)] =
     makeFrom(
       Identity.Tuple12Identity,
       {
@@ -343,24 +354,24 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple13Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
+  implicit def Tuple13InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
     makeFrom(
       Identity.Tuple13Identity,
       {
@@ -387,25 +398,25 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple14Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
+  implicit def Tuple14InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
     makeFrom(
       Identity.Tuple14Identity,
       {
@@ -433,26 +444,26 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple15Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
+  implicit def Tuple15InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
     makeFrom(
       Identity.Tuple15Identity,
       {
@@ -481,27 +492,27 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple16Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse,
-    P: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
+  implicit def Tuple16InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero,
+    P: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
     makeFrom(
       Identity.Tuple16Identity,
       {
@@ -531,28 +542,28 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple17Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse,
-    P: Inverse,
-    Q: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
+  implicit def Tuple17InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero,
+    P: InverseNonZero,
+    Q: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
     makeFrom(
       Identity.Tuple17Identity,
       {
@@ -583,29 +594,29 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple18Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse,
-    P: Inverse,
-    Q: Inverse,
-    R: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
+  implicit def Tuple18InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero,
+    P: InverseNonZero,
+    Q: InverseNonZero,
+    R: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
     makeFrom(
       Identity.Tuple18Identity,
       {
@@ -637,30 +648,30 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple19Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse,
-    P: Inverse,
-    Q: Inverse,
-    R: Inverse,
-    S: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
+  implicit def Tuple19InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero,
+    P: InverseNonZero,
+    Q: InverseNonZero,
+    R: InverseNonZero,
+    S: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
     makeFrom(
       Identity.Tuple19Identity,
       {
@@ -693,31 +704,31 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple20Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse,
-    P: Inverse,
-    Q: Inverse,
-    R: Inverse,
-    S: Inverse,
-    T: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
+  implicit def Tuple20InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero,
+    P: InverseNonZero,
+    Q: InverseNonZero,
+    R: InverseNonZero,
+    S: InverseNonZero,
+    T: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
     makeFrom(
       Identity.Tuple20Identity,
       {
@@ -751,32 +762,32 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple21Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse,
-    P: Inverse,
-    Q: Inverse,
-    R: Inverse,
-    S: Inverse,
-    T: Inverse,
-    U: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
+  implicit def Tuple21InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero,
+    P: InverseNonZero,
+    Q: InverseNonZero,
+    R: InverseNonZero,
+    S: InverseNonZero,
+    T: InverseNonZero,
+    U: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
     makeFrom(
       Identity.Tuple21Identity,
       {
@@ -811,33 +822,33 @@ object Inverse extends Lawful[EqualInverse] {
     )
 
   /**
-   * Derives an `Inverse` for a product type given an `Inverse` for
+   * Derives an `InverseNonZero` for a product type given an `InverseNonZero` for
    * each element of the product type.
    */
-  implicit def Tuple22Inverse[
-    A: Inverse,
-    B: Inverse,
-    C: Inverse,
-    D: Inverse,
-    E: Inverse,
-    F: Inverse,
-    G: Inverse,
-    H: Inverse,
-    I: Inverse,
-    J: Inverse,
-    K: Inverse,
-    L: Inverse,
-    M: Inverse,
-    N: Inverse,
-    O: Inverse,
-    P: Inverse,
-    Q: Inverse,
-    R: Inverse,
-    S: Inverse,
-    T: Inverse,
-    U: Inverse,
-    V: Inverse
-  ]: Inverse[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
+  implicit def Tuple22InverseNonZero[
+    A: InverseNonZero,
+    B: InverseNonZero,
+    C: InverseNonZero,
+    D: InverseNonZero,
+    E: InverseNonZero,
+    F: InverseNonZero,
+    G: InverseNonZero,
+    H: InverseNonZero,
+    I: InverseNonZero,
+    J: InverseNonZero,
+    K: InverseNonZero,
+    L: InverseNonZero,
+    M: InverseNonZero,
+    N: InverseNonZero,
+    O: InverseNonZero,
+    P: InverseNonZero,
+    Q: InverseNonZero,
+    R: InverseNonZero,
+    S: InverseNonZero,
+    T: InverseNonZero,
+    U: InverseNonZero,
+    V: InverseNonZero
+  ]: InverseNonZero[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
     makeFrom(
       Identity.Tuple22Identity,
       {
@@ -872,4 +883,26 @@ object Inverse extends Lawful[EqualInverse] {
       }
     )
 
+}
+
+trait InverseNonZeroSyntax {
+
+  /**
+   * Provides infix syntax for combining two values with an inverse
+   * operation.
+   */
+  implicit class InverseNonZeroOps[A](l: A) {
+
+    /**
+     * A symbolic alias for `inverse`.
+     */
+    def ~~(r: => A)(implicit inverse: InverseNonZero[A]): A =
+      inverse.inverse(l, r)
+
+    /**
+     * InverseNonZeros this value with the specified value
+     */
+    def inverse(r: => A)(implicit inverse: InverseNonZero[A]): A =
+      inverse.inverse(l, r)
+  }
 }
