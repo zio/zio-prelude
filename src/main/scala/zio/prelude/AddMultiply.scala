@@ -19,11 +19,10 @@ object AddMultiply extends LowPriorityAddMultiplyInstances {
 
   type IntAddition[x]       = Commutative[x] with Inverse[x]
   type IntMultiplication[x] = Commutative[x] with Identity[x]
-
-  implicit val IntAnnihilatingZeroDistributiveMultiply: Substract[Int, IntAddition, IntMultiplication]
+  implicit val IntAnnihilatingZeroDistributiveMultiply: Subtract[Int, IntAddition, IntMultiplication]
     with AnnihilatingZero[Int, IntAddition, IntMultiplication]
     with DistributiveMultiply[Int, IntAddition, IntMultiplication] =
-    new Substract[Int, IntAddition, IntMultiplication]
+    new Subtract[Int, IntAddition, IntMultiplication]
       with AnnihilatingZero[Int, IntAddition, IntMultiplication]
       with DistributiveMultiply[Int, IntAddition, IntMultiplication] {
 
@@ -42,11 +41,11 @@ object AddMultiply extends LowPriorityAddMultiplyInstances {
 
   type DoubleAddition[x]       = Commutative[x] with Inverse[x]
   type DoubleMultiplication[x] = Commutative[x] with InverseNonZero[x]
-  implicit val DoubleAnnihilatingZeroDistributiveMultiply: Substract[Double, DoubleAddition, DoubleMultiplication]
+  implicit val DoubleAnnihilatingZeroDistributiveMultiply: Subtract[Double, DoubleAddition, DoubleMultiplication]
     with Divide[Double, DoubleAddition, DoubleMultiplication]
     with AnnihilatingZero[Double, DoubleAddition, DoubleMultiplication]
     with DistributiveMultiply[Double, DoubleAddition, DoubleMultiplication] =
-    new Substract[Double, DoubleAddition, DoubleMultiplication]
+    new Subtract[Double, DoubleAddition, DoubleMultiplication]
       with Divide[Double, DoubleAddition, DoubleMultiplication]
       with AnnihilatingZero[Double, DoubleAddition, DoubleMultiplication]
       with DistributiveMultiply[Double, DoubleAddition, DoubleMultiplication] {

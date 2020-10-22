@@ -8,9 +8,10 @@ import zio.test.laws.{ Lawful, Laws }
  * The `InverseNonZero` type class describes an associative binary operator for a
  * type `A` that has an identity element and an inverse binary operator.
  * Combining any value with itself with the inverse operator must return the
- * identity element. For example, for integer addition zero is an identty
- * element and subtraction is an inverse operation, because subtracting any
- * value from itself always returns zero.
+ * identity element. The exception may be the `zero` element, where the result is not defined.
+ * For example, for multiplication of reals, one is an identity
+ * element and division is an inverse operation, because dividing any
+ * value by itself always returns one.
  *
  * Because `InverseNonZero` defines a binary rather than a unary operator it can be
  * used to describe inverse operations for types that do not have inverse

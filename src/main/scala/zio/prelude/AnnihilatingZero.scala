@@ -48,7 +48,7 @@ object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
    * Summons an implicit `AnnihilatingZero[A]`.
    */
   def apply[A, Addition[x] <: Identity[x], Multiplication[x] <: Associative[x]](implicit
-    AnnihilatingZero: AnnihilatingZero[A, Addition, Multiplication]
+    annihilatingZero: AnnihilatingZero[A, Addition, Multiplication]
   ): AnnihilatingZero[A, Addition, Multiplication] =
-    AnnihilatingZero
+    annihilatingZero
 }

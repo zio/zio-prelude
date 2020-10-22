@@ -31,7 +31,7 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
-    with SubstractSyntax
+    with SubtractSyntax
     with TraversableSyntax
     with BicovariantSyntax {
 
@@ -79,10 +79,10 @@ package object prelude
     type Semiring[A] =
       DistributiveMultiply[A, CommutativeMonoid, Identity] with AnnihilatingZero[A, CommutativeMonoid, Identity]
     type Ring[A]     =
-      DistributiveMultiply[A, AbelianGroup, Identity] with Substract[A, AbelianGroup, Identity]
+      DistributiveMultiply[A, AbelianGroup, Identity] with Subtract[A, AbelianGroup, Identity]
     type Field[A]    =
       DistributiveMultiply[A, AbelianGroup, InverseNonZero]
-        with Substract[A, AbelianGroup, InverseNonZero]
+        with Subtract[A, AbelianGroup, InverseNonZero]
         with prelude.Divide[A, AbelianGroup, InverseNonZero]
 
     type Functor[F[+_]]       = Covariant[F]

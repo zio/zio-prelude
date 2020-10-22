@@ -20,31 +20,15 @@ import zio.test.laws.{ Lawful, Laws }
  * natural numbers, since subtracting a number from itself always returns
  * zero.
  */
-trait Inverse[A] extends InverseNonZero[A] {
-  def inverse(l: => A, r: => A): A
-}
+trait Inverse[A] extends InverseNonZero[A]
 
 object Inverse extends Lawful[EqualInverse] {
-
-  /**
-   * The inverse law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
-   *
-   * {{{
-   * a * a === identity
-   * }}}
-   */
-  val inverseLaw: Laws[EqualInverse] =
-    new Laws.Law1[EqualInverse]("rightInverseLaw") {
-      def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
-        I.inverse(a, a) <-> I.identity
-    }
 
   /**
    * The set of all laws that instances of `Inverse` must satisfy.
    */
   val laws: Laws[EqualInverse] =
-    inverseLaw + InverseNonZero.laws
+    InverseNonZero.laws
 
   /**
    * Summons an implicit `Inverse[A]`.
