@@ -1,7 +1,6 @@
 package zio.prelude
 
 import zio.prelude.coherent.EqualInverse
-import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
 /**

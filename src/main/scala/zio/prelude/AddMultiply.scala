@@ -15,71 +15,53 @@ trait AddMultiply[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Assoc
   def Multiplication: Multiplication[Prod[A]]
 }
 
-object AddMultiply extends LowPriorityAddMultiplyInstances {
+object AddMultiply {
 
-  type IntAddition[x]       = Commutative[x] with Inverse[x]
-  type IntMultiplication[x] = Commutative[x] with Identity[x]
-  implicit val IntAnnihilatingZeroDistributiveMultiply: Subtract[Int, IntAddition, IntMultiplication]
-    with AnnihilatingZero[Int, IntAddition, IntMultiplication]
-    with DistributiveMultiply[Int, IntAddition, IntMultiplication] =
-    new Subtract[Int, IntAddition, IntMultiplication]
-      with AnnihilatingZero[Int, IntAddition, IntMultiplication]
-      with DistributiveMultiply[Int, IntAddition, IntMultiplication] {
+  /// Helper classes to make the code shorter, but we don't want them to be exposed to ZIO Prelude users
+  private abstract class Ring[A]
+      extends AnnihilatingZero[A, Ring.Addition, Ring.Multiplication]
+      with Distributive[A, Ring.Addition, Ring.Multiplication]
+      with Subtract[A, Ring.Addition, Ring.Multiplication]
 
-      override def add(l: => Int, r: => Int): Int = l + r
+  private final object Ring {
+    type Addition[x]       = Commutative[x] with Inverse[x]
+    type Multiplication[x] = Commutative[x] with Identity[x]
+  }
 
-      override def multiply(l: => Int, r: => Int): Int = l * r
+  private abstract class Field[A]
+      extends AnnihilatingZero[A, Field.Addition, Field.Multiplication]
+      with Distributive[A, Field.Addition, Field.Multiplication]
+      with Divide[A, Field.Addition, Field.Multiplication]
+      with Subtract[A, Field.Addition, Field.Multiplication]
 
-      override def subtract(l: => Int, r: => Int): Int = l - r
+  private final object Field {
+    type Addition[x]       = Commutative[x] with Inverse[x]
+    type Multiplication[x] = Commutative[x] with InverseNonZero[x]
+  }
 
-      override def Addition: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
-        Associative.IntSumCommutativeInverse
+  implicit val IntAnnihilatingZeroDistributive: classic.Ring[Int] = new Ring[Int] {
+    override def add(l: => Int, r: => Int): Int      = l + r
+    override def multiply(l: => Int, r: => Int): Int = l * r
+    override def subtract(l: => Int, r: => Int): Int = l - r
 
-      override def Multiplication: Commutative[Prod[Int]] with Identity[Prod[Int]] =
-        Associative.IntProdCommutativeIdentity
-    }
+    override def Addition: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
+      Associative.IntSumCommutativeInverse
 
-  type DoubleAddition[x]       = Commutative[x] with Inverse[x]
-  type DoubleMultiplication[x] = Commutative[x] with InverseNonZero[x]
-  implicit val DoubleAnnihilatingZeroDistributiveMultiply: Subtract[Double, DoubleAddition, DoubleMultiplication]
-    with Divide[Double, DoubleAddition, DoubleMultiplication]
-    with AnnihilatingZero[Double, DoubleAddition, DoubleMultiplication]
-    with DistributiveMultiply[Double, DoubleAddition, DoubleMultiplication] =
-    new Subtract[Double, DoubleAddition, DoubleMultiplication]
-      with Divide[Double, DoubleAddition, DoubleMultiplication]
-      with AnnihilatingZero[Double, DoubleAddition, DoubleMultiplication]
-      with DistributiveMultiply[Double, DoubleAddition, DoubleMultiplication] {
+    override def Multiplication: Commutative[Prod[Int]] with Identity[Prod[Int]] =
+      Associative.IntProdCommutativeIdentity
+  }
 
-      override def add(l: => Double, r: => Double): Double = l + r
+  implicit val DoubleAnnihilatingZeroDistributive: classic.Field[Double] = new Field[Double] {
+    override def add(l: => Double, r: => Double): Double      = l + r
+    override def divide(l: => Double, r: => Double): Double   = l / r
+    override def multiply(l: => Double, r: => Double): Double = l * r
+    override def subtract(l: => Double, r: => Double): Double = l - r
 
-      override def divide(l: => Double, r: => Double): Double = l / r
+    override def Addition: Commutative[Sum[Double]] with Inverse[Sum[Double]] =
+      Associative.DoubleSumCommutativeInverse
 
-      override def multiply(l: => Double, r: => Double): Double = l * r
-
-      override def subtract(l: => Double, r: => Double): Double = l - r
-
-      override def Addition: Commutative[Sum[Double]] with Inverse[Sum[Double]] =
-        Associative.DoubleSumCommutativeInverse
-
-      override def Multiplication: Commutative[Prod[Double]] with InverseNonZero[Prod[Double]] =
-        Associative.DoubleProdCommutativeIdentity
-    }
-}
-
-trait LowPriorityAddMultiplyInstances {
-  implicit def additiveInverseImpliesMultiplicativeZero[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[
-    x
-  ]](implicit
-    ev: AddMultiply[A, Addition, Multiplication]
-  ): AnnihilatingZero[A, Addition, Multiplication] = new AnnihilatingZero[A, Addition, Multiplication] {
-
-    override def add(l: => A, r: => A): A = ev.add(l, r)
-
-    override def multiply(l: => A, r: => A): A = ev.multiply(l, r)
-
-    override def Addition: Addition[Sum[A]] = ev.Addition
-
-    override def Multiplication: Multiplication[Prod[A]] = ev.Multiplication
+    override def Multiplication: Commutative[Prod[Double]] with InverseNonZero[Prod[Double]] =
+      Associative.DoubleProdCommutativeIdentity
   }
 }
 

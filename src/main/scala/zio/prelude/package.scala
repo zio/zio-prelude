@@ -77,11 +77,14 @@ package object prelude
     type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
 
     type Semiring[A] =
-      DistributiveMultiply[A, CommutativeMonoid, Identity] with AnnihilatingZero[A, CommutativeMonoid, Identity]
+      AnnihilatingZero[A, CommutativeMonoid, Identity] with Distributive[A, CommutativeMonoid, Identity]
     type Ring[A]     =
-      DistributiveMultiply[A, AbelianGroup, Identity] with Subtract[A, AbelianGroup, Identity]
+      AnnihilatingZero[A, AbelianGroup, Identity]
+        with Distributive[A, AbelianGroup, Identity]
+        with Subtract[A, AbelianGroup, Identity]
     type Field[A]    =
-      DistributiveMultiply[A, AbelianGroup, InverseNonZero]
+      AnnihilatingZero[A, AbelianGroup, InverseNonZero]
+        with Distributive[A, AbelianGroup, InverseNonZero]
         with Subtract[A, AbelianGroup, InverseNonZero]
         with prelude.Divide[A, AbelianGroup, InverseNonZero]
 

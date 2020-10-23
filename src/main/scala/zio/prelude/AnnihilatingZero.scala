@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.AnnihilatingZeroEqual
-import zio.prelude.newtypes.Sum
+import zio.prelude.newtypes.{ Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
@@ -51,4 +51,31 @@ object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
     annihilatingZero: AnnihilatingZero[A, Addition, Multiplication]
   ): AnnihilatingZero[A, Addition, Multiplication] =
     annihilatingZero
+
+  def fromAdditiveInverse[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
+    ev: Distributive[A, Addition, Multiplication]
+  ): AnnihilatingZero[A, Addition, Multiplication]
+    with Distributive[A, Addition, Multiplication]
+    with Subtract[A, Addition, Multiplication] = Subtract.fromAdditiveInverseAndDistributive(ev)
+
+  def fromSubtract[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
+    distributive0: Distributive[A, Addition, Multiplication],
+    subtract0: Subtract[A, Addition, Multiplication]
+  ): AnnihilatingZero[A, Addition, Multiplication]
+    with Distributive[A, Addition, Multiplication]
+    with Subtract[A, Addition, Multiplication] =
+    new AnnihilatingZero[A, Addition, Multiplication]
+      with Distributive[A, Addition, Multiplication]
+      with Subtract[A, Addition, Multiplication] {
+
+      override def add(l: => A, r: => A): A = distributive0.add(l, r)
+
+      override def multiply(l: => A, r: => A): A = distributive0.multiply(l, r)
+
+      override def subtract(l: => A, r: => A): A = subtract0.subtract(l, r)
+
+      override def Addition: Addition[Sum[A]] = distributive0.Addition
+
+      override def Multiplication: Multiplication[Prod[A]] = distributive0.Multiplication
+    }
 }
