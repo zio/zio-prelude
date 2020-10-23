@@ -1282,6 +1282,6 @@ trait AssociativeSyntax {
      * Associatively combines the values in a parallel manner.
      */
     def reduceAssociative(implicit associative: Associative[A]): A =
-      v.reduce(associative.combine)
+      v.reduce(associative.combine(_, _))
   }
 }
