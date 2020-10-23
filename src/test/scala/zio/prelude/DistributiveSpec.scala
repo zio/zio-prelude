@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.test.laws._
-import zio.test._
 import zio.test.TestAspect._
+import zio.test._
+import zio.test.laws._
 
 object DistributiveSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
