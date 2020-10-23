@@ -24,13 +24,13 @@ object Subtract {
     override def Multiplication: Multiplication[Prod[A]] = ev.Multiplication
   }
 
-  def fromAdditiveInverseAndDistributive[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
-    ev: Distributive[A, Addition, Multiplication]
+  def fromAdditiveInverseAndDistributiveMultiply[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](
+    implicit ev: DistributiveMultiply[A, Addition, Multiplication]
   ): AnnihilatingZero[A, Addition, Multiplication]
-    with Distributive[A, Addition, Multiplication]
+    with DistributiveMultiply[A, Addition, Multiplication]
     with Subtract[A, Addition, Multiplication] =
     new AnnihilatingZero[A, Addition, Multiplication]
-      with Distributive[A, Addition, Multiplication]
+      with DistributiveMultiply[A, Addition, Multiplication]
       with Subtract[A, Addition, Multiplication] {
 
       override def add(l: => A, r: => A): A = ev.add(l, r)

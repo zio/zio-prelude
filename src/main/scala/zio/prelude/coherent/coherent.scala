@@ -233,14 +233,14 @@ object DeriveEqualTraversable {
     }
 }
 
-trait DistributiveEqual[A] extends Distributive[A, Associative, Associative] with Equal[A]
+trait DistributiveMultiplyEqual[A] extends DistributiveMultiply[A, Associative, Associative] with Equal[A]
 
-object DistributiveEqual {
+object DistributiveMultiplyEqual {
   implicit def derive[A](implicit
-    distributive0: Distributive[A, Associative, Associative],
+    distributive0: DistributiveMultiply[A, Associative, Associative],
     equal0: Equal[A]
-  ): DistributiveEqual[A] =
-    new DistributiveEqual[A] {
+  ): DistributiveMultiplyEqual[A] =
+    new DistributiveMultiplyEqual[A] {
 
       override def add(l: => A, r: => A): A = distributive0.add(l, r)
 

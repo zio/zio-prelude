@@ -20,26 +20,26 @@ object AddMultiply {
   /// Helper classes to make the code shorter, but we don't want them to be exposed to ZIO Prelude users
   private abstract class Ring[A]
       extends AnnihilatingZero[A, Ring.Addition, Ring.Multiplication]
-      with Distributive[A, Ring.Addition, Ring.Multiplication]
+      with DistributiveMultiply[A, Ring.Addition, Ring.Multiplication]
       with Subtract[A, Ring.Addition, Ring.Multiplication]
 
-  private final object Ring {
+  private object Ring {
     type Addition[x]       = Commutative[x] with Inverse[x]
     type Multiplication[x] = Commutative[x] with Identity[x]
   }
 
   private abstract class Field[A]
       extends AnnihilatingZero[A, Field.Addition, Field.Multiplication]
-      with Distributive[A, Field.Addition, Field.Multiplication]
+      with DistributiveMultiply[A, Field.Addition, Field.Multiplication]
       with Divide[A, Field.Addition, Field.Multiplication]
       with Subtract[A, Field.Addition, Field.Multiplication]
 
-  private final object Field {
+  private object Field {
     type Addition[x]       = Commutative[x] with Inverse[x]
     type Multiplication[x] = Commutative[x] with InverseNonZero[x]
   }
 
-  implicit val IntAnnihilatingZeroDistributive: classic.Ring[Int] = new Ring[Int] {
+  implicit val IntAnnihilatingZeroDistributiveMultiply: classic.Ring[Int] = new Ring[Int] {
     override def add(l: => Int, r: => Int): Int      = l + r
     override def multiply(l: => Int, r: => Int): Int = l * r
     override def subtract(l: => Int, r: => Int): Int = l - r
@@ -51,7 +51,7 @@ object AddMultiply {
       Associative.IntProdCommutativeIdentity
   }
 
-  implicit val DoubleAnnihilatingZeroDistributive: classic.Field[Double] = new Field[Double] {
+  implicit val DoubleAnnihilatingZeroDistributiveMultiply: classic.Field[Double] = new Field[Double] {
     override def add(l: => Double, r: => Double): Double      = l + r
     override def divide(l: => Double, r: => Double): Double   = l / r
     override def multiply(l: => Double, r: => Double): Double = l * r

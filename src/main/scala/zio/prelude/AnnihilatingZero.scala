@@ -53,19 +53,19 @@ object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
     annihilatingZero
 
   def fromAdditiveInverse[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
-    ev: Distributive[A, Addition, Multiplication]
+    ev: DistributiveMultiply[A, Addition, Multiplication]
   ): AnnihilatingZero[A, Addition, Multiplication]
-    with Distributive[A, Addition, Multiplication]
-    with Subtract[A, Addition, Multiplication] = Subtract.fromAdditiveInverseAndDistributive(ev)
+    with DistributiveMultiply[A, Addition, Multiplication]
+    with Subtract[A, Addition, Multiplication] = Subtract.fromAdditiveInverseAndDistributiveMultiply(ev)
 
   def fromSubtract[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
-    distributive0: Distributive[A, Addition, Multiplication],
+    distributive0: DistributiveMultiply[A, Addition, Multiplication],
     subtract0: Subtract[A, Addition, Multiplication]
   ): AnnihilatingZero[A, Addition, Multiplication]
-    with Distributive[A, Addition, Multiplication]
+    with DistributiveMultiply[A, Addition, Multiplication]
     with Subtract[A, Addition, Multiplication] =
     new AnnihilatingZero[A, Addition, Multiplication]
-      with Distributive[A, Addition, Multiplication]
+      with DistributiveMultiply[A, Addition, Multiplication]
       with Subtract[A, Addition, Multiplication] {
 
       override def add(l: => A, r: => A): A = distributive0.add(l, r)
