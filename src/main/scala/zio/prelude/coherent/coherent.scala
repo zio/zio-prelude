@@ -2,6 +2,23 @@ package zio.prelude.coherent
 
 import zio.prelude._
 
+trait AbsorptionEqual[A] extends Absorption[A, Associative, Associative] with Equal[A]
+
+object AbsorptionEqual {
+  implicit def derive[A](implicit
+    absorption0: Absorption[A, Associative, Associative],
+    equal0: Equal[A]
+  ): AbsorptionEqual[A] =
+    new AbsorptionEqual[A] {
+
+      override def Join: Associative[A] = absorption0.Join
+
+      override def Meet: Associative[A] = absorption0.Meet
+
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+    }
+}
+
 trait AssociativeBothDeriveEqualInvariant[F[_]] extends AssociativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
 object AssociativeBothDeriveEqualInvariant {
@@ -208,6 +225,23 @@ object DeriveEqualTraversable {
         deriveEqual0.derive
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         traversable0.foreach(fa)(f)
+    }
+}
+
+trait DistributiveJoinMeetEqual[A] extends DistributiveJoinMeet[A, Associative, Associative] with Equal[A]
+
+object DistributiveJoinMeetEqual {
+  implicit def derive[A](implicit
+    distributiveJoinMeet0: DistributiveJoinMeet[A, Associative, Associative],
+    equal0: Equal[A]
+  ): DistributiveJoinMeetEqual[A] =
+    new DistributiveJoinMeetEqual[A] {
+
+      override def Join: Associative[A] = distributiveJoinMeet0.Join
+
+      override def Meet: Associative[A] = distributiveJoinMeet0.Meet
+
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }
 
