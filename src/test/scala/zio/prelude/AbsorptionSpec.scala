@@ -8,7 +8,8 @@ object AbsorptionSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("AbsorptionSpec")(
       suite("laws")(
-        testM("set")(checkAllLaws(Absorption)(Gen.setOf(Gen.anyInt)))
+        testM("set")(checkAllLaws(Absorption)(Gen.setOf(Gen.anyInt))),
+        testM("boolean")(checkAllLaws(Absorption)(Gen.anyInt.map(_ % 2 == 0)))
       )
     )
 }

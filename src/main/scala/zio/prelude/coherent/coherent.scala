@@ -117,6 +117,25 @@ object CommutativeEqual {
     }
 }
 
+trait ComplementEqual[A] extends Complement[A, Identity, Identity] with Equal[A]
+
+object ComplementEqual {
+  implicit def derive[A](implicit
+    complement0: Complement[A, Identity, Identity],
+    equal0: Equal[A]
+  ): ComplementEqual[A] =
+    new ComplementEqual[A] {
+
+      override def complement(a: A): A = complement0.complement(a)
+
+      override def Join: Identity[A] = complement0.Join
+
+      override def Meet: Identity[A] = complement0.Meet
+
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+    }
+}
+
 trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 
 object CovariantDeriveEqual {
@@ -324,4 +343,23 @@ object HashOrd {
   def default[A](implicit ord: scala.math.Ordering[A]): Hash[A] with Ord[A] =
     make(_.hashCode(), (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
 
+}
+
+trait InvolutionEqual[A] extends Involution[A, Associative, Associative] with Equal[A]
+
+object InvolutionEqual {
+  implicit def derive[A](implicit
+    involution0: Involution[A, Associative, Associative],
+    equal0: Equal[A]
+  ): InvolutionEqual[A] =
+    new InvolutionEqual[A] {
+
+      override def complement(a: A): A = involution0.complement(a)
+
+      override def Join: Associative[A] = involution0.Join
+
+      override def Meet: Associative[A] = involution0.Meet
+
+      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
+    }
 }

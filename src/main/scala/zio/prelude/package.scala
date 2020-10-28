@@ -11,6 +11,7 @@ package object prelude
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
     with AssociativeFlattenSyntax
+    with ComplementShapeSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with CovariantSyntax

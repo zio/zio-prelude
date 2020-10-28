@@ -25,6 +25,39 @@ object JoinMeet {
         override def combine(l: => Set[A], r: => Set[A]): Set[A] = l.intersect(r)
       }
     }
+
+  type BooleanJoin[x] = Commutative[x] with Idempotent[x] with Inverse[x]
+  type BooleanMeet[x] = Commutative[x] with Idempotent[x] with Inverse[x]
+  implicit def BoolJoinMeet: Absorption[Boolean, BooleanJoin, BooleanMeet]
+    with DistributiveJoinMeet[Boolean, BooleanJoin, BooleanMeet]
+    with Complement[Boolean, BooleanJoin, BooleanMeet]
+    with Involution[Boolean, BooleanJoin, BooleanMeet] =
+    new Absorption[Boolean, BooleanJoin, BooleanMeet]
+      with DistributiveJoinMeet[Boolean, BooleanJoin, BooleanMeet]
+      with Complement[Boolean, BooleanJoin, BooleanMeet]
+      with Involution[Boolean, BooleanJoin, BooleanMeet] {
+
+      override def complement(a: Boolean): Boolean = !a
+
+      override def Join: BooleanJoin[Boolean] = new Commutative[Boolean]
+        with Idempotent[Boolean]
+        with Inverse[Boolean] {
+        override def inverse(l: => Boolean, r: => Boolean): Boolean = Meet.combine(l, r)
+
+        override def identity: Boolean = false
+
+        override def combine(l: => Boolean, r: => Boolean): Boolean = l || r
+      }
+      override def Meet: BooleanMeet[Boolean] = new Commutative[Boolean]
+        with Idempotent[Boolean]
+        with Inverse[Boolean] {
+        override def inverse(l: => Boolean, r: => Boolean): Boolean = Join.combine(l, r)
+
+        override def identity: Boolean = true
+
+        override def combine(l: => Boolean, r: => Boolean): Boolean = l && r
+      }
+    }
 }
 
 trait JoinMeetSyntax {
@@ -37,26 +70,26 @@ trait JoinMeetSyntax {
     /**
      * A symbolic alias for `join`.
      */
-    def vvv(r: => A)(implicit associative: JoinMeet[A, Associative, Associative]): A =
-      associative.join(l, r)
+    def vvv(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+      joinMeet.join(l, r)
 
     /**
      * Join two values.
      */
-    def join(r: => A)(implicit associative: JoinMeet[A, Associative, Associative]): A =
-      associative.join(l, r)
+    def join(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+      joinMeet.join(l, r)
 
     /**
      * A symbolic alias for `meet`.
      */
-    def ^^^(r: => A)(implicit associative: JoinMeet[A, Associative, Associative]): A =
-      associative.meet(l, r)
+    def ^^^(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+      joinMeet.meet(l, r)
 
     /**
      * Meet two values.
      */
-    def meet(r: => A)(implicit associative: JoinMeet[A, Associative, Associative]): A =
-      associative.meet(l, r)
+    def meet(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+      joinMeet.meet(l, r)
   }
 
 }
