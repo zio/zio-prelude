@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.prelude.newtypes.{ Prod, Sum }
 
-trait AddMultiply[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Associative[x]] {
+trait AddMultiplyShape[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Associative[x]] {
 
   def add(l: => A, r: => A): A =
     Sum.unwrap(Addition.combine(Sum(l), Sum(r)))
@@ -15,13 +15,13 @@ trait AddMultiply[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Assoc
   def Multiplication: Multiplication[Prod[A]]
 }
 
-object AddMultiply {
+object AddMultiplyShape {
 
   /// Helper classes to make the code shorter, but we don't want them to be exposed to ZIO Prelude users
   private abstract class Ring[A]
       extends AnnihilatingZero[A, Ring.Addition, Ring.Multiplication]
       with DistributiveMultiply[A, Ring.Addition, Ring.Multiplication]
-      with Subtract[A, Ring.Addition, Ring.Multiplication]
+      with SubtractShape[A, Ring.Addition, Ring.Multiplication]
 
   private object Ring {
     type Addition[x]       = Commutative[x] with Inverse[x]
@@ -31,8 +31,8 @@ object AddMultiply {
   private abstract class Field[A]
       extends AnnihilatingZero[A, Field.Addition, Field.Multiplication]
       with DistributiveMultiply[A, Field.Addition, Field.Multiplication]
-      with Divide[A, Field.Addition, Field.Multiplication]
-      with Subtract[A, Field.Addition, Field.Multiplication]
+      with DivideShape[A, Field.Addition, Field.Multiplication]
+      with SubtractShape[A, Field.Addition, Field.Multiplication]
 
   private object Field {
     type Addition[x]       = Commutative[x] with Inverse[x]
@@ -65,35 +65,35 @@ object AddMultiply {
   }
 }
 
-trait AddMultiplySyntax {
+trait AddMultiplyShapeSyntax {
 
   /**
    * Provides infix syntax for adding or multiplying two values.
    */
-  implicit class AddMultiplyOps[A](private val l: A) {
+  implicit class AddMultiplyShapeOps[A](private val l: A) {
 
     /**
      * A symbolic alias for `add`.
      */
-    def +++(r: => A)(implicit associative: AddMultiply[A, Associative, Associative]): A =
+    def +++(r: => A)(implicit associative: AddMultiplyShape[A, Associative, Associative]): A =
       associative.add(l, r)
 
     /**
      * Add two values.
      */
-    def add(r: => A)(implicit associative: AddMultiply[A, Associative, Associative]): A =
+    def add(r: => A)(implicit associative: AddMultiplyShape[A, Associative, Associative]): A =
       associative.add(l, r)
 
     /**
      * A symbolic alias for `multiply`.
      */
-    def ***(r: => A)(implicit associative: AddMultiply[A, Associative, Associative]): A =
+    def ***(r: => A)(implicit associative: AddMultiplyShape[A, Associative, Associative]): A =
       associative.multiply(l, r)
 
     /**
      * Multiply two values.
      */
-    def multiply(r: => A)(implicit associative: AddMultiply[A, Associative, Associative]): A =
+    def multiply(r: => A)(implicit associative: AddMultiplyShape[A, Associative, Associative]): A =
       associative.multiply(l, r)
   }
 

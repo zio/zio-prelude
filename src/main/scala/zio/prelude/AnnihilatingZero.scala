@@ -6,7 +6,7 @@ import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
 trait AnnihilatingZero[A, +Addition[x] <: Identity[x], +Multiplication[x] <: Associative[x]]
-    extends AddMultiply[A, Addition, Multiplication]
+    extends AddMultiplyShape[A, Addition, Multiplication]
 
 object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
 
@@ -56,17 +56,17 @@ object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
     ev: DistributiveMultiply[A, Addition, Multiplication]
   ): AnnihilatingZero[A, Addition, Multiplication]
     with DistributiveMultiply[A, Addition, Multiplication]
-    with Subtract[A, Addition, Multiplication] = Subtract.fromAdditiveInverseAndDistributiveMultiply(ev)
+    with SubtractShape[A, Addition, Multiplication] = SubtractShape.fromAdditiveInverseAndDistributiveMultiply(ev)
 
   def fromSubtract[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
     distributive0: DistributiveMultiply[A, Addition, Multiplication],
-    subtract0: Subtract[A, Addition, Multiplication]
+    subtract0: SubtractShape[A, Addition, Multiplication]
   ): AnnihilatingZero[A, Addition, Multiplication]
     with DistributiveMultiply[A, Addition, Multiplication]
-    with Subtract[A, Addition, Multiplication] =
+    with SubtractShape[A, Addition, Multiplication] =
     new AnnihilatingZero[A, Addition, Multiplication]
       with DistributiveMultiply[A, Addition, Multiplication]
-      with Subtract[A, Addition, Multiplication] {
+      with SubtractShape[A, Addition, Multiplication] {
 
       override def add(l: => A, r: => A): A = distributive0.add(l, r)
 

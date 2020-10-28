@@ -5,7 +5,7 @@ import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
 trait DistributiveMultiply[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Associative[x]]
-    extends AddMultiply[A, Addition, Multiplication]
+    extends AddMultiplyShape[A, Addition, Multiplication]
 
 object DistributiveMultiply extends Lawful[DistributiveMultiplyEqual] {
 

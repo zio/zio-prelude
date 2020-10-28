@@ -5,7 +5,7 @@ import zio.test.{ TestResult, assert }
 import com.github.ghik.silencer.silent
 
 package object prelude
-    extends AddMultiplySyntax
+    extends AddMultiplyShapeSyntax
     with Assertions
     with AssociativeSyntax
     with AssociativeBothSyntax
@@ -18,7 +18,7 @@ package object prelude
     with ContravariantSyntax
     with DebugSyntax
     with DivariantSyntax
-    with DivideSyntax
+    with DivideShapeSyntax
     with EqualSyntax
     with HashSyntax
     with IdExports
@@ -31,7 +31,7 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
-    with SubtractSyntax
+    with SubtractShapeSyntax
     with TraversableSyntax
     with BicovariantSyntax {
 
@@ -81,12 +81,12 @@ package object prelude
     type Ring[A]     =
       AnnihilatingZero[A, AbelianGroup, Identity]
         with DistributiveMultiply[A, AbelianGroup, Identity]
-        with Subtract[A, AbelianGroup, Identity]
+        with SubtractShape[A, AbelianGroup, Identity]
     type Field[A]    =
       AnnihilatingZero[A, AbelianGroup, InverseNonZero]
         with DistributiveMultiply[A, AbelianGroup, InverseNonZero]
-        with Subtract[A, AbelianGroup, InverseNonZero]
-        with prelude.Divide[A, AbelianGroup, InverseNonZero]
+        with SubtractShape[A, AbelianGroup, InverseNonZero]
+        with prelude.DivideShape[A, AbelianGroup, InverseNonZero]
 
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
