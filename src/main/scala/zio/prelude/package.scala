@@ -75,6 +75,13 @@ package object prelude
     type Semilattice[A]        = Commutative[A] with Idempotent[A]
     type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
 
+    type Lattice[A]                  = Absorption[A, Semilattice, Semilattice]
+    type BoundedLattice[A]           = Absorption[A, BoundedSemilattice, BoundedSemilattice]
+    type OrthoComplementedLattice[A] = BoundedLattice[A]
+      with Complement[A, BoundedSemilattice, BoundedSemilattice]
+      with Involution[A, BoundedSemilattice, BoundedSemilattice]
+    type DistributiveLattice[A]      = Lattice[A] with DistributiveJoinMeet[A, Semilattice, Semilattice]
+
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]
     type Invariant[F[_]]      = zio.prelude.Invariant[F]
