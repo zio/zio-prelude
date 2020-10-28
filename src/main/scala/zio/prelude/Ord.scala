@@ -179,7 +179,7 @@ object Ord extends Lawful[Ord] {
     }
 
   /**
-   * For all values `a1` and `a2`, iff `a1 =??= a2` is `Ordering.Equals` then `a1 === a2`.
+   * For all values `a1` and `a2`, iff `a1 =?= a2` is `Ordering.Equals` then `a1 === a2`.
    */
   val eqConsistencyLaw: Laws[Ord] =
     new Laws.Law2[Ord]("eqConsistencyLaw") {
