@@ -1,6 +1,6 @@
 package zio.prelude
 
-trait JoinMeet[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] {
+trait JoinMeetShape[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] {
 
   def join(l: => A, r: => A): A =
     Join.combine(l, r)
@@ -13,7 +13,7 @@ trait JoinMeet[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] {
   def Meet: Meet[A]
 }
 
-object JoinMeet {
+object JoinMeetShape {
 
   type BooleanJoin[x] = Commutative[x] with Idempotent[x] with Inverse[x]
   type BooleanMeet[x] = Commutative[x] with Idempotent[x] with Inverse[x]
@@ -65,30 +65,30 @@ trait JoinMeetSyntax {
   /**
    * Provides infix syntax for adding or multiplying two values.
    */
-  implicit class JoinMeetOps[A](private val l: A) {
+  implicit class JoinMeetShapeOps[A](private val l: A) {
 
     /**
      * A symbolic alias for `join`.
      */
-    def vvv(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+    def vvv(r: => A)(implicit joinMeet: JoinMeetShape[A, Associative, Associative]): A =
       joinMeet.join(l, r)
 
     /**
      * Join two values.
      */
-    def join(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+    def join(r: => A)(implicit joinMeet: JoinMeetShape[A, Associative, Associative]): A =
       joinMeet.join(l, r)
 
     /**
      * A symbolic alias for `meet`.
      */
-    def ^^^(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+    def ^^^(r: => A)(implicit joinMeet: JoinMeetShape[A, Associative, Associative]): A =
       joinMeet.meet(l, r)
 
     /**
      * Meet two values.
      */
-    def meet(r: => A)(implicit joinMeet: JoinMeet[A, Associative, Associative]): A =
+    def meet(r: => A)(implicit joinMeet: JoinMeetShape[A, Associative, Associative]): A =
       joinMeet.meet(l, r)
   }
 

@@ -4,7 +4,7 @@ import zio.prelude.coherent.AbsorptionEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Absorption[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] extends JoinMeet[A, Join, Meet]
+trait Absorption[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] extends JoinMeetShape[A, Join, Meet]
 
 object Absorption extends Lawful[AbsorptionEqual] {
 

@@ -4,7 +4,8 @@ import zio.prelude.coherent.DistributiveJoinMeetEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait DistributiveJoinMeet[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] extends JoinMeet[A, Join, Meet]
+trait DistributiveJoinMeet[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]]
+    extends JoinMeetShape[A, Join, Meet]
 
 object DistributiveJoinMeet extends Lawful[DistributiveJoinMeetEqual] {
 
