@@ -135,6 +135,15 @@ object PartialOrd extends Lawful[PartialOrd] {
     }
 
   /**
+   * For all values `a1` and `a2`, iff `a1 =??= a2` is `Ordering.Equals` then `a1 === a2`.
+   */
+  val eqConsistencyLaw: Laws[PartialOrd] =
+    new Laws.Law2[PartialOrd]("eqConsistencyLaw") {
+      def apply[A: PartialOrd](a1: A, a2: A): TestResult =
+        ((a1 =??= a2) isEqualTo Ordering.Equals) <==> ((a1 === a2) isEqualTo true)
+    }
+
+  /**
    * The set of all laws that instances of `PartialOrd` must satisfy.
    */
   val laws: Laws[PartialOrd] =
@@ -142,6 +151,7 @@ object PartialOrd extends Lawful[PartialOrd] {
       transitivityLaw2 +
       antisymmetryLaw1 +
       antisymmetryLaw2 +
+      eqConsistencyLaw +
       Equal.laws
 
   /**
