@@ -3,6 +3,7 @@ package zio.prelude
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
 import scala.util.{ Success, Try }
+
 import zio._
 import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
 import zio.prelude.newtypes.{ AndF, Failure, OrF }
