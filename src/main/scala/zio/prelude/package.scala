@@ -5,7 +5,8 @@ import zio.test.{ TestResult, assert }
 import com.github.ghik.silencer.silent
 
 package object prelude
-    extends Assertions
+    extends ApplicationComposeSyntax
+    with Assertions
     with AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeComposeSyntax
@@ -105,11 +106,13 @@ package object prelude
     type Applicative[F[+_]]         = Covariant[F] with IdentityBoth[F]
     type InvariantApplicative[F[_]] = Invariant[F] with IdentityBoth[F]
 
-    type Category[:=>[-_, +_]]                         = IdentityCompose[:=>]
-    type CartesianCategory[:=>[-_, +_], :*:[+_, +_]]   = Category[:=>] with BothCompose[:=>, :*:]
-    type CoCartesianCategory[:=>[-_, +_], :+:[+_, +_]] = Category[:=>] with EitherCompose[:=>, :+:]
-    type Profunctor[:=>[-_, +_]]                       = Divariant[:=>]
-    type Bifunctor[:=>[+_, +_]]                        = Bicovariant[:=>]
+    type Category[:=>[-_, +_]]                                           = IdentityCompose[:=>]
+    type CartesianCategory[:=>[-_, +_], :*:[+_, +_]]                     = Category[:=>] with BothCompose[:=>, :*:]
+    type ClosedCartesianCategory[:=>[-_, +_], :*:[+_, +_], :-->[-_, +_]] =
+      CartesianCategory[:=>, :*:] with ApplicationCompose[:=>, :*:, :-->]
+    type CoCartesianCategory[:=>[-_, +_], :+:[+_, +_]]                   = Category[:=>] with EitherCompose[:=>, :+:]
+    type Profunctor[:=>[-_, +_]]                                         = Divariant[:=>]
+    type Bifunctor[:=>[+_, +_]]                                          = Bicovariant[:=>]
   }
 
   /**

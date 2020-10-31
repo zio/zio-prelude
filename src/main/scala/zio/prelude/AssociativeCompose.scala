@@ -17,10 +17,13 @@ trait AssociativeCompose[:=>[-_, +_]] {
 
 object AssociativeCompose {
 
-  implicit val FunctionBothEitherIdentityCompose: BothCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda]
-    with EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda]
-    with IdentityCompose[Function] =
-    new BothCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda]
+  implicit val FunctionBothEitherIdentityCompose
+    : ApplicationCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda, Function]
+      with BothCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda]
+      with EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda]
+      with IdentityCompose[Function] =
+    new ApplicationCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda, Function]
+      with BothCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda]
       with EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda]
       with IdentityCompose[Function] {
 
@@ -33,8 +36,20 @@ object AssociativeCompose {
 
       override def fromSecond[A, B]: Function[(A, B), B] = _._2
 
-      override def toBoth[A, B, C](a2b: => Function[A, B])(a2c: => Function[A, C]): Function[A, (B, C)] = { a =>
+      override def toBoth[A, B, C](a2b: Function[A, B])(a2c: Function[A, C]): Function[A, (B, C)] = { a =>
         (a2b(a), a2c(a))
+      }
+
+      override def application[A, B]: Function[(Function[A, B], A), B] = { case (a2b, a) =>
+        a2b(a)
+      }
+
+      override def curry[A, B, C](f: Function[(A, B), C]): Function[A, Function[B, C]] = { a => b =>
+        f((a, b))
+      }
+
+      override def uncurry[A, B, C](g: Function[A, Function[B, C]]): Function[(A, B), C] = { case (a, b) =>
+        g(a)(b)
       }
 
       override def toLeft[A, B]: Function[A, Either[A, B]] = Left(_)
@@ -49,7 +64,7 @@ object AssociativeCompose {
 }
 
 trait AssociativeComposeSyntax {
-  implicit class AssociativeComposeOps[:=>[-_, +_], A, B](private val ab: A :=> B) {
+  implicit class AssociativeComposeOps[A, B, :=>[-_, +_]](private val ab: A :=> B) {
 
     /** A symbolic alias for `andThen`. Composes `A -> B` with `B -> C` to form `A -> C`. */
     def >>>[C](implicit ev: AssociativeCompose[:=>]): (B :=> C) => (A :=> C) = { bc =>

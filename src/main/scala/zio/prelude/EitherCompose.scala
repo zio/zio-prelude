@@ -19,7 +19,7 @@ trait EitherCompose[:=>[-_, +_], :+:[+_, +_]] extends AssociativeCompose[:=>] {
 }
 
 trait EitherComposeSyntax {
-  implicit class EitherComposeOps[:=>[-_, +_], A, C](private val a2b: A :=> C) {
+  implicit class EitherComposeOps[A, C, :=>[-_, +_]](private val a2b: A :=> C) {
 
     /** A symbolic alias for `fromEither`. Composes `A -> C` with `B -> C` to form `A or B -> C`. */
     def |||[B, :+:[+_, +_]](implicit either: EitherCompose[:=>, :+:]): (=> B :=> C) => ((A :+: B) :=> C) =
