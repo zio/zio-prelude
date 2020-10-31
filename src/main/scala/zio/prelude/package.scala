@@ -11,12 +11,14 @@ package object prelude
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
     with AssociativeFlattenSyntax
+    with BothComposeSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with CovariantSyntax
     with ContravariantSyntax
     with DebugSyntax
     with DivariantSyntax
+    with EitherComposeSyntax
     with EqualSyntax
     with HashSyntax
     with IdExports
@@ -103,9 +105,11 @@ package object prelude
     type Applicative[F[+_]]         = Covariant[F] with IdentityBoth[F]
     type InvariantApplicative[F[_]] = Invariant[F] with IdentityBoth[F]
 
-    type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
-    type Profunctor[:=>[-_, +_]] = Divariant[:=>]
-    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
+    type Category[:=>[-_, +_]]                         = IdentityCompose[:=>]
+    type CartesianCategory[:=>[-_, +_], :*:[+_, +_]]   = Category[:=>] with BothCompose[:=>, :*:]
+    type CoCartesianCategory[:=>[-_, +_], :+:[+_, +_]] = Category[:=>] with EitherCompose[:=>, :+:]
+    type Profunctor[:=>[-_, +_]]                       = Divariant[:=>]
+    type Bifunctor[:=>[+_, +_]]                        = Bicovariant[:=>]
   }
 
   /**

@@ -16,24 +16,59 @@ trait AssociativeCompose[:=>[-_, +_]] {
 }
 
 object AssociativeCompose {
-  implicit val FunctionIdentityCompose: IdentityCompose[Function] =
-    new IdentityCompose[Function] {
-      def identity[A]: A => A = (a: A) => a
+
+  implicit val FunctionBothEitherIdentityCompose: BothCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda]
+    with EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda]
+    with IdentityCompose[Function] =
+    new BothCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda]
+      with EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda]
+      with IdentityCompose[Function] {
+
+      def identity[A]: A => A = scala.Predef.identity
 
       def compose[A, B, C](bc: B => C, ab: A => B): A => C =
         bc.compose(ab)
+
+      override def fromFirst[A, B]: Function[(A, B), A] = _._1
+
+      override def fromSecond[A, B]: Function[(A, B), B] = _._2
+
+      override def toBoth[A, B, C](a2b: => Function[A, B])(a2c: => Function[A, C]): Function[A, (B, C)] = { a =>
+        (a2b(a), a2c(a))
+      }
+
+      override def toLeft[A, B]: Function[A, Either[A, B]] = Left(_)
+
+      override def toRight[A, B]: Function[B, Either[A, B]] = Right(_)
+
+      override def fromEither[A, B, C](a2c: => Function[A, C])(b2c: => Function[B, C]): Function[Either[A, B], C] = {
+        case Left(a)  => a2c(a)
+        case Right(b) => b2c(b)
+      }
     }
 }
 
 trait AssociativeComposeSyntax {
   implicit class AssociativeComposeOps[:=>[-_, +_], A, B](private val ab: A :=> B) {
 
-    /** Composes `A -> B` with `B -> C` to form `A -> C`. */
-    def >>>[C](bc: B :=> C)(implicit ev: AssociativeCompose[:=>]): A :=> C =
+    /** A symbolic alias for `andThen`. Composes `A -> B` with `B -> C` to form `A -> C`. */
+    def >>>[C](implicit ev: AssociativeCompose[:=>]): (B :=> C) => (A :=> C) = { bc =>
       ev.compose(bc, ab)
+    }
+
+    /** Composes `A -> B` with `B -> C` to form `A -> C`. */
+    def andThen[C](implicit ev: AssociativeCompose[:=>]): (B :=> C) => (A :=> C) = { bc =>
+      ev.compose(bc, ab)
+    }
+
+    /** A symbolic alias for `compose`. Composes `B <- A` with `A <- Z` to form `B <- Z`. */
+    def <<<[Z](implicit ev: AssociativeCompose[:=>]): (Z :=> A) => Z :=> B = { za =>
+      ev.compose(ab, za)
+    }
 
     /** Composes `B <- A` with `A <- Z` to form `B <- Z`. */
-    def <<<[Z](za: Z :=> A)(implicit ev: AssociativeCompose[:=>]): Z :=> B =
+    def compose[Z](implicit ev: AssociativeCompose[:=>]): (Z :=> A) => Z :=> B = { za =>
       ev.compose(ab, za)
+    }
   }
 }
