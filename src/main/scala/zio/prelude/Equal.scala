@@ -366,7 +366,9 @@ object Equal extends Lawful[Equal] {
   implicit def TryEqual[A: Equal]: Equal[Try[A]] =
     make {
       case (scala.util.Success(a1), scala.util.Success(a2)) => a1 === a2
-      case (scala.util.Failure(e1), scala.util.Failure(e2)) => e1 === e2
+      case (scala.util.Failure(e1), scala.util.Failure(e2)) =>
+        implicit val ThrowableEqual: Equal[Throwable] = ThrowableHash
+        e1 === e2
       case _                                                => false
     }
 
@@ -824,8 +826,11 @@ object Equal extends Lawful[Equal] {
   /**
    * `Hash` (and thus also `Equal`) instance for `Throwable` values.
    * Comparison is based on: Class, message and cause (stack trace is ignored).
+   *
+   * Note: This is intentionally not in the implicit scope, because it would allow
+   * comparing _all_ Throwables across hierarchies defined by users, which would typically be a mistake.
    */
-  implicit lazy val ThrowableHash: Hash[Throwable] = {
+  lazy val ThrowableHash: Hash[Throwable] = {
     implicit val hashOT: Hash[Option[Throwable]] = Hash.OptionHash {
       // use an indirect instance, so that calling ThrowableHash infinitely doesn't cause stack overflow
       new Hash[Throwable] {
