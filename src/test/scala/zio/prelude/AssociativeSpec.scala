@@ -30,6 +30,9 @@ object AssociativeSpec extends DefaultRunnableSpec {
         testM("tuple2")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString))),
         testM("tuple3")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString).zip(Gen.anyString))),
         testM("chunk")(checkAllLaws(Associative)(Gen.chunkOf(Gen.anyString)))
-      )
+      ),
+      test("ParSeq") {
+        assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceAssociative)(equalTo(Sum(10)))
+      }
     )
 }
