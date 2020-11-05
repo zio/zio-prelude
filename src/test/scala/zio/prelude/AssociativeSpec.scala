@@ -44,7 +44,7 @@ object AssociativeSpec extends DefaultRunnableSpec {
           }
         }
         import Converters._
-        
+
         assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceAssociative)(equalTo(Sum(10)))
       }
     )
