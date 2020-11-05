@@ -32,6 +32,19 @@ object AssociativeSpec extends DefaultRunnableSpec {
         testM("chunk")(checkAllLaws(Associative)(Gen.chunkOf(Gen.anyString)))
       ),
       test("ParSeq") {
+        // https://github.com/scala/scala-parallel-collections/issues/22#issuecomment-288389306
+        val Converters = {
+          object Compat {
+            object CollectionConverters
+          }
+          import Compat._
+          {
+            import scala.collection.parallel._
+            CollectionConverters
+          }
+        }
+        import Converters._
+        
         assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceAssociative)(equalTo(Sum(10)))
       }
     )
