@@ -52,7 +52,7 @@ object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvaria
    * The set of law laws that instances of `IdentityEither` must satisfy.
    */
   val laws: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
-    leftIdentityLaw + rightIdentityLaw
+    leftIdentityLaw + rightIdentityLaw + AssociativeEither.laws
 
   /**
    * Summons an implicit `IdentityEither[F]`.
