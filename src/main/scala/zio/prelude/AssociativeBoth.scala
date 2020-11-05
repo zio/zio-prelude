@@ -57,6 +57,14 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
     associativityLaw
 
+  def fromCovariantAssociativeFlatten[F[+_]](implicit
+    covariant: Covariant[F],
+    identityFlatten: AssociativeFlatten[F]
+  ): AssociativeBoth[F] =
+    new AssociativeBoth[F] {
+      override def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = fa.map(a => fb.map(b => (a, b))).flatten
+    }
+
   /**
    * Combines 2 `F` values using the provided function `f`.
    */

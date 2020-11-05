@@ -63,6 +63,17 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
    */
   def apply[F[_]](implicit identityBoth: IdentityBoth[F]): IdentityBoth[F] =
     identityBoth
+
+  def fromCovariantIdentityFlatten[F[+_]](implicit
+    covariant: Covariant[F],
+    identityFlatten: IdentityFlatten[F]
+  ): IdentityBoth[F] = new IdentityBoth[F] {
+
+    override def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = fa.map(a => fb.map(b => (a, b))).flatten
+
+    override def any: F[Any] = identityFlatten.any
+
+  }
 }
 
 trait IdentityBothSyntax {
