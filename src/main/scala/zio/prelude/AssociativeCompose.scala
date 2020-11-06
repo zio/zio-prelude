@@ -32,9 +32,9 @@ object AssociativeCompose {
       def compose[A, B, C](bc: B => C, ab: A => B): A => C =
         bc.compose(ab)
 
-      override def fromFirst[A, B]: Function[(A, B), A] = _._1
+      override def fromFirst[A]: Function[(A, Any), A] = _._1
 
-      override def fromSecond[A, B]: Function[(A, B), B] = _._2
+      override def fromSecond[B]: Function[(Any, B), B] = _._2
 
       override def toBoth[A, B, C](a2b: Function[A, B])(a2c: Function[A, C]): Function[A, (B, C)] = { a =>
         (a2b(a), a2c(a))
@@ -52,9 +52,9 @@ object AssociativeCompose {
         g(a)(b)
       }
 
-      override def toLeft[A, B]: Function[A, Either[A, B]] = Left(_)
+      override def toLeft[A]: Function[A, Either[A, Nothing]] = Left(_)
 
-      override def toRight[A, B]: Function[B, Either[A, B]] = Right(_)
+      override def toRight[B]: Function[B, Either[Nothing, B]] = Right(_)
 
       override def fromEither[A, B, C](a2c: => Function[A, C])(b2c: => Function[B, C]): Function[Either[A, B], C] = {
         case Left(a)  => a2c(a)

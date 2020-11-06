@@ -1,8 +1,8 @@
 package zio.prelude
 
 trait EitherCompose[:=>[-_, +_], :+:[+_, +_]] extends AssociativeCompose[:=>] {
-  def toLeft[A, B]: A :=> (A :+: B)
-  def toRight[A, B]: B :=> (A :+: B)
+  def toLeft[A]: A :=> (A :+: Nothing)
+  def toRight[B]: B :=> (Nothing :+: B)
   def fromEither[A, B, C](a2c: => A :=> C)(b2c: => B :=> C): (A :+: B) :=> C
 
   def eitherCompose[A, B, C](

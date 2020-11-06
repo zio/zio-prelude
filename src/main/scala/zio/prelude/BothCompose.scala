@@ -1,8 +1,8 @@
 package zio.prelude
 
 trait BothCompose[:=>[-_, +_], :*:[+_, +_]] extends AssociativeCompose[:=>] {
-  def fromFirst[A, B]: (A :*: B) :=> A
-  def fromSecond[A, B]: (A :*: B) :=> B
+  def fromFirst[A]: (A :*: Any) :=> A
+  def fromSecond[B]: (Any :*: B) :=> B
   def toBoth[A, B, C](a2b: A :=> B)(a2c: A :=> C): A :=> (B :*: C)
 
   def bothCompose[A, B, C](
