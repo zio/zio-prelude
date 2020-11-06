@@ -151,21 +151,27 @@ object Equal extends Lawful[Equal] {
       )
 
   /**
-   * The `CommutativeBoth` instance for `Equal`.
+   * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for `Equal`.
    */
-  implicit val EqualCommutativeBoth: CommutativeBoth[Equal] =
-    new CommutativeBoth[Equal] {
+  implicit val EqualCommutativeIdentityBoth: CommutativeBoth[Equal] with IdentityBoth[Equal] =
+    new CommutativeBoth[Equal] with IdentityBoth[Equal] {
+      val any: Equal[Any] =
+        AnyHashOrd
+
       def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
         fa.both(fb)
     }
 
   /**
-   * The `CommutativeEither` instance for `Equal`.
+   * The `CommutativeEither` and `IdentityEither` (and thus `AssociativeEither`) instance for `Equal`.
    */
-  implicit val EqualCommutativeEither: CommutativeEither[Equal] =
-    new CommutativeEither[Equal] {
+  implicit val EqualCommutativeIdentityEither: CommutativeEither[Equal] with IdentityEither[Equal] =
+    new CommutativeEither[Equal] with IdentityEither[Equal] {
       def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
         fa.either(fb)
+
+      val none: Equal[Nothing] =
+        NothingHashOrd
     }
 
   /**
@@ -175,28 +181,6 @@ object Equal extends Lawful[Equal] {
     new Contravariant[Equal] {
       def contramap[A, B](f: B => A): Equal[A] => Equal[B] =
         _.contramap(f)
-    }
-
-  /**
-   * The `IdentityBoth` instance for `Equal`.
-   */
-  implicit val EqualIdentityBoth: IdentityBoth[Equal] =
-    new IdentityBoth[Equal] {
-      val any: Equal[Any]                                             =
-        AnyHashOrd
-      def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
-        fa.both(fb)
-    }
-
-  /**
-   * The `IdentityEither` instance for `Equal`.
-   */
-  implicit val EqualIdentityEither: IdentityEither[Equal] =
-    new IdentityEither[Equal] {
-      def either[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[Either[A, B]] =
-        fa.either(fb)
-      val none: Equal[Nothing]                                                =
-        NothingHashOrd
     }
 
   /**

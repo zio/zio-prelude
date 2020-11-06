@@ -56,7 +56,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
    * The set of law laws that instances of `IdentityBoth` must satisfy.
    */
   val laws: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
-    leftIdentityLaw + rightIdentityLaw
+    leftIdentityLaw + rightIdentityLaw + AssociativeBoth.laws
 
   /**
    * Summons an implicit `IdentityBoth[F]`.
