@@ -1,10 +1,13 @@
 package zio.prelude
 
+import com.github.ghik.silencer.silent
 import zio.prelude.newtypes.{ And, Max, Min, Or, Prod, Sum }
 import zio.test.laws._
 import zio.test.{ DefaultRunnableSpec, _ }
 
 object IdentitySpec extends DefaultRunnableSpec {
+
+  @silent("Unused import")
   def spec: ZSpec[Environment, Failure] =
     suite("IdentitySpec")(
       suite("laws")(
@@ -42,6 +45,27 @@ object IdentitySpec extends DefaultRunnableSpec {
           case ((a, b), c) => (a, b, c)
         })),
         testM("chunk")(checkAllLaws(Identity)(Gen.chunkOf(Gen.anyString)))
-      )
+      ), {
+        // https://github.com/scala/scala-parallel-collections/issues/22#issuecomment-288389306
+        val ParallelCollectionCompatibility = {
+          object Compat {
+            object CollectionConverters
+          }
+          import Compat._
+          {
+            import scala.collection.parallel._
+            CollectionConverters
+          }
+        }
+        import ParallelCollectionCompatibility._
+        suite("ParSeq")(
+          test("ParSeq non-empty returns a value") {
+            assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceIdentity)(equalTo(Sum(10)))
+          },
+          testM("ParSeq empty returns the `identity` element, non-blocking") {
+            assertM(List[Sum[Int]]().par.reduceIdentityNonblocking)(equalTo(Sum(0)))
+          }
+        )
+      }
     )
 }

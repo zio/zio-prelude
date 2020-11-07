@@ -33,10 +33,9 @@ object AssociativeSpec extends DefaultRunnableSpec {
         testM("tuple2")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString))),
         testM("tuple3")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString).zip(Gen.anyString))),
         testM("chunk")(checkAllLaws(Associative)(Gen.chunkOf(Gen.anyString)))
-      ),
-      test("ParSeq") {
+      ), {
         // https://github.com/scala/scala-parallel-collections/issues/22#issuecomment-288389306
-        val Converters = {
+        val ParallelCollectionCompatibility = {
           object Compat {
             object CollectionConverters
           }
@@ -46,9 +45,15 @@ object AssociativeSpec extends DefaultRunnableSpec {
             CollectionConverters
           }
         }
-        import Converters._
-
-        assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceAssociative)(equalTo(Sum(10)))
+        import ParallelCollectionCompatibility._
+        suite("ParSeq")(
+          testM("ParSeq non-empty returns Some, non-blocking") {
+            assertM(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceAssociativeNonblocking)(equalTo(Some(Sum(10))))
+          },
+          test("ParSeq empty returns None") {
+            assert(List[Sum[Int]]().par.reduceAssociative)(equalTo(None))
+          }
+        )
       }
     )
 }
