@@ -1274,21 +1274,22 @@ trait AssociativeSyntax {
   }
 
   /**
-   * Provides syntax for combining values in a `ParSeq` which is thus done in a parallel manner.
+   * Provides syntax for combining values in a `ParIterable` which is thus done in a parallel manner.
    */
-  implicit class AssociativeParSeqOps[A](private val p: collection.parallel.immutable.ParIterable[A]) {
+  implicit class AssociativeParIterableOps[A](private val p: collection.parallel.immutable.ParIterable[A]) {
 
     /**
-     * Associatively combines the values in a parallel manner.
+     * Associatively combines the values in a parallel manner,
+     * while blocking the thread.
      */
-    def reduceAssociative(implicit associative: Associative[A]): Option[A] =
+    def reduceAssociativeBlocking(implicit associative: Associative[A]): Option[A] =
       p.reduceOption(associative.combine(_, _))
 
     /**
      * Returns an effect, that associatively combines the values in a parallel manner,
      * while ensuring the current thread isn't blocked.
      */
-    def reduceAssociativeNonblocking(implicit associative: Associative[A]): zio.RIO[zio.blocking.Blocking, Option[A]] =
-      zio.blocking.effectBlocking(reduceAssociative)
+    def reduceAssociative(implicit associative: Associative[A]): zio.RIO[zio.blocking.Blocking, Option[A]] =
+      zio.blocking.effectBlocking(reduceAssociativeBlocking)
   }
 }

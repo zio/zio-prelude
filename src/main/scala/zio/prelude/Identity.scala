@@ -819,21 +819,22 @@ trait IdentitySyntax {
   }
 
   /**
-   * Provides syntax for combining values in a `ParSeq` which is thus done in a parallel manner.
+   * Provides syntax for combining values in a `ParIterable` which is thus done in a parallel manner.
    */
-  implicit class IdentityParSeqOps[A](private val p: collection.parallel.immutable.ParIterable[A]) {
+  implicit class IdentityParIterableOps[A](private val p: collection.parallel.immutable.ParIterable[A]) {
 
     /**
-     * Associatively combines the values in a parallel manner, returning the `identity` element if empty.
+     * Associatively combines the values in a parallel manner, returning the `identity` element if empty,
+     * while blocking the thread.
      */
-    def reduceIdentity(implicit identity: Identity[A]): A =
+    def reduceIdentityBlocking(implicit identity: Identity[A]): A =
       p.fold(identity.identity)(identity.combine(_, _))
 
     /**
      * Returns an effect, that associatively combines the values in a parallel manner, returning the `identity` element if empty,
      * while ensuring the current thread isn't blocked.
      */
-    def reduceIdentityNonblocking(implicit identity: Identity[A]): zio.RIO[zio.blocking.Blocking, A] =
-      zio.blocking.effectBlocking(reduceIdentity)
+    def reduceIdentity(implicit identity: Identity[A]): zio.RIO[zio.blocking.Blocking, A] =
+      zio.blocking.effectBlocking(reduceIdentityBlocking)
   }
 }

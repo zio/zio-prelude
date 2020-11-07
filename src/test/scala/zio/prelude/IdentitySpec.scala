@@ -58,12 +58,12 @@ object IdentitySpec extends DefaultRunnableSpec {
           }
         }
         import ParallelCollectionCompatibility._
-        suite("ParSeq")(
-          test("ParSeq non-empty returns a value") {
-            assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceIdentity)(equalTo(Sum(10)))
+        suite("ParIterable")(
+          test("ParIterable non-empty returns a value") {
+            assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceIdentityBlocking)(equalTo(Sum(10)))
           },
-          testM("ParSeq empty returns the `identity` element, non-blocking") {
-            assertM(List[Sum[Int]]().par.reduceIdentityNonblocking)(equalTo(Sum(0)))
+          testM("ParIterable empty returns the `identity` element, non-blocking") {
+            assertM(List[Sum[Int]]().par.reduceIdentity)(equalTo(Sum(0)))
           }
         )
       }
