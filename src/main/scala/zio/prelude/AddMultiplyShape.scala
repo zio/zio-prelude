@@ -19,7 +19,7 @@ object AddMultiplyShape {
 
   /// Helper classes to make the code shorter, but we don't want them to be exposed to ZIO Prelude users
   private abstract class Ring[A]
-      extends AnnihilatingZero[A, Ring.Addition, Ring.Multiplication]
+      extends Annihilation[A, Ring.Addition, Ring.Multiplication]
       with DistributiveMultiply[A, Ring.Addition, Ring.Multiplication]
       with SubtractShape[A, Ring.Addition, Ring.Multiplication]
 
@@ -29,7 +29,7 @@ object AddMultiplyShape {
   }
 
   private abstract class Field[A]
-      extends AnnihilatingZero[A, Field.Addition, Field.Multiplication]
+      extends Annihilation[A, Field.Addition, Field.Multiplication]
       with DistributiveMultiply[A, Field.Addition, Field.Multiplication]
       with DivideShape[A, Field.Addition, Field.Multiplication]
       with SubtractShape[A, Field.Addition, Field.Multiplication]
@@ -39,10 +39,11 @@ object AddMultiplyShape {
     type Multiplication[x] = Commutative[x] with InverseNonZero[x]
   }
 
-  implicit val IntAnnihilatingZeroDistributiveMultiply: classic.Ring[Int] = new Ring[Int] {
+  implicit val IntAnnihilationDistributiveMultiply: classic.Ring[Int] = new Ring[Int] {
     override def add(l: => Int, r: => Int): Int      = l + r
     override def multiply(l: => Int, r: => Int): Int = l * r
     override def subtract(l: => Int, r: => Int): Int = l - r
+    override def annihilation: Int                   = 0
 
     override def Addition: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
       Associative.IntSumCommutativeInverse
@@ -51,11 +52,12 @@ object AddMultiplyShape {
       Associative.IntProdCommutativeIdentity
   }
 
-  implicit val DoubleAnnihilatingZeroDistributiveMultiply: classic.Field[Double] = new Field[Double] {
+  implicit val DoubleAnnihilationDistributiveMultiply: classic.Field[Double] = new Field[Double] {
     override def add(l: => Double, r: => Double): Double      = l + r
     override def divide(l: => Double, r: => Double): Double   = l / r
     override def multiply(l: => Double, r: => Double): Double = l * r
     override def subtract(l: => Double, r: => Double): Double = l - r
+    override def annihilation: Double                         = 0.0
 
     override def Addition: Commutative[Sum[Double]] with Inverse[Sum[Double]] =
       Associative.DoubleSumCommutativeInverse

@@ -1,14 +1,16 @@
 package zio.prelude
 
-import zio.prelude.coherent.AnnihilatingZeroEqual
+import zio.prelude.coherent.AnnihilationEqual
 import zio.prelude.newtypes.{ Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait AnnihilatingZero[A, +Addition[x] <: Identity[x], +Multiplication[x] <: Associative[x]]
-    extends AddMultiplyShape[A, Addition, Multiplication]
+trait Annihilation[A, +Addition[x] <: Identity[x], +Multiplication[x] <: Associative[x]]
+    extends AddMultiplyShape[A, Addition, Multiplication] {
+  def annihilation: A = Sum.unwrap(Addition.identity)
+}
 
-object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
+object Annihilation extends Lawful[AnnihilationEqual] {
 
   /**
    * The left annihilation law states that for the multiplication operator `*`,
@@ -18,10 +20,10 @@ object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
    * 0 * a === 0
    * }}}
    */
-  val leftAnnihilationLaw: Laws[AnnihilatingZeroEqual] =
-    new Laws.Law1[AnnihilatingZeroEqual]("leftAnnihilationLaw") {
-      def apply[A](a: A)(implicit A: AnnihilatingZeroEqual[A]): TestResult =
-        (Sum.unwrap(A.Addition.identity) *** a) <-> Sum.unwrap(A.Addition.identity)
+  val leftAnnihilationLaw: Laws[AnnihilationEqual] =
+    new Laws.Law1[AnnihilationEqual]("leftAnnihilationLaw") {
+      def apply[A](a: A)(implicit A: AnnihilationEqual[A]): TestResult =
+        (A.annihilation *** a) <-> A.annihilation
     }
 
   /**
@@ -32,39 +34,39 @@ object AnnihilatingZero extends Lawful[AnnihilatingZeroEqual] {
    * a * 0 === 0
    * }}}
    */
-  val rightAnnihilationLaw: Laws[AnnihilatingZeroEqual] =
-    new Laws.Law1[AnnihilatingZeroEqual]("rightAnnihilationLaw") {
-      def apply[A](a: A)(implicit A: AnnihilatingZeroEqual[A]): TestResult =
-        (a *** Sum.unwrap(A.Addition.identity)) <-> Sum.unwrap(A.Addition.identity)
+  val rightAnnihilationLaw: Laws[AnnihilationEqual] =
+    new Laws.Law1[AnnihilationEqual]("rightAnnihilationLaw") {
+      def apply[A](a: A)(implicit A: AnnihilationEqual[A]): TestResult =
+        (a *** A.annihilation) <-> A.annihilation
     }
 
   /**
-   * The set of all laws that instances of `AnnihilatingZero` must satisfy.
+   * The set of all laws that instances of `Annihilation` must satisfy.
    */
-  val laws: Laws[AnnihilatingZeroEqual] =
+  val laws: Laws[AnnihilationEqual] =
     leftAnnihilationLaw + rightAnnihilationLaw
 
   /**
-   * Summons an implicit `AnnihilatingZero[A]`.
+   * Summons an implicit `Annihilation[A]`.
    */
   def apply[A, Addition[x] <: Identity[x], Multiplication[x] <: Associative[x]](implicit
-    annihilatingZero: AnnihilatingZero[A, Addition, Multiplication]
-  ): AnnihilatingZero[A, Addition, Multiplication] =
+    annihilatingZero: Annihilation[A, Addition, Multiplication]
+  ): Annihilation[A, Addition, Multiplication] =
     annihilatingZero
 
   def fromAdditiveInverse[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
     ev: DistributiveMultiply[A, Addition, Multiplication]
-  ): AnnihilatingZero[A, Addition, Multiplication]
+  ): Annihilation[A, Addition, Multiplication]
     with DistributiveMultiply[A, Addition, Multiplication]
     with SubtractShape[A, Addition, Multiplication] = SubtractShape.fromAdditiveInverseAndDistributiveMultiply(ev)
 
   def fromSubtract[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
     distributive0: DistributiveMultiply[A, Addition, Multiplication],
     subtract0: SubtractShape[A, Addition, Multiplication]
-  ): AnnihilatingZero[A, Addition, Multiplication]
+  ): Annihilation[A, Addition, Multiplication]
     with DistributiveMultiply[A, Addition, Multiplication]
     with SubtractShape[A, Addition, Multiplication] =
-    new AnnihilatingZero[A, Addition, Multiplication]
+    new Annihilation[A, Addition, Multiplication]
       with DistributiveMultiply[A, Addition, Multiplication]
       with SubtractShape[A, Addition, Multiplication] {
 

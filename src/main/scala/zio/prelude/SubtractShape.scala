@@ -26,10 +26,10 @@ object SubtractShape {
 
   def fromAdditiveInverseAndDistributiveMultiply[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](
     implicit ev: DistributiveMultiply[A, Addition, Multiplication]
-  ): AnnihilatingZero[A, Addition, Multiplication]
+  ): Annihilation[A, Addition, Multiplication]
     with DistributiveMultiply[A, Addition, Multiplication]
     with SubtractShape[A, Addition, Multiplication] =
-    new AnnihilatingZero[A, Addition, Multiplication]
+    new Annihilation[A, Addition, Multiplication]
       with DistributiveMultiply[A, Addition, Multiplication]
       with SubtractShape[A, Addition, Multiplication] {
 

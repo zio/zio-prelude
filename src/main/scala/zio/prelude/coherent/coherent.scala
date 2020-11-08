@@ -3,14 +3,14 @@ package zio.prelude.coherent
 import zio.prelude._
 import zio.prelude.newtypes.{ Prod, Sum }
 
-trait AnnihilatingZeroEqual[A] extends AnnihilatingZero[A, Identity, Associative] with Equal[A]
+trait AnnihilationEqual[A] extends Annihilation[A, Identity, Associative] with Equal[A]
 
-object AnnihilatingZeroEqual {
+object AnnihilationEqual {
   implicit def derive[A](implicit
-    annihilatingZero0: AnnihilatingZero[A, Identity, Associative],
+    annihilatingZero0: Annihilation[A, Identity, Associative],
     equal0: Equal[A]
-  ): AnnihilatingZeroEqual[A] =
-    new AnnihilatingZeroEqual[A] {
+  ): AnnihilationEqual[A] =
+    new AnnihilationEqual[A] {
 
       override def add(l: => A, r: => A): A = annihilatingZero0.add(l, r)
 
