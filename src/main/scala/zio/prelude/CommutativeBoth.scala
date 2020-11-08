@@ -35,7 +35,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
    * The set of law laws that instances of `CommutativeBoth` must satisfy.
    */
   val laws: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
-    commutativeLaw
+    commutativeLaw + AssociativeBoth.laws
 
   /**
    * Summons an implicit `CommutativeBoth[F]`.
