@@ -2,8 +2,9 @@ package zio.prelude
 
 import zio.prelude.newtypes.{ Prod, Sum }
 
-trait SubtractShape[A, +Addition[x] <: Inverse[x], +Multiplication[x] <: Associative[x]]
-    extends AddMultiplyShape[A, Addition, Multiplication] {
+trait SubtractShape[A] extends AddMultiplyShape[A] {
+
+  override type Addition[x] <: Inverse[x]
 
   def subtract(l: => A, r: => A): A =
     Sum.unwrap(Addition.inverse(Sum(l), Sum(r)))
@@ -11,35 +12,46 @@ trait SubtractShape[A, +Addition[x] <: Inverse[x], +Multiplication[x] <: Associa
 
 object SubtractShape {
 
-  def fromAdditiveInverse[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
-    ev: AddMultiplyShape[A, Addition, Multiplication]
-  ): SubtractShape[A, Addition, Multiplication] = new SubtractShape[A, Addition, Multiplication] {
+  type Aux[A, +addition[x] <: Inverse[x], +multiplication[x] <: Associative[x]] = SubtractShape[A] {
+    type Addition[x] <: addition[x]
+    type Multiplication[x] <: multiplication[x]
+  }
+
+  def fromAdditiveInverse[A, addition[x] <: Inverse[x], multiplication[x] <: Associative[x]](implicit
+    ev: AddMultiplyShape.Aux[A, addition, multiplication]
+  ): SubtractShape.Aux[A, addition, multiplication] = new SubtractShape[A] {
+
+    override type Addition[x] = addition[x]
+
+    override type Multiplication[x] = multiplication[x]
 
     override def add(l: => A, r: => A): A = ev.add(l, r)
 
     override def multiply(l: => A, r: => A): A = ev.multiply(l, r)
 
-    override def Addition: Addition[Sum[A]] = ev.Addition
+    override def Addition: addition[Sum[A]] = ev.Addition
 
-    override def Multiplication: Multiplication[Prod[A]] = ev.Multiplication
+    override def Multiplication: multiplication[Prod[A]] = ev.Multiplication
   }
 
-  def fromAdditiveInverseAndDistributiveMultiply[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](
-    implicit ev: DistributiveMultiply[A, Addition, Multiplication]
-  ): Annihilation[A, Addition, Multiplication]
-    with DistributiveMultiply[A, Addition, Multiplication]
-    with SubtractShape[A, Addition, Multiplication] =
-    new Annihilation[A, Addition, Multiplication]
-      with DistributiveMultiply[A, Addition, Multiplication]
-      with SubtractShape[A, Addition, Multiplication] {
+  def fromAdditiveInverseAndDistributiveMultiply[A, addition[x] <: Inverse[x], multiplication[x] <: Associative[x]](
+    implicit ev: DistributiveMultiply.Aux[A, addition, multiplication]
+  ): Annihilation.Aux[A, addition, multiplication]
+    with DistributiveMultiply.Aux[A, addition, multiplication]
+    with SubtractShape.Aux[A, addition, multiplication] =
+    new Annihilation[A] with DistributiveMultiply[A] with SubtractShape[A] {
+
+      override type Addition[x] = addition[x]
+
+      override type Multiplication[x] = multiplication[x]
 
       override def add(l: => A, r: => A): A = ev.add(l, r)
 
       override def multiply(l: => A, r: => A): A = ev.multiply(l, r)
 
-      override def Addition: Addition[Sum[A]] = ev.Addition
+      override def Addition: addition[Sum[A]] = ev.Addition
 
-      override def Multiplication: Multiplication[Prod[A]] = ev.Multiplication
+      override def Multiplication: multiplication[Prod[A]] = ev.Multiplication
     }
 }
 
@@ -53,13 +65,13 @@ trait SubtractShapeSyntax {
     /**
      * A symbolic alias for `subtract`.
      */
-    def ---(r: => A)(implicit subtract: SubtractShape[A, Inverse, Associative]): A =
+    def ---(r: => A)(implicit subtract: SubtractShape.Aux[A, Inverse, Associative]): A =
       subtract.subtract(l, r)
 
     /**
      * Subtract two values.
      */
-    def subtract(r: => A)(implicit subtract: SubtractShape[A, Inverse, Associative]): A =
+    def subtract(r: => A)(implicit subtract: SubtractShape.Aux[A, Inverse, Associative]): A =
       subtract.subtract(l, r)
 
   }

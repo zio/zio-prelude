@@ -4,10 +4,14 @@ import zio.prelude.coherent.DistributiveMultiplyEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait DistributiveMultiply[A, +Addition[x] <: Associative[x], +Multiplication[x] <: Associative[x]]
-    extends AddMultiplyShape[A, Addition, Multiplication]
+trait DistributiveMultiply[A] extends AddMultiplyShape[A]
 
 object DistributiveMultiply extends Lawful[DistributiveMultiplyEqual] {
+
+  type Aux[A, +addition[x] <: Associative[x], +multiplication[x] <: Associative[x]] = DistributiveMultiply[A] {
+    type Addition[x] <: addition[x]
+    type Multiplication[x] <: multiplication[x]
+  }
 
   /**
    * The left distributivity law states that for operators `+` and `*`, for all
@@ -47,7 +51,7 @@ object DistributiveMultiply extends Lawful[DistributiveMultiplyEqual] {
    * Summons an implicit `DistributiveMultiply[A]`.
    */
   def apply[A, Addition[x] <: Associative[x], Multiplication[x] <: Associative[x]](implicit
-    distributiveMultiply: DistributiveMultiply[A, Addition, Multiplication]
-  ): DistributiveMultiply[A, Addition, Multiplication] =
+    distributiveMultiply: DistributiveMultiply.Aux[A, Addition, Multiplication]
+  ): DistributiveMultiply.Aux[A, Addition, Multiplication] =
     distributiveMultiply
 }

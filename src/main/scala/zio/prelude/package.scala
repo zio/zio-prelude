@@ -76,17 +76,18 @@ package object prelude
     type Semilattice[A]        = Commutative[A] with Idempotent[A]
     type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
 
-    type Semiring[A] =
-      Annihilation[A, CommutativeMonoid, Identity] with DistributiveMultiply[A, CommutativeMonoid, Identity]
-    type Ring[A]     =
-      Annihilation[A, AbelianGroup, Identity]
-        with DistributiveMultiply[A, AbelianGroup, Identity]
-        with SubtractShape[A, AbelianGroup, Identity]
-    type Field[A]    =
-      Annihilation[A, AbelianGroup, InverseNonZero]
-        with DistributiveMultiply[A, AbelianGroup, InverseNonZero]
-        with SubtractShape[A, AbelianGroup, InverseNonZero]
-        with prelude.DivideShape[A, AbelianGroup, InverseNonZero]
+    type Semiring[A] = Annihilation[A] with DistributiveMultiply[A] {
+      type Addition[x] <: CommutativeMonoid[x]
+      type Multiplication[x] <: Identity[x]
+    }
+    type Ring[A]     = Semiring[A] with SubtractShape[A] {
+      type Addition[x] <: AbelianGroup[x]
+      type Multiplication[x] <: Identity[x]
+    }
+    type Field[A]    = Ring[A] with prelude.DivideShape[A] {
+      type Addition[x] <: AbelianGroup[x]
+      type Multiplication[x] <: InverseNonZero[x]
+    }
 
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]

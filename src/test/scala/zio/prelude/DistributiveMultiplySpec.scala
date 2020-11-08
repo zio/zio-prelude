@@ -4,9 +4,9 @@ import zio.test.TestAspect._
 import zio.test._
 import zio.test.laws._
 
-object DistributiveSpec extends DefaultRunnableSpec {
+object DistributiveMultiplySpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
-    suite("DistributiveSpec")(
+    suite("DistributiveMultiplySpec")(
       suite("laws")(
         testM("int distributive multiply")(checkAllLaws(DistributiveMultiply)(Gen.anyInt)),
         suite("floating point")(

@@ -5,12 +5,19 @@ import zio.prelude.newtypes.{ Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Annihilation[A, +Addition[x] <: Identity[x], +Multiplication[x] <: Associative[x]]
-    extends AddMultiplyShape[A, Addition, Multiplication] {
+trait Annihilation[A] extends AddMultiplyShape[A] {
+
+  override type Addition[x] <: Identity[x]
+
   def annihilation: A = Sum.unwrap(Addition.identity)
 }
 
 object Annihilation extends Lawful[AnnihilationEqual] {
+
+  type Aux[A, +addition[x] <: Identity[x], +multiplication[x] <: Associative[x]] = Annihilation[A] {
+    type Addition[x] <: addition[x]
+    type Multiplication[x] <: multiplication[x]
+  }
 
   /**
    * The left annihilation law states that for the multiplication operator `*`,
@@ -50,25 +57,28 @@ object Annihilation extends Lawful[AnnihilationEqual] {
    * Summons an implicit `Annihilation[A]`.
    */
   def apply[A, Addition[x] <: Identity[x], Multiplication[x] <: Associative[x]](implicit
-    annihilatingZero: Annihilation[A, Addition, Multiplication]
-  ): Annihilation[A, Addition, Multiplication] =
+    annihilatingZero: Annihilation.Aux[A, Addition, Multiplication]
+  ): Annihilation.Aux[A, Addition, Multiplication] =
     annihilatingZero
 
   def fromAdditiveInverse[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
-    ev: DistributiveMultiply[A, Addition, Multiplication]
-  ): Annihilation[A, Addition, Multiplication]
-    with DistributiveMultiply[A, Addition, Multiplication]
-    with SubtractShape[A, Addition, Multiplication] = SubtractShape.fromAdditiveInverseAndDistributiveMultiply(ev)
+    ev: DistributiveMultiply.Aux[A, Addition, Multiplication]
+  ): Annihilation.Aux[A, Addition, Multiplication]
+    with DistributiveMultiply.Aux[A, Addition, Multiplication]
+    with SubtractShape.Aux[A, Addition, Multiplication] =
+    SubtractShape.fromAdditiveInverseAndDistributiveMultiply[A, Addition, Multiplication](ev)
 
-  def fromSubtract[A, Addition[x] <: Inverse[x], Multiplication[x] <: Associative[x]](implicit
-    distributive0: DistributiveMultiply[A, Addition, Multiplication],
-    subtract0: SubtractShape[A, Addition, Multiplication]
-  ): Annihilation[A, Addition, Multiplication]
-    with DistributiveMultiply[A, Addition, Multiplication]
-    with SubtractShape[A, Addition, Multiplication] =
-    new Annihilation[A, Addition, Multiplication]
-      with DistributiveMultiply[A, Addition, Multiplication]
-      with SubtractShape[A, Addition, Multiplication] {
+  def fromSubtract[A, addition[x] <: Inverse[x], multiplication[x] <: Associative[x]](implicit
+    distributive0: DistributiveMultiply.Aux[A, addition, multiplication],
+    subtract0: SubtractShape.Aux[A, addition, multiplication]
+  ): Annihilation.Aux[A, addition, multiplication]
+    with DistributiveMultiply.Aux[A, addition, multiplication]
+    with SubtractShape.Aux[A, addition, multiplication] =
+    new Annihilation[A] with DistributiveMultiply[A] with SubtractShape[A] {
+
+      override type Addition[x] = addition[x]
+
+      override type Multiplication[x] = multiplication[x]
 
       override def add(l: => A, r: => A): A = distributive0.add(l, r)
 
@@ -76,8 +86,8 @@ object Annihilation extends Lawful[AnnihilationEqual] {
 
       override def subtract(l: => A, r: => A): A = subtract0.subtract(l, r)
 
-      override def Addition: Addition[Sum[A]] = distributive0.Addition
+      override def Addition: addition[Sum[A]] = distributive0.Addition
 
-      override def Multiplication: Multiplication[Prod[A]] = distributive0.Multiplication
+      override def Multiplication: multiplication[Prod[A]] = distributive0.Multiplication
     }
 }

@@ -3,11 +3,14 @@ package zio.prelude.coherent
 import zio.prelude._
 import zio.prelude.newtypes.{ Prod, Sum }
 
-trait AnnihilationEqual[A] extends Annihilation[A, Identity, Associative] with Equal[A]
+trait AnnihilationEqual[A] extends Annihilation[A] with Equal[A] {
+  type Addition[x]       = Identity[x]
+  type Multiplication[x] = Associative[x]
+}
 
 object AnnihilationEqual {
   implicit def derive[A](implicit
-    annihilatingZero0: Annihilation[A, Identity, Associative],
+    annihilatingZero0: Annihilation.Aux[A, Identity, Associative],
     equal0: Equal[A]
   ): AnnihilationEqual[A] =
     new AnnihilationEqual[A] {
@@ -235,11 +238,14 @@ object DeriveEqualTraversable {
     }
 }
 
-trait DistributiveMultiplyEqual[A] extends DistributiveMultiply[A, Associative, Associative] with Equal[A]
+trait DistributiveMultiplyEqual[A] extends DistributiveMultiply[A] with Equal[A] {
+  type Addition[x]       = Associative[x]
+  type Multiplication[x] = Associative[x]
+}
 
 object DistributiveMultiplyEqual {
   implicit def derive[A](implicit
-    distributive0: DistributiveMultiply[A, Associative, Associative],
+    distributive0: DistributiveMultiply.Aux[A, Associative, Associative],
     equal0: Equal[A]
   ): DistributiveMultiplyEqual[A] =
     new DistributiveMultiplyEqual[A] {
