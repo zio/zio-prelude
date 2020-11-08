@@ -155,24 +155,6 @@ object PartialOrd extends Lawful[PartialOrd] {
       Equal.laws
 
   /**
-   * The `AssociativeBoth` instance for `PartialOrd`.
-   */
-  implicit val PartialOrdAssociativeBoth: AssociativeBoth[PartialOrd] =
-    new AssociativeBoth[PartialOrd] {
-      def both[A, B](fa: => PartialOrd[A], fb: => PartialOrd[B]): PartialOrd[(A, B)] =
-        fa.both(fb)
-    }
-
-  /**
-   * The `AssociativeEither` instance for `PartialOrd`.
-   */
-  implicit val PartialOrdAssociativeEither: AssociativeEither[PartialOrd] =
-    new AssociativeEither[PartialOrd] {
-      def either[A, B](fa: => PartialOrd[A], fb: => PartialOrd[B]): PartialOrd[Either[A, B]] =
-        fa.either(fb)
-    }
-
-  /**
    * The `Contravariant` instance for `PartialOrd`.
    */
   implicit val PartialOrdContravariant: Contravariant[PartialOrd] =
@@ -182,7 +164,7 @@ object PartialOrd extends Lawful[PartialOrd] {
     }
 
   /**
-   * The `IdentityBoth` instance for `PartialOrd`.
+   * The `IdentityBoth` (and thus `AssociativeBoth`) instance for `PartialOrd`.
    */
   implicit val PartialOrdIdentityBoth: IdentityBoth[PartialOrd] =
     new IdentityBoth[PartialOrd] {
@@ -193,7 +175,7 @@ object PartialOrd extends Lawful[PartialOrd] {
     }
 
   /**
-   * The `IdentityEither` instance for `PartialOrd`.
+   * The `IdentityEither` (and thus `AssociativeEither`) instance for `PartialOrd`.
    */
   implicit val PartialOrdIdentityEither: IdentityEither[PartialOrd] =
     new IdentityEither[PartialOrd] {
