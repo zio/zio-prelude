@@ -60,7 +60,7 @@ object AssociativeFlattenCovariantDeriveEqual {
     }
 }
 
-trait CommutativeBothDeriveEqualInvariant[F[_]] extends CommutativeBoth[F] with DeriveEqual[F] with Invariant[F]
+trait CommutativeBothDeriveEqualInvariant[F[_]] extends AssociativeBothDeriveEqualInvariant[F] with CommutativeBoth[F]
 
 object CommutativeBothDeriveEqualInvariant {
   implicit def derive[F[_]](implicit
@@ -75,7 +75,9 @@ object CommutativeBothDeriveEqualInvariant {
     }
 }
 
-trait CommutativeEitherDeriveEqualInvariant[F[_]] extends CommutativeEither[F] with DeriveEqual[F] with Invariant[F]
+trait CommutativeEitherDeriveEqualInvariant[F[_]]
+    extends AssociativeEitherDeriveEqualInvariant[F]
+    with CommutativeEither[F]
 
 object CommutativeEitherDeriveEqualInvariant {
   implicit def derive[F[_]](implicit
@@ -149,7 +151,7 @@ object CovariantDeriveEqualIdentityFlatten {
     }
 }
 
-trait DeriveEqualIdentityBothInvariant[F[_]] extends DeriveEqual[F] with IdentityBoth[F] with Invariant[F]
+trait DeriveEqualIdentityBothInvariant[F[_]] extends AssociativeBothDeriveEqualInvariant[F] with IdentityBoth[F]
 
 object DeriveEqualIdentityBothInvariant {
   implicit def derive[F[_]](implicit
@@ -165,7 +167,7 @@ object DeriveEqualIdentityBothInvariant {
     }
 }
 
-trait DeriveEqualIdentityEitherInvariant[F[_]] extends DeriveEqual[F] with IdentityEither[F] with Invariant[F]
+trait DeriveEqualIdentityEitherInvariant[F[_]] extends AssociativeEitherDeriveEqualInvariant[F] with IdentityEither[F]
 
 object DeriveEqualIdentityEitherInvariant {
   implicit def derive[F[_]](implicit

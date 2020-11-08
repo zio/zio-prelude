@@ -37,7 +37,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
    * The set of law laws that instances of `CommutativeEither` must satisfy.
    */
   val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
-    commutativeLaw
+    commutativeLaw + AssociativeEither.laws
 
   /**
    * The `CommutativeEither` instance for `Future`.

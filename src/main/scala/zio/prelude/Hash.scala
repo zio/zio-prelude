@@ -111,6 +111,30 @@ object Hash extends Lawful[Hash] {
     }
 
   /**
+   * The `IdentityBoth` (and thus `AssociativeBoth`) instance for `Hash`.
+   */
+  implicit val HashIdentityBoth: IdentityBoth[Hash] =
+    new IdentityBoth[Hash] {
+      val any: Hash[Any] =
+        Equal.AnyHashOrd
+
+      def both[A, B](fa: => Hash[A], fb: => Hash[B]): Hash[(A, B)] =
+        fa.both(fb)
+    }
+
+  /**
+   * The `IdentityEither` (and thus `AssociativeEither`) instance for `Hash`.
+   */
+  implicit val HashIdentityEither: IdentityEither[Hash] =
+    new IdentityEither[Hash] {
+      def either[A, B](fa: => Hash[A], fb: => Hash[B]): Hash[Either[A, B]] =
+        fa.either(fb)
+
+      val none: Hash[Nothing] =
+        Equal.NothingHashOrd
+    }
+
+  /**
    * Summons an implicit `Hash[A]`.
    */
   def apply[A](implicit hash: Hash[A]): Hash[A] =
