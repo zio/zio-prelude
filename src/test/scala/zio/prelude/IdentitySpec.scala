@@ -61,10 +61,10 @@ object IdentitySpec extends DefaultRunnableSpec {
         import ParallelCollectionCompatibility._
         suite("ParIterable")(
           test("ParIterable non-empty returns a value") {
-            assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceIdentityBlocking)(equalTo(Sum(10)))
+            assert(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceIdentity)(equalTo(Sum(10)))
           },
           testM("ParIterable empty returns the `identity` element, non-blocking") {
-            assertM(List[Sum[Int]]().par.reduceIdentity)(equalTo(Sum(0)))
+            assertM(List[Sum[Int]]().par.reduceIdentityM)(equalTo(Sum(0)))
           }
         )
       }

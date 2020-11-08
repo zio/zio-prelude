@@ -48,10 +48,10 @@ object AssociativeSpec extends DefaultRunnableSpec {
         import ParallelCollectionCompatibility._
         suite("ParIterable")(
           testM("ParIterable non-empty returns Some, non-blocking") {
-            assertM(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceAssociative)(equalTo(Some(Sum(10))))
+            assertM(List(Sum(1), Sum(2), Sum(3), Sum(4)).par.reduceAssociativeM)(equalTo(Some(Sum(10))))
           },
           test("ParIterable empty returns None") {
-            assert(List[Sum[Int]]().par.reduceAssociativeBlocking)(equalTo(None))
+            assert(List[Sum[Int]]().par.reduceAssociative)(equalTo(None))
           }
         )
       }

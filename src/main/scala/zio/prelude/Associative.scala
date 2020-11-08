@@ -1282,14 +1282,14 @@ trait AssociativeSyntax {
      * Associatively combines the values in a parallel manner,
      * while blocking the thread.
      */
-    def reduceAssociativeBlocking(implicit associative: Associative[A]): Option[A] =
+    def reduceAssociative(implicit associative: Associative[A]): Option[A] =
       p.reduceOption(associative.combine(_, _))
 
     /**
      * Returns an effect, that associatively combines the values in a parallel manner,
      * while ensuring the current thread isn't blocked.
      */
-    def reduceAssociative(implicit associative: Associative[A]): zio.RIO[zio.blocking.Blocking, Option[A]] =
-      zio.blocking.effectBlocking(reduceAssociativeBlocking)
+    def reduceAssociativeM(implicit associative: Associative[A]): zio.RIO[zio.blocking.Blocking, Option[A]] =
+      zio.blocking.effectBlocking(reduceAssociative)
   }
 }
