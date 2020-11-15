@@ -341,7 +341,7 @@ workflows:
       - microsite:
           context: Website
           requires:
-            - microsite
+            - release
           filters:
             <<: *filter_tags
             branches:
