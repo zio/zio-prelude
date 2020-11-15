@@ -70,7 +70,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * summary value, maintaining some internal state along the way.
    */
   def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S =
-    foreach(fa)(a => State.update((s: S) => f(s, a))).runState(s)
+    foreach[({ type lambda[+A] = State[S, A] })#lambda, A, Unit](fa)(a => State.update((s: S) => f(s, a))).runState(s)
 
   /**
    * Maps each element of the collection to a type `B` for which an `Identity`
@@ -78,7 +78,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * summary using the `combine` operation of `Identity`, or the `identity`
    * element if the collection is empty.
    */
-  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B =
+  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B   =
     foldLeft(fa)(Identity[B].identity)((b: B, a: A) => b combine f(a))
 
   /**
@@ -141,13 +141,13 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * collection.
    */
   def mapAccum[S, A, B](fa: F[A])(s: S)(f: (S, A) => (S, B)): (S, F[B]) =
-    foreach(fa)(a => State.modify((s: S) => f(s, a))).run(s)
+    foreach[({ type lambda[+A] = State[S, A] })#lambda, A, B](fa)(a => State.modify((s: S) => f(s, a))).run(s)
 
   /**
    * Returns the largest value in the collection if one exists or `None`
    * otherwise.
    */
-  def maxOption[A: Ord](fa: F[A]): Option[A] =
+  def maxOption[A: Ord](fa: F[A]): Option[A]                            =
     maxByOption(fa)(identity)
 
   /**
@@ -262,7 +262,9 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * Zips each element of the collection with its index.
    */
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
-    foreach(fa)(a => State.modify((n: Int) => (n + 1, (a, n)))).runResult(0)
+    foreach[({ type lambda[+A] = State[Int, A] })#lambda, A, (A, Int)](fa)(a =>
+      State.modify((n: Int) => (n + 1, (a, n)))
+    ).runResult(0)
 }
 
 object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {

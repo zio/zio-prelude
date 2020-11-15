@@ -258,7 +258,9 @@ private[prelude] object NewtypeModule {
           type Type = A
 
           def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
-            Traversable[F].foreach(value)(Validation.fromAssert(_)(assertion))
+            Traversable[F].foreach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
+              Validation.fromAssert(_)(assertion)
+            )
 
           protected def wrapAll[F[_]](value: F[A]): F[A] = value
 
@@ -281,7 +283,9 @@ private[prelude] object NewtypeModule {
           type Type = A
 
           def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
-            Traversable[F].foreach(value)(Validation.fromAssert(_)(assertion))
+            Traversable[F].foreach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
+              Validation.fromAssert(_)(assertion)
+            )
 
           protected def wrapAll[F[_]](value: F[A]): F[A] = value
 
