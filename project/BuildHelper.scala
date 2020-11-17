@@ -10,10 +10,10 @@ import scalafix.sbt.ScalafixPlugin.autoImport.scalafixSemanticdb
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
-  private val Scala211        = "2.11.12"
-  private val Scala212        = "2.12.12"
-  private val Scala213        = "2.13.3"
-  private val ScalaDotty      = "0.27.0-RC1"
+  val Scala211                = "2.11.12"
+  val Scala212                = "2.12.12"
+  val Scala213                = "2.13.3"
+  val ScalaDotty              = "0.27.0-RC1"
   private val SilencerVersion = "1.7.1"
 
   private val stdOptions = Seq(

@@ -40,6 +40,16 @@ lazy val root =
     .settings(dottySettings)
     .settings(buildInfoSettings("zio.prelude"))
     .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
+    .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
+      libraryDependencies ++= {
+        val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0" % Optional)
+        scalaVersion.value match {
+          case BuildHelper.Scala213   => spc
+          case BuildHelper.ScalaDotty => spc.map(_.withDottyCompat(scalaVersion.value))
+          case _                      => List()
+        }
+      }
+    )
     .enablePlugins(BuildInfoPlugin)
 
 lazy val benchmarks = project
