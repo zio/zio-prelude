@@ -42,7 +42,7 @@ lazy val root =
     .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
     .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
       libraryDependencies ++= {
-        val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0" % Optional)
+        val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
         scalaVersion.value match {
           case BuildHelper.Scala213   => spc
           case BuildHelper.ScalaDotty => spc.map(_.withDottyCompat(scalaVersion.value))
