@@ -131,6 +131,38 @@ object Associative extends Lawful[AssociativeEqual] {
     }
 
   /**
+   * The `Commutative`, `Idempotent` instance for the max of `BigDecimal` values
+   */
+  implicit val BigDecimalMaxIdempotent: Commutative[Max[BigDecimal]] with Idempotent[Max[BigDecimal]] =
+    new Commutative[Max[BigDecimal]] with Idempotent[Max[BigDecimal]] {
+      override def combine(l: => Max[BigDecimal], r: => Max[BigDecimal]): Max[BigDecimal] = Max(l max r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` instance for the min of `BigDecimal` values
+   */
+  implicit val BigDecimalMinIdempotent: Commutative[Min[BigDecimal]] with Idempotent[Min[BigDecimal]] =
+    new Commutative[Min[BigDecimal]] with Idempotent[Min[BigDecimal]] {
+      override def combine(l: => Min[BigDecimal], r: => Min[BigDecimal]): Min[BigDecimal] = Min(l min r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` instance for the product of `BigDecimal` values
+   */
+  implicit val BigDecimalProdIdempotent: Commutative[Prod[BigDecimal]] with Idempotent[Prod[BigDecimal]] =
+    new Commutative[Prod[BigDecimal]] with Idempotent[Prod[BigDecimal]] {
+      override def combine(l: => Prod[BigDecimal], r: => Prod[BigDecimal]): Prod[BigDecimal] = Prod(l * r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` instance for the sum of `BigDecimal` values
+   */
+  implicit val BigDecimalSumIdempotent: Commutative[Sum[BigDecimal]] with Idempotent[Sum[BigDecimal]] =
+    new Commutative[Sum[BigDecimal]] with Idempotent[Sum[BigDecimal]] {
+      override def combine(l: => Sum[BigDecimal], r: => Sum[BigDecimal]): Sum[BigDecimal] = Sum(l + r)
+    }
+
+  /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Byte` values.
    */
   implicit val ByteMaxIdempotentIdentity: Commutative[Max[Byte]] with Idempotent[Max[Byte]] with Identity[Max[Byte]] =
