@@ -38,6 +38,10 @@ trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] {
    */
   def map[A, B](f: A => B): F[A] => F[B]
 
+  def fproduct[A, B](f: A => B): F[A] => F[(A, B)] = map(a => a -> f(a))
+
+  def fproductLeft[A, B](f: A => B): F[A] => F[(B, A)] = map(a => f(a) -> a)
+
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => map(f.to)(fa), (fb: F[B]) => map(f.from)(fb))
 }
@@ -87,6 +91,12 @@ trait CovariantSyntax {
 
     def map[B](f: A => B)(implicit F: Covariant[F]): F[B] =
       F.map(f)(self)
+
+    def fproduct[B](f: A => B)(implicit F: Covariant[F]): F[(A, B)] =
+      F.fproduct[A, B](f)(self)
+
+    def fproductLeft[B](f: A => B)(implicit F: Covariant[F]): F[(B, A)] =
+      F.fproductLeft[A, B](f)(self)
 
     def unit(implicit F: Covariant[F]): F[Unit] = as(())
   }
