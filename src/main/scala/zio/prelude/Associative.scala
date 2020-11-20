@@ -1,5 +1,7 @@
 package zio.prelude
 
+import scala.annotation.tailrec
+
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{ And, First, Last, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
@@ -31,6 +33,15 @@ import zio.{ Chunk, NonEmptyChunk }
  */
 trait Associative[A] {
   def combine(l: => A, r: => A): A
+
+  final def repeatOption(a: A, n: Int): Option[A] = {
+    @tailrec
+    def repeatOptionHelper(res: A, n: Int): Option[A] =
+      if (n < 1) None
+      else if (n == 1) Some(res)
+      else repeatOptionHelper(combine(res, a), n - 1)
+    repeatOptionHelper(a, n)
+  }
 }
 
 object Associative extends Lawful[AssociativeEqual] {

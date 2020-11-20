@@ -22,6 +22,8 @@ trait Identity[A] extends Associative[A] {
    * The identity element.
    */
   def identity: A
+  final def repeat(a: A, n: Int): A =
+    repeatOption(a, n).getOrElse(identity)
 }
 
 object Identity extends Lawful[EqualIdentity] {
