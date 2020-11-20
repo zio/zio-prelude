@@ -156,6 +156,7 @@ sealed trait Validation[+E, +A] { self =>
 
 object Validation {
 
+  /** Adding documentation */
   final case class Failure[+E](errors: NonEmptyMultiSet[E]) extends Validation[E, Nothing]
   final case class Success[+A](value: A)                    extends Validation[Nothing, A]
 
