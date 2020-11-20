@@ -443,9 +443,9 @@ object ZPure {
    * the results.
    */
   def collectAll[F[+_]: Traversable, S, R, E, A](fa: F[ZPure[S, S, R, E, A]]): ZPure[S, S, R, E, F[A]] =
-    Traversable[F].flip(fa)
+    Traversable[F].flip[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda, A](fa)
 
-  def environment[S, R]: ZPure[S, S, R, Nothing, R] =
+  def environment[S, R]: ZPure[S, S, R, Nothing, R]                                                    =
     access(r => r)
 
   def fail[E](e: E): ZPure[Any, Nothing, Any, E, Nothing] =
@@ -469,12 +469,12 @@ object ZPure {
    * computation to the next and collects the results.
    */
   def foreach[F[+_]: Traversable, S, R, E, A, B](fa: F[A])(f: A => ZPure[S, S, R, E, B]): ZPure[S, S, R, E, F[B]] =
-    Traversable[F].foreach(fa)(f)
+    Traversable[F].foreach[({ type lambda[+A] = ZPure[S, S, R, E, A] })#lambda, A, B](fa)(f)
 
   /**
    * Constructs a computation that returns the initial state unchanged.
    */
-  def get[S]: ZPure[S, S, Any, Nothing, S] =
+  def get[S]: ZPure[S, S, Any, Nothing, S]                                                                        =
     modify(s => (s, s))
 
   /**

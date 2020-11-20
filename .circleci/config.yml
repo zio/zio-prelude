@@ -70,25 +70,25 @@ save_cache: &save_cache
           - "~/.cache"
           # - "~/website/node_modules"
 
-# install_yarn: &install_yarn
-#   - run:
-#       name: Install Yarn
-#       command: |
-#         curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-#         sudo bash -c 'echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list'
-#         sudo apt update && sudo apt install yarn -y
-#         yarn policies set-version
-#         yarn -v
+install_yarn: &install_yarn
+  - run:
+      name: Install Yarn
+      command: |
+        curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        sudo bash -c 'echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list'
+        sudo apt update && sudo apt install yarn -y
+        yarn policies set-version
+        yarn -v
 
-# install_nodejs: &install_nodejs
-#   - run:
-#       name: Install node.js
-#       command: |
-#         export NVM_DIR="/opt/circleci/.nvm"
-#         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-#         nvm install
-#         nvm use
-#         node -v
+install_nodejs: &install_nodejs
+  - run:
+      name: Install node.js
+      command: |
+        export NVM_DIR="/opt/circleci/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install
+        nvm use
+        node -v
 
 filter_tags: &filter_tags
   tags:
@@ -169,33 +169,33 @@ release: &release
             echo $PGP_SECRET | base64 -di | gpg2 --import --no-tty --batch --yes
             PATH=$HOME/bin:$PATH ./sbt ++${SCALA_VERSION}! clean ci-release
 
-# microsite: &microsite
-#   steps:
-#       - add_ssh_keys:
-#           fingerprints:
-#             - "11:2c:fa:98:69:d8:a1:d5:76:2e:38:d0:91:39:85:ce"
-#       - checkout
-#       - <<: *load_cache
-#       - <<: *install_nodejs
-#       - <<: *install_yarn
-#       - run:
-#           name: Publishing website
-#           command: |
-#             git config --global user.email "${GH_NAME}@users.noreply.github.com"
-#             git config --global user.name "${GH_NAME}"
-#             export GIT_USER=${GH_NAME}
-#             export TRAVIS_BUILD_NUMBER="${CIRCLE_BUILD_NUM}"
-#             export TRAVIS_COMMIT="${CIRCLE_SHA1}"
-#             sudo chown -R $USER:$USER /tmp
-#             export NVM_DIR="/opt/circleci/.nvm"
-#             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-#             nvm install
-#             nvm use
-#             node -v
-#             ./sbt ++${SCALA_VERSION}! docs/docusaurusCreateSite
-#             ./sbt ++${SCALA_VERSION}! docs/docusaurusPublishGhpages
-#       - <<: *clean_cache
-#       - <<: *save_cache
+microsite: &microsite
+  steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ea:30:ee:48:f1:96:e0:60:fd:8f:53:32:79:d5:7d:29"
+      - checkout
+      - <<: *load_cache
+      - <<: *install_nodejs
+      - <<: *install_yarn
+      - run:
+          name: Publishing website
+          command: |
+            git config --global user.email "${GH_NAME}@users.noreply.github.com"
+            git config --global user.name "${GH_NAME}"
+            export GIT_USER=${GH_NAME}
+            export TRAVIS_BUILD_NUMBER="${CIRCLE_BUILD_NUM}"
+            export TRAVIS_COMMIT="${CIRCLE_SHA1}"
+            sudo chown -R $USER:$USER /tmp
+            export NVM_DIR="/opt/circleci/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install
+            nvm use
+            node -v
+            ./sbt ++${SCALA_VERSION}! docs/docusaurusCreateSite
+            ./sbt ++${SCALA_VERSION}! docs/docusaurusPublishGhpages
+      - <<: *clean_cache
+      - <<: *save_cache
 
 jobs:
   lint:
@@ -268,12 +268,12 @@ jobs:
       - <<: *scala_213
       - <<: *jdk_8
 
-  # microsite:
-  #   <<: *microsite
-  #   <<: *machine_ubuntu
-  #   environment:
-  #     - <<: *scala_212
-  #     - <<: *jdk_8
+  microsite:
+    <<: *microsite
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_8
 
 workflows:
   version: 2
@@ -338,11 +338,11 @@ workflows:
             branches:
               only:
                 - master
-      # - microsite:
-      #     context: Website
-      #     requires:
-      #       - microsite
-      #     filters:
-      #       <<: *filter_tags
-      #       branches:
-      #         ignore: /.*/
+      - microsite:
+          context: Website
+          requires:
+            - release
+          filters:
+            <<: *filter_tags
+            branches:
+              ignore: /.*/
