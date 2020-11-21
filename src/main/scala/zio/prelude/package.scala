@@ -104,10 +104,9 @@ package object prelude
     type Applicative[F[+_]]         = Covariant[F] with IdentityBoth[F]
     type InvariantApplicative[F[_]] = Invariant[F] with IdentityBoth[F]
 
-    type Category[:=>[-_, +_]]      = IdentityCompose[:=>]
-    type Profunctor[:=>[-_, +_]]    = Divariant[:=>]
-    type Bifunctor[:=>[+_, +_]]     = Bicovariant[:=>]
-    type Zifunctor[:=>[-_, +_, +_]] = Zivariant[:=>]
+    type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
+    type Profunctor[:=>[-_, +_]] = Divariant[:=>]
+    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
   }
 
   /**
