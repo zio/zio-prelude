@@ -4,6 +4,7 @@ import scala.annotation.switch
 
 import zio.internal.Stack
 import zio.prelude._
+import zio.{ CanFail, NeedsEnv }
 
 /**
  * `ZPure[S1, S2, R, E, A]` is a purely functional description of a computation
@@ -35,7 +36,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     self zipRight that
 
   /**
-   * Runs this computatation if the provided environment is a `Left` or else
+   * Runs this computation if the provided environment is a `Left` or else
    * runs that computation if the provided environment is a `Right`, returning
    * the result in an `Either`.
    */
@@ -61,7 +62,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def <+>[S0 <: S1, S3 >: S2, R1 <: R, E1, B](
     that: => ZPure[S0, S3, R1, E1, B]
-  ): ZPure[S0, S3, R1, E1, Either[A, B]] =
+  )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, Either[A, B]] =
     self orElseEither that
 
   /**
@@ -75,7 +76,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def <>[S0 <: S1, S3 >: S2, R1 <: R, E1, A1 >: A](
     that: => ZPure[S0, S3, R1, E1, A1]
-  ): ZPure[S0, S3, R1, E1, A1] =
+  )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, A1] =
     self orElse that
 
   /**
@@ -91,7 +92,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     self andThen that
 
   /**
-   * Runs this computatation if the provided environment is a `Left` or else
+   * Runs this computation if the provided environment is a `Left` or else
    * runs that computation if the provided environment is a `Right`, unifying
    * the result to a common supertype.
    */
@@ -129,14 +130,14 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   /**
    * Maps the error value of this computation to the optional value.
    */
-  final def asSomeError: ZPure[S1, S2, R, Option[E], A] =
+  final def asSomeError(implicit ev: CanFail[E]): ZPure[S1, S2, R, Option[E], A] =
     mapError(Some(_))
 
   /**
    * Returns a computation whose error and success channels have been mapped
    * by the specified functions, `f` and `g`.
    */
-  final def bimap[E1, B](f: E => E1, g: A => B): ZPure[S1, S2, R, E1, B] =
+  final def bimap[E1, B](f: E => E1, g: A => B)(implicit ev: CanFail[E]): ZPure[S1, S2, R, E1, B] =
     foldM(e => fail(f(e)), a => succeed(g(a)))
 
   /**
@@ -144,7 +145,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def catchAll[S0 <: S1, S3 >: S2, R1 <: R, E1, A1 >: A](
     f: E => ZPure[S0, S3, R1, E1, A1]
-  ): ZPure[S0, S3, R1, E1, A1] =
+  )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, A1] =
     foldM(f, succeed)
 
   /**
@@ -152,7 +153,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def catchSome[S0 <: S1, S3 >: S2, R1 <: R, E1 >: E, A1 >: A](
     pf: PartialFunction[E, ZPure[S0, S3, R1, E1, A1]]
-  ): ZPure[S0, S3, R1, E1, A1] =
+  )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, A1] =
     catchAll(pf.applyOrElse[E, ZPure[S0, S3, R1, E1, A1]](_, fail))
 
   /**
@@ -192,7 +193,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * `Either`. The resulting computation cannot fail, because the failure case
    * has been exposed as part of the `Either` success case.
    */
-  final def either[S3 >: S2 <: S1]: ZPure[S3, S3, R, Nothing, Either[E, A]] =
+  final def either[S3 >: S2 <: S1](implicit ev: CanFail[E]): ZPure[S3, S3, R, Nothing, Either[E, A]] =
     fold(Left(_), Right(_))
 
   /**
@@ -221,7 +222,9 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * a computation that does not fail, but succeeds with the value of the left
    * or righr function passed to `fold`.
    */
-  final def fold[S3 >: S2 <: S1, B](failure: E => B, success: A => B): ZPure[S3, S3, R, Nothing, B] =
+  final def fold[S3 >: S2 <: S1, B](failure: E => B, success: A => B)(implicit
+    ev: CanFail[E]
+  ): ZPure[S3, S3, R, Nothing, B] =
     self.foldM(e => ZPure.succeed(failure(e)), a => ZPure.succeed(success(a)))
 
   /**
@@ -231,7 +234,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def foldM[S0 <: S1, S3, R1 <: R, E1, B](
     failure: E => ZPure[S0, S3, R1, E1, B],
     success: A => ZPure[S2, S3, R1, E1, B]
-  ): ZPure[S0, S3, R1, E1, B] =
+  )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, B] =
     Fold(self, failure, success)
 
   /**
@@ -244,7 +247,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * Transforms the error type of this computation with the specified
    * function.
    */
-  final def mapError[E1](f: E => E1): ZPure[S1, S2, R, E1, A] =
+  final def mapError[E1](f: E => E1)(implicit ev: CanFail[E]): ZPure[S1, S2, R, E1, A] =
     catchAll(e => fail(f(e)))
 
   /**
@@ -260,7 +263,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def orElse[S0 <: S1, S3 >: S2, R1 <: R, E1, A1 >: A](
     that: => ZPure[S0, S3, R1, E1, A1]
-  ): ZPure[S0, S3, R1, E1, A1] =
+  )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, A1] =
     foldM(_ => that, succeed)
 
   /**
@@ -269,14 +272,14 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def orElseEither[S0 <: S1, S3 >: S2, R1 <: R, E1, B](
     that: => ZPure[S0, S3, R1, E1, B]
-  ): ZPure[S0, S3, R1, E1, Either[A, B]] =
+  )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, Either[A, B]] =
     foldM(_ => that.map(Right(_)), a => succeed(Left(a)))
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
    * otherwise fails with the specified error.
    */
-  final def orElseFail[E1](e1: => E1): ZPure[S1, S2, R, E1, A] =
+  final def orElseFail[E1](e1: => E1)(implicit ev: CanFail[E]): ZPure[S1, S2, R, E1, A] =
     orElse(fail(e1))
 
   /**
@@ -293,20 +296,22 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * Executes this computation and returns its value, if it succeeds, but
    * otherwise succeeds with the specified value.
    */
-  final def orElseSucceed[A1 >: A](a1: => A1): ZPure[S1, Any, R, Nothing, A1] =
+  final def orElseSucceed[A1 >: A](a1: => A1)(implicit ev: CanFail[E]): ZPure[S1, Any, R, Nothing, A1] =
     orElse(succeed(a1))
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
    * otherwise fallbacks to the new state with the specified value.
    */
-  final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3): ZPure[S1, S3, R, Nothing, A1] =
+  final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3)(implicit
+    ev: CanFail[E]
+  ): ZPure[S1, S3, R, Nothing, A1] =
     orElse(succeed(a1).mapState(_ => s3))
 
   /**
    * Provides this computation with its required environment.
    */
-  final def provide(r: R): ZPure[S1, S2, Any, E, A] =
+  final def provide(r: R)(implicit ev: NeedsEnv[R]): ZPure[S1, S2, Any, E, A] =
     ZPure.Provide(r, self)
 
   /**
@@ -320,7 +325,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * Runs this computation with the specified initial state, returning either a
    * failure or the updated state and the result
    */
-  final def runEither(s: S1)(implicit ev: Any <:< R): Either[E, (S2, A)] = {
+  final def runEither(s: S1)(implicit ev: Any <:< R, ev1: CanFail[E]): Either[E, (S2, A)] = {
     val _                                                   = ev
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any]] = Stack()
     var s0: Any                                             = s
