@@ -1,11 +1,13 @@
 package zio
 
+import zio.prelude.fx.ZPureSyntax
 import zio.test.{ TestResult, assert }
 
 import com.github.ghik.silencer.silent
 
 package object prelude
     extends Assertions
+    with ZPureSyntax
     with AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeComposeSyntax

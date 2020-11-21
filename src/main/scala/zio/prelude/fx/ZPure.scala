@@ -290,20 +290,6 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     catchAll(ev(_).fold(that)(e => ZPure.fail(Some(e))))
 
   /**
-   * Executes this computation and returns its value, if it succeeds, but
-   * otherwise succeeds with the specified value.
-   */
-  final def orElseSucceed[A1 >: A](a1: => A1): ZPure[S1, Any, R, Nothing, A1] =
-    orElse(succeed(a1))
-
-  /**
-   * Executes this computation and returns its value, if it succeeds, but
-   * otherwise fallbacks to the new state with the specified value.
-   */
-  final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3): ZPure[S1, S3, R, Nothing, A1] =
-    orElse(succeed(a1).mapState(_ => s3))
-
-  /**
    * Provides this computation with its required environment.
    */
   final def provide(r: R): ZPure[S1, S2, Any, E, A] =
@@ -458,6 +444,18 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     that: ZPure[S2, S3, R1, E1, B]
   )(f: (A, B) => C): ZPure[S1, S3, R1, E1, C] =
     self.flatMap(a => that.flatMap(b => State.succeed(f(a, b))))
+}
+
+trait ZPureSyntax {
+  final implicit class ZPureOps[S1, S2, R, E, A](private val self: ZPure[S1, S2, R, E, A]) {
+
+    /**
+     * Executes this computation and returns its value, if it succeeds, but
+     * otherwise succeeds with the specified value.
+     */
+    def orElseSucceed[A1 >: A](a1: => A1)(implicit ev: S1 <:< S2): ZPure[S1, S2, R, Nothing, A1] =
+      self.orElse(ZPure.modify(s => (ev(s), a1)))
+  }
 }
 
 object ZPure {
