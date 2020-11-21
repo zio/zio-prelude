@@ -1,7 +1,8 @@
 package zio.prelude.fx
 
-import scala.annotation.switch
+import zio.CanFail
 
+import scala.annotation.switch
 import zio.internal.Stack
 import zio.prelude._
 
@@ -221,7 +222,9 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * a computation that does not fail, but succeeds with the value of the left
    * or righr function passed to `fold`.
    */
-  final def fold[S3 >: S2 <: S1, B](failure: E => B, success: A => B): ZPure[S3, S3, R, Nothing, B] =
+  final def fold[S3 >: S2 <: S1, B](failure: E => B, success: A => B)(implicit
+    canFail: CanFail[E]
+  ): ZPure[S3, S3, R, Nothing, B] =
     self.foldM(e => ZPure.succeed(failure(e)), a => ZPure.succeed(success(a)))
 
   /**
@@ -231,7 +234,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def foldM[S0 <: S1, S3, R1 <: R, E1, B](
     failure: E => ZPure[S0, S3, R1, E1, B],
     success: A => ZPure[S2, S3, R1, E1, B]
-  ): ZPure[S0, S3, R1, E1, B] =
+  )(implicit canFail: CanFail[E1]): ZPure[S0, S3, R1, E1, B] =
     Fold(self, failure, success)
 
   /**

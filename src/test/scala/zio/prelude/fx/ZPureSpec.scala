@@ -1,5 +1,6 @@
 package zio.prelude.fx
 
+import zio.CanFail
 import zio.prelude._
 import zio.random.Random
 import zio.test.Assertion.isLeft
@@ -218,7 +219,7 @@ object ZPureSpec extends DefaultRunnableSpec {
             },
             testM("success") {
               check(genInt, genInt, genIntToInt, genIntToInt) { (s1, a1, failure, success) =>
-                val (s2, a2) = ZPure.succeed[Int, Int](a1).fold(failure, success).run(s1)
+                val (s2, a2) = ZPure.succeed[Int, Int](a1).fold(failure, success)(CanFail).run(s1)
                 assert(s2)(equalTo(s1)) && assert(a2)(equalTo(success(a1)))
               }
             }
@@ -230,7 +231,7 @@ object ZPureSpec extends DefaultRunnableSpec {
               val result  = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
-              )
+              )(CanFail)
               assert(result.run(10))(equalTo((11, 0)))
             },
             test("success") {
@@ -239,7 +240,7 @@ object ZPureSpec extends DefaultRunnableSpec {
               val result  = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
-              )
+              )(CanFail)
               assert(result.run(10))(equalTo((12, 2)))
             }
           )
