@@ -279,7 +279,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * Executes this computation and returns its value, if it succeeds, but
    * otherwise fails with the specified error.
    */
-  final def orElseFail[E1](e1: => E1): ZPure[S1, S2, R, E1, A] =
+  final def orElseFail[E1](e1: => E1)(implicit ev: CanFail[E]): ZPure[S1, S2, R, E1, A] =
     orElse(fail(e1))
 
   /**
@@ -296,14 +296,16 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * Executes this computation and returns its value, if it succeeds, but
    * otherwise succeeds with the specified value.
    */
-  final def orElseSucceed[A1 >: A](a1: => A1): ZPure[S1, Any, R, Nothing, A1] =
+  final def orElseSucceed[A1 >: A](a1: => A1)(implicit ev: CanFail[E]): ZPure[S1, Any, R, Nothing, A1] =
     orElse(succeed(a1))
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
    * otherwise fallbacks to the new state with the specified value.
    */
-  final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3): ZPure[S1, S3, R, Nothing, A1] =
+  final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3)(implicit
+    ev: CanFail[E]
+  ): ZPure[S1, S3, R, Nothing, A1] =
     orElse(succeed(a1).mapState(_ => s3))
 
   /**

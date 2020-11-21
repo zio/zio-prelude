@@ -188,7 +188,7 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           testM("orElseSucceed (Success case)") {
             check(genInt, genInt, genInt) { (s1, v, v1) =>
-              val (_, a) = ZPure.succeed(v).orElseSucceed(v1).run(s1)
+              val (_, a) = ZPure.succeed(v).orElseSucceed(v1)(CanFail).run(s1)
               assert(a)(equalTo(v))
             }
           },
@@ -200,7 +200,7 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           testM("orElseFallback (Success case)") {
             check(genInt, genInt, genInt, genInt) { (s1, s3, v, v1) =>
-              val (s, a) = ZPure.succeed(v).orElseFallback(v1, s3).run(s1)
+              val (s, a) = ZPure.succeed(v).orElseFallback(v1, s3)(CanFail).run(s1)
               assert(a)(equalTo(v)) && assert(s)(equalTo(s1))
             }
           },
