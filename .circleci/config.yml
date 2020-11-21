@@ -47,6 +47,7 @@ install_jdk: &install_jdk
         elif [ $JDK_VERSION == 8 ]; then
           sudo apt install -y --no-install-recommends openjdk-8-jre-headless
           ls -alh /usr/lib/jvm/
+          sudo update-alternatives --list java
           sudo update-alternatives --set java /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java
         fi
         java -version
