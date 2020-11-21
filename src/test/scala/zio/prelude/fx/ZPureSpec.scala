@@ -10,6 +10,9 @@ object ZPureSpec extends DefaultRunnableSpec {
   lazy val genInt: Gen[Random, Int] =
     Gen.anyInt
 
+  lazy val genString: Gen[Random with Sized, String] =
+    Gen.anyString
+
   lazy val genIntIntToInt: Gen[Random, (Int, Int) => Int] =
     Gen.function2(genInt)
 
@@ -162,6 +165,48 @@ object ZPureSpec extends DefaultRunnableSpec {
             check(genInt, genInt) { (s1, e) =>
               val (s2, a) = ZPure.fail(e).either.run(s1)
               assert(s2)(equalTo(s1)) && assert(a)(isLeft(equalTo(e)))
+            }
+          },
+          testM("orElseFail") {
+            check(genInt, genInt, genString) { (s1, e, e1) =>
+              val errorOrUpdate = ZPure.fail(e).orElseFail(e1).runEither(s1)
+              assert(errorOrUpdate)(isLeft(equalTo(e1)))
+            }
+          },
+          testM("orElseOptional (Some case)") {
+            check(genInt, genString, genString) { (s1, e, e1) =>
+              val errorOrUpdate = ZPure.fail(Some(e)).orElseOptional(ZPure.fail(Some(e1))).runEither(s1)
+              assert(errorOrUpdate)(isLeft(equalTo(Option(e))))
+            }
+          },
+          testM("orElseOptional (None case)") {
+            check(genInt, genString) { (s1, e) =>
+              val errorOrUpdate = ZPure.fail(Option.empty[String]).orElseOptional(ZPure.fail(Some(e))).runEither(s1)
+              assert(errorOrUpdate)(isLeft(equalTo(Option(e))))
+            }
+          },
+          testM("orElseSucceed (Success case)") {
+            check(genInt, genInt, genInt) { (s1, v, v1) =>
+              val (_, a) = ZPure.succeed(v).orElseSucceed(v1).run(s1)
+              assert(a)(equalTo(v))
+            }
+          },
+          testM("orElseSucceed (Failure case)") {
+            check(genInt, genString, genInt) { (s1, e, v1) =>
+              val (_, a) = ZPure.fail(e).orElseSucceed(v1).run(s1)
+              assert(a)(equalTo(v1))
+            }
+          },
+          testM("orElseFallback (Success case)") {
+            check(genInt, genInt, genInt, genInt) { (s1, s3, v, v1) =>
+              val (s, a) = ZPure.succeed(v).orElseFallback(v1, s3).run(s1)
+              assert(a)(equalTo(v)) && assert(s)(equalTo(s1))
+            }
+          },
+          testM("orElseFallback (Failure case)") {
+            check(genInt, genInt, genString, genInt) { (s1, s3, e, v1) =>
+              val (s, a) = ZPure.fail(e).orElseFallback(v1, s3).run(s1)
+              assert(a)(equalTo(v1)) && assert(s)(equalTo(s3))
             }
           },
           suite("fold")(
