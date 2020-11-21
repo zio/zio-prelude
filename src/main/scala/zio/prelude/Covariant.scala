@@ -30,7 +30,7 @@ trait CovariantSubset[F[+_], Subset[_]] {
  * `String => Int` that returns the length of a string, then we can construct
  * a `List[Int]` with the length of each string.
  */
-trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] {
+trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] { self =>
   final def mapSubset[A, B: AnyType](f: A => B): F[A] => F[B] = map(f)
 
   /**
@@ -40,6 +40,10 @@ trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] {
 
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => map(f.to)(fa), (fb: F[B]) => map(f.from)(fb))
+
+  final def compose[G[+_]](g: Covariant[G]): Covariant[Lambda[+[A] => F[G[A]]]] = new Covariant[Lambda[+[A] => F[G[A]]]] {
+    def map[A, B](f: A => B): F[G[A]] => F[G[B]] = self.map(g.map(f))
+  }
 }
 
 object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
