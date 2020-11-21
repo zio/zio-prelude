@@ -127,6 +127,12 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     map(Some(_))
 
   /**
+   * Maps the output state to a constant value
+   */
+  final def asState[S3](s: S3): ZPure[S1, S3, R, E, A] =
+    mapState(_ => s)
+
+  /**
    * Maps the error value of this computation to the optional value.
    */
   final def asSomeError: ZPure[S1, S2, R, Option[E], A] =

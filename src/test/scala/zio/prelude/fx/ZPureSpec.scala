@@ -142,6 +142,11 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(State.set(s2).run(s1))(equalTo((s2, ())))
             }
           },
+          testM("asState") {
+            check(genInt, genInt, genInt) { (s1, s2, s3) =>
+              assert(State.set(s2).asState(s3).run(s1))(equalTo((s3, ())))
+            }
+          },
           testM("succeed") {
             check(genInt, genInt) { (s, a) =>
               assert(State.succeed(a).run(s))(equalTo((s, a)))
