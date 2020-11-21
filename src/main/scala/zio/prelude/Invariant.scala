@@ -32,9 +32,13 @@ trait Invariant[F[_]] { self =>
   def compositionLaw[A, B, C](fa: F[A], f: A <=> B, g: B <=> C)(implicit equal: Equal[F[C]]): Boolean =
     (invmap(f) >>> invmap(g)).to(fa) === invmap(f andThen g).to(fa)
 
-  final def composeInvariant[G[_]](g: Invariant[G]): Invariant[Lambda[A => F[G[A]]]] = new Invariant[Lambda[A => F[G[A]]]] {
-    def invmap[A, B](f: A <=> B): F[G[A]] <=> F[G[B]] = self.invmap(g.invmap(f))
-  }
+  /**
+   * Compose two invariant functors.
+   */
+  final def composeInvariant[G[_]](g: Invariant[G]): Invariant[({ type lambda[A] = F[G[A]] })#lambda] =
+    new Invariant[({ type lambda[A] = F[G[A]] })#lambda] {
+      def invmap[A, B](f: A <=> B): F[G[A]] <=> F[G[B]] = self.invmap(g.invmap(f))
+    }
 }
 
 object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpecific {

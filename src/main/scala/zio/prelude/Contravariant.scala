@@ -43,13 +43,21 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 
-  final def compose[G[-_]](g: Contravariant[G]): Covariant[Lambda[+[A] => F[G[A]]]] = new Covariant[Lambda[+[A] => F[G[A]]]] {
-    def map[A, B](f: A => B): F[G[A]] => F[G[B]] = self.contramap(g.contramap(f))
-  }
+  /**
+   * Compose two contravariant functors.
+   */
+  final def compose[G[-_]](g: Contravariant[G]): Covariant[({ type lambda[+A] = F[G[A]] })#lambda] =
+    new Covariant[({ type lambda[+A] = F[G[A]] })#lambda] {
+      def map[A, B](f: A => B): F[G[A]] => F[G[B]] = self.contramap(g.contramap(f))
+    }
 
-  final def compose[G[+_]](g: Covariant[G]): Contravariant[Lambda[-[A] => F[G[A]]]] = new Contravariant[Lambda[-[A] => F[G[A]]]] {
-    def contramap[A, B](f: B => A): F[G[A]] => F[G[B]] = self.contramap(g.map(f))
-  }
+  /**
+   * Compose contravariant and covariant functors.
+   */
+  final def compose[G[+_]](g: Covariant[G]): Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] =
+    new Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] {
+      def contramap[A, B](f: B => A): F[G[A]] => F[G[B]] = self.contramap(g.map(f))
+    }
 }
 
 object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
