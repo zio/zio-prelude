@@ -1,6 +1,6 @@
 package zio.prelude.fx
 
-import zio.CanFail
+import zio.{ CanFail, NeedsEnv }
 
 import scala.annotation.switch
 import zio.internal.Stack
@@ -42,7 +42,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def +++[S0 <: S1, S3 >: S2, R1, B, E1 >: E](
     that: ZPure[S0, S3, R1, E1, B]
-  ): ZPure[S0, S3, Either[R, R1], E1, Either[A, B]] =
+  )(implicit evL: NeedsEnv[R], evR: NeedsEnv[R1]): ZPure[S0, S3, Either[R, R1], E1, Either[A, B]] =
     ZPure.accessM(_.fold(self.provide(_).map(Left(_)), that.provide(_).map(Right(_))))
 
   /**
@@ -98,7 +98,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def |||[S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
     that: ZPure[S0, S3, R1, E1, A1]
-  ): ZPure[S0, S3, Either[R, R1], E1, A1] =
+  )(implicit evL: NeedsEnv[R], evR: NeedsEnv[R1]): ZPure[S0, S3, Either[R, R1], E1, A1] =
     ZPure.accessM(_.fold(self.provide, that.provide))
 
   /**
@@ -309,7 +309,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   /**
    * Provides this computation with its required environment.
    */
-  final def provide(r: R): ZPure[S1, S2, Any, E, A] =
+  final def provide(r: R)(implicit ev: NeedsEnv[R]): ZPure[S1, S2, Any, E, A] =
     ZPure.Provide(r, self)
 
   /**
