@@ -44,6 +44,10 @@ trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] { s
   final def compose[G[+_]](g: Covariant[G]): Covariant[Lambda[+[A] => F[G[A]]]] = new Covariant[Lambda[+[A] => F[G[A]]]] {
     def map[A, B](f: A => B): F[G[A]] => F[G[B]] = self.map(g.map(f))
   }
+
+  final def compose[G[-_]](g: Contravariant[G]): Contravariant[Lambda[-[A] => F[G[A]]]] = new Contravariant[Lambda[-[A] => F[G[A]]]] {
+    def contramap[A, B](f: B => A): F[G[A]] => F[G[B]] = self.map(g.contramap(f))
+  }
 }
 
 object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
