@@ -1,9 +1,12 @@
 package zio.prelude
 
+import zio.blocking.Blocking
 import zio.prelude.newtypes.Sum
 import zio.test._
-import zio.blocking.Blocking
 
+import com.github.ghik.silencer.silent
+
+@silent
 object IdentityParIterableSpec extends DefaultRunnableSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
