@@ -123,7 +123,7 @@ mdoc: &mdoc
     - run:
         name: Generate documentation
         command: |
-          ./sbt doc
+          ./sbt coreJVM/doc coreJS/doc
           ./sbt ++${SCALA_VERSION}! docs/mdoc
     - <<: *clean_cache
     - <<: *save_cache
