@@ -40,6 +40,17 @@ object CoherentSpec extends DefaultRunnableSpec {
 
         assert(instance.combine(Sum(1), Sum(5)))(equalTo(Sum(6))) &&
         assert(instance.equal(Sum(5), Sum(5)))(isTrue)
+      },
+      test("EqualInverse") {
+        val instance = implicitly[EqualInverse[Sum[Int]]]
+
+        assert(instance.inverse(Sum(42), Sum(20)))(equalTo(Sum(22))) &&
+        assert(instance.multiply(5)(Sum(2)))(equalTo(Sum(10))) &&
+        assert(instance.multiply(0)(Sum(2)))(equalTo(Sum(0))) &&
+        assert(instance.multiply(-5)(Sum(2)))(equalTo(Sum(-10))) &&
+        assert(instance.multiplyOption(5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(10)))) &&
+        assert(instance.multiplyOption(0)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(0)))) &&
+        assert(instance.multiplyOption(-5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(-10))))
       }
     )
 }

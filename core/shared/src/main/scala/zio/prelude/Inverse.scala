@@ -28,10 +28,10 @@ trait Inverse[A] extends Identity[A] {
   def multiply(n: Int)(a: A): A = {
     @tailrec
     def multiplyHelper(res: A, n: Int): A =
-      if (n == 0) identity
+      if (n == 0) res
       else if (n > 0) multiplyHelper(combine(a, res), n - 1)
       else multiplyHelper(inverse(res, a), n + 1)
-    multiplyHelper(a, n)
+    multiplyHelper(identity, n)
   }
 
   override def multiplyOption(n: Int)(a: A): Some[A] =
