@@ -31,6 +31,13 @@ import zio.{ Chunk, NonEmptyChunk }
  */
 trait Associative[A] {
   def combine(l: => A, r: => A): A
+  def multiplyOption(n: Int)(a: A): Option[A] = {
+    def multiplyHelper(res: A, n: Int): Option[A] =
+      if (n <= 0) None
+      else if (n == 1) Some(res)
+      else multiplyHelper(combine(a, res), n - 1)
+    multiplyHelper(a, n)
+  }
 }
 
 object Associative extends Lawful[AssociativeEqual] {

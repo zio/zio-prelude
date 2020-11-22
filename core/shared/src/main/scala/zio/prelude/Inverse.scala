@@ -1,5 +1,7 @@
 package zio.prelude
 
+import scala.annotation.tailrec
+
 import zio.prelude.coherent.EqualInverse
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
@@ -22,6 +24,16 @@ import zio.test.laws.{ Lawful, Laws }
  */
 trait Inverse[A] extends Identity[A] {
   def inverse(l: => A, r: => A): A
+  def multiply(n: Int)(a: A): A =
+    (multiplyOption(n)(a)).getOrElse(identity)
+  override def multiplyOption(n: Int)(a: A): Option[A] = {
+    @tailrec
+    def multiplyHelper(res: A, n: Int): Option[A] =
+      if (n <= 0) None
+      else if (n == 1) Some(res)
+      else multiplyHelper(inverse(a, res), n - 1)
+    multiplyHelper(a, n)
+  }
 }
 
 object Inverse extends Lawful[EqualInverse] {
