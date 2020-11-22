@@ -1,6 +1,7 @@
 package zio.prelude.fx
 
 import scala.annotation.switch
+import scala.util.Try
 
 import zio.internal.Stack
 import zio.prelude._
@@ -500,10 +501,46 @@ object ZPure {
     fromFunction(_._1)
 
   /**
+   * Constructs a computation from an effect that may throw.
+   */
+  def fromEffect[S, A](effect: => A): ZPure[S, S, Any, Throwable, A] =
+    suspend {
+      try ZPure.succeed(effect)
+      catch {
+        case t: VirtualMachineError => throw t
+        case t: Throwable           => ZPure.fail(t)
+      }
+    }
+
+  /**
+   * Constructs a computation from an `Either`.
+   */
+  def fromEither[S, L, R](either: Either[L, R]): ZPure[S, S, Any, L, R] =
+    either.fold(l => ZPure.fail(l), r => ZPure.succeed(r))
+
+  /**
    * Constructs a computation from a function.
    */
   def fromFunction[S, R, A](f: R => A): ZPure[S, S, R, Nothing, A] =
     access(f)
+
+  /**
+   * Constructs a computation from an `Option`.
+   */
+  def fromOption[S, A](option: Option[A]): ZPure[S, S, Any, Unit, A] =
+    option match {
+      case Some(a) => ZPure.succeed(a)
+      case None    => ZPure.fail(())
+    }
+
+  /**
+   * Constructs a computation from a `scala.util.Try`.
+   */
+  def fromTry[S, A](t: Try[A]): ZPure[S, S, Any, Throwable, A] =
+    fromEffect(t).flatMap {
+      case scala.util.Success(v) => ZPure.succeed(v)
+      case scala.util.Failure(t) => ZPure.fail(t)
+    }
 
   /**
    * Maps each element of a collection to a computation and combines them all
@@ -543,6 +580,12 @@ object ZPure {
    */
   def succeed[S, A](a: A): ZPure[S, S, Any, Nothing, A] =
     Succeed(a)
+
+  /**
+   * Returns a lazily constructed computation, whose construction may itself require effects.
+   */
+  def suspend[S1, S2, R, E, A](pure: => ZPure[S1, S2, R, E, A]): ZPure[S1, S2, R, E, A] =
+    ZPure.unit.flatMap(_ => pure)
 
   /**
    * Constructs a computation that always returns the `Unit` value, passing the

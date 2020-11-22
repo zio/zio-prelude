@@ -1,9 +1,11 @@
 package zio.prelude.fx
 
+import scala.util.Try
+
 import zio.CanFail
 import zio.prelude._
 import zio.random.Random
-import zio.test.Assertion.isLeft
+import zio.test.Assertion.{ isLeft, isRight }
 import zio.test._
 
 object ZPureSpec extends DefaultRunnableSpec {
@@ -260,6 +262,47 @@ object ZPureSpec extends DefaultRunnableSpec {
             check(genInt) { e =>
               assert(ZPure.fail(e).runEither(()))(isLeft(equalTo(e)))
             }
+          },
+          testM("fromEither (Left)") {
+            check(genString) { l =>
+              assert(ZPure.fromEither(Left(l)).runEither(()))(isLeft(equalTo(l)))
+            }
+          },
+          testM("fromEither (Right)") {
+            check(genString) { r =>
+              val (_, a) = ZPure.fromEither(Right(r)).run(())
+              assert(a)(equalTo(r))
+            }
+          },
+          test("fromOption (None)") {
+            assert(ZPure.fromOption(Option.empty[String]).runEither(()))(isLeft(equalTo(())))
+          },
+          testM("fromOption (Some)") {
+            check(genInt) { a =>
+              assert(ZPure.fromOption(Option(a)).runEither(()))(isRight(equalTo(((), a))))
+            }
+          },
+          testM("fromTry (Success case)") {
+            check(genInt) { a =>
+              assert(ZPure.fromTry(Try(a)).runEither(()))(isRight(equalTo(((), a))))
+            }
+          },
+          test("fromTry (Failure case)") {
+            implicit val throwableHash = Equal.ThrowableHash
+            assert(ZPure.fromTry(Try("a".toInt)).runEither(()))(
+              isLeft(equalTo(new NumberFormatException("""For input string: "a"""")))
+            )
+          },
+          testM("fromEffect (Success case)") {
+            check(genInt) { a =>
+              assert(ZPure.fromEffect(a).runEither(()))(isRight(equalTo(((), a))))
+            }
+          },
+          test("fromEffect (Failure case)") {
+            implicit val throwableHash = Equal.ThrowableHash
+            assert(ZPure.fromEffect("a".toInt).runEither(()))(
+              isLeft(equalTo(new NumberFormatException("""For input string: "a"""")))
+            )
           }
         )
       )
