@@ -18,7 +18,7 @@ inThisBuild(
     pgpSecretRing := file("/tmp/secret.asc"),
     scmInfo := Some(
       ScmInfo(url("https://github.com/zio/zio-prelude/"), "scm:git:git@github.com:zio/zio-prelude.git")
-    ),
+    )
   )
 )
 
@@ -60,8 +60,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= {
       val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
       Seq(
-        "dev.zio" %%% "zio"          % zioVersion,
-        "dev.zio" %%% "zio-test"     % zioVersion,
+        "dev.zio" %%% "zio"      % zioVersion,
+        "dev.zio" %%% "zio-test" % zioVersion
       ) ++
         (scalaVersion.value match {
           case BuildHelper.Scala213   => spc
@@ -73,11 +73,11 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
-lazy val coreJS = core.js
+lazy val coreJS     = core.js
   .settings(jsSettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
 
-lazy val coreJVM = core.jvm
+lazy val coreJVM    = core.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
 
@@ -86,7 +86,7 @@ lazy val coreNative = core.native
   .settings(crossScalaVersions := Seq(scalaVersion.value))
   .settings(skip in Test := true)
   .settings(skip in doc := true)
-  .settings( // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
+  .settings(       // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
     SettingKey[Boolean]("ide-skip-project") := true
   )
   .settings(sources in (Compile, doc) := Seq.empty)
