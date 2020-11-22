@@ -2,6 +2,7 @@ package zio.prelude.fx
 
 import java.util.NoSuchElementException
 
+import zio.CanFail
 import zio.prelude._
 import zio.random.Random
 import zio.test.Assertion.{ anything, isLeft, isNone, isRight, isSome, isSubtype }
@@ -11,6 +12,9 @@ object ZPureSpec extends DefaultRunnableSpec {
 
   lazy val genInt: Gen[Random, Int] =
     Gen.anyInt
+
+  lazy val genString: Gen[Random with Sized, String] =
+    Gen.anyString
 
   lazy val genIntIntToInt: Gen[Random, (Int, Int) => Int] =
     Gen.function2(genInt)
@@ -141,6 +145,11 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(State.set(s2).run(s1))(equalTo((s2, ())))
             }
           },
+          testM("asState") {
+            check(genInt, genInt, genInt) { (s1, s2, s3) =>
+              assert(State.set(s2).asState(s3).run(s1))(equalTo((s3, ())))
+            }
+          },
           testM("succeed") {
             check(genInt, genInt) { (s, a) =>
               assert(State.succeed(a).run(s))(equalTo((s, a)))
@@ -166,6 +175,50 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(s2)(equalTo(s1)) && assert(a)(isLeft(equalTo(e)))
             }
           },
+          testM("orElseFail") {
+            check(genInt, genInt, genString) { (s1, e, e1) =>
+              val errorOrUpdate = ZPure.fail(e).orElseFail(e1).runEither(s1)
+              assert(errorOrUpdate)(isLeft(equalTo(e1)))
+            }
+          },
+          testM("orElseOptional (Some case)") {
+            check(genInt, genString, genString) { (s1, e, e1) =>
+              val errorOrUpdate = ZPure.fail(Some(e)).orElseOptional(ZPure.fail(Some(e1))).runEither(s1)
+              assert(errorOrUpdate)(isLeft(equalTo(Option(e))))
+            }
+          },
+          testM("orElseOptional (None case)") {
+            check(genInt, genString) { (s1, e) =>
+              val errorOrUpdate = ZPure.fail(Option.empty[String]).orElseOptional(ZPure.fail(Some(e))).runEither(s1)
+              assert(errorOrUpdate)(isLeft(equalTo(Option(e))))
+            }
+          },
+          testM("orElseSucceed (Success case)") {
+            implicit val canFail = CanFail
+            check(genInt, genInt, genInt) { (s1, v, v1) =>
+              val (_, a) = ZPure.succeed(v).orElseSucceed(v1).run(s1)
+              assert(a)(equalTo(v))
+            }
+          },
+          testM("orElseSucceed (Failure case)") {
+            check(genInt, genString, genInt) { (s1, e, v1) =>
+              val (_, a) = ZPure.fail(e).orElseSucceed(v1).run(s1)
+              assert(a)(equalTo(v1))
+            }
+          },
+          testM("orElseFallback (Success case)") {
+            implicit val canFail = CanFail
+            check(genInt, genInt, genInt, genInt) { (s1, s3, v, v1) =>
+              val (s, a) = ZPure.succeed[Int, Int](v).orElseFallback(v1, s3).run(s1)
+              assert(a)(equalTo(v)) && assert(s)(equalTo(s1))
+            }
+          },
+          testM("orElseFallback (Failure case)") {
+            check(genInt, genInt, genString, genInt) { (s1, s3, e, v1) =>
+              val (s, a) = ZPure.fail(e).orElseFallback(v1, s3).run(s1)
+              assert(a)(equalTo(v1)) && assert(s)(equalTo(s3))
+            }
+          },
           suite("fold")(
             testM("failure") {
               check(genInt, genInt, genIntToInt, genIntToInt) { (s1, e, failure, success) =>
@@ -174,6 +227,7 @@ object ZPureSpec extends DefaultRunnableSpec {
               }
             },
             testM("success") {
+              implicit val canFail = CanFail
               check(genInt, genInt, genIntToInt, genIntToInt) { (s1, a1, failure, success) =>
                 val (s2, a2) = ZPure.succeed[Int, Int](a1).fold(failure, success).run(s1)
                 assert(s2)(equalTo(s1)) && assert(a2)(equalTo(success(a1)))
@@ -182,18 +236,20 @@ object ZPureSpec extends DefaultRunnableSpec {
           ),
           suite("foldM")(
             test("failure") {
-              val failing =
+              implicit val canFail = CanFail
+              val failing          =
                 ZPure.succeed[Int, Int](1).flatMap(n => if (n % 2 !== 0) ZPure.fail("fail") else ZPure.succeed(n))
-              val result  = failing.foldM(
+              val result           = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
               )
               assert(result.run(10))(equalTo((11, 0)))
             },
             test("success") {
-              val failing =
+              implicit val canFail = CanFail
+              val failing          =
                 ZPure.succeed[Int, Int](2).flatMap(n => if (n % 2 !== 0) ZPure.fail("fail") else ZPure.succeed(n))
-              val result  = failing.foldM(
+              val result           = failing.foldM(
                 _ => State.update[Int, Int](_ + 1) *> ZPure.succeed(0),
                 a => State.update[Int, Int](_ + 2) *> ZPure.succeed(a)
               )

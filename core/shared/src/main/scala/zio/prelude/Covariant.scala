@@ -30,7 +30,7 @@ trait CovariantSubset[F[+_], Subset[_]] {
  * `String => Int` that returns the length of a string, then we can construct
  * a `List[Int]` with the length of each string.
  */
-trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] {
+trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] { self =>
   final def mapSubset[A, B: AnyType](f: A => B): F[A] => F[B] = map(f)
 
   /**
@@ -38,8 +38,28 @@ trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] {
    */
   def map[A, B](f: A => B): F[A] => F[B]
 
+  def fproduct[A, B](f: A => B): F[A] => F[(A, B)] = map(a => a -> f(a))
+
+  def fproductLeft[A, B](f: A => B): F[A] => F[(B, A)] = map(a => f(a) -> a)
+
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => map(f.to)(fa), (fb: F[B]) => map(f.from)(fb))
+
+  /**
+   * Compose two covariant functors.
+   */
+  final def compose[G[+_]](g: Covariant[G]): Covariant[({ type lambda[+A] = F[G[A]] })#lambda] =
+    new Covariant[({ type lambda[+A] = F[G[A]] })#lambda] {
+      def map[A, B](f: A => B): F[G[A]] => F[G[B]] = self.map(g.map(f))
+    }
+
+  /**
+   * Compose covariant and contravariant functors.
+   */
+  final def compose[G[-_]](g: Contravariant[G]): Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] =
+    new Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] {
+      def contramap[A, B](f: B => A): F[G[A]] => F[G[B]] = self.map(g.contramap(f))
+    }
 }
 
 object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
@@ -87,6 +107,12 @@ trait CovariantSyntax {
 
     def map[B](f: A => B)(implicit F: Covariant[F]): F[B] =
       F.map(f)(self)
+
+    def fproduct[B](f: A => B)(implicit F: Covariant[F]): F[(A, B)] =
+      F.fproduct[A, B](f)(self)
+
+    def fproductLeft[B](f: A => B)(implicit F: Covariant[F]): F[(B, A)] =
+      F.fproductLeft[A, B](f)(self)
 
     def unit(implicit F: Covariant[F]): F[Unit] = as(())
   }

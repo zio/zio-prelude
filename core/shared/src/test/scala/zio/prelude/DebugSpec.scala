@@ -11,7 +11,7 @@ object DebugSpec extends DefaultRunnableSpec {
   def primitiveTest[A: Debug](renderer: Renderer)(a: A, exp: Option[String] = None): TestResult =
     assert(a.debug.render(renderer))(equalTo(exp.getOrElse(a.toString)))
 
-  def primScalaTest[A: Debug](a: A): TestResult                              = primitiveTest[A](Renderer.Scala)(a)
+  def primScalaTest[A: Debug](a: A, exp: Option[String] = None): TestResult  = primitiveTest[A](Renderer.Scala)(a, exp)
   def primSimpleTest[A: Debug](a: A, exp: Option[String] = None): TestResult = primitiveTest[A](Renderer.Simple)(a, exp)
   def primFullTest[A: Debug](a: A, exp: Option[String] = None): TestResult   = primitiveTest[A](Renderer.Full)(a, exp)
 
@@ -47,7 +47,7 @@ object DebugSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("DebugSpec")(
       suite("ScalaRenderer")(
-        testM("unit")(check(Gen.unit)(primScalaTest(_))),
+        testM("unit")(check(Gen.unit)(primScalaTest(_, Some("()")))),
         testM("int")(check(Gen.anyInt)(primFullTest(_))),
         testM("double")(check(Gen.anyDouble)(primScalaTest(_))),
         testM("float")(check(Gen.anyFloat)(primScalaTest(_))),
@@ -76,7 +76,7 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("testTrait")(check(genTestTrait)(primScalaTest(_)))
       ),
       suite("SimpleRenderer")(
-        testM("unit")(check(Gen.unit)(primSimpleTest(_))),
+        testM("unit")(check(Gen.unit)(primSimpleTest(_, Some("()")))),
         testM("int")(check(Gen.anyInt)(primSimpleTest(_))),
         testM("double")(check(Gen.anyDouble)(primSimpleTest(_))),
         testM("float")(check(Gen.anyFloat)(f => primSimpleTest(f, Some(s"${f.toString}f")))),

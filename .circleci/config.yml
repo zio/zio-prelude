@@ -18,6 +18,9 @@ jdk_8: &jdk_8
 jdk_11: &jdk_11
   JDK_VERSION: 11
 
+machine_resource: &machine_resource
+  resource_class: large
+
 machine_ubuntu: &machine_ubuntu
   machine:
     image: ubuntu-1604:201903-01
@@ -42,9 +45,11 @@ install_jdk: &install_jdk
         fi
         sudo apt update
         if [ $JDK_VERSION == 11 ]; then
-          sudo apt install -y adoptopenjdk-11-hotspot
+          sudo apt install -y --no-install-recommends adoptopenjdk-11-hotspot-jre
+          sudo update-alternatives --set java /usr/lib/jvm/adoptopenjdk-11-hotspot-jre-amd64/bin/java
         elif [ $JDK_VERSION == 8 ]; then
-          sudo apt install -y openjdk-8-jdk
+          sudo apt install -y --no-install-recommends openjdk-8-jre-headless
+          sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
         fi
         java -version
 
@@ -121,23 +126,37 @@ mdoc: &mdoc
     - run:
         name: Generate documentation
         command: |
-          ./sbt doc
+          ./sbt coreJVM/doc coreJS/doc
           ./sbt ++${SCALA_VERSION}! docs/mdoc
     - <<: *clean_cache
     - <<: *save_cache
 
-test: &test
+testJS: &testJS
+  steps:
+    - checkout
+    - <<: *load_cache
+    - <<: *install_jdk
+    - <<: *install_nodejs
+    - run:
+        name: Run tests
+        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! testJS
+    - <<: *clean_cache
+    - <<: *save_cache
+    - store_test_results:
+        path: core/js/target/test-reports
+
+testJVM: &testJVM
   steps:
     - checkout
     - <<: *load_cache
     - <<: *install_jdk
     - run:
         name: Run tests
-        command: ./sbt ++${SCALA_VERSION}! test
+        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! testJVM
     - <<: *clean_cache
     - <<: *save_cache
     - store_test_results:
-        path: target/test-reports
+        path: core/jvm/target/test-reports
 
 release: &release
   steps:
@@ -146,7 +165,7 @@ release: &release
           name: Fetch git tags
           command: git fetch --tags
       - <<: *load_cache
-      - run: 
+      - run:
           name: Write sonatype credentials
           command: echo "credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", \"${SONATYPE_USER}\", \"${SONATYPE_PASSWORD}\")" > ~/.sbt/1.0/sonatype.sbt
       - run:
@@ -213,53 +232,77 @@ jobs:
       - <<: *jdk_8
 
   test_211_jdk8_jvm:
-    <<: *test
+    <<: *testJVM
     <<: *machine_ubuntu
     environment:
       - <<: *scala_211
       - <<: *jdk_8
 
   test_212_jdk8_jvm:
-    <<: *test
+    <<: *testJVM
     <<: *machine_ubuntu
     environment:
       - <<: *scala_212
       - <<: *jdk_8
 
   test_213_jdk8_jvm:
-    <<: *test
+    <<: *testJVM
     <<: *machine_ubuntu
     environment:
       - <<: *scala_213
       - <<: *jdk_8
 
   test_dotty_jdk8_jvm:
-    <<: *test
+    <<: *testJVM
     <<: *machine_ubuntu
     environment:
       - <<: *scala_dotty
       - <<: *jdk_8
 
   test_212_jdk11_jvm:
-    <<: *test
+    <<: *testJVM
     <<: *machine_ubuntu
     environment:
       - <<: *scala_212
       - <<: *jdk_11
 
   test_213_jdk11_jvm:
-    <<: *test
+    <<: *testJVM
     <<: *machine_ubuntu
     environment:
       - <<: *scala_213
       - <<: *jdk_11
 
   test_dotty_jdk11_jvm:
-    <<: *test
+    <<: *testJVM
     <<: *machine_ubuntu
     environment:
       - <<: *scala_dotty
       - <<: *jdk_11
+
+  test_211_jdk8_js:
+    <<: *testJS
+    <<: *machine_ubuntu
+    <<: *machine_resource
+    environment:
+      - <<: *scala_211
+      - <<: *jdk_8
+
+  test_212_jdk8_js:
+    <<: *testJS
+    <<: *machine_ubuntu
+    <<: *machine_resource
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_8
+
+  test_213_jdk8_js:
+    <<: *testJS
+    <<: *machine_ubuntu
+    <<: *machine_resource
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_8
 
   release:
     <<: *release
@@ -322,6 +365,21 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
+      - test_211_jdk8_js:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_212_jdk8_js:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_213_jdk8_js:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
       - release:
           context: Sonatype2
           requires:
@@ -332,6 +390,9 @@ workflows:
             - test_213_jdk11_jvm
             - test_dotty_jdk8_jvm
             - test_dotty_jdk11_jvm
+            - test_211_jdk8_js
+            - test_212_jdk8_js
+            - test_213_jdk8_js
             - mdoc
           filters:
             <<: *filter_tags

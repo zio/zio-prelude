@@ -24,36 +24,62 @@ inThisBuild(
 
 addCommandAlias("fix", "; all compile:scalafix test:scalafix; all scalafmtSbt scalafmtAll")
 addCommandAlias("check", "; scalafmtSbtCheck; scalafmtCheckAll; compile:scalafix --check; test:scalafix --check")
-
-val zioVersion = "1.0.3"
-libraryDependencies ++= Seq(
-  "dev.zio" %% "zio"          % zioVersion,
-  "dev.zio" %% "zio-test"     % zioVersion,
-  "dev.zio" %% "zio-test-sbt" % zioVersion
+addCommandAlias(
+  "testJVM",
+  ";coreJVM/test"
+)
+addCommandAlias(
+  "testJS",
+  ";coreJS/test"
 )
 
-testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
+val zioVersion = "1.0.3"
 
-lazy val root =
-  (project in file("."))
-    .settings(stdSettings("zio-prelude"))
-    .settings(dottySettings)
-    .settings(buildInfoSettings("zio.prelude"))
-    .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
-    .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
-      libraryDependencies ++= {
-        val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
-        scalaVersion.value match {
+lazy val root = project
+  .in(file("."))
+  .settings(
+    skip in publish := true,
+    unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
+  )
+  .aggregate(
+    coreJVM,
+    coreJS,
+    benchmarks,
+    docs
+  )
+  .enablePlugins(ScalaJSPlugin)
+
+lazy val core = crossProject(JSPlatform, JVMPlatform)
+  .in(file("core"))
+  .settings(stdSettings("zio-prelude"))
+  .settings(crossProjectSettings)
+  .settings(buildInfoSettings("zio.prelude"))
+  .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
+    libraryDependencies ++= {
+      val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
+      Seq(
+        "dev.zio" %%% "zio"          % zioVersion,
+        "dev.zio" %%% "zio-test"     % zioVersion,
+        "dev.zio" %%% "zio-test-sbt" % zioVersion
+      ) ++
+        (scalaVersion.value match {
           case BuildHelper.Scala213   => spc
           case BuildHelper.ScalaDotty => spc.map(_.withDottyCompat(scalaVersion.value))
           case _                      => List()
-        }
-      }
-    )
-    .enablePlugins(BuildInfoPlugin)
+        })
+    }
+  )
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .enablePlugins(BuildInfoPlugin)
 
-lazy val benchmarks = project
-  .in(file("zio-prelude-benchmarks"))
+lazy val coreJS = core.js
+  .settings(jsSettings)
+
+lazy val coreJVM = core.jvm
+  .settings(dottySettings)
+
+lazy val benchmarks = project.module
   .settings(
     skip.in(publish) := true,
     moduleName := "zio-prelude-benchmarks",
@@ -67,7 +93,7 @@ lazy val benchmarks = project
       }
     )
   )
-  .dependsOn(root)
+  .dependsOn(coreJVM)
   .enablePlugins(JmhPlugin)
 
 lazy val docs = project
@@ -80,11 +106,11 @@ lazy val docs = project
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio" % zioVersion
     ),
-    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(root),
+    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(coreJVM),
     target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
     cleanFiles += (target in (ScalaUnidoc, unidoc)).value,
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(unidoc in Compile).value,
     docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(unidoc in Compile).value
   )
-  .dependsOn(root)
+  .dependsOn(coreJVM, coreJS)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)

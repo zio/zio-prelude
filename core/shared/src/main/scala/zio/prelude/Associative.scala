@@ -131,6 +131,38 @@ object Associative extends Lawful[AssociativeEqual] {
     }
 
   /**
+   * The `Commutative`, `Idempotent` instance for the max of `BigDecimal` values
+   */
+  implicit val BigDecimalMaxCommutativeIdempotent: Commutative[Max[BigDecimal]] with Idempotent[Max[BigDecimal]] =
+    new Commutative[Max[BigDecimal]] with Idempotent[Max[BigDecimal]] {
+      override def combine(l: => Max[BigDecimal], r: => Max[BigDecimal]): Max[BigDecimal] = Max(l max r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` instance for the min of `BigDecimal` values
+   */
+  implicit val BigDecimalMinCommutativeIdempotent: Commutative[Min[BigDecimal]] with Idempotent[Min[BigDecimal]] =
+    new Commutative[Min[BigDecimal]] with Idempotent[Min[BigDecimal]] {
+      override def combine(l: => Min[BigDecimal], r: => Min[BigDecimal]): Min[BigDecimal] = Min(l min r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` instance for the product of `BigDecimal` values
+   */
+  implicit val BigDecimalProdCommutativeIdempotent: Commutative[Prod[BigDecimal]] with Idempotent[Prod[BigDecimal]] =
+    new Commutative[Prod[BigDecimal]] with Idempotent[Prod[BigDecimal]] {
+      override def combine(l: => Prod[BigDecimal], r: => Prod[BigDecimal]): Prod[BigDecimal] = Prod(l * r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` instance for the sum of `BigDecimal` values
+   */
+  implicit val BigDecimalSumCommutativeIdempotent: Commutative[Sum[BigDecimal]] with Idempotent[Sum[BigDecimal]] =
+    new Commutative[Sum[BigDecimal]] with Idempotent[Sum[BigDecimal]] {
+      override def combine(l: => Sum[BigDecimal], r: => Sum[BigDecimal]): Sum[BigDecimal] = Sum(l + r)
+    }
+
+  /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Byte` values.
    */
   implicit val ByteMaxIdempotentIdentity: Commutative[Max[Byte]] with Idempotent[Max[Byte]] with Identity[Max[Byte]] =
@@ -1258,7 +1290,7 @@ object Associative extends Lawful[AssociativeEqual] {
     Identity.make(Vector.empty, _ ++ _)
 }
 
-trait AssociativeSyntax {
+trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
 
   /**
    * Provides infix syntax for combining two values with an associative
@@ -1279,23 +1311,4 @@ trait AssociativeSyntax {
       associative.combine(l, r)
   }
 
-  /**
-   * Provides syntax for combining values in a `ParIterable` which is thus done in a parallel manner.
-   */
-  implicit class AssociativeParIterableOps[A](private val p: collection.parallel.immutable.ParIterable[A]) {
-
-    /**
-     * Associatively combines the values in a parallel manner,
-     * while blocking the thread.
-     */
-    def reduceAssociative(implicit associative: Associative[A]): Option[A] =
-      p.reduceOption(associative.combine(_, _))
-
-    /**
-     * Returns an effect, that associatively combines the values in a parallel manner,
-     * while ensuring the current thread isn't blocked.
-     */
-    def reduceAssociativeM(implicit associative: Associative[A]): zio.RIO[zio.blocking.Blocking, Option[A]] =
-      zio.blocking.effectBlocking(reduceAssociative)
-  }
 }
