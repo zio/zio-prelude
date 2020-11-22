@@ -32,6 +32,10 @@ addCommandAlias(
   "testJS",
   ";coreJS/test"
 )
+addCommandAlias(
+  "testNative",
+  ";coreNative/test:compile"
+)
 
 val zioVersion = "1.0.3"
 

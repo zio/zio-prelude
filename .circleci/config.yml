@@ -139,7 +139,7 @@ testJS: &testJS
     - <<: *install_nodejs
     - run:
         name: Run tests
-        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! testJS
+        command: ./sbt ++${SCALA_VERSION}! testJS
     - <<: *clean_cache
     - <<: *save_cache
     - store_test_results:
@@ -152,7 +152,7 @@ testJVM: &testJVM
     - <<: *install_jdk
     - run:
         name: Run tests
-        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! testJVM
+        command: ./sbt ++${SCALA_VERSION}! testJVM
     - <<: *clean_cache
     - <<: *save_cache
     - store_test_results:
@@ -165,7 +165,7 @@ testNative: &testNative
     - <<: *install_jdk
     - run:
         name: Run tests
-        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! compileNative
+        command: ./sbt ++${SCALA_VERSION}! testNative
     - <<: *clean_cache
     - <<: *save_cache
     - store_test_results:
