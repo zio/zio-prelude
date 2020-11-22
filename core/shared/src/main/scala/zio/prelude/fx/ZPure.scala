@@ -1,12 +1,12 @@
 package zio.prelude.fx
 
-import zio.internal.Stack
-import zio.prelude._
-import zio.{ CanFail, NeedsEnv }
-
 import scala.annotation.switch
 import scala.util.Try
 import scala.util.control.NonFatal
+
+import zio.internal.Stack
+import zio.prelude._
+import zio.{ CanFail, NeedsEnv }
 
 /**
  * `ZPure[S1, S2, R, E, A]` is a purely functional description of a computation
