@@ -2,6 +2,7 @@ package zio.prelude.fx
 
 import scala.annotation.switch
 import scala.util.Try
+import scala.util.control.NonFatal
 
 import zio.internal.Stack
 import zio.prelude._
@@ -591,8 +592,8 @@ object ZPure {
     suspend {
       try ZPure.succeed(effect)
       catch {
-        case t: VirtualMachineError => throw t
-        case t: Throwable           => ZPure.fail(t)
+        case NonFatal(e)  => ZPure.fail(e)
+        case t: Throwable => throw t
       }
     }
 
