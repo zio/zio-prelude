@@ -592,7 +592,7 @@ object ZPure {
     suspend {
       try ZPure.succeed(effect)
       catch {
-        case NonFatal(e)  => ZPure.fail(e)
+        case NonFatal(e) => ZPure.fail(e)
       }
     }
 
