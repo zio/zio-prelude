@@ -295,8 +295,8 @@ object ZPureSpec extends DefaultRunnableSpec {
               test("right") {
                 val result = ZPure
                   .succeed[Int, Either[Nothing, Int]](Right(1))
-                  .leftOrFailWith[Any, Any, String](_ => "Oh crap")
-                assert(result.runEither(0))(isLeft(equalTo("Oh crap")))
+                  .leftOrFailWith[Any, Any, String](_ => "oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("oh crap")))
               },
               test("left") {
                 val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).leftOrFail("oh crap")
