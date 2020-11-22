@@ -366,7 +366,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    * continue with our held value.
    */
   final def reject[S0 <: S1, S3 >: S2, R1 <: R, E1 >: E](pf: PartialFunction[A, E1]): ZPure[S0, S3, R1, E1, A] =
-    rejectM(pf.andThen(ZPure.fail))
+    rejectM(pf.andThen(ZPure.fail _))
 
   /**
    * Continue with the returned computation if the `PartialFunction` matches,
