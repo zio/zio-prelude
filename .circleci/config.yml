@@ -139,7 +139,7 @@ testJS: &testJS
     - <<: *install_nodejs
     - run:
         name: Run tests
-        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! testJS
+        command: ./sbt ++${SCALA_VERSION}! testJS
     - <<: *clean_cache
     - <<: *save_cache
     - store_test_results:
@@ -152,7 +152,7 @@ testJVM: &testJVM
     - <<: *install_jdk
     - run:
         name: Run tests
-        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! testJVM
+        command: ./sbt ++${SCALA_VERSION}! testJVM
     - <<: *clean_cache
     - <<: *save_cache
     - store_test_results:
@@ -165,11 +165,11 @@ testNative: &testNative
     - <<: *install_jdk
     - run:
         name: Run tests
-        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! compileNative
+        command: ./sbt ++${SCALA_VERSION}! testNative
     - <<: *clean_cache
     - <<: *save_cache
     - store_test_results:
-        path: core/jvm/target/test-reports
+        path: core/native/target/test-reports
 
 release: &release
   steps:
@@ -251,6 +251,14 @@ jobs:
       - <<: *scala_211
       - <<: *jdk_8
 
+  test_211_jdk8_js:
+    <<: *testJS
+    <<: *machine_ubuntu
+    <<: *machine_resource
+    environment:
+      - <<: *scala_211
+      - <<: *jdk_8
+
   test_211_jdk8_native:
     <<: *testNative
     <<: *machine_ubuntu
@@ -265,49 +273,6 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_8
 
-  test_213_jdk8_jvm:
-    <<: *testJVM
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_213
-      - <<: *jdk_8
-
-  test_dotty_jdk8_jvm:
-    <<: *testJVM
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_dotty
-      - <<: *jdk_8
-
-  test_212_jdk11_jvm:
-    <<: *testJVM
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_212
-      - <<: *jdk_11
-
-  test_213_jdk11_jvm:
-    <<: *testJVM
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_213
-      - <<: *jdk_11
-
-  test_dotty_jdk11_jvm:
-    <<: *testJVM
-    <<: *machine_ubuntu
-    environment:
-      - <<: *scala_dotty
-      - <<: *jdk_11
-
-  test_211_jdk8_js:
-    <<: *testJS
-    <<: *machine_ubuntu
-    <<: *machine_resource
-    environment:
-      - <<: *scala_211
-      - <<: *jdk_8
-
   test_212_jdk8_js:
     <<: *testJS
     <<: *machine_ubuntu
@@ -316,12 +281,33 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_8
 
+  test_213_jdk8_jvm:
+    <<: *testJVM
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_8
+
   test_213_jdk8_js:
     <<: *testJS
     <<: *machine_ubuntu
     <<: *machine_resource
     environment:
       - <<: *scala_213
+      - <<: *jdk_8
+
+  test_213_jdk11_jvm:
+    <<: *testJVM
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_11
+
+  test_dotty_jdk8_jvm:
+    <<: *testJVM
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_dotty
       - <<: *jdk_8
 
   release:
@@ -355,7 +341,22 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
+      - test_211_jdk8_js:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_211_jdk8_native:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
       - test_212_jdk8_jvm:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_212_jdk8_js:
           requires:
             - lint
           filters:
@@ -365,7 +366,7 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
-      - test_212_jdk11_jvm:
+      - test_213_jdk8_js:
           requires:
             - lint
           filters:
@@ -380,39 +381,18 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
-      - test_dotty_jdk11_jvm:
-          requires:
-            - lint
-          filters:
-            <<: *filter_tags
-      - test_211_jdk8_js:
-          requires:
-            - lint
-          filters:
-            <<: *filter_tags
-      - test_212_jdk8_js:
-          requires:
-            - lint
-          filters:
-            <<: *filter_tags
-      - test_213_jdk8_js:
-          requires:
-            - lint
-          filters:
-            <<: *filter_tags
       - release:
           context: Sonatype2
           requires:
             - test_211_jdk8_jvm
+            - test_211_jdk8_js
+            - test_211_jdk8_native
             - test_212_jdk8_jvm
-            - test_212_jdk11_jvm
+            - test_212_jdk8_js
             - test_213_jdk8_jvm
+            - test_213_jdk8_js
             - test_213_jdk11_jvm
             - test_dotty_jdk8_jvm
-            - test_dotty_jdk11_jvm
-            - test_211_jdk8_js
-            - test_212_jdk8_js
-            - test_213_jdk8_js
             - mdoc
           filters:
             <<: *filter_tags
