@@ -435,6 +435,51 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def runState(s: S1)(implicit ev1: Any <:< R, ev2: E <:< Nothing): S2 =
     run(s)._1
 
+  /**
+   * Converts an option on values into an option on errors leaving the state unchanged.
+   */
+  final def some[B](implicit ev: A <:< Option[B]): ZPure[S1, S2, R, Option[E], B] =
+    self.foldM(
+      e => ZPure.fail(Some(e)),
+      a => a.fold[ZPure[S2, S2, R, Option[E], B]](ZPure.fail(Option.empty))(ZPure.succeed)
+    )
+
+  /**
+   * Extracts the optional value or returns the given 'default' leaving the state unchanged.
+   */
+  final def someOrElse[B](default: => B)(implicit ev: A <:< Option[B]): ZPure[S1, S2, R, E, B] =
+    map(_.getOrElse(default))
+
+  /**
+   * Extracts the optional value or runs the specified computation passing the
+   * updated state from this computation.
+   */
+  final def someOrElseM[S3 >: S2, R1 <: R, E1 >: E, B](
+    that: ZPure[S2, S3, R1, E1, B]
+  )(implicit ev: A <:< Option[B]): ZPure[S1, S3, R1, E1, B] =
+    self.flatMap(ev(_).fold(that)(ZPure.succeed))
+
+  /**
+   * Extracts the optional value or fails with the given error 'e'.
+   */
+  final def someOrFail[B, E1 >: E](e: => E1)(implicit ev: A <:< Option[B]): ZPure[S1, S2, R, E1, B] =
+    self.flatMap(ev(_) match {
+      case Some(value) => ZPure.succeed(value)
+      case None        => ZPure.fail(e)
+    })
+
+  /**
+   * Extracts the optional value or fails with a [[java.util.NoSuchElementException]] leaving the state unchanged.
+   */
+  final def someOrFailException[B, E1 >: E](implicit
+    ev: A <:< Option[B],
+    ev2: NoSuchElementException <:< E1
+  ): ZPure[S1, S2, R, E1, B] =
+    self.flatMap(ev(_) match {
+      case Some(value) => ZPure.succeed(value)
+      case None        => ZPure.fail(new NoSuchElementException("None.get"))
+    })
+
   def tag: Int
 
   /**
