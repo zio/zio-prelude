@@ -44,12 +44,13 @@ lazy val root = project
   .aggregate(
     coreJVM,
     coreJS,
+    coreNative,
     benchmarks,
     docs
   )
   .enablePlugins(ScalaJSPlugin)
 
-lazy val core = crossProject(JSPlatform, JVMPlatform)
+lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
   .settings(stdSettings("zio-prelude"))
   .settings(crossProjectSettings)
@@ -59,9 +60,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= {
       val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
       Seq(
-        "dev.zio" %%% "zio"          % zioVersion,
-        "dev.zio" %%% "zio-test"     % zioVersion,
-        "dev.zio" %%% "zio-test-sbt" % zioVersion
+        "dev.zio" %%% "zio"      % zioVersion,
+        "dev.zio" %%% "zio-test" % zioVersion
       ) ++
         (scalaVersion.value match {
           case BuildHelper.Scala213   => spc
@@ -73,11 +73,30 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
-lazy val coreJS = core.js
+lazy val coreJS     = core.js
   .settings(jsSettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
 
-lazy val coreJVM = core.jvm
+lazy val coreJVM    = core.jvm
   .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
+
+lazy val coreNative = core.native
+  .settings(scalaVersion := Scala211)
+  .settings(crossScalaVersions := Seq(scalaVersion.value))
+  .settings(skip in Test := true)
+  .settings(skip in doc := true)
+  .settings(       // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
+    SettingKey[Boolean]("ide-skip-project") := true
+  )
+  .settings(sources in (Compile, doc) := Seq.empty)
+  .settings(
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
+  )
+  .disablePlugins(
+    ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
+  )
 
 lazy val benchmarks = project.module
   .settings(

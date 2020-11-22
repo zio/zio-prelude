@@ -16,15 +16,16 @@ object CoherentSpec extends DefaultRunnableSpec {
       },
       test("IdentityEqual") {
         val instance = implicitly[EqualIdentity[String]]
-
         assert(instance.identity)(isEmptyString) &&
         assert(instance.combine("a", "b"))(equalTo("ab")) &&
         assert(instance.equal("a", "a"))(isTrue)
       },
       test("AssociativeEqual") {
         val instance = implicitly[AssociativeEqual[String]]
-
         assert(instance.combine("a", "b"))(equalTo("ab")) &&
+        assert(instance.repeat("a")(5))(equalTo("aaaaa")) &&
+        assert(instance.repeat("a")(1))(equalTo("a")) &&
+        assert(instance.repeat("a")(0))(equalTo("a")) &&
         assert(instance.equal("a", "a"))(isTrue)
       },
       test("CommutativeEqual") {

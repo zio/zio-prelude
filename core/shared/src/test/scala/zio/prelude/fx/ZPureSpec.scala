@@ -1,5 +1,7 @@
 package zio.prelude.fx
 
+import java.util.NoSuchElementException
+
 import scala.util.Try
 
 import zio.CanFail
@@ -255,6 +257,68 @@ object ZPureSpec extends DefaultRunnableSpec {
               )
               assert(result.run(10))(equalTo((12, 2)))
             }
+          ),
+          suite("left methods")(
+            suite("left")(
+              test("failure") {
+                val result = ZPure.fail("fail").left
+                assert(result.runEither(0))(isLeft(isSome(equalTo("fail"))))
+              },
+              test("right") {
+                val result = ZPure.succeed[Int, Either[Nothing, Int]](Right(1)).left
+                assert(result.runEither(0))(isLeft(isNone))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).left
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            ),
+            suite("leftOrFail")(
+              test("failure") {
+                val result = ZPure.fail("fail").leftOrFail("oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("fail")))
+              },
+              test("right") {
+                val result = ZPure
+                  .succeed[Int, Either[Nothing, Int]](Right(1))
+                  .leftOrFail("oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("oh crap")))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).leftOrFail("oh crap")
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            ),
+            suite("leftOrFailWith")(
+              test("failure") {
+                val result = ZPure.fail("fail").leftOrFailWith[Any, Any, String](_ => "Oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("fail")))
+              },
+              test("right") {
+                val result = ZPure
+                  .succeed[Int, Either[Nothing, Int]](Right(1))
+                  .leftOrFailWith[Any, Any, String](_ => "oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("oh crap")))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).leftOrFail("oh crap")
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            ),
+            suite("leftOrFailWithException")(
+              test("failure") {
+                val result = ZPure.fail(new NoSuchElementException()).leftOrFailWithException
+                assert(result.runEither(0))(isLeft(isSubtype[NoSuchElementException](anything)))
+              },
+              test("right") {
+                val result = ZPure.succeed[Int, Either[Nothing, Int]](Right(1)).leftOrFailWithException
+                assert(result.runEither(0))(isLeft(isSubtype[NoSuchElementException](anything)))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).leftOrFailWithException
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            )
           ),
           suite("some")(
             testM("success (Some)") {

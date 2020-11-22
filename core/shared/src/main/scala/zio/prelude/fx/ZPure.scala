@@ -245,6 +245,45 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     Fold(self, failure, success)
 
   /**
+   * Returns a successful computation if the value is `Left`, or fails with error `None`.
+   */
+  final def left[B, C](implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, Option[E], B] =
+    foldM(
+      e => ZPure.fail(Some(e)),
+      a => ev(a).fold(ZPure.succeed, _ => ZPure.fail(None))
+    )
+
+  /**
+   * Returns a successful computation if the value is `Left`, or fails with error `e`.
+   */
+  final def leftOrFail[B, C, E1 >: E](e: => E1)(implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, E1, B] =
+    flatMap(ev(_) match {
+      case Right(_)    => ZPure.fail(e)
+      case Left(value) => ZPure.succeed(value)
+    })
+
+  /**
+   * Returns a successful computation if the value is `Left`, or fails with the given error function `e`.
+   */
+  final def leftOrFailWith[B, C, E1 >: E](e: C => E1)(implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, E1, B] =
+    flatMap(ev(_) match {
+      case Right(err)  => ZPure.fail(e(err))
+      case Left(value) => ZPure.succeed(value)
+    })
+
+  /**
+   * Returns a successful computation if the value is `Left`, or fails with a [[java.util.NoSuchElementException]].
+   */
+  final def leftOrFailWithException[B, C, E1 >: NoSuchElementException](implicit
+    ev: A <:< Either[B, C],
+    ev2: E <:< E1
+  ): ZPure[S1, S2, R, E1, B] =
+    foldM(
+      e => ZPure.fail(ev2(e)),
+      a => ev(a).fold(ZPure.succeed, _ => ZPure.fail(new NoSuchElementException("Either.left.get on Right")))
+    )
+
+  /**
    * Transforms the result of this computation with the specified function.
    */
   final def map[B](f: A => B): ZPure[S1, S2, R, E, B] =
