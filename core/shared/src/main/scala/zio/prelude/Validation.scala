@@ -183,8 +183,8 @@ object Validation {
   /**
    * The `Covariant` instance for `Validation`.
    */
-  implicit def ValidationCovariant[E]: Covariant[Validation[E, +*]] =
-    new Covariant[Validation[E, +*]] {
+  implicit def ValidationCovariant[E]: Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new Covariant[({ type lambda[+x] = Validation[E, x] })#lambda] {
       def map[A, B](f: A => B): Validation[E, A] => Validation[E, B] =
         _.map(f)
     }
@@ -211,8 +211,8 @@ object Validation {
   /**
    * The `DeriveEqual` instance for `Validation`.
    */
-  implicit def ValidationDeriveEqual[E: Equal]: DeriveEqual[Validation[E, +*]] =
-    new DeriveEqual[Validation[E, +*]] {
+  implicit def ValidationDeriveEqual[E: Equal]: DeriveEqual[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = Validation[E, x] })#lambda] {
       def derive[A: Equal]: Equal[Validation[E, A]] =
         ValidationEqual
     }
@@ -220,8 +220,9 @@ object Validation {
   /**
    * The `Covariant` instance for `Validation` with respect to its error type.
    */
-  implicit def ValidationFailureCovariant[A]: Covariant[Lambda[`+x` => newtypes.Failure[Validation[x, A]]]] =
-    new Covariant[Lambda[`+x` => newtypes.Failure[Validation[x, A]]]] {
+  implicit def ValidationFailureCovariant[A]
+    : Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] =
+    new Covariant[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] {
       def map[E, E1](f: E => E1): newtypes.Failure[Validation[E, A]] => newtypes.Failure[Validation[E1, A]] =
         validation => newtypes.Failure.wrap(newtypes.Failure.unwrap(validation).mapError(f))
     }
@@ -229,8 +230,9 @@ object Validation {
   /**
    * The `DeriveEqual` instance for `Validation` with respect to its error type.
    */
-  implicit def ValidationFailureDeriveEqual[A: Equal]: DeriveEqual[Lambda[`+x` => newtypes.Failure[Validation[x, A]]]] =
-    new DeriveEqual[Lambda[`+x` => newtypes.Failure[Validation[x, A]]]] {
+  implicit def ValidationFailureDeriveEqual[A: Equal]
+    : DeriveEqual[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = newtypes.Failure[Validation[x, A]] })#lambda] {
       def derive[E: Equal]: Equal[newtypes.Failure[Validation[E, A]]] =
         ValidationEqual[E, A].contramap(newtypes.Failure.unwrap)
     }
@@ -257,23 +259,24 @@ object Validation {
   /**
    * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for Validation.
    */
-  implicit def ValidationCommutativeIdentityBoth[E]
-    : CommutativeBoth[Validation[E, *]] with IdentityBoth[Validation[E, *]] =
-    new CommutativeBoth[Validation[E, *]] with IdentityBoth[Validation[E, *]] {
+  implicit def ValidationCommutativeIdentityBoth[E]: CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda]
+    with IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] =
+    new CommutativeBoth[({ type lambda[x] = Validation[E, x] })#lambda]
+      with IdentityBoth[({ type lambda[x] = Validation[E, x] })#lambda] {
       val any: Validation[Nothing, Any]                                                       =
         Validation.unit
       def both[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
         fa.zipPar(fb)
 
       def bothPar[A, B](fa: => Validation[E, A], fb: => Validation[E, B]): Validation[E, (A, B)] =
-        fa.zipPar(fb)
+        both(fa, fb)
     }
 
   /**
    * The `Traversable` instance for `Validation`.
    */
-  implicit def ValidationTraversable[E]: Traversable[Validation[E, +*]] =
-    new Traversable[Validation[E, +*]] {
+  implicit def ValidationTraversable[E]: Traversable[({ type lambda[+x] = Validation[E, x] })#lambda] =
+    new Traversable[({ type lambda[+x] = Validation[E, x] })#lambda] {
       def foreach[F[+_]: IdentityBoth: Covariant, A, B](fa: Validation[E, A])(f: A => F[B]): F[Validation[E, B]] =
         fa.foreach(f)
     }

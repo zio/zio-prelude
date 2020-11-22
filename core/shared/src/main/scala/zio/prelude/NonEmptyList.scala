@@ -592,7 +592,7 @@ trait LowPriorityNonEmptyListImplicits {
         fa.zip(fb)
 
       def bothPar[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
-        fa.zip(fb)
+        both(fa, fb)
     }
 
   /**
