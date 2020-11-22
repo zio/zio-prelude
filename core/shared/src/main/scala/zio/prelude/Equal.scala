@@ -160,6 +160,9 @@ object Equal extends Lawful[Equal] {
 
       def both[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
         fa.both(fb)
+
+      def bothPar[A, B](fa: => Equal[A], fb: => Equal[B]): Equal[(A, B)] =
+        fa.both(fb)
     }
 
   /**

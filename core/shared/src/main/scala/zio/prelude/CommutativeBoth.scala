@@ -14,7 +14,13 @@ import zio.test.laws._
  * `F[B]` to produce an `F[(A, B)]`.
  */
 @implicitNotFound("No implicit CommutativeBoth defined for ${F}.")
-trait CommutativeBoth[F[_]] extends AssociativeBoth[F]
+trait CommutativeBoth[F[_]] extends AssociativeBoth[F] {
+
+  /**
+   * Combines two values of types `F[A]` and `F[B]` in a parallel manner to produce an `F[(A, B)]`.
+   */
+  def bothPar[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
+}
 
 object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] {
 
@@ -49,14 +55,18 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   implicit def ChunkCommutativeBoth: CommutativeBoth[Chunk] =
     new CommutativeBoth[Chunk] {
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa zip fb
+
+      def bothPar[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa zip fb
     }
 
   /**
    * The `CommutativeBoth` instance for `Exit`.
    */
-  implicit def ExitCommutativeBoth[E]: CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] {
+  implicit def ExitCommutativeBoth[E]: CommutativeBoth[Exit[E, +*]] =
+    new CommutativeBoth[Exit[E, +*]] {
       def both[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, (A, B)] = fa zipPar fb
+
+      def bothPar[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, (A, B)] = fa zipPar fb
     }
 
   /**
@@ -65,6 +75,8 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   implicit val IdCommutativeBoth: CommutativeBoth[Id] =
     new CommutativeBoth[Id] {
       def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] = Id((Id.unwrap(fa), Id.unwrap(fb)))
+
+      def bothPar[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] = Id((Id.unwrap(fa), Id.unwrap(fb)))
     }
 
   /**
@@ -73,6 +85,8 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   implicit def ListCommutativeBoth: CommutativeBoth[List] =
     new CommutativeBoth[List] {
       def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa zip fb
+
+      def bothPar[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa zip fb
     }
 
   /**
@@ -82,6 +96,9 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
     new CommutativeBoth[NonEmptyChunk] {
       def both[A, B](fa: => NonEmptyChunk[A], fb: => NonEmptyChunk[B]): NonEmptyChunk[(A, B)] =
         (fa zipWith fb)((_, _))
+
+      def bothPar[A, B](fa: => NonEmptyChunk[A], fb: => NonEmptyChunk[B]): NonEmptyChunk[(A, B)] =
+        (fa zipWithPar fb)((_, _))
     }
 
   /**
@@ -94,15 +111,25 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
           case (Some(a), Some(b)) => Some((a, b))
           case _                  => None
         }
+
+      def bothPar[A, B](fa: => Option[A], fb: => Option[B]): Option[(A, B)] =
+        (fa, fb) match {
+          case (Some(a), Some(b)) => Some((a, b))
+          case _                  => None
+        }
     }
 
   /**
    * The `CommutativeBoth` instance for And `Schedule`.
    */
-  implicit def ScheduleAndCommutativeBoth[R, E]
-    : CommutativeBoth[({ type lambda[+a] = AndF[Schedule[R, E, a]] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = AndF[Schedule[R, E, a]] })#lambda] {
+  implicit def ScheduleAndCommutativeBoth[R, E]: CommutativeBoth[Lambda[`+a` => AndF[Schedule[R, E, a]]]] =
+    new CommutativeBoth[Lambda[`+a` => AndF[Schedule[R, E, a]]]] {
       def both[A, B](fa: => AndF[Schedule[R, E, A]], fb: => AndF[Schedule[R, E, B]]): AndF[Schedule[R, E, (A, B)]] =
+        AndF.wrap {
+          AndF.unwrap(fa) && AndF.unwrap(fb)
+        }
+
+      def bothPar[A, B](fa: => AndF[Schedule[R, E, A]], fb: => AndF[Schedule[R, E, B]]): AndF[Schedule[R, E, (A, B)]] =
         AndF.wrap {
           AndF.unwrap(fa) && AndF.unwrap(fb)
         }
@@ -111,9 +138,14 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for Or `Schedule`.
    */
-  implicit def ScheduleOrCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] {
+  implicit def ScheduleOrCommutativeBoth[R, E]: CommutativeBoth[Lambda[`+a` => OrF[Schedule[R, E, a]]]] =
+    new CommutativeBoth[Lambda[`+a` => OrF[Schedule[R, E, a]]]] {
       def both[A, B](fa: => OrF[Schedule[R, E, A]], fb: => OrF[Schedule[R, E, B]]): OrF[Schedule[R, E, (A, B)]] =
+        OrF.wrap {
+          OrF.unwrap(fa) || OrF.unwrap(fb)
+        }
+
+      def bothPar[A, B](fa: => OrF[Schedule[R, E, A]], fb: => OrF[Schedule[R, E, B]]): OrF[Schedule[R, E, (A, B)]] =
         OrF.wrap {
           OrF.unwrap(fa) || OrF.unwrap(fb)
         }
@@ -125,25 +157,34 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   implicit def VectorCommutativeBoth: CommutativeBoth[Vector] =
     new CommutativeBoth[Vector] {
       def both[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa zip fb
+
+      def bothPar[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa zip fb
     }
 
   /**
    * The `CommutativeBoth` instance for `ZIO`.
    */
-  implicit def ZIOCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+  implicit def ZIOCommutativeBoth[R, E]: CommutativeBoth[ZIO[R, E, +*]] =
+    new CommutativeBoth[ZIO[R, E, +*]] {
       def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zipPar fb
+
+      def bothPar[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zipPar fb
     }
 
   /**
    * The `CommutativeBoth` instance for failed `ZIO`.
    */
-  implicit def ZIOFailureCommutativeBoth[R, A]: CommutativeBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
-    new CommutativeBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
+  implicit def ZIOFailureCommutativeBoth[R, A]: CommutativeBoth[Lambda[`+e` => Failure[ZIO[R, e, A]]]] =
+    new CommutativeBoth[Lambda[`+e` => Failure[ZIO[R, e, A]]]] {
       def both[EA, EB](
         fa: => Failure[ZIO[R, EA, A]],
         fb: => Failure[ZIO[R, EB, A]]
       ): Failure[ZIO[R, (EA, EB), A]] =
+        Failure.wrap {
+          (Failure.unwrap(fa).flip zipPar Failure.unwrap(fb).flip).flip
+        }
+
+      def bothPar[EA, EB](fa: => Failure[ZIO[R, EA, A]], fb: => Failure[ZIO[R, EB, A]]): Failure[ZIO[R, (EA, EB), A]] =
         Failure.wrap {
           (Failure.unwrap(fa).flip zipPar Failure.unwrap(fb).flip).flip
         }
@@ -152,26 +193,37 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `CommutativeBoth` instance for `ZLayer`.
    */
-  implicit def ZLayerCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
+  implicit def ZLayerCommutativeBoth[R, E]: CommutativeBoth[ZLayer[R, E, +*]] =
+    new CommutativeBoth[ZLayer[R, E, +*]] {
       def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
+
+      def bothPar[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
     }
 
   /**
    * The `CommutativeBoth` instance for `ZManaged`.
    */
-  implicit def ZManagedCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
+  implicit def ZManagedCommutativeBoth[R, E]: CommutativeBoth[ZManaged[R, E, +*]] =
+    new CommutativeBoth[ZManaged[R, E, +*]] {
       def both[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, (A, B)] = fa zipPar fb
+
+      def bothPar[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, (A, B)] = fa zipPar fb
     }
 
   /**
    * The `CommutativeBoth` instance for failed `ZManaged`.
    */
-  implicit def ZManagedFailureCommutativeBoth[R, A]
-    : CommutativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new CommutativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
+  implicit def ZManagedFailureCommutativeBoth[R, A]: CommutativeBoth[Lambda[`+e` => Failure[ZManaged[R, e, A]]]] =
+    new CommutativeBoth[Lambda[`+e` => Failure[ZManaged[R, e, A]]]] {
       def both[EA, EB](
+        fa: => Failure[ZManaged[R, EA, A]],
+        fb: => Failure[ZManaged[R, EB, A]]
+      ): Failure[ZManaged[R, (EA, EB), A]] =
+        Failure.wrap {
+          (Failure.unwrap(fa).flip zipPar Failure.unwrap(fb).flip).flip
+        }
+
+      def bothPar[EA, EB](
         fa: => Failure[ZManaged[R, EA, A]],
         fb: => Failure[ZManaged[R, EB, A]]
       ): Failure[ZManaged[R, (EA, EB), A]] =
@@ -183,17 +235,23 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `CommutativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkCommutativeBoth[R, E, I, L]: CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, (A, B)] = fa zipPar fb
+  implicit def ZSinkCommutativeBoth[R, E, I, L]: CommutativeBoth[ZSink[R, E, I, L, +*]] =
+    new CommutativeBoth[ZSink[R, E, I, L, +*]] {
+      def both[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, (A, B)] =
+        fa zipPar fb
+
+      def bothPar[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, (A, B)] =
+        fa zipPar fb
     }
 
   /**
    * The `CommutativeBoth` instance for `ZStream`.
    */
-  implicit def ZStreamCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
+  implicit def ZStreamCommutativeBoth[R, E]: CommutativeBoth[ZStream[R, E, +*]] =
+    new CommutativeBoth[ZStream[R, E, +*]] {
       def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa zip fb
+
+      def bothPar[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa zip fb
     }
 
   /**
@@ -1208,7 +1266,7 @@ trait CommutativeBothSyntax {
      * `F[(A, B)]`.
      */
     def zipPar[B](fb: => F[B])(implicit both: CommutativeBoth[F]): F[(A, B)] =
-      both.both(fa, fb)
+      both.bothPar(fa, fb)
   }
 
   /**
@@ -1223,7 +1281,7 @@ trait CommutativeBothSyntax {
     def zipWithPar[B, C](
       fb: => F[B]
     )(f: (A, B) => C)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[C] =
-      both.both(fa, fb).map(f.tupled)
+      both.bothPar(fa, fb).map(f.tupled)
   }
 
   /**

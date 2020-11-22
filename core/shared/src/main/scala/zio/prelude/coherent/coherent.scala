@@ -69,9 +69,10 @@ object CommutativeBothDeriveEqualInvariant {
     invariant0: Invariant[F]
   ): CommutativeBothDeriveEqualInvariant[F] =
     new CommutativeBothDeriveEqualInvariant[F] {
-      def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = commutativeBoth0.both(fa, fb)
-      def derive[A: Equal]: Equal[F[A]]                   = deriveEqual0.derive
-      def invmap[A, B](f: A <=> B): F[A] <=> F[B]         = invariant0.invmap(f)
+      def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]    = commutativeBoth0.both(fa, fb)
+      def bothPar[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = commutativeBoth0.bothPar(fa, fb)
+      def derive[A: Equal]: Equal[F[A]]                      = deriveEqual0.derive
+      def invmap[A, B](f: A <=> B): F[A] <=> F[B]            = invariant0.invmap(f)
     }
 }
 

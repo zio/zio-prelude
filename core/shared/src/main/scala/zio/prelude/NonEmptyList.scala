@@ -121,7 +121,7 @@ sealed trait NonEmptyList[+A] { self =>
   final def find(f: A => Boolean): Option[A] =
     self match {
       case Cons(h, t) => if (f(h)) Some(h) else t.find(f)
-      case Single(h)  => if (f(h)) Some(h) else None
+      case Single(h)  => Some(h).filter(f)
     }
 
   /**
@@ -589,6 +589,9 @@ trait LowPriorityNonEmptyListImplicits {
   implicit val NonEmptyListCommutativeBoth: CommutativeBoth[NonEmptyList] =
     new CommutativeBoth[NonEmptyList] {
       def both[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
+        fa.zip(fb)
+
+      def bothPar[A, B](fa: => NonEmptyList[A], fb: => NonEmptyList[B]): NonEmptyList[(A, B)] =
         fa.zip(fb)
     }
 
