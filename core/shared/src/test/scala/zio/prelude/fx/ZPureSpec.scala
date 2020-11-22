@@ -441,8 +441,8 @@ object ZPureSpec extends DefaultRunnableSpec {
         suite("reject")(
           testM("success") {
             check(genInt, genInt, genInt) { (s1, a1, e1) =>
-              val result = ZPure.succeed[Int, Int](a1).reject {
-                case _ => e1
+              val result = ZPure.succeed[Int, Int](a1).reject { case _ =>
+                e1
               }
               assert(result.runEither(s1))(isLeft(equalTo(e1)))
             }
@@ -452,15 +452,15 @@ object ZPureSpec extends DefaultRunnableSpec {
               val result = ZPure.succeed[Int, Int](a1).reject {
                 case _ if false => e1
               }
-              assert(result.runEither(s1))(isRight(equalTo((s1,a1))))
+              assert(result.runEither(s1))(isRight(equalTo((s1, a1))))
             }
           }
         ),
         suite("rejectM")(
           testM("success") {
             check(genInt, genInt, genInt) { (s1, a1, e1) =>
-              val result = ZPure.succeed[Int, Int](a1).rejectM {
-                case _ => ZPure.succeed[Int, Int](e1)
+              val result = ZPure.succeed[Int, Int](a1).rejectM { case _ =>
+                ZPure.succeed[Int, Int](e1)
               }
               assert(result.runEither(s1))(isLeft(equalTo(e1)))
             }
@@ -470,7 +470,7 @@ object ZPureSpec extends DefaultRunnableSpec {
               val result = ZPure.succeed[Int, Int](a1).rejectM {
                 case _ if false => ZPure.succeed[Int, Int](e1)
               }
-              assert(result.runEither(s1))(isRight(equalTo((s1,a1))))
+              assert(result.runEither(s1))(isRight(equalTo((s1, a1))))
             }
           }
         ),
