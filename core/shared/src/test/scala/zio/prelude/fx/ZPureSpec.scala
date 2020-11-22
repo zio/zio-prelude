@@ -406,8 +406,9 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           test("fromTry (Failure case)") {
             implicit val throwableHash = Equal.ThrowableHash
+            val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
             assert(ZPure.fromTry(Try("a".toInt)).runEither(()))(
-              isLeft(equalTo(new NumberFormatException("""For input string: "a"""")))
+              isLeft(equalTo(exception))
             )
           },
           testM("fromEffect (Success case)") {
@@ -417,8 +418,9 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           test("fromEffect (Failure case)") {
             implicit val throwableHash = Equal.ThrowableHash
+            val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
             assert(ZPure.fromEffect("a".toInt).runEither(()))(
-              isLeft(equalTo(new NumberFormatException("""For input string: "a"""")))
+              isLeft(equalTo(exception))
             )
           }
         )
