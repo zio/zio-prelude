@@ -16,6 +16,12 @@ trait Assertions {
     Assertion.assertion("equalTo")(param(expected))(_ === expected)
 
   /**
+   * Failing assertion, used for unexpected cases
+   */
+  val unexpectedResult: Assertion[Any] =
+    Assertion.assertion("unexpectedResult")()(_ => false)
+
+  /**
    * Makes a new assertion that requires a validation failure satisfying a
    * specified assertion.
    */

@@ -1201,14 +1201,6 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
-   * The `AssociativeBoth` instance for `ZIO`.
-   */
-  implicit def ZIOAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zip fb
-    }
-
-  /**
    * The `AssociativeBoth` instance for failed `ZIO`.
    */
   implicit def ZIOFailureAssociativeBoth[R, A]: AssociativeBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
