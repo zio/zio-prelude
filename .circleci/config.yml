@@ -158,6 +158,19 @@ testJVM: &testJVM
     - store_test_results:
         path: core/jvm/target/test-reports
 
+testNative: &testNative
+  steps:
+    - checkout
+    - <<: *load_cache
+    - <<: *install_jdk
+    - run:
+        name: Run tests
+        command: ./sbt -Dfatal.warnings=true ++${SCALA_VERSION}! compileNative
+    - <<: *clean_cache
+    - <<: *save_cache
+    - store_test_results:
+        path: core/jvm/target/test-reports
+
 release: &release
   steps:
       - checkout
@@ -233,6 +246,13 @@ jobs:
 
   test_211_jdk8_jvm:
     <<: *testJVM
+    <<: *machine_ubuntu
+    environment:
+      - <<: *scala_211
+      - <<: *jdk_8
+
+  test_211_jdk8_jvm:
+    <<: *testNative
     <<: *machine_ubuntu
     environment:
       - <<: *scala_211
