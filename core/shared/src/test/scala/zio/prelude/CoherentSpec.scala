@@ -3,6 +3,7 @@ package zio.prelude
 import zio.prelude.coherent._
 import zio.prelude.newtypes.Sum
 import zio.test.Assertion.{ isEmptyString, isTrue }
+import zio.prelude.Equal.OptionEqual
 import zio.test._
 
 object CoherentSpec extends DefaultRunnableSpec {
@@ -19,13 +20,19 @@ object CoherentSpec extends DefaultRunnableSpec {
 
         assert(instance.identity)(isEmptyString) &&
         assert(instance.combine("a", "b"))(equalTo("ab")) &&
-        assert(instance.equal("a", "a"))(isTrue)
+        assert(instance.equal("a", "a"))(isTrue) &&
+        assert(instance.multiplyOption(5)("a"))(equalTo[Option[String]](Some("aaaaa"))) &&
+        assert(instance.multiplyOption(-1)("a"))(equalTo[Option[String]](None)) &&
+        assert(instance.multiplyOption(0)("a"))(equalTo[Option[String]](Some("")))
       },
       test("AssociativeEqual") {
         val instance = implicitly[AssociativeEqual[String]]
 
         assert(instance.combine("a", "b"))(equalTo("ab")) &&
-        assert(instance.equal("a", "a"))(isTrue)
+        assert(instance.equal("a", "a"))(isTrue) &&
+        assert(instance.multiplyOption(5)("a"))(equalTo[Option[String]](Some("aaaaa"))) &&
+        assert(instance.multiplyOption(-1)("a"))(equalTo[Option[String]](None)) &&
+        assert(instance.multiplyOption(1)("a"))(equalTo[Option[String]](Some("a")))
       },
       test("CommutativeEqual") {
         val instance = implicitly[CommutativeEqual[Sum[Int]]]
