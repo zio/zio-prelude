@@ -1328,6 +1328,19 @@ trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
      */
     def combine(r: => A)(implicit associative: Associative[A]): A =
       associative.combine(l, r)
+
+    /**
+     * Associatively repeats value 'n' times
+     */
+    def repeat(n: Int)(implicit associative: Associative[A]): A =
+      associative.repeat(l)(n)
+
+    /**
+     * Associatively multiplies value 'n' times
+     */
+    def multiplyOption(n: Int)(implicit associative: Associative[A]): Option[A] =
+      associative.multiplyOption(n)(l)
+
   }
 
 }

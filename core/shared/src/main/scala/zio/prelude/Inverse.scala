@@ -907,5 +907,11 @@ trait InverseSyntax {
      */
     def inverse(r: => A)(implicit inverse: Inverse[A]): A =
       inverse.inverse(l, r)
+
+    /**
+     * Multiplies value 'n' times
+     */
+    def multiply(n: Int)(implicit inverse: Inverse[A]): A =
+      inverse.multiply(n)(l)
   }
 }
