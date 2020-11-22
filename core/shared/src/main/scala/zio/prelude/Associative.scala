@@ -1340,7 +1340,6 @@ trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
      */
     def multiplyOption(n: Int)(implicit associative: Associative[A]): Option[A] =
       associative.multiplyOption(n)(l)
-
   }
 
 }

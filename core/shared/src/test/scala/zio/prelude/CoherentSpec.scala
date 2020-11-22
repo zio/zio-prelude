@@ -18,22 +18,22 @@ object CoherentSpec extends DefaultRunnableSpec {
       test("IdentityEqual") {
         val instance = implicitly[EqualIdentity[String]]
         assert(instance.identity)(isEmptyString) &&
-        assert(instance.combine("a", "b"))(equalTo("ab")) &&
+        assert("a".combine("b"))(equalTo("ab")) &&
         assert(instance.equal("a", "a"))(isTrue) &&
-        assert(instance.multiplyOption(5)("a"))(equalTo[Option[String]](Some("aaaaa"))) &&
-        assert(instance.multiplyOption(-1)("a"))(equalTo[Option[String]](None)) &&
-        assert(instance.multiplyOption(0)("a"))(equalTo[Option[String]](Some("")))
+        assert("a".multiplyOption(5))(equalTo[Option[String]](Some("aaaaa"))) &&
+        assert("a".multiplyOption(-1))(equalTo[Option[String]](None)) &&
+        assert("a".multiplyOption(0))(equalTo[Option[String]](Some("")))
       },
       test("AssociativeEqual") {
         val instance = implicitly[AssociativeEqual[String]]
-        assert(instance.combine("a", "b"))(equalTo("ab")) &&
-        assert(instance.repeat("a")(5))(equalTo("aaaaa")) &&
-        assert(instance.repeat("a")(1))(equalTo("a")) &&
-        assert(instance.repeat("a")(0))(equalTo("a")) &&
+        assert("a".combine("b"))(equalTo("ab")) &&
+        assert("a".repeat(5))(equalTo("aaaaa")) &&
+        assert("a".repeat(1))(equalTo("a")) &&
+        assert("a".repeat(0))(equalTo("a")) &&
         assert(instance.equal("a", "a"))(isTrue) &&
-        assert(instance.multiplyOption(5)("a"))(equalTo[Option[String]](Some("aaaaa"))) &&
-        assert(instance.multiplyOption(-1)("a"))(equalTo[Option[String]](None)) &&
-        assert(instance.multiplyOption(1)("a"))(equalTo[Option[String]](Some("a")))
+        assert("a".multiplyOption(5))(equalTo[Option[String]](Some("aaaaa"))) &&
+        assert("a".multiplyOption(-1))(equalTo[Option[String]](None)) &&
+        assert("a".multiplyOption(1))(equalTo[Option[String]](Some("a")))
       },
       test("CommutativeEqual") {
         val instance = implicitly[CommutativeEqual[Sum[Int]]]
@@ -43,11 +43,10 @@ object CoherentSpec extends DefaultRunnableSpec {
       },
       test("EqualInverse") {
         val instance = implicitly[EqualInverse[Sum[Int]]]
-
-        assert(instance.inverse(Sum(42), Sum(20)))(equalTo(Sum(22))) &&
-        assert(instance.multiply(5)(Sum(2)))(equalTo(Sum(10))) &&
-        assert(instance.multiply(0)(Sum(2)))(equalTo(Sum(0))) &&
-        assert(instance.multiply(-5)(Sum(2)))(equalTo(Sum(-10))) &&
+        assert(Sum(42).inverse(Sum(20)))(equalTo(Sum(22))) &&
+        assert(Sum(2).multiply(5))(equalTo(Sum(10))) &&
+        assert(Sum(2).multiply(0))(equalTo(Sum(0))) &&
+        assert(Sum(2).multiply(-5))(equalTo(Sum(-10))) &&
         assert(instance.multiplyOption(5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(10)))) &&
         assert(instance.multiplyOption(0)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(0)))) &&
         assert(instance.multiplyOption(-5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(-10))))
