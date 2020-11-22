@@ -1,9 +1,9 @@
 package zio.prelude
 
+import zio.prelude.Equal.OptionEqual
 import zio.prelude.coherent._
 import zio.prelude.newtypes.Sum
 import zio.test.Assertion.{ isEmptyString, isTrue }
-import zio.prelude.Equal.OptionEqual
 import zio.test._
 
 object CoherentSpec extends DefaultRunnableSpec {

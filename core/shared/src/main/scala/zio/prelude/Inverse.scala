@@ -29,14 +29,13 @@ trait Inverse[A] extends Identity[A] {
     @tailrec
     def multiplyHelper(res: A, n: Int): A =
       if (n == 0) identity
-      else if(n > 0) multiplyHelper(combine(a, res), n - 1)
+      else if (n > 0) multiplyHelper(combine(a, res), n - 1)
       else multiplyHelper(inverse(res, a), n + 1)
     multiplyHelper(a, n)
   }
 
-  override def multiplyOption(n: Int)(a: A): Some[A] = {
+  override def multiplyOption(n: Int)(a: A): Some[A] =
     Some(multiply(n)(a))
-  }
 }
 
 object Inverse extends Lawful[EqualInverse] {
