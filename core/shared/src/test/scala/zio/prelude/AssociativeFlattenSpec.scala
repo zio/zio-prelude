@@ -8,7 +8,7 @@ object AssociativeFlattenSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("AssociativeFlattenSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(AssociativeFlatten)(GenF.chunk, Gen.chunkOf(Gen.anyString))),
+//        testM("chunk")(checkAllLaws(AssociativeFlatten)(GenF.chunk, Gen.chunkOf(Gen.anyString))),
         testM("either")(checkAllLaws(AssociativeFlatten)(GenFs.either(Gen.anyInt), Gen.anyInt)),
         testM("option")(checkAllLaws(AssociativeFlatten)(GenF.option, Gen.anyInt)),
         testM("list")(checkAllLaws(AssociativeFlatten)(GenF.list, Gen.anyString)),
