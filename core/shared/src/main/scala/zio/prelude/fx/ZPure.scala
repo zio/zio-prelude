@@ -593,7 +593,6 @@ object ZPure {
       try ZPure.succeed(effect)
       catch {
         case NonFatal(e)  => ZPure.fail(e)
-        case t: Throwable => throw t
       }
     }
 
