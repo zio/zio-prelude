@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.prelude.Equal.OptionEqual
 import zio.prelude.coherent._
 import zio.prelude.newtypes.Sum
 import zio.test.Assertion.{ isEmptyString, isTrue }
@@ -19,15 +18,14 @@ object CoherentSpec extends DefaultRunnableSpec {
         val instance = implicitly[EqualIdentity[String]]
         assert(instance.identity)(isEmptyString) &&
         assert(instance.combine("a", "b"))(equalTo("ab")) &&
-        assert(instance.repeat("a", 5))(equalTo("aaaaa")) &&
-        assert(instance.repeat("a", 0))(isEmptyString) &&
         assert(instance.equal("a", "a"))(isTrue)
       },
       test("AssociativeEqual") {
         val instance = implicitly[AssociativeEqual[String]]
         assert(instance.combine("a", "b"))(equalTo("ab")) &&
-        assert(instance.repeatOption("a", 5))(equalTo[Option[String]](Some("aaaaa"))) &&
-        assert(instance.repeatOption("a", 0))(equalTo[Option[String]](None)) &&
+        assert(instance.repeat("a")(5))(equalTo("aaaaa")) &&
+        assert(instance.repeat("a")(1))(equalTo("a")) &&
+        assert(instance.repeat("a")(0))(equalTo("a")) &&
         assert(instance.equal("a", "a"))(isTrue)
       },
       test("CommutativeEqual") {
