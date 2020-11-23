@@ -25,14 +25,16 @@ object AssociativeSpec extends DefaultRunnableSpec {
         testM("long multiplication")(checkAllLaws(Associative)(Gen.anyLong.map(Prod(_)))),
         testM("boolean disjunction")(checkAllLaws(Associative)(Gen.boolean.map(Or(_)))),
         testM("boolean conjuction")(checkAllLaws(Associative)(Gen.boolean.map(And(_)))),
-        testM("option")(checkAllLaws(Associative)(Gen.option(Gen.anyString))),
-        testM("list")(checkAllLaws(Associative)(Gen.listOf(Gen.anyString))),
-        testM("vector")(checkAllLaws(Associative)(Gen.vectorOf(Gen.anyString))),
-        testM("map")(checkAllLaws(Associative)(Gen.mapOf(Gen.anyString, Gen.anyString))),
-        testM("set")(checkAllLaws(Associative)(Gen.setOf(Gen.anyString))),
-        testM("tuple2")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString))),
-        testM("tuple3")(checkAllLaws(Associative)(Gen.anyString.zip(Gen.anyString).zip(Gen.anyString))),
-        testM("chunk")(checkAllLaws(Associative)(Gen.chunkOf(Gen.anyString)))
+        testM("option")(checkAllLaws(Associative)(Gen.option(Gen.anyInt.map(Sum(_))))),
+        testM("list")(checkAllLaws(Associative)(Gen.listOf(Gen.anyInt))),
+        testM("vector")(checkAllLaws(Associative)(Gen.vectorOf(Gen.anyInt))),
+        testM("map")(checkAllLaws(Associative)(Gen.mapOf(Gen.anyInt, Gen.anyInt.map(Sum(_))))),
+        testM("set")(checkAllLaws(Associative)(Gen.setOf(Gen.anyInt))),
+        testM("tuple2")(checkAllLaws(Associative)(Gen.anyInt.map(Sum(_)).zip(Gen.anyInt.map(Sum(_))))),
+        testM("tuple3")(
+          checkAllLaws(Associative)(Gen.anyInt.map(Sum(_)).zip(Gen.anyInt.map(Sum(_))).zip(Gen.anyInt.map(Sum(_))))
+        ),
+        testM("chunk")(checkAllLaws(Associative)(Gen.chunkOf(Gen.anyInt)))
       )
     )
 }
