@@ -362,6 +362,29 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     ZPure.Provide(r, self)
 
   /**
+   * Fail with the returned value if the `PartialFunction` matches, otherwise
+   * continue with our held value.
+   */
+  final def reject[S0 <: S1, S3 >: S2, R1 <: R, E1 >: E](pf: PartialFunction[A, E1]): ZPure[S0, S3, R1, E1, A] =
+    rejectM(pf.andThen(ZPure.fail(_)))
+
+  /**
+   * Continue with the returned computation if the `PartialFunction` matches,
+   * translating the successful match into a failure, otherwise continue with
+   * our held value.
+   */
+  final def rejectM[S0 <: S1, S3 >: S2, R1 <: R, E1 >: E](
+    pf: PartialFunction[A, ZPure[S2, S3, R1, E1, E1]]
+  ): ZPure[S0, S3, R1, E1, A] =
+    self.flatMap[S3, R1, E1, A] { v =>
+      if (pf.isDefinedAt(v)) {
+        pf(v).flatMap[S3, R1, E1, A](ZPure.fail)
+      } else {
+        ZPure.succeed(v)
+      }
+    }
+
+  /**
    * Runs this computation with the specified initial state, returning both
    * the updated state and the result.
    */
