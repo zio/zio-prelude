@@ -42,6 +42,14 @@ trait Associative[A] {
         repeatHelper(combine(res, a), n - 1)
     repeatHelper(a, n)
   }
+
+  def multiplyOption(n: Int)(a: A): Option[A] = {
+    def multiplyHelper(res: A, n: Int): Option[A] =
+      if (n <= 0) None
+      else if (n == 1) Some(res)
+      else multiplyHelper(combine(a, res), n - 1)
+    multiplyHelper(a, n)
+  }
 }
 
 object Associative extends Lawful[AssociativeEqual] {
@@ -1320,6 +1328,18 @@ trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
      */
     def combine(r: => A)(implicit associative: Associative[A]): A =
       associative.combine(l, r)
+
+    /**
+     * Associatively repeats value 'n' times
+     */
+    def repeat(n: Int)(implicit associative: Associative[A]): A =
+      associative.repeat(l)(n)
+
+    /**
+     * Associatively multiplies value 'n' times
+     */
+    def multiplyOption(n: Int)(implicit associative: Associative[A]): Option[A] =
+      associative.multiplyOption(n)(l)
   }
 
 }

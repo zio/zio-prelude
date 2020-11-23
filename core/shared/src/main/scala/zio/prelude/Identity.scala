@@ -22,6 +22,11 @@ trait Identity[A] extends Associative[A] {
    * The identity element.
    */
   def identity: A
+
+  override def multiplyOption(n: Int)(a: A): Option[A] =
+    if (n < 0) None
+    else if (n == 0) Some(identity)
+    else super.multiplyOption(n)(a)
 }
 
 object Identity extends Lawful[EqualIdentity] {
