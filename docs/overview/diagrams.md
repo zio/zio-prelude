@@ -290,7 +290,7 @@ classDiagram
     Fiber[E, +*]
     STM[R, E, +*]
 
-  () both[A,B](=> F[A], => F[B]): F[(A,B)]
+    () both[A,B](=> F[A], => F[B]): F[(A,B)]
   }
   class CommutativeBoth~F<_>~{
     Chunk[+*]
@@ -319,7 +319,7 @@ classDiagram
     List[+*]
     Try[+*]
  
-  () any: F[Any]
+    () any: F[Any]
   }
 ```
 
