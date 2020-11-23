@@ -1,6 +1,8 @@
 package zio.prelude.fx
 
 import scala.annotation.switch
+import scala.util.Try
+import scala.util.control.NonFatal
 
 import zio.internal.Stack
 import zio.prelude._
@@ -244,6 +246,45 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     Fold(self, failure, success)
 
   /**
+   * Returns a successful computation if the value is `Left`, or fails with error `None`.
+   */
+  final def left[B, C](implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, Option[E], B] =
+    foldM(
+      e => ZPure.fail(Some(e)),
+      a => ev(a).fold(ZPure.succeed, _ => ZPure.fail(None))
+    )
+
+  /**
+   * Returns a successful computation if the value is `Left`, or fails with error `e`.
+   */
+  final def leftOrFail[B, C, E1 >: E](e: => E1)(implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, E1, B] =
+    flatMap(ev(_) match {
+      case Right(_)    => ZPure.fail(e)
+      case Left(value) => ZPure.succeed(value)
+    })
+
+  /**
+   * Returns a successful computation if the value is `Left`, or fails with the given error function `e`.
+   */
+  final def leftOrFailWith[B, C, E1 >: E](e: C => E1)(implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, E1, B] =
+    flatMap(ev(_) match {
+      case Right(err)  => ZPure.fail(e(err))
+      case Left(value) => ZPure.succeed(value)
+    })
+
+  /**
+   * Returns a successful computation if the value is `Left`, or fails with a [[java.util.NoSuchElementException]].
+   */
+  final def leftOrFailWithException[B, C, E1 >: NoSuchElementException](implicit
+    ev: A <:< Either[B, C],
+    ev2: E <:< E1
+  ): ZPure[S1, S2, R, E1, B] =
+    foldM(
+      e => ZPure.fail(ev2(e)),
+      a => ev(a).fold(ZPure.succeed, _ => ZPure.fail(new NoSuchElementException("Either.left.get on Right")))
+    )
+
+  /**
    * Transforms the result of this computation with the specified function.
    */
   final def map[B](f: A => B): ZPure[S1, S2, R, E, B] =
@@ -319,6 +360,29 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def provide(r: R)(implicit ev: NeedsEnv[R]): ZPure[S1, S2, Any, E, A] =
     ZPure.Provide(r, self)
+
+  /**
+   * Fail with the returned value if the `PartialFunction` matches, otherwise
+   * continue with our held value.
+   */
+  final def reject[S0 <: S1, S3 >: S2, R1 <: R, E1 >: E](pf: PartialFunction[A, E1]): ZPure[S0, S3, R1, E1, A] =
+    rejectM(pf.andThen(ZPure.fail(_)))
+
+  /**
+   * Continue with the returned computation if the `PartialFunction` matches,
+   * translating the successful match into a failure, otherwise continue with
+   * our held value.
+   */
+  final def rejectM[S0 <: S1, S3 >: S2, R1 <: R, E1 >: E](
+    pf: PartialFunction[A, ZPure[S2, S3, R1, E1, E1]]
+  ): ZPure[S0, S3, R1, E1, A] =
+    self.flatMap[S3, R1, E1, A] { v =>
+      if (pf.isDefinedAt(v)) {
+        pf(v).flatMap[S3, R1, E1, A](ZPure.fail)
+      } else {
+        ZPure.succeed(v)
+      }
+    }
 
   /**
    * Runs this computation with the specified initial state, returning both
@@ -545,10 +609,45 @@ object ZPure {
     fromFunction(_._1)
 
   /**
+   * Constructs a computation from an effect that may throw.
+   */
+  def fromEffect[S, A](effect: => A): ZPure[S, S, Any, Throwable, A] =
+    suspend {
+      try ZPure.succeed(effect)
+      catch {
+        case NonFatal(e) => ZPure.fail(e)
+      }
+    }
+
+  /**
+   * Constructs a computation from an `Either`.
+   */
+  def fromEither[S, L, R](either: Either[L, R]): ZPure[S, S, Any, L, R] =
+    either.fold(l => ZPure.fail(l), r => ZPure.succeed(r))
+
+  /**
    * Constructs a computation from a function.
    */
   def fromFunction[S, R, A](f: R => A): ZPure[S, S, R, Nothing, A] =
     access(f)
+
+  /**
+   * Constructs a computation from an `Option`.
+   */
+  def fromOption[S, A](option: Option[A]): ZPure[S, S, Any, Unit, A] =
+    option match {
+      case Some(a) => ZPure.succeed(a)
+      case None    => ZPure.fail(())
+    }
+
+  /**
+   * Constructs a computation from a `scala.util.Try`.
+   */
+  def fromTry[S, A](t: Try[A]): ZPure[S, S, Any, Throwable, A] =
+    fromEffect(t).flatMap {
+      case scala.util.Success(v) => ZPure.succeed(v)
+      case scala.util.Failure(t) => ZPure.fail(t)
+    }
 
   /**
    * Maps each element of a collection to a computation and combines them all
@@ -588,6 +687,12 @@ object ZPure {
    */
   def succeed[S, A](a: A): ZPure[S, S, Any, Nothing, A] =
     Succeed(a)
+
+  /**
+   * Returns a lazily constructed computation, whose construction may itself require effects.
+   */
+  def suspend[S1, S2, R, E, A](pure: => ZPure[S1, S2, R, E, A]): ZPure[S1, S2, R, E, A] =
+    ZPure.unit.flatMap(_ => pure)
 
   /**
    * Constructs a computation that always returns the `Unit` value, passing the

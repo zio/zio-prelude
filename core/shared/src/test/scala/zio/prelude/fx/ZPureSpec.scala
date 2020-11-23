@@ -1,5 +1,9 @@
 package zio.prelude.fx
 
+import java.util.NoSuchElementException
+
+import scala.util.Try
+
 import zio.CanFail
 import zio.prelude._
 import zio.random.Random
@@ -254,6 +258,68 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(result.run(10))(equalTo((12, 2)))
             }
           ),
+          suite("left methods")(
+            suite("left")(
+              test("failure") {
+                val result = ZPure.fail("fail").left
+                assert(result.runEither(0))(isLeft(isSome(equalTo("fail"))))
+              },
+              test("right") {
+                val result = ZPure.succeed[Int, Either[Nothing, Int]](Right(1)).left
+                assert(result.runEither(0))(isLeft(isNone))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).left
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            ),
+            suite("leftOrFail")(
+              test("failure") {
+                val result = ZPure.fail("fail").leftOrFail("oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("fail")))
+              },
+              test("right") {
+                val result = ZPure
+                  .succeed[Int, Either[Nothing, Int]](Right(1))
+                  .leftOrFail("oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("oh crap")))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).leftOrFail("oh crap")
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            ),
+            suite("leftOrFailWith")(
+              test("failure") {
+                val result = ZPure.fail("fail").leftOrFailWith[Any, Any, String](_ => "Oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("fail")))
+              },
+              test("right") {
+                val result = ZPure
+                  .succeed[Int, Either[Nothing, Int]](Right(1))
+                  .leftOrFailWith[Any, Any, String](_ => "oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("oh crap")))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).leftOrFail("oh crap")
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            ),
+            suite("leftOrFailWithException")(
+              test("failure") {
+                val result = ZPure.fail(new NoSuchElementException()).leftOrFailWithException
+                assert(result.runEither(0))(isLeft(isSubtype[NoSuchElementException](anything)))
+              },
+              test("right") {
+                val result = ZPure.succeed[Int, Either[Nothing, Int]](Right(1)).leftOrFailWithException
+                assert(result.runEither(0))(isLeft(isSubtype[NoSuchElementException](anything)))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).leftOrFailWithException
+                assert(result.runEither(0))(isRight(equalTo((0, "Left"))))
+              }
+            )
+          ),
           suite("some")(
             testM("success (Some)") {
               check(genInt, genInt, genInt) { (s1, s2, a) =>
@@ -372,11 +438,90 @@ object ZPureSpec extends DefaultRunnableSpec {
             }
           )
         ),
+        suite("reject")(
+          testM("success") {
+            check(genInt, genInt, genInt) { (s1, a1, e1) =>
+              val result = ZPure.succeed[Int, Int](a1).reject { case _ =>
+                e1
+              }
+              assert(result.runEither(s1))(isLeft(equalTo(e1)))
+            }
+          },
+          testM("failure") {
+            check(genInt, genInt, genInt) { (s1, a1, e1) =>
+              val result = ZPure.succeed[Int, Int](a1).reject {
+                case _ if false => e1
+              }
+              assert(result.runEither(s1))(isRight(equalTo((s1, a1))))
+            }
+          }
+        ),
+        suite("rejectM")(
+          testM("success") {
+            check(genInt, genInt, genInt) { (s1, a1, e1) =>
+              val result = ZPure.succeed[Int, Int](a1).rejectM { case _ =>
+                ZPure.succeed[Int, Int](e1)
+              }
+              assert(result.runEither(s1))(isLeft(equalTo(e1)))
+            }
+          },
+          testM("failure") {
+            check(genInt, genInt, genInt) { (s1, a1, e1) =>
+              val result = ZPure.succeed[Int, Int](a1).rejectM {
+                case _ if false => ZPure.succeed[Int, Int](e1)
+              }
+              assert(result.runEither(s1))(isRight(equalTo((s1, a1))))
+            }
+          }
+        ),
         suite("constructors")(
           testM("fail") {
             check(genInt) { e =>
               assert(ZPure.fail(e).runEither(()))(isLeft(equalTo(e)))
             }
+          },
+          testM("fromEither (Left)") {
+            check(genString) { l =>
+              assert(ZPure.fromEither(Left(l)).runEither(()))(isLeft(equalTo(l)))
+            }
+          },
+          testM("fromEither (Right)") {
+            check(genString) { r =>
+              val (_, a) = ZPure.fromEither(Right(r)).run(())
+              assert(a)(equalTo(r))
+            }
+          },
+          test("fromOption (None)") {
+            assert(ZPure.fromOption(Option.empty[String]).runEither(()))(isLeft(equalTo(())))
+          },
+          testM("fromOption (Some)") {
+            check(genInt) { a =>
+              assert(ZPure.fromOption(Option(a)).runEither(()))(isRight(equalTo(((), a))))
+            }
+          },
+          testM("fromTry (Success case)") {
+            check(genInt) { a =>
+              assert(ZPure.fromTry(Try(a)).runEither(()))(isRight(equalTo(((), a))))
+            }
+          },
+          test("fromTry (Failure case)") {
+            implicit val throwableHash = Equal.ThrowableHash
+            val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
+            assert(ZPure.fromTry(Try("a".toInt)).runEither(()))(
+              isLeft(equalTo(exception))
+            )
+          },
+          testM("fromEffect (Success case)") {
+            check(genInt) { a =>
+              assert(ZPure.fromEffect(a).runEither(()))(isRight(equalTo(((), a))))
+            }
+          },
+          test("fromEffect (Failure case)") {
+            implicit val throwableHash = Equal.ThrowableHash
+            val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
+            assert(ZPure.fromEffect("a".toInt).runEither(()))(
+              isLeft(equalTo(exception))
+            )
           }
         )
       )
