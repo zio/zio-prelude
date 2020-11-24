@@ -50,6 +50,25 @@ object ZPureSpec extends DefaultRunnableSpec {
           test("accessM") {
             val zPure = ZPure.accessM[Int](n => State.update[Int, Int](_ + n))
             assert(zPure.provide(2).runState(3))(equalTo(5))
+          },
+          test("provide is scoped correctly") {
+            val zPure = for {
+              start <- ZPure.environment[Any, Int]
+              inner <- (for {
+                         innerStart <- ZPure.environment[Any, Int]
+                         innerInner <- ZPure.environment[Any, Int].provide(111)
+                         innerEnd   <- ZPure.environment[Any, Int]
+                       } yield (innerStart, innerInner, innerEnd)).provide(11)
+              end   <- ZPure.environment[Any, Int]
+            } yield (start, inner, end)
+            assert(zPure.provide(1).runResult(()))(equalTo((1, (11, 111, 11), 1)))
+          },
+          test("provided environment should be restored on error") {
+            val zPure = for {
+              _   <- (ZPure.fail(()): ZPure[Any, Any, Int, Unit, Nothing]).provide(1).either
+              end <- ZPure.environment[Any, Int]
+            } yield end
+            assert(zPure.provide(0).runResult(()))(equalTo(0))
           }
         )
       ),
