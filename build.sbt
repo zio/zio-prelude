@@ -102,6 +102,35 @@ lazy val coreNative = core.native
     ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
   )
 
+lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("experimental"))
+  .dependsOn(core)
+  .settings(stdSettings("zio-prelude-experimental"))
+  .settings(crossProjectSettings)
+  .settings(buildInfoSettings("zio.prelude.experimental"))
+
+lazy val experimentalJVM    = core.jvm
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
+
+lazy val experimentalJS     = core.js
+  .settings(jsSettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
+
+lazy val experimentalNative = core.native
+  .settings(scalaVersion := Scala211)
+  .settings(crossScalaVersions := Seq(scalaVersion.value))
+  .settings(skip in Test := true)
+  .settings(skip in doc := true)
+  .settings(       // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
+    SettingKey[Boolean]("ide-skip-project") := true
+  )
+  .settings(sources in (Compile, doc) := Seq.empty)
+  .settings(
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
+  )
+
 lazy val benchmarks = project.module
   .settings(
     skip.in(publish) := true,
