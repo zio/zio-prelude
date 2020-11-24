@@ -26,15 +26,15 @@ addCommandAlias("fix", "; all compile:scalafix test:scalafix; all scalafmtSbt sc
 addCommandAlias("check", "; scalafmtSbtCheck; scalafmtCheckAll; compile:scalafix --check; test:scalafix --check")
 addCommandAlias(
   "testJVM",
-  ";coreJVM/test"
+  ";coreJVM/test;experimentalJVM/test"
 )
 addCommandAlias(
   "testJS",
-  ";coreJS/test"
+  ";coreJS/test;experimentalJVM/test"
 )
 addCommandAlias(
   "testNative",
-  ";coreNative/test:compile"
+  ";coreNative/test:compile;experimentalJVM/test"
 )
 
 val zioVersion = "1.0.3"
@@ -49,6 +49,9 @@ lazy val root = project
     coreJVM,
     coreJS,
     coreNative,
+    experimentalJVM,
+    experimentalJS,
+    experimentalNative,
     benchmarks,
     docs
   )
