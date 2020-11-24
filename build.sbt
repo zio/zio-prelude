@@ -122,7 +122,7 @@ lazy val experimentalNative = core.native
   .settings(crossScalaVersions := Seq(scalaVersion.value))
   .settings(skip in Test := true)
   .settings(skip in doc := true)
-  .settings(       // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
+  .settings( // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
     SettingKey[Boolean]("ide-skip-project") := true
   )
   .settings(sources in (Compile, doc) := Seq.empty)
