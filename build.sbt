@@ -129,6 +129,10 @@ lazy val experimentalNative = experimental.native
     SettingKey[Boolean]("ide-skip-project") := true
   )
   .settings(sources in (Compile, doc) := Seq.empty)
+  .settings(
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
+  )
   .disablePlugins(
     ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
   )
