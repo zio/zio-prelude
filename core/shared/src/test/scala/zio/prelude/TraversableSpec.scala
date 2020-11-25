@@ -79,7 +79,7 @@ object TraversableSpec extends DefaultRunnableSpec {
         },
         testM("foldLeftM") {
           for {
-            ref   <- Ref.make(Chunk.empty[Int])
+            ref   <- Ref.make[Chunk[Int]](Chunk.empty)
             in     = List(1, 2, 3, 4, 5)
             s     <- in.foldLeftM(0)((s, a) => ref.modify(chunk => (s + a, chunk :+ a)))
             value <- ref.get
@@ -95,7 +95,7 @@ object TraversableSpec extends DefaultRunnableSpec {
         },
         testM("foldRightM") {
           for {
-            ref   <- Ref.make(Chunk.empty[Int])
+            ref   <- Ref.make[Chunk[Int]](Chunk.empty)
             in     = List(1, 2, 3, 4, 5)
             s     <- in.foldRightM(0)((a, s) => ref.modify(chunk => (s + a, chunk :+ a)))
             value <- ref.get
