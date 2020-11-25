@@ -3,7 +3,7 @@ package zio.prelude
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
-import zio.{ Chunk, NonEmptyChunk }
+import zio.{ Chunk, NonEmptyChunk, Ref }
 
 object TraversableSpec extends DefaultRunnableSpec {
 
@@ -77,12 +77,30 @@ object TraversableSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
+        testM("foldLeftM") {
+          for {
+            ref <- Ref.make(Chunk.empty[Int])
+            in  =  List(1, 2, 3, 4, 5)
+            s   <- in.foldLeftM(0)((s, a) => ref.modify(chunk => (s + a, chunk :+ a)))
+            value <- ref.get
+          } yield assert(s)(equalTo(15)) &&
+            assert(value)(equalTo(Chunk(1, 2, 3, 4, 5)))
+        },
         testM("foldRight") {
           check(genList, genInt, genIntFunction2) { (as, s, f) =>
             val actual   = Traversable[List].foldRight(as)(s)(f)
             val expected = as.foldRight(s)(f)
             assert(actual)(equalTo(expected))
           }
+        },
+        testM("foldRightM") {
+          for {
+            ref <- Ref.make(Chunk.empty[Int])
+            in  =  List(1, 2, 3, 4, 5)
+            s   <- in.foldRightM(0)((a, s) => ref.modify(chunk => (s + a, chunk :+ a)))
+            value <- ref.get
+          } yield assert(s)(equalTo(15)) &&
+            assert(value)(equalTo(Chunk(5, 4, 3, 2, 1)))
         },
         testM("forall") {
           check(genList, genBooleanFunction) { (as, f) =>

@@ -69,8 +69,15 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * Folds over the elements of this collection from left to right to produce a
    * summary value, maintaining some internal state along the way.
    */
-  def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S =
+  def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S                                           =
     foreach[({ type lambda[+A] = State[S, A] })#lambda, A, Unit](fa)(a => State.update((s: S) => f(s, a))).runState(s)
+
+  /**
+   * Effectually fold over the elements of this collection from left to right
+   * to produce a summary value, maintaining some internal state along the way.
+   */
+  def foldLeftM[G[+_]: IdentityFlatten: Covariant, S, A](fa: F[A])(s: S)(f: (S, A) => G[S]): G[S] =
+    foldLeft[G[S], A](fa)(IdentityFlatten[G].any.map(_ => s))((s, a) => s.flatMap(f(_, a)))
 
   /**
    * Maps each element of the collection to a type `B` for which an `Identity`
@@ -78,7 +85,7 @@ trait Traversable[F[+_]] extends Covariant[F] {
    * summary using the `combine` operation of `Identity`, or the `identity`
    * element if the collection is empty.
    */
-  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B   =
+  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B =
     foldLeft(fa)(Identity[B].identity)((b: B, a: A) => b combine f(a))
 
   /**
@@ -87,6 +94,13 @@ trait Traversable[F[+_]] extends Covariant[F] {
    */
   def foldRight[S, A](fa: F[A])(s: S)(f: (A, S) => S): S =
     foldLeft(reverse(fa))(s)((s, a) => f(a, s))
+
+  /**
+   * Effectually fold over the elements of this collection from right to left
+   * to produce a summary value, maintaining some internal state along the way.
+   */
+  def foldRightM[G[+_]: IdentityFlatten: Covariant, S, A](fa: F[A])(s: S)(f: (A, S) => G[S]): G[S] =
+    foldRight[G[S], A](fa)(IdentityFlatten[G].any.map(_ => s))((a, s) => s.flatMap(f(a, _)))
 
   /**
    * Returns whether any element of the collection satisfies the specified
@@ -288,61 +302,65 @@ trait TraversableSyntax {
    * Provides infix syntax for traversing collections.
    */
   implicit class TraversableOps[F[+_], A](private val self: F[A]) {
-    def foreach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: Traversable[F]): G[F[B]] =
+    def foreach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: Traversable[F]): G[F[B]]               =
       F.foreach(self)(f)
-    def contains[A1 >: A](a: A1)(implicit A: Equal[A1], F: Traversable[F]): Boolean                   =
+    def contains[A1 >: A](a: A1)(implicit A: Equal[A1], F: Traversable[F]): Boolean                                 =
       F.contains[A, A1](self)(a)
-    def count(f: A => Boolean)(implicit F: Traversable[F]): Int                                       =
+    def count(f: A => Boolean)(implicit F: Traversable[F]): Int                                                     =
       F.count(self)(f)
-    def exists(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                  =
+    def exists(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                                =
       F.exists(self)(f)
-    def find(f: A => Boolean)(implicit F: Traversable[F]): Option[A]                                  =
+    def find(f: A => Boolean)(implicit F: Traversable[F]): Option[A]                                                =
       F.find(self)(f)
-    def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: Traversable[F]): S                              =
+    def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: Traversable[F]): S                                            =
       F.foldLeft(self)(s)(f)
-    def foldMap[B: Identity](f: A => B)(implicit F: Traversable[F]): B                                =
+    def foldLeftM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (S, A) => G[S])(implicit F: Traversable[F]): G[S]  =
+      F.foldLeftM(self)(s)(f)
+    def foldMap[B: Identity](f: A => B)(implicit F: Traversable[F]): B                                              =
       F.foldMap(self)(f)
-    def foldRight[S](s: S)(f: (A, S) => S)(implicit F: Traversable[F]): S                             =
+    def foldRight[S](s: S)(f: (A, S) => S)(implicit F: Traversable[F]): S                                           =
       F.foldRight(self)(s)(f)
-    def forall(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                  =
+    def foldRightM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (A, S) => G[S])(implicit F: Traversable[F]): G[S] =
+      F.foldRightM(self)(s)(f)
+    def forall(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                                =
       F.forall(self)(f)
-    def foreach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: Traversable[F]): G[Unit] =
+    def foreach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: Traversable[F]): G[Unit]               =
       F.foreach_(self)(f)
-    def isEmpty(implicit F: Traversable[F]): Boolean                                                  =
+    def isEmpty(implicit F: Traversable[F]): Boolean                                                                =
       F.isEmpty(self)
-    def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: Traversable[F]): (S, F[B])              =
+    def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: Traversable[F]): (S, F[B])                            =
       F.mapAccum(self)(s)(f)
-    def maxOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                   =
+    def maxOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                                 =
       F.maxOption(self)
-    def maxByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                         =
+    def maxByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                                       =
       F.maxByOption(self)(f)
-    def minOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                   =
+    def minOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                                 =
       F.minOption(self)
-    def minByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                         =
+    def minByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                                       =
       F.minByOption(self)(f)
-    def nonEmpty(implicit F: Traversable[F]): Boolean                                                 =
+    def nonEmpty(implicit F: Traversable[F]): Boolean                                                               =
       F.nonEmpty(self)
-    def reduceAssociative(implicit F: Traversable[F], A: Associative[A]): Option[A]                   =
+    def reduceAssociative(implicit F: Traversable[F], A: Associative[A]): Option[A]                                 =
       F.reduceAssociative(self)
-    def reduceIdempotent(implicit F: Traversable[F], ia: Idempotent[A], ea: Equal[A]): Option[A]      =
+    def reduceIdempotent(implicit F: Traversable[F], ia: Idempotent[A], ea: Equal[A]): Option[A]                    =
       F.reduceIdempotent(self)
-    def reduceIdentity(implicit F: Traversable[F], A: Identity[A]): A                                 =
+    def reduceIdentity(implicit F: Traversable[F], A: Identity[A]): A                                               =
       F.reduceIdentity(self)
-    def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A                                  =
+    def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A                                                =
       F.product(self)
-    def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B]             =
+    def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B]                           =
       F.reduceMapOption(self)(f)
-    def reduceOption(f: (A, A) => A)(implicit F: Traversable[F]): Option[A]                           =
+    def reduceOption(f: (A, A) => A)(implicit F: Traversable[F]): Option[A]                                         =
       F.reduceOption(self)(f)
-    def reverse(implicit F: Traversable[F]): F[A]                                                     =
+    def reverse(implicit F: Traversable[F]): F[A]                                                                   =
       F.reverse(self)
-    def size(implicit F: Traversable[F]): Int                                                         =
+    def size(implicit F: Traversable[F]): Int                                                                       =
       F.size(self)
-    def sum(implicit A: Identity[Sum[A]], F: Traversable[F]): A                                       =
+    def sum(implicit A: Identity[Sum[A]], F: Traversable[F]): A                                                     =
       F.sum(self)
-    def toChunk(implicit F: Traversable[F]): Chunk[A]                                                 =
+    def toChunk(implicit F: Traversable[F]): Chunk[A]                                                               =
       F.toChunk(self)
-    def zipWithIndex(implicit F: Traversable[F]): F[(A, Int)]                                         =
+    def zipWithIndex(implicit F: Traversable[F]): F[(A, Int)]                                                       =
       F.zipWithIndex(self)
   }
 
