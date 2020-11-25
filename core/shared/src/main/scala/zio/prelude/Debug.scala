@@ -1,8 +1,8 @@
 package zio.prelude
 
-import scala.collection.immutable.ListMap
-
 import zio.{ Chunk, NonEmptyChunk }
+
+import scala.collection.immutable.ListMap
 
 trait Debug[-A] {
   def debug(a: A): Debug.Repr

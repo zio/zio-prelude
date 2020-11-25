@@ -1,14 +1,14 @@
 package zio.prelude
 
-import scala.annotation.implicitNotFound
-import scala.util.Try
-import scala.{ math => sm }
-
 import zio.Exit.{ Failure, Success }
 import zio.prelude.coherent.HashOrd
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace }
+
+import scala.annotation.implicitNotFound
+import scala.util.Try
+import scala.{ math => sm }
 
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be

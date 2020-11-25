@@ -1,10 +1,10 @@
 package zio.prelude
 
-import scala.annotation.implicitNotFound
-
 import zio.prelude.coherent.CovariantDeriveEqualIdentityFlatten
 import zio.test.TestResult
 import zio.test.laws._
+
+import scala.annotation.implicitNotFound
 
 /**
  * `IdentityFlatten` described a type that can be "flattened" in an
