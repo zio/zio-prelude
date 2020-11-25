@@ -112,26 +112,25 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental"))
 
-lazy val experimentalJVM    = core.jvm
+lazy val experimentalJVM    = experimental.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
 
-lazy val experimentalJS     = core.js
+lazy val experimentalJS     = experimental.js
   .settings(jsSettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
 
-lazy val experimentalNative = core.native
+lazy val experimentalNative = experimental.native
   .settings(scalaVersion := Scala211)
   .settings(crossScalaVersions := Seq(scalaVersion.value))
   .settings(skip in Test := true)
   .settings(skip in doc := true)
-  .settings( // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
+  .settings(       // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
     SettingKey[Boolean]("ide-skip-project") := true
   )
   .settings(sources in (Compile, doc) := Seq.empty)
-  .settings(
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-    dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
+  .disablePlugins(
+    ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
   )
 
 lazy val benchmarks = project.module
