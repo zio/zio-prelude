@@ -1,22 +1,17 @@
 package zio.prelude
 
-import zio.ZIO
 import zio.prelude.coherent.CommutativeEitherDeriveEqualInvariant
-import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.{ ExecutionContext, Future, Promise }
 
 /**
  * A commutative binary operator that combines two values of types `F[A]` and
  * `F[B]` to produce an `F[Either[A, B]]`.
  */
 @implicitNotFound("No implicit CommutativeEither defined for ${F}.")
-trait CommutativeEither[F[_]] extends AssociativeEither[F] {
-  // def eitherPar[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
-}
+trait CommutativeEither[F[_]] extends AssociativeEither[F]
 
 object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] {
 
@@ -38,43 +33,6 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
    */
   val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
     commutativeLaw + AssociativeEither.laws
-
-  /**
-   * The `CommutativeEither` instance for `Future`.
-   */
-  implicit def FutureCommutativeEither(implicit ec: ExecutionContext): CommutativeEither[Future] =
-    new CommutativeEither[Future] {
-      def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
-        Promise[Either[A, B]]().completeWith(fa.map(Left(_))).completeWith(fb.map(Right(_))).future
-    }
-
-  /**
-   * The `CommutativeEither` instance for `ZIO`.
-   */
-  implicit def ZIOCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new CommutativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      def either[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, Either[A, B]] =
-        fa.raceEither(fb)
-    }
-
-  /**
-   * The `CommutativeEither` instance for `ZSink`.
-   */
-  implicit def ZSinkCommutativeEither[R, E, I, L]
-    : CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
-    new CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
-      def either[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, Either[A, B]] =
-        fa.raceBoth(fb)
-    }
-
-  /**
-   * The `CommutativeEither` instance for `ZStream`.
-   */
-  implicit def ZStreamCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
-    new CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
-      def either[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, Either[A, B]] =
-        fa mergeEither fb
-    }
 
   /**
    * Summons an implicit `CommutativeEither[F]`.

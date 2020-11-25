@@ -3,12 +3,12 @@ package zio.prelude
 import zio._
 import zio.prelude.coherent.AssociativeEitherDeriveEqualInvariant
 import zio.prelude.newtypes.Failure
-import zio.stream.ZStream
+import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.util.Try
 
 /**
@@ -116,14 +116,12 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
-   * The `AssociativeEither` instance for `Future`.
+   * The `CommutativeEither` (and `AssociativeEither`) instance for `Future`.
    */
-  implicit def FutureAssociativeEither(implicit ec: ExecutionContext): AssociativeEither[Future] =
-    new AssociativeEither[Future] {
+  implicit def FutureCommutativeEither(implicit ec: ExecutionContext): CommutativeEither[Future] =
+    new CommutativeEither[Future] {
       def either[A, B](fa: => Future[A], fb: => Future[B]): Future[Either[A, B]] =
-        fa.map(Left(_)).recoverWith { case _: Throwable =>
-          fb.map(Right(_))
-        }
+        Promise[Either[A, B]]().completeWith(fa.map(Left(_))).completeWith(fb.map(Right(_))).future
     }
 
   /**
@@ -157,12 +155,12 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
-   * The `AssociativeEither` instance for `ZIO`.
+   * The `CommutativeEither` (and `AssociativeEither`) instance for `ZIO`.
    */
-  implicit def ZIOAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new AssociativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+  implicit def ZIOCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
       def either[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, Either[A, B]] =
-        fa.orElseEither(fb)
+        fa.raceEither(fb)
     }
 
   /**
@@ -214,12 +212,22 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
-   * The `AssociativeEither` instance for `ZStream`.
+   * The `CommutativeEither` (and `AssociativeEither`) instance for `ZSink`.
    */
-  implicit def ZStreamAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
-    new AssociativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
+  implicit def ZSinkCommutativeEither[R, E, I, L]
+    : CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
+      def either[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, Either[A, B]] =
+        fa.raceBoth(fb)
+    }
+
+  /**
+   * The `CommutativeEither` (and `AssociativeEither`) instance for `ZStream`.
+   */
+  implicit def ZStreamCommutativeEither[R, E]: CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def either[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, Either[A, B]] =
-        fa.map(Left(_)) orElse fb.map(Right(_))
+        fa mergeEither fb
     }
 
   /**
