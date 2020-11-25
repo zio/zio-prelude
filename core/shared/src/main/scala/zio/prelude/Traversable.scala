@@ -1,9 +1,10 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualTraversable
-import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
+import zio.prelude.newtypes.{And, First, Max, Min, Or, Prod, Sum}
+import zio.test.TestResult
 import zio.test.laws._
-import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
+import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
 
 /**
  * `Traversable` is an abstraction that describes the ability to iterate over
@@ -269,11 +270,25 @@ trait Traversable[F[+_]] extends Covariant[F] {
 
 object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
 
+// need to implement natural transformations for this property?
+// val naturalityLaw: LawsF.Covariant[DeriveEqualTraversable, Equal] = ???
+
+  /**
+   * Traversing by `Id` is equivalent to mapping.
+   */
+  val identityLaw: LawsF.Covariant[DeriveEqualTraversable, Equal] = {
+    // g: B => C is not needed here, but no appropriate law constructor exists in zio-test
+    new LawsF.Covariant.ComposeLaw[DeriveEqualTraversable, Equal]("identityLaw") {
+      def apply[F[+_]: DeriveEqualTraversable, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
+        Id.unwrap(fa.foreach(a => Id[B](f(a)))) <-> fa.map(f)
+    }
+  }
+
   /**
    * The set of all laws that instances of `Traversable` must satisfy.
    */
   val laws: LawsF.Covariant[DeriveEqualTraversable, Equal] =
-    Covariant.laws
+    Covariant.laws + identityLaw
 
   /**
    * Summons an implicit `Traversable`.
