@@ -1,8 +1,5 @@
 package zio.prelude
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Try
-
 import zio.prelude.newtypes.{ Failure, FailureIn, FailureOut }
 import zio.stm.ZSTM
 import zio.stream.{ ZSink, ZStream }
@@ -21,6 +18,9 @@ import zio.{
   ZRef,
   ZRefM
 }
+
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
 
 trait Invariant[F[_]] { self =>
 

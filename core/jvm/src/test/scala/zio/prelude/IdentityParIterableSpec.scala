@@ -1,10 +1,9 @@
 package zio.prelude
 
+import com.github.ghik.silencer.silent
 import zio.blocking.Blocking
 import zio.prelude.newtypes.Sum
 import zio.test._
-
-import com.github.ghik.silencer.silent
 
 @silent
 object IdentityParIterableSpec extends DefaultRunnableSpec {

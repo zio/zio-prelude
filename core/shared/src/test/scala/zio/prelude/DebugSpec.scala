@@ -1,10 +1,10 @@
 package zio.prelude
 
-import scala.collection.immutable.ListMap
-
 import zio.prelude.Debug.{ Renderer, Repr, _ }
 import zio.random.Random
 import zio.test.{ TestResult, _ }
+
+import scala.collection.immutable.ListMap
 
 object DebugSpec extends DefaultRunnableSpec {
 
