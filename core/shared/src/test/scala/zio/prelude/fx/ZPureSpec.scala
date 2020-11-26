@@ -541,7 +541,15 @@ object ZPureSpec extends DefaultRunnableSpec {
             assert(ZPure.fromEffect("a".toInt).runEither(()))(
               isLeft(equalTo(exception))
             )
-          }
+          },
+          suite("modifyEither")(
+            test("success") {
+              assert(ZPure.modifyEither((_: Int) => Right((1, "success"))).run(0))(equalTo((1, "success")))
+            },
+            test("failure") {
+              assert(ZPure.modifyEither((_: Int) => Left("error")).runEither(0))(isLeft(equalTo("error")))
+            }
+          )
         )
       )
     )

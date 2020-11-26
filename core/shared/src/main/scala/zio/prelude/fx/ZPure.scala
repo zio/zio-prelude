@@ -678,6 +678,15 @@ object ZPure {
     Modify(f)
 
   /**
+   * Constructs a computation that may fail from the specified modify function.
+   */
+  def modifyEither[S1, S2, E, A](f: S1 => Either[E, (S2, A)]): ZPure[S1, S2, Any, E, A] =
+    get.map(f).flatMap {
+      case Left(e)        => ZPure.fail(e)
+      case Right((s2, a)) => ZPure.succeed(a).asState(s2)
+    }
+
+  /**
    * Constructs a computation that extracts the second element of a tuple.
    */
   def second[S, B]: ZPure[S, S, (Any, B), Nothing, B] =
