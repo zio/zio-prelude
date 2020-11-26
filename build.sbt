@@ -145,7 +145,7 @@ lazy val benchmarks = project.module
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio" % zioVersion,
-      ("org.typelevel" %% "cats-core" % "2.2.0") match {
+      ("org.typelevel" %% "cats-core" % "2.3.0") match {
         case cats if isDotty.value => cats.withDottyCompat(scalaVersion.value)
         case cats                  => cats
       }
