@@ -320,7 +320,7 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
       ): TestResult = ???
     }
 
-  val parallelFusionLaw =
+  val parallelFusionLaw: ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal] =
     new ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal]("parallelFusion") {
       def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, H[+_]: Applicative, A: Equal, B: Equal, C: Equal](
         fa: F[A],

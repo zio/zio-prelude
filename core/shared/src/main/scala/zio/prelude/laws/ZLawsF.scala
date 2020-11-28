@@ -18,7 +18,10 @@ object ZLawsF {
     abstract class PurityLaw[-CapsF[_[+_]], -CapsG[_[+_]], -Caps[_]](label: String) { self =>
       def apply[F[+_]: CapsF, G[+_]: CapsG, A: Caps](fa: F[A]): TestResult
 
-      final def run[R <: TestConfig, F[+_]: CapsF, G[+_]: CapsG, A: Caps](genF: GenF[R, F], gen: Gen[R, A]): URIO[R, TestResult] =
+      final def run[R <: TestConfig, F[+_]: CapsF, G[+_]: CapsG, A: Caps](
+        genF: GenF[R, F],
+        gen: Gen[R, A]
+      ): URIO[R, TestResult] =
         check(genF(gen))(apply(_).map(_.label(label)))
     }
 

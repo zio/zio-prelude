@@ -31,15 +31,18 @@ object Instances {
   trait ApplicativeDeriveEqual[F[+_]] extends Covariant[F] with IdentityBoth[F] with DeriveEqual[F]
 
   object ApplicativeDeriveEqual {
-    implicit def derive[F[+_]](implicit applicative0: Applicative[F], deriveEqual0: DeriveEqual[F]): ApplicativeDeriveEqual[F] =
+    implicit def derive[F[+_]](implicit
+      applicative0: Applicative[F],
+      deriveEqual0: DeriveEqual[F]
+    ): ApplicativeDeriveEqual[F] =
       new ApplicativeDeriveEqual[F] {
-        def any: F[Any] =
+        def any: F[Any]                                     =
           applicative0.any
         def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] =
           applicative0.both(fa, fb)
-        def derive[A: Equal]: Equal[F[A]] =
+        def derive[A: Equal]: Equal[F[A]]                   =
           deriveEqual0.derive
-        def map[A, B](f: A => B): F[A] => F[B] =
+        def map[A, B](f: A => B): F[A] => F[B]              =
           applicative0.map(f)
       }
   }
