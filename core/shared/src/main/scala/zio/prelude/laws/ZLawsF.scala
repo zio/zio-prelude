@@ -25,7 +25,7 @@ object ZLawsF {
         check(genF(gen))(apply(_).map(_.label(label)))
     }
 
-    abstract class FusionLaw[-CapsF[_[+_]], -CapsGH[_[+_]], -Caps[_]](label: String) { self =>
+    abstract class SequentialFusionLaw[-CapsF[_[+_]], -CapsGH[_[+_]], -Caps[_]](label: String) { self =>
       def apply[F[+_]: CapsF, G[+_]: CapsGH, H[+_]: CapsGH, A: Caps, B: Caps, C: Caps](
         fa: F[A],
         agb: A => G[B],

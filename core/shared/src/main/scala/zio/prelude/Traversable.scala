@@ -282,8 +282,8 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
     }
 
   /** Two sequentially dependent effects can be fused into one, their composition */
-  val sequentialFusionLaw: ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal] =
-    new ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal]("sequentialFusionLaw") {
+  val sequentialFusionLaw: ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, Applicative, Equal] =
+    new ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, Applicative, Equal]("sequentialFusionLaw") {
       def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, H[+_]: Applicative, A: Equal, B: Equal, C: Equal](
         fa: F[A],
         agb: A => G[B],
@@ -309,8 +309,8 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
       }
     }
 
-  val naturalityLaw: ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal] =
-    new ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal]("parallelFusion") {
+  val naturalityLaw: ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, Applicative, Equal] =
+    new ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, Applicative, Equal]("parallelFusion") {
       def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, H[+_]: Applicative, A: Equal, B: Equal, C: Equal](
         fa: F[A],
         agb: A => G[B],
@@ -327,13 +327,19 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
       }
     }
 
-  val parallelFusionLaw: ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal] =
-    new ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal]("parallelFusion") {
+  val parallelFusionLaw: ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, Applicative, Equal] =
+    new ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, Applicative, Equal]("parallelFusion") {
       def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, H[+_]: Applicative, A: Equal, B: Equal, C: Equal](
         fa: F[A],
         agb: A => G[B],
         bhc: B => H[C]
-      ): TestResult = ???
+      ): TestResult = {
+        type GH[+A] = (G[A], H[A])
+        implicit val GH: Applicative[GH]                      = Applicative.product(Applicative[G], Applicative[H])
+        implicit lazy val ghEqual: ApplicativeDeriveEqual[GH] = ApplicativeDeriveEqual.derive[GH]
+
+        ???
+      }
     }
 
   /**
