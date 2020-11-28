@@ -290,13 +290,11 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
         bhc: B => H[C]
       ): TestResult = {
         type GH[+A] = G[H[A]]
-        // should I make infix syntax for this?
-        implicit val gh: Applicative[GH]                      = Applicative.compose(Applicative[G], Applicative[H])
+        implicit val GH: Applicative[GH]                      = Applicative.compose(Applicative[G], Applicative[H])
         implicit lazy val ghEqual: ApplicativeDeriveEqual[GH] = ApplicativeDeriveEqual.derive[GH]
 
         val ghfc1: GH[F[C]] = fa.foreach(agb).map(_.foreach(bhc))
-        // is there any way to restate this?
-        val ghfc2: GH[F[C]] = fa.map(agb.andThen(_.map(bhc)).andThen(ghc => gh.both(ghc, gh.any))).foreach(_.map(_._1))
+        val ghfc2: GH[F[C]] = fa.foreach(a => GH.both(agb(a).map(bhc), GH.any).map(_._1))
         ghfc1 <-> ghfc2
       }
     }
@@ -317,7 +315,16 @@ object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
         fa: F[A],
         agb: A => G[B],
         bhc: B => H[C]
-      ): TestResult = ???
+      ): TestResult = {
+        val F = Traversable[F]
+        type GH[+A] = G[H[A]]
+        implicit val GH: Applicative[GH]                      = Applicative.compose(Applicative[G], Applicative[H])
+        implicit lazy val ghEqual: ApplicativeDeriveEqual[GH] = ApplicativeDeriveEqual.derive[GH]
+
+        val ghfc1: GH[F[C]] = F.flip(fa.map(agb)).map(b => F.flip(b.map(bhc)))
+        val ghfc2: GH[F[C]] = F.flip(fa.map(a => GH.both(agb(a).map(bhc), GH.any).map(_._1)))
+        ghfc1 <-> ghfc2
+      }
     }
 
   val parallelFusionLaw: ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal] =
