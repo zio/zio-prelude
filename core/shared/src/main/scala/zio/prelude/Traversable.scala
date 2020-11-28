@@ -1,10 +1,10 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualTraversable
-import zio.prelude.newtypes.{And, First, Max, Min, Or, Prod, Sum}
+import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws._
-import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
+import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
 
 /**
  * `Traversable` is an abstraction that describes the ability to iterate over
@@ -269,20 +269,65 @@ trait Traversable[F[+_]] extends Covariant[F] {
 }
 
 object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
+  import zio.prelude.classic.Applicative
+  import zio.prelude.Instances.Applicative
+  import zio.prelude.Instances.ApplicativeDeriveEqual
+  import zio.prelude.laws.ZLawsF
 
-// need to implement natural transformations for this property?
-// val naturalityLaw: LawsF.Covariant[DeriveEqualTraversable, Equal] = ???
-
-  /**
-   * Traversing by `Id` is equivalent to mapping.
-   */
-  val identityLaw: LawsF.Covariant[DeriveEqualTraversable, Equal] = {
-    // g: B => C is not needed here, but no appropriate law constructor exists in zio-test
-    new LawsF.Covariant.ComposeLaw[DeriveEqualTraversable, Equal]("identityLaw") {
-      def apply[F[+_]: DeriveEqualTraversable, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
-        Id.unwrap(fa.foreach(a => Id[B](f(a)))) <-> fa.map(f)
+  /** Traversing by `Id` is equivalent to mapping. */
+  val identityLaw: LawsF.Covariant[DeriveEqualTraversable, Equal] =
+    new ZLawsF.Traversable.MapLaw[DeriveEqualTraversable, Equal]("identityLaw") {
+      def apply[F[+_]: DeriveEqualTraversable, A: Equal, B: Equal](fa: F[A], f: A => B): TestResult =
+        Id.unwrap(fa.foreach(f.andThen(Id[B]))) <-> fa.map(f)
     }
-  }
+
+  /** Two sequentially dependent effects can be fused into one, their composition */
+  val sequentialFusionLaw: ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal] =
+    new ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal]("sequentialFusionLaw") {
+      def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, H[+_]: Applicative, A: Equal, B: Equal, C: Equal](
+        fa: F[A],
+        agb: A => G[B],
+        bhc: B => H[C]
+      ): TestResult = {
+        type GH[+A] = G[H[A]]
+        // should I make infix syntax for this?
+        implicit val gh: Applicative[GH]                      = Applicative.compose(Applicative[G], Applicative[H])
+        implicit lazy val ghEqual: ApplicativeDeriveEqual[GH] = ApplicativeDeriveEqual.derive[GH]
+
+        val ghfc1: GH[F[C]] = fa.foreach(agb).map(_.foreach(bhc))
+        // is there any way to restate this?
+        val ghfc2: GH[F[C]] = fa.map(agb.andThen(_.map(bhc)).andThen(ghc => gh.both(ghc, gh.any))).foreach(_.map(_._1))
+        ghfc1 <-> ghfc2
+      }
+    }
+
+  /** Traversal with succeed is the same as applying succeed directly */
+  val purityLaw: ZLawsF.Traversable.PurityLaw[DeriveEqualTraversable, Applicative, Equal] =
+    new ZLawsF.Traversable.PurityLaw[DeriveEqualTraversable, Applicative, Equal]("purityLaw") {
+      def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, A: Equal](fa: F[A]): TestResult = {
+        implicit lazy val gEqual: ApplicativeDeriveEqual[G] = ApplicativeDeriveEqual.derive[G]
+        // should I implement `Applicative#succeed`?
+        fa.foreach(Applicative[G].any.as[A](_)) <-> Applicative[G].any.as(fa)
+      }
+    }
+
+  val naturalityLaw: ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal] =
+    new ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal]("parallelFusion") {
+      def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, H[+_]: Applicative, A: Equal, B: Equal, C: Equal](
+        fa: F[A],
+        agb: A => G[B],
+        bhc: B => H[C]
+      ): TestResult = ???
+    }
+
+  val parallelFusionLaw =
+    new ZLawsF.Traversable.FusionLaw[DeriveEqualTraversable, Applicative, Equal]("parallelFusion") {
+      def apply[F[+_]: DeriveEqualTraversable, G[+_]: Applicative, H[+_]: Applicative, A: Equal, B: Equal, C: Equal](
+        fa: F[A],
+        agb: A => G[B],
+        bhc: B => H[C]
+      ): TestResult = ???
+    }
 
   /**
    * The set of all laws that instances of `Traversable` must satisfy.
