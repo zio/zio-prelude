@@ -1,12 +1,14 @@
 package zio.prelude
 
+import zio.prelude.AssociativeBoth.OptionIdentityBoth
+import zio.prelude.Invariant.OptionTraversable
 import zio.prelude.classic.Applicative
 
 // not sure about putting this here
 object Instances {
 
   object Applicative {
-    def apply[F[+_]: Applicative]: Applicative[F] = new Covariant[F] with IdentityBoth[F] { self =>
+    def apply[F[+_]: Covariant: IdentityBoth]: Applicative[F] = new Covariant[F] with IdentityBoth[F] { self =>
       def map[A, B](f: A => B): F[A] => F[B] = Covariant[F].map(f)
 
       def any: F[Any] = IdentityBoth[F].any
@@ -41,6 +43,8 @@ object Instances {
         def both[A, B](faga: => (F[A], G[A]), fbgb: => (F[B], G[B])): (F[(A, B)], G[(A, B)]) =
           (F.both(faga._1, fbgb._1), G.both(faga._2, fbgb._2))
       }
+
+    implicit val applicativeOption: Applicative[Option] = Applicative[Option](OptionTraversable, OptionIdentityBoth)
   }
 
   trait ApplicativeDeriveEqual[F[+_]] extends Covariant[F] with IdentityBoth[F] with DeriveEqual[F]

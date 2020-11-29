@@ -1,5 +1,7 @@
 package zio.prelude
 
+import zio.prelude.Instances.Applicative._
+import zio.prelude.laws.checkAllLaws
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -21,7 +23,7 @@ object NonEmptyTraversableSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("NonEmptyTraversableSpec")(
       suite("instances")(
-        testM("nonEmptyChunk")(checkAllLaws(NonEmptyTraversable)(GenFs.nonEmptyChunk, Gen.anyInt))
+        testM("nonEmptyChunk")(checkAllLaws(NonEmptyTraversable)(GenFs.nonEmptyChunk, GenF.option, Gen.anyInt))
       ),
       suite("combinators")(
         testM("max") {

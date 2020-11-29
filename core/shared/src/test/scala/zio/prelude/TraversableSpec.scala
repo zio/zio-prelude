@@ -1,5 +1,7 @@
 package zio.prelude
 
+import zio.prelude.Instances.Applicative._
+import zio.prelude.laws.checkAllLaws
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -34,12 +36,12 @@ object TraversableSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("TraversableSpec")(
       suite("instances")(
-        testM("chunk")(checkAllLaws(Traversable)(GenF.chunk, Gen.anyInt)),
-        testM("either")(checkAllLaws(Traversable)(GenFs.either(Gen.anyInt), Gen.anyInt)),
-        testM("list")(checkAllLaws(Traversable)(GenF.list, Gen.anyInt)),
-        testM("map")(checkAllLaws(Traversable)(GenFs.map(Gen.anyInt), Gen.anyInt)),
-        testM("option")(checkAllLaws(Traversable)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt))
+        testM("chunk")(checkAllLaws(Traversable)(GenF.chunk, GenF.option, Gen.anyInt)),
+        testM("either")(checkAllLaws(Traversable)(GenFs.either(Gen.anyInt), GenF.option, Gen.anyInt)),
+        testM("list")(checkAllLaws(Traversable)(GenF.list, GenF.option, Gen.anyInt)),
+        testM("map")(checkAllLaws(Traversable)(GenFs.map(Gen.anyInt), GenF.option, Gen.anyInt)),
+        testM("option")(checkAllLaws(Traversable)(GenF.option, GenF.option, Gen.anyInt)),
+        testM("vector")(checkAllLaws(Traversable)(GenF.vector, GenF.option, Gen.anyInt))
       ),
       suite("combinators")(
         testM("contains") {

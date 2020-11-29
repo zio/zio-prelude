@@ -1,8 +1,8 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualNonEmptyTraversable
+import zio.prelude.laws._
 import zio.prelude.newtypes.{ Max, Min }
-import zio.test.laws._
 import zio.{ ChunkBuilder, NonEmptyChunk }
 
 /**
@@ -134,12 +134,14 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
   def toNonEmptyList[A](fa: F[A]): NonEmptyList[A] =
     reduceMapLeft(fa)(NonEmptyList.single)((as, a) => NonEmptyList.cons(a, as)).reverse
 }
-object NonEmptyTraversable extends LawfulF.Covariant[DeriveEqualNonEmptyTraversable, Equal] {
+
+import zio.prelude.Instances.ApplicativeDeriveEqual
+object NonEmptyTraversable extends LawfulF.Traversable[DeriveEqualNonEmptyTraversable, ApplicativeDeriveEqual, Equal] {
 
   /**
    * The set of all laws that instances of `NonEmptyTraversable` must satisfy.
    */
-  val laws: LawsF.Covariant[DeriveEqualNonEmptyTraversable, Equal] =
+  val laws: LawsF.Traversable[DeriveEqualNonEmptyTraversable, ApplicativeDeriveEqual, Equal] =
     Traversable.laws
 
   /**
