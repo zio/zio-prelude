@@ -2,6 +2,7 @@ package zio.prelude
 
 import zio.Exit.{ Failure, Success }
 import zio.prelude.coherent.HashOrd
+import zio.prelude.newtypes.Nested
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace }
@@ -203,6 +204,17 @@ object Equal extends Lawful[Equal] {
    */
   def default[A]: Equal[A] =
     make(_ == _)
+
+  implicit def IdEqual[A: Equal]: Equal[Id[A]] = new Equal[Id[A]] {
+    override protected def checkEqual(l: Id[A], r: Id[A]): Boolean =
+      Id.unwrap[A](l) === Id.unwrap[A](r)
+  }
+
+  implicit def NestedEqual[F[+_], G[+_], A](implicit eqFGA: Equal[F[G[A]]]): Equal[Nested[F, G, A]] =
+    new Equal[Nested[F, G, A]] {
+      override protected def checkEqual(l: Nested[F, G, A], r: Nested[F, G, A]): Boolean =
+        eqFGA.checkEqual(Nested.unwrap[F[G[A]]](l), Nested.unwrap[F[G[A]]](r))
+    }
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.

@@ -677,6 +677,8 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new Traversable[Option] {
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
         option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
+
+      override def map[A, B](f: A => B): Option[A] => Option[B] = _.map(f)
     }
 
   /**

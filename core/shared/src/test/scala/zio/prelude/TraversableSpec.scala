@@ -1,8 +1,8 @@
 package zio.prelude
 
 import zio.random.Random
-import zio.test._
 import zio.test.laws._
+import zio.test.{ Sized, testM, _ }
 import zio.{ Chunk, NonEmptyChunk }
 
 object TraversableSpec extends DefaultRunnableSpec {
@@ -39,7 +39,8 @@ object TraversableSpec extends DefaultRunnableSpec {
         testM("list")(checkAllLaws(Traversable)(GenF.list, Gen.anyInt)),
         testM("map")(checkAllLaws(Traversable)(GenFs.map(Gen.anyInt), Gen.anyInt)),
         testM("option")(checkAllLaws(Traversable)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt))
+        testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt)),
+        testM("Nested[vector,option]")(checkAllLaws(Traversable)(GenFs.nested(GenF.vector, GenF.option), Gen.anyInt))
       ),
       suite("combinators")(
         testM("contains") {

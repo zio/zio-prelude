@@ -1,7 +1,8 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualTraversable
-import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
+import zio.prelude.newtypes._
+import zio.test.TestResult
 import zio.test.laws._
 import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
 
@@ -270,16 +271,67 @@ trait Traversable[F[+_]] extends Covariant[F] {
 object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
 
   /**
+   * Identity Law :
+   *  traverse Identity ta = Identity ta
+   */
+  val traversableIdentityLaw: LawsF.Covariant[DeriveEqualTraversable, Equal] =
+    new LawsF.Covariant.Law1[DeriveEqualTraversable, Equal]("traversableIdentityLaw") {
+      def apply[F[+_]: DeriveEqualTraversable, A: Equal](fa: F[A]): TestResult =
+        fa.foreach(Id(_)) <-> Id(fa)
+    }
+
+  /**
+   *  Composition Law for various kind of Applivatives
+   */
+  val traversableCompositionLaw: LawsF.Covariant[DeriveEqualTraversable, Equal] = {
+    compositionLawCase[Id, Id] + compositionLawCase[Option, List] + compositionLawCase[List, Option]
+  }
+
+  /**
+   * Composition law
+   * traverse (Compose . fmap g . f) ta = Compose . fmap (traverse g) . traverse f $ ta
+   */
+  private def compositionLawCase[F[+_]: IdentityBoth: Covariant: DeriveEqual, G[
+    +_
+  ]: IdentityBoth: Covariant: DeriveEqual]: LawsF.Covariant[DeriveEqualTraversable, Equal] =
+    new LawsF.Covariant.ComposeLaw[DeriveEqualTraversable, Equal]("traversableCompositionLaw") {
+      def apply[T[+_]: DeriveEqualTraversable, A: Equal, B: Equal, C: Equal](
+        ta: T[A],
+        f: A => B,
+        g: B => C
+      ): TestResult = {
+        val fA: A => F[B]             = f.map(_.succeed[F])
+        val gA: B => G[C]             = g.map(_.succeed[G])
+        val left: Nested[F, G, T[C]]  = Nested(ta.foreach(fA).map(_.foreach(gA)))
+        val right: Nested[F, G, T[C]] = ta.foreach(a => Nested(fA(a).map(gA)): Nested[F, G, C])
+        left <-> right
+      }
+    }
+
+  /**
    * The set of all laws that instances of `Traversable` must satisfy.
    */
   val laws: LawsF.Covariant[DeriveEqualTraversable, Equal] =
-    Covariant.laws
+    traversableIdentityLaw + traversableCompositionLaw + Covariant.laws
 
   /**
    * Summons an implicit `Traversable`.
    */
   def apply[F[+_]](implicit traversable: Traversable[F]): Traversable[F] =
     traversable
+
+  implicit def NestedTraversable[F[+_]: Traversable, G[+_]: Traversable]
+    : Traversable[({ type lambda[+A] = Nested[F, G, A] })#lambda] =
+    new Traversable[({ type lambda[+A] = Nested[F, G, A] })#lambda] {
+      override def foreach[E[+_]: IdentityBoth: Covariant, A, B](ta: Nested[F, G, A])(
+        f: A => E[B]
+      ): E[Nested[F, G, B]] =
+        Nested.wrapAll(Nested.unwrap[F[G[A]]](ta).foreach(_.foreach(f)))
+
+      private lazy val nestedCovariant = Covariant.NestedCovariant[F, G]
+
+      override def map[A, B](f: A => B): Nested[F, G, A] => Nested[F, G, B] = nestedCovariant.map(f)
+    }
 }
 
 trait TraversableSyntax {
