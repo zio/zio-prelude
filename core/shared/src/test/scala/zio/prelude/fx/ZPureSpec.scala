@@ -148,6 +148,34 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(ZPure.modifyEither(f).repeatUntilEquals(1).runEither(0))(isLeft(equalTo("error")))
             }
           ),
+          suite("repeatUntilState")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatUntilState(_ == 1).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatUntilState(_ == 10).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatUntilState(_ == 20).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatUntilState(_ == 30).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatUntilState(_ == 40).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatUntilState(_ == 10).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatUntilStateEquals")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatUntilStateEquals(1).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatUntilStateEquals(10).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatUntilStateEquals(20).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatUntilStateEquals(30).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatUntilStateEquals(40).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatUntilStateEquals(10).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
           suite("repeatWhile")(
             test("success") {
               val f = (s: Int) => (s + 1, (s + 1) / 10)
@@ -170,6 +198,20 @@ object ZPureSpec extends DefaultRunnableSpec {
             test("failure") {
               val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
               assert(ZPure.modifyEither(f).repeatWhileEquals(0).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatWhileState")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatWhileState(_ < 1).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatWhileState(_ < 10).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatWhileState(_ < 20).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatWhileState(_ < 30).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatWhileState(_ < 40).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatWhileState(_ < 10).runEither(0))(isLeft(equalTo("error")))
             }
           ),
           testM("run") {

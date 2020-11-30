@@ -406,6 +406,23 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     repeatUntil(_ == a)
 
   /**
+   * Repeats this computation until the updated state satisfies the specified predicate
+   * (or until the first failure) passing the updated state to each successive repetition.
+   */
+  final def repeatUntilState(f: S2 => Boolean)(implicit ev: S2 <:< S1): ZPure[S1, S2, R, E, A] =
+    self.zip(ZPure.get).flatMap { case (a, s) =>
+      if (f(s)) ZPure.succeed(a)
+      else repeatUntilState(f).contramapState(ev)
+    }
+
+  /**
+   * Repeats this computation until the updated state is equal to the specified value
+   * (or until the first failure) passing the updated state to each successive repetition.
+   */
+  final def repeatUntilStateEquals[S3 >: S2](s: => S3)(implicit ev: S2 <:< S1): ZPure[S1, S3, R, E, A] =
+    repeatUntilState(_ == s)
+
+  /**
    * Repeats this computation for as long as its value satisfies the specified predicate
    * (or until the first failure) passing the updated state to each successive repetition.
    */
@@ -418,6 +435,13 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def repeatWhileEquals[A1 >: A](a: => A1)(implicit ev: S2 <:< S1): ZPure[S1, S2, R, E, A1] =
     repeatWhile(_ == a)
+
+  /**
+   * Repeats this computation for as long as the updated state satisfies the specified predicate
+   * (or until the first failure) passing the updated state to each successive repetition.
+   */
+  final def repeatWhileState(f: S2 => Boolean)(implicit ev: S2 <:< S1): ZPure[S1, S2, R, E, A] =
+    repeatUntilState(!f(_))
 
   /**
    * Runs this computation with the specified initial state, returning both
