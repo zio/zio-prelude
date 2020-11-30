@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualTraversable
-import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
+import zio.prelude.newtypes.{ And, First, Max, Min, Nested, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
 
@@ -286,13 +286,20 @@ object Traversable
     new ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal](
       "sequentialFusionLaw"
     ) {
-      def apply[F[+_]: DeriveEqualTraversable, G[+_]: ApplicativeDeriveEqual, H[
-        +_
-      ]: ApplicativeDeriveEqual, A, B, C: Equal](fa: F[A], agb: A => G[B], bhc: B => H[C]): TestResult = {
-        type GH[+A] = G[H[A]]
-        implicit val GH: Applicative[GH] = Applicative.compose(Applicative[G], Applicative[H])
-        val left: G[H[F[C]]]             = fa.foreach(agb).map(_.foreach(bhc))
-        val right: G[H[F[C]]]            = fa.foreach(a => GH.both(agb(a).map(bhc), GH.any).map(_._1))
+      def apply[
+        F[+_]: DeriveEqualTraversable,
+        G[+_]: ApplicativeDeriveEqual,
+        H[+_]: ApplicativeDeriveEqual,
+        A,
+        B,
+        C: Equal
+      ](fa: F[A], agb: A => G[B], bhc: B => H[C]): TestResult = {
+        implicit val GH: Applicative[({ type lambda[+A] = Nested[G, H, A] })#lambda] = Applicative.nested0[G, H]
+
+        val left: Nested[G, H, F[C]]  =
+          Nested(fa.foreach(agb).map(_.foreach(bhc)))
+        val right: Nested[G, H, F[C]] =
+          fa.foreach(a => (GH.both(Nested(agb(a).map(bhc)): Nested[G, H, C], GH.any): Nested[G, H, (C, Any)]).map(_._1))
         left <-> right
       }
     }
@@ -311,11 +318,12 @@ object Traversable
         aga: A => G[A],
         aha: A => H[A]
       ): TestResult = {
-        type GH[+A] = G[H[A]]
-        implicit val GH: Applicative[GH] = Applicative.compose(Applicative[G], Applicative[H])
+        implicit val GH: Applicative[({ type lambda[+A] = Nested[G, H, A] })#lambda] = Applicative.nested0[G, H]
 
-        val left: G[H[F[A]]]  = fa.map(aga).flip.map(a => a.map(aha).flip)
-        val right: G[H[F[A]]] = fa.map(a => GH.both(aga(a).map(aha), GH.any).map(_._1)).flip
+        val left: Nested[G, H, F[A]]  =
+          Nested(fa.map(aga).flip.map(a => a.map(aha).flip))
+        val right: Nested[G, H, F[A]] =
+          fa.map(a => (GH.both(Nested(aga(a).map(aha)), GH.any): Nested[G, H, (A, Any)]).map(_._1)).flip
         left <-> right
       }
     }
@@ -325,18 +333,23 @@ object Traversable
     new ZLawsF.Traversable.ParallelFusionLaw[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal](
       "parallelFusionLaw"
     ) {
-      def apply[F[+_]: DeriveEqualTraversable, G[+_]: ApplicativeDeriveEqual, H[
-        +_
-      ]: ApplicativeDeriveEqual, A, B: Equal](
+      def apply[
+        F[+_]: DeriveEqualTraversable,
+        G[+_]: ApplicativeDeriveEqual,
+        H[+_]: ApplicativeDeriveEqual,
+        A,
+        B: Equal
+      ](
         fa: F[A],
         agb: A => G[B],
         ahb: A => H[B]
       ): TestResult = {
-        type GH[+A] = (G[A], H[A])
-        implicit val GH: Applicative[GH] = Applicative.product(Applicative[G], Applicative[H])
+        import newtypes.Product
+        implicit val GH: Applicative[({ type lambda[+A] = Product[G, H, A] })#lambda] = Applicative.product0[G, H]
 
-        val left: (G[F[B]], H[F[B]])  = (fa.foreach(agb), fa.foreach(ahb))
-        val right: (G[F[B]], H[F[B]]) = fa.foreach(a => GH.both((agb(a), ahb(a)), GH.any).map(_._1))
+        val left: Product[G, H, F[B]]  = Product((fa.foreach(agb), fa.foreach(ahb)))
+        val right: Product[G, H, F[B]] =
+          fa.foreach(a => (GH.both(Product((agb(a), ahb(a))), GH.any): Product[G, H, (B, Any)]).map(_._1))
         left <-> right
       }
     }

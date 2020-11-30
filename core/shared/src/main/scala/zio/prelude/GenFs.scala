@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.Failure
+import zio.prelude.newtypes.{ Failure, Nested }
 import zio.random.Random
 import zio.test.Gen.oneOf
 import zio.test._
@@ -55,6 +55,19 @@ object GenFs {
     new GenF[R, ({ type lambda[+v] = Map[K, v] })#lambda] {
       def apply[R1 <: R, V](v: Gen[R1, V]): Gen[R1, Map[K, V]] =
         Gen.mapOf(k, v)
+    }
+
+  def nested[F[+_], G[+_], RF, RG](
+    genF: GenF[RF, F],
+    genG: GenF[RG, G]
+  ): GenF[RF with RG, ({ type lambda[+A] = Nested[F, G, A] })#lambda] =
+    new GenF[RF with RG, ({ type lambda[+A] = Nested[F, G, A] })#lambda] {
+      override def apply[R1 <: RF with RG, A](gen: Gen[R1, A]): Gen[R1, Nested[F, G, A]] = {
+        val value: Gen[R1 with RG with RF, newtypes.Nested.newtypeF.Type[F[G[A]]]] =
+          genF(genG(gen)).map(Nested(_): Nested[F, G, A])
+        value
+      }
+
     }
 
   /**

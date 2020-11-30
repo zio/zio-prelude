@@ -3,6 +3,7 @@ package zio.prelude
 import zio.prelude.AssociativeBoth.OptionIdentityBoth
 import zio.prelude.Invariant.OptionTraversable
 import zio.prelude.classic.Applicative
+import zio.prelude.newtypes.{ Nested, Product }
 
 // not sure about putting this here
 object Instances {
@@ -29,6 +30,22 @@ object Instances {
           F.map[(G[A], G[B]), G[(A, B)]] { case (ga, gb) => G.both(ga, gb) }(F.both(fa, fb))
       }
 
+    implicit def nested0[F[+_], G[+_]](implicit
+      F: Applicative[F],
+      G: Applicative[G]
+    ): Applicative[({ type lambda[+A] = Nested[F, G, A] })#lambda] =
+      new Covariant[({ type lambda[+A] = Nested[F, G, A] })#lambda]
+        with IdentityBoth[({ type lambda[+A] = Nested[F, G, A] })#lambda] {
+        private lazy val FG = F.compose(G)
+
+        override def map[A, B](f: A => B): Nested[F, G, A] => Nested[F, G, B]                         = (fga: Nested[F, G, A]) =>
+          Nested(FG.map(f)(Nested.unwrap[F[G[A]]](fga)))
+        override def any: Nested[F, G, Any]                                                           =
+          Nested(G.any.succeed[F])
+        override def both[A, B](fa: => Nested[F, G, A], fb: => Nested[F, G, B]): Nested[F, G, (A, B)] =
+          Nested(Nested.unwrap[F[G[A]]](fa).zipWith(Nested.unwrap[F[G[B]]](fb))(_ zip _))
+      }
+
     final def product[F[+_]: Applicative, G[+_]: Applicative](
       F: Applicative[F],
       G: Applicative[G]
@@ -45,6 +62,24 @@ object Instances {
       }
 
     implicit val applicativeOption: Applicative[Option] = Applicative[Option](OptionTraversable, OptionIdentityBoth)
+
+    implicit def product0[F[+_], G[+_]](implicit
+      F: Applicative[F],
+      G: Applicative[G]
+    ): Applicative[({ type lambda[+A] = Product[F, G, A] })#lambda] =
+      new Covariant[({ type lambda[+A] = Product[F, G, A] })#lambda]
+        with IdentityBoth[({ type lambda[+A] = Product[F, G, A] })#lambda] {
+        private lazy val FG = Applicative.product(F, G)
+
+        override def map[A, B](f: A => B): Product[F, G, A] => Product[F, G, B] = (fga: Product[F, G, A]) =>
+          Product(FG.map(f)(Product.unwrap(fga)))
+
+        override def any: Product[F, G, Any] = Product((F.any, G.any))
+
+        override def both[A, B](fga: => Product[F, G, A], fgb: => Product[F, G, B]): Product[F, G, (A, B)] =
+          Product(FG.both(Product.unwrap(fga), Product.unwrap(fgb)))
+      }
+
   }
 
   trait ApplicativeDeriveEqual[F[+_]] extends Covariant[F] with IdentityBoth[F] with DeriveEqual[F]
