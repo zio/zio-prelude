@@ -1,13 +1,13 @@
 package zio.prelude
 
-import scala.annotation.{ implicitNotFound, tailrec }
-import scala.{ math => sm }
-
 import zio.prelude.Equal._
 import zio.prelude.coherent.HashOrd
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
+
+import scala.annotation.{ implicitNotFound, tailrec }
+import scala.{ math => sm }
 
 /**
  * `Ord[A]` provides implicit evidence that values of type `A` have a total

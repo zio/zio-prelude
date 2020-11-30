@@ -1,10 +1,10 @@
 package zio.prelude
 
-import scala.annotation.tailrec
-
 import zio.prelude.coherent.EqualInverse
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
+
+import scala.annotation.tailrec
 
 /**
  * The `Inverse` type class describes an associative binary operator for a

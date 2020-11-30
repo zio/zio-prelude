@@ -1,12 +1,12 @@
 package zio.prelude
 
-import scala.annotation.tailrec
-
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{ And, First, Last, Max, Min, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Chunk, NonEmptyChunk }
+
+import scala.annotation.tailrec
 
 /**
  * The `Associative[A]` type class describes an associative binary operator
