@@ -51,6 +51,11 @@ object GenFs {
         oneOf(Gen.throwable.map(Future.failed), gen.map(Future.successful))
     }
 
+  def id: GenF[Random with Sized, Id] = new GenF[Random with Sized, Id] {
+    def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Id[A]] =
+      gen.map(Id[A])
+  }
+
   def map[R <: Random with Sized, K](k: Gen[R, K]): GenF[R, ({ type lambda[+v] = Map[K, v] })#lambda] =
     new GenF[R, ({ type lambda[+v] = Map[K, v] })#lambda] {
       def apply[R1 <: R, V](v: Gen[R1, V]): Gen[R1, Map[K, V]] =

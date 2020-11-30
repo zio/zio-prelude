@@ -1,7 +1,7 @@
 package zio.prelude
 
-import zio.prelude.AssociativeBoth.OptionIdentityBoth
-import zio.prelude.Invariant.OptionTraversable
+import zio.prelude.AssociativeBoth.IdIdentityBoth
+import zio.prelude.Invariant.IdCovariant
 import zio.prelude.classic.Applicative
 import zio.prelude.newtypes.{ Nested, Product }
 
@@ -61,7 +61,7 @@ object Instances {
           (F.both(faga._1, fbgb._1), G.both(faga._2, fbgb._2))
       }
 
-    implicit val applicativeOption: Applicative[Option] = Applicative[Option](OptionTraversable, OptionIdentityBoth)
+    implicit val applicativeId: Applicative[Id] = Applicative[Id](IdCovariant, IdIdentityBoth)
 
     implicit def product0[F[+_], G[+_]](implicit
       F: Applicative[F],

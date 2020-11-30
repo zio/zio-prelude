@@ -52,7 +52,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
         testM("identityBoth")(checkAllLaws(IdentityBoth)(GenFs.nonEmptyList, Gen.anyInt)),
         testM("identityFlatten")(checkAllLaws(IdentityFlatten)(GenFs.nonEmptyList, Gen.anyInt)),
         testM("nonEmptyTraversable")(
-          zio.prelude.laws.checkAllLaws(NonEmptyTraversable)(GenFs.nonEmptyList, GenF.option, Gen.anyInt)
+          zio.prelude.laws.checkAllLaws(NonEmptyTraversable)(GenFs.nonEmptyList, GenFs.id, Gen.anyInt)
         ),
         testM("ord")(checkAllLaws(Ord)(genNonEmptyList))
       ),
