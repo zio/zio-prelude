@@ -223,7 +223,7 @@ object BuildHelper {
         Seq(
           "com.github.ghik" % "silencer-lib" % SilencerVersion % Provided cross CrossVersion.full,
           compilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full),
-          compilerPlugin("org.typelevel"  %% "kind-projector"  % "0.11.1" cross CrossVersion.full)
+          compilerPlugin("org.typelevel"  %% "kind-projector"  % "0.11.2" cross CrossVersion.full)
         )
     },
     semanticdbEnabled := !isDotty.value, // enable SemanticDB
