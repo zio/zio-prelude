@@ -1,12 +1,12 @@
 package zio.prelude
 
-import scala.annotation.tailrec
-import scala.language.implicitConversions
-import scala.util.hashing.MurmurHash3
-
 import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
+
+import scala.annotation.tailrec
+import scala.language.implicitConversions
+import scala.util.hashing.MurmurHash3
 
 /**
  * A `NonEmptyList[A]` is a list of one or more values of type A. Unlike a

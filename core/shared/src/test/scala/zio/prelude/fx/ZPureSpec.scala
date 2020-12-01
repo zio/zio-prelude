@@ -2,13 +2,13 @@ package zio.prelude.fx
 
 import java.util.NoSuchElementException
 
-import scala.util.Try
-
 import zio.CanFail
 import zio.prelude._
 import zio.random.Random
 import zio.test.Assertion.{ anything, isLeft, isNone, isRight, isSome, isSubtype }
 import zio.test._
+
+import scala.util.Try
 
 object ZPureSpec extends DefaultRunnableSpec {
 
@@ -339,6 +339,68 @@ object ZPureSpec extends DefaultRunnableSpec {
               }
             )
           ),
+          suite("right methods")(
+            suite("right")(
+              test("failure") {
+                val result = ZPure.fail("fail").right
+                assert(result.runEither(0))(isLeft(isSome(equalTo("fail"))))
+              },
+              test("right") {
+                val result = ZPure.succeed[Int, Either[Nothing, String]](Right("Right")).right
+                assert(result.runEither(0))(isRight(equalTo((0, "Right"))))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[Int, Nothing]](Left(1)).right
+                assert(result.runEither(0))(isLeft(isNone))
+              }
+            ),
+            suite("rightOrFail")(
+              test("failure") {
+                val result = ZPure.fail("fail").rightOrFail("oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("fail")))
+              },
+              test("right") {
+                val result = ZPure
+                  .succeed[Int, Either[Nothing, Int]](Right(1))
+                  .rightOrFail("oh crap")
+                assert(result.runEither(0))(isRight(equalTo((0, 1))))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).rightOrFail("oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("oh crap")))
+              }
+            ),
+            suite("rightOrFailWith")(
+              test("failure") {
+                val result = ZPure.fail("fail").rightOrFailWith[Any, Any, String](_ => "Oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("fail")))
+              },
+              test("right") {
+                val result = ZPure
+                  .succeed[Int, Either[Nothing, Int]](Right(1))
+                  .rightOrFailWith[Any, Int, String](_ => "oh crap")
+                assert(result.runEither(0))(isRight(equalTo((0, 1))))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).rightOrFail("oh crap")
+                assert(result.runEither(0))(isLeft(equalTo("oh crap")))
+              }
+            ),
+            suite("rightOrFailWithException")(
+              test("failure") {
+                val result = ZPure.fail(new NoSuchElementException()).rightOrFailWithException
+                assert(result.runEither(0))(isLeft(isSubtype[NoSuchElementException](anything)))
+              },
+              test("right") {
+                val result = ZPure.succeed[Int, Either[Nothing, Int]](Right(1)).rightOrFailWithException
+                assert(result.runEither(0))(isRight(equalTo((0, 1))))
+              },
+              test("left") {
+                val result = ZPure.succeed[Int, Either[String, Int]](Left("Left")).rightOrFailWithException
+                assert(result.runEither(0))(isLeft(isSubtype[NoSuchElementException](anything)))
+              }
+            )
+          ),
           suite("some")(
             testM("success (Some)") {
               check(genInt, genInt, genInt) { (s1, s2, a) =>
@@ -541,7 +603,15 @@ object ZPureSpec extends DefaultRunnableSpec {
             assert(ZPure.fromEffect("a".toInt).runEither(()))(
               isLeft(equalTo(exception))
             )
-          }
+          },
+          suite("modifyEither")(
+            test("success") {
+              assert(ZPure.modifyEither((_: Int) => Right((1, "success"))).run(0))(equalTo((1, "success")))
+            },
+            test("failure") {
+              assert(ZPure.modifyEither((_: Int) => Left("error")).runEither(0))(isLeft(equalTo("error")))
+            }
+          )
         )
       )
     )

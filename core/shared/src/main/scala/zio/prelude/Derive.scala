@@ -1,8 +1,8 @@
 package zio.prelude
 
-import scala.util.Try
-
 import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
+
+import scala.util.Try
 
 /**
  * `Derive[F, Typeclass]` represents a universally quantified function from

@@ -1,8 +1,8 @@
 package zio.prelude
 
-import scala.language.implicitConversions
-
 import zio.prelude.newtypes.{ Max, Prod, Sum }
+
+import scala.language.implicitConversions
 
 /**
  * Similar to `ZSet`, a `ZNonEmptySet[A, B]` is a guaranteed non-empty set of `A` values where `B` represents some notion of

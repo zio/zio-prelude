@@ -1,8 +1,8 @@
 package zio.prelude
 
-import scala.language.implicitConversions
-
 import zio.NonEmptyChunk
+
+import scala.language.implicitConversions
 
 final class NonEmptySet[A] private (private val set: Set[A]) { self =>
 
