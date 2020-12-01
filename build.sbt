@@ -89,14 +89,7 @@ lazy val coreJVM    = core.jvm
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
 
 lazy val coreNative = core.native
-  .settings(scalaVersion := Scala211)
-  .settings(crossScalaVersions := Seq(scalaVersion.value))
-  .settings(skip in Test := true)
-  .settings(skip in doc := true)
-  .settings(       // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
-    SettingKey[Boolean]("ide-skip-project") := true
-  )
-  .settings(sources in (Compile, doc) := Seq.empty)
+  .settings(nativeSettings)
   .settings(
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
@@ -121,14 +114,7 @@ lazy val experimentalJS     = experimental.js
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
 
 lazy val experimentalNative = experimental.native
-  .settings(scalaVersion := Scala211)
-  .settings(crossScalaVersions := Seq(scalaVersion.value))
-  .settings(skip in Test := true)
-  .settings(skip in doc := true)
-  .settings(       // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
-    SettingKey[Boolean]("ide-skip-project") := true
-  )
-  .settings(sources in (Compile, doc) := Seq.empty)
+  .settings(nativeSettings)
   .settings(
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
