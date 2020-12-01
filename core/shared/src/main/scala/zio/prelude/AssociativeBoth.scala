@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
-import zio.prelude.newtypes.{ AndF, Failure, OrF }
+import zio.prelude.newtypes.{ AndF, Failure, NestedF, OrF }
 import zio.stm.ZSTM
 import zio.stream.{ ZSink, ZStream }
 import zio.test.TestResult
@@ -17,12 +17,19 @@ import scala.util.{ Success, Try }
  * and `F[B]` to produce an `F[(A, B)]`.
  */
 @implicitNotFound("No implicit AssociativeBoth defined for ${F}.")
-trait AssociativeBoth[F[_]] {
+trait AssociativeBoth[F[_]] { self =>
 
   /**
    * Combines two values of types `F[A]` and `F[B]` to produce an `F[(A, B)]`.
    */
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
+
+  /** Combine with another `AssociativeBoth` to produce an `AssociativeBoth[(F[A], G[A])]`. */
+  final def bothF[G[_]](g: AssociativeBoth[G]): AssociativeBoth[({ type lambda[A] = (F[A], G[A]) })#lambda] =
+    new AssociativeBoth[({ type lambda[A] = (F[A], G[A]) })#lambda] {
+      def both[A, B](faga: => (F[A], G[A]), fbgb: => (F[B], G[B])): (F[(A, B)], G[(A, B)]) =
+        (self.both(faga._1, fbgb._1), g.both(faga._2, fbgb._2))
+    }
 }
 
 object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] {
@@ -1133,6 +1140,30 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
         List(())
 
       def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  final def composeF[F[+_]: IdentityBoth: Covariant, G[+_]](implicit
+    G: IdentityBoth[G]
+  ): IdentityBoth[({ type lambda[+A] = F[G[A]] })#lambda] =
+    new IdentityBoth[({ type lambda[+A] = F[G[A]] })#lambda] {
+      def any: F[G[Any]] =
+        G.any.succeed[F]
+
+      def both[A, B](fa: => F[G[A]], fb: => F[G[B]]): F[G[(A, B)]] =
+        fa.zipWith(fb)(_ zip _)
+    }
+
+  implicit def NestedIdentityBoth[F[+_]: IdentityBoth: Covariant, G[+_]](implicit
+    G: IdentityBoth[G]
+  ): IdentityBoth[({ type lambda[+A] = NestedF[F, G, A] })#lambda] =
+    new IdentityBoth[({ type lambda[+A] = NestedF[F, G, A] })#lambda] {
+      private val FG: IdentityBoth[({ type lambda[+A] = F[G[A]] })#lambda] = composeF[F, G]
+
+      def any: NestedF[F, G, Any] =
+        NestedF(FG.any)
+
+      def both[A, B](fa: => NestedF[F, G, A], fb: => NestedF[F, G, B]): NestedF[F, G, (A, B)] =
+        NestedF(FG.both(NestedF.unwrap[F[G[A]]](fa), NestedF.unwrap[F[G[B]]](fb)))
     }
 
   /**

@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.Nested
+import zio.prelude.newtypes.NestedF
 import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
 
 import scala.util.Try
@@ -46,10 +46,10 @@ object Derive {
   implicit def NestedDeriveEqual[F[+_], G[+_]](implicit
     F: Derive[F, Equal],
     G: Derive[G, Equal]
-  ): Derive[({ type lambda[A] = Nested[F, G, A] })#lambda, Equal] =
-    new Derive[({ type lambda[A] = Nested[F, G, A] })#lambda, Equal] {
-      override def derive[A: Equal]: Equal[Nested[F, G, A]] =
-        Equal.NestedEqual(F.derive(G.derive[A]))
+  ): Derive[({ type lambda[A] = NestedF[F, G, A] })#lambda, Equal] =
+    new Derive[({ type lambda[A] = NestedF[F, G, A] })#lambda, Equal] {
+      override def derive[A: Equal]: Equal[NestedF[F, G, A]] =
+        Equal.NestedFEqual(F.derive(G.derive[A]))
     }
 
   /**

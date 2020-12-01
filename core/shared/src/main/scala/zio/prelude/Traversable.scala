@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualTraversable
-import zio.prelude.newtypes.{ And, First, Max, Min, Nested, Or, Prod, Sum }
+import zio.prelude.newtypes.{ And, BothF, First, Max, Min, NestedF, Or, Prod, Sum }
 import zio.test.TestResult
 import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
 
@@ -294,12 +294,12 @@ object Traversable
         B,
         C: Equal
       ](fa: F[A], agb: A => G[B], bhc: B => H[C]): TestResult = {
-        implicit val GH: Applicative[({ type lambda[+A] = Nested[G, H, A] })#lambda] = Applicative.nested0[G, H]
+        implicit val GH: Applicative[({ type lambda[+A] = NestedF[G, H, A] })#lambda] = Applicative.nestedF
 
-        val left: Nested[G, H, F[C]]  =
-          Nested(fa.foreach(agb).map(_.foreach(bhc)))
-        val right: Nested[G, H, F[C]] =
-          fa.foreach(a => (GH.both(Nested(agb(a).map(bhc)): Nested[G, H, C], GH.any): Nested[G, H, (C, Any)]).map(_._1))
+        val left: NestedF[G, H, F[C]]  =
+          NestedF(fa.foreach(agb).map(_.foreach(bhc)))
+        val right: NestedF[G, H, F[C]] =
+          fa.foreach(a => (GH.both(NestedF(agb(a).map(bhc)), GH.any): NestedF[G, H, (C, Any)]).map(_._1))
         left <-> right
       }
     }
@@ -308,9 +308,10 @@ object Traversable
   val purityLaw: zio.prelude.laws.LawsF.Traversable[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal] =
     new ZLawsF.Traversable.PurityLaw[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal]("purityLaw") {
       def apply[F[+_]: DeriveEqualTraversable, G[+_]: ApplicativeDeriveEqual, A: Equal](fa: F[A]): TestResult =
-        fa.foreach(Applicative[G].any.as[A](_)) <-> Applicative[G].any.as(fa)
+        fa.foreach(Applicative[G].any.as[A](_)) <-> fa.succeed[G]
     }
 
+  /** Flip */
   val naturalityLaw: zio.prelude.laws.LawsF.Traversable[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal] =
     new ZLawsF.Traversable.NaturalityFusionLaw[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal]("naturalityLaw") {
       def apply[F[+_]: DeriveEqualTraversable, G[+_]: ApplicativeDeriveEqual, H[+_]: ApplicativeDeriveEqual, A: Equal](
@@ -318,12 +319,12 @@ object Traversable
         aga: A => G[A],
         aha: A => H[A]
       ): TestResult = {
-        implicit val GH: Applicative[({ type lambda[+A] = Nested[G, H, A] })#lambda] = Applicative.nested0[G, H]
+        implicit val GH: Applicative[({ type lambda[+A] = NestedF[G, H, A] })#lambda] = Applicative.nestedF[G, H]
 
-        val left: Nested[G, H, F[A]]  =
-          Nested(fa.map(aga).flip.map(a => a.map(aha).flip))
-        val right: Nested[G, H, F[A]] =
-          fa.map(a => (GH.both(Nested(aga(a).map(aha)), GH.any): Nested[G, H, (A, Any)]).map(_._1)).flip
+        val left: NestedF[G, H, F[A]]  =
+          NestedF(fa.map(aga).flip.map(a => a.map(aha).flip))
+        val right: NestedF[G, H, F[A]] =
+          fa.map(a => (GH.both(NestedF(aga(a).map(aha)), GH.any): NestedF[G, H, (A, Any)]).map(_._1)).flip
         left <-> right
       }
     }
@@ -344,12 +345,12 @@ object Traversable
         agb: A => G[B],
         ahb: A => H[B]
       ): TestResult = {
-        import newtypes.Product
-        implicit val GH: Applicative[({ type lambda[+A] = Product[G, H, A] })#lambda] = Applicative.product0[G, H]
+        implicit val GH: Applicative[({ type lambda[+A] = BothF[G, H, A] })#lambda] = Applicative.bothF
 
-        val left: Product[G, H, F[B]]  = Product((fa.foreach(agb), fa.foreach(ahb)))
-        val right: Product[G, H, F[B]] =
-          fa.foreach(a => (GH.both(Product((agb(a), ahb(a))), GH.any): Product[G, H, (B, Any)]).map(_._1))
+        val left: BothF[G, H, F[B]]  =
+          BothF((fa.foreach(agb), fa.foreach(ahb)))
+        val right: BothF[G, H, F[B]] =
+          fa.foreach(a => (GH.both(BothF((agb(a), ahb(a))), GH.any): BothF[G, H, (B, Any)]).map(_._1))
         left <-> right
       }
     }

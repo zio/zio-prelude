@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.Exit.{ Failure, Success }
 import zio.prelude.coherent.HashOrd
-import zio.prelude.newtypes.{ Nested, Product }
+import zio.prelude.newtypes.{ BothF, NestedF }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace }
@@ -209,13 +209,13 @@ object Equal extends Lawful[Equal] {
   implicit def IdEqual[A: Equal]: Equal[Id[A]] = (l: Id[A], r: Id[A]) => Id.unwrap[A](l) === Id.unwrap[A](r)
 
   /** Constructs an `Equal` instance for two nested type constructors. */
-  implicit def NestedEqual[F[+_], G[+_], A](implicit eq0: Equal[F[G[A]]]): Equal[Nested[F, G, A]] =
-    (l: Nested[F, G, A], r: Nested[F, G, A]) => eq0.checkEqual(Nested.unwrap[F[G[A]]](l), Nested.unwrap[F[G[A]]](r))
+  implicit def NestedFEqual[F[+_], G[+_], A](implicit eq0: Equal[F[G[A]]]): Equal[NestedF[F, G, A]] =
+    (l: NestedF[F, G, A], r: NestedF[F, G, A]) => eq0.checkEqual(NestedF.unwrap[F[G[A]]](l), NestedF.unwrap[F[G[A]]](r))
 
   /** Constructs an `Equal` instance for the product of two type constructors. */
-  implicit def ProductEqual[F[+_], G[+_], A](implicit eq0: Equal[(F[A], G[A])]): Equal[Product[F, G, A]] =
-    (l: Product[F, G, A], r: Product[F, G, A]) =>
-      eq0.checkEqual(Product.unwrap[(F[A], G[A])](l), Product.unwrap[(F[A], G[A])](r))
+  implicit def BothEqual[F[+_], G[+_], A](implicit eq0: Equal[(F[A], G[A])]): Equal[BothF[F, G, A]] =
+    (l: BothF[F, G, A], r: BothF[F, G, A]) =>
+      eq0.checkEqual(BothF.unwrap[(F[A], G[A])](l), BothF.unwrap[(F[A], G[A])](r))
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
