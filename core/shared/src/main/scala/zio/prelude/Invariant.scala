@@ -35,7 +35,7 @@ trait Invariant[F[_]] { self =>
   /**
    * Compose two invariant functors.
    */
-  final def composeInvariant[G[_]](g: Invariant[G]): Invariant[({ type lambda[A] = F[G[A]] })#lambda] =
+  final def compose[G[_]](implicit g: Invariant[G]): Invariant[({ type lambda[A] = F[G[A]] })#lambda] =
     new Invariant[({ type lambda[A] = F[G[A]] })#lambda] {
       def invmap[A, B](f: A <=> B): F[G[A]] <=> F[G[B]] = self.invmap(g.invmap(f))
     }
