@@ -48,7 +48,7 @@ trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] { s
   /**
    * Compose two covariant functors.
    */
-  final def compose[G[+_]](g: Covariant[G]): Covariant[({ type lambda[+A] = F[G[A]] })#lambda] =
+  final def compose[G[+_]](implicit g: Covariant[G]): Covariant[({ type lambda[+A] = F[G[A]] })#lambda] =
     new Covariant[({ type lambda[+A] = F[G[A]] })#lambda] {
       def map[A, B](f: A => B): F[G[A]] => F[G[B]] = self.map(g.map(f))
     }
@@ -56,7 +56,7 @@ trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] { s
   /**
    * Compose covariant and contravariant functors.
    */
-  final def compose[G[-_]](g: Contravariant[G]): Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] =
+  final def compose[G[-_]](implicit g: Contravariant[G]): Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] =
     new Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] {
       def contramap[A, B](f: B => A): F[G[A]] => F[G[B]] = self.map(g.contramap(f))
     }

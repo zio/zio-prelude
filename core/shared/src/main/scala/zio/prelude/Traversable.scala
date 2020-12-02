@@ -15,7 +15,7 @@ import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
  * with state we can describe folds which allow implementing a wide variety of
  * collection operations that produce summaries from a collection of values.
  */
-trait Traversable[F[+_]] extends Covariant[F] {
+trait Traversable[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Traverse each element in the collection using the specified effectual
@@ -265,6 +265,12 @@ trait Traversable[F[+_]] extends Covariant[F] {
     foreach[({ type lambda[+A] = State[Int, A] })#lambda, A, (A, Int)](fa)(a =>
       State.modify((n: Int) => (n + 1, (a, n)))
     ).runResult(0)
+
+  final def compose[G[+_]: Traversable]: Traversable[({ type lambda[+A] = F[G[A]] })#lambda] =
+    new Traversable[({ type lambda[+A] = F[G[A]] })#lambda] {
+      def foreach[H[+_]: IdentityBoth: Covariant, A, B](fa: F[G[A]])(f: A => H[B]) =
+        self.foreach(fa)(_.foreach(f))
+    }
 }
 
 object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
