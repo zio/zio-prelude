@@ -269,9 +269,9 @@ trait Traversable[F[+_]] extends Covariant[F] {
 
 object Traversable
     extends zio.prelude.laws.LawfulF.Traversable[DeriveEqualTraversable, Instances.ApplicativeDeriveEqual, Equal] {
-  import zio.prelude.Instances.ApplicativeDeriveEqual
-  import zio.prelude.classic.Applicative
   import zio.prelude.Instances.Applicative
+  import zio.prelude.Instances.Applicative.nestedF
+  import zio.prelude.Instances.ApplicativeDeriveEqual
   import zio.prelude.laws.ZLawsF
 
   /** Traversing by `Id` is equivalent to mapping. */
@@ -286,20 +286,15 @@ object Traversable
     new ZLawsF.Traversable.SequentialFusionLaw[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal](
       "sequentialFusionLaw"
     ) {
-      def apply[
-        F[+_]: DeriveEqualTraversable,
-        G[+_]: ApplicativeDeriveEqual,
-        H[+_]: ApplicativeDeriveEqual,
-        A,
-        B,
-        C: Equal
-      ](fa: F[A], agb: A => G[B], bhc: B => H[C]): TestResult = {
-        implicit val GH: Applicative[({ type lambda[+A] = NestedF[G, H, A] })#lambda] = Applicative.nestedF
-
-        val left: NestedF[G, H, F[C]]  =
-          NestedF(fa.foreach(agb).map(_.foreach(bhc)))
-        val right: NestedF[G, H, F[C]] =
-          fa.foreach(a => (GH.both(NestedF(agb(a).map(bhc)), GH.any): NestedF[G, H, (C, Any)]).map(_._1))
+      def apply[F[+_], G[+_], H[+_], A, B, C](fa: F[A], agb: A => G[B], bhc: B => H[C])(implicit
+        F: DeriveEqualTraversable[F],
+        G: ApplicativeDeriveEqual[G],
+        H: ApplicativeDeriveEqual[H],
+        C: Equal[C]
+      ): TestResult = {
+        val GH    = Applicative.nestedF[G, H]
+        val left  = NestedF(fa.foreach(agb).map(_.foreach(bhc)))
+        val right = fa.foreach(a => (GH.both(NestedF(agb(a).map(bhc)), GH.any): NestedF[G, H, (C, Any)]).map(_._1))
         left <-> right
       }
     }
@@ -311,7 +306,7 @@ object Traversable
         fa.foreach(Applicative[G].any.as[A](_)) <-> fa.succeed[G]
     }
 
-  /** Flip */
+  /** Flipping each of two effects sequentially is the same as flipping once on a composed effect. */
   val naturalityLaw: zio.prelude.laws.LawsF.Traversable[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal] =
     new ZLawsF.Traversable.NaturalityFusionLaw[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal]("naturalityLaw") {
       def apply[F[+_]: DeriveEqualTraversable, G[+_]: ApplicativeDeriveEqual, H[+_]: ApplicativeDeriveEqual, A: Equal](
@@ -319,12 +314,9 @@ object Traversable
         aga: A => G[A],
         aha: A => H[A]
       ): TestResult = {
-        implicit val GH: Applicative[({ type lambda[+A] = NestedF[G, H, A] })#lambda] = Applicative.nestedF[G, H]
-
-        val left: NestedF[G, H, F[A]]  =
-          NestedF(fa.map(aga).flip.map(a => a.map(aha).flip))
-        val right: NestedF[G, H, F[A]] =
-          fa.map(a => (GH.both(NestedF(aga(a).map(aha)), GH.any): NestedF[G, H, (A, Any)]).map(_._1)).flip
+        val GH    = Applicative.nestedF[G, H]
+        val left  = NestedF(fa.map(aga).flip.map(a => a.map(aha).flip))
+        val right = fa.map(a => (GH.both(NestedF(aga(a).map(aha)), GH.any): NestedF[G, H, (A, Any)]).map(_._1)).flip
         left <-> right
       }
     }
@@ -334,23 +326,19 @@ object Traversable
     new ZLawsF.Traversable.ParallelFusionLaw[DeriveEqualTraversable, ApplicativeDeriveEqual, Equal](
       "parallelFusionLaw"
     ) {
-      def apply[
-        F[+_]: DeriveEqualTraversable,
-        G[+_]: ApplicativeDeriveEqual,
-        H[+_]: ApplicativeDeriveEqual,
-        A,
-        B: Equal
-      ](
+      def apply[F[+_], G[+_], H[+_], A, B](
         fa: F[A],
         agb: A => G[B],
         ahb: A => H[B]
+      )(implicit
+        F: DeriveEqualTraversable[F],
+        G: ApplicativeDeriveEqual[G],
+        H: ApplicativeDeriveEqual[H],
+        B: Equal[B]
       ): TestResult = {
-        implicit val GH: Applicative[({ type lambda[+A] = BothF[G, H, A] })#lambda] = Applicative.bothF
-
-        val left: BothF[G, H, F[B]]  =
-          BothF((fa.foreach(agb), fa.foreach(ahb)))
-        val right: BothF[G, H, F[B]] =
-          fa.foreach(a => (GH.both(BothF((agb(a), ahb(a))), GH.any): BothF[G, H, (B, Any)]).map(_._1))
+        val GH    = Applicative.bothF[G, H]
+        val left  = BothF((fa.foreach(agb), fa.foreach(ahb)))
+        val right = fa.foreach(a => (GH.both(BothF((agb(a), ahb(a))), GH.any): BothF[G, H, (B, Any)]).map(_._1))
         left <-> right
       }
     }
