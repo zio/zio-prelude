@@ -2,15 +2,15 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
-import zio.prelude.newtypes.{ AndF, Failure, NestedF, OrF }
+import zio.prelude.newtypes.{AndF, BothF, Failure, NestedF, OrF}
 import zio.stm.ZSTM
-import zio.stream.{ ZSink, ZStream }
+import zio.stream.{ZSink, ZStream}
 import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
-import scala.util.{ Success, Try }
+import scala.util.{Success, Try}
 
 /**
  * An associative binary operator that combines two values of types `F[A]`
@@ -1153,17 +1153,41 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
         fa.zipWith(fb)(_ zip _)
     }
 
-  implicit def NestedIdentityBoth[F[+_]: IdentityBoth: Covariant, G[+_]](implicit
+  final def bothF[F[+_], G[+_]](implicit
+    F: IdentityBoth[F],
     G: IdentityBoth[G]
-  ): IdentityBoth[({ type lambda[+A] = NestedF[F, G, A] })#lambda] =
+  ): IdentityBoth[({ type lambda[+A] = (F[A], G[A]) })#lambda] =
+    new IdentityBoth[({ type lambda[+A] = (F[A], G[A]) })#lambda] {
+      private val bothFG = F.bothF[G](G)
+
+      def any: (F[Any], G[Any]) =
+        (F.any, G.any)
+
+      def both[A, B](fa: => (F[A], G[A]), fb: => (F[B], G[B])): (F[(A, B)], G[(A, B)]) =
+        bothFG.both(fa, fb)
+    }
+
+  implicit def NestedFIdentityBoth[F[+_]: IdentityBoth: Covariant, G[+_]: IdentityBoth]
+    : IdentityBoth[({ type lambda[+A] = NestedF[F, G, A] })#lambda] =
     new IdentityBoth[({ type lambda[+A] = NestedF[F, G, A] })#lambda] {
-      private val FG: IdentityBoth[({ type lambda[+A] = F[G[A]] })#lambda] = composeF[F, G]
+      private val FG = composeF[F, G]
 
       def any: NestedF[F, G, Any] =
         NestedF(FG.any)
 
       def both[A, B](fa: => NestedF[F, G, A], fb: => NestedF[F, G, B]): NestedF[F, G, (A, B)] =
         NestedF(FG.both(NestedF.unwrap[F[G[A]]](fa), NestedF.unwrap[F[G[B]]](fb)))
+    }
+
+  implicit def BothFIdentityBoth[F[+_], G[+_]](implicit F: IdentityBoth[F], G: IdentityBoth[G]): IdentityBoth[({ type lambda[+A] = BothF[F, G, A]})#lambda] =
+    new IdentityBoth[({ type lambda[+A] = BothF[F, G, A]})#lambda] {
+      private val FG = AssociativeBoth.bothF[F, G]
+
+      def any: BothF[F, G, Any] =
+        BothF(FG.any)
+
+      def both[A, B](fga: => BothF[F, G, A], fgb: => BothF[F, G, B]): BothF[F, G, (A, B)] =
+        BothF(FG.both(BothF.unwrap(fga), BothF.unwrap(fgb)))
     }
 
   /**

@@ -39,8 +39,8 @@ object Instances {
     ): Applicative[({ type lambda[+A] = NestedF[F, G, A] })#lambda] =
       new Covariant[({ type lambda[+A] = NestedF[F, G, A] })#lambda]
         with IdentityBoth[({ type lambda[+A] = NestedF[F, G, A] })#lambda] {
-        private val C  = Covariant.NestedCovariant[F, G](F, G)
-        private val IB = AssociativeBoth.NestedIdentityBoth[F, G](F, F, G)
+        private val C  = Covariant.NestedFCovariant[F, G](F, G)
+        private val IB = AssociativeBoth.NestedFIdentityBoth[F, G](F, F, G)
 
         def map[A, B](f: A => B): NestedF[F, G, A] => NestedF[F, G, B]                          =
           C.map(f)
@@ -73,14 +73,15 @@ object Instances {
     ): Applicative[({ type lambda[+A] = BothF[F, G, A] })#lambda] =
       new Covariant[({ type lambda[+A] = BothF[F, G, A] })#lambda]
         with IdentityBoth[({ type lambda[+A] = BothF[F, G, A] })#lambda] {
-        private lazy val FG = Applicative.both(F, G)
+        private val C  = Covariant.BothFCovariant[F, G](F, G)
+        private val IB = AssociativeBoth.BothFIdentityBoth[F, G](F, G)
 
-        def map[A, B](f: A => B): BothF[F, G, A] => BothF[F, G, B]                          = (fga: BothF[F, G, A]) =>
-          BothF(FG.map(f)(BothF.unwrap(fga)))
-        def any: BothF[F, G, Any]                                                           =
-          BothF(FG.any)
+        def map[A, B](f: A => B): BothF[F, G, A] => BothF[F, G, B] =
+          C.map(f)
+        def any: BothF[F, G, Any] =
+          IB.any
         def both[A, B](fga: => BothF[F, G, A], fgb: => BothF[F, G, B]): BothF[F, G, (A, B)] =
-          BothF(FG.both(BothF.unwrap(fga), BothF.unwrap(fgb)))
+          IB.both(fga, fgb)
       }
   }
 
