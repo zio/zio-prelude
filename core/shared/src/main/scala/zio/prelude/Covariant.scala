@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.CovariantDeriveEqual
-import zio.prelude.newtypes.{BothF, NestedF}
+import zio.prelude.newtypes.{ BothF, NestedF }
 import zio.test.TestResult
 import zio.test.laws._
 

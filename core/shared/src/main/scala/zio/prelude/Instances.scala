@@ -76,9 +76,9 @@ object Instances {
         private val C  = Covariant.BothFCovariant[F, G](F, G)
         private val IB = AssociativeBoth.BothFIdentityBoth[F, G](F, G)
 
-        def map[A, B](f: A => B): BothF[F, G, A] => BothF[F, G, B] =
+        def map[A, B](f: A => B): BothF[F, G, A] => BothF[F, G, B]                          =
           C.map(f)
-        def any: BothF[F, G, Any] =
+        def any: BothF[F, G, Any]                                                           =
           IB.any
         def both[A, B](fga: => BothF[F, G, A], fgb: => BothF[F, G, B]): BothF[F, G, (A, B)] =
           IB.both(fga, fgb)
