@@ -106,6 +106,114 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
             }
           },
+          suite("repeatN")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) * 10)
+              assert(State.modify(f).repeatN(0).run(0))(equalTo((1, 10))) &&
+              assert(State.modify(f).repeatN(1).run(0))(equalTo((2, 20))) &&
+              assert(State.modify(f).repeatN(2).run(0))(equalTo((3, 30))) &&
+              assert(State.modify(f).repeatN(3).run(0))(equalTo((4, 40))) &&
+              assert(State.modify(f).repeatN(4).run(0))(equalTo((5, 50)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) * 10))
+              assert(ZPure.modifyEither(f).repeatN(5).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatUntil")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatUntil(_ == 0).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatUntil(_ == 1).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatUntil(_ == 2).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatUntil(_ == 3).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatUntil(_ == 4).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatUntil(_ == 1).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatUntilEquals")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatUntilEquals(0).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatUntilEquals(1).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatUntilEquals(2).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatUntilEquals(3).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatUntilEquals(4).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatUntilEquals(1).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatUntilState")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatUntilState(_ == 1).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatUntilState(_ == 10).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatUntilState(_ == 20).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatUntilState(_ == 30).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatUntilState(_ == 40).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatUntilState(_ == 10).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatUntilStateEquals")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatUntilStateEquals(1).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatUntilStateEquals(10).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatUntilStateEquals(20).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatUntilStateEquals(30).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatUntilStateEquals(40).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatUntilStateEquals(10).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatWhile")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatWhile(_ < 0).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatWhile(_ < 1).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatWhile(_ < 2).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatWhile(_ < 3).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatWhile(_ < 4).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatWhile(_ < 1).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatWhileEquals")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatWhileEquals(0).run(0))(equalTo((10, 1)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatWhileEquals(0).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
+          suite("repeatWhileState")(
+            test("success") {
+              val f = (s: Int) => (s + 1, (s + 1) / 10)
+              assert(State.modify(f).repeatWhileState(_ < 1).run(0))(equalTo((1, 0))) &&
+              assert(State.modify(f).repeatWhileState(_ < 10).run(0))(equalTo((10, 1))) &&
+              assert(State.modify(f).repeatWhileState(_ < 20).run(0))(equalTo((20, 2))) &&
+              assert(State.modify(f).repeatWhileState(_ < 30).run(0))(equalTo((30, 3))) &&
+              assert(State.modify(f).repeatWhileState(_ < 40).run(0))(equalTo((40, 4)))
+            },
+            test("failure") {
+              val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
+              assert(ZPure.modifyEither(f).repeatWhileState(_ < 10).runEither(0))(isLeft(equalTo("error")))
+            }
+          ),
           testM("run") {
             check(genIntToIntInt, genInt) { (f, s) =>
               assert(State.modify(f).run(s))(equalTo(f(s)))
