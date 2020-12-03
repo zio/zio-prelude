@@ -65,6 +65,13 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
       override def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = fa.map(a => fb.map(b => (a, b))).flatten
     }
 
+  def compose[F[+_]: AssociativeBoth: Covariant, G[_]: AssociativeBoth]
+    : AssociativeBoth[({ type lambda[A] = F[G[A]] })#lambda] =
+    new AssociativeBoth[({ type lambda[A] = F[G[A]] })#lambda] {
+      override def both[A, B](fa: => F[G[A]], fb: => F[G[B]]) =
+        fa.zipWith(fb)(_ zip _)
+    }
+
   /**
    * Combines 2 `F` values using the provided function `f`.
    */
