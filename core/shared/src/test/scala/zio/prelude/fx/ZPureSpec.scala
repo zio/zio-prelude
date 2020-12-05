@@ -94,6 +94,24 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(ffa.flatten.run(s))(equalTo((s2, b)))
             }
           },
+          testM("head") {
+            check(genInt, genString, genString) { (s, el, el2) =>
+              val optOrHead = ZPure.succeed[Int, List[String]](List(el, el2)).head.runEither(s)
+              assert(optOrHead)(isRight(equalTo((s, el))))
+            }
+          },
+          testM("head (Failure case)") {
+            check(genInt, genString, genString) { (s, e, el) =>
+              val optOrHead = ZPure.fail(e).as(List(el)).head.runEither(s)
+              assert(optOrHead)(isLeft(equalTo(Option(e))))
+            }
+          },
+          testM("head (empty List)") {
+            check(genInt) { s =>
+              val optOrHead = ZPure.succeed[Int, List[String]](List.empty).head.runEither(s)
+              assert(optOrHead)(isLeft(equalTo(Option.empty[String])))
+            }
+          },
           testM("map") {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
