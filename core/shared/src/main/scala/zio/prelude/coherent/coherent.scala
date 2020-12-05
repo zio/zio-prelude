@@ -210,6 +210,11 @@ object DeriveEqualTraversable {
         deriveEqual0.derive
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         traversable0.foreach(fa)(f)
+
+      // Traversable provides default implementation for Covariant.map,
+      // so if we want properly check Covariant laws for Traversable instance with overrode 'map'
+      // we need to forward it
+      override def map[A, B](f: A => B): F[A] => F[B] = traversable0.map(f)
     }
 }
 
