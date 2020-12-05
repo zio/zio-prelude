@@ -1,9 +1,12 @@
 package zio.prelude
 
+import scala.collection.Set
+
 import zio.random.Random
+import zio.test.Assertion._
 import zio.test._
 import zio.test.laws._
-import zio.{ Chunk, NonEmptyChunk }
+import zio.{ Chunk, IO, NonEmptyChunk }
 
 object TraversableSpec extends DefaultRunnableSpec {
 
@@ -24,6 +27,14 @@ object TraversableSpec extends DefaultRunnableSpec {
 
   val genIntFunction: Gen[Random, Int => Int] =
     Gen.function(genInt)
+
+  val genOptIntFunction: Gen[Random, Int => Option[Int]] =
+    Gen.boolean.zipWith(Gen.function(genInt)) {
+      case (true, f)  =>
+        x => Some(f(x))
+      case (false, _) =>
+        _ => None
+    }
 
   val genIntFunction2: Gen[Random, (Int, Int) => Int] =
     Gen.function2(genInt)
@@ -113,6 +124,52 @@ object TraversableSpec extends DefaultRunnableSpec {
                 .toMap // .toList .toMap because Scala 2.13 collections
             )
             assert(actual)(equalTo(expected))
+          }
+        },
+        testM("forany") {
+          check(genList, genOptIntFunction) { case (as, f) =>
+            val actual   = Traversable[List].forany(as)(f).flatten
+            val expected = as.map(f).flatten.headOption
+            assert(actual)(equalTo(expected))
+          }
+        },
+        testM("forany[IO]") {
+          checkM(genList, genOptIntFunction) { case (as, f) =>
+            for {
+              actual                       <- (as forany f.map {
+                                                case Some(x) => IO.succeedNow(x)
+                                                case None    => IO.fail(())
+                                              }(Invariant.Function1Covariant)).flip.option
+              expected: Option[Option[Int]] = {
+                val allResults = as.map(f)
+                if (allResults.nonEmpty && allResults.forall(_.isEmpty))
+                  None
+                else
+                  Some(allResults.flatten.headOption)
+              }
+            } yield assert(actual)(equalTo(expected))
+          }
+        },
+        testM("foranyPar[IO]") {
+          checkM(genList, genOptIntFunction) { case (as, f) =>
+            for {
+              actual                    <- (as foranyPar f.map {
+                                             case Some(x) => IO.succeedNow(x)
+                                             case None    => IO.fail(())
+                                           }(Invariant.Function1Covariant)).flip.option
+              expected: Option[Set[Int]] = {
+                val allResults = as.map(f)
+                if (allResults.nonEmpty && allResults.forall(_.isEmpty))
+                  None
+                else
+                  Some(allResults.flatten.toSet)
+              }
+            } yield (actual, expected) match {
+              case (None, None)                            => assertCompletes
+              case (Some(Some(result)), Some(allPossible)) => assert(List(result))(hasOneOf(allPossible))
+              case (Some(None), Some(allPossible))         => assert(allPossible)(isEmpty)
+              case _ @result                               => assert(result)(unexpectedResult)
+            }
           }
         },
         testM("isEmpty") {

@@ -63,6 +63,15 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   def apply[F[_]](implicit identityBoth: IdentityBoth[F]): IdentityBoth[F] =
     identityBoth
 
+  /**
+   * The `IdentityBoth` instance for `ZIO`.
+   */
+  implicit def ZIOIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      def any: ZIO[R, E, Any]                                                     = ZIO.unit
+      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zip fb
+    }
+
   def fromCovariantIdentityFlatten[F[+_]](implicit
     covariant: Covariant[F],
     identityFlatten: IdentityFlatten[F]
