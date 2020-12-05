@@ -246,6 +246,20 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     Fold(self, failure, success)
 
   /**
+   * Returns a successful computation with the head of the list if the list is
+   * non-empty or fails with the error `None` if the list is empty.
+   */
+  final def head[B](implicit ev: A <:< List[B]): ZPure[S1, S2, R, Option[E], B] =
+    foldM(
+      e => ZPure.fail(Some(e)),
+      a =>
+        ev(a).headOption match {
+          case Some(b) => ZPure.succeed(b)
+          case None    => ZPure.fail(None)
+        }
+    )
+
+  /**
    * Returns a successful computation if the value is `Left`, or fails with error `None`.
    */
   final def left[B, C](implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, Option[E], B] =
