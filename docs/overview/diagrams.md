@@ -338,33 +338,37 @@ classDiagram
 ```mermaid
 classDiagram
   AssociativeCompose~:=>[-_, +_]~ <|-- IdentityCompose~:=>[-_, +_]~
-  AssociativeCompose~:=>[-_, +_]~ <|-- BothCompose~:=>[-_, +_], :*:[+_, +_]~
-  AssociativeCompose~:=>[-_, +_]~ <|-- EitherCompose~:=>[-_, +_], :+:[+_, +_]~
-  BothCompose <|-- ApplicationCompose~:=>[-_, +_], :*:[+_, +_], :-->[-_, +_]~
+  AssociativeCompose~:=>[-_, +_]~ <|-- BothCompose~:=>[-_, +_]~
+  AssociativeCompose~:=>[-_, +_]~ <|-- EitherCompose~:=>[-_, +_]~
+  BothCompose <|-- ApplicationCompose~:=>[-_, +_]~
   class AssociativeCompose~:=>[-_, +_]~{
     () compose[A, B, C](B :=> C, A :=> B): A :=> C
   }
   class IdentityCompose~:=>[-_, +_]~{
-    A => B
+    Function[-*, +*]
 
     () identity[A]: A :=> A
   }
-  class BothCompose~:=>[-_, +_], :*:[+_, +_]~{
-
+  class BothCompose~:=>[-_, +_]~{
+  
+    () type :*:[+_, +_]
     () fromFirst[A]: (A :*: Any) :=> A
     () fromSecond[B]: (Any :*: B) :=> B
     () toBoth[A, B, C](A :=> B)(A :=> C): A :=> (B :*: C)
   }
-  class ApplicationCompose~:=>[-_, +_], :*:[+_, +_], :-->[-_, +_]~{
-    A => B [:*: = ❨_, _❩, :--> = =>]
+  class ApplicationCompose~:=>[-_, +_]~{
+    Function[-*, +*] [type :*: = ❨_, _❩; type :--> = Function]
     
+    () type :*:[+_, +_]
+    () type :-->[-_, +_]
     () application[A, B]: ((A :--> B) :*: A) :=> B
     () curry[A, B, C]((A :*: B) :=> C): A :=> (B :--> C)
     () uncurry[A, B, C](A :=> (B :--> C)): (A :*: B) :=> C
   }
-  class EitherCompose~:=>[-_, +_], :+:[+_, +_]~{
-    A => B [:+: = Either]
+  class EitherCompose~:=>[-_, +_]~{
+    Function[-*, +*] [type :+: = Either]
 
+    () type :+:[+_, +_]
     () toLeft[A]: A :=> (A :+: Nothing)
     () toRight[B]: B :=> (Nothing :+: B)
     () fromEither[A, B, C](=> A :=> C)(=> B :=> C): (A :+: B) :=> C
@@ -373,5 +377,5 @@ classDiagram
 
 </details>
 
-[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/98312440-04db3480-1fd2-11eb-8fe1-609f3137b1d8.png
-[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX46PT5bLV8sICtfXSwgOio6WytfLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBFaXRoZXJDb21wb3Nlfjo9PlstXywgK19dLCA6KzpbK18sICtfXX5cbiAgQm90aENvbXBvc2UgPHwtLSBBcHBsaWNhdGlvbkNvbXBvc2V-Oj0-Wy1fLCArX10sIDoqOlsrXywgK19dLCA6LS0-Wy1fLCArX11-XG4gIGNsYXNzIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX57XG4gICAgKCkgY29tcG9zZVtBLCBCLCBDXShCIDo9PiBDLCBBIDo9PiBCKTogQSA6PT4gQ1xuICB9XG4gIGNsYXNzIElkZW50aXR5Q29tcG9zZX46PT5bLV8sICtfXX57XG4gICAgQSA9PiBCXG5cbiAgICAoKSBpZGVudGl0eVtBXTogQSA6PT4gQVxuICB9XG4gIGNsYXNzIEJvdGhDb21wb3Nlfjo9PlstXywgK19dLCA6KjpbK18sICtfXX57XG5cbiAgICAoKSBmcm9tRmlyc3RbQV06IChBIDoqOiBBbnkpIDo9PiBBXG4gICAgKCkgZnJvbVNlY29uZFtCXTogKEFueSA6KjogQikgOj0-IEJcbiAgICAoKSB0b0JvdGhbQSwgQiwgQ10oQSA6PT4gQikoQSA6PT4gQyk6IEEgOj0-IChCIDoqOiBDKVxuICB9XG4gIGNsYXNzIEFwcGxpY2F0aW9uQ29tcG9zZX46PT5bLV8sICtfXSwgOio6WytfLCArX10sIDotLT5bLV8sICtfXX57XG4gICAgQSA9PiBCIFs6KjogPSDinahfLCBf4p2pLCA6LS0-ID0gPT5dXG4gICAgXG4gICAgKCkgYXBwbGljYXRpb25bQSwgQl06ICgoQSA6LS0-IEIpIDoqOiBBKSA6PT4gQlxuICAgICgpIGN1cnJ5W0EsIEIsIENdKChBIDoqOiBCKSA6PT4gQyk6IEEgOj0-IChCIDotLT4gQylcbiAgICAoKSB1bmN1cnJ5W0EsIEIsIENdKEEgOj0-IChCIDotLT4gQykpOiAoQSA6KjogQikgOj0-IENcbiAgfVxuICBjbGFzcyBFaXRoZXJDb21wb3Nlfjo9PlstXywgK19dLCA6KzpbK18sICtfXX57XG4gICAgQSA9PiBCIFs6KzogPSBFaXRoZXJdXG5cbiAgICAoKSB0b0xlZnRbQV06IEEgOj0-IChBIDorOiBOb3RoaW5nKVxuICAgICgpIHRvUmlnaHRbQl06IEIgOj0-IChOb3RoaW5nIDorOiBCKVxuICAgICgpIGZyb21FaXRoZXJbQSwgQiwgQ10oPT4gQSA6PT4gQykoPT4gQiA6PT4gQyk6IChBIDorOiBCKSA6PT4gQ1xuICB9XG4iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCIsInRoZW1lVmFyaWFibGVzIjp7ImJhY2tncm91bmQiOiJ3aGl0ZSIsInByaW1hcnlDb2xvciI6IiNFQ0VDRkYiLCJzZWNvbmRhcnlDb2xvciI6IiNmZmZmZGUiLCJ0ZXJ0aWFyeUNvbG9yIjoiaHNsKDgwLCAxMDAlLCA5Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5Qm9yZGVyQ29sb3IiOiJoc2woMjQwLCA2MCUsIDg2LjI3NDUwOTgwMzklKSIsInNlY29uZGFyeUJvcmRlckNvbG9yIjoiaHNsKDYwLCA2MCUsIDgzLjUyOTQxMTc2NDclKSIsInRlcnRpYXJ5Qm9yZGVyQ29sb3IiOiJoc2woODAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwicHJpbWFyeVRleHRDb2xvciI6IiMxMzEzMDAiLCJzZWNvbmRhcnlUZXh0Q29sb3IiOiIjMDAwMDIxIiwidGVydGlhcnlUZXh0Q29sb3IiOiJyZ2IoOS41MDAwMDAwMDAxLCA5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSkiLCJsaW5lQ29sb3IiOiIjMzMzMzMzIiwidGV4dENvbG9yIjoiIzMzMyIsIm1haW5Ca2ciOiIjRUNFQ0ZGIiwic2Vjb25kQmtnIjoiI2ZmZmZkZSIsImJvcmRlcjEiOiIjOTM3MERCIiwiYm9yZGVyMiI6IiNhYWFhMzMiLCJhcnJvd2hlYWRDb2xvciI6IiMzMzMzMzMiLCJmb250RmFtaWx5IjoiXCJ0cmVidWNoZXQgbXNcIiwgdmVyZGFuYSwgYXJpYWwiLCJmb250U2l6ZSI6IjE2cHgiLCJsYWJlbEJhY2tncm91bmQiOiIjZThlOGU4Iiwibm9kZUJrZyI6IiNFQ0VDRkYiLCJub2RlQm9yZGVyIjoiIzkzNzBEQiIsImNsdXN0ZXJCa2ciOiIjZmZmZmRlIiwiY2x1c3RlckJvcmRlciI6IiNhYWFhMzMiLCJkZWZhdWx0TGlua0NvbG9yIjoiIzMzMzMzMyIsInRpdGxlQ29sb3IiOiIjMzMzIiwiZWRnZUxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJhY3RvckJvcmRlciI6ImhzbCgyNTkuNjI2MTY4MjI0MywgNTkuNzc2NTM2MzEyOCUsIDg3LjkwMTk2MDc4NDMlKSIsImFjdG9yQmtnIjoiI0VDRUNGRiIsImFjdG9yVGV4dENvbG9yIjoiYmxhY2siLCJhY3RvckxpbmVDb2xvciI6ImdyZXkiLCJzaWduYWxDb2xvciI6IiMzMzMiLCJzaWduYWxUZXh0Q29sb3IiOiIjMzMzIiwibGFiZWxCb3hCa2dDb2xvciI6IiNFQ0VDRkYiLCJsYWJlbEJveEJvcmRlckNvbG9yIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwibGFiZWxUZXh0Q29sb3IiOiJibGFjayIsImxvb3BUZXh0Q29sb3IiOiJibGFjayIsIm5vdGVCb3JkZXJDb2xvciI6IiNhYWFhMzMiLCJub3RlQmtnQ29sb3IiOiIjZmZmNWFkIiwibm90ZVRleHRDb2xvciI6ImJsYWNrIiwiYWN0aXZhdGlvbkJvcmRlckNvbG9yIjoiIzY2NiIsImFjdGl2YXRpb25Ca2dDb2xvciI6IiNmNGY0ZjQiLCJzZXF1ZW5jZU51bWJlckNvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IiOiJyZ2JhKDEwMiwgMTAyLCAyNTUsIDAuNDkpIiwiYWx0U2VjdGlvbkJrZ0NvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IyIjoiI2ZmZjQwMCIsInRhc2tCb3JkZXJDb2xvciI6IiM1MzRmYmMiLCJ0YXNrQmtnQ29sb3IiOiIjOGE5MGRkIiwidGFza1RleHRMaWdodENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dERhcmtDb2xvciI6ImJsYWNrIiwidGFza1RleHRPdXRzaWRlQ29sb3IiOiJibGFjayIsInRhc2tUZXh0Q2xpY2thYmxlQ29sb3IiOiIjMDAzMTYzIiwiYWN0aXZlVGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsImFjdGl2ZVRhc2tCa2dDb2xvciI6IiNiZmM3ZmYiLCJncmlkQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JrZ0NvbG9yIjoibGlnaHRncmV5IiwiZG9uZVRhc2tCb3JkZXJDb2xvciI6ImdyZXkiLCJjcml0Qm9yZGVyQ29sb3IiOiIjZmY4ODg4IiwiY3JpdEJrZ0NvbG9yIjoicmVkIiwidG9kYXlMaW5lQ29sb3IiOiJyZWQiLCJsYWJlbENvbG9yIjoiYmxhY2siLCJlcnJvckJrZ0NvbG9yIjoiIzU1MjIyMiIsImVycm9yVGV4dENvbG9yIjoiIzU1MjIyMiIsImNsYXNzVGV4dCI6IiMxMzEzMDAiLCJmaWxsVHlwZTAiOiIjRUNFQ0ZGIiwiZmlsbFR5cGUxIjoiI2ZmZmZkZSIsImZpbGxUeXBlMiI6ImhzbCgzMDQsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlMyI6ImhzbCgxMjQsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSIsImZpbGxUeXBlNCI6ImhzbCgxNzYsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNSI6ImhzbCgtNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU2IjoiaHNsKDgsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNyI6ImhzbCgxODgsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSJ9fSwidXBkYXRlRWRpdG9yIjpmYWxzZX0
+[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/101269999-cffb0280-3774-11eb-81c5-4c3feefae390.png
+[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX46PT5bLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfjo9PlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfjo9PlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA6PT4gQywgQSA6PT4gQik6IEEgOj0-IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBIDo9PiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICBcbiAgICAoKSB0eXBlIDoqOlsrXywgK19dXG4gICAgKCkgZnJvbUZpcnN0W0FdOiAoQSA6KjogQW55KSA6PT4gQVxuICAgICgpIGZyb21TZWNvbmRbQl06IChBbnkgOio6IEIpIDo9PiBCXG4gICAgKCkgdG9Cb3RoW0EsIEIsIENdKEEgOj0-IEIpKEEgOj0-IEMpOiBBIDo9PiAoQiA6KjogQylcbiAgfVxuICBjbGFzcyBBcHBsaWNhdGlvbkNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl0gW3R5cGUgOio6ID0g4p2oXywgX-KdqTsgdHlwZSA6LS0-ID0gRnVuY3Rpb25dXG4gICAgXG4gICAgKCkgdHlwZSA6KjpbK18sICtfXVxuICAgICgpIHR5cGUgOi0tPlstXywgK19dXG4gICAgKCkgYXBwbGljYXRpb25bQSwgQl06ICgoQSA6LS0-IEIpIDoqOiBBKSA6PT4gQlxuICAgICgpIGN1cnJ5W0EsIEIsIENdKChBIDoqOiBCKSA6PT4gQyk6IEEgOj0-IChCIDotLT4gQylcbiAgICAoKSB1bmN1cnJ5W0EsIEIsIENdKEEgOj0-IChCIDotLT4gQykpOiAoQSA6KjogQikgOj0-IENcbiAgfVxuICBjbGFzcyBFaXRoZXJDb21wb3Nlfjo9PlstXywgK19dfntcbiAgICBGdW5jdGlvblstKiwgKypdIFt0eXBlIDorOiA9IEVpdGhlcl1cblxuICAgICgpIHR5cGUgOis6WytfLCArX11cbiAgICAoKSB0b0xlZnRbQV06IEEgOj0-IChBIDorOiBOb3RoaW5nKVxuICAgICgpIHRvUmlnaHRbQl06IEIgOj0-IChOb3RoaW5nIDorOiBCKVxuICAgICgpIGZyb21FaXRoZXJbQSwgQiwgQ10oPT4gQSA6PT4gQykoPT4gQiA6PT4gQyk6IChBIDorOiBCKSA6PT4gQ1xuICB9XG4iLCJtZXJtYWlkIjp7fSwidXBkYXRlRWRpdG9yIjpmYWxzZX0
