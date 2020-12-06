@@ -30,11 +30,11 @@ object BothCompose {
 
   implicit val FunctionApplicationCompose: ApplicationCompose[Function] = new ApplicationCompose[Function] {
 
-    type :*:[+f, +s]  = (f, s)
+    type :*:[+f, +s]  = Tuple2[f, s]
     type :-->[-t, +r] = Function[t, r]
 
     override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
-      bc.compose(ab)
+      AssociativeCompose.FunctionIdentityCompose.compose(bc, ab)
 
     override def fromFirst[A]: Function[(A, Any), A] = _._1
 
