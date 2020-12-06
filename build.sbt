@@ -42,27 +42,26 @@ val zioVersion = "1.0.3"
 lazy val root = project
   .in(file("."))
   .settings(
-    skip in publish := true,
+    publish / skip := true,
     unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
   )
   .aggregate(
-    coreJVM,
-    coreJS,
-    coreNative,
-    experimentalJVM,
-    experimentalJS,
-    experimentalNative,
     benchmarks,
-    docs
+    coreJS,
+    coreJVM,
+    coreNative,
+    docs,
+    experimentalJS,
+    experimentalJVM,
+    experimentalNative
   )
-  .enablePlugins(ScalaJSPlugin)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
   .settings(stdSettings("zio-prelude"))
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude"))
-  .settings(scalacOptions in (Compile, console) ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
     libraryDependencies ++= {
       val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
@@ -125,12 +124,11 @@ lazy val experimentalNative = experimental.native
 
 lazy val benchmarks = project.module
   .settings(
-    skip.in(publish) := true,
+    publish / skip := true,
     moduleName := "zio-prelude-benchmarks",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % zioVersion,
       ("org.typelevel" %% "cats-core" % "2.3.0") match {
         case cats if isDotty.value => cats.withDottyCompat(scalaVersion.value)
         case cats                  => cats
@@ -143,18 +141,15 @@ lazy val benchmarks = project.module
 lazy val docs = project
   .in(file("zio-prelude-docs"))
   .settings(
-    skip.in(publish) := true,
+    publish / skip := true,
     moduleName := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % zioVersion
-    ),
-    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(coreJVM),
-    target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
-    cleanFiles += (target in (ScalaUnidoc, unidoc)).value,
-    docusaurusCreateSite := docusaurusCreateSite.dependsOn(unidoc in Compile).value,
-    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(unidoc in Compile).value
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJVM),
+    ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
+    cleanFiles += (ScalaUnidoc / unidoc / target).value,
+    docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
+    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .dependsOn(coreJVM, coreJS)
+  .dependsOn(coreJS, coreJVM /*, coreNative */ )
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
