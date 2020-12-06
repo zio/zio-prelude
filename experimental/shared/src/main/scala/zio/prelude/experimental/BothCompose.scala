@@ -28,7 +28,7 @@ object BothCompose {
     type :*:[+f, +s] = Product[f, s]
   }
 
-  implicit val FunctionBothEitherIdentityCompose: ApplicationCompose[Function] = new ApplicationCompose[Function] {
+  implicit val FunctionApplicationCompose: ApplicationCompose[Function] = new ApplicationCompose[Function] {
 
     type :*:[+f, +s]  = (f, s)
     type :-->[-t, +r] = Function[t, r]

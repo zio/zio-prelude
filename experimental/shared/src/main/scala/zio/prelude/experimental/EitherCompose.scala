@@ -28,7 +28,7 @@ object EitherCompose {
     type :+:[+l, +r] = Sum[l, r]
   }
 
-  implicit val FunctionBothEitherIdentityCompose: EitherCompose[Function] = new EitherCompose[Function] {
+  implicit val FunctionEitherCompose: EitherCompose[Function] = new EitherCompose[Function] {
 
     type :+:[+l, +r] = Either[l, r]
 
