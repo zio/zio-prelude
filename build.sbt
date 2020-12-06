@@ -140,7 +140,7 @@ lazy val benchmarks = project
   .enablePlugins(JmhPlugin)
 
 lazy val docs = project
-  .in(file("docs"))
+  .in(file("zio-prelude-docs"))
   .settings(stdSettings("zio-prelude-docs"))
   .settings(
     publish / skip := true,
