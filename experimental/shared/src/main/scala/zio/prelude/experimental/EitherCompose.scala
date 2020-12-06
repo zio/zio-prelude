@@ -1,7 +1,10 @@
 package zio.prelude
 package experimental
 
-trait EitherCompose[:=>[-_, +_], :+:[+_, +_]] extends AssociativeCompose[:=>] {
+trait EitherCompose[:=>[-_, +_]] extends AssociativeCompose[:=>] {
+
+  type :+:[+_, +_]
+
   def toLeft[A]: A :=> (A :+: Nothing)
   def toRight[B]: B :=> (Nothing :+: B)
   def fromEither[A, B, C](a2c: => A :=> C)(b2c: => B :=> C): (A :+: B) :=> C
@@ -21,33 +24,39 @@ trait EitherCompose[:=>[-_, +_], :+:[+_, +_]] extends AssociativeCompose[:=>] {
 
 object EitherCompose {
 
-  implicit val FunctionBothEitherIdentityCompose
-    : EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda] =
-    new EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda] {
+  type Aux[:=>[-_, +_], Sum[+_, +_]] = EitherCompose[:=>] {
+    type :+:[+l, +r] = Sum[l, r]
+  }
 
-      override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
-        bc.compose(ab)
+  implicit val FunctionBothEitherIdentityCompose: EitherCompose[Function] = new EitherCompose[Function] {
 
-      override def toLeft[A]: Function[A, Either[A, Nothing]] = Left(_)
+    type :+:[+l, +r] = Either[l, r]
 
-      override def toRight[B]: Function[B, Either[Nothing, B]] = Right(_)
+    override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
+      bc.compose(ab)
 
-      override def fromEither[A, B, C](a2c: => Function[A, C])(b2c: => Function[B, C]): Function[Either[A, B], C] = {
-        case Left(a)  => a2c(a)
-        case Right(b) => b2c(b)
-      }
+    override def toLeft[A]: Function[A, Either[A, Nothing]] = Left(_)
+
+    override def toRight[B]: Function[B, Either[Nothing, B]] = Right(_)
+
+    override def fromEither[A, B, C](a2c: => Function[A, C])(b2c: => Function[B, C]): Function[Either[A, B], C] = {
+      case Left(a)  => a2c(a)
+      case Right(b) => b2c(b)
     }
+  }
 }
 
 trait EitherComposeSyntax {
   implicit class EitherComposeOps[A, C, :=>[-_, +_]](private val a2b: A :=> C) {
 
     /** A symbolic alias for `fromEither`. Composes `A -> C` with `B -> C` to form `A or B -> C`. */
-    def |||[B, :+:[+_, +_]](implicit either: EitherCompose[:=>, :+:]): (=> B :=> C) => ((A :+: B) :=> C) =
-      either.fromEither(a2b)
+    def |||[B, :+:[+_, +_]](implicit eitherCompose: EitherCompose.Aux[:=>, :+:]): (=> B :=> C) => ((A :+: B) :=> C) =
+      eitherCompose.fromEither(a2b)
 
     /** Composes `A -> C` with `B -> C` to form `A or B -> C`. */
-    def fromEither[B, :+:[+_, +_]](implicit either: EitherCompose[:=>, :+:]): (=> B :=> C) => ((A :+: B) :=> C) =
-      either.fromEither(a2b)
+    def fromEither[B, :+:[+_, +_]](implicit
+      eitherCompose: EitherCompose.Aux[:=>, :+:]
+    ): (=> B :=> C) => ((A :+: B) :=> C) =
+      eitherCompose.fromEither(a2b)
   }
 }

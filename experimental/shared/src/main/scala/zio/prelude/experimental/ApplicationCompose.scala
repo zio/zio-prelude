@@ -1,7 +1,10 @@
 package zio.prelude
 package experimental
 
-trait ApplicationCompose[:=>[-_, +_], :*:[+_, +_], :-->[-_, +_]] extends BothCompose[:=>, :*:] {
+trait ApplicationCompose[:=>[-_, +_]] extends BothCompose[:=>] {
+
+  type :-->[-_, +_]
+
   def application[A, B]: ((A :--> B) :*: A) :=> B
   def curry[A, B, C](f: (A :*: B) :=> C): A :=> (B :--> C)
   def uncurry[A, B, C](g: A :=> (B :--> C)): (A :*: B) :=> C
@@ -21,6 +24,13 @@ trait ApplicationCompose[:=>[-_, +_], :*:[+_, +_], :-->[-_, +_]] extends BothCom
   }
 }
 
+object ApplicationCompose {
+  type Aux[:=>[-_, +_], Product[+_, +_], Arrow[-_, +_]] = ApplicationCompose[:=>] {
+    type :*:[+f, +s]  = Product[f, s]
+    type :-->[-t, +r] = Arrow[t, r]
+  }
+}
+
 trait ApplicationComposeSyntax {
 
   implicit class ApplicationComposeCurryOps[A, B, C, :=>[-_, +_], :*:[+_, +_], :-->[-_, +_]](
@@ -28,8 +38,8 @@ trait ApplicationComposeSyntax {
   ) {
 
     /** Curries `(A, B) -> C` to `A -> (B -> C)`. */
-    def curry(implicit imply: ApplicationCompose[:=>, :*:, :-->]): A :=> (B :--> C) =
-      imply.curry(ab2c)
+    def curry(implicit applicationCompose: ApplicationCompose.Aux[:=>, :*:, :-->]): A :=> (B :--> C) =
+      applicationCompose.curry(ab2c)
   }
 
   implicit class ApplicationComposeUncurryOps[A, B, C, :=>[-_, +_], :*:[+_, +_], :-->[-_, +_]](
@@ -37,7 +47,7 @@ trait ApplicationComposeSyntax {
   ) {
 
     /** Uncurries `A -> (B -> C)` to `(A, B) -> C`. */
-    def uncurry(implicit imply: ApplicationCompose[:=>, :*:, :-->]): (A :*: B) :=> C =
-      imply.uncurry(a2b2c)
+    def uncurry(implicit applicationCompose: ApplicationCompose.Aux[:=>, :*:, :-->]): (A :*: B) :=> C =
+      applicationCompose.uncurry(a2b2c)
   }
 }

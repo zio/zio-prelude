@@ -1,7 +1,10 @@
 package zio.prelude
 package experimental
 
-trait BothCompose[:=>[-_, +_], :*:[+_, +_]] extends AssociativeCompose[:=>] {
+trait BothCompose[:=>[-_, +_]] extends AssociativeCompose[:=>] {
+
+  type :*:[+_, +_]
+
   def fromFirst[A]: (A :*: Any) :=> A
   def fromSecond[B]: (Any :*: B) :=> B
   def toBoth[A, B, C](a2b: A :=> B)(a2c: A :=> C): A :=> (B :*: C)
@@ -21,45 +24,50 @@ trait BothCompose[:=>[-_, +_], :*:[+_, +_]] extends AssociativeCompose[:=>] {
 
 object BothCompose {
 
-  implicit val FunctionBothEitherIdentityCompose
-    : ApplicationCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda, Function] =
-    new ApplicationCompose[Function, ({ type lambda[+f, +s] = (f, s) })#lambda, Function] {
+  type Aux[:=>[-_, +_], Product[+_, +_]] = BothCompose[:=>] {
+    type :*:[+f, +s] = Product[f, s]
+  }
 
-      override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
-        bc.compose(ab)
+  implicit val FunctionBothEitherIdentityCompose: ApplicationCompose[Function] = new ApplicationCompose[Function] {
 
-      override def fromFirst[A]: Function[(A, Any), A] = _._1
+    type :*:[+f, +s]  = (f, s)
+    type :-->[-t, +r] = Function[t, r]
 
-      override def fromSecond[B]: Function[(Any, B), B] = _._2
+    override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
+      bc.compose(ab)
 
-      override def toBoth[A, B, C](a2b: Function[A, B])(a2c: Function[A, C]): Function[A, (B, C)] = { a =>
-        (a2b(a), a2c(a))
-      }
+    override def fromFirst[A]: Function[(A, Any), A] = _._1
 
-      override def application[A, B]: Function[(Function[A, B], A), B] = { case (a2b, a) =>
-        a2b(a)
-      }
+    override def fromSecond[B]: Function[(Any, B), B] = _._2
 
-      override def curry[A, B, C](f: Function[(A, B), C]): Function[A, Function[B, C]] = { a => b =>
-        f((a, b))
-      }
-
-      override def uncurry[A, B, C](g: Function[A, Function[B, C]]): Function[(A, B), C] = { case (a, b) =>
-        g(a)(b)
-      }
-
+    override def toBoth[A, B, C](a2b: Function[A, B])(a2c: Function[A, C]): Function[A, (B, C)] = { a =>
+      (a2b(a), a2c(a))
     }
+
+    override def application[A, B]: Function[(Function[A, B], A), B] = { case (a2b, a) =>
+      a2b(a)
+    }
+
+    override def curry[A, B, C](f: Function[(A, B), C]): Function[A, Function[B, C]] = { a => b =>
+      f((a, b))
+    }
+
+    override def uncurry[A, B, C](g: Function[A, Function[B, C]]): Function[(A, B), C] = { case (a, b) =>
+      g(a)(b)
+    }
+
+  }
 }
 
 trait BothComposeSyntax {
   implicit class BothComposeOps[A, B, :=>[-_, +_]](private val a2b: A :=> B) {
 
     /** A symbolic alias for `toBoth`. Composes `A -> B` with `A -> C` to form `A -> (B, C)`. */
-    def &&&[C, :*:[+_, +_]](implicit both: BothCompose[:=>, :*:]): (A :=> C) => (A :=> (B :*: C)) =
+    def &&&[C, :*:[+_, +_]](implicit both: BothCompose.Aux[:=>, :*:]): (A :=> C) => (A :=> (B :*: C)) =
       both.toBoth(a2b)
 
     /** Composes `A -> B` with `A -> C` to form `A -> (B, C)`. */
-    def toBoth[C, :*:[+_, +_]](implicit both: BothCompose[:=>, :*:]): (A :=> C) => (A :=> (B :*: C)) =
+    def toBoth[C, :*:[+_, +_]](implicit both: BothCompose.Aux[:=>, :*:]): (A :=> C) => (A :=> (B :*: C)) =
       both.toBoth(a2b)
   }
 }
