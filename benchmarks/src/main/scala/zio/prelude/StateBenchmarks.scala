@@ -2,11 +2,10 @@ package zio.prelude
 
 import java.util.concurrent.TimeUnit
 
-import org.openjdk.jmh.annotations.{ State => BenchmarkState, _ }
-
-import cats.data.{ EitherT, Kleisli, State => CatsState, StateT }
+import cats.data.{ EitherT, Kleisli, State => CatsState }
 import cats.instances.list._
 import cats.syntax.traverse._
+import org.openjdk.jmh.annotations.{ State => BenchmarkState, _ }
 
 @BenchmarkState(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
@@ -19,7 +18,7 @@ class StateBenchmarks {
   var size: Int = _
 
   @Setup(Level.Trial)
-  def setup() =
+  def setup(): Unit =
     list = (1 to size).toList
 
   type CatsIntState[A]       = CatsState[Int, A]
@@ -32,7 +31,7 @@ class StateBenchmarks {
         EitherT.liftF[CatsIntState, Nothing, Int](CatsState.get)
       Kleisli.liftF(eitherT)
     }
-    def pure[A](a: A): CatsStack[A] =
+    def pure[A](a: A): CatsStack[A]                =
       Kleisli.pure(a)
     def runState[A](fa: CatsStack[A])(s: Int): Int =
       fa.run(()).merge.runS(s).value

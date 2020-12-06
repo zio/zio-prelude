@@ -122,10 +122,11 @@ lazy val experimentalNative = experimental.native
     ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
   )
 
-lazy val benchmarks = project.module
+lazy val benchmarks = project
+  .in(file("benchmarks"))
+  .settings(stdSettings("zio-prelude-benchmarks"))
   .settings(
     publish / skip := true,
-    moduleName := "zio-prelude-benchmarks",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
@@ -139,10 +140,10 @@ lazy val benchmarks = project.module
   .enablePlugins(JmhPlugin)
 
 lazy val docs = project
-  .in(file("zio-prelude-docs"))
+  .in(file("docs"))
+  .settings(stdSettings("zio-prelude-docs"))
   .settings(
     publish / skip := true,
-    moduleName := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJVM),
