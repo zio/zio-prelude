@@ -1,4 +1,5 @@
 package zio.prelude
+package experimental
 
 trait EitherCompose[:=>[-_, +_], :+:[+_, +_]] extends AssociativeCompose[:=>] {
   def toLeft[A]: A :=> (A :+: Nothing)
@@ -16,6 +17,26 @@ trait EitherCompose[:=>[-_, +_], :+:[+_, +_]] extends AssociativeCompose[:=>] {
 
     law1 && law2 && law3
   }
+}
+
+object EitherCompose {
+
+  implicit val FunctionBothEitherIdentityCompose
+    : EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda] =
+    new EitherCompose[Function, ({ type lambda[+l, +r] = Either[l, r] })#lambda] {
+
+      override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
+        bc.compose(ab)
+
+      override def toLeft[A]: Function[A, Either[A, Nothing]] = Left(_)
+
+      override def toRight[B]: Function[B, Either[Nothing, B]] = Right(_)
+
+      override def fromEither[A, B, C](a2c: => Function[A, C])(b2c: => Function[B, C]): Function[Either[A, B], C] = {
+        case Left(a)  => a2c(a)
+        case Right(b) => b2c(b)
+      }
+    }
 }
 
 trait EitherComposeSyntax {

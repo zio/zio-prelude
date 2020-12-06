@@ -1,4 +1,5 @@
 package zio.prelude
+package experimental
 
 trait ApplicationCompose[:=>[-_, +_], :*:[+_, +_], :-->[-_, +_]] extends BothCompose[:=>, :*:] {
   def application[A, B]: ((A :--> B) :*: A) :=> B
