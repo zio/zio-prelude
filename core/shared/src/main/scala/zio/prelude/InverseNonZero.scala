@@ -4,6 +4,8 @@ import zio.prelude.coherent.EqualInverseNonZero
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
+import scala.annotation.tailrec
+
 /**
  * The `InverseNonZero` type class describes an associative binary operator for a
  * type `A` that has an identity element and an inverse binary operator.
@@ -22,7 +24,20 @@ import zio.test.laws.{ Lawful, Laws }
  * zero.
  */
 trait InverseNonZero[A] extends Identity[A] {
+
   def inverse(l: => A, r: => A): A
+
+  def multiply(n: Int)(a: A): A = {
+    @tailrec
+    def multiplyHelper(res: A, n: Int): A =
+      if (n == 0) res
+      else if (n > 0) multiplyHelper(combine(a, res), n - 1)
+      else multiplyHelper(inverse(res, a), n + 1)
+    multiplyHelper(identity, n)
+  }
+
+  override def multiplyOption(n: Int)(a: A): Some[A] =
+    Some(multiply(n)(a))
 }
 
 object InverseNonZero extends Lawful[EqualInverseNonZero] {
@@ -905,5 +920,11 @@ trait InverseNonZeroSyntax {
      */
     def inverse(r: => A)(implicit inverse: InverseNonZero[A]): A =
       inverse.inverse(l, r)
+
+    /**
+     * Multiplies value 'n' times
+     */
+    def multiply(n: Int)(implicit inverse: Inverse[A]): A =
+      inverse.multiply(n)(l)
   }
 }

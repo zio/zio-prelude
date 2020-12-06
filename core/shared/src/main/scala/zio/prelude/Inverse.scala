@@ -3,8 +3,6 @@ package zio.prelude
 import zio.prelude.coherent.EqualInverse
 import zio.test.laws.{ Lawful, Laws }
 
-import scala.annotation.tailrec
-
 /**
  * The `Inverse` type class describes an associative binary operator for a
  * type `A` that has an identity element and an inverse binary operator.
@@ -21,20 +19,7 @@ import scala.annotation.tailrec
  * natural numbers, since subtracting a number from itself always returns
  * zero.
  */
-trait Inverse[A] extends InverseNonZero[A] {
-
-  def multiply(n: Int)(a: A): A = {
-    @tailrec
-    def multiplyHelper(res: A, n: Int): A =
-      if (n == 0) res
-      else if (n > 0) multiplyHelper(combine(a, res), n - 1)
-      else multiplyHelper(inverse(res, a), n + 1)
-    multiplyHelper(identity, n)
-  }
-
-  override def multiplyOption(n: Int)(a: A): Some[A] =
-    Some(multiply(n)(a))
-}
+trait Inverse[A] extends InverseNonZero[A]
 
 object Inverse extends Lawful[EqualInverse] {
 
@@ -870,20 +855,4 @@ object Inverse extends Lawful[EqualInverse] {
       }
     )
 
-}
-
-trait InverseSyntax {
-
-  /**
-   * Provides infix syntax for combining two values with an inverse
-   * operation.
-   */
-  implicit class InverseOps[A](l: A) {
-
-    /**
-     * Multiplies value 'n' times
-     */
-    def multiply(n: Int)(implicit inverse: Inverse[A]): A =
-      inverse.multiply(n)(l)
-  }
 }
