@@ -27,7 +27,7 @@ trait InverseNonZero[A] extends Identity[A] {
 
   def inverse(l: => A, r: => A): A
 
-  def multiply(n: Int)(a: A): A = {
+  def multiplyBy(n: Int)(a: A): A = {
     @tailrec
     def multiplyHelper(res: A, n: Int): A =
       if (n == 0) res
@@ -37,7 +37,7 @@ trait InverseNonZero[A] extends Identity[A] {
   }
 
   override def multiplyOption(n: Int)(a: A): Some[A] =
-    Some(multiply(n)(a))
+    Some(multiplyBy(n)(a))
 }
 
 object InverseNonZero extends Lawful[EqualInverseNonZero] {
@@ -924,7 +924,7 @@ trait InverseNonZeroSyntax {
     /**
      * Multiplies value 'n' times
      */
-    def multiply(n: Int)(implicit inverse: Inverse[A]): A =
-      inverse.multiply(n)(l)
+    def multiplyBy(n: Int)(implicit inverse: Inverse[A]): A =
+      inverse.multiplyBy(n)(l)
   }
 }
