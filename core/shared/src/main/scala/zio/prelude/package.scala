@@ -4,8 +4,7 @@ import com.github.ghik.silencer.silent
 import zio.test.{ TestResult, assert }
 
 package object prelude
-    extends AddMultiplyShapeSyntax
-    with Assertions
+    extends Assertions
     with AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeComposeSyntax
@@ -17,7 +16,6 @@ package object prelude
     with ContravariantSyntax
     with DebugSyntax
     with DivariantSyntax
-    with DivideShapeSyntax
     with EqualSyntax
     with HashSyntax
     with IdExports
@@ -30,7 +28,6 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
-    with SubtractShapeSyntax
     with TraversableSyntax
     with BicovariantSyntax
     with ZivariantSyntax {
@@ -75,19 +72,6 @@ package object prelude
 
     type Semilattice[A]        = Commutative[A] with Idempotent[A]
     type BoundedSemilattice[A] = Semilattice[A] with Identity[A]
-
-    type Semiring[A] = Annihilation[A] with DistributiveMultiply[A] {
-      type Addition[x] <: CommutativeMonoid[x]
-      type Multiplication[x] <: Identity[x]
-    }
-    type Ring[A]     = Semiring[A] with SubtractShape[A] {
-      type Addition[x] <: AbelianGroup[x]
-      type Multiplication[x] <: Identity[x]
-    }
-    type Field[A]    = Ring[A] with prelude.DivideShape[A] {
-      type Addition[x] <: AbelianGroup[x]
-      type Multiplication[x] <: InverseNonZero[x]
-    }
 
     type Functor[F[+_]]       = Covariant[F]
     type Contravariant[F[-_]] = zio.prelude.Contravariant[F]

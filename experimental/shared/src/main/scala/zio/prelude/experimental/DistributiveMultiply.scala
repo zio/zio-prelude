@@ -1,6 +1,7 @@
 package zio.prelude
+package experimental
 
-import zio.prelude.coherent.DistributiveMultiplyEqual
+import zio.prelude.experimental.coherent.DistributiveMultiplyEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 

@@ -1,4 +1,5 @@
 package zio.prelude
+package experimental
 
 import zio.prelude.newtypes.{ Prod, Sum }
 

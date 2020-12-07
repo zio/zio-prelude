@@ -1,4 +1,4 @@
-package zio.prelude
+package zio.prelude.experimental
 
 import zio.test.TestAspect._
 import zio.test._

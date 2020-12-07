@@ -1,31 +1,6 @@
 package zio.prelude.coherent
 
 import zio.prelude._
-import zio.prelude.newtypes.{ Prod, Sum }
-
-trait AnnihilationEqual[A] extends Annihilation[A] with Equal[A] {
-  type Addition[x]       = Identity[x]
-  type Multiplication[x] = Associative[x]
-}
-
-object AnnihilationEqual {
-  implicit def derive[A](implicit
-    annihilatingZero0: Annihilation.Aux[A, Identity, Associative],
-    equal0: Equal[A]
-  ): AnnihilationEqual[A] =
-    new AnnihilationEqual[A] {
-
-      override def add(l: => A, r: => A): A = annihilatingZero0.add(l, r)
-
-      override def multiply(l: => A, r: => A): A = annihilatingZero0.multiply(l, r)
-
-      override def Addition: Identity[Sum[A]] = annihilatingZero0.Addition
-
-      override def Multiplication: Associative[Prod[A]] = annihilatingZero0.Multiplication
-
-      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
-    }
-}
 
 trait AssociativeBothDeriveEqualInvariant[F[_]] extends AssociativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
@@ -235,30 +210,6 @@ object DeriveEqualTraversable {
         deriveEqual0.derive
       def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         traversable0.foreach(fa)(f)
-    }
-}
-
-trait DistributiveMultiplyEqual[A] extends DistributiveMultiply[A] with Equal[A] {
-  type Addition[x]       = Associative[x]
-  type Multiplication[x] = Associative[x]
-}
-
-object DistributiveMultiplyEqual {
-  implicit def derive[A](implicit
-    distributive0: DistributiveMultiply.Aux[A, Associative, Associative],
-    equal0: Equal[A]
-  ): DistributiveMultiplyEqual[A] =
-    new DistributiveMultiplyEqual[A] {
-
-      override def add(l: => A, r: => A): A = distributive0.add(l, r)
-
-      override def multiply(l: => A, r: => A): A = distributive0.multiply(l, r)
-
-      override def Addition: Associative[Sum[A]] = distributive0.Addition
-
-      override def Multiplication: Associative[Prod[A]] = distributive0.Multiplication
-
-      protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }
 

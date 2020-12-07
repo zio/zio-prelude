@@ -1,6 +1,7 @@
 package zio.prelude
+package experimental
 
-import zio.prelude.coherent.AnnihilationEqual
+import zio.prelude.experimental.coherent.AnnihilationEqual
 import zio.prelude.newtypes.{ Prod, Sum }
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
