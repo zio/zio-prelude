@@ -351,24 +351,24 @@ classDiagram
   }
   class BothCompose~:=>[-_, +_]~{
   
-    () type :*:[+_, +_]
+    (type) :*:[+_, +_]
     () fromFirst[A]: (A :*: Any) :=> A
     () fromSecond[B]: (Any :*: B) :=> B
     () toBoth[A, B, C](A :=> B)(A :=> C): A :=> (B :*: C)
   }
   class ApplicationCompose~:=>[-_, +_]~{
-    Function[-*, +*] [type :*: = Tuple2; type :--> = Function]
+    Function[-*, +*] [ :*: = Tuple2 ; :--> = Function ]
     
-    () type :*:[+_, +_]
-    () type :-->[-_, +_]
+    (type) :*:[+_, +_]
+    (type) :-->[-_, +_]
     () application[A, B]: ((A :--> B) :*: A) :=> B
     () curry[A, B, C]((A :*: B) :=> C): A :=> (B :--> C)
     () uncurry[A, B, C](A :=> (B :--> C)): (A :*: B) :=> C
   }
   class EitherCompose~:=>[-_, +_]~{
-    Function[-*, +*] [type :+: = Either]
-
-    () type :+:[+_, +_]
+    Function[-*, +*] [ :+: = Either ]
+    
+    (type) :+:[+_, +_]
     () toLeft[A]: A :=> (A :+: Nothing)
     () toRight[B]: B :=> (Nothing :+: B)
     () fromEither[A, B, C](=> A :=> C)(=> B :=> C): (A :+: B) :=> C
@@ -377,5 +377,5 @@ classDiagram
 
 </details>
 
-[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/101292558-77794300-3810-11eb-9d9c-d65eee37b045.png
-[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX46PT5bLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfjo9PlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfjo9PlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA6PT4gQywgQSA6PT4gQik6IEEgOj0-IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBIDo9PiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICBcbiAgICAoKSB0eXBlIDoqOlsrXywgK19dXG4gICAgKCkgZnJvbUZpcnN0W0FdOiAoQSA6KjogQW55KSA6PT4gQVxuICAgICgpIGZyb21TZWNvbmRbQl06IChBbnkgOio6IEIpIDo9PiBCXG4gICAgKCkgdG9Cb3RoW0EsIEIsIENdKEEgOj0-IEIpKEEgOj0-IEMpOiBBIDo9PiAoQiA6KjogQylcbiAgfVxuICBjbGFzcyBBcHBsaWNhdGlvbkNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl0gW3R5cGUgOio6ID0gVHVwbGUyOyB0eXBlIDotLT4gPSBGdW5jdGlvbl1cbiAgICBcbiAgICAoKSB0eXBlIDoqOlsrXywgK19dXG4gICAgKCkgdHlwZSA6LS0-Wy1fLCArX11cbiAgICAoKSBhcHBsaWNhdGlvbltBLCBCXTogKChBIDotLT4gQikgOio6IEEpIDo9PiBCXG4gICAgKCkgY3VycnlbQSwgQiwgQ10oKEEgOio6IEIpIDo9PiBDKTogQSA6PT4gKEIgOi0tPiBDKVxuICAgICgpIHVuY3VycnlbQSwgQiwgQ10oQSA6PT4gKEIgOi0tPiBDKSk6IChBIDoqOiBCKSA6PT4gQ1xuICB9XG4gIGNsYXNzIEVpdGhlckNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl0gW3R5cGUgOis6ID0gRWl0aGVyXVxuXG4gICAgKCkgdHlwZSA6KzpbK18sICtfXVxuICAgICgpIHRvTGVmdFtBXTogQSA6PT4gKEEgOis6IE5vdGhpbmcpXG4gICAgKCkgdG9SaWdodFtCXTogQiA6PT4gKE5vdGhpbmcgOis6IEIpXG4gICAgKCkgZnJvbUVpdGhlcltBLCBCLCBDXSg9PiBBIDo9PiBDKSg9PiBCIDo9PiBDKTogKEEgOis6IEIpIDo9PiBDXG4gIH1cbiIsIm1lcm1haWQiOnt9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ
+[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/101298310-a18d2e00-382d-11eb-8c2e-ee11072f7617.png
+[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX46PT5bLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfjo9PlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfjo9PlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA6PT4gQywgQSA6PT4gQik6IEEgOj0-IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBIDo9PiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICBcbiAgICAodHlwZSkgOio6WytfLCArX11cbiAgICAoKSBmcm9tRmlyc3RbQV06IChBIDoqOiBBbnkpIDo9PiBBXG4gICAgKCkgZnJvbVNlY29uZFtCXTogKEFueSA6KjogQikgOj0-IEJcbiAgICAoKSB0b0JvdGhbQSwgQiwgQ10oQSA6PT4gQikoQSA6PT4gQyk6IEEgOj0-IChCIDoqOiBDKVxuICB9XG4gIGNsYXNzIEFwcGxpY2F0aW9uQ29tcG9zZX46PT5bLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDoqOiA9IFR1cGxlMiA7IDotLT4gPSBGdW5jdGlvbiBdXG4gICAgXG4gICAgKHR5cGUpIDoqOlsrXywgK19dXG4gICAgKHR5cGUpIDotLT5bLV8sICtfXVxuICAgICgpIGFwcGxpY2F0aW9uW0EsIEJdOiAoKEEgOi0tPiBCKSA6KjogQSkgOj0-IEJcbiAgICAoKSBjdXJyeVtBLCBCLCBDXSgoQSA6KjogQikgOj0-IEMpOiBBIDo9PiAoQiA6LS0-IEMpXG4gICAgKCkgdW5jdXJyeVtBLCBCLCBDXShBIDo9PiAoQiA6LS0-IEMpKTogKEEgOio6IEIpIDo9PiBDXG4gIH1cbiAgY2xhc3MgRWl0aGVyQ29tcG9zZX46PT5bLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDorOiA9IEVpdGhlciBdXG4gICAgXG4gICAgKHR5cGUpIDorOlsrXywgK19dXG4gICAgKCkgdG9MZWZ0W0FdOiBBIDo9PiAoQSA6KzogTm90aGluZylcbiAgICAoKSB0b1JpZ2h0W0JdOiBCIDo9PiAoTm90aGluZyA6KzogQilcbiAgICAoKSBmcm9tRWl0aGVyW0EsIEIsIENdKD0-IEEgOj0-IEMpKD0-IEIgOj0-IEMpOiAoQSA6KzogQikgOj0-IENcbiAgfVxuIiwibWVybWFpZCI6e30sInVwZGF0ZUVkaXRvciI6ZmFsc2V9
