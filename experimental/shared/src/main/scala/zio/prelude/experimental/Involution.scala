@@ -1,6 +1,7 @@
 package zio.prelude
+package experimental
 
-import zio.prelude.coherent.InvolutionEqual
+import zio.prelude.experimental.coherent.InvolutionEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 

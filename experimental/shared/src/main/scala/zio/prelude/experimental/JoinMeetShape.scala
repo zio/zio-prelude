@@ -1,4 +1,5 @@
 package zio.prelude
+package experimental
 
 trait JoinMeetShape[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] {
 

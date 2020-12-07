@@ -1,4 +1,5 @@
 package zio.prelude
+package experimental
 
 import zio.test._
 import zio.test.laws._

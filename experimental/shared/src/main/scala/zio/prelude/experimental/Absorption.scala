@@ -1,6 +1,7 @@
 package zio.prelude
+package experimental
 
-import zio.prelude.coherent.AbsorptionEqual
+import zio.prelude.experimental.coherent.AbsorptionEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 

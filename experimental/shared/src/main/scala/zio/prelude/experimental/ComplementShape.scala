@@ -1,4 +1,5 @@
 package zio.prelude
+package experimental
 
 trait ComplementShape[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] extends JoinMeetShape[A, Join, Meet] {
   def complement(a: A): A

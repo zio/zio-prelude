@@ -1,6 +1,7 @@
 package zio.prelude
+package experimental
 
-import zio.prelude.coherent.ComplementEqual
+import zio.prelude.experimental.coherent.ComplementEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 

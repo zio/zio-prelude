@@ -1,6 +1,7 @@
 package zio.prelude
+package experimental
 
-import zio.prelude.coherent.DistributiveJoinMeetEqual
+import zio.prelude.experimental.coherent.DistributiveJoinMeetEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
