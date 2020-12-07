@@ -31,7 +31,6 @@ package object prelude
     with OrdSyntax
     with PartialOrdSyntax
     with TraversableSyntax
-    with BicovariantSyntax
     with ZivariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
