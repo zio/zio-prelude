@@ -73,7 +73,7 @@ save_cache: &save_cache
           - "~/.sbt"
           - "~/.m2"
           - "~/.cache"
-          # - "~/website/node_modules"
+          - "~/website/node_modules"
 
 install_yarn: &install_yarn
   - run:
