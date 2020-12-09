@@ -1,7 +1,7 @@
 package zio.prelude
 
 import com.github.ghik.silencer.silent
-import zio.prelude.newtypes.{ And, Max, Min, Or, Prod, Sum }
+import zio.prelude.newtypes.{ And, Max, Min, Or, OrF, Prod, Sum }
 import zio.test.laws._
 import zio.test.{ DefaultRunnableSpec, _ }
 
@@ -39,7 +39,7 @@ object IdentitySpec extends DefaultRunnableSpec {
         testM("list")(checkAllLaws(Identity)(Gen.listOf(Gen.anyInt))),
         testM("vector")(checkAllLaws(Identity)(Gen.vectorOf(Gen.anyInt))),
         testM("map")(checkAllLaws(Identity)(Gen.mapOf(Gen.anyInt, Gen.anyInt.map(Sum(_))))),
-        testM("set")(checkAllLaws(Identity)(Gen.setOf(Gen.anyInt))),
+        testM("set")(checkAllLaws(Identity)(Gen.setOf(Gen.anyInt).map(OrF(_)))),
         testM("tuple2")(checkAllLaws(Identity)(Gen.anyInt.map(Sum(_)).zip(Gen.anyInt.map(Sum(_))))),
         testM("tuple3")(
           checkAllLaws(Identity)(

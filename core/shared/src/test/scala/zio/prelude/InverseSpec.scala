@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ Sum }
+import zio.prelude.newtypes.{ OrF, Sum }
 import zio.test.laws._
 import zio.test.{ DefaultRunnableSpec, _ }
 
@@ -13,7 +13,7 @@ object InverseSpec extends DefaultRunnableSpec {
         testM("short addition")(checkAllLaws(Inverse)(Gen.anyShort.map(Sum(_)))),
         testM("int addition")(checkAllLaws(Inverse)(Gen.anyInt.map(Sum(_)))),
         testM("long addition")(checkAllLaws(Inverse)(Gen.anyLong.map(Sum(_)))),
-        testM("set")(checkAllLaws(Inverse)(Gen.setOf(Gen.anyInt))),
+        testM("set")(checkAllLaws(Inverse)(Gen.setOf(Gen.anyInt).map(OrF(_)))),
         testM("tuple2")(checkAllLaws(Inverse)(Gen.anyInt.map(Sum(_)).zip(Gen.anyInt.map(Sum(_))))),
         testM("tuple3")(
           checkAllLaws(Inverse)(Gen.anyInt.map(Sum(_)).zip(Gen.anyInt.map(Sum(_))).zip(Gen.anyInt.map(Sum(_))).map {

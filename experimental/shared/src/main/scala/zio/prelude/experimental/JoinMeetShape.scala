@@ -1,6 +1,8 @@
 package zio.prelude
 package experimental
 
+import zio.prelude.newtypes.{ AndF, OrF }
+
 trait JoinMeetShape[A] {
 
   type Join[x] <: Associative[x]
@@ -8,14 +10,14 @@ trait JoinMeetShape[A] {
   type Meet[x] <: Associative[x]
 
   def join(l: => A, r: => A): A =
-    Join.combine(l, r)
+    Join.combine(OrF(l), OrF(r))
 
   def meet(l: => A, r: => A): A =
-    Meet.combine(l, r)
+    Meet.combine(AndF(l), AndF(r))
 
-  def Join: Join[A]
+  def Join: Join[OrF[A]]
 
-  def Meet: Meet[A]
+  def Meet: Meet[AndF[A]]
 }
 
 object JoinMeetShape {
@@ -32,32 +34,32 @@ object JoinMeetShape {
       override type Join[x] = Commutative[x] with Idempotent[x] with Inverse[x]
       override type Meet[x] = Commutative[x] with Idempotent[x] with Inverse[x]
 
-      override def complement(a: Boolean): Boolean = !a
+      override def complement(a: Boolean): Boolean             = !a
+      override def bottom: Boolean                             = false
+      override def top: Boolean                                = true
+      override def join(l: => Boolean, r: => Boolean): Boolean = l || r
+      override def meet(l: => Boolean, r: => Boolean): Boolean = l && r
 
-      override def Join: Join[Boolean] = new Commutative[Boolean] with Idempotent[Boolean] with Inverse[Boolean] {
-        override def inverse(l: => Boolean, r: => Boolean): Boolean = Meet.combine(l, r)
-
-        override def identity: Boolean = false
-
-        override def combine(l: => Boolean, r: => Boolean): Boolean = l || r
-      }
-      override def Meet: Meet[Boolean] = new Commutative[Boolean] with Idempotent[Boolean] with Inverse[Boolean] {
-        override def inverse(l: => Boolean, r: => Boolean): Boolean = Join.combine(l, r)
-
-        override def identity: Boolean = true
-
-        override def combine(l: => Boolean, r: => Boolean): Boolean = l && r
-      }
+      override def Join: Join[OrF[Boolean]]  =
+        new Commutative[OrF[Boolean]] with Idempotent[OrF[Boolean]] with Inverse[OrF[Boolean]] {
+          override def inverse(l: => OrF[Boolean], r: => OrF[Boolean]): OrF[Boolean] = OrF(l && r)
+          override def identity: OrF[Boolean]                                        = OrF(false)
+          override def combine(l: => OrF[Boolean], r: => OrF[Boolean]): OrF[Boolean] = OrF(l || r)
+        }
+      override def Meet: Meet[AndF[Boolean]] =
+        new Commutative[AndF[Boolean]] with Idempotent[AndF[Boolean]] with Inverse[AndF[Boolean]] {
+          override def inverse(l: => AndF[Boolean], r: => AndF[Boolean]): AndF[Boolean] = AndF(l || r)
+          override def identity: AndF[Boolean]                                          = AndF(true)
+          override def combine(l: => AndF[Boolean], r: => AndF[Boolean]): AndF[Boolean] = AndF(l && r)
+        }
     }
 
   implicit def SetJoinMeet[A]: Absorption[Set[A]] with DistributiveJoinMeet[Set[A]] =
     new Absorption[Set[A]] with DistributiveJoinMeet[Set[A]] {
       override type Join[x] = Commutative[x] with Idempotent[x] with Inverse[x]
       override type Meet[x] = Commutative[x] with Idempotent[x]
-      override def Join: Join[Set[A]] = Associative.SetIdempotentInverse
-      override def Meet: Meet[Set[A]] = new Commutative[Set[A]] with Idempotent[Set[A]] {
-        override def combine(l: => Set[A], r: => Set[A]): Set[A] = l.intersect(r)
-      }
+      override def Join: Join[OrF[Set[A]]]  = Associative.SetOrFCommutativeIdempotentInverse
+      override def Meet: Meet[AndF[Set[A]]] = Associative.SetAndFCommutativeIdempotent
     }
 }
 

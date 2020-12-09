@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ And, Or, Prod, Sum }
+import zio.prelude.newtypes.{ And, Or, OrF, Prod, Sum }
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -26,7 +26,7 @@ object CommutativeSpec extends DefaultRunnableSpec {
         testM("boolean conjuction")(checkAllLaws(Commutative)(Gen.boolean.map(And(_)))),
         testM("option")(checkAllLaws(Commutative)(Gen.option(anySumInt))),
         testM("either")(checkAllLaws(Commutative)(Gen.either(anySumInt, anySumInt))),
-        testM("set")(checkAllLaws(Commutative)(Gen.setOf(anySumInt))),
+        testM("set")(checkAllLaws(Commutative)(Gen.setOf(anySumInt).map(OrF(_)))),
         testM("map")(checkAllLaws(Commutative)(Gen.mapOf(anySumInt, anySumInt))),
         testM("tuple2")(checkAllLaws(Commutative)(anySumInt.zip(anySumInt))),
         testM("tuple3")(

@@ -2,6 +2,7 @@ package zio.prelude.experimental.coherent
 
 import zio.prelude._
 import zio.prelude.experimental._
+import zio.prelude.newtypes.{ AndF, OrF }
 
 trait AbsorptionEqual[A] extends Absorption[A] with Equal[A] {
   override type Join[x] = Associative[x]
@@ -15,9 +16,9 @@ object AbsorptionEqual {
   ): AbsorptionEqual[A] =
     new AbsorptionEqual[A] {
 
-      override def Join: Associative[A] = absorption0.Join
+      override def Join: Associative[OrF[A]] = absorption0.Join
 
-      override def Meet: Associative[A] = absorption0.Meet
+      override def Meet: Associative[AndF[A]] = absorption0.Meet
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
@@ -37,9 +38,9 @@ object ComplementEqual {
 
       override def complement(a: A): A = complement0.complement(a)
 
-      override def Join: Identity[A] = complement0.Join
+      override def Join: Identity[OrF[A]] = complement0.Join
 
-      override def Meet: Identity[A] = complement0.Meet
+      override def Meet: Identity[AndF[A]] = complement0.Meet
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
@@ -57,9 +58,9 @@ object DistributiveJoinMeetEqual {
   ): DistributiveJoinMeetEqual[A] =
     new DistributiveJoinMeetEqual[A] {
 
-      override def Join: Associative[A] = distributiveJoinMeet0.Join
+      override def Join: Associative[OrF[A]] = distributiveJoinMeet0.Join
 
-      override def Meet: Associative[A] = distributiveJoinMeet0.Meet
+      override def Meet: Associative[AndF[A]] = distributiveJoinMeet0.Meet
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
@@ -79,9 +80,9 @@ object InvolutionEqual {
 
       override def complement(a: A): A = involution0.complement(a)
 
-      override def Join: involution0.Join[A] = involution0.Join
+      override def Join: Join[OrF[A]] = involution0.Join
 
-      override def Meet: Associative[A] = involution0.Meet
+      override def Meet: Associative[AndF[A]] = involution0.Meet
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }

@@ -15,7 +15,7 @@ object IdempotentSpec extends DefaultRunnableSpec {
         testM("boolean disjunction")(checkAllLaws(Idempotent)(Gen.boolean.map(Or(_)))),
         testM("boolean conjuction")(checkAllLaws(Idempotent)(Gen.boolean.map(And(_)))),
         testM("option")(checkAllLaws(Idempotent)(Gen.option(anyMaxInt))),
-        testM("set")(checkAllLaws(Idempotent)(Gen.setOf(Gen.anyInt))),
+        testM("set")(checkAllLaws(Idempotent)(Gen.setOf(Gen.anyInt).map(OrF(_)))),
         testM("map")(checkAllLaws(Idempotent)(Gen.mapOf(anyMaxInt, anyMaxInt))),
         testM("tuple2")(checkAllLaws(Idempotent)(anyMaxInt.zip(anyMaxInt))),
         testM("tuple3")(

@@ -1,7 +1,7 @@
 package zio.prelude
 
 import com.github.ghik.silencer.silent
-import zio.prelude.newtypes.{ And, Or, Prod, Sum }
+import zio.prelude.newtypes.{ And, Or, OrF, Prod, Sum }
 import zio.test.laws._
 import zio.test.{ testM, _ }
 
@@ -28,7 +28,7 @@ object AssociativeSpec extends DefaultRunnableSpec {
         testM("list")(checkAllLaws(Associative)(Gen.listOf(Gen.anyInt))),
         testM("vector")(checkAllLaws(Associative)(Gen.vectorOf(Gen.anyInt))),
         testM("map")(checkAllLaws(Associative)(Gen.mapOf(Gen.anyInt, Gen.anyInt.map(Sum(_))))),
-        testM("set")(checkAllLaws(Associative)(Gen.setOf(Gen.anyInt))),
+        testM("set")(checkAllLaws(Associative)(Gen.setOf(Gen.anyInt).map(OrF(_)))),
         testM("tuple2")(checkAllLaws(Associative)(Gen.anyInt.map(Sum(_)).zip(Gen.anyInt.map(Sum(_))))),
         testM("tuple3")(
           checkAllLaws(Associative)(Gen.anyInt.map(Sum(_)).zip(Gen.anyInt.map(Sum(_))).zip(Gen.anyInt.map(Sum(_))))
