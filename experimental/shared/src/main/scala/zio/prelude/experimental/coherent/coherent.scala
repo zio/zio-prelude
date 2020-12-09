@@ -3,11 +3,14 @@ package zio.prelude.experimental.coherent
 import zio.prelude._
 import zio.prelude.experimental._
 
-trait AbsorptionEqual[A] extends Absorption[A, Associative, Associative] with Equal[A]
+trait AbsorptionEqual[A] extends Absorption[A] with Equal[A] {
+  override type Join[x] = Associative[x]
+  override type Meet[x] = Associative[x]
+}
 
 object AbsorptionEqual {
   implicit def derive[A](implicit
-    absorption0: Absorption[A, Associative, Associative],
+    absorption0: Absorption.Aux[A, Associative, Associative],
     equal0: Equal[A]
   ): AbsorptionEqual[A] =
     new AbsorptionEqual[A] {
@@ -20,11 +23,14 @@ object AbsorptionEqual {
     }
 }
 
-trait ComplementEqual[A] extends Complement[A, Identity, Identity] with Equal[A]
+trait ComplementEqual[A] extends Complement[A] with Equal[A] {
+  override type Join[x] = Identity[x]
+  override type Meet[x] = Identity[x]
+}
 
 object ComplementEqual {
   implicit def derive[A](implicit
-    complement0: Complement[A, Identity, Identity],
+    complement0: Complement.Aux[A, Identity, Identity],
     equal0: Equal[A]
   ): ComplementEqual[A] =
     new ComplementEqual[A] {
@@ -39,11 +45,14 @@ object ComplementEqual {
     }
 }
 
-trait DistributiveJoinMeetEqual[A] extends DistributiveJoinMeet[A, Associative, Associative] with Equal[A]
+trait DistributiveJoinMeetEqual[A] extends DistributiveJoinMeet[A] with Equal[A] {
+  override type Join[x] = Associative[x]
+  override type Meet[x] = Associative[x]
+}
 
 object DistributiveJoinMeetEqual {
   implicit def derive[A](implicit
-    distributiveJoinMeet0: DistributiveJoinMeet[A, Associative, Associative],
+    distributiveJoinMeet0: DistributiveJoinMeet.Aux[A, Associative, Associative],
     equal0: Equal[A]
   ): DistributiveJoinMeetEqual[A] =
     new DistributiveJoinMeetEqual[A] {
@@ -56,18 +65,21 @@ object DistributiveJoinMeetEqual {
     }
 }
 
-trait InvolutionEqual[A] extends Involution[A, Associative, Associative] with Equal[A]
+trait InvolutionEqual[A] extends Involution[A] with Equal[A] {
+  override type Join[x] = Associative[x]
+  override type Meet[x] = Associative[x]
+}
 
 object InvolutionEqual {
   implicit def derive[A](implicit
-    involution0: Involution[A, Associative, Associative],
+    involution0: Involution.Aux[A, Associative, Associative],
     equal0: Equal[A]
   ): InvolutionEqual[A] =
     new InvolutionEqual[A] {
 
       override def complement(a: A): A = involution0.complement(a)
 
-      override def Join: Associative[A] = involution0.Join
+      override def Join: involution0.Join[A] = involution0.Join
 
       override def Meet: Associative[A] = involution0.Meet
 

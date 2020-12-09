@@ -5,10 +5,14 @@ import zio.prelude.experimental.coherent.DistributiveJoinMeetEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait DistributiveJoinMeet[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]]
-    extends JoinMeetShape[A, Join, Meet]
+trait DistributiveJoinMeet[A] extends JoinMeetShape[A]
 
 object DistributiveJoinMeet extends Lawful[DistributiveJoinMeetEqual] {
+
+  type Aux[A, +join[x] <: Associative[x], +meet[x] <: Associative[x]] = DistributiveJoinMeet[A] {
+    type Join[x] <: join[x]
+    type Meet[x] <: meet[x]
+  }
 
   /**
    * The join distributiveJoinMeet law states that for the join operator `vvv`, the meet operator `^^^`,
@@ -47,8 +51,8 @@ object DistributiveJoinMeet extends Lawful[DistributiveJoinMeetEqual] {
   /**
    * Summons an implicit `DistributiveJoinMeet[A]`.
    */
-  def apply[A, Join[x] <: Identity[x], Meet[x] <: Associative[x]](implicit
-    distributiveJoinMeet: DistributiveJoinMeet[A, Join, Meet]
-  ): DistributiveJoinMeet[A, Join, Meet] =
+  def apply[A, Join[x] <: Associative[x], Meet[x] <: Associative[x]](implicit
+    distributiveJoinMeet: DistributiveJoinMeet.Aux[A, Join, Meet]
+  ): DistributiveJoinMeet.Aux[A, Join, Meet] =
     distributiveJoinMeet
 }

@@ -5,9 +5,14 @@ import zio.prelude.experimental.coherent.AbsorptionEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Absorption[A, +Join[x] <: Associative[x], +Meet[x] <: Associative[x]] extends JoinMeetShape[A, Join, Meet]
+trait Absorption[A] extends JoinMeetShape[A]
 
 object Absorption extends Lawful[AbsorptionEqual] {
+
+  type Aux[A, +join[x] <: Associative[x], +meet[x] <: Associative[x]] = Absorption[A] {
+    type Join[x] <: join[x]
+    type Meet[x] <: meet[x]
+  }
 
   /**
    * The join absorption law states that for the join operator `vvv`, the meet operator `^^^`,
@@ -46,8 +51,8 @@ object Absorption extends Lawful[AbsorptionEqual] {
   /**
    * Summons an implicit `Absorption[A]`.
    */
-  def apply[A, Join[x] <: Identity[x], Meet[x] <: Associative[x]](implicit
-    absorption: Absorption[A, Join, Meet]
-  ): Absorption[A, Join, Meet] =
+  def apply[A, Join[x] <: Associative[x], Meet[x] <: Associative[x]](implicit
+    absorption: Absorption.Aux[A, Join, Meet]
+  ): Absorption.Aux[A, Join, Meet] =
     absorption
 }

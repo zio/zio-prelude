@@ -5,11 +5,14 @@ import zio.prelude.experimental.coherent.ComplementEqual
 import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
 
-trait Complement[A, +Join[x] <: Identity[x], +Meet[x] <: Identity[x]]
-    extends BottomTopShape[A, Join, Meet]
-    with ComplementShape[A, Join, Meet]
+trait Complement[A] extends BottomTopShape[A] with ComplementShape[A]
 
 object Complement extends Lawful[ComplementEqual] {
+
+  type Aux[A, +join[x] <: Identity[x], +meet[x] <: Identity[x]] = Complement[A] {
+    type Join[x] <: join[x]
+    type Meet[x] <: meet[x]
+  }
 
   /**
    * The join complement law states that for the join operator `vvv`, the top element `1`, complement operator `!`
@@ -22,7 +25,7 @@ object Complement extends Lawful[ComplementEqual] {
   val joinComplementLaw: Laws[ComplementEqual] =
     new Laws.Law1[ComplementEqual]("joinComplementLaw") {
       def apply[A](a: A)(implicit A: ComplementEqual[A]): TestResult =
-        (A.complement(a) vvv a) <-> A.top
+        (!a vvv a) <-> A.top
     }
 
   /**
@@ -49,7 +52,7 @@ object Complement extends Lawful[ComplementEqual] {
    * Summons an implicit `Complement[A]`.
    */
   def apply[A, Join[x] <: Identity[x], Meet[x] <: Identity[x]](implicit
-    complement: Complement[A, Join, Meet]
-  ): Complement[A, Join, Meet] =
+    complement: Complement.Aux[A, Join, Meet]
+  ): Complement.Aux[A, Join, Meet] =
     complement
 }
