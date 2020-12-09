@@ -1,9 +1,14 @@
 package zio.prelude
 
+import zio.Chunk
 import zio.test._
 import zio.test.laws._
 
 object CovariantSpec extends DefaultRunnableSpec {
+  import Fixtures._
+
+  implicit val chunkOptionCovariant: Covariant[ChunkOption] =
+    Covariant[Chunk].compose(Covariant[Option])
 
   def spec: ZSpec[Environment, Failure] =
     suite("CovariantSpec")(
@@ -18,7 +23,8 @@ object CovariantSpec extends DefaultRunnableSpec {
         testM("cause")(checkAllLaws(Covariant)(GenFs.cause, Gen.anyInt)),
         testM("chunk")(checkAllLaws(Covariant)(GenF.chunk, Gen.anyInt)),
         testM("exit")(checkAllLaws(Covariant)(GenFs.exit(Gen.causes(Gen.anyInt, Gen.throwable)), Gen.anyInt)),
-        testM("nonEmptyChunk")(checkAllLaws(Covariant)(GenFs.nonEmptyChunk, Gen.anyInt))
+        testM("nonEmptyChunk")(checkAllLaws(Covariant)(GenFs.nonEmptyChunk, Gen.anyInt)),
+        testM("chunk . option")(checkAllLaws(Covariant)(chunkOptionGenF, Gen.anyInt))
       )
     )
 }

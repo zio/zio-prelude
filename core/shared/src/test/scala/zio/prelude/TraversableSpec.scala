@@ -6,6 +6,7 @@ import zio.test.laws._
 import zio.{ Chunk, NonEmptyChunk, Ref }
 
 object TraversableSpec extends DefaultRunnableSpec {
+  import Fixtures._
 
   val genBoolean: Gen[Random, Boolean] =
     Gen.boolean
@@ -31,6 +32,9 @@ object TraversableSpec extends DefaultRunnableSpec {
   val genIntIntFunction2: Gen[Random, (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
+  implicit val chunkOptionTraversable: Traversable[ChunkOption] =
+    Traversable[Chunk].compose[Option]
+
   def spec: ZSpec[Environment, Failure] =
     suite("TraversableSpec")(
       suite("instances")(
@@ -39,7 +43,8 @@ object TraversableSpec extends DefaultRunnableSpec {
         testM("list")(checkAllLaws(Traversable)(GenF.list, Gen.anyInt)),
         testM("map")(checkAllLaws(Traversable)(GenFs.map(Gen.anyInt), Gen.anyInt)),
         testM("option")(checkAllLaws(Traversable)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt))
+        testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt)),
+        testM("chunk . option")(checkAllLaws(Traversable)(chunkOptionGenF, Gen.anyInt))
       ),
       suite("combinators")(
         testM("contains") {
