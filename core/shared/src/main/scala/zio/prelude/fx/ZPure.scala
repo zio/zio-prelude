@@ -471,9 +471,9 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def runEither(s: S1)(implicit ev: Any <:< R, ev1: CanFail[E]): Either[E, (S2, A)] = {
     val _                                                   = ev
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any]] = Stack()
+    val environments: Stack[AnyRef]                         = Stack()
     var s0: Any                                             = s
     var a: Any                                              = null
-    var r: Any                                              = null
     var failed                                              = false
     var curZPure: ZPure[Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any]]
 
@@ -487,8 +487,6 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
             unwinding = false
           case null                                =>
             unwinding = false
-          case value: ProvideEnd[_, _, _, _, _]    =>
-            r = value.r
           case _                                   =>
         }
     }
@@ -535,24 +533,21 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
           } else
             curZPure = nextInstr(zPure.error)
 
-        case Tags.Fold       =>
+        case Tags.Fold    =>
           val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any]]
           curZPure = zPure.value
           stack.push(zPure)
-        case Tags.Access     =>
+        case Tags.Access  =>
           val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any]]
-          curZPure = zPure.access(r)
-        case Tags.Provide    =>
+          curZPure = zPure.access(environments.peek())
+        case Tags.Provide =>
           val zPure = curZPure.asInstanceOf[Provide[Any, Any, Any, Any, Any]]
-          stack.push(ZPure.ProvideEnd(r))
-          r = zPure.r
-          curZPure = zPure.continue
-        case Tags.ProvideEnd =>
-          val zPure     = curZPure.asInstanceOf[ProvideEnd[Any, Any, Any, Any, Any]]
-          r = zPure.r
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Modify     =>
+          environments.push(zPure.r.asInstanceOf[AnyRef])
+          curZPure = zPure.continue.foldM(
+            e => ZPure.succeed(environments.pop()) *> ZPure.fail(e),
+            a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
+          )
+        case Tags.Modify  =>
           val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any]]
           val updated   = zPure.run0(s0)
           s0 = updated._1
@@ -878,14 +873,13 @@ object ZPure {
     }
 
   object Tags {
-    final val FlatMap    = 0
-    final val Succeed    = 1
-    final val Fail       = 2
-    final val Fold       = 3
-    final val Access     = 4
-    final val Provide    = 5
-    final val Modify     = 6
-    final val ProvideEnd = 7
+    final val FlatMap = 0
+    final val Succeed = 1
+    final val Fail    = 2
+    final val Fold    = 3
+    final val Access  = 4
+    final val Provide = 5
+    final val Modify  = 6
   }
 
   private final case class Succeed[+A](value: A)                     extends ZPure[Any, Nothing, Any, Nothing, A] {
@@ -908,7 +902,7 @@ object ZPure {
     failure: E1 => ZPure[S1, S3, R, E2, B],
     success: A => ZPure[S2, S3, R, E2, B]
   )                                                                  extends ZPure[S1, S3, R, E2, B]
-      with Function[A, ZPure[S2, S3, R, E2, B]]  {
+      with Function[A, ZPure[S2, S3, R, E2, B]] {
     override def tag: Int                             = Tags.Fold
     override def apply(a: A): ZPure[S2, S3, R, E2, B] =
       success(a)
@@ -916,14 +910,8 @@ object ZPure {
   private final case class Access[S1, S2, R, E, A](access: R => ZPure[S1, S2, R, E, A]) extends ZPure[S1, S2, R, E, A] {
     override def tag: Int = Tags.Access
   }
-  private final case class ProvideEnd[S1, S2, R, E, A](r: R)
-      extends ZPure[S1, S2, Any, E, A]
-      with Function[Any, ZPure[S1, S2, R, E, A]] {
-    override def tag: Int                               = Tags.ProvideEnd
-    override def apply(v1: Any): ZPure[S1, S2, R, E, A] = this
-  }
   private final case class Provide[S1, S2, R, E, A](r: R, continue: ZPure[S1, S2, R, E, A])
-      extends ZPure[S1, S2, Any, E, A]           {
+      extends ZPure[S1, S2, Any, E, A]          {
     override def tag: Int = Tags.Provide
   }
 }
