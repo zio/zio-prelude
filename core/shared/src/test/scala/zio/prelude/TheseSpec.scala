@@ -5,7 +5,7 @@ import zio.test.laws._
 
 object TheseSpec extends DefaultRunnableSpec {
 
-  def spec = suite("TheseSpec")(
+  def spec: ZSpec[Environment,Failure] = suite("TheseSpec")(
     suite("laws")(
       testM("associative")(checkAllLaws(Associative)(Gens.these(Gen.chunkOf(Gen.anyInt), Gen.chunkOf(Gen.anyInt)))),
       testM("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.these(Gen.chunkOf(Gen.anyInt)), Gen.anyInt)),
