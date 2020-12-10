@@ -8,7 +8,7 @@ trait DivideShape[A] extends AddMultiplyShape[A] {
   override type Multiplication[x] <: InverseNonZero[x]
 
   def divide(l: => A, r: => A): A =
-    Prod.unwrap(Multiplication.inverse(Prod(l), Prod(r)))
+    Multiplication.inverse(Prod(l), Prod(r))
 }
 
 object DivideShape {

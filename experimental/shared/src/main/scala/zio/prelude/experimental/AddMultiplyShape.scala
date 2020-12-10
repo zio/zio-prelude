@@ -10,10 +10,10 @@ trait AddMultiplyShape[A] {
   type Multiplication[x] <: Associative[x]
 
   def add(l: => A, r: => A): A =
-    Sum.unwrap(Addition.combine(Sum(l), Sum(r)))
+    Addition.combine(Sum(l), Sum(r))
 
   def multiply(l: => A, r: => A): A =
-    Prod.unwrap(Multiplication.combine(Prod(l), Prod(r)))
+    Multiplication.combine(Prod(l), Prod(r))
 
   def Addition: Addition[Sum[A]]
 

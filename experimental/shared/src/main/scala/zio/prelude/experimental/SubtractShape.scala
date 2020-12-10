@@ -8,7 +8,7 @@ trait SubtractShape[A] extends AddMultiplyShape[A] {
   override type Addition[x] <: Inverse[x]
 
   def subtract(l: => A, r: => A): A =
-    Sum.unwrap(Addition.inverse(Sum(l), Sum(r)))
+    Addition.inverse(Sum(l), Sum(r))
 }
 
 object SubtractShape {

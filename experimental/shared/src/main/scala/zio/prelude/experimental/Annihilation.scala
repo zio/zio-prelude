@@ -10,7 +10,7 @@ trait Annihilation[A] extends AddMultiplyShape[A] {
 
   override type Addition[x] <: Identity[x]
 
-  def annihilation: A = Sum.unwrap(Addition.identity)
+  def annihilation: A = Addition.identity
 }
 
 object Annihilation extends Lawful[AnnihilationEqual] {
