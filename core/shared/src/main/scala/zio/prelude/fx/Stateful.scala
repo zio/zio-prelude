@@ -13,6 +13,6 @@ object Stateful {
   implicit def statefulZIO[S]: Stateful[S, ({ type lambda[-R, +E, +A] = ZIO[RefState[S] with R, E, A] })#lambda] =
     ???
 
-  implicit def statefulZPure[S]: Stateful[S, ({ type lambda[-R, +E, +A] = ZPure[S, S, R, E, A] })#lambda] =
+  implicit def statefulZPure[S]: Stateful[S, ({ type lambda[-R, +E, +A] = ZPure[Nothing, S, S, R, E, A] })#lambda] =
     ???
 }

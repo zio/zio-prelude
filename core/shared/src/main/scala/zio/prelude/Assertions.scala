@@ -20,9 +20,11 @@ trait Assertions {
    * specified assertion.
    */
   def isFailureV[E](assertion: Assertion[NonEmptyMultiSet[E]]): Assertion[Validation[E, Any]] =
-    Assertion.assertionRec("isFailureV")(param(assertion))(assertion) {
-      case Validation.Failure(es) => Some(es)
-      case _                      => None
+    Assertion.assertionRec("isFailureV")(param(assertion))(assertion) { validation =>
+      validation.runEitherCause(()) match {
+        case Left(es) => Some(es.toNonEmptyMultiSet)
+        case _        => None
+      }
     }
 
   /**
@@ -58,8 +60,10 @@ trait Assertions {
    * specified assertion.
    */
   def isSuccessV[A](assertion: Assertion[A]): Assertion[Validation[Any, A]] =
-    Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) {
-      case Validation.Success(a) => Some(a)
-      case _                     => None
+    Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) { validation =>
+      validation.runEither(()) match {
+        case Right(a) => Some(a._2)
+        case _        => None
+      }
     }
 }

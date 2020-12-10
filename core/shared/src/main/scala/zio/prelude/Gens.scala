@@ -25,7 +25,7 @@ object Gens {
    */
   def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
     Gen.either(Gen.setOf1(e), a).map {
-      case Left(es) => Validation.Failure(NonEmptyMultiSet.fromIterableOption(es).get)
-      case Right(a) => Validation.Success(a)
+      case Left(es) => Validation.halt(Validation.Cause.fromSet(es).get)
+      case Right(a) => Validation.succeed(a)
     }
 }

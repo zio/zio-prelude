@@ -36,17 +36,23 @@ package object prelude
 
   type AnyF[_] = Any
 
-  type EState[S, +E, +A] = zio.prelude.fx.ZPure[S, S, Any, E, A]
+  type EState[S, +E, +A] = zio.prelude.fx.ZPure[Nothing, S, S, Any, E, A]
   val EState: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type State[S, +A] = zio.prelude.fx.ZPure[S, S, Any, Nothing, A]
+  type State[S, +A] = zio.prelude.fx.ZPure[Nothing, S, S, Any, Nothing, A]
   val State: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type Reader[-R, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, Nothing, A]
+  type Reader[-R, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, R, Nothing, A]
   val Reader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, E, A]
+  type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, R, E, A]
   val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type ZValidation[+W, +E, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, E, A]
+  val ZValidation: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type Validation[+E, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, Any, E, A]
+  val Validation: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
   type MultiSet[+A] = ZSet[A, Int]
   val MultiSet: ZSet.type = ZSet
