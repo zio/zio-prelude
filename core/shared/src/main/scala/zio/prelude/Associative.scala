@@ -1315,30 +1315,30 @@ trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
    * Provides infix syntax for combining two values with an associative
    * operation.
    */
-  implicit class AssociativeOps[A](l: A) {
+  implicit class AssociativeOps[+A](l: A) {
 
     /**
      * A symbolic alias for `combine`.
      */
-    def <>(r: => A)(implicit associative: Associative[A]): A =
+    def <>[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
      * Associatively combines this value with the specified value
      */
-    def combine(r: => A)(implicit associative: Associative[A]): A =
+    def combine[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
      * Associatively repeats value 'n' times
      */
-    def repeat(n: Int)(implicit associative: Associative[A]): A =
+    def repeat[A1 >: A](n: Int)(implicit associative: Associative[A1]): A1 =
       associative.repeat(l)(n)
 
     /**
      * Associatively multiplies value 'n' times
      */
-    def multiplyOption(n: Int)(implicit associative: Associative[A]): Option[A] =
+    def multiplyOption[A1 >: A](n: Int)(implicit associative: Associative[A1]): Option[A1] =
       associative.multiplyOption(n)(l)
   }
 

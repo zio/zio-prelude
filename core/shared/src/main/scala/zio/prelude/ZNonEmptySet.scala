@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.NonEmptyChunk
 import zio.prelude.newtypes.{ Max, Prod, Sum }
 
 import scala.language.implicitConversions
@@ -170,6 +171,14 @@ object ZNonEmptySet {
   def fromIterableOption[A](elems: Iterable[A]): Option[NonEmptyMultiSet[A]] =
     if (elems.isEmpty) None
     else Some(new ZNonEmptySet(ZSet.fromIterable(elems)))
+
+  /**
+   * Constructs a set from the specified `NonEmptyChunk`. The measure of how
+   * many times a value occurs in the set will be an integer representing how
+   * many times the value occurred in the specified `Iterable`.
+   */
+  def fromNonEmptyChunk[A](nonEmptyChunk: NonEmptyChunk[A]): NonEmptyMultiSet[A] =
+    new ZNonEmptySet(ZSet.fromIterable(nonEmptyChunk))
 
   /**
    * Constructs a set from the specified `Set`. The measure of how many times
