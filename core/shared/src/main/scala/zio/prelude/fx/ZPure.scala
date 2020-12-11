@@ -751,6 +751,8 @@ object ZPure {
       self zipParRight that
     def zipPar[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                   =
       self.zipWithPar(that)((_, _))
+    def zipPar0[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                  =
+      self.zipWithPar(that)((_, _))
     def zipParLeft[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                    =
       self.zipWithPar(that)((a, _) => a)
     def zipParRight[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                   =
@@ -1035,4 +1037,17 @@ object ZPure {
         case (Some(cause), e) => Some(Cause.Both(cause, Cause.Fail(e)))
       }
   }
+}
+
+trait LowPriorityZPureImplicits {
+
+  /**
+   * The `CommutativeBoth` instance for `ZPure`.
+   */
+  implicit def ZPureCommutativeBoth[W, S, R, E]
+    : CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
+    new CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
+      def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
+        fa.zipPar(fb)
+    }
 }

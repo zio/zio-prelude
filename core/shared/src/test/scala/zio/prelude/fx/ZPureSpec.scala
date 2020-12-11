@@ -749,8 +749,8 @@ object ZPureSpec extends DefaultRunnableSpec {
             if (age >= 18) Validation.succeed(age) else Validation.fail("Under age")
           def validateAuthorized(authorized: Boolean): Validation[String, Unit] =
             if (authorized) Validation.unit else Validation.fail("Not authorized")
-          val validation                                                        = validateName("Jane Doe") <&>
-            validateAge(17) <&>
+          val validation                                                        = validateName("Jane Doe") zipPar0
+            validateAge(17) zipPar0
             validateAuthorized(false)
           val result                                                            = validation.runEitherCause(()) match {
             case Left(errors) => Some(errors.toNonEmptyMultiSet.toSet)
