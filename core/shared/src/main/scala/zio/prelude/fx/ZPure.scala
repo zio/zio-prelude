@@ -10,11 +10,12 @@ import scala.util.Try
 import scala.util.control.NonFatal
 
 /**
- * `ZPure[S1, S2, W, R, E, A]` is a purely functional description of a computation
- * that requires an environment `R` and an initial state `S1` and may either
- * fail with an `E` or succeed with an updated state `S2` and an `A`. Because
- * of its polymorphism `ZPure` can be used to model a variety of effects
- * including context, state, and failure.
+ * `ZPure[W, S1, S2, R, E, A]` is a purely functional description of a
+ * computation that requires an environment `R` and an initial state `S1` and
+ * may either fail with an `E` or succeed with an updated state `S2` and an `A`
+ * along with in either case a log with entries of type `W`. Because of its
+ * polymorphism `ZPure` can be used to model a variety of effects including
+ * context, state, failure, and logging.
  */
 
 sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
@@ -29,7 +30,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self zip that
 
   /**
-   * A symbolic alias for `zip`.
+   * Splits the environment, providing the first part to this computaiton and
+   * the second part to that computation.
    */
   final def ***[W1 >: W, S3, R1, E1 >: E, B](
     that: ZPure[W1, S2, S3, R1, E1, B]
@@ -67,12 +69,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self zip that
 
   /**
-   * A symbolic alias for `log`.
-   */
-  final def ??[W1 >: W](w: W1): ZPure[W1, S1, S2, R, E, A] =
-    self.log(w)
-
-  /**
    * A symbolic alias for `orElseEither`.
    */
   final def <+>[W1 >: W, S0 <: S1, S3 >: S2, R1 <: R, E1, B](
@@ -105,6 +101,12 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def >>>[W1 >: W, S3, E1 >: E, B](that: ZPure[W1, S2, S3, A, E1, B]): ZPure[W1, S1, S3, R, E1, B] =
     self andThen that
+
+  /**
+   * A symbolic alias for `log`.
+   */
+  final def ??[W1 >: W](w: W1): ZPure[W1, S1, S2, R, E, A] =
+    self.log(w)
 
   /**
    * Runs this computation if the provided environment is a `Left` or else
@@ -143,16 +145,16 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     map(Some(_))
 
   /**
-   * Maps the output state to a constant value
-   */
-  final def asState[S3](s: S3): ZPure[W, S1, S3, R, E, A] =
-    mapState(_ => s)
-
-  /**
    * Maps the error value of this computation to the optional value.
    */
   final def asSomeError(implicit ev: CanFail[E]): ZPure[W, S1, S2, R, Option[E], A] =
     mapError(Some(_))
+
+  /**
+   * Maps the output state to a constant value
+   */
+  final def asState[S3](s: S3): ZPure[W, S1, S3, R, E, A] =
+    mapState(_ => s)
 
   /**
    * Returns a computation whose error and success channels have been mapped
@@ -740,18 +742,20 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
 object ZPure {
 
-  implicit final class ValidationSyntax[W, R, E, A](private val self: ZPure[W, Unit, Unit, R, E, A]) extends AnyVal {
-    def <&>[S3, B](
-      that: ZPure[W, Unit, Unit, R, E, B]
-    ): ZPure[W, Unit, Unit, R, E, (A, B)]            =
+  implicit final class UnifiedSyntax[W, S, R, E, A](private val self: ZPure[W, S, S, R, E, A]) extends AnyVal {
+    def <&>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                      =
       self zipPar that
-    def zipPar[S3, B](
-      that: ZPure[W, Unit, Unit, R, E, B]
-    ): ZPure[W, Unit, Unit, R, E, (A, B)]            =
+    def <&[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                            =
+      self zipParLeft that
+    def &>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                            =
+      self zipParRight that
+    def zipPar[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                   =
       self.zipWithPar(that)((_, _))
-    def zipWithPar[B, C](
-      that: ZPure[W, Unit, Unit, R, E, B]
-    )(f: (A, B) => C): ZPure[W, Unit, Unit, R, E, C] =
+    def zipParLeft[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                    =
+      self.zipWithPar(that)((a, _) => a)
+    def zipParRight[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                   =
+      self.zipWithPar(that)((_, b) => b)
+    def zipWithPar[B, C](that: ZPure[W, S, S, R, E, B])(f: (A, B) => C): ZPure[W, S, S, R, E, C] =
       self.foldCauseM(
         c1 =>
           that.foldCauseM(
@@ -791,7 +795,13 @@ object ZPure {
   def first[S, A]: ZPure[Nothing, S, S, (A, Any), Nothing, A] =
     fromFunction(_._1)
 
-  def fromAssert[A](value: A)(assertion: Assertion[A]): Validation[String, A] =
+  /**
+   * Constructs a computation from a value and an assertion about that value.
+   * The resulting computation will be a success if the value satisfies the
+   * assertion or else will contain a string rendering describing how the
+   * value did not satisfy the assertion.
+   */
+  def fromAssert[S, A](value: A)(assertion: Assertion[A]): ZPure[Nothing, S, S, Any, String, A] =
     if (assertion.test(value)) succeed(value)
     else fail(s"$value did not satisfy ${assertion.render}")
 
