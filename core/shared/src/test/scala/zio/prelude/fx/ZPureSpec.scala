@@ -726,8 +726,14 @@ object ZPureSpec extends DefaultRunnableSpec {
                 positive <- zpure2 if positive > 0
               } yield positive
               assert(program.runEither(())) {
-                implicit val eq: Equal[Throwable] = Equal.ThrowableHash
-                isLeft(equalTo(new NoSuchElementException("The value doesn't satisfy the predicate")))
+                implicit val eq: Equal[RuntimeException] = Equal.ThrowableHash
+                isLeft(
+                  equalTo(
+                    new NoSuchElementException(
+                      "The value doesn't satisfy the predicate"
+                    ): RuntimeException // upcast to RuntimeException because of Dotty
+                  )
+                )
               }
             }
           )
