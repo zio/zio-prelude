@@ -88,6 +88,29 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
             }
           },
+          testM("filterOrElse") {
+            check(genInt, genInt, genInt, genInt, genInt) { (s1, s2, s3, a1, a2) =>
+              val z = ZPure.succeed[Int, Int](a1).asState(s2)
+              val f = (_: Int) => ZPure.succeed(a2).asState(s3)
+              assert(z.filterOrElse(_ => true)(f).run(s1))(equalTo((s2, a1))) &&
+              assert(z.filterOrElse(_ => false)(f).run(s1))(equalTo((s3, a2)))
+            }
+          },
+          testM("filterOrElse_") {
+            check(genInt, genInt, genInt, genInt, genInt) { (s1, s2, s3, a1, a2) =>
+              val z1 = ZPure.succeed[Int, Int](a1).asState(s2)
+              val z2 = ZPure.succeed(a2).asState(s3)
+              assert(z1.filterOrElse_(_ => true)(z2).run(s1))(equalTo((s2, a1))) &&
+              assert(z1.filterOrElse_(_ => false)(z2).run(s1))(equalTo((s3, a2)))
+            }
+          },
+          testM("filterOrFail") {
+            check(genInt, genInt) { (a, e) =>
+              val z = ZPure.succeed[Unit, Int](a)
+              assert(z.filterOrFail(_ => true)(e).runEither(()))(isRight(equalTo(((), a)))) &&
+              assert(z.filterOrFail(_ => false)(e).runEither(()))(isLeft(equalTo(e)))
+            }
+          },
           testM("flatMap") {
             check(genState, genIntToState, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)

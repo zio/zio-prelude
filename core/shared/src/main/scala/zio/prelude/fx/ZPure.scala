@@ -206,6 +206,32 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Applies the specified function if the predicate fails.
+   */
+  final def filterOrElse[S3 >: S2, R1 <: R, E1 >: E, A1 >: A](
+    p: A => Boolean
+  )(f: A => ZPure[S2, S3, R1, E1, A1]): ZPure[S1, S3, R1, E1, A1] =
+    self.flatMap {
+      case v if !p(v) => f(v)
+      case v          => ZPure.succeed(v)
+    }
+
+  /**
+   * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
+   * to apply if the predicate fails.
+   */
+  final def filterOrElse_[S3 >: S2, R1 <: R, E1 >: E, A1 >: A](p: A => Boolean)(
+    zPure: => ZPure[S2, S3, R1, E1, A1]
+  ): ZPure[S1, S3, R1, E1, A1] =
+    filterOrElse[S3, R1, E1, A1](p)(_ => zPure)
+
+  /**
+   * Fails with the specified error if the predicate fails.
+   */
+  final def filterOrFail[E1 >: E](p: A => Boolean)(e: => E1): ZPure[S1, S2, R, E1, A] =
+    filterOrElse_[S2, R, E1, A](p)(ZPure.fail(e))
+
+  /**
    * Extends this computation with another computation that depends on the
    * result of this computation by running the first computation, using its
    * result to generate a second computation, and running that computation.
