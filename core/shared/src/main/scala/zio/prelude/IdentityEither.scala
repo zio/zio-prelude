@@ -63,45 +63,10 @@ object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvaria
 
 trait IdentityEitherSyntax {
 
-  /**
-   * Provides infix syntax for identity operations for invariant types.
-   */
-  implicit class IdentityEitherOps[F[_], A](fa: => F[A]) {
+  implicit class IdentityEitherAnyOps[A](nothing: => Nothing) {
 
-    /**
-     * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[Either[A, B]]`.
-     */
-    def orElseEitherIdentity[B](fb: => F[B])(implicit either: IdentityEither[F]): F[Either[A, B]] =
-      either.either(fa, fb)
+    def fail[F[-_]](implicit either: IdentityEither[F], contravariant: Contravariant[F]): F[A] =
+      contravariant.contramap[Nothing, A](_ => nothing)(either.none)
   }
 
-  /**
-   * Provides infix syntax for identity operations for covariant types.
-   */
-  implicit class IdentityEitherCovariantOps[F[+_], A](fa: => F[A]) {
-
-    /**
-     * Combines two values of types `F[A]` and `F[A]` to produce an
-     * `F[Either[A, A]]` and then merges the result.
-     */
-    def orElseIdentity(fa2: => F[A])(implicit either: IdentityEither[F], covariant: Covariant[F]): F[A] =
-      either.either(fa, fa2).map(_.merge)
-  }
-
-  /**
-   * Provides infix syntax for identity operations for contravariant types.
-   */
-  implicit class IdentityEitherContravariantOps[F[-_], A](fa: => F[A]) {
-
-    /**
-     * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[Either[A, B]]` and then contramaps the result with the specified
-     * function.
-     */
-    def eitherWithIdentity[B, C](
-      fb: => F[B]
-    )(f: C => Either[A, B])(implicit either: IdentityEither[F], contravariant: Contravariant[F]): F[C] =
-      either.either(fa, fb).contramap(f)
-  }
 }
