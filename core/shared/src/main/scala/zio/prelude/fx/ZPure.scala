@@ -94,6 +94,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     self andThen that
 
   /**
+   * A symbolic alias for `join`.
    * Runs this computation if the provided environment is a `Left` or else
    * runs that computation if the provided environment is a `Right`, unifying
    * the result to a common supertype.
@@ -101,7 +102,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def |||[S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
     that: ZPure[S0, S3, R1, E1, A1]
   ): ZPure[S0, S3, Either[R, R1], E1, A1] =
-    ZPure.accessM(_.fold(self.provide, that.provide))
+    self join that
 
   /**
    * Submerges the error case of an `Either` into the error type of this
@@ -260,6 +261,16 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     )
 
   /**
+   * Runs this computation if the provided environment is a `Left` or else
+   * runs that computation if the provided environment is a `Right`, unifying
+   * the result to a common supertype.
+   */
+  final def join[S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
+    that: ZPure[S0, S3, R1, E1, A1]
+  ): ZPure[S0, S3, Either[R, R1], E1, A1] =
+    ZPure.accessM(_.fold(self.provide, that.provide))
+
+  /**
    * Returns a successful computation if the value is `Left`, or fails with error `None`.
    */
   final def left[B, C](implicit ev: A <:< Either[B, C]): ZPure[S1, S2, R, Option[E], B] =
@@ -317,6 +328,21 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def mapState[S3](f: S2 => S3): ZPure[S1, S3, R, E, A] =
     self <* update(f)
+
+  /**
+   * Negates the boolean value of this computation.
+   */
+  final def negate(implicit ev: A <:< Boolean): ZPure[S1, S2, R, E, Boolean] =
+    map(!_)
+
+  /**
+   * Requires the value of this computation to be `None`, otherwise fails with `None`.
+   */
+  final def none[B](implicit ev: A <:< Option[B]): ZPure[S1, S2, R, Option[E], Unit] =
+    self.foldM(
+      e => ZPure.fail(Some(e)),
+      a => a.fold[ZPure[S2, S2, R, Option[E], Unit]](ZPure.succeed(()))(_ => ZPure.fail(None))
+    )
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
@@ -693,6 +719,12 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
       e => ZPure.fail(ev2(e)),
       a => ev(a).fold(_ => ZPure.fail(new NoSuchElementException("Either.right.get on Left")), ZPure.succeed)
     )
+
+  /**
+   * Maps the value of this computation to unit.
+   */
+  final def unit: ZPure[S1, S2, R, E, Unit] = as(())
+
 }
 
 object ZPure {
