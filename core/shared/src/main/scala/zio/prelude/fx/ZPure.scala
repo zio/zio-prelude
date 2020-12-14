@@ -1031,7 +1031,8 @@ object ZPure {
         ffa.flatten
     }
 
-  implicit final class ZPureWithFilterOps[W, S1, S2, R, E, A](private val self: ZPure[W, S1, S2, R, E, A]) extends AnyVal {
+  implicit final class ZPureWithFilterOps[W, S1, S2, R, E, A](private val self: ZPure[W, S1, S2, R, E, A])
+      extends AnyVal {
 
     /**
      * Enables to check conditions in the value produced by ZPure
