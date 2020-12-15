@@ -215,8 +215,9 @@ object PartialOrd extends Lawful[PartialOrd] {
   implicit def ChunkPartialOrd[A: PartialOrd]: PartialOrd[Chunk[A]] =
     makeFrom(
       { (l, r) =>
-        val j = l.length
-        val k = r.length
+        val j           = l.length
+        val k           = r.length
+        val PartialOrdA = PartialOrd[A]
 
         @tailrec
         def loop(i: Int): PartialOrdering =
@@ -224,7 +225,7 @@ object PartialOrd extends Lawful[PartialOrd] {
           else if (i == j) Ordering.LessThan
           else if (i == k) Ordering.GreaterThan
           else {
-            val compare = PartialOrd[A].compare(l(i), r(i))
+            val compare = PartialOrdA.compare(l(i), r(i))
             if (compare.isEqual) loop(i + 1) else compare
           }
 
@@ -277,19 +278,22 @@ object PartialOrd extends Lawful[PartialOrd] {
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def MapPartialOrd[A, B: PartialOrd]: PartialOrd[Map[A, B]] =
-    PartialOrd.make { (l, r) =>
-      def compareValues(lesserMap: Map[A, B], expected: Ordering): PartialOrdering =
-        lesserMap.keys.map(k => l(k) =??= r(k)).fold(expected)(_.reduce(_))
-      if (l.keySet == r.keySet) {
-        compareValues(l, Ordering.Equals)
-      } else if (l.keySet.subsetOf(r.keySet)) {
-        compareValues(l, Ordering.LessThan)
-      } else if (r.keySet.subsetOf(l.keySet)) {
-        compareValues(r, Ordering.GreaterThan)
-      } else {
-        PartialOrdering.NoOrder
-      }
-    }
+    PartialOrd.makeFrom(
+      { (l, r) =>
+        def compareValues(lesserMap: Map[A, B], expected: Ordering): PartialOrdering =
+          lesserMap.keys.map(k => l(k) =??= r(k)).fold(expected)(_.reduce(_))
+        if (l.keySet == r.keySet) {
+          compareValues(l, Ordering.Equals)
+        } else if (l.keySet.subsetOf(r.keySet)) {
+          compareValues(l, Ordering.LessThan)
+        } else if (r.keySet.subsetOf(l.keySet)) {
+          compareValues(r, Ordering.GreaterThan)
+        } else {
+          PartialOrdering.NoOrder
+        }
+      },
+      Equal.MapEqual
+    )
 
   /**
    * Derives an `PartialOrd[NonEmptyChunk[A]]` given an `PartialOrd[A]`.
@@ -859,21 +863,26 @@ object PartialOrd extends Lawful[PartialOrd] {
    * Derives an `PartialOrd[Vector[A]]` given an `PartialOrd[A]`.
    */
   implicit def VectorPartialOrd[A: PartialOrd]: PartialOrd[Vector[A]] =
-    make { (l, r) =>
-      val j = l.length
-      val k = r.length
+    makeFrom(
+      { (l, r) =>
+        val j           = l.length
+        val k           = r.length
+        val PartialOrdA = PartialOrd[A]
 
-      def loop(i: Int): PartialOrdering =
-        if (i == j && i == k) Ordering.Equals
-        else if (i == j) Ordering.LessThan
-        else if (i == k) Ordering.GreaterThan
-        else {
-          val compare = PartialOrd[A].compare(l(i), r(i))
-          if (compare.isEqual) loop(i + 1) else compare
-        }
+        @tailrec
+        def loop(i: Int): PartialOrdering =
+          if (i == j && i == k) Ordering.Equals
+          else if (i == j) Ordering.LessThan
+          else if (i == k) Ordering.GreaterThan
+          else {
+            val compare = PartialOrdA.compare(l(i), r(i))
+            if (compare.isEqual) loop(i + 1) else compare
+          }
 
-      loop(0)
-    }
+        loop(0)
+      },
+      Equal.VectorEqual
+    )
 }
 
 trait PartialOrdSyntax {

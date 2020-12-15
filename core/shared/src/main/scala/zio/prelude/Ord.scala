@@ -192,18 +192,17 @@ object Ord extends Lawful[Ord] {
    * first compare the values for reference equality and then compare the
    * values using the specified function.
    */
-  def make[A](ord: (A, A) => Ordering): Ord[A] = new Ord[A] {
-    override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
-  }
+  def make[A](ord: (A, A) => Ordering): Ord[A] =
+    (l: A, r: A) => ord(l, r)
 
   /**
    * Constructs an instance from an `ord` function and a `equal0` function.
    * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
    */
-  def makeFrom[A](ord: (A, A) => Ordering, partialOrd: PartialOrd[A]): Ord[A] =
+  def makeFrom[A](ord: (A, A) => Ordering, equal0: Equal[A]): Ord[A] =
     new Ord[A] {
       override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
-      override protected def checkEqual(l: A, r: A): Boolean    = partialOrd.equal(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean    = equal0.equal(l, r)
     }
 
   /**
@@ -218,8 +217,9 @@ object Ord extends Lawful[Ord] {
   implicit def ChunkOrd[A: Ord]: Ord[Chunk[A]] =
     makeFrom(
       { (l, r) =>
-        val j = l.length
-        val k = r.length
+        val j    = l.length
+        val k    = r.length
+        val OrdA = Ord[A]
 
         @tailrec
         def loop(i: Int): Ordering =
@@ -227,7 +227,7 @@ object Ord extends Lawful[Ord] {
           else if (i == j) Ordering.LessThan
           else if (i == k) Ordering.GreaterThan
           else {
-            val compare = Ord[A].compare(l(i), r(i))
+            val compare = OrdA.compare(l(i), r(i))
             if (compare.isEqual) loop(i + 1) else compare
           }
 
@@ -810,22 +810,26 @@ object Ord extends Lawful[Ord] {
    * Derives an `Ord[Vector[A]]` given an `Ord[A]`.
    */
   implicit def VectorOrd[A: Ord]: Ord[Vector[A]] =
-    make { (l, r) =>
-      val j = l.length
-      val k = r.length
+    makeFrom(
+      { (l, r) =>
+        val j    = l.length
+        val k    = r.length
+        val OrdA = Ord[A]
 
-      @tailrec
-      def loop(i: Int): Ordering =
-        if (i == j && i == k) Ordering.Equals
-        else if (i == j) Ordering.LessThan
-        else if (i == k) Ordering.GreaterThan
-        else {
-          val compare = Ord[A].compare(l(i), r(i))
-          if (compare.isEqual) loop(i + 1) else compare
-        }
+        @tailrec
+        def loop(i: Int): Ordering =
+          if (i == j && i == k) Ordering.Equals
+          else if (i == j) Ordering.LessThan
+          else if (i == k) Ordering.GreaterThan
+          else {
+            val compare = OrdA.compare(l(i), r(i))
+            if (compare.isEqual) loop(i + 1) else compare
+          }
 
-      loop(0)
-    }
+        loop(0)
+      },
+      PartialOrd.VectorPartialOrd
+    )
 }
 
 trait OrdSyntax {
