@@ -63,10 +63,11 @@ object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvaria
 
 trait IdentityEitherSyntax {
 
-  implicit class IdentityEitherAnyOps[A](nothing: => Nothing) {
+  implicit class IdentityEitherAnyOps(a: Any) {
 
-    def fail[F[-_]](implicit either: IdentityEither[F], contravariant: Contravariant[F]): F[A] =
-      contravariant.contramap[Nothing, A](_ => nothing)(either.none)
+    /** Ignores its argument and returns a "failed" `F` */
+    def fail[F[_]](implicit either: IdentityEither[F]): F[Nothing] =
+      either.none
   }
 
 }
