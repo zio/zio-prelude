@@ -31,7 +31,7 @@ sealed trait Cause[+E] { self =>
    * other failures that have occurred.
    */
   @tailrec
-  def failure: E =
+  final def failure: E =
     self match {
       case Cause.Both(left, _) => left.failure
       case Cause.Then(left, _) => left.failure
