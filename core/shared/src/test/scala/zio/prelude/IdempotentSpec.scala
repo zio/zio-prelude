@@ -11,15 +11,6 @@ object IdempotentSpec extends DefaultRunnableSpec {
 
   val anyMaxInt: Gen[Random, Max[Int]] = Gen.anyInt.map(Max(_))
 
-  val anyPartialOrdering: Gen[Random, PartialOrdering] = Gen.anyInt.map { n =>
-    abs(n) % 4 match {
-      case 0 => Ordering.LessThan
-      case 1 => Ordering.Equals
-      case 2 => Ordering.GreaterThan
-      case 3 => PartialOrdering.NoOrder
-    }
-  }
-
   val anyOrdering: Gen[Random, Ordering] = Gen.anyInt.map { n =>
     abs(n) % 3 match {
       case 0 => Ordering.LessThan
@@ -40,7 +31,7 @@ object IdempotentSpec extends DefaultRunnableSpec {
         testM("tuple3")(
           checkAllLaws(Idempotent)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt).map { case ((x, y), z) => (x, y, z) })
         ),
-        testM("partial ordering")(checkAllLaws(Idempotent)(anyPartialOrdering)),
+        testM("partial ordering")(checkAllLaws(Idempotent)(Gen.option(anyOrdering))),
         testM("ordering")(checkAllLaws(Idempotent)(anyOrdering))
       ),
       test("Idempotent.reduceIdempotent") {

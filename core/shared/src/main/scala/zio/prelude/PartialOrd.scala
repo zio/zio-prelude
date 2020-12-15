@@ -17,16 +17,19 @@ trait PartialOrd[-A] extends Equal[A] { self =>
   /**
    * Returns the result of comparing two values of type `A`.
    */
-  def compare(l: A, r: A): PartialOrdering =
-    if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
+  final def compareOption(l: A, r: A): Option[Ordering] =
+    if (Equal.refEq(l, r)) Some(Ordering.Equals) else checkCompareOption(l, r)
 
   /**
-   * Returns the result of comparing two values of type `A`.
+   * Returns the result of comparing two values of type `A` or `None`, if there is no order defined between `l` and `r`.
    */
-  protected def checkCompare(l: A, r: A): PartialOrdering
+  protected def checkCompareOption(l: A, r: A): Option[Ordering]
 
   override protected def checkEqual(l: A, r: A): Boolean =
-    compare(l, r).isEqual
+    compareOption(l, r) match {
+      case Some(Ordering.Equals) => true
+      case _                     => false
+    }
 
   /**
    * Constructs an `PartialOrd[(A, B)]` given an `PartialOrd[A]` and `PartialOrd[B]` by first
@@ -45,7 +48,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
   final def bothWith[B, C](that: => PartialOrd[B])(f: C => (A, B)): PartialOrd[C] =
     PartialOrd.make { (c1, c2) =>
       (f(c1), f(c2)) match {
-        case ((a1, b1), (a2, b2)) => self.compare(a1, a2) <> that.compare(b1, b2)
+        case ((a1, b1), (a2, b2)) => self.compareOption(a1, a2) <> that.compareOption(b1, b2)
       }
     }
 
@@ -55,7 +58,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
    * an `A` and compare the `A` values.
    */
   override def contramap[B](f: B => A): PartialOrd[B] =
-    PartialOrd.make((b1, b2) => compare(f(b1), f(b2)))
+    PartialOrd.make((b1, b2) => compareOption(f(b1), f(b2)))
 
   /**
    * Constructs an `PartialOrd[Either[A, B]]` given an `PartialOrd[A]` and an `PartialOrd[B]`. If
@@ -76,10 +79,10 @@ trait PartialOrd[-A] extends Equal[A] { self =>
   final def eitherWith[B, C](that: => PartialOrd[B])(f: C => Either[A, B]): PartialOrd[C] =
     PartialOrd.make { (c1, c2) =>
       (f(c1), f(c2)) match {
-        case (Left(a1), Left(a2))   => self.compare(a1, a2)
-        case (Left(_), Right(_))    => Ordering.LessThan
-        case (Right(_), Left(_))    => Ordering.GreaterThan
-        case (Right(b1), Right(b2)) => that.compare(b1, b2)
+        case (Left(a1), Left(a2))   => self.compareOption(a1, a2)
+        case (Left(_), Right(_))    => Some(Ordering.LessThan)
+        case (Right(_), Left(_))    => Some(Ordering.GreaterThan)
+        case (Right(b1), Right(b2)) => that.compareOption(b1, b2)
       }
     }
 
@@ -87,8 +90,8 @@ trait PartialOrd[-A] extends Equal[A] { self =>
    * Constructs a new `PartialOrd[A]` by mapping the result of this ordering using the
    * specified function.
    */
-  final def mapPartialOrdering(f: PartialOrdering => PartialOrdering): PartialOrd[A] =
-    PartialOrd.make((l, r) => f(compare(l, r)))
+  final def mapPartialOrdering(f: Option[Ordering] => Option[Ordering]): PartialOrd[A] =
+    PartialOrd.make((l, r) => f(compareOption(l, r)))
 
 }
 
@@ -140,7 +143,7 @@ object PartialOrd extends Lawful[PartialOrd] {
   val eqConsistencyLaw: Laws[PartialOrd] =
     new Laws.Law2[PartialOrd]("eqConsistencyLaw") {
       def apply[A: PartialOrd](a1: A, a2: A): TestResult =
-        ((a1 =??= a2) isEqualTo Ordering.Equals) <==> ((a1 === a2) isEqualTo true)
+        ((a1 =??= a2) isEqualTo Some(Ordering.Equals)) <==> ((a1 === a2) isEqualTo true)
     }
 
   /**
@@ -196,17 +199,17 @@ object PartialOrd extends Lawful[PartialOrd] {
    * first compare the values for reference equality and then compare the
    * values using the specified function.
    */
-  def make[A](ord: (A, A) => PartialOrdering): PartialOrd[A] =
+  def make[A](ord: (A, A) => Option[Ordering]): PartialOrd[A] =
     (l, r) => ord(l, r)
 
   /**
    * Constructs an instance from an `ord` function and a `equal0` function.
    * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
    */
-  def makeFrom[A](ord: (A, A) => PartialOrdering, equal0: Equal[A]): PartialOrd[A] =
+  def makeFrom[A](ord: (A, A) => Option[Ordering], equal0: Equal[A]): PartialOrd[A] =
     new PartialOrd[A] {
-      override protected def checkCompare(l: A, r: A): PartialOrdering = ord(l, r)
-      override protected def checkEqual(l: A, r: A): Boolean           = equal0.equal(l, r)
+      override protected def checkCompareOption(l: A, r: A): Option[Ordering] = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean                  = equal0.equal(l, r)
     }
 
   /**
@@ -220,14 +223,15 @@ object PartialOrd extends Lawful[PartialOrd] {
         val PartialOrdA = PartialOrd[A]
 
         @tailrec
-        def loop(i: Int): PartialOrdering =
-          if (i == j && i == k) Ordering.Equals
-          else if (i == j) Ordering.LessThan
-          else if (i == k) Ordering.GreaterThan
-          else {
-            val compare = PartialOrdA.compare(l(i), r(i))
-            if (compare.isEqual) loop(i + 1) else compare
-          }
+        def loop(i: Int): Option[Ordering] =
+          if (i == j && i == k) Some(Ordering.Equals)
+          else if (i == j) Some(Ordering.LessThan)
+          else if (i == k) Some(Ordering.GreaterThan)
+          else
+            PartialOrdA.compareOption(l(i), r(i)) match {
+              case Some(Ordering.Equals) => loop(i + 1)
+              case compareOption         => compareOption
+            }
 
         loop(0)
       },
@@ -247,8 +251,8 @@ object PartialOrd extends Lawful[PartialOrd] {
     makeFrom(
       {
         case (Left(a1), Left(a2))   => a1 =??= a2
-        case (Left(_), Right(_))    => Ordering.LessThan
-        case (Right(_), Left(_))    => Ordering.GreaterThan
+        case (Left(_), Right(_))    => Some(Ordering.LessThan)
+        case (Right(_), Left(_))    => Some(Ordering.GreaterThan)
         case (Right(b1), Right(b2)) => b1 =??= b2
       },
       Equal.EitherEqual
@@ -258,16 +262,19 @@ object PartialOrd extends Lawful[PartialOrd] {
    * Derives an `PartialOrd[List[A]]` given an `PartialOrd[A]`.
    */
   implicit def ListPartialOrd[A: PartialOrd]: PartialOrd[List[A]] = {
+    val PartialOrdA = PartialOrd[A]
 
     @tailrec
-    def loop(left: List[A], right: List[A]): PartialOrdering =
+    def loop(left: List[A], right: List[A]): Option[Ordering] =
       (left, right) match {
-        case (Nil, Nil)               => Ordering.Equals
-        case (Nil, _)                 => Ordering.LessThan
-        case (_, Nil)                 => Ordering.GreaterThan
-        case ((h1 :: t1), (h2 :: t2)) =>
-          val compare = PartialOrd[A].compare(h1, h2)
-          if (compare.isEqual) loop(t1, t2) else compare
+        case (Nil, Nil)           => Some(Ordering.Equals)
+        case (Nil, _)             => Some(Ordering.LessThan)
+        case (_, Nil)             => Some(Ordering.GreaterThan)
+        case (h1 :: t1, h2 :: t2) =>
+          PartialOrdA.compareOption(h1, h2) match {
+            case Some(Ordering.Equals) => loop(t1, t2)
+            case compareOption         => compareOption
+          }
       }
 
     makeFrom((l, r) => loop(l, r), Equal.ListEqual)
@@ -280,8 +287,15 @@ object PartialOrd extends Lawful[PartialOrd] {
   implicit def MapPartialOrd[A, B: PartialOrd]: PartialOrd[Map[A, B]] =
     PartialOrd.makeFrom(
       { (l, r) =>
-        def compareValues(lesserMap: Map[A, B], expected: Ordering): PartialOrdering =
-          lesserMap.keys.map(k => l(k) =??= r(k)).fold(expected)(_.reduce(_))
+        def reduce(l: Option[Ordering], r: Option[Ordering]): Option[Ordering]        = (l, r) match {
+          case (Some(Ordering.LessThan), Some(Ordering.LessThan))       => Some(Ordering.LessThan)
+          case (Some(Ordering.GreaterThan), Some(Ordering.GreaterThan)) => Some(Ordering.GreaterThan)
+          case (Some(Ordering.Equals), that)                            => that
+          case (self, Some(Ordering.Equals))                            => self
+          case _                                                        => None
+        }
+        def compareValues(lesserMap: Map[A, B], expected: Ordering): Option[Ordering] =
+          lesserMap.keys.map(k => l(k) =??= r(k)).fold(Some(expected))(reduce)
         if (l.keySet == r.keySet) {
           compareValues(l, Ordering.Equals)
         } else if (l.keySet.subsetOf(r.keySet)) {
@@ -289,7 +303,7 @@ object PartialOrd extends Lawful[PartialOrd] {
         } else if (r.keySet.subsetOf(l.keySet)) {
           compareValues(r, Ordering.GreaterThan)
         } else {
-          PartialOrdering.NoOrder
+          None
         }
       },
       Equal.MapEqual
@@ -870,14 +884,15 @@ object PartialOrd extends Lawful[PartialOrd] {
         val PartialOrdA = PartialOrd[A]
 
         @tailrec
-        def loop(i: Int): PartialOrdering =
-          if (i == j && i == k) Ordering.Equals
-          else if (i == j) Ordering.LessThan
-          else if (i == k) Ordering.GreaterThan
-          else {
-            val compare = PartialOrdA.compare(l(i), r(i))
-            if (compare.isEqual) loop(i + 1) else compare
-          }
+        def loop(i: Int): Option[Ordering] =
+          if (i == j && i == k) Some(Ordering.Equals)
+          else if (i == j) Some(Ordering.LessThan)
+          else if (i == k) Some(Ordering.GreaterThan)
+          else
+            PartialOrdA.compareOption(l(i), r(i)) match {
+              case Some(Ordering.Equals) => loop(i + 1)
+              case compareOption         => compareOption
+            }
 
         loop(0)
       },
@@ -896,31 +911,45 @@ trait PartialOrdSyntax {
      * Returns whether this value is greater than the specified value.
      */
     def >[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      ord.compare(l, r) === Ordering.GreaterThan
+      ord.compareOption(l, r) match {
+        case Some(Ordering.GreaterThan) => true
+        case _                          => false
+      }
 
     /**
      * Returns whether this value is greater than or equal to the specified
      * value.
      */
     def >=[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      (l > r) || (l === r)
+      ord.compareOption(l, r) match {
+        case Some(Ordering.GreaterThan) => true
+        case Some(Ordering.Equals)      => true
+        case _                          => false
+      }
 
     /**
      * Returns whether this value is less than the specified value.
      */
     def <[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      ord.compare(l, r) === Ordering.LessThan
+      ord.compareOption(l, r) match {
+        case Some(Ordering.LessThan) => true
+        case _                       => false
+      }
 
     /**
      * Returns whether this value is less than or equal to the specified
      * value.
      */
     def <=[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      (l < r) || (l === r)
+      ord.compareOption(l, r) match {
+        case Some(Ordering.LessThan) => true
+        case Some(Ordering.Equals)   => true
+        case _                       => false
+      }
 
     /**
      * Returns the result of comparing this value with the specified value.
      */
-    def =??=[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): PartialOrdering = ord.compare(l, r)
+    def =??=[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Option[Ordering] = ord.compareOption(l, r)
   }
 }

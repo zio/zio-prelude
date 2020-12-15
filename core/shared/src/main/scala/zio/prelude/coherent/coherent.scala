@@ -249,40 +249,43 @@ object EqualInverse {
 trait HashPartialOrd[-A] extends Hash[A] with PartialOrd[A] { self =>
   override def contramap[B](f: B => A): Hash[B] with PartialOrd[B] =
     new HashPartialOrd[B] {
-      def hash(b: B): Int                                     = self.hash(f(b))
-      protected def checkCompare(l: B, r: B): PartialOrdering = self.compare(f(l), f(r))
-      override protected def checkEqual(l: B, r: B): Boolean  = self.equal(f(l), f(r))
+      def hash(b: B): Int                                            = self.hash(f(b))
+      protected def checkCompareOption(l: B, r: B): Option[Ordering] = self.compareOption(f(l), f(r))
+      override protected def checkEqual(l: B, r: B): Boolean         = self.equal(f(l), f(r))
     }
 }
 
 object HashPartialOrd {
   implicit def derive[A](implicit hash0: Hash[A], ord0: PartialOrd[A]): HashPartialOrd[A] =
     new HashPartialOrd[A] {
-      def hash(a: A): Int                                     = hash0.hash(a)
-      protected def checkCompare(l: A, r: A): PartialOrdering = ord0.compare(l, r)
-      override protected def checkEqual(l: A, r: A): Boolean  = ord0.equal(l, r)
+      def hash(a: A): Int                                            = hash0.hash(a)
+      protected def checkCompareOption(l: A, r: A): Option[Ordering] = ord0.compareOption(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean         = ord0.equal(l, r)
     }
 
   /**
    * Constructs an instance from a `hash0` function, an `ord`` function and a `equal0` function.
    * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
    */
-  def make[A](hash0: A => Int, ord: (A, A) => PartialOrdering, equal0: (A, A) => Boolean): Hash[A] with PartialOrd[A] =
+  def make[A](hash0: A => Int, ord: (A, A) => Option[Ordering], equal0: (A, A) => Boolean): Hash[A] with PartialOrd[A] =
     new HashPartialOrd[A] {
-      def hash(a: A): Int                                              = hash0(a)
-      override protected def checkCompare(l: A, r: A): PartialOrdering = ord(l, r)
-      override protected def checkEqual(l: A, r: A): Boolean           = equal0(l, r)
+      def hash(a: A): Int                                                     = hash0(a)
+      override protected def checkCompareOption(l: A, r: A): Option[Ordering] = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean                  = equal0(l, r)
     }
 
   /**
    * Constructs an instance from a hash function, equal function and ord function.
    * Checking equality is delegated to `ord`, so short-circuiting the equality check (failing fast) is not possible.
    */
-  def make[A](hash0: A => Int, ord: (A, A) => PartialOrdering): Hash[A] with PartialOrd[A] =
+  def make[A](hash0: A => Int, ord: (A, A) => Option[Ordering]): Hash[A] with PartialOrd[A] =
     new HashPartialOrd[A] {
-      def hash(a: A): Int                                              = hash0(a)
-      override protected def checkCompare(l: A, r: A): PartialOrdering = ord(l, r)
-      override protected def checkEqual(l: A, r: A): Boolean           = ord(l, r).isEqual
+      def hash(a: A): Int                                                     = hash0(a)
+      override protected def checkCompareOption(l: A, r: A): Option[Ordering] = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean                  = ord(l, r) match {
+        case Some(Ordering.Equals) => true
+        case _                     => false
+      }
     }
 
 }

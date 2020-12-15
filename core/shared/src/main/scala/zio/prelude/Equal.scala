@@ -195,7 +195,7 @@ object Equal extends Lawful[Equal] {
    * values for value equality.
    */
   def make[A](equal: (A, A) => Boolean): Equal[A] =
-    (l, r) => refEq(l, r) || equal(l, r)
+    (l, r) => equal(l, r)
 
   /**
    * Constructs an `Equal[A]` that uses the default notion of equality
@@ -339,10 +339,10 @@ object Equal extends Lawful[Equal] {
     HashPartialOrd.make(
       _.hashCode,
       (l, r) =>
-        if (l == r) Ordering.Equals
-        else if (l.subsetOf(r)) Ordering.LessThan
-        else if (r.subsetOf(l)) Ordering.GreaterThan
-        else PartialOrdering.NoOrder
+        if (l == r) Some(Ordering.Equals)
+        else if (l.subsetOf(r)) Some(Ordering.LessThan)
+        else if (r.subsetOf(l)) Some(Ordering.GreaterThan)
+        else None
     )
 
   /**
