@@ -19,11 +19,11 @@ trait Assertions {
    * Makes a new assertion that requires a validation failure satisfying a
    * specified assertion.
    */
-  def isFailureV[E](assertion: Assertion[NonEmptyMultiSet[E]]): Assertion[Validation[E, Any]] =
+  def isFailureV[E](assertion: Assertion[E]): Assertion[Validation[E, Any]] =
     Assertion.assertionRec("isFailureV")(param(assertion))(assertion) { validation =>
-      validation.runEitherCause(()) match {
-        case Left(es) => Some(es.toNonEmptyMultiSet)
-        case _        => None
+      validation.runEither(()) match {
+        case Left(e) => Some(e)
+        case _       => None
       }
     }
 

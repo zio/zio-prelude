@@ -1098,33 +1098,6 @@ object ZPure {
   private final case class Log[S, +W](log: W) extends ZPure[W, S, S, Any, Nothing, Unit] {
     override def tag: Int = Tags.Log
   }
-
-  sealed trait Cause[+E] { self =>
-    def failure: E                              =
-      self match {
-        case Cause.Both(left, _) => left.failure
-        case Cause.Then(left, _) => left.failure
-        case Cause.Fail(value)   => value
-      }
-    def toNonEmptyMultiSet: NonEmptyMultiSet[E] =
-      self match {
-        case Cause.Both(left, right) => left.toNonEmptyMultiSet | right.toNonEmptyMultiSet
-        case Cause.Then(left, right) => left.toNonEmptyMultiSet | right.toNonEmptyMultiSet
-        case Cause.Fail(value)       => NonEmptyMultiSet(value)
-      }
-  }
-
-  object Cause {
-    final case class Both[+E](left: Cause[E], right: Cause[E]) extends Cause[E]
-    final case class Then[+E](left: Cause[E], right: Cause[E]) extends Cause[E]
-    final case class Fail[+E](value: E)                        extends Cause[E]
-
-    def fromSet[E](set: Set[E]): Option[Cause[E]] =
-      set.foldLeft[Option[Cause[E]]](None) {
-        case (None, e)        => Some(Cause.Fail(e))
-        case (Some(cause), e) => Some(Cause.Both(cause, Cause.Fail(e)))
-      }
-  }
 }
 
 trait LowPriorityZPureImplicits {

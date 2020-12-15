@@ -5,7 +5,7 @@ import java.util.NoSuchElementException
 import zio.CanFail
 import zio.prelude._
 import zio.random.Random
-import zio.test.Assertion.{ anything, hasSameElements, isLeft, isNone, isRight, isSome, isSubtype }
+import zio.test.Assertion.{ anything, isLeft, isNone, isRight, isSome, isSubtype }
 import zio.test._
 
 import scala.util.Try
@@ -845,11 +845,10 @@ object ZPureSpec extends DefaultRunnableSpec {
           val validation                                                        = validateName("Jane Doe") zipPar0
             validateAge(17) zipPar0
             validateAuthorized(false)
-          val result                                                            = validation.runEitherCause(()) match {
-            case Left(errors) => Some(errors.toNonEmptyMultiSet.toSet)
-            case _            => None
-          }
-          assert(result)(isSome(hasSameElements(Set("Wrong name!", "Under age", "Not authorized"))))
+          val result                                                            = validation.runEitherCause(())
+          assert(result)(
+            isLeft(equalTo(Cause.fail("Wrong name!") && Cause.fail("Under age") && Cause.fail("Not authorized")))
+          )
         }
       )
     )

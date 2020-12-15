@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.fx.Cause
 import zio.random.Random
 import zio.test._
 
@@ -7,6 +8,33 @@ import zio.test._
  * Provides generators for data types from _ZIO Prelude_.
  */
 object Gens {
+
+  def causes[R <: Random with Sized, E](e: Gen[R, E]): Gen[R, Cause[E]] = {
+    val failure = e.map(Cause.fail)
+
+    def sequential(n: Int) = Gen.suspend {
+      for {
+        i <- Gen.int(1, n - 1)
+        l <- causesN(i)
+        r <- causesN(n - i)
+      } yield Cause.Then(l, r)
+    }
+
+    def parallel(n: Int) = Gen.suspend {
+      for {
+        i <- Gen.int(1, n - 1)
+        l <- causesN(i)
+        r <- causesN(n - i)
+      } yield Cause.Both(l, r)
+    }
+
+    def causesN(n: Int): Gen[R, Cause[E]] = Gen.suspend {
+      if (n == 1) failure
+      else Gen.oneOf(sequential(n), parallel(n))
+    }
+
+    Gen.small(causesN, 1)
+  }
 
   /**
    * A generator of `NonEmptyList` values.
@@ -24,8 +52,8 @@ object Gens {
    * A generator of `Validation` values.
    */
   def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
-    Gen.either(Gen.setOf1(e), a).map {
-      case Left(es) => Validation.halt(Validation.Cause.fromSet(es).get)
+    Gen.either(Gens.causes(e), a).map {
+      case Left(es) => Validation.halt(es)
       case Right(a) => Validation.succeed(a)
     }
 }
