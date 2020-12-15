@@ -197,8 +197,9 @@ object Ord extends Lawful[Ord] {
    * first compare the values for reference equality and then compare the
    * values using the specified function.
    */
-  def make[A](ord: (A, A) => Ordering): Ord[A] =
-    (l: A, r: A) => ord(l, r)
+  def make[A](ord: (A, A) => Ordering): Ord[A] = new Ord[A] {
+    override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
+  }
 
   /**
    * Constructs an instance from an `ord` function and a `equal0` function.
@@ -214,7 +215,7 @@ object Ord extends Lawful[Ord] {
    * Constructs an `Ord[A]` from a [[scala.math.Ordering]].
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
-    makeFrom((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)), ord.equiv)
+    makeFrom((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)), Equal.fromScala(ord))
 
   /**
    * Derives an `Ord[Chunk[A]]` given an `Ord[A]`.
