@@ -9,7 +9,7 @@ trait ApplicationCompose[:=>[-_, +_]] extends BothCompose[:=>] {
   def curry[A, B, C](f: (A :*: B) :=> C): A :=> (B :--> C)
   def uncurry[A, B, C](g: A :=> (B :--> C)): (A :*: B) :=> C
 
-  def implyCompose[A, B, C](
+  def applicationCompose[A, B, C](
     f: (A :*: B) :=> C,
     g: A :=> (B :--> C)
   )(implicit eqF: Equal[(A :*: B) :=> C], eqG: Equal[A :=> (B :--> C)]): Boolean = {
