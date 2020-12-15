@@ -30,7 +30,7 @@ trait Ord[-A] extends PartialOrd[A] { self =>
   /**
    * Returns the result of comparing two values of type `A`, always returned in `Some(_)`.
    */
-  override protected def checkCompareOption(l: A, r: A): Some[Ordering] = Some(checkCompare(l, r))
+  final override protected def checkCompareOption(l: A, r: A): Some[Ordering] = Some(checkCompare(l, r))
 
   override protected def checkEqual(l: A, r: A): Boolean =
     compare(l, r).isEqual
