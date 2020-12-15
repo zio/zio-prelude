@@ -2,11 +2,11 @@ package zio.prelude.fx
 
 import java.util.NoSuchElementException
 
-import zio.CanFail
 import zio.prelude._
 import zio.random.Random
 import zio.test.Assertion.{ anything, isLeft, isNone, isRight, isSome, isSubtype }
 import zio.test._
+import zio.{ CanFail, Chunk }
 
 import scala.util.Try
 
@@ -849,6 +849,12 @@ object ZPureSpec extends DefaultRunnableSpec {
           assert(result)(
             isLeft(equalTo(Cause.fail("Wrong name!") && Cause.fail("Under age") && Cause.fail("Not authorized")))
           )
+        }
+      ),
+      suite("log")(
+        test("logging example") {
+          val zPure = ZPure.unit[Unit].log("first").log("second").log("third").getLog
+          assert(zPure.runResult(()))(equalTo(Chunk("first", "second", "third")))
         }
       )
     )

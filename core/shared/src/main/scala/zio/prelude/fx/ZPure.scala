@@ -3,7 +3,7 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{ CanFail, Chunk, NeedsEnv }
+import zio.{ CanFail, Chunk, ChunkBuilder, NeedsEnv }
 
 import scala.annotation.{ implicitNotFound, switch }
 import scala.util.Try
@@ -294,6 +294,9 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   )(implicit ev: CanFail[E]): ZPure[W1, S0, S3, R1, E1, B] =
     foldCauseM((cause: Cause[E]) => failure(cause.failure), success)
 
+  final def getLog: ZPure[W, S1, S2, R, E, Chunk[W]] =
+    self *> ZPure.getLog
+
   /**
    * Returns a successful computation with the head of the list if the list is
    * non-empty or fails with the error `None` if the list is empty.
@@ -554,7 +557,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     val environments: Stack[AnyRef]                              = Stack()
     var s0: Any                                                  = s
     var a: Any                                                   = null
-    var log: Chunk[Any]                                          = Chunk.empty
+    val builder: ChunkBuilder[Any]                               = ChunkBuilder.make()
     var failed                                                   = false
     var curZPure: ZPure[Any, Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
 
@@ -637,11 +640,14 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
         case Tags.Log     =>
           val zPure     = curZPure.asInstanceOf[Log[Any, Any]]
-          log = log :+ zPure.log
+          builder += zPure.log
           val nextInstr = stack.pop()
           a = ()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-
+        case Tags.GetLog  =>
+          a = builder.result()
+          val nextInstr = stack.pop()
+          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
       }
     }
     if (failed) Left(a.asInstanceOf[Cause[E]])
@@ -919,6 +925,12 @@ object ZPure {
   def get[S]: ZPure[Nothing, S, S, Any, Nothing, S] =
     modify(s => (s, s))
 
+  /**
+   * Constructs a computation that returns the initial state unchanged.
+   */
+  def getLog[W, S]: ZPure[W, S, S, Any, Nothing, Chunk[W]] =
+    ZPure.GetLog()
+
   def log[S, W](w: W): ZPure[W, S, S, Any, Nothing, Unit] =
     ZPure.Log(w)
 
@@ -1059,6 +1071,7 @@ object ZPure {
     final val Provide = 5
     final val Modify  = 6
     final val Log     = 7
+    final val GetLog  = 8
   }
 
   private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A] {
@@ -1097,6 +1110,10 @@ object ZPure {
 
   private final case class Log[S, +W](log: W) extends ZPure[W, S, S, Any, Nothing, Unit] {
     override def tag: Int = Tags.Log
+  }
+
+  private final case class GetLog[W, S]() extends ZPure[W, S, S, Any, Nothing, Chunk[W]] {
+    override def tag: Int = Tags.GetLog
   }
 }
 
