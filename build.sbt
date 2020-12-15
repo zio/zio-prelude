@@ -24,6 +24,7 @@ inThisBuild(
 
 addCommandAlias("fix", "; all compile:scalafix test:scalafix; all scalafmtSbt scalafmtAll")
 addCommandAlias("check", "; scalafmtSbtCheck; scalafmtCheckAll; compile:scalafix --check; test:scalafix --check")
+
 addCommandAlias(
   "testJVM",
   ";coreJVM/test;experimentalJVM/test"
@@ -34,7 +35,7 @@ addCommandAlias(
 )
 addCommandAlias(
   "testNative",
-  ";coreNative/test:compile;experimentalJVM/test"
+  ";coreNative/test:compile;experimentalJVM/test:compile"
 )
 
 val zioVersion = "1.0.3"
@@ -146,7 +147,7 @@ lazy val docs = project
     publish / skip := true,
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJVM),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJS, coreJVM /*, coreNative */ ),
     ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,

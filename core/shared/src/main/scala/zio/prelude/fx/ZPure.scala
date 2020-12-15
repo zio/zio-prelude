@@ -4,7 +4,7 @@ import zio.internal.Stack
 import zio.prelude._
 import zio.{ CanFail, NeedsEnv }
 
-import scala.annotation.switch
+import scala.annotation.{ implicitNotFound, switch }
 import scala.util.Try
 import scala.util.control.NonFatal
 
@@ -94,6 +94,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     self andThen that
 
   /**
+   * A symbolic alias for `join`.
    * Runs this computation if the provided environment is a `Left` or else
    * runs that computation if the provided environment is a `Right`, unifying
    * the result to a common supertype.
@@ -101,7 +102,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def |||[S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
     that: ZPure[S0, S3, R1, E1, A1]
   ): ZPure[S0, S3, Either[R, R1], E1, A1] =
-    ZPure.accessM(_.fold(self.provide, that.provide))
+    self join that
 
   /**
    * Submerges the error case of an `Either` into the error type of this
@@ -205,6 +206,32 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Applies the specified function if the predicate fails.
+   */
+  final def filterOrElse[S3 >: S2, R1 <: R, E1 >: E, A1 >: A](
+    p: A => Boolean
+  )(f: A => ZPure[S2, S3, R1, E1, A1]): ZPure[S1, S3, R1, E1, A1] =
+    self.flatMap {
+      case v if !p(v) => f(v)
+      case v          => ZPure.succeed(v)
+    }
+
+  /**
+   * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
+   * to apply if the predicate fails.
+   */
+  final def filterOrElse_[S3 >: S2, R1 <: R, E1 >: E, A1 >: A](p: A => Boolean)(
+    zPure: => ZPure[S2, S3, R1, E1, A1]
+  ): ZPure[S1, S3, R1, E1, A1] =
+    filterOrElse[S3, R1, E1, A1](p)(_ => zPure)
+
+  /**
+   * Fails with the specified error if the predicate fails.
+   */
+  final def filterOrFail[E1 >: E](p: A => Boolean)(e: => E1): ZPure[S1, S2, R, E1, A] =
+    filterOrElse_[S2, R, E1, A](p)(ZPure.fail(e))
+
+  /**
    * Extends this computation with another computation that depends on the
    * result of this computation by running the first computation, using its
    * result to generate a second computation, and running that computation.
@@ -258,6 +285,16 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
           case None    => ZPure.fail(None)
         }
     )
+
+  /**
+   * Runs this computation if the provided environment is a `Left` or else
+   * runs that computation if the provided environment is a `Right`, unifying
+   * the result to a common supertype.
+   */
+  final def join[S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
+    that: ZPure[S0, S3, R1, E1, A1]
+  ): ZPure[S0, S3, Either[R, R1], E1, A1] =
+    ZPure.accessM(_.fold(self.provide, that.provide))
 
   /**
    * Returns a successful computation if the value is `Left`, or fails with error `None`.
@@ -317,6 +354,21 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def mapState[S3](f: S2 => S3): ZPure[S1, S3, R, E, A] =
     self <* update(f)
+
+  /**
+   * Negates the boolean value of this computation.
+   */
+  final def negate(implicit ev: A <:< Boolean): ZPure[S1, S2, R, E, Boolean] =
+    map(!_)
+
+  /**
+   * Requires the value of this computation to be `None`, otherwise fails with `None`.
+   */
+  final def none[B](implicit ev: A <:< Option[B]): ZPure[S1, S2, R, Option[E], Unit] =
+    self.foldM(
+      e => ZPure.fail(Some(e)),
+      a => a.fold[ZPure[S2, S2, R, Option[E], Unit]](ZPure.succeed(()))(_ => ZPure.fail(None))
+    )
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
@@ -693,6 +745,12 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
       e => ZPure.fail(ev2(e)),
       a => ev(a).fold(_ => ZPure.fail(new NoSuchElementException("Either.right.get on Left")), ZPure.succeed)
     )
+
+  /**
+   * Maps the value of this computation to unit.
+   */
+  final def unit: ZPure[S1, S2, R, E, Unit] = as(())
+
 }
 
 object ZPure {
@@ -841,6 +899,20 @@ object ZPure {
       Access(f)
   }
 
+  @implicitNotFound(
+    "Pattern guards are only supported when the error type is a supertype of NoSuchElementException. However, your effect has ${E} for the error type."
+  )
+  abstract class CanFilter[+E] {
+    def apply(t: NoSuchElementException): E
+  }
+
+  object CanFilter {
+    implicit def canFilter[E >: NoSuchElementException]: CanFilter[E] =
+      new CanFilter[E] {
+        def apply(t: NoSuchElementException): E = t
+      }
+  }
+
   /**
    * The `Covariant` instance for `ZPure`.
    */
@@ -871,6 +943,24 @@ object ZPure {
       def flatten[A](ffa: ZPure[S, S, R, E, ZPure[S, S, R, E, A]]): ZPure[S, S, R, E, A] =
         ffa.flatten
     }
+
+  implicit final class ZPureWithFilterOps[S1, S2, R, E, A](private val self: ZPure[S1, S2, R, E, A]) extends AnyVal {
+
+    /**
+     * Enables to check conditions in the value produced by ZPure
+     * If the condition is not satisfied, it fails with NoSuchElementException
+     * this provide the syntax sugar in for-comprehension:
+     * for {
+     *   (i, j) <- zpure1
+     *   positive <- zpure2 if positive > 0
+     *  } yield ()
+     */
+    def withFilter(predicate: A => Boolean)(implicit ev: CanFilter[E]): ZPure[S1, S2, R, E, A] =
+      self.flatMap { a =>
+        if (predicate(a)) ZPure.succeed(a)
+        else ZPure.fail(ev(new NoSuchElementException("The value doesn't satisfy the predicate")))
+      }
+  }
 
   object Tags {
     final val FlatMap = 0
