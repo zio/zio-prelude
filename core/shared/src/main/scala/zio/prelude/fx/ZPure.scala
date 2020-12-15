@@ -4,7 +4,7 @@ import zio.internal.Stack
 import zio.prelude._
 import zio.{ CanFail, NeedsEnv }
 
-import scala.annotation.switch
+import scala.annotation.{ implicitNotFound, switch }
 import scala.util.Try
 import scala.util.control.NonFatal
 
@@ -94,6 +94,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     self andThen that
 
   /**
+   * A symbolic alias for `join`.
    * Runs this computation if the provided environment is a `Left` or else
    * runs that computation if the provided environment is a `Right`, unifying
    * the result to a common supertype.
@@ -101,7 +102,7 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def |||[S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
     that: ZPure[S0, S3, R1, E1, A1]
   ): ZPure[S0, S3, Either[R, R1], E1, A1] =
-    ZPure.accessM(_.fold(self.provide, that.provide))
+    self join that
 
   /**
    * Submerges the error case of an `Either` into the error type of this
@@ -205,6 +206,32 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Applies the specified function if the predicate fails.
+   */
+  final def filterOrElse[S3 >: S2, R1 <: R, E1 >: E, A1 >: A](
+    p: A => Boolean
+  )(f: A => ZPure[S2, S3, R1, E1, A1]): ZPure[S1, S3, R1, E1, A1] =
+    self.flatMap {
+      case v if !p(v) => f(v)
+      case v          => ZPure.succeed(v)
+    }
+
+  /**
+   * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
+   * to apply if the predicate fails.
+   */
+  final def filterOrElse_[S3 >: S2, R1 <: R, E1 >: E, A1 >: A](p: A => Boolean)(
+    zPure: => ZPure[S2, S3, R1, E1, A1]
+  ): ZPure[S1, S3, R1, E1, A1] =
+    filterOrElse[S3, R1, E1, A1](p)(_ => zPure)
+
+  /**
+   * Fails with the specified error if the predicate fails.
+   */
+  final def filterOrFail[E1 >: E](p: A => Boolean)(e: => E1): ZPure[S1, S2, R, E1, A] =
+    filterOrElse_[S2, R, E1, A](p)(ZPure.fail(e))
+
+  /**
    * Extends this computation with another computation that depends on the
    * result of this computation by running the first computation, using its
    * result to generate a second computation, and running that computation.
@@ -244,6 +271,30 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
     success: A => ZPure[S2, S3, R1, E1, B]
   )(implicit ev: CanFail[E]): ZPure[S0, S3, R1, E1, B] =
     Fold(self, failure, success)
+
+  /**
+   * Returns a successful computation with the head of the list if the list is
+   * non-empty or fails with the error `None` if the list is empty.
+   */
+  final def head[B](implicit ev: A <:< List[B]): ZPure[S1, S2, R, Option[E], B] =
+    foldM(
+      e => ZPure.fail(Some(e)),
+      a =>
+        ev(a).headOption match {
+          case Some(b) => ZPure.succeed(b)
+          case None    => ZPure.fail(None)
+        }
+    )
+
+  /**
+   * Runs this computation if the provided environment is a `Left` or else
+   * runs that computation if the provided environment is a `Right`, unifying
+   * the result to a common supertype.
+   */
+  final def join[S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
+    that: ZPure[S0, S3, R1, E1, A1]
+  ): ZPure[S0, S3, Either[R, R1], E1, A1] =
+    ZPure.accessM(_.fold(self.provide, that.provide))
 
   /**
    * Returns a successful computation if the value is `Left`, or fails with error `None`.
@@ -303,6 +354,21 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
    */
   final def mapState[S3](f: S2 => S3): ZPure[S1, S3, R, E, A] =
     self <* update(f)
+
+  /**
+   * Negates the boolean value of this computation.
+   */
+  final def negate(implicit ev: A <:< Boolean): ZPure[S1, S2, R, E, Boolean] =
+    map(!_)
+
+  /**
+   * Requires the value of this computation to be `None`, otherwise fails with `None`.
+   */
+  final def none[B](implicit ev: A <:< Option[B]): ZPure[S1, S2, R, Option[E], Unit] =
+    self.foldM(
+      e => ZPure.fail(Some(e)),
+      a => a.fold[ZPure[S2, S2, R, Option[E], Unit]](ZPure.succeed(()))(_ => ZPure.fail(None))
+    )
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
@@ -457,9 +523,9 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
   final def runEither(s: S1)(implicit ev: Any <:< R, ev1: CanFail[E]): Either[E, (S2, A)] = {
     val _                                                   = ev
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any]] = Stack()
+    val environments: Stack[AnyRef]                         = Stack()
     var s0: Any                                             = s
     var a: Any                                              = null
-    var r: Any                                              = null
     var failed                                              = false
     var curZPure: ZPure[Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any]]
 
@@ -473,8 +539,6 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
             unwinding = false
           case null                                =>
             unwinding = false
-          case value: ProvideEnd[_, _, _, _, _]    =>
-            r = value.r
           case _                                   =>
         }
     }
@@ -521,24 +585,21 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
           } else
             curZPure = nextInstr(zPure.error)
 
-        case Tags.Fold       =>
+        case Tags.Fold    =>
           val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any]]
           curZPure = zPure.value
           stack.push(zPure)
-        case Tags.Access     =>
+        case Tags.Access  =>
           val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any]]
-          curZPure = zPure.access(r)
-        case Tags.Provide    =>
+          curZPure = zPure.access(environments.peek())
+        case Tags.Provide =>
           val zPure = curZPure.asInstanceOf[Provide[Any, Any, Any, Any, Any]]
-          stack.push(ZPure.ProvideEnd(r))
-          r = zPure.r
-          curZPure = zPure.continue
-        case Tags.ProvideEnd =>
-          val zPure     = curZPure.asInstanceOf[ProvideEnd[Any, Any, Any, Any, Any]]
-          r = zPure.r
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Modify     =>
+          environments.push(zPure.r.asInstanceOf[AnyRef])
+          curZPure = zPure.continue.foldM(
+            e => ZPure.succeed(environments.pop()) *> ZPure.fail(e),
+            a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
+          )
+        case Tags.Modify  =>
           val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any]]
           val updated   = zPure.run0(s0)
           s0 = updated._1
@@ -684,6 +745,12 @@ sealed trait ZPure[-S1, +S2, -R, +E, +A] { self =>
       e => ZPure.fail(ev2(e)),
       a => ev(a).fold(_ => ZPure.fail(new NoSuchElementException("Either.right.get on Left")), ZPure.succeed)
     )
+
+  /**
+   * Maps the value of this computation to unit.
+   */
+  final def unit: ZPure[S1, S2, R, E, Unit] = as(())
+
 }
 
 object ZPure {
@@ -832,6 +899,20 @@ object ZPure {
       Access(f)
   }
 
+  @implicitNotFound(
+    "Pattern guards are only supported when the error type is a supertype of NoSuchElementException. However, your effect has ${E} for the error type."
+  )
+  abstract class CanFilter[+E] {
+    def apply(t: NoSuchElementException): E
+  }
+
+  object CanFilter {
+    implicit def canFilter[E >: NoSuchElementException]: CanFilter[E] =
+      new CanFilter[E] {
+        def apply(t: NoSuchElementException): E = t
+      }
+  }
+
   /**
    * The `Covariant` instance for `ZPure`.
    */
@@ -863,15 +944,32 @@ object ZPure {
         ffa.flatten
     }
 
+  implicit final class ZPureWithFilterOps[S1, S2, R, E, A](private val self: ZPure[S1, S2, R, E, A]) extends AnyVal {
+
+    /**
+     * Enables to check conditions in the value produced by ZPure
+     * If the condition is not satisfied, it fails with NoSuchElementException
+     * this provide the syntax sugar in for-comprehension:
+     * for {
+     *   (i, j) <- zpure1
+     *   positive <- zpure2 if positive > 0
+     *  } yield ()
+     */
+    def withFilter(predicate: A => Boolean)(implicit ev: CanFilter[E]): ZPure[S1, S2, R, E, A] =
+      self.flatMap { a =>
+        if (predicate(a)) ZPure.succeed(a)
+        else ZPure.fail(ev(new NoSuchElementException("The value doesn't satisfy the predicate")))
+      }
+  }
+
   object Tags {
-    final val FlatMap    = 0
-    final val Succeed    = 1
-    final val Fail       = 2
-    final val Fold       = 3
-    final val Access     = 4
-    final val Provide    = 5
-    final val Modify     = 6
-    final val ProvideEnd = 7
+    final val FlatMap = 0
+    final val Succeed = 1
+    final val Fail    = 2
+    final val Fold    = 3
+    final val Access  = 4
+    final val Provide = 5
+    final val Modify  = 6
   }
 
   private final case class Succeed[+A](value: A)                     extends ZPure[Any, Nothing, Any, Nothing, A] {
@@ -894,7 +992,7 @@ object ZPure {
     failure: E1 => ZPure[S1, S3, R, E2, B],
     success: A => ZPure[S2, S3, R, E2, B]
   )                                                                  extends ZPure[S1, S3, R, E2, B]
-      with Function[A, ZPure[S2, S3, R, E2, B]]  {
+      with Function[A, ZPure[S2, S3, R, E2, B]] {
     override def tag: Int                             = Tags.Fold
     override def apply(a: A): ZPure[S2, S3, R, E2, B] =
       success(a)
@@ -902,14 +1000,8 @@ object ZPure {
   private final case class Access[S1, S2, R, E, A](access: R => ZPure[S1, S2, R, E, A]) extends ZPure[S1, S2, R, E, A] {
     override def tag: Int = Tags.Access
   }
-  private final case class ProvideEnd[S1, S2, R, E, A](r: R)
-      extends ZPure[S1, S2, Any, E, A]
-      with Function[Any, ZPure[S1, S2, R, E, A]] {
-    override def tag: Int                               = Tags.ProvideEnd
-    override def apply(v1: Any): ZPure[S1, S2, R, E, A] = this
-  }
   private final case class Provide[S1, S2, R, E, A](r: R, continue: ZPure[S1, S2, R, E, A])
-      extends ZPure[S1, S2, Any, E, A]           {
+      extends ZPure[S1, S2, Any, E, A]          {
     override def tag: Int = Tags.Provide
   }
 }

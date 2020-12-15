@@ -73,7 +73,7 @@ save_cache: &save_cache
           - "~/.sbt"
           - "~/.m2"
           - "~/.cache"
-          # - "~/website/node_modules"
+          - "~/website/node_modules"
 
 install_yarn: &install_yarn
   - run:
@@ -99,20 +99,11 @@ filter_tags: &filter_tags
   tags:
     only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
 
-compile: &compile
-  steps:
-    - checkout
-    - <<: *load_cache
-    - run:
-        name: Compile code
-        command: ./sbt ++${SCALA_VERSION}! compile
-    - <<: *clean_cache
-    - <<: *save_cache
-
 lint: &lint
   steps:
     - checkout
     - <<: *load_cache
+    - <<: *install_jdk
     - run:
         name: Lint code
         command: ./sbt ++${SCALA_VERSION}! check
@@ -123,6 +114,7 @@ mdoc: &mdoc
   steps:
     - checkout
     - <<: *load_cache
+    - <<: *install_jdk
     - run:
         name: Generate documentation
         command: |
@@ -314,7 +306,7 @@ jobs:
     <<: *release
     <<: *machine_ubuntu
     environment:
-      - <<: *scala_213
+      - <<: *scala_212
       - <<: *jdk_8
 
   microsite:

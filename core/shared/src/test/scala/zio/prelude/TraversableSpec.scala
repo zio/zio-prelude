@@ -5,9 +5,10 @@ import zio.prelude.laws.checkAllLaws
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
-import zio.{ Chunk, NonEmptyChunk }
+import zio.{ Chunk, NonEmptyChunk, Ref }
 
 object TraversableSpec extends DefaultRunnableSpec {
+  import Fixtures._
 
   val genBoolean: Gen[Random, Boolean] =
     Gen.boolean
@@ -33,6 +34,9 @@ object TraversableSpec extends DefaultRunnableSpec {
   val genIntIntFunction2: Gen[Random, (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
+  implicit val chunkOptionTraversable: Traversable[ChunkOption] =
+    Traversable[Chunk].compose[Option]
+
   def spec: ZSpec[Environment, Failure] =
     suite("TraversableSpec")(
       suite("instances")(
@@ -41,7 +45,8 @@ object TraversableSpec extends DefaultRunnableSpec {
         testM("list")(checkAllLaws(Traversable)(GenF.list, GenFs.id, Gen.anyInt)),
         testM("map")(checkAllLaws(Traversable)(GenFs.map(Gen.anyInt), GenFs.id, Gen.anyInt)),
         testM("option")(checkAllLaws(Traversable)(GenF.option, GenFs.id, Gen.anyInt)),
-        testM("vector")(checkAllLaws(Traversable)(GenF.vector, GenFs.id, Gen.anyInt))
+        testM("vector")(checkAllLaws(Traversable)(GenF.vector, GenFs.id, Gen.anyInt)),
+        testM("chunk . option")(checkAllLaws(Traversable)(chunkOptionGenF, GenFs.id, Gen.anyInt))
       ),
       suite("combinators")(
         testM("contains") {
@@ -79,12 +84,30 @@ object TraversableSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
+        testM("foldLeftM") {
+          for {
+            ref   <- Ref.make[Chunk[Int]](Chunk.empty)
+            in     = List(1, 2, 3, 4, 5)
+            s     <- in.foldLeftM(0)((s, a) => ref.modify(chunk => (s + a, chunk :+ a)))
+            value <- ref.get
+          } yield assert(s)(equalTo(15)) &&
+            assert(value)(equalTo(Chunk(1, 2, 3, 4, 5)))
+        },
         testM("foldRight") {
           check(genList, genInt, genIntFunction2) { (as, s, f) =>
             val actual   = Traversable[List].foldRight(as)(s)(f)
             val expected = as.foldRight(s)(f)
             assert(actual)(equalTo(expected))
           }
+        },
+        testM("foldRightM") {
+          for {
+            ref   <- Ref.make[Chunk[Int]](Chunk.empty)
+            in     = List(1, 2, 3, 4, 5)
+            s     <- in.foldRightM(0)((a, s) => ref.modify(chunk => (s + a, chunk :+ a)))
+            value <- ref.get
+          } yield assert(s)(equalTo(15)) &&
+            assert(value)(equalTo(Chunk(5, 4, 3, 2, 1)))
         },
         testM("forall") {
           check(genList, genBooleanFunction) { (as, f) =>
