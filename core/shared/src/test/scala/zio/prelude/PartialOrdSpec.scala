@@ -40,7 +40,8 @@ object PartialOrdSpec extends DefaultRunnableSpec {
         assert(Map(1 -> 3, 2 -> 4) =??= Map(1 -> 2))(equalTo(Ordering.GreaterThan)) &&
         assert(Map(1 -> 2) =??= Map(2 -> 2))(equalTo(PartialOrdering.Incomparable)) &&
         assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 3, 2 -> 2))(equalTo(PartialOrdering.Incomparable)) &&
-        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 1, 2 -> 2))(equalTo(PartialOrdering.Incomparable))
+        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 1, 2 -> 2))(equalTo(PartialOrdering.Incomparable)) &&
+        assert(Map("William" -> "Will") =??= Map("William" -> "Bill"))(equalTo(Ordering.GreaterThan))
       }
     )
 }
