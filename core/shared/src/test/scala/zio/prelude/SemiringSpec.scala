@@ -1,17 +1,16 @@
-package zio.prelude.fx
+package zio.prelude
 
-import zio.prelude._
-import zio.prelude.fx.Cause._
+import zio.prelude.Semiring._
 import zio.random._
 import zio.test._
 
-object CauseSpec extends DefaultRunnableSpec {
+object SemiringSpec extends DefaultRunnableSpec {
 
-  val causes: Gen[Random with Sized, Cause[Int]] =
-    Gens.causes(Gen.anyInt)
+  val semiring: Gen[Random with Sized, Semiring[Int]] =
+    Gens.semiring(Gen.anyInt)
 
-  val equalCauses: Gen[Random with Sized, (Cause[Int], Cause[Int])] =
-    (causes <*> causes <*> causes).flatMap { case ((a, b), c) =>
+  val equalSemirings: Gen[Random with Sized, (Semiring[Int], Semiring[Int])] =
+    (semiring <*> semiring <*> semiring).flatMap { case ((a, b), c) =>
       Gen.elements(
         (a, a),
         (Then(Then(a, b), c), Then(a, Then(b, c))),
@@ -22,34 +21,34 @@ object CauseSpec extends DefaultRunnableSpec {
       )
     }
 
-  val hash = Cause.CauseHash
+  val hash = Semiring.SemiringHash
 
   def spec: ZSpec[Environment, Failure] =
-    suite("CauseSpec")(
+    suite("SemiringSpec")(
       testM("both is associative") {
-        check(causes, causes, causes) { (a, b, c) =>
+        check(semiring, semiring, semiring) { (a, b, c) =>
           assert((a && b) && c)(equalTo(a && (b && c))) &&
           assert(a && (b && c))(equalTo((a && b) && c))
         }
       },
       testM("both is commutative") {
-        check(causes, causes) { (a, b) =>
+        check(semiring, semiring) { (a, b) =>
           assert(a && b)(equalTo(b && a))
         }
       },
       testM("equals is consistent with hash code") {
-        check(equalCauses) { case (a, b) =>
+        check(equalSemirings) { case (a, b) =>
           assert(a.hashCode)(equalTo(b.hashCode))
         }
       },
       testM("then is associative") {
-        check(causes, causes, causes) { (a, b, c) =>
+        check(semiring, semiring, semiring) { (a, b, c) =>
           assert((a ++ b) ++ c)(equalTo(a ++ (b ++ c))) &&
           assert(a ++ (b ++ c))(equalTo((a ++ b) ++ c))
         }
       },
       testM("then distributes over both") {
-        check(causes, causes, causes) { (a, b, c) =>
+        check(semiring, semiring, semiring) { (a, b, c) =>
           assert(a ++ (b && c))(equalTo((a ++ b) && (a ++ c))) &&
           assert((a && b) ++ c)(equalTo((a ++ c) && (b ++ c)))
         }

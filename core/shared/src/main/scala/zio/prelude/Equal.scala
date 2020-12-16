@@ -875,7 +875,7 @@ object Equal extends Lawful[Equal] {
    * An `Equal` instance for `Any` values that uses Scala's default notion of
    * equality embodied in `equals`.
    */
-  private val DefaultEqual: Equal[Any] =
+  private lazy val DefaultEqual: Equal[Any] =
     Equal.make(_ == _)
 }
 

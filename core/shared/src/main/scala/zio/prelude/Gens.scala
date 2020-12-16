@@ -9,8 +9,8 @@ import zio.test._
  */
 object Gens {
 
-  def causes[R <: Random with Sized, E](e: Gen[R, E]): Gen[R, Cause[E]] = {
-    val failure = e.map(Cause.fail)
+  def semiring[R <: Random with Sized, E](e: Gen[R, E]): Gen[R, Cause[E]] = {
+    val failure = e.map(Cause.single)
 
     def sequential(n: Int) = Gen.suspend {
       for {
@@ -52,7 +52,7 @@ object Gens {
    * A generator of `Validation` values.
    */
   def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
-    Gen.either(Gens.causes(e), a).map {
+    Gen.either(Gens.semiring(e), a).map {
       case Left(es) => Validation.halt(es)
       case Right(a) => Validation.succeed(a)
     }

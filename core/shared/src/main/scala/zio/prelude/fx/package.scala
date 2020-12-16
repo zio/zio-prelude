@@ -10,4 +10,7 @@ package object fx {
       def modify[A](f: S => (S, A)): UIO[A]
     }
   }
+
+  type Cause[+E] = Semiring[E]
+  val Cause: Semiring.type = Semiring
 }

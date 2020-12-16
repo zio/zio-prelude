@@ -292,7 +292,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     failure: E => ZPure[W1, S0, S3, R1, E1, B],
     success: A => ZPure[W1, S2, S3, R1, E1, B]
   )(implicit ev: CanFail[E]): ZPure[W1, S0, S3, R1, E1, B] =
-    foldCauseM((cause: Cause[E]) => failure(cause.failure), success)
+    foldCauseM((cause: Cause[E]) => failure(cause.first), success)
 
   final def getLog: ZPure[W, S1, S2, R, E, Chunk[W]] =
     self *> ZPure.getLog
@@ -545,7 +545,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     runEither(s).fold(ev2, identity)
 
   final def runEither(s: S1)(implicit ev: Any <:< R, ev1: CanFail[E]): Either[E, (S2, A)] =
-    runEitherCause(s).fold(cause => Left(cause.failure), Right(_))
+    runEitherCause(s).fold(cause => Left(cause.first), Right(_))
 
   /**
    * Runs this computation with the specified initial state, returning either a
@@ -822,7 +822,7 @@ object ZPure {
       self.foldCauseM(
         c1 =>
           that.foldCauseM(
-            c2 => ZPure.halt(Cause.Both(c1, c2)),
+            c2 => ZPure.halt(c1 && c2),
             _ => ZPure.halt(c1)
           ),
         a => that.map(b => f(a, b))
@@ -847,7 +847,7 @@ object ZPure {
     access(r => r)
 
   def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
-    halt(Cause.Fail(e))
+    halt(Cause(e))
 
   def halt[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
     ZPure.Fail(cause)

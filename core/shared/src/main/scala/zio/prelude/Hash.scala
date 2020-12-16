@@ -858,7 +858,7 @@ object Hash extends Lawful[Hash] {
    * A `Hash` instance for `Any` values that uses Scala's default notions of
    * equality and hashing embodied in `equals` and `hashCode`.
    */
-  private val DefaultHash: Hash[Any] =
+  private lazy val DefaultHash: Hash[Any] =
     Hash.make(_.hashCode, _ == _)
 }
 

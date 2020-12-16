@@ -847,7 +847,7 @@ object ZPureSpec extends DefaultRunnableSpec {
             validateAuthorized(false)
           val result                                                            = validation.runEitherCause(())
           assert(result)(
-            isLeft(equalTo(Cause.fail("Wrong name!") && Cause.fail("Under age") && Cause.fail("Not authorized")))
+            isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
           )
         }
       ),
