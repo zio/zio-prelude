@@ -46,7 +46,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `CommutativeBoth` instance for `Chunk`.
    */
-  implicit def ChunkCommutativeBoth: CommutativeBoth[Chunk] =
+  implicit val ChunkCommutativeBoth: CommutativeBoth[Chunk] =
     new CommutativeBoth[Chunk] {
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa zip fb
     }
@@ -70,7 +70,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `CommutativeBoth` instance for `List`.
    */
-  implicit def ListCommutativeBoth: CommutativeBoth[List] =
+  implicit val ListCommutativeBoth: CommutativeBoth[List] =
     new CommutativeBoth[List] {
       def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa zip fb
     }
@@ -78,7 +78,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `CommutativeBoth` instance for `NonEmptyChunk`.
    */
-  implicit def NonEmptyChunkCommutativeBoth: CommutativeBoth[NonEmptyChunk] =
+  implicit val NonEmptyChunkCommutativeBoth: CommutativeBoth[NonEmptyChunk] =
     new CommutativeBoth[NonEmptyChunk] {
       def both[A, B](fa: => NonEmptyChunk[A], fb: => NonEmptyChunk[B]): NonEmptyChunk[(A, B)] =
         (fa zipWith fb)((_, _))
@@ -122,7 +122,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The `CommutativeBoth` instance for `Vector`.
    */
-  implicit def VectorCommutativeBoth: CommutativeBoth[Vector] =
+  implicit val VectorCommutativeBoth: CommutativeBoth[Vector] =
     new CommutativeBoth[Vector] {
       def both[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa zip fb
     }

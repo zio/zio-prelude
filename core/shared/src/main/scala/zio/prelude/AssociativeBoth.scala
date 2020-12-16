@@ -1064,7 +1064,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for `Chunk`.
    */
-  implicit def ChunkAssociativeBoth: AssociativeBoth[Chunk] =
+  implicit val ChunkAssociativeBoth: AssociativeBoth[Chunk] =
     new AssociativeBoth[Chunk] {
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
@@ -1147,7 +1147,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for `NonEmptyChunk`.
    */
-  implicit def NonEmptyChunkAssociativeBoth: AssociativeBoth[NonEmptyChunk] =
+  implicit val NonEmptyChunkAssociativeBoth: AssociativeBoth[NonEmptyChunk] =
     new AssociativeBoth[NonEmptyChunk] {
       def both[A, B](fa: => NonEmptyChunk[A], fb: => NonEmptyChunk[B]): NonEmptyChunk[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
@@ -1204,7 +1204,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for `Vector`.
    */
-  implicit def VectorAssociativeBoth: AssociativeBoth[Vector] =
+  implicit val VectorAssociativeBoth: AssociativeBoth[Vector] =
     new AssociativeBoth[Vector] {
       def both[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }

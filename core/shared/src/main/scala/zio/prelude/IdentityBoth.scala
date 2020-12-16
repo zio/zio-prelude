@@ -76,51 +76,10 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
 }
 
 trait IdentityBothSyntax {
+
   implicit class IdentityBothAnyOps[A](a: => A) {
     def succeed[F[+_]](implicit both: IdentityBoth[F], covariant: Covariant[F]): F[A] =
       both.any.map(_ => a)
   }
 
-  /**
-   * Provides infix syntax for identity operations for invariant types.
-   */
-  implicit class IdentityBothOps[F[_], A](fa: => F[A]) {
-
-    /**
-     * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[(A, B)]`.
-     */
-    def zipIdentity[B](fb: => F[B])(implicit both: IdentityBoth[F]): F[(A, B)] =
-      both.both(fa, fb)
-  }
-
-  /**
-   * Provides infix syntax for identity operations for covariant types.
-   */
-  implicit class IdentityBothCovariantOps[F[+_], A](fa: => F[A]) {
-
-    /**
-     * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[(A, B)]` and then maps the result with the specified function.
-     */
-    def zipWithIdentity[B, C](
-      fb: => F[B]
-    )(f: (A, B) => C)(implicit both: IdentityBoth[F], covariant: Covariant[F]): F[C] =
-      both.both(fa, fb).map(f.tupled)
-  }
-
-  /**
-   * Provides infix syntax for identity operations for contravariant types.
-   */
-  implicit class IdentityBothContravariantOps[F[-_], A](fa: => F[A]) {
-
-    /**
-     * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[(A, B)]` and then contramaps the result with the specified function.
-     */
-    def bothWithIdentity[B, C](
-      fb: => F[B]
-    )(f: C => (A, B))(implicit both: IdentityBoth[F], contravariant: Contravariant[F]): F[C] =
-      both.both(fa, fb).contramap(f)
-  }
 }
