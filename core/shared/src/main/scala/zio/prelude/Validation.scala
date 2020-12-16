@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.prelude.Validation._
 import zio.test.Assertion
-import zio.{ IO, ZIO }
+import zio.{IO, ZIO}
 
 import scala.util.Try
 

@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
+import zio.prelude.newtypes.{Max, Min, Prod, Sum}
 
 import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.immutable.HashMap

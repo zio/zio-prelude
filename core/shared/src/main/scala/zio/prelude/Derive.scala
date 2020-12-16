@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Cause, Chunk, Exit, NonEmptyChunk }
+import zio.{Cause, Chunk, Exit, NonEmptyChunk}
 
 import scala.util.Try
 

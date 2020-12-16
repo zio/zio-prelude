@@ -2,15 +2,15 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
-import zio.prelude.newtypes.{ AndF, Failure, OrF }
+import zio.prelude.newtypes.{AndF, Failure, OrF}
 import zio.stm.ZSTM
-import zio.stream.{ ZSink, ZStream }
+import zio.stream.{ZSink, ZStream}
 import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
-import scala.util.{ Success, Try }
+import scala.util.{Success, Try}
 
 /**
  * An associative binary operator that combines two values of types `F[A]`
@@ -1064,7 +1064,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for `Chunk`.
    */
-  implicit def ChunkAssociativeBoth: AssociativeBoth[Chunk] =
+  implicit val ChunkAssociativeBoth: AssociativeBoth[Chunk] =
     new AssociativeBoth[Chunk] {
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
@@ -1147,7 +1147,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for `NonEmptyChunk`.
    */
-  implicit def NonEmptyChunkAssociativeBoth: AssociativeBoth[NonEmptyChunk] =
+  implicit val NonEmptyChunkAssociativeBoth: AssociativeBoth[NonEmptyChunk] =
     new AssociativeBoth[NonEmptyChunk] {
       def both[A, B](fa: => NonEmptyChunk[A], fb: => NonEmptyChunk[B]): NonEmptyChunk[(A, B)] =
         fa.flatMap(a => fb.map(b => (a, b)))
@@ -1204,7 +1204,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The `AssociativeBoth` instance for `Vector`.
    */
-  implicit def VectorAssociativeBoth: AssociativeBoth[Vector] =
+  implicit val VectorAssociativeBoth: AssociativeBoth[Vector] =
     new AssociativeBoth[Vector] {
       def both[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }

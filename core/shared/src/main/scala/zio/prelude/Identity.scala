@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.prelude.coherent.EqualIdentity
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 /**
  * The `Identity` type class describes an associative binary operator for a
