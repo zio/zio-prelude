@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{Sum}
+import zio.prelude.newtypes.Sum
 import zio.test.laws._
 import zio.test.{DefaultRunnableSpec, _}
 
