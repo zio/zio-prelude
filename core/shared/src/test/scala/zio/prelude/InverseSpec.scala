@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ Sum }
+import zio.prelude.newtypes.Sum
 import zio.test.laws._
-import zio.test.{ DefaultRunnableSpec, _ }
+import zio.test.{DefaultRunnableSpec, _}
 
 object InverseSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =

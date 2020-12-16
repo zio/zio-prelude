@@ -1,11 +1,11 @@
 package zio.prelude
 
-import java.util.concurrent.TimeUnit
-
-import cats.data.{ EitherT, Kleisli, State => CatsState }
+import cats.data.{EitherT, Kleisli, State => CatsState}
 import cats.instances.list._
 import cats.syntax.traverse._
-import org.openjdk.jmh.annotations.{ State => BenchmarkState, _ }
+import org.openjdk.jmh.annotations.{State => BenchmarkState, _}
+
+import java.util.concurrent.TimeUnit
 
 @BenchmarkState(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
