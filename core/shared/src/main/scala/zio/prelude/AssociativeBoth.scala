@@ -2,15 +2,15 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
-import zio.prelude.newtypes.{ AndF, Failure, OrF }
+import zio.prelude.newtypes.{AndF, Failure, OrF}
 import zio.stm.ZSTM
-import zio.stream.{ ZSink, ZStream }
+import zio.stream.{ZSink, ZStream}
 import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
-import scala.util.{ Success, Try }
+import scala.util.{Success, Try}
 
 /**
  * An associative binary operator that combines two values of types `F[A]`

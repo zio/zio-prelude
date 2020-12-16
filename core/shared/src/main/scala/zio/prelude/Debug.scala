@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Chunk, NonEmptyChunk }
+import zio.{Chunk, NonEmptyChunk}
 
 import scala.collection.immutable.ListMap
 
@@ -79,7 +79,7 @@ object Debug {
       Char => SChar,
       Byte => SByte
     }
-    import java.lang.{ String => SString }
+    import java.lang.{String => SString}
 
     final case class Int(value: SInt)                                                                    extends Repr
     final case class Double(value: SDouble)                                                              extends Repr

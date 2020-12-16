@@ -3,7 +3,7 @@ package zio.prelude
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
-import zio.{ Chunk, NonEmptyChunk, Ref }
+import zio.{Chunk, NonEmptyChunk, Ref}
 
 object TraversableSpec extends DefaultRunnableSpec {
   import Fixtures._

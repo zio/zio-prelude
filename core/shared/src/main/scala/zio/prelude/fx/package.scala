@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.{ Has, UIO }
+import zio.{Has, UIO}
 
 package object fx {
   type RefState[S] = Has[RefState.Service[S]]

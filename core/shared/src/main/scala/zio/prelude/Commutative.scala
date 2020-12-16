@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.prelude.coherent.CommutativeEqual
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 /**
  * The `Commutative` type class describes a binary operator for a type `A` that

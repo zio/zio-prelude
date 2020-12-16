@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.prelude.Debug.{ Renderer, Repr, _ }
+import zio.prelude.Debug.{Renderer, Repr, _}
 import zio.random.Random
-import zio.test.{ TestResult, _ }
+import zio.test.{TestResult, _}
 
 import scala.collection.immutable.ListMap
 
