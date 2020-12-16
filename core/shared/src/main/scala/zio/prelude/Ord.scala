@@ -893,16 +893,6 @@ sealed trait Ordering { self =>
     }
 
   /**
-   * Returns this ordering, but if this ordering is equal returns the
-   * specified ordering.
-   */
-  final def orElse(that: => Ordering): Ordering =
-    self match {
-      case Ordering.Equals => that
-      case ordering        => ordering
-    }
-
-  /**
    * Converts this `Ordering` to an ordinal representation, with `0`
    * representing `LessThan`, `1` representing `Equals` and `2` representing
    * `GreaterThan`.
@@ -912,6 +902,16 @@ sealed trait Ordering { self =>
       case Ordering.LessThan    => 0
       case Ordering.Equals      => 1
       case Ordering.GreaterThan => 2
+    }
+
+  /**
+   * Returns this ordering, but if this ordering is equal returns the
+   * specified ordering.
+   */
+  final def orElse(that: => Ordering): Ordering =
+    self match {
+      case Ordering.Equals => that
+      case ordering        => ordering
     }
 
   /**
