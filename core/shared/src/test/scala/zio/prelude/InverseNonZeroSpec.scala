@@ -5,15 +5,15 @@ import zio.test.TestAspect.ignore
 import zio.test._
 import zio.test.laws._
 
-object InverseNonZeroSpec extends DefaultRunnableSpec {
+object PartialInverseSpec extends DefaultRunnableSpec {
 
   private val nonZeroDoubleProd = Gen.anyDouble.filter(_ != 0).map(Prod(_))
 
   def spec: ZSpec[Environment, Failure] =
-    suite("InverseNonZeroSpec")(
+    suite("PartialInverseSpec")(
       suite("laws")(
         suite("floating point")(
-          testM("double prod")(checkAllLaws(InverseNonZero)(nonZeroDoubleProd))
+          testM("double prod")(checkAllLaws(PartialInverse)(nonZeroDoubleProd))
         ) @@ ignore // floating point ignored because slight differences in the results make the test fail
       )
     )

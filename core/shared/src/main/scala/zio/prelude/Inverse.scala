@@ -1,7 +1,10 @@
 package zio.prelude
 
 import zio.prelude.coherent.EqualInverse
+import zio.test.TestResult
 import zio.test.laws.{ Lawful, Laws }
+
+import scala.annotation.tailrec
 
 /**
  * The `Inverse` type class describes an associative binary operator for a
@@ -19,15 +22,46 @@ import zio.test.laws.{ Lawful, Laws }
  * natural numbers, since subtracting a number from itself always returns
  * zero.
  */
-trait Inverse[A] extends InverseNonZero[A]
+trait Inverse[A] extends PartialInverse[A] {
+
+  def inverse(l: => A, r: => A): A
+
+  final override def inverseOption(l: => A, r: => A): Some[A] = Some(inverse(l, r))
+
+  def multiplyBy(n: Int)(a: A): A = {
+    @tailrec
+    def multiplyHelper(res: A, n: Int): A =
+      if (n == 0) res
+      else if (n > 0) multiplyHelper(combine(a, res), n - 1)
+      else multiplyHelper(inverse(res, a), n + 1)
+    multiplyHelper(identity, n)
+  }
+
+  final override def multiplyOption(n: Int)(a: A): Some[A] =
+    Some(multiplyBy(n)(a))
+}
 
 object Inverse extends Lawful[EqualInverse] {
+
+  /**
+   * The inverse law states that for some binary operator `*`, for all
+   * values `a`, with the exception of the `zero` element, the following must hold:
+   *
+   * {{{
+   * a * a === identity
+   * }}}
+   */
+  val inverseLaw: Laws[EqualInverse] =
+    new Laws.Law1[EqualInverse]("rightPartialInverseLaw") {
+      def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
+        I.inverse(a, a) <-> I.identity
+    }
 
   /**
    * The set of all laws that instances of `Inverse` must satisfy.
    */
   val laws: Laws[EqualInverse] =
-    InverseNonZero.laws
+    inverseLaw + PartialInverse.laws
 
   /**
    * Summons an implicit `Inverse[A]`.
@@ -855,4 +889,32 @@ object Inverse extends Lawful[EqualInverse] {
       }
     )
 
+}
+
+trait InverseSyntax {
+
+  /**
+   * Provides infix syntax for combining two values with an inverse
+   * operation.
+   */
+  implicit class InverseOps[A](l: A) {
+
+    /**
+     * A symbolic alias for `inverse`.
+     */
+    def ~~(r: => A)(implicit inverse: Inverse[A]): A =
+      inverse.inverse(l, r)
+
+    /**
+     * PartialInverses this value with the specified value
+     */
+    def inverse(r: => A)(implicit inverse: Inverse[A]): A =
+      inverse.inverse(l, r)
+
+    /**
+     * Multiplies value 'n' times
+     */
+    def multiplyBy(n: Int)(implicit inverse: Inverse[A]): A =
+      inverse.multiplyBy(n)(l)
+  }
 }

@@ -3,9 +3,9 @@ package experimental
 
 import zio.prelude.newtypes.{ Prod, Sum }
 
-trait DivideShape[A] extends AddMultiplyShape[A] {
+trait DivideShape[A] extends PartialDivideShape[A] {
 
-  override type Multiplication[x] <: InverseNonZero[x]
+  override type Multiplication[x] <: Inverse[x]
 
   def divide(l: => A, r: => A): A =
     Multiplication.inverse(Prod(l), Prod(r))
@@ -13,12 +13,12 @@ trait DivideShape[A] extends AddMultiplyShape[A] {
 
 object DivideShape {
 
-  type Aux[A, +addition[x] <: Associative[x], +multiplication[x] <: InverseNonZero[x]] = DivideShape[A] {
+  type Aux[A, +addition[x] <: Associative[x], +multiplication[x] <: Inverse[x]] = DivideShape[A] {
     type Addition[x] <: addition[x]
     type Multiplication[x] <: multiplication[x]
   }
 
-  def fromMultiplicativeInverse[A, addition[x] <: Associative[x], multiplication[x] <: InverseNonZero[x]](implicit
+  def fromMultiplicativeInverse[A, addition[x] <: Associative[x], multiplication[x] <: Inverse[x]](implicit
     ev: AddMultiplyShape.Aux[A, addition, multiplication]
   ): DivideShape.Aux[A, addition, multiplication] = new DivideShape[A] {
 
@@ -46,13 +46,13 @@ trait DivideShapeSyntax {
     /**
      * A symbolic alias for `subtract`.
      */
-    def -:-(r: => A)(implicit divide: DivideShape.Aux[A, Associative, InverseNonZero]): A =
+    def -:-(r: => A)(implicit divide: DivideShape.Aux[A, Associative, Inverse]): A =
       divide.divide(l, r)
 
     /**
      * Subtract two values.
      */
-    def divide(r: => A)(implicit divide: DivideShape.Aux[A, Associative, InverseNonZero]): A =
+    def divide(r: => A)(implicit divide: DivideShape.Aux[A, Associative, Inverse]): A =
       divide.divide(l, r)
 
   }

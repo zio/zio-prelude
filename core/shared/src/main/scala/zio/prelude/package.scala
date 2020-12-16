@@ -22,7 +22,8 @@ package object prelude
     with IdentitySyntax
     with IdentityBothSyntax
     with IdentityEitherSyntax
-    with InverseNonZeroSyntax
+    with InverseSyntax
+    with PartialInverseSyntax
     with NewtypeExports
     with NewtypeFExports
     with NonEmptySetSyntax

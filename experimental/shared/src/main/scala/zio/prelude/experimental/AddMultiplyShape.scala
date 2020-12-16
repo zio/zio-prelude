@@ -33,8 +33,8 @@ object AddMultiplyShape {
     override type Multiplication[x] <: Commutative[x] with Identity[x]
   }
 
-  private trait Field[A] extends Ring[A] with DivideShape[A] {
-    override type Multiplication[x] = Commutative[x] with InverseNonZero[x]
+  private trait Field[A] extends Ring[A] with PartialDivideShape[A] {
+    override type Multiplication[x] = Commutative[x] with PartialInverse[x]
   }
 
   implicit val IntAnnihilationDistributiveMultiply: classic.Ring[Int] = new Ring[Int] {
@@ -53,16 +53,16 @@ object AddMultiplyShape {
   }
 
   implicit val DoubleAnnihilationDistributiveMultiply: classic.Field[Double] = new Field[Double] {
-    override def add(l: => Double, r: => Double): Double      = l + r
-    override def divide(l: => Double, r: => Double): Double   = l / r
-    override def multiply(l: => Double, r: => Double): Double = l * r
-    override def subtract(l: => Double, r: => Double): Double = l - r
-    override def annihilation: Double                         = 0.0
+    override def add(l: => Double, r: => Double): Double                  = l + r
+    override def divideOption(l: => Double, r: => Double): Option[Double] = if (r != 0) Some(l / r) else None
+    override def multiply(l: => Double, r: => Double): Double             = l * r
+    override def subtract(l: => Double, r: => Double): Double             = l - r
+    override def annihilation: Double                                     = 0.0
 
     override def Addition: Commutative[Sum[Double]] with Inverse[Sum[Double]] =
       Associative.DoubleSumCommutativeInverse
 
-    override def Multiplication: Commutative[Prod[Double]] with InverseNonZero[Prod[Double]] =
+    override def Multiplication: Commutative[Prod[Double]] with PartialInverse[Prod[Double]] =
       Associative.DoubleProdCommutativeIdentity
   }
 }

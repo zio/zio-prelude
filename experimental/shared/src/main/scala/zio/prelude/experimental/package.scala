@@ -1,6 +1,10 @@
 package zio.prelude
 
-package object experimental extends AddMultiplyShapeSyntax with DivideShapeSyntax with SubtractShapeSyntax {
+package object experimental
+    extends AddMultiplyShapeSyntax
+    with DivideShapeSyntax
+    with PartialDivideShapeSyntax
+    with SubtractShapeSyntax {
 
   object classic {
 
@@ -14,9 +18,9 @@ package object experimental extends AddMultiplyShapeSyntax with DivideShapeSynta
       type Addition[x] <: AbelianGroup[x]
       type Multiplication[x] <: Identity[x]
     }
-    type Field[A]    = Ring[A] with DivideShape[A] {
+    type Field[A]    = Ring[A] with PartialDivideShape[A] {
       type Addition[x] <: AbelianGroup[x]
-      type Multiplication[x] <: InverseNonZero[x]
+      type Multiplication[x] <: PartialInverse[x]
     }
 
   }

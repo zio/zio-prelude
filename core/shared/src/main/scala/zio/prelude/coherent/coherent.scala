@@ -234,7 +234,7 @@ object EqualIdempotent {
     }
 }
 
-trait EqualInverse[A] extends EqualInverseNonZero[A] with Inverse[A]
+trait EqualInverse[A] extends EqualPartialInverse[A] with Inverse[A]
 
 object EqualInverse {
   implicit def derive[A](implicit equal0: Equal[A], inverse0: Inverse[A]): EqualInverse[A] =
@@ -246,14 +246,14 @@ object EqualInverse {
     }
 }
 
-trait EqualInverseNonZero[A] extends EqualIdentity[A] with InverseNonZero[A]
+trait EqualPartialInverse[A] extends EqualIdentity[A] with PartialInverse[A]
 
-object EqualInverseNonZero {
-  implicit def derive[A](implicit equal0: Equal[A], inverse0: InverseNonZero[A]): EqualInverseNonZero[A] =
-    new EqualInverseNonZero[A] {
+object EqualPartialInverse {
+  implicit def derive[A](implicit equal0: Equal[A], inverse0: PartialInverse[A]): EqualPartialInverse[A] =
+    new EqualPartialInverse[A] {
       def combine(l: => A, r: => A): A                       = inverse0.combine(l, r)
       def identity: A                                        = inverse0.identity
-      def inverse(l: => A, r: => A): A                       = inverse0.inverse(l, r)
+      def inverseOption(l: => A, r: => A): Option[A]         = inverse0.inverseOption(l, r)
       override protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
 }
