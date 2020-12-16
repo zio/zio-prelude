@@ -48,6 +48,12 @@ package object prelude
   type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, R, E, A]
   val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
+  type Writer[+W, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, Nothing, A]
+  val Writer: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type EWriter[+W, +E, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, E, A]
+  val EWriter: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
   type ZValidation[+W, +E, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, E, A]
   val ZValidation: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
