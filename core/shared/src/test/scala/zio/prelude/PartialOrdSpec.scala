@@ -30,17 +30,17 @@ object PartialOrdSpec extends DefaultRunnableSpec {
         testM("map")(checkAllLaws(PartialOrd)(Gen.mapOf(Gen.anyInt, Gen.anyInt)))
       ),
       test("map ord") {
-        assert(Map.empty[Int, Int] =??= Map.empty[Int, Int])(equalTo(Some(Ordering.Equals))) &&
-        assert(Map(1 -> 2) =??= Map.empty[Int, Int])(equalTo(Some(Ordering.GreaterThan))) &&
-        assert(Map.empty[Int, Int] =??= Map(1 -> 2))(equalTo(Some(Ordering.LessThan))) &&
-        assert(Map(1 -> 2) =??= Map(1 -> 2))(equalTo(Some(Ordering.Equals))) &&
-        assert(Map(1 -> 2) =??= Map(1 -> 3))(equalTo(Some(Ordering.LessThan))) &&
-        assert(Map(1 -> 3) =??= Map(1 -> 2))(equalTo(Some(Ordering.GreaterThan))) &&
-        assert(Map(1 -> 2) =??= Map(1 -> 3, 2 -> 4))(equalTo(Some(Ordering.LessThan))) &&
-        assert(Map(1 -> 3, 2 -> 4) =??= Map(1 -> 2))(equalTo(Some(Ordering.GreaterThan))) &&
-        assert(Map(1 -> 2) =??= Map(2 -> 2))(equalTo(None)) &&
-        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 3, 2 -> 2))(equalTo(None)) &&
-        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 1, 2 -> 2))(equalTo(None))
+        assert(Map.empty[Int, Int] =??= Map.empty[Int, Int])(equalTo(Ordering.Equals)) &&
+        assert(Map(1 -> 2) =??= Map.empty[Int, Int])(equalTo(Ordering.GreaterThan)) &&
+        assert(Map.empty[Int, Int] =??= Map(1 -> 2))(equalTo(Ordering.LessThan)) &&
+        assert(Map(1 -> 2) =??= Map(1 -> 2))(equalTo(Ordering.Equals)) &&
+        assert(Map(1 -> 2) =??= Map(1 -> 3))(equalTo(Ordering.LessThan)) &&
+        assert(Map(1 -> 3) =??= Map(1 -> 2))(equalTo(Ordering.GreaterThan)) &&
+        assert(Map(1 -> 2) =??= Map(1 -> 3, 2 -> 4))(equalTo(Ordering.LessThan)) &&
+        assert(Map(1 -> 3, 2 -> 4) =??= Map(1 -> 2))(equalTo(Ordering.GreaterThan)) &&
+        assert(Map(1 -> 2) =??= Map(2 -> 2))(equalTo(PartialOrdering.Incomparable)) &&
+        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 3, 2 -> 2))(equalTo(PartialOrdering.Incomparable)) &&
+        assert(Map(1 -> 2, 3 -> 3) =??= Map(3 -> 1, 2 -> 2))(equalTo(PartialOrdering.Incomparable))
       }
     )
 }

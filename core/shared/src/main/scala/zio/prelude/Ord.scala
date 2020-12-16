@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.Equal._
-import zio.prelude.coherent.HashOrd
+import zio.prelude.coherent.{HashOrd, HashPartialOrd}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
@@ -19,18 +19,13 @@ trait Ord[-A] extends PartialOrd[A] { self =>
   /**
    * Returns the result of comparing two values of type `A`.
    */
-  final def compare(l: A, r: A): Ordering =
+  final override def compare(l: A, r: A): Ordering =
     if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
 
   /**
    * Returns the result of comparing two values of type `A`.
    */
   protected def checkCompare(l: A, r: A): Ordering
-
-  /**
-   * Returns the result of comparing two values of type `A`, always returned in `Some(_)`.
-   */
-  final override protected def checkCompareOption(l: A, r: A): Some[Ordering] = Some(checkCompare(l, r))
 
   override protected def checkEqual(l: A, r: A): Boolean =
     compare(l, r).isEqual
@@ -852,17 +847,12 @@ trait OrdSyntax {
     def =?=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Ordering = ord.compare(l, r)
   }
 }
-
-/**
- * An `Ordering` is the result of comparing two values. The result may be
- * `LessThan`, `Equals`, or `GreaterThan`.
- */
-sealed trait Ordering { self =>
+sealed trait PartialOrdering extends Product with Serializable { self =>
 
   /**
    * A symbolic alias for `orElse`.
    */
-  final def <>(that: => Ordering): Ordering =
+  def <>(that: => PartialOrdering): PartialOrdering =
     self orElse that
 
   /**
@@ -891,6 +881,77 @@ sealed trait Ordering { self =>
       case Ordering.LessThan => true
       case _                 => false
     }
+
+  /**
+   * Returns this ordering, but if this ordering is equal returns the
+   * specified ordering.
+   */
+  def orElse(that: => PartialOrdering): PartialOrdering =
+    self match {
+      case Ordering.Equals => that
+      case ordering        => ordering
+    }
+
+  def reduce(that: PartialOrdering): PartialOrdering = (self, that) match {
+    case (Ordering.LessThan, Ordering.LessThan)       => Ordering.LessThan
+    case (Ordering.GreaterThan, Ordering.GreaterThan) => Ordering.GreaterThan
+    case (Ordering.Equals, that)                      => that
+    case (self, Ordering.Equals)                      => self
+    case _                                            => PartialOrdering.Incomparable
+  }
+}
+
+sealed trait Comparison extends Product with Serializable
+
+object Comparison {
+
+  sealed trait NotEqual extends Comparison
+
+}
+
+object PartialOrdering {
+
+  case object Incomparable extends PartialOrdering with Comparison.NotEqual
+
+  /**
+   * `Hash` and `PartialOrd` instance for `PartialOrdering` values.
+   */
+  implicit val PartialOrderingHashPartialOrd: Hash[PartialOrdering] with PartialOrd[PartialOrdering] =
+    HashPartialOrd.make(
+      (x: PartialOrdering) => x.hashCode,
+      (l: PartialOrdering, r: PartialOrdering) =>
+        (l, r) match {
+          case (l: Ordering, r: Ordering)   => Ordering.OrderingHashOrd.compare(l, r)
+          case (Incomparable, Incomparable) => Ordering.Equals
+          case _                            => Incomparable
+        }
+    )
+
+  /**
+   * `Idempotent`, `Identity` (and thus `Associative`) instance for `PartialOrdering` values.
+   */
+  implicit val PartialOrderingIdempotentIdentity: Idempotent[PartialOrdering] with Identity[PartialOrdering] =
+    new Idempotent[PartialOrdering] with Identity[PartialOrdering] {
+      override def combine(l: => PartialOrdering, r: => PartialOrdering): PartialOrdering = l match {
+        case Ordering.Equals => r
+        case l               => l
+      }
+
+      override def identity: PartialOrdering = Ordering.Equals
+    }
+}
+
+/**
+ * An `Ordering` is the result of comparing two values. The result may be
+ * `LessThan`, `Equals`, or `GreaterThan`.
+ */
+sealed trait Ordering extends PartialOrdering { self =>
+
+  /**
+   * A symbolic alias for `orElse`.
+   */
+  final def <>(that: => Ordering): Ordering =
+    self orElse that
 
   /**
    * Converts this `Ordering` to an ordinal representation, with `0`
@@ -927,9 +988,9 @@ sealed trait Ordering { self =>
 }
 
 object Ordering {
-  case object LessThan    extends Ordering
-  case object Equals      extends Ordering
-  case object GreaterThan extends Ordering
+  case object LessThan    extends Ordering with Comparison.NotEqual
+  case object Equals      extends Ordering with Comparison
+  case object GreaterThan extends Ordering with Comparison.NotEqual
 
   /**
    * Converts an integer result from [[scala.math.Ordering.compare]] or

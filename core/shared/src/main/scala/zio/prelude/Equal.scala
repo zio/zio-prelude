@@ -339,10 +339,10 @@ object Equal extends Lawful[Equal] {
     HashPartialOrd.make(
       _.hashCode,
       (l, r) =>
-        if (l == r) Some(Ordering.Equals)
-        else if (l.subsetOf(r)) Some(Ordering.LessThan)
-        else if (r.subsetOf(l)) Some(Ordering.GreaterThan)
-        else None
+        if (l == r) Ordering.Equals
+        else if (l.subsetOf(r)) Ordering.LessThan
+        else if (r.subsetOf(l)) Ordering.GreaterThan
+        else PartialOrdering.Incomparable
     )
 
   /**
