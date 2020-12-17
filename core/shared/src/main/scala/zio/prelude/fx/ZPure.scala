@@ -2,9 +2,9 @@ package zio.prelude.fx
 
 import zio.internal.Stack
 import zio.prelude._
-import zio.{ CanFail, NeedsEnv }
+import zio.{CanFail, NeedsEnv}
 
-import scala.annotation.{ implicitNotFound, switch }
+import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
 import scala.util.control.NonFatal
 

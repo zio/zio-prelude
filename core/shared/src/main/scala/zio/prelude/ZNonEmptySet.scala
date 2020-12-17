@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ Max, Prod, Sum }
+import zio.prelude.newtypes.{Max, Prod, Sum}
 
 import scala.language.implicitConversions
 

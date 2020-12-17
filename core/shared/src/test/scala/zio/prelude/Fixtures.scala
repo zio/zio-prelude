@@ -3,7 +3,7 @@ package zio.prelude
 import zio.Chunk
 import zio.random.Random
 import zio.test.laws.GenF
-import zio.test.{ Gen, Sized }
+import zio.test.{Gen, Sized}
 
 object Fixtures {
   type ChunkOption[+A] = Chunk[Option[A]]

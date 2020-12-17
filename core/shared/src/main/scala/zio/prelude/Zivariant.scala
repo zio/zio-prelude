@@ -3,9 +3,9 @@ package zio.prelude
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.ZStream
-import zio.{ ZIO, ZLayer, ZManaged }
+import zio.{ZIO, ZLayer, ZManaged}
 
-import scala.Predef.{ identity => id }
+import scala.Predef.{identity => id}
 
 /**
  * Abstract over type constructor with 3 parameters: on first as contravariant

@@ -1,9 +1,9 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualTraversable
-import zio.prelude.newtypes.{ And, First, Max, Min, Or, Prod, Sum }
+import zio.prelude.newtypes.{And, First, Max, Min, Or, Prod, Sum}
 import zio.test.laws._
-import zio.{ Chunk, ChunkBuilder, NonEmptyChunk }
+import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
 
 /**
  * `Traversable` is an abstraction that describes the ability to iterate over
