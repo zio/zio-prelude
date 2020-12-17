@@ -113,8 +113,7 @@ sealed trait Semiring[+Z <: Unit, +A] { self =>
    * events.
    */
   final def foreach[F[+_]: IdentityBoth: Covariant, B](f: A => F[B]): F[Semiring[Z, B]] =
-    fold(Semiring.empty.succeed, a => f(a).map(Semiring.single))(_.zipWith(_)(_ ++ _), _.zipWith(_)(_ && _))
-      .asInstanceOf[F[Semiring[Z, B]]]
+    fold[F[Semiring[Unit, B]]](Semiring.empty.succeed, a => f(a).map(Semiring.single))(_.zipWith(_)(_ ++ _), _.zipWith(_)(_ && _)).asInstanceOf[F[Semiring[Z, B]]]
 
   /**
    * Transforms the type of events in this collection of events with the
