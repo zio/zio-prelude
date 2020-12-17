@@ -1,8 +1,8 @@
 package zio.prelude
 
 import zio.prelude.coherent.EqualPartialInverse
-import zio.test.laws.{ Lawful, Laws }
-import zio.test.{ TestResult, assertCompletes }
+import zio.test.laws.{Lawful, Laws}
+import zio.test.{TestResult, assertCompletes}
 
 import scala.annotation.tailrec
 

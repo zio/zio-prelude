@@ -1,7 +1,7 @@
 package zio.prelude
 package experimental
 
-import zio.prelude.newtypes.{ Prod, Sum }
+import zio.prelude.newtypes.{Prod, Sum}
 
 trait DivideShape[A] extends PartialDivideShape[A] {
 

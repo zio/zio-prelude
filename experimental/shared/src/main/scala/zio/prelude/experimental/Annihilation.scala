@@ -2,9 +2,9 @@ package zio.prelude
 package experimental
 
 import zio.prelude.experimental.coherent.AnnihilationEqual
-import zio.prelude.newtypes.{ Prod, Sum }
+import zio.prelude.newtypes.{Prod, Sum}
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 trait Annihilation[A] extends AddMultiplyShape[A] {
 

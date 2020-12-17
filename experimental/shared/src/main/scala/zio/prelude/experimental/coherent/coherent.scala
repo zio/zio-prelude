@@ -2,7 +2,7 @@ package zio.prelude.experimental.coherent
 
 import zio.prelude._
 import zio.prelude.experimental._
-import zio.prelude.newtypes.{ Prod, Sum }
+import zio.prelude.newtypes.{Prod, Sum}
 
 trait AnnihilationEqual[A] extends Annihilation[A] with Equal[A] {
   type Addition[x]       = Identity[x]

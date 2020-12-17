@@ -3,7 +3,7 @@ package experimental
 
 import zio.prelude.experimental.coherent.DistributiveMultiplyEqual
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 trait DistributiveMultiply[A] extends AddMultiplyShape[A]
 
