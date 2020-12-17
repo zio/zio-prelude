@@ -1,9 +1,9 @@
 package zio.prelude
 
 import zio.prelude.coherent.DeriveEqualNonEmptyTraversable
-import zio.prelude.newtypes.{ Max, Min }
+import zio.prelude.newtypes.{Max, Min}
 import zio.test.laws._
-import zio.{ ChunkBuilder, NonEmptyChunk }
+import zio.{ChunkBuilder, NonEmptyChunk}
 
 /**
  * A `NonEmptyTraversable` describes a `Traversable` that is guaranteed to

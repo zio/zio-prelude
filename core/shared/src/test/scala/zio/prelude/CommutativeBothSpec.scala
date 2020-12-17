@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.test.laws._
-import zio.test.{ testM, _ }
+import zio.test.{testM, _}
 
 object CommutativeBothSpec extends DefaultRunnableSpec {
 

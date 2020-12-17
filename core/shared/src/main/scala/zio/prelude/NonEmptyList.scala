@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
-import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
+import zio.prelude.newtypes.{Max, Min, Prod, Sum}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions

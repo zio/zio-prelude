@@ -1,13 +1,12 @@
 package zio.prelude.fx
 
-import java.util.NoSuchElementException
-
 import zio.CanFail
 import zio.prelude._
 import zio.random.Random
-import zio.test.Assertion.{ anything, isLeft, isNone, isRight, isSome, isSubtype }
+import zio.test.Assertion.{anything, isLeft, isNone, isRight, isSome, isSubtype}
 import zio.test._
 
+import java.util.NoSuchElementException
 import scala.util.Try
 
 object ZPureSpec extends DefaultRunnableSpec {
@@ -74,10 +73,41 @@ object ZPureSpec extends DefaultRunnableSpec {
       ),
       suite("state")(
         suite("methods")(
+          testM("|||") {
+            check(genInt, genInt, genInt, genInt, genInt) { (s0, s1, s2, a1, a2) =>
+              val z1 = ZPure.fromFunction[Int, Unit, Int](_ => a1).asState(s1)
+              val z2 = ZPure.fromFunction[Int, Unit, Int](_ => a2).asState(s2)
+              assert((z1 ||| z2).provide(Left(())).run(s0))(equalTo((s1, a1))) &&
+              assert((z1 ||| z2).provide(Right(())).run(s0))(equalTo((s2, a2)))
+            }
+          },
           testM("contramap") {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
               assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
+            }
+          },
+          testM("filterOrElse") {
+            check(genInt, genInt, genInt, genInt, genInt) { (s1, s2, s3, a1, a2) =>
+              val z = ZPure.succeed[Int, Int](a1).asState(s2)
+              val f = (_: Int) => ZPure.succeed(a2).asState(s3)
+              assert(z.filterOrElse(_ => true)(f).run(s1))(equalTo((s2, a1))) &&
+              assert(z.filterOrElse(_ => false)(f).run(s1))(equalTo((s3, a2)))
+            }
+          },
+          testM("filterOrElse_") {
+            check(genInt, genInt, genInt, genInt, genInt) { (s1, s2, s3, a1, a2) =>
+              val z1 = ZPure.succeed[Int, Int](a1).asState(s2)
+              val z2 = ZPure.succeed(a2).asState(s3)
+              assert(z1.filterOrElse_(_ => true)(z2).run(s1))(equalTo((s2, a1))) &&
+              assert(z1.filterOrElse_(_ => false)(z2).run(s1))(equalTo((s3, a2)))
+            }
+          },
+          testM("filterOrFail") {
+            check(genInt, genInt) { (a, e) =>
+              val z = ZPure.succeed[Unit, Int](a)
+              assert(z.filterOrFail(_ => true)(e).runEither(()))(isRight(equalTo(((), a)))) &&
+              assert(z.filterOrFail(_ => false)(e).runEither(()))(isLeft(equalTo(e)))
             }
           },
           testM("flatMap") {
@@ -112,6 +142,14 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(optOrHead)(isLeft(equalTo(Option.empty[String])))
             }
           },
+          testM("join") {
+            check(genInt, genInt, genInt, genInt, genInt) { (s0, s1, s2, a1, a2) =>
+              val z1 = ZPure.fromFunction[Int, Unit, Int](_ => a1).asState(s1)
+              val z2 = ZPure.fromFunction[Int, Unit, Int](_ => a2).asState(s2)
+              assert(z1.join(z2).provide(Left(())).run(s0))(equalTo((s1, a1))) &&
+              assert(z1.join(z2).provide(Right(())).run(s0))(equalTo((s2, a2)))
+            }
+          },
           testM("map") {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
@@ -122,6 +160,12 @@ object ZPureSpec extends DefaultRunnableSpec {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
               assert(fa.mapState(f).run(s))(equalTo((f(s1), a1)))
+            }
+          },
+          testM("negate") {
+            check(genInt) { s =>
+              assert(State.succeed[Int, Boolean](true).negate.run(s))(equalTo((s, false))) &&
+              assert(State.succeed[Int, Boolean](false).negate.run(s))(equalTo((s, true)))
             }
           },
           suite("repeatN")(
@@ -247,6 +291,11 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(State.modify(f).runState(s))(equalTo(f(s)._1))
             }
           },
+          testM("unit") {
+            check(genInt, genInt) { (s, a) =>
+              assert(State.succeed[Int, Int](a).unit.run(s))(equalTo((s, ())))
+            }
+          },
           testM("zip") {
             check(genState, genState, genInt) { (fa, fb, s) =>
               val (s1, a) = fa.run(s)
@@ -322,6 +371,18 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(s2)(equalTo(s1)) && assert(a)(isLeft(equalTo(e)))
             }
           },
+          suite("none")(
+            testM("success") {
+              check(genInt) { s =>
+                assert(ZPure.succeed[Int, Option[Int]](None).none.runEither(s))(isRight(equalTo((s, ()))))
+              }
+            },
+            testM("failure") {
+              check(genInt, genInt) { (s, a) =>
+                assert(ZPure.succeed[Int, Option[Int]](Some(a)).none.runEither(s))(isLeft(isNone))
+              }
+            }
+          ),
           testM("orElseFail") {
             check(genInt, genInt, genString) { (s1, e, e1) =>
               val errorOrUpdate = ZPure.fail(e).orElseFail(e1).runEither(s1)
@@ -641,6 +702,37 @@ object ZPureSpec extends DefaultRunnableSpec {
                 val failure: ZPure[Int, Int, Any, Int, Option[Int]] = ZPure.fail(e)
                 val result: ZPure[Int, Int, Any, Any, Int]          = failure.someOrFailException
                 assert(result.runEither(s))(isLeft(isSubtype[Int](equalTo(e))))
+              }
+            }
+          ),
+          suite("withFilter")(
+            test("withFilter success") {
+              val zpure1: ZPure[Unit, Unit, Any, NoSuchElementException, (Int, Int)] = ZPure.succeed((1, 2))
+              val zpure2: ZPure[Unit, Unit, Any, RuntimeException, Int]              = ZPure.succeed(3)
+
+              val program = for {
+                (i, j)   <- zpure1
+                positive <- zpure2 if positive > 0
+              } yield positive
+              assert(program.runEither(()))(isRight(equalTo(((), 3))))
+            },
+            test("withFilter fail") {
+              val zpure1: ZPure[Unit, Unit, Any, RuntimeException, (Int, Int)] = ZPure.succeed((1, 2))
+              val zpure2: ZPure[Unit, Unit, Any, NoSuchElementException, Int]  = ZPure.succeed(-3)
+
+              val program = for {
+                (i, j)   <- zpure1
+                positive <- zpure2 if positive > 0
+              } yield positive
+              assert(program.runEither(())) {
+                implicit val eq: Equal[RuntimeException] = Equal.ThrowableHash
+                isLeft(
+                  equalTo(
+                    new NoSuchElementException(
+                      "The value doesn't satisfy the predicate"
+                    ): RuntimeException // upcast to RuntimeException because of Dotty
+                  )
+                )
               }
             }
           )
