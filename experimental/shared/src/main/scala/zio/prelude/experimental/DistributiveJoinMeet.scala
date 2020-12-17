@@ -3,7 +3,7 @@ package experimental
 
 import zio.prelude.experimental.coherent.DistributiveJoinMeetEqual
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 trait DistributiveJoinMeet[A] extends JoinMeetShape[A]
 

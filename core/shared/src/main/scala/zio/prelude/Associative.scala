@@ -1,10 +1,10 @@
 package zio.prelude
 
 import zio.prelude.coherent.AssociativeEqual
-import zio.prelude.newtypes.{ And, AndF, First, Last, Max, Min, Or, OrF, Prod, Sum }
+import zio.prelude.newtypes.{And, AndF, First, Last, Max, Min, Or, OrF, Prod, Sum}
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
-import zio.{ Chunk, NonEmptyChunk }
+import zio.test.laws.{Lawful, Laws}
+import zio.{Chunk, NonEmptyChunk}
 
 import scala.annotation.tailrec
 

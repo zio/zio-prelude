@@ -3,7 +3,7 @@ package experimental
 
 import zio.prelude.experimental.coherent.AbsorptionEqual
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 trait Absorption[A] extends JoinMeetShape[A]
 

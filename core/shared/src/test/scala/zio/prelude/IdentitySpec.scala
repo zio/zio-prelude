@@ -1,9 +1,9 @@
 package zio.prelude
 
 import com.github.ghik.silencer.silent
-import zio.prelude.newtypes.{ And, Max, Min, Or, OrF, Prod, Sum }
+import zio.prelude.newtypes.{And, Max, Min, Or, OrF, Prod, Sum}
 import zio.test.laws._
-import zio.test.{ DefaultRunnableSpec, _ }
+import zio.test.{DefaultRunnableSpec, _}
 
 object IdentitySpec extends DefaultRunnableSpec {
 

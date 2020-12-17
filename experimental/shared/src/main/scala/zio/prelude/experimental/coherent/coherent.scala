@@ -2,7 +2,7 @@ package zio.prelude.experimental.coherent
 
 import zio.prelude._
 import zio.prelude.experimental._
-import zio.prelude.newtypes.{ AndF, OrF }
+import zio.prelude.newtypes.{AndF, OrF}
 
 trait AbsorptionEqual[A] extends Absorption[A] with Equal[A] {
   override type Join[x] = Associative[x]

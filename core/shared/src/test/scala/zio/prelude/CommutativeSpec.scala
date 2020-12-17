@@ -1,6 +1,6 @@
 package zio.prelude
 
-import zio.prelude.newtypes.{ And, Or, OrF, Prod, Sum }
+import zio.prelude.newtypes.{And, Or, OrF, Prod, Sum}
 import zio.random.Random
 import zio.test._
 import zio.test.laws._

@@ -1,7 +1,7 @@
 package zio.prelude
 package experimental
 
-import zio.prelude.newtypes.{ AndF, OrF }
+import zio.prelude.newtypes.{AndF, OrF}
 
 trait JoinMeetShape[A] {
 

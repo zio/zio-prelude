@@ -3,7 +3,7 @@ package experimental
 
 import zio.prelude.experimental.coherent.InvolutionEqual
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 trait Involution[A] extends ComplementShape[A]
 

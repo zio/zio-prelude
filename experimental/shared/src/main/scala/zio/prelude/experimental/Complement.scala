@@ -3,7 +3,7 @@ package experimental
 
 import zio.prelude.experimental.coherent.ComplementEqual
 import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+import zio.test.laws.{Lawful, Laws}
 
 trait Complement[A] extends BottomTopShape[A] with ComplementShape[A]
 
