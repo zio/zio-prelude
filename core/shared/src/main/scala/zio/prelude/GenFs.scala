@@ -72,6 +72,12 @@ object GenFs {
         Gens.nonEmptyListOf(gen)
     }
 
+  val semiring: GenF[Random with Sized, Semiring] =
+    new GenF[Random with Sized, Semiring] {
+      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Semiring[A]] =
+        Gens.semiring(gen)
+    }
+
   /**
    * A generator of `Try` values.
    */

@@ -3,6 +3,7 @@ package zio.prelude
 import zio.prelude.Semiring._
 import zio.random._
 import zio.test._
+import zio.test.laws._
 
 object SemiringSpec extends DefaultRunnableSpec {
 
@@ -25,33 +26,54 @@ object SemiringSpec extends DefaultRunnableSpec {
 
   def spec: ZSpec[Environment, Failure] =
     suite("SemiringSpec")(
-      testM("both is associative") {
-        check(semiring, semiring, semiring) { (a, b, c) =>
-          assert((a && b) && c)(equalTo(a && (b && c))) &&
-          assert(a && (b && c))(equalTo((a && b) && c))
+      suite("laws")(
+        testM("covariant") {
+          checkAllLaws(Covariant)(GenFs.semiring, Gen.anyInt)
+        },
+        testM("hash") {
+          checkAllLaws(Hash)(Gens.semiring(Gen.anyInt))
+        },
+        testM("identityBoth") {
+          checkAllLaws(IdentityBoth)(GenFs.semiring, Gen.anyInt)
+        },
+        testM("identityFlatten") {
+          checkAllLaws(IdentityFlatten)(GenFs.semiring, Gen.anyInt)
+        },
+        testM("nonEmptyTraversable") {
+          checkAllLaws(NonEmptyTraversable)(GenFs.semiring, Gen.anyInt)
         }
-      },
-      testM("both is commutative") {
-        check(semiring, semiring) { (a, b) =>
-          assert(a && b)(equalTo(b && a))
+      ),
+      suite("both")(
+        testM("associative") {
+          check(semiring, semiring, semiring) { (a, b, c) =>
+            assert((a && b) && c)(equalTo(a && (b && c))) &&
+            assert(a && (b && c))(equalTo((a && b) && c))
+          }
+        },
+        testM("commutative") {
+          check(semiring, semiring) { (a, b) =>
+            assert(a && b)(equalTo(b && a))
+          }
         }
-      },
-      testM("equals is consistent with hash code") {
+      ),
+      testM("hashCode") {
         check(equalSemirings) { case (a, b) =>
           assert(a.hashCode)(equalTo(b.hashCode))
         }
       },
-      testM("then is associative") {
-        check(semiring, semiring, semiring) { (a, b, c) =>
-          assert((a ++ b) ++ c)(equalTo(a ++ (b ++ c))) &&
-          assert(a ++ (b ++ c))(equalTo((a ++ b) ++ c))
+      suite("then")(
+        testM("associative") {
+          check(semiring, semiring, semiring) { (a, b, c) =>
+            assert((a ++ b) ++ c)(equalTo(a ++ (b ++ c))) &&
+            assert(a ++ (b ++ c))(equalTo((a ++ b) ++ c))
+          }
+        },
+        testM("commutative") {
+          check(semiring, semiring, semiring) { (a, b, c) =>
+            assert(a ++ (b && c))(equalTo((a ++ b) && (a ++ c))) &&
+            assert((a && b) ++ c)(equalTo((a ++ c) && (b ++ c)))
+          }
         }
-      },
-      testM("then distributes over both") {
-        check(semiring, semiring, semiring) { (a, b, c) =>
-          assert(a ++ (b && c))(equalTo((a ++ b) && (a ++ c))) &&
-          assert((a && b) ++ c)(equalTo((a ++ c) && (b ++ c)))
-        }
-      }
+      )
     )
 }

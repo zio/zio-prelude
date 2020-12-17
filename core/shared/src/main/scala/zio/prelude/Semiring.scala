@@ -16,18 +16,43 @@ sealed trait Semiring[+A] { self =>
   /**
    * Combines this collection of events with that collection of events to
    * return a new collection of events that represents this collection of
-   * events followed by that collection of events.
+   * events in parallel with that collection of events.
    */
-  def ++[A1 >: A](that: Semiring[A1]): Semiring[A1] =
-    Semiring.Then(self, that)
+  final def &&[A1 >: A](that: Semiring[A1]): Semiring[A1] =
+    Semiring.Both(self, that)
+
+  /**
+   * A symbolic alias for `zipRight`.
+   */
+  final def *>[B](that: Semiring[B]): Semiring[B] =
+    zipRight(that)
 
   /**
    * Combines this collection of events with that collection of events to
    * return a new collection of events that represents this collection of
-   * events in parallel with that collection of events.
+   * events followed by that collection of events.
    */
-  def &&[A1 >: A](that: Semiring[A1]): Semiring[A1] =
-    Semiring.Both(self, that)
+  final def ++[A1 >: A](that: Semiring[A1]): Semiring[A1] =
+    Semiring.Then(self, that)
+
+  /**
+   * A symbolic alias for `zipLeft`.
+   */
+  final def <*[B](that: Semiring[B]): Semiring[A] =
+    zipLeft(that)
+
+  /**
+   * A symbolic alias for `zip`.
+   */
+  final def <*>[B](that: Semiring[B]): Semiring[(A, B)] =
+    zip(that)
+
+  /**
+   * Maps the events in this collection of events to the specified constant
+   * value.
+   */
+  final def as[B](b: B): Semiring[B] =
+    map(_ => b)
 
   /**
    * Returns the first event in this collection of events. If multiple events
@@ -41,6 +66,91 @@ sealed trait Semiring[+A] { self =>
       case Semiring.Then(left, _) => left.first
       case Semiring.Single(value) => value
     }
+
+  /**
+   * Constructs a new collection of events for each event in this collection of
+   * events, collecting them back into a single collection of events.
+   */
+  final def flatMap[B](f: A => Semiring[B]): Semiring[B] =
+    fold(f)(_ ++ _, _ && _)
+
+  /**
+   * Flattens a collection of collections of events into a single collection
+   * of events.
+   */
+  final def flatten[B](implicit ev: A <:< Semiring[B]): Semiring[B] =
+    flatMap(ev)
+
+  /**
+   * Folds over the events in this collection of events using the specified
+   * functions.
+   */
+  final def fold[B](singleCase: A => B)(thenCase: (B, B) => B, bothCase: (B, B) => B): B = {
+    @tailrec
+    def loop(in: List[Semiring[A]], out: List[Either[Boolean, B]]): List[B] =
+      in match {
+        case Semiring.Both(left, right) :: semirings => loop(left :: right :: semirings, Left(true) :: out)
+        case Semiring.Then(left, right) :: semirings => loop(left :: right :: semirings, Left(false) :: out)
+        case Semiring.Single(a) :: semirings         => loop(semirings, Right(singleCase(a)) :: out)
+        case Nil                                     =>
+          out.foldLeft[List[B]](List.empty) {
+            case (acc, Right(semiring)) => semiring :: acc
+            case (acc, Left(true))      =>
+              val left :: right :: semirings = acc
+              bothCase(left, right) :: semirings
+            case (acc, Left(false))     =>
+              val left :: right :: semirings = acc
+              thenCase(left, right) :: semirings
+          }
+      }
+    loop(List(self), List.empty).head
+  }
+
+  /**
+   * Performs the specified effectual function for each event in this
+   * collection of events, collecting them back into a single collection of
+   * events.
+   */
+  final def foreach[F[+_]: AssociativeBoth: Covariant, B](f: A => F[B]): F[Semiring[B]] =
+    fold(a => f(a).map(Semiring.single))(_.zipWith(_)(_ ++ _), _.zipWith(_)(_ && _))
+
+  /**
+   * Transforms the type of events in this collection of events with the
+   * specified function.
+   */
+  final def map[B](f: A => B): Semiring[B] =
+    flatMap(a => Semiring.single(f(a)))
+
+  /**
+   * Combines this collection of events with that collection of events to
+   * return the Cartesian product of events, combining the elements into a
+   * tuple.
+   */
+  final def zip[B](that: Semiring[B]): Semiring[(A, B)] =
+    zipWith(that)((_, _))
+
+  /**
+   * Combines this collection of events with that collection of events to
+   * return the Cartesian product of events, keeping only the events from this
+   * collection.
+   */
+  final def zipLeft[B](that: Semiring[B]): Semiring[A] =
+    zipWith(that)((a, _) => a)
+
+  /**
+   * Combines this collection of events with that collection of events to
+   * return the Cartesian product of events, keeping only the events from that
+   * collection.
+   */
+  final def zipRight[B](that: Semiring[B]): Semiring[B] =
+    zipWith(that)((_, b) => b)
+
+  /**
+   * Combines this collection of events with that collection of events to
+   * return the Cartesian product of events using the specified function.
+   */
+  final def zipWith[B, C](that: Semiring[B])(f: (A, B) => C): Semiring[C] =
+    self.flatMap(a => that.map(b => f(a, b)))
 }
 
 object Semiring {
@@ -54,7 +164,7 @@ object Semiring {
           false
       }
     override def hashCode: Int                                          =
-      flatten(self).hashCode
+      Semiring.flatten(self).hashCode
     private def associate(l: Semiring[Any], r: Semiring[Any]): Boolean  =
       (l, r) match {
         case (Both(Both(al, bl), cl), Both(ar, Both(br, cr))) =>
@@ -96,7 +206,7 @@ object Semiring {
       case _                 => false
     }
     override def hashCode: Int                                          =
-      flatten(self).hashCode
+      Semiring.flatten(self).hashCode
     private def associate(l: Semiring[Any], r: Semiring[Any]): Boolean  = (l, r) match {
       case (Then(Then(al, bl), cl), Then(ar, Then(br, cr))) => al == ar && bl == br && cl == cr
       case _                                                => false
@@ -127,6 +237,61 @@ object Semiring {
    */
   def single[A](a: A): Semiring[A] =
     Semiring.Single(a)
+
+  /**
+   * A collection of events that contains a single event with no information.
+   */
+  val unit: Semiring[Unit] =
+    single(())
+
+  /**
+   * The `Covariant` instance for `Semiring`.
+   */
+  implicit val SemiringCovariant: Covariant[Semiring] =
+    new Covariant[Semiring] {
+      def map[A, B](f: A => B): Semiring[A] => Semiring[B] =
+        _.map(f)
+    }
+
+  /**
+   * Derives a `Debug[Semiring[A]]` given a `Debug[A]`.
+   */
+  implicit def SemiringDebug[A: Debug]: Debug[Semiring[A]] =
+    _.fold(a => Debug.Repr.VConstructor(List("zio", "prelude"), "Single", List(a.debug)))(
+      (l, r) => Debug.Repr.VConstructor(List("zio", "prelude"), "Then", List(l, r)),
+      (l, r) => Debug.Repr.VConstructor(List("zio", "prelude"), "Both", List(l, r))
+    )
+
+  /**
+   * The `IdentityBoth` instance for `Semiring`.
+   */
+  implicit val SemiringIdentityBoth: IdentityBoth[Semiring] =
+    new IdentityBoth[Semiring] {
+      def any: Semiring[Any]                                                        =
+        unit
+      def both[A, B](left: => Semiring[A], right: => Semiring[B]): Semiring[(A, B)] =
+        left.zip(right)
+    }
+
+  /**
+   * The `IdentityFlatten` instance for `Semiring`.
+   */
+  implicit val SemiringIdentityFlatten: IdentityFlatten[Semiring] =
+    new IdentityFlatten[Semiring] {
+      def any: Semiring[Any]                                        =
+        unit
+      def flatten[A](semirings: Semiring[Semiring[A]]): Semiring[A] =
+        semirings.flatten
+    }
+
+  /**
+   * The `NonEmptyTraversable` instance for `Semiring.
+   */
+  implicit val SemiringNonEmptyTraversable: NonEmptyTraversable[Semiring] =
+    new NonEmptyTraversable[Semiring] {
+      def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: Semiring[A])(f: A => F[B]): F[Semiring[B]] =
+        fa.foreach(f)
+    }
 
   /**
    * The `Hash` instance for `Semiring`. Note that due to limitations of
