@@ -87,9 +87,9 @@ object Derive {
   /**
    * The `DeriveEqual` instance for `Semiring`.
    */
-  implicit val SemiringDeriveEqual: DeriveEqual[Semiring] =
-    new DeriveEqual[Semiring] {
-      def derive[A: Equal]: Equal[Semiring[A]] =
+  implicit def SemiringDeriveEqual[Z <: Unit]: DeriveEqual[({ type lambda[+x] = Semiring[Z, x] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = Semiring[Z, x] })#lambda] {
+      def derive[A: Equal]: Equal[Semiring[Z, A]] =
         Semiring.SemiringHash
     }
 

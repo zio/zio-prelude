@@ -7,10 +7,10 @@ import zio.test.laws._
 
 object SemiringSpec extends DefaultRunnableSpec {
 
-  val semiring: Gen[Random with Sized, Semiring[Int]] =
-    Gens.semiring(Gen.anyInt)
+  val semiring: Gen[Random with Sized, Semiring[Unit, Int]] =
+    Gens.semiring(Gen.unit, Gen.anyInt)
 
-  val equalSemirings: Gen[Random with Sized, (Semiring[Int], Semiring[Int])] =
+  val equalSemirings: Gen[Random with Sized, (Semiring[Unit, Int], Semiring[Unit, Int])] =
     (semiring <*> semiring <*> semiring).flatMap { case ((a, b), c) =>
       Gen.elements(
         (a, a),
@@ -18,7 +18,9 @@ object SemiringSpec extends DefaultRunnableSpec {
         (Then(a, Both(b, c)), Both(Then(a, b), Then(a, c))),
         (Both(Both(a, b), c), Both(a, Both(b, c))),
         (Both(Then(a, c), Then(b, c)), Then(Both(a, b), c)),
-        (Both(a, b), Both(b, a))
+        (Both(a, b), Both(b, a)),
+        (a, Then(a, Empty)),
+        (a, Both(a, Empty))
       )
     }
 
@@ -28,19 +30,19 @@ object SemiringSpec extends DefaultRunnableSpec {
     suite("SemiringSpec")(
       suite("laws")(
         testM("covariant") {
-          checkAllLaws(Covariant)(GenFs.semiring, Gen.anyInt)
+          checkAllLaws(Covariant)(GenFs.semiring(Gen.unit), Gen.anyInt)
         },
         testM("hash") {
-          checkAllLaws(Hash)(Gens.semiring(Gen.anyInt))
+          checkAllLaws(Hash)(Gens.semiring(Gen.unit, Gen.anyInt))
         },
         testM("identityBoth") {
-          checkAllLaws(IdentityBoth)(GenFs.semiring, Gen.anyInt)
+          checkAllLaws(IdentityBoth)(GenFs.semiring(Gen.unit), Gen.anyInt)
         },
         testM("identityFlatten") {
-          checkAllLaws(IdentityFlatten)(GenFs.semiring, Gen.anyInt)
+          checkAllLaws(IdentityFlatten)(GenFs.semiring(Gen.unit), Gen.anyInt)
         },
-        testM("nonEmptyTraversable") {
-          checkAllLaws(NonEmptyTraversable)(GenFs.semiring, Gen.anyInt)
+        testM("traversable") {
+          checkAllLaws(Traversable)(GenFs.semiring(Gen.unit), Gen.anyInt)
         }
       ),
       suite("both")(
@@ -53,6 +55,12 @@ object SemiringSpec extends DefaultRunnableSpec {
         testM("commutative") {
           check(semiring, semiring) { (a, b) =>
             assert(a && b)(equalTo(b && a))
+          }
+        },
+        testM("identity") {
+          check(semiring) { a =>
+            assert(Both(a, empty))(equalTo(a)) &&
+            assert(Both(empty, a))(equalTo(a))
           }
         }
       ),
@@ -72,6 +80,12 @@ object SemiringSpec extends DefaultRunnableSpec {
           check(semiring, semiring, semiring) { (a, b, c) =>
             assert(a ++ (b && c))(equalTo((a ++ b) && (a ++ c))) &&
             assert((a && b) ++ c)(equalTo((a ++ c) && (b ++ c)))
+          }
+        },
+        testM("identity") {
+          check(semiring) { a =>
+            assert(Then(a, empty))(equalTo(a)) &&
+            assert(Then(empty, a))(equalTo(a))
           }
         }
       )

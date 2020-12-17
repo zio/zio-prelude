@@ -72,10 +72,15 @@ object GenFs {
         Gens.nonEmptyListOf(gen)
     }
 
-  val semiring: GenF[Random with Sized, Semiring] =
-    new GenF[Random with Sized, Semiring] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, Semiring[A]] =
-        Gens.semiring(gen)
+  /**
+   * A generator of `Semiring` values.
+   */
+  def semiring[R <: Random with Sized, Z <: Unit](
+    z: Gen[R, Z]
+  ): GenF[R, ({ type lambda[+x] = Semiring[Z, x] })#lambda] =
+    new GenF[R, ({ type lambda[+x] = Semiring[Z, x] })#lambda] {
+      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, Semiring[Z, A]] =
+        Gens.semiring(z, a)
     }
 
   /**
