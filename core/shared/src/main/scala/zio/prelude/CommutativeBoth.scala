@@ -2,8 +2,8 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.CommutativeBothDeriveEqualInvariant
-import zio.prelude.newtypes.{ AndF, Failure, OrF }
-import zio.stream.{ ZSink, ZStream }
+import zio.prelude.newtypes.{AndF, Failure, OrF}
+import zio.stream.{ZSink, ZStream}
 import zio.test.TestResult
 import zio.test.laws._
 

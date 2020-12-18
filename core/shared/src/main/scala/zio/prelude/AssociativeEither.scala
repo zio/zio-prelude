@@ -8,7 +8,7 @@ import zio.test.TestResult
 import zio.test.laws._
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 /**

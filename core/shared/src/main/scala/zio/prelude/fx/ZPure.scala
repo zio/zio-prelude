@@ -3,9 +3,9 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{ CanFail, ChunkBuilder, NeedsEnv }
+import zio.{CanFail, ChunkBuilder, NeedsEnv}
 
-import scala.annotation.{ implicitNotFound, switch }
+import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
 import scala.util.control.NonFatal
 

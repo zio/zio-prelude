@@ -3,7 +3,7 @@ package zio.prelude
 import zio.ZIO
 import zio.test._
 
-import scala.concurrent.{ Future, blocking }
+import scala.concurrent.{Future, blocking}
 
 object CommutativeEitherSpec extends DefaultRunnableSpec {
 
