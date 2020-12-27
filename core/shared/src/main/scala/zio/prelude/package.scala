@@ -128,6 +128,44 @@ package object prelude
       assert(self)(isLessThanEqualTo(that))
   }
 
+  implicit class MapSyntax[K, V](private val l: Map[K, V]) extends AnyVal {
+
+    /** Compares two maps, where you supply `compareValues` that compares the common values */
+    def compareWith(
+      compareValues: (Ordering, Iterable[(V, V)]) => PartialOrdering
+    )(r: Map[K, V]): PartialOrdering = {
+      def commonValues(lesserMap: Map[K, V]): Iterable[(V, V)] =
+        lesserMap.keys.map(k => (l(k), r(k)))
+      if (l.keySet == r.keySet) {
+        compareValues(Ordering.Equals, commonValues(l))
+      } else if (l.keySet.subsetOf(r.keySet)) {
+        compareValues(Ordering.LessThan, commonValues(l))
+      } else if (r.keySet.subsetOf(l.keySet)) {
+        compareValues(Ordering.GreaterThan, commonValues(r))
+      } else {
+        PartialOrdering.Incomparable
+      }
+    }
+
+    /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
+    def compareSoft(r: Map[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
+      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+        commonValues.map { case (l, r) => l =??= r }.fold(expected)(_.reduce(_))
+      compareWith(compareValues)(r)
+    }
+
+    /** Compares two maps, expecting the values for the common keys to be equal. */
+    def compareStrict(r: Map[K, V])(implicit V: Equal[V]): PartialOrdering = {
+      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+        if (commonValues.forall { case (l, r) => l === r }) {
+          expected
+        } else {
+          PartialOrdering.Incomparable
+        }
+      compareWith(compareValues)(r)
+    }
+  }
+
   implicit class AnySyntax[A](private val a: A) extends AnyVal {
 
     @silent("side-effecting nullary methods are discouraged")

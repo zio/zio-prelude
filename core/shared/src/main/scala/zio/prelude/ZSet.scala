@@ -343,6 +343,6 @@ trait LowPriorityZSetImplicits {
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def ZSetPartialOrd[A, B: PartialOrd]: PartialOrd[ZSet[A, B]] =
-    PartialOrd[Map[A, B]].contramap[ZSet[A, B]](_.toMap)
+    PartialOrd.makeFrom((l, r) => l.toMap.compareSoft(r.toMap), ZSet.ZSetEqual)
 
 }
