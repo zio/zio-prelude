@@ -342,7 +342,8 @@ object Equal extends Lawful[Equal] {
         if (l == r) Ordering.Equals
         else if (l.subsetOf(r)) Ordering.LessThan
         else if (r.subsetOf(l)) Ordering.GreaterThan
-        else PartialOrdering.Incomparable
+        else PartialOrdering.Incomparable,
+      _ == _
     )
 
   /**

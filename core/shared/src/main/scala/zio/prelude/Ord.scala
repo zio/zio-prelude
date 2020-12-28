@@ -847,12 +847,21 @@ trait OrdSyntax {
     def =?=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Ordering = ord.compare(l, r)
   }
 }
+
+sealed trait Comparison extends Product with Serializable
+
+object Comparison {
+
+  sealed trait NotEqual extends Comparison
+
+}
+
 sealed trait PartialOrdering extends Product with Serializable { self =>
 
   /**
    * A symbolic alias for `orElse`.
    */
-  def <>(that: => PartialOrdering): PartialOrdering =
+  final def <>(that: => PartialOrdering): PartialOrdering =
     self orElse that
 
   /**
@@ -886,27 +895,19 @@ sealed trait PartialOrdering extends Product with Serializable { self =>
    * Returns this ordering, but if this ordering is equal returns the
    * specified ordering.
    */
-  def orElse(that: => PartialOrdering): PartialOrdering =
+  final def orElse(that: => PartialOrdering): PartialOrdering =
     self match {
       case Ordering.Equals => that
       case ordering        => ordering
     }
 
-  def reduce(that: PartialOrdering): PartialOrdering = (self, that) match {
+  def unify(that: PartialOrdering): PartialOrdering = (self, that) match {
     case (Ordering.LessThan, Ordering.LessThan)       => Ordering.LessThan
     case (Ordering.GreaterThan, Ordering.GreaterThan) => Ordering.GreaterThan
     case (Ordering.Equals, that)                      => that
     case (self, Ordering.Equals)                      => self
     case _                                            => PartialOrdering.Incomparable
   }
-}
-
-sealed trait Comparison extends Product with Serializable
-
-object Comparison {
-
-  sealed trait NotEqual extends Comparison
-
 }
 
 object PartialOrdering {
@@ -918,13 +919,12 @@ object PartialOrdering {
    */
   implicit val PartialOrderingHashPartialOrd: Hash[PartialOrdering] with PartialOrd[PartialOrdering] =
     HashPartialOrd.make(
-      (x: PartialOrdering) => x.hashCode,
-      (l: PartialOrdering, r: PartialOrdering) =>
-        (l, r) match {
-          case (l: Ordering, r: Ordering)   => Ordering.OrderingHashOrd.compare(l, r)
-          case (Incomparable, Incomparable) => Ordering.Equals
-          case _                            => Incomparable
-        }
+      _.hashCode,
+      {
+        case (l: Ordering, r: Ordering)   => Ordering.OrderingHashOrd.compare(l, r)
+        case (Incomparable, Incomparable) => Ordering.Equals
+        case _                            => Incomparable
+      }
     )
 
   /**
@@ -932,12 +932,19 @@ object PartialOrdering {
    */
   implicit val PartialOrderingIdempotentIdentity: Idempotent[PartialOrdering] with Identity[PartialOrdering] =
     new Idempotent[PartialOrdering] with Identity[PartialOrdering] {
-      override def combine(l: => PartialOrdering, r: => PartialOrdering): PartialOrdering = l match {
-        case Ordering.Equals => r
-        case l               => l
-      }
+      override def combine(l: => PartialOrdering, r: => PartialOrdering): PartialOrdering = l <> r
+      override def identity: PartialOrdering                                              = Ordering.Equals
+    }
 
-      override def identity: PartialOrdering = Ordering.Equals
+  /**
+   * `Idempotent`, `Identity` (and thus `Associative`) instance for `PartialOrdering` values
+   * that combines them for non-lexicographic purposes.
+   */
+  val PartialOrderingNonlexicographicCommutativeIdempotentIdentity
+    : Commutative[PartialOrdering] with Idempotent[PartialOrdering] with Identity[PartialOrdering] =
+    new Commutative[PartialOrdering] with Idempotent[PartialOrdering] with Identity[PartialOrdering] {
+      override def combine(l: => PartialOrdering, r: => PartialOrdering): PartialOrdering = l.unify(r)
+      override def identity: PartialOrdering                                              = Ordering.Equals
     }
 }
 

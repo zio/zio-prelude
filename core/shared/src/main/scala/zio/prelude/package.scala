@@ -150,7 +150,7 @@ package object prelude
     /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
     def compareSoft(r: Map[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
       def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
-        commonValues.map { case (l, r) => l =??= r }.fold(expected)(_.reduce(_))
+        commonValues.map { case (l, r) => l =??= r }.fold(expected)(_.unify(_))
       compareWith(compareValues)(r)
     }
 
