@@ -599,13 +599,12 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Covariant` (and thus `Invariant`) instance for `Id`.
+   * The `NonEmptyTraversable` (and thus `Traversable`, `Covariant` and `Invariant`) instance for `Id`.
    */
-  implicit val IdCovariant: Covariant[Id] =
-    new Covariant[Id] {
-      def map[A, B](f: A => B): Id[A] => Id[B] = { id =>
-        Id(f(Id.unwrap(id)))
-      }
+  implicit val IdNonEmptyTraversable: NonEmptyTraversable[Id] =
+    new NonEmptyTraversable[Id] {
+      override def foreach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
+        f(Id.unwrap(fa)).map(Id(_))
     }
 
   implicit val IdentityInvariant: Invariant[Identity] =
