@@ -919,12 +919,13 @@ object PartialOrdering {
    */
   implicit val PartialOrderingHashPartialOrd: Hash[PartialOrdering] with PartialOrd[PartialOrdering] =
     HashPartialOrd.make(
-      _.hashCode,
-      {
-        case (l: Ordering, r: Ordering)   => Ordering.OrderingHashOrd.compare(l, r)
-        case (Incomparable, Incomparable) => Ordering.Equals
-        case _                            => Incomparable
-      }
+      (x: PartialOrdering) => x.hashCode,
+      (l: PartialOrdering, r: PartialOrdering) =>
+        (l, r) match {
+          case (l: Ordering, r: Ordering)   => Ordering.OrderingHashOrd.compare(l, r)
+          case (Incomparable, Incomparable) => Ordering.Equals
+          case _                            => Incomparable
+        }
     )
 
   /**
