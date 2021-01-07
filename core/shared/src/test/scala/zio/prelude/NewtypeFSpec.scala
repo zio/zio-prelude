@@ -29,7 +29,7 @@ object NewtypeFSpec extends DefaultRunnableSpec {
     )
 
   object ShortList extends SubtypeSmartF[List](isShorterThan(5)) {
-    val list1234 = ShortList[Int](List(1, 2, 3, 4))
+    val list1234: Type[Int] = ShortList[Int](List(1, 2, 3, 4))
   }
   type ShortList[x] = ShortList.Type[x]
 
