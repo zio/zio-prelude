@@ -2,8 +2,6 @@ package zio.prelude
 
 import zio.test.Assertion
 
-import scala.language.reflectiveCalls
-
 /**
  * The `NewtypeF` module provides functionality for creating newtypes that are
  * parameterized on some type `A`. See the documentation on `Newtype` for a
@@ -62,13 +60,14 @@ import scala.language.reflectiveCalls
  * also available.
  */
 private[prelude] sealed trait NewtypeModuleF {
+
   def newtypeF: NewtypeF
 
-  def newtypeSmartF[A[_]](assertion: Object { def apply[x]: Assertion[A[x]] }): NewtypeSmartF[A]
+  def newtypeSmartF[A[_]](assertion: AssertionK[A]): NewtypeSmartF[A]
 
   def subtypeF: SubtypeF
 
-  def subtypeSmartF[A[_]](assertion: Object { def apply[x]: Assertion[A[x]] }): SubtypeSmartF[A]
+  def subtypeSmartF[A[_]](assertion: AssertionK[A]): SubtypeSmartF[A]
 
   private[this] type Id[+A] = A
 
@@ -205,7 +204,7 @@ private[prelude] object NewtypeModuleF {
           def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
 
-      override def newtypeSmartF[A[_]](assertion: Object { def apply[x]: Assertion[A[x]] }): NewtypeSmartF[A] =
+      override def newtypeSmartF[A[_]](assertion: AssertionK[A]): NewtypeSmartF[A] =
         new NewtypeSmartF[A] {
           type Type[x] = A[x]
 
@@ -230,7 +229,7 @@ private[prelude] object NewtypeModuleF {
           def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
 
-      override def subtypeSmartF[A[_]](assertion: Object { def apply[x]: Assertion[A[x]] }): SubtypeSmartF[A] =
+      override def subtypeSmartF[A[_]](assertion: AssertionK[A]): SubtypeSmartF[A] =
         new SubtypeSmartF[A] {
           type Type[x] = A[x]
 
@@ -247,6 +246,8 @@ private[prelude] object NewtypeModuleF {
         }
     }
 }
+
+trait AssertionK[-A[_]] { def apply[x]: Assertion[A[x]] }
 
 trait NewtypeFExports {
   import NewtypeModuleF._
@@ -287,8 +288,7 @@ trait NewtypeFExports {
    * type ShortList = ShortList.Type
    * }}}
    */
-  abstract class NewtypeSmartF[A[_]](assertion: Object { def apply[x]: Assertion[A[x]] })
-      extends instance.NewtypeSmartF[A] {
+  abstract class NewtypeSmartF[A[_]](assertion: AssertionK[A]) extends instance.NewtypeSmartF[A] {
     val newtypeF: instance.NewtypeSmartF[A] = instance.newtypeSmartF(assertion)
 
     type Type[x] = newtypeF.Type[x]
@@ -340,8 +340,7 @@ trait NewtypeFExports {
    * type ShortList = ShortList.Type
    * }}}
    */
-  abstract class SubtypeSmartF[A[_]](assertion: Object { def apply[x]: Assertion[A[x]] })
-      extends instance.SubtypeSmartF[A] {
+  abstract class SubtypeSmartF[A[_]](assertion: AssertionK[A]) extends instance.SubtypeSmartF[A] {
     val subtypeF: instance.SubtypeSmartF[A] = instance.subtypeSmartF(assertion)
 
     type Type[x] = subtypeF.Type[x]
