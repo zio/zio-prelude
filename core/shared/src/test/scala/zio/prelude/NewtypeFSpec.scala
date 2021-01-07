@@ -23,13 +23,13 @@ object NewtypeFSpec extends DefaultRunnableSpec {
       ),
       suite("SubtypeSmartF")(
         test("subtypes values") {
-          assert(ShortList.list1234 ++ List(5, 6))(equalTo(List(1, 2, 3, 4) ++ List(5, 6)))
+          assert((ShortList.list1234: List[Int]) ++ List(5, 6))(equalTo(List(1, 2, 3, 4) ++ List(5, 6)))
         }
       )
     )
 
   object ShortList extends SubtypeSmartF[List](isShorterThan(5)) {
-    val list1234: Type[Int] = ShortList[Int](List(1, 2, 3, 4))
+    val list1234: ShortList[Int] = ShortList[Int](List(1, 2, 3, 4))
   }
   type ShortList[x] = ShortList.Type[x]
 
