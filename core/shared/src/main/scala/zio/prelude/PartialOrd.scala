@@ -4,15 +4,25 @@ import zio.prelude.Equal._
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
+import scala.{math => sm}
+import sm.Ordering._
 
 import scala.annotation.{implicitNotFound, tailrec}
+import zio.Fiber
 
 /**
  * `PartialOrd[A]` provides implicit evidence that values of type `A` have a partial
  * ordering.
  */
 @implicitNotFound("No implicit PartialOrd defined for ${A}.")
-trait PartialOrd[-A] extends Equal[A] { self =>
+abstract class PartialOrd[-A](implicit E: Equal[A]) { self =>
+  //// Exported members
+  final def equal(l: A, r: A): Boolean =
+    E.equal(l, r)
+
+  final def notEqual(l: A, r: A): Boolean =
+    E.notEqual(l, r)
+  ////
 
   /**
    * Returns the result of comparing two values of type `A`.
@@ -25,7 +35,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
    */
   protected def checkCompare(l: A, r: A): PartialOrdering
 
-  override protected def checkEqual(l: A, r: A): Boolean =
+  final protected def checkEqual(l: A, r: A): Boolean =
     compare(l, r).isEqual
 
   /**
@@ -33,7 +43,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
    * comparing the `A` values, and then if the `A` values are equal comparing
    * the `B` values
    */
-  final def both[B](that: => PartialOrd[B]): PartialOrd[(A, B)] =
+  final def both[B: Equal](that: => PartialOrd[B]): PartialOrd[(A, B)] =
     bothWith(that)(identity)
 
   /**
@@ -42,20 +52,20 @@ trait PartialOrd[-A] extends Equal[A] { self =>
    * `C` value into an `(A, B)`, compare the `A` values, and then if the `A`
    * values are equal compare the `B` values.
    */
-  final def bothWith[B, C](that: => PartialOrd[B])(f: C => (A, B)): PartialOrd[C] =
-    PartialOrd.make { (c1, c2) =>
+  final def bothWith[B: Equal, C](that: => PartialOrd[B])(f: C => (A, B)): PartialOrd[C] =
+    PartialOrd.make[C] { (c1, c2) =>
       (f(c1), f(c2)) match {
         case ((a1, b1), (a2, b2)) => self.checkCompare(a1, a2) <> that.checkCompare(b1, b2)
       }
-    }
+    }(Equal[(A, B)].contramap(f))
 
   /**
    * Constructs an `PartialOrd[B]` given an `PartialOrd[A]` and a function `f` to transform a
    * `B` value into an `A` value. The instance will convert each `B` value into
    * an `A` and compare the `A` values.
    */
-  override def contramap[B](f: B => A): PartialOrd[B] =
-    PartialOrd.make((b1, b2) => checkCompare(f(b1), f(b2)))
+  final def contramap[B](f: B => A): PartialOrd[B] =
+    PartialOrd.make[B]((b1, b2) => checkCompare(f(b1), f(b2)))(E.contramap(f))
 
   /**
    * Constructs an `PartialOrd[Either[A, B]]` given an `PartialOrd[A]` and an `PartialOrd[B]`. If
@@ -63,7 +73,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
    * value as less than the `Right` value. Otherwise, it will compare the two
    * values.
    */
-  final def either[B](that: => PartialOrd[B]): PartialOrd[Either[A, B]] =
+  final def either[B: Equal](that: => PartialOrd[B]): PartialOrd[Either[A, B]] =
     eitherWith(that)(identity)
 
   /**
@@ -73,15 +83,15 @@ trait PartialOrd[-A] extends Equal[A] { self =>
    * value is `Right` it will treat the `Left` value as less than the `Right`
    * value. Otherwise, it will compare the two values.
    */
-  final def eitherWith[B, C](that: => PartialOrd[B])(f: C => Either[A, B]): PartialOrd[C] =
-    PartialOrd.make { (c1, c2) =>
+  final def eitherWith[B: Equal, C](that: => PartialOrd[B])(f: C => Either[A, B]): PartialOrd[C] =
+    PartialOrd.make[C] { (c1, c2) =>
       (f(c1), f(c2)) match {
         case (Left(a1), Left(a2))   => self.compare(a1, a2)
         case (Left(_), Right(_))    => Ordering.LessThan
         case (Right(_), Left(_))    => Ordering.GreaterThan
         case (Right(b1), Right(b2)) => that.compare(b1, b2)
       }
-    }
+    }(Equal[Either[A, B]].contramap(f))
 
   /**
    * Constructs a new `PartialOrd[A]` by mapping the result of this ordering using the
@@ -118,72 +128,70 @@ object PartialOrd extends Lawful[PartialOrd] {
    * For all values `a1` and `a2`, if `a1` is less than or equal to `a2` and
    * `a2` is less than or equal to `a1` then `a1` is equal to `a2`.
    */
-  val antisymmetryLaw1: Laws[PartialOrd] =
-    new Laws.Law2[PartialOrd]("antisymmetryLaw1") {
-      def apply[A: PartialOrd](a1: A, a2: A): TestResult =
-        ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 isEqualTo a2)
-    }
+  // val antisymmetryLaw1: Laws[PartialOrd] =
+  //   new Laws.Law2[PartialOrd]("antisymmetryLaw1") {
+  //     def apply[A: PartialOrd: Equal](a1: A, a2: A): TestResult =
+  //       ((a1 lessOrEqual a2) && (a2 lessOrEqual a1)) ==> (a1 isEqualTo a2)
+  //   }
 
   /**
    * For all values `a1` and `a2`, if `a1` is greater than or equal to `a2` and
    * `a2` is greater than or equal to `a1` then `a1` is equal to `a2`.
    */
-  val antisymmetryLaw2: Laws[PartialOrd] =
-    new Laws.Law2[PartialOrd]("antisymmetryLaw2") {
-      def apply[A: PartialOrd](a1: A, a2: A): TestResult =
-        ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 isEqualTo a2)
-    }
+  // val antisymmetryLaw2: Laws[PartialOrd] =
+  //   new Laws.Law2[PartialOrd]("antisymmetryLaw2") {
+  //     def apply[A: PartialOrd: Equal](a1: A, a2: A): TestResult =
+  //       ((a1 greaterOrEqual a2) && (a2 greaterOrEqual a1)) ==> (a1 isEqualTo a2)
+  //   }
 
   /**
    * For all values `a1` and `a2`, iff `a1 =??= a2` is `Ordering.Equals` then `a1 === a2`.
    */
-  val eqConsistencyLaw: Laws[PartialOrd] =
-    new Laws.Law2[PartialOrd]("eqConsistencyLaw") {
-      def apply[A: PartialOrd](a1: A, a2: A): TestResult =
-        ((a1 =??= a2) isEqualTo Ordering.Equals) <==> ((a1 === a2) isEqualTo true)
-    }
+  // val eqConsistencyLaw: Laws[PartialOrd] =
+  //   new Laws.Law2[PartialOrd]("eqConsistencyLaw") {
+  //     def apply[A: PartialOrd: Equal](a1: A, a2: A): TestResult =
+  //       ((a1 =??= a2) isEqualTo Ordering.Equals) <==> ((a1 === a2) isEqualTo true)
+  //   }
 
   /**
    * The set of all laws that instances of `PartialOrd` must satisfy.
    */
-  val laws: Laws[PartialOrd] =
-    transitivityLaw1 +
-      transitivityLaw2 +
-      antisymmetryLaw1 +
-      antisymmetryLaw2 +
-      eqConsistencyLaw +
-      Equal.laws
+  // val laws: Laws[PartialOrd] =
+  //   transitivityLaw1 +
+  //     transitivityLaw2 +
+  //     antisymmetryLaw1 +
+  //     antisymmetryLaw2
 
   /**
    * The `Contravariant` instance for `PartialOrd`.
    */
-  implicit val PartialOrdContravariant: Contravariant[PartialOrd] =
-    new Contravariant[PartialOrd] {
-      def contramap[A, B](f: B => A): PartialOrd[A] => PartialOrd[B] =
-        _.contramap(f)
-    }
+  // implicit val PartialOrdContravariant: Contravariant[PartialOrd] =
+  //   new Contravariant[PartialOrd] {
+  //     def contramap[A, B](f: B => A): PartialOrd[A] => PartialOrd[B] =
+  //       _.contramap(f)
+  //   }
 
   /**
    * The `IdentityBoth` (and thus `AssociativeBoth`) instance for `PartialOrd`.
    */
-  implicit val PartialOrdIdentityBoth: IdentityBoth[PartialOrd] =
-    new IdentityBoth[PartialOrd] {
-      val any: PartialOrd[Any]                                                       =
-        AnyHashOrd
-      def both[A, B](fa: => PartialOrd[A], fb: => PartialOrd[B]): PartialOrd[(A, B)] =
-        fa.both(fb)
-    }
+  // implicit val PartialOrdIdentityBoth: IdentityBoth[PartialOrd] =
+  //   new IdentityBoth[PartialOrd] {
+  //     val any: PartialOrd[Any]                                                       =
+  //       AnyHashOrd
+  //     def both[A, B](fa: => PartialOrd[A], fb: => PartialOrd[B]): PartialOrd[(A, B)] =
+  //       fa.both(fb)
+  //   }
 
   /**
    * The `IdentityEither` (and thus `AssociativeEither`) instance for `PartialOrd`.
    */
-  implicit val PartialOrdIdentityEither: IdentityEither[PartialOrd] =
-    new IdentityEither[PartialOrd] {
-      def either[A, B](fa: => PartialOrd[A], fb: => PartialOrd[B]): PartialOrd[Either[A, B]] =
-        fa.either(fb)
-      val none: PartialOrd[Nothing]                                                          =
-        NothingHashOrd
-    }
+  // implicit val PartialOrdIdentityEither: IdentityEither[PartialOrd] =
+  //   new IdentityEither[PartialOrd] {
+  //     def either[A, B: Equal](fa: => PartialOrd[A], fb: => PartialOrd[B]): PartialOrd[Either[A, B]] =
+  //       fa.either(fb)
+  //     val none: PartialOrd[Nothing]                                                                 =
+  //       NothingPartialOrd
+  //   }
 
   /**
    * Summons an implicit `PartialOrd[A]`.
@@ -191,29 +199,71 @@ object PartialOrd extends Lawful[PartialOrd] {
   def apply[A](implicit ord: PartialOrd[A]): PartialOrd[A] =
     ord
 
+  def default[A: Equal](implicit ord: scala.math.PartialOrdering[A]): PartialOrd[A] =
+    make((l, r) => PartialOrdering.fromTryCompare(ord.tryCompare(l, r)))
+
   /**
    * Constructs an `PartialOrd[A]` from a function. The instance will be optimized to
    * first compare the values for reference equality and then compare the
    * values using the specified function.
    */
-  def make[A](ord: (A, A) => PartialOrdering): PartialOrd[A] =
-    (l, r) => ord(l, r)
-
-  /**
-   * Constructs an instance from an `ord` function and a `equal0` function.
-   * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
-   */
-  def makeFrom[A](ord: (A, A) => PartialOrdering, equal0: Equal[A]): PartialOrd[A] =
+  def make[A: Equal](ord: (A, A) => PartialOrdering): PartialOrd[A] =
     new PartialOrd[A] {
-      override protected def checkCompare(l: A, r: A): PartialOrdering = ord(l, r)
-      override protected def checkEqual(l: A, r: A): Boolean           = equal0.equal(l, r)
+      def checkCompare(l: A, r: A): PartialOrdering = ord(l, r)
     }
+
+  val AnyPartialOrd: PartialOrd[Any] =
+    make((_: Any, _: Any) => Ordering.Equals)(Equal.AnyEqual)
+
+  implicit val NothingPartialOrd: PartialOrd[Nothing] =
+    make[Nothing]((_: Nothing, _: Nothing) => sys.error("nothing.partialord"))(Equal.NothingEqual)
+
+  implicit val UnitPartialOrd: PartialOrd[Unit] =
+    make((_, _) => Ordering.Equals)
+
+  implicit val BooleanPartialOrd: PartialOrd[Boolean] =
+    default
+
+  implicit val BytePartialOrd: PartialOrd[Byte] =
+    default
+
+  implicit val ShortPartialOrd: PartialOrd[Short] =
+    default
+
+  implicit val CharPartialOrd: PartialOrd[Char] =
+    default
+
+  implicit val DoublePartialOrd: PartialOrd[Double] =
+    make((l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
+
+  implicit val FloatPartialOrd: PartialOrd[Float] =
+    make((l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
+
+  implicit lazy val FiberIdPartialOrd: PartialOrd[Fiber.Id] =
+    PartialOrd[(Long, Long)].contramap[Fiber.Id](fid => (fid.startTimeMillis, fid.seqNumber))
+
+  implicit val IntPartialOrd: PartialOrd[Int] =
+    default
+
+  implicit val LongPartialOrd: PartialOrd[Long] =
+    default
+
+  implicit def SetPartialOrd[A]: PartialOrd[Set[A]] =
+    make((l, r) =>
+      if (l == r) Ordering.Equals
+      else if (l.subsetOf(r)) Ordering.LessThan
+      else if (r.subsetOf(l)) Ordering.GreaterThan
+      else PartialOrdering.Incomparable
+    )
+
+  implicit val StringPartialOrd: PartialOrd[String] =
+    default
 
   /**
    * Derives an `PartialOrd[Chunk[A]]` given an `PartialOrd[A]`.
    */
-  implicit def ChunkPartialOrd[A: PartialOrd]: PartialOrd[Chunk[A]] =
-    makeFrom(
+  implicit def ChunkPartialOrd[A: PartialOrd: Equal]: PartialOrd[Chunk[A]] =
+    make(
       { (l, r) =>
         val j           = l.length
         val k           = r.length
@@ -231,8 +281,7 @@ object PartialOrd extends Lawful[PartialOrd] {
             }
 
         loop(0)
-      },
-      Equal.ChunkEqual
+      }
     )
 
   /**
@@ -244,21 +293,20 @@ object PartialOrd extends Lawful[PartialOrd] {
   /**
    * Derives an `PartialOrd[Either[A, B]]` given an `PartialOrd[A]` and an `PartialOrd[B]`.
    */
-  implicit def EitherPartialOrd[A: PartialOrd, B: PartialOrd]: PartialOrd[Either[A, B]] =
-    makeFrom(
+  implicit def EitherPartialOrd[A: PartialOrd: Equal, B: PartialOrd: Equal]: PartialOrd[Either[A, B]] =
+    make(
       {
         case (Left(a1), Left(a2))   => a1 =??= a2
         case (Left(_), Right(_))    => Ordering.LessThan
         case (Right(_), Left(_))    => Ordering.GreaterThan
         case (Right(b1), Right(b2)) => b1 =??= b2
-      },
-      Equal.EitherEqual
+      }
     )
 
   /**
    * Derives an `PartialOrd[List[A]]` given an `PartialOrd[A]`.
    */
-  implicit def ListPartialOrd[A: PartialOrd]: PartialOrd[List[A]] = {
+  implicit def ListPartialOrd[A: PartialOrd: Equal]: PartialOrd[List[A]] = {
     val PartialOrdA = PartialOrd[A]
 
     @tailrec
@@ -274,7 +322,7 @@ object PartialOrd extends Lawful[PartialOrd] {
           }
       }
 
-    makeFrom((l, r) => loop(l, r), Equal.ListEqual)
+    make((l, r) => loop(l, r))
   }
 
   /**
@@ -282,20 +330,20 @@ object PartialOrd extends Lawful[PartialOrd] {
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] =
-    PartialOrd.makeFrom(_.compareStrict(_), Equal.MapEqual)
+    make(_.compareStrict(_))
 
   /**
    * Derives an `PartialOrd[NonEmptyChunk[A]]` given an `PartialOrd[A]`.
    */
-  implicit def NonEmptyChunkPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyChunk[A]] =
+  implicit def NonEmptyChunkPartialOrd[A: PartialOrd: Equal]: PartialOrd[NonEmptyChunk[A]] =
     PartialOrd[Chunk[A]].contramap(_.toChunk)
 
   /**
    * Derives an `PartialOrd[Option[A]]` given an `PartialOrd[A]`. `None` will be treated as
    * less than all other values.
    */
-  implicit def OptionPartialOrd[A: PartialOrd]: PartialOrd[Option[A]] =
-    PartialOrd[Unit].eitherWith(PartialOrd[A]) {
+  implicit def OptionPartialOrd[A: PartialOrd: Equal]: PartialOrd[Option[A]] =
+    UnitPartialOrd.eitherWith(PartialOrd[A]) {
       case None    => Left(())
       case Some(a) => Right(a)
     }
@@ -304,49 +352,52 @@ object PartialOrd extends Lawful[PartialOrd] {
    * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
    * the product type.
    */
-  implicit def Tuple2PartialOrd[A: PartialOrd, B: PartialOrd]: PartialOrd[(A, B)] =
-    makeFrom(
+  implicit def Tuple2PartialOrd[A: PartialOrd: Equal, B: PartialOrd: Equal]: PartialOrd[(A, B)] =
+    make(
       { case ((a1, b1), (a2, b2)) =>
         (a1 =??= a2) <> (b1 =??= b2)
-      },
-      Equal.Tuple2Equal
+      }
     )
 
   /**
    * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
    * the product type.
    */
-  implicit def Tuple3PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd]: PartialOrd[(A, B, C)] =
-    makeFrom(
+  implicit def Tuple3PartialOrd[A: PartialOrd: Equal, B: PartialOrd: Equal, C: PartialOrd: Equal]
+    : PartialOrd[(A, B, C)] =
+    make(
       { case ((a1, b1, c1), (a2, b2, c2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2)
-      },
-      Equal.Tuple3Equal
+      }
     )
 
   /**
    * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
    * the product type.
    */
-  implicit def Tuple4PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd, D: PartialOrd]: PartialOrd[(A, B, C, D)] =
-    makeFrom(
+  implicit def Tuple4PartialOrd[A: PartialOrd: Equal, B: PartialOrd: Equal, C: PartialOrd: Equal, D: PartialOrd: Equal]
+    : PartialOrd[(A, B, C, D)] =
+    make(
       { case ((a1, b1, c1, d1), (a2, b2, c2, d2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2)
-      },
-      Equal.Tuple4Equal
+      }
     )
 
   /**
    * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
    * the product type.
    */
-  implicit def Tuple5PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd, D: PartialOrd, E: PartialOrd]
-    : PartialOrd[(A, B, C, D, E)] =
-    makeFrom(
+  implicit def Tuple5PartialOrd[
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal
+  ]: PartialOrd[(A, B, C, D, E)] =
+    make(
       { case ((a1, b1, c1, d1, e1), (a2, b2, c2, d2, e2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2)
-      },
-      Equal.Tuple5Equal
+      }
     )
 
   /**
@@ -354,18 +405,17 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple6PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F)] =
-    makeFrom(
+    make(
       { case ((a1, b1, c1, d1, e1, f1), (a2, b2, c2, d2, e2, f2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2)
-      },
-      Equal.Tuple6Equal
+      }
     )
 
   /**
@@ -373,19 +423,18 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple7PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G)] =
-    makeFrom(
+    make(
       { case ((a1, b1, c1, d1, e1, f1, g1), (a2, b2, c2, d2, e2, f2, g2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2)
-      },
-      Equal.Tuple7Equal
+      }
     )
 
   /**
@@ -393,20 +442,19 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple8PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H)] =
-    makeFrom(
+    make(
       { case ((a1, b1, c1, d1, e1, f1, g1, h1), (a2, b2, c2, d2, e2, f2, g2, h2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2)
-      },
-      Equal.Tuple8Equal
+      }
     )
 
   /**
@@ -414,21 +462,20 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple9PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I)] =
-    makeFrom(
+    make(
       { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1), (a2, b2, c2, d2, e2, f2, g2, h2, i2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2)
-      },
-      Equal.Tuple9Equal
+      }
     )
 
   /**
@@ -436,22 +483,21 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple10PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J)] =
-    makeFrom(
+    make(
       { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2)
-      },
-      Equal.Tuple10Equal
+      }
     )
 
   /**
@@ -459,23 +505,22 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple11PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K)] =
-    makeFrom(
+    make(
       { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2)
-      },
-      Equal.Tuple11Equal
+      }
     )
 
   /**
@@ -483,24 +528,23 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple12PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L)] =
-    makeFrom(
+    make(
       { case ((a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1), (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2)) =>
         (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2)
-      },
-      Equal.Tuple12Equal
+      }
     )
 
   /**
@@ -508,29 +552,28 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple13PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2)
-      },
-      Equal.Tuple13Equal
+      }
     )
 
   /**
@@ -538,30 +581,29 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple14PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2)
-      },
-      Equal.Tuple14Equal
+      }
     )
 
   /**
@@ -569,31 +611,30 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple15PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2)
-      },
-      Equal.Tuple15Equal
+      }
     )
 
   /**
@@ -601,32 +642,31 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple16PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd,
-    P: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal,
+    P: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2) <> (p1 =??= p2)
-      },
-      Equal.Tuple16Equal
+      }
     )
 
   /**
@@ -634,33 +674,32 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple17PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd,
-    P: PartialOrd,
-    Q: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal,
+    P: PartialOrd: Equal,
+    Q: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2) <> (p1 =??= p2) <> (q1 =??= q2)
-      },
-      Equal.Tuple17Equal
+      }
     )
 
   /**
@@ -668,34 +707,33 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple18PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd,
-    P: PartialOrd,
-    Q: PartialOrd,
-    R: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal,
+    P: PartialOrd: Equal,
+    Q: PartialOrd: Equal,
+    R: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2) <> (p1 =??= p2) <> (q1 =??= q2) <> (r1 =??= r2)
-      },
-      Equal.Tuple18Equal
+      }
     )
 
   /**
@@ -703,35 +741,34 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple19PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd,
-    P: PartialOrd,
-    Q: PartialOrd,
-    R: PartialOrd,
-    S: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal,
+    P: PartialOrd: Equal,
+    Q: PartialOrd: Equal,
+    R: PartialOrd: Equal,
+    S: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2) <> (p1 =??= p2) <> (q1 =??= q2) <> (r1 =??= r2) <> (s1 =??= s2)
-      },
-      Equal.Tuple19Equal
+      }
     )
 
   /**
@@ -739,36 +776,35 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple20PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd,
-    P: PartialOrd,
-    Q: PartialOrd,
-    R: PartialOrd,
-    S: PartialOrd,
-    T: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal,
+    P: PartialOrd: Equal,
+    Q: PartialOrd: Equal,
+    R: PartialOrd: Equal,
+    S: PartialOrd: Equal,
+    T: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2) <> (p1 =??= p2) <> (q1 =??= q2) <> (r1 =??= r2) <> (s1 =??= s2) <> (t1 =??= t2)
-      },
-      Equal.Tuple20Equal
+      }
     )
 
   /**
@@ -776,37 +812,36 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple21PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd,
-    P: PartialOrd,
-    Q: PartialOrd,
-    R: PartialOrd,
-    S: PartialOrd,
-    T: PartialOrd,
-    U: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal,
+    P: PartialOrd: Equal,
+    Q: PartialOrd: Equal,
+    R: PartialOrd: Equal,
+    S: PartialOrd: Equal,
+    T: PartialOrd: Equal,
+    U: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2) <> (p1 =??= p2) <> (q1 =??= q2) <> (r1 =??= r2) <> (s1 =??= s2) <> (t1 =??= t2) <> (u1 =??= u2)
-      },
-      Equal.Tuple21Equal
+      }
     )
 
   /**
@@ -814,45 +849,44 @@ object PartialOrd extends Lawful[PartialOrd] {
    * the product type.
    */
   implicit def Tuple22PartialOrd[
-    A: PartialOrd,
-    B: PartialOrd,
-    C: PartialOrd,
-    D: PartialOrd,
-    E: PartialOrd,
-    F: PartialOrd,
-    G: PartialOrd,
-    H: PartialOrd,
-    I: PartialOrd,
-    J: PartialOrd,
-    K: PartialOrd,
-    L: PartialOrd,
-    M: PartialOrd,
-    N: PartialOrd,
-    O: PartialOrd,
-    P: PartialOrd,
-    Q: PartialOrd,
-    R: PartialOrd,
-    S: PartialOrd,
-    T: PartialOrd,
-    U: PartialOrd,
-    V: PartialOrd
+    A: PartialOrd: Equal,
+    B: PartialOrd: Equal,
+    C: PartialOrd: Equal,
+    D: PartialOrd: Equal,
+    E: PartialOrd: Equal,
+    F: PartialOrd: Equal,
+    G: PartialOrd: Equal,
+    H: PartialOrd: Equal,
+    I: PartialOrd: Equal,
+    J: PartialOrd: Equal,
+    K: PartialOrd: Equal,
+    L: PartialOrd: Equal,
+    M: PartialOrd: Equal,
+    N: PartialOrd: Equal,
+    O: PartialOrd: Equal,
+    P: PartialOrd: Equal,
+    Q: PartialOrd: Equal,
+    R: PartialOrd: Equal,
+    S: PartialOrd: Equal,
+    T: PartialOrd: Equal,
+    U: PartialOrd: Equal,
+    V: PartialOrd: Equal
   ]: PartialOrd[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)] =
-    makeFrom(
+    make(
       {
         case (
               (a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1, r1, s1, t1, u1, v1),
               (a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2, r2, s2, t2, u2, v2)
             ) =>
           (a1 =??= a2) <> (b1 =??= b2) <> (c1 =??= c2) <> (d1 =??= d2) <> (e1 =??= e2) <> (f1 =??= f2) <> (g1 =??= g2) <> (h1 =??= h2) <> (i1 =??= i2) <> (j1 =??= j2) <> (k1 =??= k2) <> (l1 =??= l2) <> (m1 =??= m2) <> (n1 =??= n2) <> (o1 =??= o2) <> (p1 =??= p2) <> (q1 =??= q2) <> (r1 =??= r2) <> (s1 =??= s2) <> (t1 =??= t2) <> (u1 =??= u2) <> (v1 =??= v2)
-      },
-      Equal.Tuple22Equal
+      }
     )
 
   /**
    * Derives an `PartialOrd[Vector[A]]` given an `PartialOrd[A]`.
    */
-  implicit def VectorPartialOrd[A: PartialOrd]: PartialOrd[Vector[A]] =
-    makeFrom(
+  implicit def VectorPartialOrd[A: PartialOrd: Equal]: PartialOrd[Vector[A]] =
+    make(
       { (l, r) =>
         val j           = l.length
         val k           = r.length
@@ -870,8 +904,7 @@ object PartialOrd extends Lawful[PartialOrd] {
             }
 
         loop(0)
-      },
-      Equal.VectorEqual
+      }
     )
 }
 
