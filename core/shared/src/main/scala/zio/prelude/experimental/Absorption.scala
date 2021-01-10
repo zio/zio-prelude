@@ -33,7 +33,7 @@ object Absorption extends Lawful[AbsorptionEqual] {
    * and for any value `a`, the following must hold:
    *
    * {{{
-   * a1 vvv (a1 ^^^ a2) === a1
+   * a1 ^^^ (a1 vvv a2) === a1
    * }}}
    */
   val meetAbsorptionLaw: Laws[AbsorptionEqual] =

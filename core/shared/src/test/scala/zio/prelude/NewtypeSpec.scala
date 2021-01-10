@@ -71,10 +71,10 @@ object NewtypeSpec extends DefaultRunnableSpec {
     as.foldLeft(B.identity)((b, a) => B.combine(b, f(a)))
 
   def exists[A](as: List[A])(f: A => Boolean): Boolean =
-    Or.unwrap(foldMap(as)(a => Or(f(a))))
+    OrF.unwrap(foldMap(as)(a => Or(f(a))))
 
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
-    And.unwrap(foldMap(as)(a => And(f(a))))
+    AndF.unwrap(foldMap(as)(a => And(f(a))))
 
   object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
     val two: Natural = Natural(2)

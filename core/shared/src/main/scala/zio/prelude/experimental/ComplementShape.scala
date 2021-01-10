@@ -24,13 +24,13 @@ trait ComplementShapeSyntax {
     /**
      * A symbolic alias for `complement`.
      */
-    def unary_!(implicit complement: ComplementShape.Aux[A, Identity, Identity]): A =
+    def unary_!(implicit complement: ComplementShape.Aux[A, Associative, Associative]): A =
       complement.complement(a)
 
     /**
      * The complement of the value.
      */
-    def complement(implicit complement: ComplementShape.Aux[A, Identity, Identity]): A =
+    def complement(implicit complement: ComplementShape.Aux[A, Associative, Associative]): A =
       complement.complement(a)
 
   }

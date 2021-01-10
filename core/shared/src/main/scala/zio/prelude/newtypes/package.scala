@@ -15,19 +15,21 @@ package object newtypes {
    */
   type Prod[A] = Prod.Type[A]
 
-  object Or extends Subtype[Boolean]
-
   /**
    * A newtype representing logical disjunction.
    */
-  type Or = Or.Type
-
-  object And extends Subtype[Boolean]
+  type Or = OrF[Boolean]
+  object Or {
+    def apply(boolean: Boolean): Or = OrF(boolean)
+  }
 
   /**
    * A newtype representing logical conjunction.
    */
-  type And = And.Type
+  type And = AndF[Boolean]
+  object And {
+    def apply(boolean: Boolean): And = AndF(boolean)
+  }
 
   object AndF extends SubtypeF
 
@@ -91,4 +93,7 @@ package object newtypes {
   object FailureOut extends NewtypeF
 
   type FailureOut[+A] = FailureOut.Type[A]
+
+//  implicit def OrFBoolToOr(orFBool: OrF[Boolean]): Or      = Or(orFBool: Boolean)
+//  implicit def AndFBoolToAnd(andFBool: AndF[Boolean]): And = And(andFBool: Boolean)
 }

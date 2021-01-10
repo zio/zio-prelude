@@ -27,9 +27,17 @@ object JoinMeetShape {
     type Meet[x] <: meet[x]
   }
 
-  implicit def BoolJoinMeet
-    : Absorption[Boolean] with Complement[Boolean] with DistributiveJoinMeet[Boolean] with Involution[Boolean] =
-    new Absorption[Boolean] with Complement[Boolean] with DistributiveJoinMeet[Boolean] with Involution[Boolean] {
+  implicit def BoolJoinMeet: Absorption[Boolean] with DistributiveJoinMeet[Boolean] with ExcludedMiddle[
+    Boolean
+  ] with Involution[Boolean] with Noncontradiction[Boolean] {
+    type Join[x] = Commutative[x] with Idempotent[x] with Inverse[x]
+    type Meet[x] = Commutative[x] with Idempotent[x] with Inverse[x]
+  } =
+    new Absorption[Boolean]
+      with DistributiveJoinMeet[Boolean]
+      with ExcludedMiddle[Boolean]
+      with Involution[Boolean]
+      with Noncontradiction[Boolean] {
 
       override type Join[x] = Commutative[x] with Idempotent[x] with Inverse[x]
       override type Meet[x] = Commutative[x] with Idempotent[x] with Inverse[x]
@@ -54,12 +62,28 @@ object JoinMeetShape {
         }
     }
 
-  implicit def SetJoinMeet[A]: Absorption[Set[A]] with DistributiveJoinMeet[Set[A]] =
+  implicit def SetJoinMeet[A]: Absorption[Set[A]] with DistributiveJoinMeet[Set[A]] {
+    type Join[x] = Commutative[x] with Idempotent[x] with Inverse[x]
+    type Meet[x] = Commutative[x] with Idempotent[x]
+  } =
     new Absorption[Set[A]] with DistributiveJoinMeet[Set[A]] {
       override type Join[x] = Commutative[x] with Idempotent[x] with Inverse[x]
       override type Meet[x] = Commutative[x] with Idempotent[x]
-      override def Join: Join[OrF[Set[A]]]  = Associative.SetOrFCommutativeIdempotentInverse
-      override def Meet: Meet[AndF[Set[A]]] = Associative.SetAndFCommutativeIdempotent
+
+      override def join(l: => Set[A], r: => Set[A]): Set[A] = l | r
+      override def meet(l: => Set[A], r: => Set[A]): Set[A] = l & r
+
+      override def Join: Join[OrF[Set[A]]] =
+        new Commutative[OrF[Set[A]]] with Idempotent[OrF[Set[A]]] with Inverse[OrF[Set[A]]] {
+          def combine(l: => OrF[Set[A]], r: => OrF[Set[A]]): OrF[Set[A]] = OrF((l: Set[A]) | (r: Set[A]))
+          val identity: OrF[Set[A]]                                      = OrF(Set.empty)
+          def inverse(l: => OrF[Set[A]], r: => OrF[Set[A]]): OrF[Set[A]] = OrF((l: Set[A]) &~ (r: Set[A]))
+        }
+
+      override def Meet: Meet[AndF[Set[A]]] =
+        new Commutative[AndF[Set[A]]] with Idempotent[AndF[Set[A]]] {
+          def combine(l: => AndF[Set[A]], r: => AndF[Set[A]]): AndF[Set[A]] = AndF((l: Set[A]) & (r: Set[A]))
+        }
     }
 }
 

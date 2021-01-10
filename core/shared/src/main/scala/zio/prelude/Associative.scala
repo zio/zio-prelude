@@ -1,7 +1,8 @@
 package zio.prelude
 
 import zio.prelude.coherent.AssociativeEqual
-import zio.prelude.newtypes.{And, AndF, First, Last, Max, Min, Or, OrF, Prod, Sum}
+import zio.prelude.experimental.JoinMeetShape
+import zio.prelude.newtypes.{AndF, First, Last, Max, Min, OrF, Prod, Sum}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
@@ -85,27 +86,11 @@ object Associative extends Lawful[AssociativeEqual] {
   def make[A](f: (A, A) => A): Associative[A] =
     (l, r) => f(l, r)
 
-  /**
-   * The `Commutative`, `Idempotent` and `Inverse` instance for the conjunction of `Boolean`
-   * values.
-   */
-  implicit val BooleanConjunctionIdempotentInverse: Commutative[And] with Idempotent[And] with Inverse[And] =
-    new Commutative[And] with Idempotent[And] with Inverse[And] {
-      def combine(l: => And, r: => And): And = And(l && r)
-      val identity: And                      = And(true)
-      def inverse(l: => And, r: => And): And = And(l || !r)
-    }
-
-  /**
-   * The `Commutative`, `Idempotent` and `Inverse` instance for the disjunction of `Boolean`
-   * values.
-   */
-  implicit val BooleanDisjunctionIdempotentInverse: Commutative[Or] with Idempotent[Or] with Inverse[Or] =
-    new Commutative[Or] with Idempotent[Or] with Inverse[Or] {
-      def combine(l: => Or, r: => Or): Or = Or(l || r)
-      val identity: Or                    = Or(false)
-      def inverse(l: => Or, r: => Or): Or = Or(l && !r)
-    }
+  /** Derives an `Associative` (or a subtype of) instance of `AndF` from a `JoinMeetShape` instance. */
+  implicit def AndFAssociative[A, join[x] <: Associative[x], meet[x] <: Associative[x]](implicit
+    ev: JoinMeetShape.Aux[A, join, meet]
+  ): meet[AndF[A]] =
+    ev.Meet
 
   /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Boolean` values.
@@ -510,25 +495,11 @@ object Associative extends Lawful[AssociativeEqual] {
       }
     )
 
-  /**
-   * The `Commutative`, `Idempotent` and `Inverse` instance for the union of `Set[A]`
-   * values.
-   */
-  implicit def SetOrFCommutativeIdempotentInverse[A]
-    : Commutative[OrF[Set[A]]] with Idempotent[OrF[Set[A]]] with Inverse[OrF[Set[A]]] =
-    new Commutative[OrF[Set[A]]] with Idempotent[OrF[Set[A]]] with Inverse[OrF[Set[A]]] {
-      def combine(l: => OrF[Set[A]], r: => OrF[Set[A]]): OrF[Set[A]] = OrF((l: Set[A]) | (r: Set[A]))
-      val identity: OrF[Set[A]]                                      = OrF(Set.empty)
-      def inverse(l: => OrF[Set[A]], r: => OrF[Set[A]]): OrF[Set[A]] = OrF((l: Set[A]) &~ (r: Set[A]))
-    }
-
-  /**
-   * The `Commutative` and `Idempotent` instance for the intersection of `Set[A]` values.
-   */
-  implicit def SetAndFCommutativeIdempotent[A]: Commutative[AndF[Set[A]]] with Idempotent[AndF[Set[A]]] =
-    new Commutative[AndF[Set[A]]] with Idempotent[AndF[Set[A]]] {
-      def combine(l: => AndF[Set[A]], r: => AndF[Set[A]]): AndF[Set[A]] = AndF((l: Set[A]) & (r: Set[A]))
-    }
+  /** Derives an `Associative` (or a subtype of) instance of `OrF` from a `JoinMeetShape` instance. */
+  implicit def OrFAssociative[A, join[x] <: Associative[x], meet[x] <: Associative[x]](implicit
+    ev: JoinMeetShape.Aux[A, join, meet]
+  ): join[OrF[A]] =
+    ev.Join
 
   /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Short` values.
