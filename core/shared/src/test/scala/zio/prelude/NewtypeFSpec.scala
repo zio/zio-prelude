@@ -6,7 +6,7 @@ import zio.test.{Assertion, DefaultRunnableSpec, ZSpec, assert, suite, test}
 
 object NewtypeFSpec extends DefaultRunnableSpec {
 
-  def isShorterThan(length: Int): AssertionK[List] = new AssertionK[List] {
+  def isShorterThan(length: Int): AssertionF[List] = new AssertionF[List] {
     def apply[x]: Assertion[List[x]] = Assertion.assertion("isShorterThan")(param(length))(_.length < length)
   }
 
