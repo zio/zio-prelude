@@ -22,10 +22,8 @@ object ValidationSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("ValidationSpec")(
       suite("laws")(
-        testM("associativeBoth")(checkAllLaws(AssociativeBoth)(genFValidation, Gen.anyInt)),
         testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(genFValidation, Gen.anyInt)),
         testM("covariant")(checkAllLaws(Covariant)(genFValidation, Gen.anyInt)),
-        testM("equal")(checkAllLaws(Equal)(genValidation)),
         testM("failureCovariant")(
           checkAllLaws[
             CovariantDeriveEqual,

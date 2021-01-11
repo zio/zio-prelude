@@ -10,8 +10,8 @@ object IdentityFlattenSpec extends DefaultRunnableSpec {
       suite("laws")(
         testM("chunk")(checkAllLaws(IdentityFlatten)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
         testM("either")(checkAllLaws(IdentityFlatten)(GenFs.either(Gen.anyInt), Gen.anyInt)),
-        testM("option")(checkAllLaws(IdentityFlatten)(GenF.option, Gen.anyInt)),
         testM("list")(checkAllLaws(IdentityFlatten)(GenF.list, Gen.anyInt)),
+        testM("option")(checkAllLaws(IdentityFlatten)(GenF.option, Gen.anyInt)),
         testM("vector")(checkAllLaws(IdentityFlatten)(GenF.vector, Gen.anyInt))
       )
     )
