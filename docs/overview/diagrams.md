@@ -427,23 +427,10 @@ classDiagram
 
     (type) Join <: Associative
     (type) Meet <: Associative
-    () Join: Join[A]
-    () Meet: Meet[A]
+    () Join: Join[OrF[A]]
+    () Meet: Meet[AndF[A]]
     () join(=> A, => A): A
     () meet(=> A, => A): A
-  }
-  class Complement~A~{
-    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
-
-    (type) Join <: Identity
-    (type) Meet <: Identity
-    () Join: Join[A]
-    () Meet: Meet[A]
-    () bottom: A
-    () complement(A): A
-    () join(=> A, => A): A
-    () meet(=> A, => A): A
-    () top: A
   }
   class DistributiveJoinMeet~A~{
     Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
@@ -451,25 +438,51 @@ classDiagram
 
     (type) Join <: Associative
     (type) Meet <: Associative
-    () Join: Join[A]
-    () Meet: Meet[A]
+    () Join: Join[OrF[A]]
+    () Meet: Meet[AndF[A]]
     () join(=> A, => A): A
     () meet(=> A, => A): A
+  }
+  class ExcludedMiddle~A~{
+    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
+
+    (type) Join <: Associative
+    (type) Meet <: Identity
+    () Join: Join[OrF[A]]
+    () Meet: Meet[AndF[A]]
+    () bottom: A
+    () complement(A): A
+    () join(=> A, => A): A
+    () meet(=> A, => A): A
+    () top: A
   }
   class Involution~A~{
     Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
 
     (type) Join <: Associative
     (type) Meet <: Associative
-    () Join: Join[A]
-    () Meet: Meet[A]
+    () Join: Join[OrF[A]]
+    () Meet: Meet[AndF[A]]
     () complement(A): A
     () join(=> A, => A): A
     () meet(=> A, => A): A
+  }
+  class Noncontradiction~A~{
+    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
+
+    (type) Join <: Identity
+    (type) Meet <: Associative
+    () Join: Join[OrF[A]]
+    () Meet: Meet[AndF[A]]
+    () bottom: A
+    () complement(A): A
+    () join(=> A, => A): A
+    () meet(=> A, => A): A
+    () top: A
   }
 ```
 
 </details>
 
-[JoinMeet-image]: https://user-images.githubusercontent.com/9019485/101298795-efa33100-382f-11eb-9e4b-70504548878b.png
-[JoinMeet-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIGNsYXNzIEFic29ycHRpb25-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuICAgIFNldFtBXSBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltBXVxuICAgICgpIE1lZXQ6IE1lZXRbQV1cbiAgICAoKSBqb2luKD0-IEEsID0-IEEpOiBBXG4gICAgKCkgbWVldCg9PiBBLCA9PiBBKTogQVxuICB9XG4gIGNsYXNzIENvbXBsZW1lbnR-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuXG4gICAgKHR5cGUpIEpvaW4gPDogSWRlbnRpdHlcbiAgICAodHlwZSkgTWVldCA8OiBJZGVudGl0eVxuICAgICgpIEpvaW46IEpvaW5bQV1cbiAgICAoKSBNZWV0OiBNZWV0W0FdXG4gICAgKCkgYm90dG9tOiBBXG4gICAgKCkgY29tcGxlbWVudChBKTogQVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gICAgKCkgdG9wOiBBXG4gIH1cbiAgY2xhc3MgRGlzdHJpYnV0aXZlSm9pbk1lZXR-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuICAgIFNldFtBXSBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltBXVxuICAgICgpIE1lZXQ6IE1lZXRbQV1cbiAgICAoKSBqb2luKD0-IEEsID0-IEEpOiBBXG4gICAgKCkgbWVldCg9PiBBLCA9PiBBKTogQVxuICB9XG4gIGNsYXNzIEludm9sdXRpb25-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuXG4gICAgKHR5cGUpIEpvaW4gPDogQXNzb2NpYXRpdmVcbiAgICAodHlwZSkgTWVldCA8OiBBc3NvY2lhdGl2ZVxuICAgICgpIEpvaW46IEpvaW5bQV1cbiAgICAoKSBNZWV0OiBNZWV0W0FdXG4gICAgKCkgY29tcGxlbWVudChBKTogQVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiIsIm1lcm1haWQiOnt9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ
+[JoinMeet-image]: https://user-images.githubusercontent.com/9019485/104251711-9e124580-5470-11eb-9e20-dac1c4359270.png
+[JoinMeet-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIGNsYXNzIEFic29ycHRpb25-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuICAgIFNldFtBXSBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltPckZbQV1dXG4gICAgKCkgTWVldDogTWVldFtBbmRGW0FdXVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgRGlzdHJpYnV0aXZlSm9pbk1lZXR-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuICAgIFNldFtBXSBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltPckZbQV1dXG4gICAgKCkgTWVldDogTWVldFtBbmRGW0FdXVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgRXhjbHVkZWRNaWRkbGV-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuXG4gICAgKHR5cGUpIEpvaW4gPDogQXNzb2NpYXRpdmVcbiAgICAodHlwZSkgTWVldCA8OiBJZGVudGl0eVxuICAgICgpIEpvaW46IEpvaW5bT3JGW0FdXVxuICAgICgpIE1lZXQ6IE1lZXRbQW5kRltBXV1cbiAgICAoKSBib3R0b206IEFcbiAgICAoKSBjb21wbGVtZW50KEEpOiBBXG4gICAgKCkgam9pbig9PiBBLCA9PiBBKTogQVxuICAgICgpIG1lZXQoPT4gQSwgPT4gQSk6IEFcbiAgICAoKSB0b3A6IEFcbiAgfVxuICBjbGFzcyBJbnZvbHV0aW9ufkF-e1xuICAgIEJvb2xlYW4gWyBKb2luID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSA7IE1lZXQgPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIF1cblxuICAgICh0eXBlKSBKb2luIDw6IEFzc29jaWF0aXZlXG4gICAgKHR5cGUpIE1lZXQgPDogQXNzb2NpYXRpdmVcbiAgICAoKSBKb2luOiBKb2luW09yRltBXV1cbiAgICAoKSBNZWV0OiBNZWV0W0FuZEZbQV1dXG4gICAgKCkgY29tcGxlbWVudChBKTogQVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgTm9uY29udHJhZGljdGlvbn5BfntcbiAgICBCb29sZWFuIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBJZGVudGl0eVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltPckZbQV1dXG4gICAgKCkgTWVldDogTWVldFtBbmRGW0FdXVxuICAgICgpIGJvdHRvbTogQVxuICAgICgpIGNvbXBsZW1lbnQoQSk6IEFcbiAgICAoKSBqb2luKD0-IEEsID0-IEEpOiBBXG4gICAgKCkgbWVldCg9PiBBLCA9PiBBKTogQVxuICAgICgpIHRvcDogQVxuICB9XG4iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ
