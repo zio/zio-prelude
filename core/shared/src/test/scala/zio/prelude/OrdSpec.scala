@@ -41,22 +41,22 @@ object OrdSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("OrdSpec")(
       suite("laws")(
-        testM("unit")(checkAllLaws(Ord)(Gen.unit)),
         testM("boolean")(checkAllLaws(Ord)(Gen.boolean)),
         testM("byte")(checkAllLaws(Ord)(Gen.anyByte)),
         testM("char")(checkAllLaws(Ord)(Gen.anyChar)),
-        testM("string")(checkAllLaws(Ord)(Gen.anyString)),
-        testM("int")(checkAllLaws(Ord)(Gen.anyInt)),
-        testM("long")(checkAllLaws(Ord)(Gen.anyLong)),
-        testM("float")(checkAllLaws(Ord)(Gen.anyFloat)),
+        testM("chunk")(checkAllLaws(Ord)(Gen.chunkOf(Gen.anyInt))),
         testM("double")(checkAllLaws(Ord)(Gen.anyDouble)),
-        testM("option")(checkAllLaws(Ord)(Gen.option(Gen.anyInt))),
         testM("either")(checkAllLaws(Ord)(Gen.either(Gen.anyInt, Gen.anyInt))),
+        testM("float")(checkAllLaws(Ord)(Gen.anyFloat)),
+        testM("int")(checkAllLaws(Ord)(Gen.anyInt)),
+        testM("list")(checkAllLaws(Ord)(Gen.listOf(Gen.anyInt))),
+        testM("long")(checkAllLaws(Ord)(Gen.anyLong)),
+        testM("option")(checkAllLaws(Ord)(Gen.option(Gen.anyInt))),
+        testM("string")(checkAllLaws(Ord)(Gen.anyString)),
         testM("tuple2")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt))),
         testM("tuple3")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("list")(checkAllLaws(Ord)(Gen.listOf(Gen.anyInt))),
-        testM("vector")(checkAllLaws(Ord)(Gen.vectorOf(Gen.anyInt))),
-        testM("chunk")(checkAllLaws(Ord)(Gen.chunkOf(Gen.anyInt)))
+        testM("unit")(checkAllLaws(Ord)(Gen.unit)),
+        testM("vector")(checkAllLaws(Ord)(Gen.vectorOf(Gen.anyInt)))
       ),
       suite("ScalaOrdering consistency")(
         testM("unit")(scalaOrderingConsistency(Gen.unit)),

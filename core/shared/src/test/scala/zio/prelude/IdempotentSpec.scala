@@ -31,17 +31,17 @@ object IdempotentSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("IdempotentSpec")(
       suite("laws")(
-        testM("boolean disjunction")(checkAllLaws(Idempotent)(Gen.boolean.map(Or(_)))),
         testM("boolean conjuction")(checkAllLaws(Idempotent)(Gen.boolean.map(And(_)))),
-        testM("option")(checkAllLaws(Idempotent)(Gen.option(anyMaxInt))),
-        testM("set")(checkAllLaws(Idempotent)(Gen.setOf(Gen.anyInt))),
+        testM("boolean disjunction")(checkAllLaws(Idempotent)(Gen.boolean.map(Or(_)))),
         testM("map")(checkAllLaws(Idempotent)(Gen.mapOf(anyMaxInt, anyMaxInt))),
+        testM("option")(checkAllLaws(Idempotent)(Gen.option(anyMaxInt))),
+        testM("ordering")(checkAllLaws(Idempotent)(anyOrdering)),
+        testM("partial ordering")(checkAllLaws(Idempotent)(anyPartialOrdering)),
+        testM("set")(checkAllLaws(Idempotent)(Gen.setOf(Gen.anyInt))),
         testM("tuple2")(checkAllLaws(Idempotent)(anyMaxInt.zip(anyMaxInt))),
         testM("tuple3")(
           checkAllLaws(Idempotent)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt).map { case ((x, y), z) => (x, y, z) })
-        ),
-        testM("partial ordering")(checkAllLaws(Idempotent)(anyPartialOrdering)),
-        testM("ordering")(checkAllLaws(Idempotent)(anyOrdering))
+        )
       ),
       test("Idempotent.reduceIdempotent") {
 
