@@ -595,19 +595,12 @@ trait LowPriorityNonEmptyListImplicits {
   /**
    * Derives an `Ord[NonEmptyList[A]]` given an `Ord[A]`.
    */
-  implicit def NonEmptyListOrd[A: Ord]: Ord[NonEmptyList[A]] = {
+  implicit def NonEmptyListOrd[A: Ord]: Ord[NonEmptyList[A]] =
+    Ord[List[A]].contramap(_.toList)
 
-    @tailrec
-    def loop(left: NonEmptyList[A], right: NonEmptyList[A]): Ordering =
-      (left, right) match {
-        case (Single(h1), Single(h2))     => Ord[A].compare(h1, h2)
-        case (Single(h1), Cons(h2, _))    => Ord[A].compare(h1, h2) <> Ordering.LessThan
-        case (Cons(h1, _), Single(h2))    => Ord[A].compare(h1, h2) <> Ordering.GreaterThan
-        case (Cons(h1, t1), Cons(h2, t2)) =>
-          val compare = Ord[A].compare(h1, h2)
-          if (compare.isEqual) loop(t1, t2) else compare
-      }
-
-    Ord.make((l, r) => loop(l, r))
-  }
+  /**
+   * Derives a `PartialOrd[NonEmptyList[A]]` given a `PartialOrd[A]`.
+   */
+  implicit def NonEmptyListPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyList[A]] =
+    PartialOrd[List[A]].contramap(_.toList)
 }

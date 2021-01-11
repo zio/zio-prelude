@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.NonEmptyChunk
+import zio.prelude.coherent.HashPartialOrd
 
 import scala.language.implicitConversions
 
@@ -162,10 +163,10 @@ object NonEmptySet {
     chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptySet", chunk.toNonEmptyList.map(_.debug).toCons)
 
   /**
-   * Derives an `Equal[NonEmptyList[A]]` given an `Equal[A]`.
+   * Derives a `Hash[NonEmptySet[A]]` and `PartialOrd[NonEmptySet[A]]` (and thus `Equal[NonEmptyList[A]]`) instance.
    */
-  implicit def NonEmptySetHash[A]: Hash[NonEmptySet[A]] =
-    Hash.default
+  implicit def NonEmptySetHashPartialOrd[A]: Hash[NonEmptySet[A]] with PartialOrd[NonEmptySet[A]] =
+    HashPartialOrd.derive[Set[A]].contramap(_.toSet)
 
   /**
    * Provides an implicit conversion from `NonEmptySet` to the `Set`

@@ -37,14 +37,14 @@ object TraversableSpec extends DefaultRunnableSpec {
 
   def spec: ZSpec[Environment, Failure] =
     suite("TraversableSpec")(
-      suite("instances")(
+      suite("laws")(
         testM("chunk")(checkAllLaws(Traversable)(GenF.chunk, Gen.anyInt)),
+        testM("chunk . option")(checkAllLaws(Traversable)(chunkOptionGenF, Gen.anyInt)),
         testM("either")(checkAllLaws(Traversable)(GenFs.either(Gen.anyInt), Gen.anyInt)),
         testM("list")(checkAllLaws(Traversable)(GenF.list, Gen.anyInt)),
         testM("map")(checkAllLaws(Traversable)(GenFs.map(Gen.anyInt), Gen.anyInt)),
         testM("option")(checkAllLaws(Traversable)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt)),
-        testM("chunk . option")(checkAllLaws(Traversable)(chunkOptionGenF, Gen.anyInt))
+        testM("vector")(checkAllLaws(Traversable)(GenF.vector, Gen.anyInt))
       ),
       suite("combinators")(
         testM("contains") {
