@@ -1,13 +1,11 @@
 package zio.prelude
 
-import com.github.ghik.silencer.silent
-import zio.prelude.newtypes.{And, Max, Min, Or, Prod, Sum}
+import zio.prelude.newtypes._
 import zio.test.laws._
 import zio.test.{DefaultRunnableSpec, _}
 
 object IdentitySpec extends DefaultRunnableSpec {
 
-  @silent("Unused import")
   def spec: ZSpec[Environment, Failure] =
     suite("IdentitySpec")(
       suite("laws")(
