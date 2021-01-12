@@ -370,44 +370,44 @@ classDiagram
 
 ```mermaid
 classDiagram
-  AssociativeCompose~:=>[-_, +_]~ <|-- IdentityCompose~:=>[-_, +_]~
-  AssociativeCompose~:=>[-_, +_]~ <|-- BothCompose~:=>[-_, +_]~
-  AssociativeCompose~:=>[-_, +_]~ <|-- EitherCompose~:=>[-_, +_]~
-  BothCompose <|-- ApplicationCompose~:=>[-_, +_]~
-  class AssociativeCompose~:=>[-_, +_]~{
-    () compose[A, B, C](B :=> C, A :=> B): A :=> C
+  AssociativeCompose~=>:[-_, +_]~ <|-- IdentityCompose~=>:[-_, +_]~
+  AssociativeCompose~=>:[-_, +_]~ <|-- BothCompose~=>:[-_, +_]~
+  AssociativeCompose~=>:[-_, +_]~ <|-- EitherCompose~=>:[-_, +_]~
+  BothCompose <|-- ApplicationCompose~=>:[-_, +_]~
+  class AssociativeCompose~=>:[-_, +_]~{
+    () compose[A, B, C](B =>: C, A =>: B): A =>: C
   }
-  class IdentityCompose~:=>[-_, +_]~{
+  class IdentityCompose~=>:[-_, +_]~{
     Function[-*, +*]
 
-    () identity[A]: A :=> A
+    () identity[A]: A =>: A
   }
-  class BothCompose~:=>[-_, +_]~{
+  class BothCompose~=>:[-_, +_]~{
   
     (type) :*:[+_, +_]
-    () fromFirst[A]: (A :*: Any) :=> A
-    () fromSecond[B]: (Any :*: B) :=> B
-    () toBoth[A, B, C](A :=> B)(A :=> C): A :=> (B :*: C)
+    () fromFirst[A]: (A :*: Any) =>: A
+    () fromSecond[B]: (Any :*: B) =>: B
+    () toBoth[A, B, C](A =>: B)(A =>: C): A =>: (B :*: C)
   }
-  class ApplicationCompose~:=>[-_, +_]~{
-    Function[-*, +*] [ :*: = Tuple2 ; :--> = Function ]
+  class ApplicationCompose~=>:[-_, +_]~{
+    Function[-*, +*] [ :*: = Tuple2 ; -->: = Function ]
     
-    (type) :-->[-_, +_]
-    () application[A, B]: ((A :--> B) :*: A) :=> B
-    () curry[A, B, C]((A :*: B) :=> C): A :=> (B :--> C)
-    () uncurry[A, B, C](A :=> (B :--> C)): (A :*: B) :=> C
+    (type) -->:[-_, +_]
+    () application[A, B]: ((A -->: B) :*: A) =>: B
+    () curry[A, B, C]((A :*: B) =>: C): A =>: (B -->: C)
+    () uncurry[A, B, C](A =>: (B -->: C)): (A :*: B) =>: C
   }
-  class EitherCompose~:=>[-_, +_]~{
+  class EitherCompose~=>:[-_, +_]~{
     Function[-*, +*] [ :+: = Either ]
     
     (type) :+:[+_, +_]
-    () toLeft[A]: A :=> (A :+: Nothing)
-    () toRight[B]: B :=> (Nothing :+: B)
-    () fromEither[A, B, C](=> A :=> C)(=> B :=> C): (A :+: B) :=> C
+    () toLeft[A]: A =>: (A :+: Nothing)
+    () toRight[B]: B =>: (Nothing :+: B)
+    () fromEither[A, B, C](=> A =>: C)(=> B =>: C): (A :+: B) =>: C
   }
 ```
 
 </details>
 
-[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/101706157-d0531080-3a88-11eb-96ff-11abe8baa68f.png
-[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX46PT5bLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX46PT5bLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfjo9PlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-Oj0-Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfjo9PlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA6PT4gQywgQSA6PT4gQik6IEEgOj0-IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBIDo9PiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-Oj0-Wy1fLCArX11-e1xuICBcbiAgICAodHlwZSkgOio6WytfLCArX11cbiAgICAoKSBmcm9tRmlyc3RbQV06IChBIDoqOiBBbnkpIDo9PiBBXG4gICAgKCkgZnJvbVNlY29uZFtCXTogKEFueSA6KjogQikgOj0-IEJcbiAgICAoKSB0b0JvdGhbQSwgQiwgQ10oQSA6PT4gQikoQSA6PT4gQyk6IEEgOj0-IChCIDoqOiBDKVxuICB9XG4gIGNsYXNzIEFwcGxpY2F0aW9uQ29tcG9zZX46PT5bLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDoqOiA9IFR1cGxlMiA7IDotLT4gPSBGdW5jdGlvbiBdXG4gICAgXG4gICAgKHR5cGUpIDotLT5bLV8sICtfXVxuICAgICgpIGFwcGxpY2F0aW9uW0EsIEJdOiAoKEEgOi0tPiBCKSA6KjogQSkgOj0-IEJcbiAgICAoKSBjdXJyeVtBLCBCLCBDXSgoQSA6KjogQikgOj0-IEMpOiBBIDo9PiAoQiA6LS0-IEMpXG4gICAgKCkgdW5jdXJyeVtBLCBCLCBDXShBIDo9PiAoQiA6LS0-IEMpKTogKEEgOio6IEIpIDo9PiBDXG4gIH1cbiAgY2xhc3MgRWl0aGVyQ29tcG9zZX46PT5bLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDorOiA9IEVpdGhlciBdXG4gICAgXG4gICAgKHR5cGUpIDorOlsrXywgK19dXG4gICAgKCkgdG9MZWZ0W0FdOiBBIDo9PiAoQSA6KzogTm90aGluZylcbiAgICAoKSB0b1JpZ2h0W0JdOiBCIDo9PiAoTm90aGluZyA6KzogQilcbiAgICAoKSBmcm9tRWl0aGVyW0EsIEIsIENdKD0-IEEgOj0-IEMpKD0-IEIgOj0-IEMpOiAoQSA6KzogQikgOj0-IENcbiAgfVxuIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjpmYWxzZX0
+[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/104252274-f5fd7c00-5471-11eb-97ea-7941bdf4b243.png
+[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX49PjpbLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfj0-OlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA9PjogQywgQSA9PjogQik6IEEgPT46IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBID0-OiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-PT46Wy1fLCArX11-e1xuICBcbiAgICAodHlwZSkgOio6WytfLCArX11cbiAgICAoKSBmcm9tRmlyc3RbQV06IChBIDoqOiBBbnkpID0-OiBBXG4gICAgKCkgZnJvbVNlY29uZFtCXTogKEFueSA6KjogQikgPT46IEJcbiAgICAoKSB0b0JvdGhbQSwgQiwgQ10oQSA9PjogQikoQSA9PjogQyk6IEEgPT46IChCIDoqOiBDKVxuICB9XG4gIGNsYXNzIEFwcGxpY2F0aW9uQ29tcG9zZX49PjpbLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDoqOiA9IFR1cGxlMiA7IC0tPjogPSBGdW5jdGlvbiBdXG4gICAgXG4gICAgKHR5cGUpIC0tPjpbLV8sICtfXVxuICAgICgpIGFwcGxpY2F0aW9uW0EsIEJdOiAoKEEgLS0-OiBCKSA6KjogQSkgPT46IEJcbiAgICAoKSBjdXJyeVtBLCBCLCBDXSgoQSA6KjogQikgPT46IEMpOiBBID0-OiAoQiAtLT46IEMpXG4gICAgKCkgdW5jdXJyeVtBLCBCLCBDXShBID0-OiAoQiAtLT46IEMpKTogKEEgOio6IEIpID0-OiBDXG4gIH1cbiAgY2xhc3MgRWl0aGVyQ29tcG9zZX49PjpbLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDorOiA9IEVpdGhlciBdXG4gICAgXG4gICAgKHR5cGUpIDorOlsrXywgK19dXG4gICAgKCkgdG9MZWZ0W0FdOiBBID0-OiAoQSA6KzogTm90aGluZylcbiAgICAoKSB0b1JpZ2h0W0JdOiBCID0-OiAoTm90aGluZyA6KzogQilcbiAgICAoKSBmcm9tRWl0aGVyW0EsIEIsIENdKD0-IEEgPT46IEMpKD0-IEIgPT46IEMpOiAoQSA6KzogQikgPT46IENcbiAgfVxuIiwibWVybWFpZCI6e30sInVwZGF0ZUVkaXRvciI6ZmFsc2V9
