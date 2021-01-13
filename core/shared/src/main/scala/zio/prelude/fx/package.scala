@@ -1,6 +1,6 @@
 package zio.prelude
 
 package object fx {
-  type Cause[+E] = Semiring[Nothing, E]
-  val Cause: Semiring.type = Semiring
+  type Cause[+E] = ParSeq[Nothing, E]
+  val Cause: ParSeq.type = ParSeq
 }

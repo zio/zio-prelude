@@ -85,12 +85,12 @@ object Derive {
     }
 
   /**
-   * The `DeriveEqual` instance for `Semiring`.
+   * The `DeriveEqual` instance for `ParSeq`.
    */
-  implicit def SemiringDeriveEqual[Z <: Unit]: DeriveEqual[({ type lambda[+x] = Semiring[Z, x] })#lambda] =
-    new DeriveEqual[({ type lambda[+x] = Semiring[Z, x] })#lambda] {
-      def derive[A: Equal]: Equal[Semiring[Z, A]] =
-        Semiring.SemiringHash
+  implicit def ParSeqDeriveEqual[Z <: Unit]: DeriveEqual[({ type lambda[+x] = ParSeq[Z, x] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = ParSeq[Z, x] })#lambda] {
+      def derive[A: Equal]: Equal[ParSeq[Z, A]] =
+        ParSeq.parSeqHash
     }
 
   /**

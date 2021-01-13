@@ -1,17 +1,17 @@
 package zio.prelude
 
-import zio.prelude.Semiring._
+import zio.prelude.ParSeq._
 import zio.random._
 import zio.test._
 import zio.test.laws._
 
-object SemiringSpec extends DefaultRunnableSpec {
+object ParSeqSpec extends DefaultRunnableSpec {
 
-  val semiring: Gen[Random with Sized, Semiring[Unit, Int]] =
-    Gens.semiring(Gen.unit, Gen.anyInt)
+  val parSeq: Gen[Random with Sized, ParSeq[Unit, Int]] =
+    Gens.parSeq(Gen.unit, Gen.anyInt)
 
-  val equalSemirings: Gen[Random with Sized, (Semiring[Unit, Int], Semiring[Unit, Int])] =
-    (semiring <*> semiring <*> semiring).flatMap { case ((a, b), c) =>
+  val equalparSeqs: Gen[Random with Sized, (ParSeq[Unit, Int], ParSeq[Unit, Int])] =
+    (parSeq <*> parSeq <*> parSeq).flatMap { case ((a, b), c) =>
       Gen.elements(
         (a, a),
         (Then(Then(a, b), c), Then(a, Then(b, c))),
@@ -24,66 +24,66 @@ object SemiringSpec extends DefaultRunnableSpec {
       )
     }
 
-  val hash = Semiring.SemiringHash
+  val hash = ParSeq.parSeqHash
 
   def spec: ZSpec[Environment, Failure] =
-    suite("SemiringSpec")(
+    suite("parSeqSpec")(
       suite("laws")(
         testM("covariant") {
-          checkAllLaws(Covariant)(GenFs.semiring(Gen.unit), Gen.anyInt)
+          checkAllLaws(Covariant)(GenFs.parSeq(Gen.unit), Gen.anyInt)
         },
         testM("hash") {
-          checkAllLaws(Hash)(Gens.semiring(Gen.unit, Gen.anyInt))
+          checkAllLaws(Hash)(Gens.parSeq(Gen.unit, Gen.anyInt))
         },
         testM("identityBoth") {
-          checkAllLaws(IdentityBoth)(GenFs.semiring(Gen.unit), Gen.anyInt)
+          checkAllLaws(IdentityBoth)(GenFs.parSeq(Gen.unit), Gen.anyInt)
         },
         testM("identityFlatten") {
-          checkAllLaws(IdentityFlatten)(GenFs.semiring(Gen.unit), Gen.anyInt)
+          checkAllLaws(IdentityFlatten)(GenFs.parSeq(Gen.unit), Gen.anyInt)
         },
         testM("traversable") {
-          checkAllLaws(Traversable)(GenFs.semiring(Gen.unit), Gen.anyInt)
+          checkAllLaws(Traversable)(GenFs.parSeq(Gen.unit), Gen.anyInt)
         }
       ),
       suite("both")(
         testM("associative") {
-          check(semiring, semiring, semiring) { (a, b, c) =>
+          check(parSeq, parSeq, parSeq) { (a, b, c) =>
             assert((a && b) && c)(equalTo(a && (b && c))) &&
             assert(a && (b && c))(equalTo((a && b) && c))
           }
         },
         testM("commutative") {
-          check(semiring, semiring) { (a, b) =>
+          check(parSeq, parSeq) { (a, b) =>
             assert(a && b)(equalTo(b && a))
           }
         },
         testM("identity") {
-          check(semiring) { a =>
+          check(parSeq) { a =>
             assert(Both(a, empty))(equalTo(a)) &&
             assert(Both(empty, a))(equalTo(a))
           }
         }
       ),
       testM("hashCode") {
-        check(equalSemirings) { case (a, b) =>
+        check(equalparSeqs) { case (a, b) =>
           assert(a.hashCode)(equalTo(b.hashCode))
         }
       },
       suite("then")(
         testM("associative") {
-          check(semiring, semiring, semiring) { (a, b, c) =>
+          check(parSeq, parSeq, parSeq) { (a, b, c) =>
             assert((a ++ b) ++ c)(equalTo(a ++ (b ++ c))) &&
             assert(a ++ (b ++ c))(equalTo((a ++ b) ++ c))
           }
         },
         testM("commutative") {
-          check(semiring, semiring, semiring) { (a, b, c) =>
+          check(parSeq, parSeq, parSeq) { (a, b, c) =>
             assert(a ++ (b && c))(equalTo((a ++ b) && (a ++ c))) &&
             assert((a && b) ++ c)(equalTo((a ++ c) && (b ++ c)))
           }
         },
         testM("identity") {
-          check(semiring) { a =>
+          check(parSeq) { a =>
             assert(Then(a, empty))(equalTo(a)) &&
             assert(Then(empty, a))(equalTo(a))
           }

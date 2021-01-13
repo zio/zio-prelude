@@ -73,14 +73,14 @@ object GenFs {
     }
 
   /**
-   * A generator of `Semiring` values.
+   * A generator of `ParSeq` values.
    */
-  def semiring[R <: Random with Sized, Z <: Unit](
+  def parSeq[R <: Random with Sized, Z <: Unit](
     z: Gen[R, Z]
-  ): GenF[R, ({ type lambda[+x] = Semiring[Z, x] })#lambda] =
-    new GenF[R, ({ type lambda[+x] = Semiring[Z, x] })#lambda] {
-      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, Semiring[Z, A]] =
-        Gens.semiring(z, a)
+  ): GenF[R, ({ type lambda[+x] = ParSeq[Z, x] })#lambda] =
+    new GenF[R, ({ type lambda[+x] = ParSeq[Z, x] })#lambda] {
+      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, ParSeq[Z, A]] =
+        Gens.parSeq(z, a)
     }
 
   /**
