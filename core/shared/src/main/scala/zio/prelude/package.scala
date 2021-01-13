@@ -10,6 +10,7 @@ package object prelude
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
     with AssociativeFlattenSyntax
+    with BicovariantSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with CovariantSyntax
@@ -28,8 +29,8 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
+    with PartialOrdSyntax
     with TraversableSyntax
-    with BicovariantSyntax
     with ZivariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
@@ -115,9 +116,9 @@ package object prelude
     type Applicative[F[+_]]         = Covariant[F] with IdentityBoth[F]
     type InvariantApplicative[F[_]] = Invariant[F] with IdentityBoth[F]
 
-    type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
-    type Profunctor[:=>[-_, +_]] = Divariant[:=>]
-    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
+    type Category[=>:[-_, +_]]   = IdentityCompose[=>:]
+    type Profunctor[=>:[-_, +_]] = Divariant[=>:]
+    type Bifunctor[=>:[+_, +_]]  = Bicovariant[=>:]
   }
 
   /**
@@ -129,14 +130,52 @@ package object prelude
     // name intentionally different from other methods (`equal`, `equalTo`, etc to avoid confusing compiler errors)
     def isEqualTo[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
       assert(self)(equalTo(that))
-    def greater(that: A)(implicit ord: Ord[A]): TestResult               =
+    def greater(that: A)(implicit ord: PartialOrd[A]): TestResult        =
       assert(self)(isGreaterThan(that))
-    def greaterOrEqual(that: A)(implicit ord: Ord[A]): TestResult        =
+    def greaterOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult =
       assert(self)(isGreaterThanEqualTo(that))
-    def less(that: A)(implicit ord: Ord[A]): TestResult                  =
+    def less(that: A)(implicit ord: PartialOrd[A]): TestResult           =
       assert(self)(isLessThan(that))
-    def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult           =
+    def lessOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult    =
       assert(self)(isLessThanEqualTo(that))
+  }
+
+  implicit class MapSyntax[K, V](private val l: Map[K, V]) extends AnyVal {
+
+    /** Compares two maps, where you supply `compareValues` that compares the common values */
+    def compareWith(
+      compareValues: (Ordering, Iterable[(V, V)]) => PartialOrdering
+    )(r: Map[K, V]): PartialOrdering = {
+      def commonValues(lesserMap: Map[K, V]): Iterable[(V, V)] =
+        lesserMap.keys.map(k => (l(k), r(k)))
+      if (l.keySet == r.keySet) {
+        compareValues(Ordering.Equals, commonValues(l))
+      } else if (l.keySet.subsetOf(r.keySet)) {
+        compareValues(Ordering.LessThan, commonValues(l))
+      } else if (r.keySet.subsetOf(l.keySet)) {
+        compareValues(Ordering.GreaterThan, commonValues(r))
+      } else {
+        PartialOrdering.Incomparable
+      }
+    }
+
+    /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
+    def compareSoft(r: Map[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
+      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+        commonValues.map { case (l, r) => l =??= r }.fold(expected)(_.unify(_))
+      compareWith(compareValues)(r)
+    }
+
+    /** Compares two maps, expecting the values for the common keys to be equal. */
+    def compareStrict(r: Map[K, V])(implicit V: Equal[V]): PartialOrdering = {
+      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+        if (commonValues.forall { case (l, r) => l === r }) {
+          expected
+        } else {
+          PartialOrdering.Incomparable
+        }
+      compareWith(compareValues)(r)
+    }
   }
 
   implicit class AnySyntax[A](private val a: A) extends AnyVal {

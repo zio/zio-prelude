@@ -99,7 +99,7 @@ object Derive {
   implicit def SetDeriveEqual[A]: DeriveEqual[({ type lambda[x] = Set[A] })#lambda] =
     new DeriveEqual[({ type lambda[x] = Set[A] })#lambda] {
       def derive[B: Equal]: Equal[Set[A]] =
-        Equal.SetHash
+        Equal.SetHashPartialOrd
     }
 
   /**

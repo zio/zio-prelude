@@ -453,6 +453,13 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZPure.Provide(r, self)
 
   /**
+   * Provides this computation with part of its required environment, leaving
+   * the remainder.
+   */
+  final def provideSome[R0](f: R0 => R): ZPure[S1, S2, R0, E, A] =
+    ZPure.accessM(r0 => self.provide(f(r0)))
+
+  /**
    * Fail with the returned value if the `PartialFunction` matches, otherwise
    * continue with our held value.
    */

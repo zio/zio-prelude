@@ -68,6 +68,10 @@ object ZPureSpec extends DefaultRunnableSpec {
               end <- ZPure.environment[Any, Int]
             } yield end
             assert(zPure.provide(0).runResult(()))(equalTo(0))
+          },
+          test("provideSome") {
+            val zPure = ZPure.environment[Any, Int].provideSome[String](_.split(" ").length)
+            assert(zPure.provide("The quick brown fox").runResult(()))(equalTo(4))
           }
         )
       ),

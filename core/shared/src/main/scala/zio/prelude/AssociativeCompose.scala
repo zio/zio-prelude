@@ -1,13 +1,13 @@
 package zio.prelude
 
-trait AssociativeCompose[:=>[-_, +_]] {
-  def compose[A, B, C](bc: B :=> C, ab: A :=> B): A :=> C
+trait AssociativeCompose[=>:[-_, +_]] {
+  def compose[A, B, C](bc: B =>: C, ab: A =>: B): A =>: C
 
   def associativeCompose[A, B, C, D](
-    ab: A :=> B,
-    bc: B :=> C,
-    cd: C :=> D
-  )(implicit eq: Equal[A :=> D]): Boolean = {
+    ab: A =>: B,
+    bc: B =>: C,
+    cd: C =>: D
+  )(implicit eq: Equal[A =>: D]): Boolean = {
     val ad1 = compose(cd, compose(bc, ab))
     val ad2 = compose(compose(cd, bc), ab)
 
@@ -16,24 +16,38 @@ trait AssociativeCompose[:=>[-_, +_]] {
 }
 
 object AssociativeCompose {
-  implicit val FunctionIdentityCompose: IdentityCompose[Function] =
-    new IdentityCompose[Function] {
-      def identity[A]: A => A = (a: A) => a
 
-      def compose[A, B, C](bc: B => C, ab: A => B): A => C =
-        bc.compose(ab)
-    }
+  implicit val FunctionIdentityCompose: IdentityCompose[Function] = new IdentityCompose[Function] {
+
+    def identity[A]: A => A = scala.Predef.identity
+
+    def compose[A, B, C](bc: B => C, ab: A => B): A => C =
+      bc.compose(ab)
+
+  }
 }
 
 trait AssociativeComposeSyntax {
-  implicit class AssociativeComposeOps[:=>[-_, +_], A, B](private val ab: A :=> B) {
+  implicit class AssociativeComposeOps[A, B, =>:[-_, +_]](private val ab: A =>: B) {
+
+    /** A symbolic alias for `andThen`. Composes `A -> B` with `B -> C` to form `A -> C`. */
+    def >>>[C](implicit ev: AssociativeCompose[=>:]): (B =>: C) => (A =>: C) = { bc =>
+      ev.compose(bc, ab)
+    }
 
     /** Composes `A -> B` with `B -> C` to form `A -> C`. */
-    def >>>[C](bc: B :=> C)(implicit ev: AssociativeCompose[:=>]): A :=> C =
+    def andThen[C](implicit ev: AssociativeCompose[=>:]): (B =>: C) => (A =>: C) = { bc =>
       ev.compose(bc, ab)
+    }
+
+    /** A symbolic alias for `compose`. Composes `B <- A` with `A <- Z` to form `B <- Z`. */
+    def <<<[Z](implicit ev: AssociativeCompose[=>:]): (Z =>: A) => Z =>: B = { za =>
+      ev.compose(ab, za)
+    }
 
     /** Composes `B <- A` with `A <- Z` to form `B <- Z`. */
-    def <<<[Z](za: Z :=> A)(implicit ev: AssociativeCompose[:=>]): Z :=> B =
+    def compose[Z](implicit ev: AssociativeCompose[=>:]): (Z =>: A) => Z =>: B = { za =>
       ev.compose(ab, za)
+    }
   }
 }

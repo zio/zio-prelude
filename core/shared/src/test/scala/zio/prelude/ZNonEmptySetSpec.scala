@@ -49,7 +49,6 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
             IntHashOrd
           )
         ),
-        testM("equal")(checkAllLaws(Equal)(genZNonEmptySet(Gen.anyInt, Gen.anyInt))),
         testM("hash")(checkAllLaws(Hash)(genZNonEmptySet(Gen.anyInt, Gen.anyInt))),
         testM("intersect commutative")(
           checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))
