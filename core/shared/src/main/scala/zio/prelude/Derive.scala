@@ -85,6 +85,15 @@ object Derive {
     }
 
   /**
+   * The `DeriveEqual` instance for `ParSeq`.
+   */
+  implicit def ParSeqDeriveEqual[Z <: Unit]: DeriveEqual[({ type lambda[+x] = ParSeq[Z, x] })#lambda] =
+    new DeriveEqual[({ type lambda[+x] = ParSeq[Z, x] })#lambda] {
+      def derive[A: Equal]: Equal[ParSeq[Z, A]] =
+        ParSeq.parSeqHash
+    }
+
+  /**
    * The `DeriveEqual` instance for `Set`.
    */
   implicit def SetDeriveEqual[A]: DeriveEqual[({ type lambda[x] = Set[A] })#lambda] =

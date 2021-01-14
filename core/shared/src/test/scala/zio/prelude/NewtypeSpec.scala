@@ -23,7 +23,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
           assert(Natural.make(0))(isSuccessV(anything))
         },
         test("invalid values") {
-          val expected = NonEmptyMultiSet("-1 did not satisfy isGreaterThanEqualTo(0)")
+          val expected = "-1 did not satisfy isGreaterThanEqualTo(0)"
           assert(Natural.make(-1))(isFailureV(equalTo(expected)))
         }
       ),

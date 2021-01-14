@@ -202,7 +202,7 @@ object Equal extends Lawful[Equal] {
    * embodied in the implementation of `equals` for values of type `A`.
    */
   def default[A]: Equal[A] =
-    make(_ == _)
+    DefaultEqual
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
@@ -878,6 +878,13 @@ object Equal extends Lawful[Equal] {
    */
   private[prelude] def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
+
+  /**
+   * An `Equal` instance for `Any` values that uses Scala's default notion of
+   * equality embodied in `equals`.
+   */
+  private lazy val DefaultEqual: Equal[Any] =
+    Equal.make(_ == _)
 }
 
 trait EqualSyntax {
