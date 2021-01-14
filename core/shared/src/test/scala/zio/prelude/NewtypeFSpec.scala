@@ -17,7 +17,7 @@ object NewtypeFSpec extends DefaultRunnableSpec {
           assert(ShortList.make(List(1, 2, 3, 4)))(isSuccessV(anything))
         },
         test("invalid values") {
-          val expected = NonEmptyMultiSet("List(1, 2, 3, 4, 5) did not satisfy isShorterThan(5)")
+          val expected = "List(1, 2, 3, 4, 5) did not satisfy isShorterThan(5)"
           assert(ShortList.make(List(1, 2, 3, 4, 5)))(isFailureV(equalTo(expected)))
         }
       ),

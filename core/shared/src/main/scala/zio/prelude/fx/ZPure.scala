@@ -456,7 +456,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Provides this computation with part of its required environment, leaving
    * the remainder.
    */
-  final def provideSome[R0](f: R0 => R): ZPure[S1, S2, R0, E, A] =
+  final def provideSome[R0](f: R0 => R): ZPure[W, S1, S2, R0, E, A] =
     ZPure.accessM(r0 => self.provide(f(r0)))
 
   /**
