@@ -7,7 +7,7 @@ scala_212: &scala_212
   SCALA_VERSION: 2.12.13
 
 scala_213: &scala_213
-  SCALA_VERSION: 2.13.4
+  SCALA_VERSION: 2.13.3
 
 scala_dotty: &scala_dotty
   SCALA_VERSION: 0.27.0-RC1
