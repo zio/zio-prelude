@@ -92,6 +92,13 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
     reduceMap(fa)(identity)
 
   /**
+   * Reduces the collection to a summary value using the idempotent operation,
+   * returning `None` if the collection is empty.
+   */
+  def reduceIdempotent1[A: Idempotent: Equal](fa: F[A]): A =
+    reduce1(fa)(Idempotent[A].idempotent)
+
+  /**
    * Maps each element of the collection to a type `B` for which a combine
    * operation is defined using the function `f` and then reduces those values
    * to a single summary using the combine operation.
@@ -163,6 +170,8 @@ trait NonEmptyTraversableSyntax {
       F.reduce(self)(f)
     def reduce1(implicit F: NonEmptyTraversable[F], A: Associative[A]): A                                         =
       F.reduce1(self)
+    def reduceIdempotent1(implicit F: NonEmptyTraversable[F], ia: Idempotent[A], ea: Equal[A]): A                 =
+      F.reduceIdempotent1(self)
     def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyTraversable[F]): B                               =
       F.reduceMap(self)(f)
     def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyTraversable[F]): B                 =

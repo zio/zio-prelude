@@ -160,7 +160,7 @@ object Hash extends Lawful[Hash] {
    * the implementation of `hashCode` for values of type `A`.
    */
   def default[A]: Hash[A] =
-    make(_.hashCode(), _ == _)
+    DefaultHash
 
   /**
    * Derives a `Hash[Chunk[A]]` given a `Hash[A]`.
@@ -853,6 +853,13 @@ object Hash extends Lawful[Hash] {
    */
   implicit def VectorHash[A: Hash]: Hash[Vector[A]] =
     makeFrom(_.map(_.hash).hashCode, Equal.VectorEqual)
+
+  /**
+   * A `Hash` instance for `Any` values that uses Scala's default notions of
+   * equality and hashing embodied in `equals` and `hashCode`.
+   */
+  private lazy val DefaultHash: Hash[Any] =
+    Hash.make(_.hashCode, _ == _)
 }
 
 trait HashSyntax {

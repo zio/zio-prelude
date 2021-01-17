@@ -199,7 +199,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
     self.flatMap(a => that.map(c => f(a, c)))
 }
 
-object ZSet {
+object ZSet extends LowPriorityZSetImplicits {
 
   /**
    * Constructs a set with the specified elements.
@@ -333,4 +333,16 @@ object ZSet {
    */
   implicit def ZSetHash[A, B: Hash]: Hash[ZSet[A, B]] =
     Hash[HashMap[A, B]].contramap(_.map)
+
+}
+
+trait LowPriorityZSetImplicits {
+
+  /**
+   * Derives a `PartialOrd[ZSet[A, B]]` given a `PartialOrd[B]`.
+   * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
+   */
+  implicit def ZSetPartialOrd[A, B: PartialOrd]: PartialOrd[ZSet[A, B]] =
+    PartialOrd.makeFrom((l, r) => l.toMap.compareSoft(r.toMap), ZSet.ZSetEqual)
+
 }

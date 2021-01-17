@@ -10,6 +10,7 @@ package object prelude
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
     with AssociativeFlattenSyntax
+    with BicovariantSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with CovariantSyntax
@@ -29,25 +30,37 @@ package object prelude
     with NonEmptySetSyntax
     with NonEmptyTraversableSyntax
     with OrdSyntax
+    with PartialOrdSyntax
     with TraversableSyntax
-    with BicovariantSyntax
     with ZivariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
 
   type AnyF[_] = Any
 
-  type EState[S, +E, +A] = zio.prelude.fx.ZPure[S, S, Any, E, A]
+  type EState[S, +E, +A] = zio.prelude.fx.ZPure[Nothing, S, S, Any, E, A]
   val EState: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type State[S, +A] = zio.prelude.fx.ZPure[S, S, Any, Nothing, A]
+  type State[S, +A] = zio.prelude.fx.ZPure[Nothing, S, S, Any, Nothing, A]
   val State: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type Reader[-R, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, Nothing, A]
+  type Reader[-R, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, R, Nothing, A]
   val Reader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Unit, Unit, R, E, A]
+  type EReader[-R, +E, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, R, E, A]
   val EReader: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type Writer[+W, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, Nothing, A]
+  val Writer: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type EWriter[+W, +E, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, E, A]
+  val EWriter: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type ZValidation[+W, +E, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, E, A]
+  val ZValidation: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+
+  type Validation[+E, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, Any, E, A]
+  val Validation: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
   type MultiSet[+A] = ZSet[A, Int]
   val MultiSet: ZSet.type = ZSet
@@ -104,9 +117,9 @@ package object prelude
     type Applicative[F[+_]]         = Covariant[F] with IdentityBoth[F]
     type InvariantApplicative[F[_]] = Invariant[F] with IdentityBoth[F]
 
-    type Category[:=>[-_, +_]]   = IdentityCompose[:=>]
-    type Profunctor[:=>[-_, +_]] = Divariant[:=>]
-    type Bifunctor[:=>[+_, +_]]  = Bicovariant[:=>]
+    type Category[=>:[-_, +_]]   = IdentityCompose[=>:]
+    type Profunctor[=>:[-_, +_]] = Divariant[=>:]
+    type Bifunctor[=>:[+_, +_]]  = Bicovariant[=>:]
   }
 
   /**
@@ -118,14 +131,52 @@ package object prelude
     // name intentionally different from other methods (`equal`, `equalTo`, etc to avoid confusing compiler errors)
     def isEqualTo[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
       assert(self)(equalTo(that))
-    def greater(that: A)(implicit ord: Ord[A]): TestResult               =
+    def greater(that: A)(implicit ord: PartialOrd[A]): TestResult        =
       assert(self)(isGreaterThan(that))
-    def greaterOrEqual(that: A)(implicit ord: Ord[A]): TestResult        =
+    def greaterOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult =
       assert(self)(isGreaterThanEqualTo(that))
-    def less(that: A)(implicit ord: Ord[A]): TestResult                  =
+    def less(that: A)(implicit ord: PartialOrd[A]): TestResult           =
       assert(self)(isLessThan(that))
-    def lessOrEqual(that: A)(implicit ord: Ord[A]): TestResult           =
+    def lessOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult    =
       assert(self)(isLessThanEqualTo(that))
+  }
+
+  implicit class MapSyntax[K, V](private val l: Map[K, V]) extends AnyVal {
+
+    /** Compares two maps, where you supply `compareValues` that compares the common values */
+    def compareWith(
+      compareValues: (Ordering, Iterable[(V, V)]) => PartialOrdering
+    )(r: Map[K, V]): PartialOrdering = {
+      def commonValues(lesserMap: Map[K, V]): Iterable[(V, V)] =
+        lesserMap.keys.map(k => (l(k), r(k)))
+      if (l.keySet == r.keySet) {
+        compareValues(Ordering.Equals, commonValues(l))
+      } else if (l.keySet.subsetOf(r.keySet)) {
+        compareValues(Ordering.LessThan, commonValues(l))
+      } else if (r.keySet.subsetOf(l.keySet)) {
+        compareValues(Ordering.GreaterThan, commonValues(r))
+      } else {
+        PartialOrdering.Incomparable
+      }
+    }
+
+    /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
+    def compareSoft(r: Map[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
+      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+        commonValues.map { case (l, r) => l =??= r }.fold(expected)(_.unify(_))
+      compareWith(compareValues)(r)
+    }
+
+    /** Compares two maps, expecting the values for the common keys to be equal. */
+    def compareStrict(r: Map[K, V])(implicit V: Equal[V]): PartialOrdering = {
+      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+        if (commonValues.forall { case (l, r) => l === r }) {
+          expected
+        } else {
+          PartialOrdering.Incomparable
+        }
+      compareWith(compareValues)(r)
+    }
   }
 
   implicit class AnySyntax[A](private val a: A) extends AnyVal {

@@ -20,7 +20,7 @@ object NonEmptyTraversableSpec extends DefaultRunnableSpec {
 
   def spec: ZSpec[Environment, Failure] =
     suite("NonEmptyTraversableSpec")(
-      suite("instances")(
+      suite("laws")(
         testM("nonEmptyChunk")(checkAllLaws(NonEmptyTraversable)(GenFs.nonEmptyChunk, Gen.anyInt))
       ),
       suite("combinators")(

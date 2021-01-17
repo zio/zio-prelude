@@ -2,7 +2,10 @@ package zio.prelude
 
 package object experimental
     extends AddMultiplyShapeSyntax
+    with ApplicationComposeSyntax
+    with BothComposeSyntax
     with DivideShapeSyntax
+    with EitherComposeSyntax
     with PartialDivideShapeSyntax
     with SubtractShapeSyntax {
 
@@ -23,6 +26,10 @@ package object experimental
       type Multiplication[x] <: PartialInverse[x]
     }
 
+    type CartesianCategory[=>:[-_, +_], :*:[+_, +_]]                     = Category[=>:] with BothCompose.Aux[=>:, :*:]
+    type ClosedCartesianCategory[=>:[-_, +_], :*:[+_, +_], -->:[-_, +_]] = CartesianCategory[=>:, :*:]
+      with ApplicationCompose.Aux[=>:, :*:, -->:]
+    type CoCartesianCategory[=>:[-_, +_], :+:[+_, +_]]                   = Category[=>:] with EitherCompose.Aux[=>:, :+:]
   }
 
 }

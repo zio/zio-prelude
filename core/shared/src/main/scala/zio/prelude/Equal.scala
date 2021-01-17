@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.Exit.{Failure, Success}
-import zio.prelude.coherent.HashOrd
+import zio.prelude.coherent.{HashOrd, HashPartialOrd}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace}
@@ -195,14 +195,14 @@ object Equal extends Lawful[Equal] {
    * values for value equality.
    */
   def make[A](equal: (A, A) => Boolean): Equal[A] =
-    (l, r) => refEq(l, r) || equal(l, r)
+    (l, r) => equal(l, r)
 
   /**
    * Constructs an `Equal[A]` that uses the default notion of equality
    * embodied in the implementation of `equals` for values of type `A`.
    */
   def default[A]: Equal[A] =
-    make(_ == _)
+    DefaultEqual
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
@@ -331,12 +331,20 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * `Hash` (and thus also `Equal`) instance for `Set[A]` values.
+   * `PartialOrd` and `Hash` (and thus also `Equal`) instance for `Set[A]` values.
    * Due to the limitations of Scala's `Set`,
    * this uses object equality and hash code on the elements.
    */
-  implicit def SetHash[A]: Hash[Set[A]] =
-    Hash.default
+  implicit def SetHashPartialOrd[A]: Hash[Set[A]] with PartialOrd[Set[A]] =
+    HashPartialOrd.make(
+      _.hashCode,
+      (l, r) =>
+        if (l == r) Ordering.Equals
+        else if (l.subsetOf(r)) Ordering.LessThan
+        else if (r.subsetOf(l)) Ordering.GreaterThan
+        else PartialOrdering.Incomparable,
+      _ == _
+    )
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `String` values.
@@ -870,6 +878,13 @@ object Equal extends Lawful[Equal] {
    */
   private[prelude] def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
+
+  /**
+   * An `Equal` instance for `Any` values that uses Scala's default notion of
+   * equality embodied in `equals`.
+   */
+  private lazy val DefaultEqual: Equal[Any] =
+    Equal.make(_ == _)
 }
 
 trait EqualSyntax {
