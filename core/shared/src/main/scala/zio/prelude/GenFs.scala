@@ -73,6 +73,17 @@ object GenFs {
     }
 
   /**
+   * A generator of `ParSeq` values.
+   */
+  def parSeq[R <: Random with Sized, Z <: Unit](
+    z: Gen[R, Z]
+  ): GenF[R, ({ type lambda[+x] = ParSeq[Z, x] })#lambda] =
+    new GenF[R, ({ type lambda[+x] = ParSeq[Z, x] })#lambda] {
+      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, ParSeq[Z, A]] =
+        Gens.parSeq(z, a)
+    }
+
+  /**
    * A generator of `Try` values.
    */
   val tryScala: GenF[Random with Sized, Try] =

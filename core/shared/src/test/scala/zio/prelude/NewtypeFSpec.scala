@@ -6,7 +6,7 @@ import zio.test.{Assertion, DefaultRunnableSpec, ZSpec, assert, suite, test}
 
 object NewtypeFSpec extends DefaultRunnableSpec {
 
-  def isShorterThan(length: Int): AssertionK[List] = new AssertionK[List] {
+  def isShorterThan(length: Int): AssertionF[List] = new AssertionF[List] {
     def apply[x]: Assertion[List[x]] = Assertion.assertion("isShorterThan")(param(length))(_.length < length)
   }
 
@@ -17,7 +17,7 @@ object NewtypeFSpec extends DefaultRunnableSpec {
           assert(ShortList.make(List(1, 2, 3, 4)))(isSuccessV(anything))
         },
         test("invalid values") {
-          val expected = NonEmptyMultiSet("List(1, 2, 3, 4, 5) did not satisfy isShorterThan(5)")
+          val expected = "List(1, 2, 3, 4, 5) did not satisfy isShorterThan(5)"
           assert(ShortList.make(List(1, 2, 3, 4, 5)))(isFailureV(equalTo(expected)))
         }
       ),
