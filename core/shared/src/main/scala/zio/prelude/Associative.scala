@@ -276,7 +276,7 @@ object Associative extends Lawful[AssociativeEqual] {
   /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Double` values.
    */
-  implicit val DoubleMaxIdempotentIdentity
+  implicit val DoubleMaxCommutativeIdempotentIdentity
     : Commutative[Max[Double]] with Idempotent[Max[Double]] with Identity[Max[Double]] =
     new Commutative[Max[Double]] with Idempotent[Max[Double]] with Identity[Max[Double]] {
       def combine(l: => Max[Double], r: => Max[Double]): Max[Double] = Max(l max r)
@@ -286,7 +286,7 @@ object Associative extends Lawful[AssociativeEqual] {
   /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Double` values.
    */
-  implicit val DoubleMinIdempotentIdentity
+  implicit val DoubleMinCommutativeIdempotentIdentity
     : Commutative[Min[Double]] with Idempotent[Min[Double]] with Identity[Min[Double]] =
     new Commutative[Min[Double]] with Idempotent[Min[Double]] with Identity[Min[Double]] {
       def combine(l: => Min[Double], r: => Min[Double]): Min[Double] = Min(l min r)
@@ -332,7 +332,7 @@ object Associative extends Lawful[AssociativeEqual] {
   /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Float` values.
    */
-  implicit val FloatMaxIdempotentIdentity
+  implicit val FloatMaxCommutativeIdempotentIdentity
     : Commutative[Max[Float]] with Idempotent[Max[Float]] with Identity[Max[Float]] =
     new Commutative[Max[Float]] with Idempotent[Max[Float]] with Identity[Max[Float]] {
       def combine(l: => Max[Float], r: => Max[Float]): Max[Float] = Max(l max r)
@@ -342,7 +342,7 @@ object Associative extends Lawful[AssociativeEqual] {
   /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Float` values.
    */
-  implicit val FloatMinIdempotentIdentity
+  implicit val FloatMinCommutativeIdempotentIdentity
     : Commutative[Min[Float]] with Idempotent[Min[Float]] with Identity[Min[Float]] =
     new Commutative[Min[Float]] with Idempotent[Min[Float]] with Identity[Min[Float]] {
       def combine(l: => Min[Float], r: => Min[Float]): Min[Float] = Min(l min r)
