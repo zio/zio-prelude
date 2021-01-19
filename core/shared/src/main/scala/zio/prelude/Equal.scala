@@ -249,7 +249,7 @@ object Equal extends Lawful[Equal] {
   /**
    * `Equal` instance for `Double` for imprecise equality with configurable tolerance.
    */
-  def DoubleEqualWithEpsilon(epsilon: Double = 1.0d / (1024 * 1024 * 1024 * 1024)): Equal[Double] = {
+  def DoubleEqualWithEpsilon(epsilon: Double = 1 / (1024d * 1024 * 1024 * 1024)): Equal[Double] = {
     (l: Double, r: Double) =>
       (l - r).abs < epsilon
   }
@@ -277,7 +277,7 @@ object Equal extends Lawful[Equal] {
   /**
    * `Equal` instance for `Float` for imprecise equality with configurable tolerance.
    */
-  def FloatEqualWithEpsilon(epsilon: Float = 1.0f / (1024 * 1024)): Equal[Float] = { (l: Float, r: Float) =>
+  def FloatEqualWithEpsilon(epsilon: Float = 1 / (1024f * 1024)): Equal[Float] = { (l: Float, r: Float) =>
     (l - r).abs < epsilon
   }
 
