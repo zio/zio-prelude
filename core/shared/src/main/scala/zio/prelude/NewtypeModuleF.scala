@@ -71,9 +71,9 @@ private[prelude] sealed trait NewtypeModuleF {
 
   private[this] type Id[+A] = A
 
-  private implicit val IdTraversable: Traversable[Id] =
-    new Traversable[Id] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
+  private implicit val IdForEach: ForEach[Id] =
+    new ForEach[Id] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
         f(fa)
     }
 
@@ -162,7 +162,7 @@ private[prelude] sealed trait NewtypeModuleF {
      * containing either a collection of valid instances of the newtype or an
      * accumulation of validation errors.
      */
-    def makeAll[F[+_]: Traversable, x](value: F[A[x]]): Validation[String, F[Type[x]]]
+    def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[Type[x]]]
 
     /**
      * Converts an instance of a type parameterized on the underlying type
@@ -208,8 +208,8 @@ private[prelude] object NewtypeModuleF {
         new NewtypeSmartF[A] {
           type Type[x] = A[x]
 
-          override def makeAll[F[+_]: Traversable, x](value: F[A[x]]): Validation[String, F[A[x]]] =
-            Traversable[F].foreach[({ type lambda[+a] = Validation[String, a] })#lambda, A[x], A[x]](value)(
+          override def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[A[x]]] =
+            ForEach[F].forEach[({ type lambda[+a] = Validation[String, a] })#lambda, A[x], A[x]](value)(
               Validation.fromAssert(_)(assertion.apply)
             )
 
@@ -233,8 +233,8 @@ private[prelude] object NewtypeModuleF {
         new SubtypeSmartF[A] {
           type Type[x] = A[x]
 
-          override def makeAll[F[+_]: Traversable, x](value: F[A[x]]): Validation[String, F[A[x]]] =
-            Traversable[F].foreach[({ type lambda[+a] = Validation[String, a] })#lambda, A[x], A[x]](value)(
+          override def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[A[x]]] =
+            ForEach[F].forEach[({ type lambda[+a] = Validation[String, a] })#lambda, A[x], A[x]](value)(
               Validation.fromAssert(_)(assertion.apply)
             )
 
@@ -293,7 +293,7 @@ trait NewtypeFExports {
 
     type Type[x] = newtypeF.Type[x]
 
-    def makeAll[F[+_]: Traversable, x](value: F[A[x]]): Validation[String, F[Type[x]]] =
+    def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[Type[x]]] =
       newtypeF.makeAll(value)
 
     protected def wrapAll[F[_], x](value: F[A[x]]): F[Type[x]] = unsafeWrapAll(value)
@@ -345,7 +345,7 @@ trait NewtypeFExports {
 
     type Type[x] = subtypeF.Type[x]
 
-    def makeAll[F[+_]: Traversable, x](value: F[A[x]]): Validation[String, F[Type[x]]] =
+    def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[Type[x]]] =
       subtypeF.makeAll(value)
 
     protected def wrapAll[F[_], x](value: F[A[x]]): F[Type[x]] = unsafeWrapAll(value)

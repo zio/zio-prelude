@@ -120,9 +120,9 @@ private[prelude] sealed trait NewtypeModule {
 
   private[this] type Id[+A] = A
 
-  private implicit val IdTraversable: Traversable[Id] =
-    new Traversable[Id] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
+  private implicit val IdForEach: ForEach[Id] =
+    new ForEach[Id] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
         f(fa)
     }
 
@@ -211,7 +211,7 @@ private[prelude] sealed trait NewtypeModule {
      * containing either a collection of valid instances of the newtype or an
      * accumulation of validation errors.
      */
-    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]]
+    def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]]
 
     /**
      * Converts an instance of a type parameterized on the underlying type
@@ -257,8 +257,8 @@ private[prelude] object NewtypeModule {
         new NewtypeSmart[A] {
           type Type = A
 
-          def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
-            Traversable[F].foreach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
+          def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[A]] =
+            ForEach[F].forEach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
               Validation.fromAssert(_)(assertion)
             )
 
@@ -282,8 +282,8 @@ private[prelude] object NewtypeModule {
         new SubtypeSmart[A] {
           type Type = A
 
-          def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
-            Traversable[F].foreach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
+          def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[A]] =
+            ForEach[F].forEach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
               Validation.fromAssert(_)(assertion)
             )
 
@@ -339,7 +339,7 @@ trait NewtypeExports {
     trait Tag extends Any
     type Type = newtype.Type with Tag
 
-    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =
+    def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
       newtype.makeAll(value).asInstanceOf[Validation[String, F[Type]]]
 
     protected def wrapAll[F[_]](value: F[A]): F[Type] = unsafeWrapAll(value)
@@ -389,7 +389,7 @@ trait NewtypeExports {
     trait Tag extends Any
     type Type = subtype.Type with Tag
 
-    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =
+    def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
       subtype.makeAll(value).asInstanceOf[Validation[String, F[Type]]]
 
     protected def wrapAll[F[_]](value: F[A]): F[Type] = unsafeWrapAll(value)

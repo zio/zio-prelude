@@ -112,7 +112,7 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
    * collection of events, collecting them back into a single collection of
    * events.
    */
-  final def foreach[F[+_]: IdentityBoth: Covariant, B](f: A => F[B]): F[ParSeq[Z, B]] =
+  final def forEach[F[+_]: IdentityBoth: Covariant, B](f: A => F[B]): F[ParSeq[Z, B]] =
     fold[F[ParSeq[Unit, B]]](ParSeq.empty.succeed, a => f(a).map(ParSeq.single))(
       _.zipWith(_)(_ ++ _),
       _.zipWith(_)(_ && _)
@@ -312,12 +312,12 @@ object ParSeq {
     }
 
   /**
-   * The `NonEmptyTraversable` instance for `ParSeq.
+   * The `NonEmptyForEach` instance for `ParSeq.
    */
-  implicit def parSeqTraversable[Z <: Unit]: Traversable[({ type lambda[+a] = ParSeq[Z, a] })#lambda] =
-    new Traversable[({ type lambda[+a] = ParSeq[Z, a] })#lambda] {
-      def foreach[F[+_]: IdentityBoth: Covariant, A, B](fa: ParSeq[Z, A])(f: A => F[B]): F[ParSeq[Z, B]] =
-        fa.foreach(f)
+  implicit def parSeqForEach[Z <: Unit]: ForEach[({ type lambda[+a] = ParSeq[Z, a] })#lambda] =
+    new ForEach[({ type lambda[+a] = ParSeq[Z, a] })#lambda] {
+      def forEach[F[+_]: IdentityBoth: Covariant, A, B](fa: ParSeq[Z, A])(f: A => F[B]): F[ParSeq[Z, B]] =
+        fa.forEach(f)
     }
 
   /**

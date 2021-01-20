@@ -12,7 +12,7 @@ import scala.util.hashing.MurmurHash3
  * A `NonEmptyList[A]` is a list of one or more values of type A. Unlike a
  * `List`, a `NonEmptyList` is guaranteed to contain at least one element.
  * This additional structure allows some operations to be defined on
- * `NonEmptyList` that are not safe on `List`, such as `head` and `reduce`.
+ * `NonEmptyList` that are not safe on `List`, such as `head` and `reduceAll`.
  *
  * For interoperability with Scala's collection library an implicit conversion
  * is provided from `NonEmptyList` to the `::` case of `List`. Operations that
@@ -171,7 +171,7 @@ sealed trait NonEmptyList[+A] { self =>
    * Transforms each element of this `NonEmptyList` with the specified
    * effectual function.
    */
-  final def foreach[F[+_]: AssociativeBoth: Covariant, B](f: A => F[B]): F[NonEmptyList[B]] =
+  final def forEach[F[+_]: AssociativeBoth: Covariant, B](f: A => F[B]): F[NonEmptyList[B]] =
     reduceMapRight(f(_).map(single))((a, fas) => f(a).zipWith(fas)(cons))
 
   /**
@@ -285,7 +285,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Reduces the elements of this `NonEmptyList` from left to right using the
    * function `map` to transform the first value to the type `B` and then the
-   * function `reduce` to combine the `B` value with each other `A` value.
+   * function `reduceAll` to combine the `B` value with each other `A` value.
    */
   final def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B): B =
     self match {
@@ -296,7 +296,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Reduces the elements of this `NonEmptyList` from right to left using the
    * function `map` to transform the first value to the type `B` and then the
-   * function `reduce` to combine the `B` value with each other `A` value.
+   * function `reduceAll` to combine the `B` value with each other `A` value.
    */
   final def reduceMapRight[B](map: A => B)(reduce: (A, B) => B): B =
     self.reverse.reduceMapLeft(map)((b, a) => reduce(a, b))
@@ -493,12 +493,12 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
 
   /**
-   * The `NonEmptyTraversable` instance for `NonEmptyList`.
+   * The `NonEmptyForEach` instance for `NonEmptyList`.
    */
-  implicit val NonEmptyListNonEmptyTraversable: NonEmptyTraversable[NonEmptyList] =
-    new NonEmptyTraversable[NonEmptyList] {
-      def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
-        fa.foreach(f)
+  implicit val NonEmptyListNonEmptyForEach: NonEmptyForEach[NonEmptyList] =
+    new NonEmptyForEach[NonEmptyList] {
+      def forEach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
+        fa.forEach(f)
     }
 
   /**

@@ -183,33 +183,33 @@ object DeriveEqualIdentityEitherInvariant {
     }
 }
 
-trait DeriveEqualNonEmptyTraversable[F[+_]] extends DeriveEqualTraversable[F] with NonEmptyTraversable[F]
+trait DeriveEqualNonEmptyForEach[F[+_]] extends DeriveEqualForEach[F] with NonEmptyForEach[F]
 
-object DeriveEqualNonEmptyTraversable {
+object DeriveEqualNonEmptyForEach {
   implicit def derive[F[+_]](implicit
     deriveEqual0: DeriveEqual[F],
-    nonEmptyTraversable0: NonEmptyTraversable[F]
-  ): DeriveEqualNonEmptyTraversable[F] =
-    new DeriveEqualNonEmptyTraversable[F] {
+    nonEmptyForEach0: NonEmptyForEach[F]
+  ): DeriveEqualNonEmptyForEach[F] =
+    new DeriveEqualNonEmptyForEach[F] {
       def derive[A: Equal]: Equal[F[A]]                                                      =
         deriveEqual0.derive
-      def foreach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-        nonEmptyTraversable0.foreach1(fa)(f)
+      def forEach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+        nonEmptyForEach0.forEach1(fa)(f)
     }
 }
 
-trait DeriveEqualTraversable[F[+_]] extends CovariantDeriveEqual[F] with Traversable[F]
+trait DeriveEqualForEach[F[+_]] extends CovariantDeriveEqual[F] with ForEach[F]
 
-object DeriveEqualTraversable {
+object DeriveEqualForEach {
   implicit def derive[F[+_]](implicit
     deriveEqual0: DeriveEqual[F],
-    traversable0: Traversable[F]
-  ): DeriveEqualTraversable[F] =
-    new DeriveEqualTraversable[F] {
+    forEach0: ForEach[F]
+  ): DeriveEqualForEach[F] =
+    new DeriveEqualForEach[F] {
       def derive[A: Equal]: Equal[F[A]]                                                  =
         deriveEqual0.derive
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-        traversable0.foreach(fa)(f)
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+        forEach0.forEach(fa)(f)
     }
 }
 

@@ -1,47 +1,47 @@
 package zio.prelude
 
-import zio.prelude.coherent.DeriveEqualNonEmptyTraversable
+import zio.prelude.coherent.DeriveEqualNonEmptyForEach
 import zio.prelude.newtypes.{Max, Min}
 import zio.test.laws._
 import zio.{ChunkBuilder, NonEmptyChunk}
 
 /**
- * A `NonEmptyTraversable` describes a `Traversable` that is guaranteed to
+ * A `NonEmptyForEach` describes a `ForEach` that is guaranteed to
  * contain at least one element, such as a `NonEmptyList`, a `NonEmptyChunk`,
  * or certain tree like data structures.
  *
  * Because of the additional information that there is always at least one
- * element, certain operations are available on a `NonEmptyTraversable` that
- * are not available on a `Traversable`. For example, if an ordering is
- * defined on the elements of a `NonEmptyTraversable` then `min` and `max` are
- * defined, whereas for a `Traversable` only `minOption` and `maxOption` would
+ * element, certain operations are available on a `NonEmptyForEach` that
+ * are not available on a `ForEach`. For example, if an ordering is
+ * defined on the elements of a `NonEmptyForEach` then `min` and `max` are
+ * defined, whereas for a `ForEach` only `minOption` and `maxOption` would
  * be, since the collection might not contain any elements at all.
  */
-trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
+trait NonEmptyForEach[F[+_]] extends ForEach[F] {
 
   /**
    * Traverse each element in the collection using the specified effectual
    * function `f`, returning a new collection with the results in the context
    * of the effect.
    */
-  def foreach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
+  def forEach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
 
   /**
    * Converts a collection with elements that are in the context of effects to
    * a collection of elements in the context of an effect.
    */
   def flip1[G[+_]: AssociativeBoth: Covariant, A](fa: F[G[A]]): G[F[A]] =
-    foreach1(fa)(identity)
+    forEach1(fa)(identity)
 
-  override def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-    foreach1(fa)(f)
+  override def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+    forEach1(fa)(f)
 
   /**
    * Traverses each element in the collection with the specified effectual
    * function `f` purely for its effects.
    */
-  def foreach1_[G[+_]: AssociativeBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
-    foreach1(fa)(f).as(())
+  def forEach1_[G[+_]: AssociativeBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
+    forEach1(fa)(f).as(())
 
   /**
    * Returns the largest value in the collection if one exists or `None`
@@ -80,7 +80,7 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
   /**
    * Reduces the collection to a summary value using the binary function `f`.
    */
-  def reduce[A](fa: F[A])(f: (A, A) => A): A = {
+  def reduceAll[A](fa: F[A])(f: (A, A) => A): A = {
     implicit val associative: Associative[A] = Associative.make(f)
     reduceMap(fa)(identity)
   }
@@ -109,11 +109,11 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
   /**
    * Reduces the elements of this collection from left to right using the
    * function `map` to transform the first value to the type `B` and then the
-   * function `reduce` to combine the `B` value with each other `A` value.
+   * function `reduceAll` to combine the `B` value with each other `A` value.
    */
   def reduceMapLeft[A, B](fa: F[A])(map: A => B)(reduce: (B, A) => B): B = {
     type StateB[+A] = State[Option[B], A]
-    foreach[StateB, A, Any](fa) { a =>
+    forEach[StateB, A, Any](fa) { a =>
       State.update {
         case None    => Some(map(a))
         case Some(b) => Some(reduce(b, a))
@@ -124,7 +124,7 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
   /**
    * Reduces the elements of this colection from right to left using the
    * function `map` to transform the first value to the type `B` and then the
-   * function `reduce` to combine the `B` value with each other `A` value.
+   * function `reduceAll` to combine the `B` value with each other `A` value.
    */
   def reduceMapRight[A, B](fa: F[A])(map: A => B)(reduce: (A, B) => B): B =
     reduceMapLeft(reverse(fa))(map)((b, a) => reduce(a, b))
@@ -141,46 +141,46 @@ trait NonEmptyTraversable[F[+_]] extends Traversable[F] {
   def toNonEmptyList[A](fa: F[A]): NonEmptyList[A] =
     reduceMapLeft(fa)(NonEmptyList.single)((as, a) => NonEmptyList.cons(a, as)).reverse
 }
-object NonEmptyTraversable extends LawfulF.Covariant[DeriveEqualNonEmptyTraversable, Equal] {
+object NonEmptyForEach extends LawfulF.Covariant[DeriveEqualNonEmptyForEach, Equal] {
 
   /**
-   * The set of all laws that instances of `NonEmptyTraversable` must satisfy.
+   * The set of all laws that instances of `NonEmptyForEach` must satisfy.
    */
-  val laws: LawsF.Covariant[DeriveEqualNonEmptyTraversable, Equal] =
-    Traversable.laws
+  val laws: LawsF.Covariant[DeriveEqualNonEmptyForEach, Equal] =
+    ForEach.laws
 
   /**
-   * Summons an implicit `NonEmptyTraversable`.
+   * Summons an implicit `NonEmptyForEach`.
    */
-  def apply[F[+_]](implicit nonEmptyTraversable: NonEmptyTraversable[F]): NonEmptyTraversable[F] =
-    nonEmptyTraversable
+  def apply[F[+_]](implicit nonEmptyForEach: NonEmptyForEach[F]): NonEmptyForEach[F] =
+    nonEmptyForEach
 }
 
-trait NonEmptyTraversableSyntax {
+trait NonEmptyForEachSyntax {
 
   /**
    * Provides infix syntax for traversing collections.
    */
-  implicit class NonEmptyTraversableOps[F[+_], A](private val self: F[A]) {
-    def foreach1[G[+_]: AssociativeBoth: Covariant, B](f: A => G[B])(implicit F: NonEmptyTraversable[F]): G[F[B]] =
-      F.foreach1(self)(f)
-    def foreach1_[G[+_]: AssociativeBoth: Covariant](f: A => G[Any])(implicit F: NonEmptyTraversable[F]): G[Unit] =
-      F.foreach1_(self)(f)
-    def reduce(f: (A, A) => A)(implicit F: NonEmptyTraversable[F]): A                                             =
-      F.reduce(self)(f)
-    def reduce1(implicit F: NonEmptyTraversable[F], A: Associative[A]): A                                         =
+  implicit class NonEmptyForEachOps[F[+_], A](private val self: F[A]) {
+    def forEach1[G[+_]: AssociativeBoth: Covariant, B](f: A => G[B])(implicit F: NonEmptyForEach[F]): G[F[B]] =
+      F.forEach1(self)(f)
+    def forEach1_[G[+_]: AssociativeBoth: Covariant](f: A => G[Any])(implicit F: NonEmptyForEach[F]): G[Unit] =
+      F.forEach1_(self)(f)
+    def reduceAll(f: (A, A) => A)(implicit F: NonEmptyForEach[F]): A                                          =
+      F.reduceAll(self)(f)
+    def reduce1(implicit F: NonEmptyForEach[F], A: Associative[A]): A                                         =
       F.reduce1(self)
-    def reduceIdempotent1(implicit F: NonEmptyTraversable[F], ia: Idempotent[A], ea: Equal[A]): A                 =
+    def reduceIdempotent1(implicit F: NonEmptyForEach[F], ia: Idempotent[A], ea: Equal[A]): A                 =
       F.reduceIdempotent1(self)
-    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyTraversable[F]): B                               =
+    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyForEach[F]): B                               =
       F.reduceMap(self)(f)
-    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyTraversable[F]): B                 =
+    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyForEach[F]): B                 =
       F.reduceMapLeft(self)(map)(reduce)
-    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyTraversable[F]): B                =
+    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyForEach[F]): B                =
       F.reduceMapRight(self)(map)(reduce)
-    def toNonEmptyChunk(implicit F: NonEmptyTraversable[F]): NonEmptyChunk[A]                                     =
+    def toNonEmptyChunk(implicit F: NonEmptyForEach[F]): NonEmptyChunk[A]                                     =
       F.toNonEmptyChunk(self)
-    def toNonEmptyList(implicit F: NonEmptyTraversable[F]): NonEmptyList[A]                                       =
+    def toNonEmptyList(implicit F: NonEmptyForEach[F]): NonEmptyList[A]                                       =
       F.toNonEmptyList(self)
   }
 
@@ -189,10 +189,10 @@ trait NonEmptyTraversableSyntax {
    */
   implicit class Flip1Ops[F[+_], G[+_], A](private val self: F[G[A]]) {
     def flip1[B](implicit
-      nonEmptyTraversable: NonEmptyTraversable[F],
+      nonEmptyForEach: NonEmptyForEach[F],
       associativeBoth: AssociativeBoth[G],
       covariant: Covariant[G]
     ): G[F[A]] =
-      nonEmptyTraversable.flip1(self)
+      nonEmptyForEach.flip1(self)
   }
 }

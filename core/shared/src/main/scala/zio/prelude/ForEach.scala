@@ -1,12 +1,12 @@
 package zio.prelude
 
-import zio.prelude.coherent.DeriveEqualTraversable
+import zio.prelude.coherent.DeriveEqualForEach
 import zio.prelude.newtypes.{And, First, Max, Min, Or, Prod, Sum}
 import zio.test.laws._
 import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
 
 /**
- * `Traversable` is an abstraction that describes the ability to iterate over
+ * `ForEach` is an abstraction that describes the ability to iterate over
  * a collection, performing an effect for each element in the collection and
  * returning a collection with the same shape in the context of the effect.
  *
@@ -15,14 +15,14 @@ import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
  * with state we can describe folds which allow implementing a wide variety of
  * collection operations that produce summaries from a collection of values.
  */
-trait Traversable[F[+_]] extends Covariant[F] { self =>
+trait ForEach[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Traverse each element in the collection using the specified effectual
    * function `f`, returning a new collection with the results in the context
    * of the effect.
    */
-  def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
+  def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
 
   /**
    * Returns whether the collection contains the specified element.
@@ -32,7 +32,7 @@ trait Traversable[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Returns the number of elements in the collection that satisfy the
-   * specified prediate.
+   * specified predicate.
    */
   def count[A](fa: F[A])(f: A => Boolean): Int =
     foldMap(fa)(a => if (f(a)) Sum(1) else Sum(0))
@@ -56,7 +56,7 @@ trait Traversable[F[+_]] extends Covariant[F] { self =>
    * a collection of elements in the context of an effect.
    */
   def flip[G[+_]: IdentityBoth: Covariant, A](fa: F[G[A]]): G[F[A]] =
-    foreach(fa)(identity)
+    forEach(fa)(identity)
 
   /**
    * Folds over the elements of this collection using an associative operation
@@ -70,7 +70,7 @@ trait Traversable[F[+_]] extends Covariant[F] { self =>
    * summary value, maintaining some internal state along the way.
    */
   def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S                                           =
-    foreach[({ type lambda[+A] = State[S, A] })#lambda, A, Unit](fa)(a => State.update((s: S) => f(s, a))).runState(s)
+    forEach[({ type lambda[+A] = State[S, A] })#lambda, A, Unit](fa)(a => State.update((s: S) => f(s, a))).runState(s)
 
   /**
    * Effectually fold over the elements of this collection from left to right
@@ -113,8 +113,8 @@ trait Traversable[F[+_]] extends Covariant[F] { self =>
    * Traverses each element in the collection with the specified effectual
    * function `f` purely for its effects.
    */
-  def foreach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
-    foreach(fa)(f).as(())
+  def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
+    forEach(fa)(f).as(())
 
   def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) { (m, v) =>
@@ -147,7 +147,7 @@ trait Traversable[F[+_]] extends Covariant[F] { self =>
    * element of a collection.
    */
   def map[A, B](f: A => B): F[A] => F[B] =
-    (fa: F[A]) => Id.unwrap(foreach[Id, A, B](fa)((a: A) => Id(f(a))))
+    (fa: F[A]) => Id.unwrap(forEach[Id, A, B](fa)((a: A) => Id(f(a))))
 
   /**
    * Statefully maps over the elements of the collection, maintaining some
@@ -155,7 +155,7 @@ trait Traversable[F[+_]] extends Covariant[F] { self =>
    * collection.
    */
   def mapAccum[S, A, B](fa: F[A])(s: S)(f: (S, A) => (S, B)): (S, F[B]) =
-    foreach[({ type lambda[+A] = State[S, A] })#lambda, A, B](fa)(a => State.modify((s: S) => f(s, a))).run(s)
+    forEach[({ type lambda[+A] = State[S, A] })#lambda, A, B](fa)(a => State.modify((s: S) => f(s, a))).run(s)
 
   /**
    * Returns the largest value in the collection if one exists or `None`
@@ -276,97 +276,97 @@ trait Traversable[F[+_]] extends Covariant[F] { self =>
    * Zips each element of the collection with its index.
    */
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
-    foreach[({ type lambda[+A] = State[Int, A] })#lambda, A, (A, Int)](fa)(a =>
+    forEach[({ type lambda[+A] = State[Int, A] })#lambda, A, (A, Int)](fa)(a =>
       State.modify((n: Int) => (n + 1, (a, n)))
     ).runResult(0)
 
-  final def compose[G[+_]: Traversable]: Traversable[({ type lambda[+A] = F[G[A]] })#lambda] =
-    new Traversable[({ type lambda[+A] = F[G[A]] })#lambda] {
-      def foreach[H[+_]: IdentityBoth: Covariant, A, B](fa: F[G[A]])(f: A => H[B]) =
-        self.foreach(fa)(_.foreach(f))
+  final def compose[G[+_]: ForEach]: ForEach[({ type lambda[+A] = F[G[A]] })#lambda] =
+    new ForEach[({ type lambda[+A] = F[G[A]] })#lambda] {
+      def forEach[H[+_]: IdentityBoth: Covariant, A, B](fa: F[G[A]])(f: A => H[B]) =
+        self.forEach(fa)(_.forEach(f))
     }
 }
 
-object Traversable extends LawfulF.Covariant[DeriveEqualTraversable, Equal] {
+object ForEach extends LawfulF.Covariant[DeriveEqualForEach, Equal] {
 
   /**
-   * The set of all laws that instances of `Traversable` must satisfy.
+   * The set of all laws that instances of `ForEach` must satisfy.
    */
-  val laws: LawsF.Covariant[DeriveEqualTraversable, Equal] =
+  val laws: LawsF.Covariant[DeriveEqualForEach, Equal] =
     Covariant.laws
 
   /**
-   * Summons an implicit `Traversable`.
+   * Summons an implicit `ForEach`.
    */
-  def apply[F[+_]](implicit traversable: Traversable[F]): Traversable[F] =
-    traversable
+  def apply[F[+_]](implicit forEach: ForEach[F]): ForEach[F] =
+    forEach
 }
 
-trait TraversableSyntax {
+trait ForEachSyntax {
 
   /**
    * Provides infix syntax for traversing collections.
    */
-  implicit class TraversableOps[F[+_], A](private val self: F[A]) {
-    def foreach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: Traversable[F]): G[F[B]]               =
-      F.foreach(self)(f)
-    def contains[A1 >: A](a: A1)(implicit A: Equal[A1], F: Traversable[F]): Boolean                                 =
+  implicit class ForEachOps[F[+_], A](private val self: F[A]) {
+    def forEach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: ForEach[F]): G[F[B]]               =
+      F.forEach(self)(f)
+    def contains[A1 >: A](a: A1)(implicit A: Equal[A1], F: ForEach[F]): Boolean                                 =
       F.contains[A, A1](self)(a)
-    def count(f: A => Boolean)(implicit F: Traversable[F]): Int                                                     =
+    def count(f: A => Boolean)(implicit F: ForEach[F]): Int                                                     =
       F.count(self)(f)
-    def exists(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                                =
+    def exists(f: A => Boolean)(implicit F: ForEach[F]): Boolean                                                =
       F.exists(self)(f)
-    def find(f: A => Boolean)(implicit F: Traversable[F]): Option[A]                                                =
+    def find(f: A => Boolean)(implicit F: ForEach[F]): Option[A]                                                =
       F.find(self)(f)
-    def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: Traversable[F]): S                                            =
+    def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: ForEach[F]): S                                            =
       F.foldLeft(self)(s)(f)
-    def foldLeftM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (S, A) => G[S])(implicit F: Traversable[F]): G[S]  =
+    def foldLeftM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (S, A) => G[S])(implicit F: ForEach[F]): G[S]  =
       F.foldLeftM(self)(s)(f)
-    def foldMap[B: Identity](f: A => B)(implicit F: Traversable[F]): B                                              =
+    def foldMap[B: Identity](f: A => B)(implicit F: ForEach[F]): B                                              =
       F.foldMap(self)(f)
-    def foldRight[S](s: S)(f: (A, S) => S)(implicit F: Traversable[F]): S                                           =
+    def foldRight[S](s: S)(f: (A, S) => S)(implicit F: ForEach[F]): S                                           =
       F.foldRight(self)(s)(f)
-    def foldRightM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (A, S) => G[S])(implicit F: Traversable[F]): G[S] =
+    def foldRightM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (A, S) => G[S])(implicit F: ForEach[F]): G[S] =
       F.foldRightM(self)(s)(f)
-    def forall(f: A => Boolean)(implicit F: Traversable[F]): Boolean                                                =
+    def forall(f: A => Boolean)(implicit F: ForEach[F]): Boolean                                                =
       F.forall(self)(f)
-    def foreach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: Traversable[F]): G[Unit]               =
-      F.foreach_(self)(f)
-    def isEmpty(implicit F: Traversable[F]): Boolean                                                                =
+    def forEach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: ForEach[F]): G[Unit]               =
+      F.forEach_(self)(f)
+    def isEmpty(implicit F: ForEach[F]): Boolean                                                                =
       F.isEmpty(self)
-    def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: Traversable[F]): (S, F[B])                            =
+    def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: ForEach[F]): (S, F[B])                            =
       F.mapAccum(self)(s)(f)
-    def maxOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                                 =
+    def maxOption(implicit A: Ord[A], F: ForEach[F]): Option[A]                                                 =
       F.maxOption(self)
-    def maxByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                                       =
+    def maxByOption[B: Ord](f: A => B)(implicit F: ForEach[F]): Option[A]                                       =
       F.maxByOption(self)(f)
-    def minOption(implicit A: Ord[A], F: Traversable[F]): Option[A]                                                 =
+    def minOption(implicit A: Ord[A], F: ForEach[F]): Option[A]                                                 =
       F.minOption(self)
-    def minByOption[B: Ord](f: A => B)(implicit F: Traversable[F]): Option[A]                                       =
+    def minByOption[B: Ord](f: A => B)(implicit F: ForEach[F]): Option[A]                                       =
       F.minByOption(self)(f)
-    def nonEmpty(implicit F: Traversable[F]): Boolean                                                               =
+    def nonEmpty(implicit F: ForEach[F]): Boolean                                                               =
       F.nonEmpty(self)
-    def reduceAssociative(implicit F: Traversable[F], A: Associative[A]): Option[A]                                 =
+    def reduceAssociative(implicit F: ForEach[F], A: Associative[A]): Option[A]                                 =
       F.reduceAssociative(self)
-    def reduceIdempotent(implicit F: Traversable[F], ia: Idempotent[A], ea: Equal[A]): Option[A]                    =
+    def reduceIdempotent(implicit F: ForEach[F], ia: Idempotent[A], ea: Equal[A]): Option[A]                    =
       F.reduceIdempotent(self)
-    def reduceIdentity(implicit F: Traversable[F], A: Identity[A]): A                                               =
+    def reduceIdentity(implicit F: ForEach[F], A: Identity[A]): A                                               =
       F.reduceIdentity(self)
-    def product(implicit A: Identity[Prod[A]], F: Traversable[F]): A                                                =
+    def product(implicit A: Identity[Prod[A]], F: ForEach[F]): A                                                =
       F.product(self)
-    def reduceMapOption[B: Associative](f: A => B)(implicit F: Traversable[F]): Option[B]                           =
+    def reduceMapOption[B: Associative](f: A => B)(implicit F: ForEach[F]): Option[B]                           =
       F.reduceMapOption(self)(f)
-    def reduceOption(f: (A, A) => A)(implicit F: Traversable[F]): Option[A]                                         =
+    def reduceOption(f: (A, A) => A)(implicit F: ForEach[F]): Option[A]                                         =
       F.reduceOption(self)(f)
-    def reverse(implicit F: Traversable[F]): F[A]                                                                   =
+    def reverse(implicit F: ForEach[F]): F[A]                                                                   =
       F.reverse(self)
-    def size(implicit F: Traversable[F]): Int                                                                       =
+    def size(implicit F: ForEach[F]): Int                                                                       =
       F.size(self)
-    def sum(implicit A: Identity[Sum[A]], F: Traversable[F]): A                                                     =
+    def sum(implicit A: Identity[Sum[A]], F: ForEach[F]): A                                                     =
       F.sum(self)
-    def toChunk(implicit F: Traversable[F]): Chunk[A]                                                               =
+    def toChunk(implicit F: ForEach[F]): Chunk[A]                                                               =
       F.toChunk(self)
-    def zipWithIndex(implicit F: Traversable[F]): F[(A, Int)]                                                       =
+    def zipWithIndex(implicit F: ForEach[F]): F[(A, Int)]                                                       =
       F.zipWithIndex(self)
   }
 
@@ -374,7 +374,7 @@ trait TraversableSyntax {
    * Provides infix syntax for flip.
    */
   implicit class FlipOps[F[+_], G[+_], A](private val self: F[G[A]]) {
-    def flip[B](implicit traversable: Traversable[F], identityBoth: IdentityBoth[G], covariant: Covariant[G]): G[F[A]] =
-      traversable.flip(self)
+    def flip[B](implicit forEach: ForEach[F], identityBoth: IdentityBoth[G], covariant: Covariant[G]): G[F[A]] =
+      forEach.flip(self)
   }
 }
