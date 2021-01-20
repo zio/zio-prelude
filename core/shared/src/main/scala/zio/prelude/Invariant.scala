@@ -66,11 +66,11 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Traversable` (and thus `Covariant` and `Invariant`) for `Chunk`.
+   * The `ForEach` (and thus `Covariant` and `Invariant`) for `Chunk`.
    */
-  implicit val ChunkTraversable: Traversable[Chunk] =
-    new Traversable[Chunk] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
+  implicit val ChunkForEach: ForEach[Chunk] =
+    new ForEach[Chunk] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
         chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
     }
 
@@ -90,12 +90,12 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     Bicovariant.EitherBicovariant.deriveFailureCovariant
 
   /**
-   * The `Traversable` (and thus `Covariant` and `Invariant`) for `Either`.
+   * The `ForEach` (and thus `Covariant` and `Invariant`) for `Either`.
    */
-  implicit def EitherTraversable[E]: Traversable[({ type lambda[+a] = Either[E, a] })#lambda] with Bicovariant[Either] =
-    new Traversable[({ type lambda[+a] = Either[E, a] })#lambda] with Bicovariant[Either] {
+  implicit def EitherForEach[E]: ForEach[({ type lambda[+a] = Either[E, a] })#lambda] with Bicovariant[Either] =
+    new ForEach[({ type lambda[+a] = Either[E, a] })#lambda] with Bicovariant[Either] {
 
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
         either.fold(Left(_).succeed, f(_).map(Right(_)))
 
       override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Either[A, B] => Either[AA, BB] = {
@@ -599,11 +599,11 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `NonEmptyTraversable` (and thus `Traversable`, `Covariant` and `Invariant`) instance for `Id`.
+   * The `NonEmptyForEach` (and thus `ForEach`, `Covariant` and `Invariant`) instance for `Id`.
    */
-  implicit val IdNonEmptyTraversable: NonEmptyTraversable[Id] =
-    new NonEmptyTraversable[Id] {
-      override def foreach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
+  implicit val IdNonEmptyForEach: NonEmptyForEach[Id] =
+    new NonEmptyForEach[Id] {
+      override def forEach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
         f(Id.unwrap(fa)).map(Id(_))
 
       override def map[A, B](f: A => B): Id[A] => Id[B] = { id =>
@@ -640,32 +640,32 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Traversable` (and thus `Covariant` and `Invariant`) instance for `List`.
+   * The `ForEach` (and thus `Covariant` and `Invariant`) instance for `List`.
    */
-  implicit val ListTraversable: Traversable[List] =
-    new Traversable[List] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
+  implicit val ListForEach: ForEach[List] =
+    new ForEach[List] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
         list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
       override def map[A, B](f: A => B): List[A] => List[B]                                      = _.map(f)
     }
 
   /**
-   * The `Traversable` (and thus `Covariant` and `Invariant`) instance for `Map`.
+   * The `ForEach` (and thus `Covariant` and `Invariant`) instance for `Map`.
    */
-  implicit def MapTraversable[K]: Traversable[({ type lambda[+v] = Map[K, v] })#lambda] =
-    new Traversable[({ type lambda[+v] = Map[K, v] })#lambda] {
-      def foreach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
+  implicit def MapForEach[K]: ForEach[({ type lambda[+v] = Map[K, v] })#lambda] =
+    new ForEach[({ type lambda[+v] = Map[K, v] })#lambda] {
+      def forEach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
         map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) { case (map, (k, v)) =>
           map.zipWith(f(v))((map, v2) => map + (k -> v2))
         }
     }
 
   /**
-   * The `NonEmptyTraversable` (and thus `Traversable`, `Covariant` and `Invariant`) instance for `NonEmptyChunk`.
+   * The `NonEmptyForEach` (and thus `ForEach`, `Covariant` and `Invariant`) instance for `NonEmptyChunk`.
    */
-  implicit val NonEmptyChunkNonEmptyTraversable: NonEmptyTraversable[NonEmptyChunk] =
-    new NonEmptyTraversable[NonEmptyChunk] {
-      def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](
+  implicit val NonEmptyChunkNonEmptyForEach: NonEmptyForEach[NonEmptyChunk] =
+    new NonEmptyForEach[NonEmptyChunk] {
+      def forEach1[F[+_]: AssociativeBoth: Covariant, A, B](
         nonEmptyChunk: NonEmptyChunk[A]
       )(f: A => F[B]): F[NonEmptyChunk[B]] =
         nonEmptyChunk
@@ -674,11 +674,11 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Traversable` (and thus `Covariant` and `Invariant`) instance for `Option`.
+   * The `ForEach` (and thus `Covariant` and `Invariant`) instance for `Option`.
    */
-  implicit val OptionTraversable: Traversable[Option] =
-    new Traversable[Option] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
+  implicit val OptionForEach: ForEach[Option] =
+    new ForEach[Option] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
         option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
     }
 
@@ -1275,11 +1275,11 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The `Traversable` (and thus `Covariant` and `Invariant`) instance for `Vector`.
+   * The `ForEach` (and thus `Covariant` and `Invariant`) instance for `Vector`.
    */
-  implicit val VectorTraversable: Traversable[Vector] =
-    new Traversable[Vector] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]] =
+  implicit val VectorForEach: ForEach[Vector] =
+    new ForEach[Vector] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]] =
         vector.foldLeft[G[Vector[B]]](Vector.empty.succeed)((bs, a) => bs.zipWith(f(a))(_ :+ _))
     }
 

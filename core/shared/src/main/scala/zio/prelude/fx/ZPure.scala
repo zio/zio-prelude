@@ -840,10 +840,10 @@ object ZPure {
    * passes the updated state from each computation to the next and collects
    * the results.
    */
-  def collectAll[F[+_]: Traversable, W, S, R, E, A](fa: F[ZPure[W, S, S, R, E, A]]): ZPure[W, S, S, R, E, F[A]] =
-    Traversable[F].flip[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A](fa)
+  def collectAll[F[+_]: ForEach, W, S, R, E, A](fa: F[ZPure[W, S, S, R, E, A]]): ZPure[W, S, S, R, E, F[A]] =
+    ForEach[F].flip[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A](fa)
 
-  def environment[S, R]: ZPure[Nothing, S, S, R, Nothing, R]                                                    =
+  def environment[S, R]: ZPure[Nothing, S, S, R, Nothing, R]                                                =
     access(r => r)
 
   def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
@@ -914,10 +914,10 @@ object ZPure {
    * into a single computation that passes the updated state from each
    * computation to the next and collects the results.
    */
-  def foreach[F[+_]: Traversable, W, S, R, E, A, B](fa: F[A])(
+  def forEach[F[+_]: ForEach, W, S, R, E, A, B](fa: F[A])(
     f: A => ZPure[W, S, S, R, E, B]
   ): ZPure[W, S, S, R, E, F[B]]                     =
-    Traversable[F].foreach[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A, B](fa)(f)
+    ForEach[F].forEach[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A, B](fa)(f)
 
   /**
    * Constructs a computation that returns the initial state unchanged.

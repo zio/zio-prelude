@@ -41,8 +41,8 @@ object ParSeqSpec extends DefaultRunnableSpec {
         testM("identityFlatten") {
           checkAllLaws(IdentityFlatten)(GenFs.parSeq(Gen.unit), Gen.anyInt)
         },
-        testM("traversable") {
-          checkAllLaws(Traversable)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+        testM("forEach") {
+          checkAllLaws(ForEach)(GenFs.parSeq(Gen.unit), Gen.anyInt)
         }
       ),
       suite("both")(
