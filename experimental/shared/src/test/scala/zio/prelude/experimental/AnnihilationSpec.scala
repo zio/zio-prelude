@@ -7,8 +7,8 @@ object AnnihilationSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("AnnihilationSpec")(
       suite("laws")(
-        testM("int annihilating zero")(checkAllLaws(Annihilation)(Gen.anyInt)),
-        testM("double annihilating zero")(checkAllLaws(Annihilation)(Gen.anyDouble))
+        testM("double annihilating")(checkAllLaws(Annihilation)(Gen.anyDouble)),
+        testM("int annihilating")(checkAllLaws(Annihilation)(Gen.anyInt))
       )
     )
 }
