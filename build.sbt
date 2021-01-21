@@ -100,13 +100,14 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(stdSettings("zio-prelude-experimental"))
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental"))
-
-lazy val experimentalJVM    = experimental.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .enablePlugins(BuildInfoPlugin)
 
 lazy val experimentalJS     = experimental.js
   .settings(jsSettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+
+lazy val experimentalJVM    = experimental.jvm
+  .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val experimentalNative = experimental.native
