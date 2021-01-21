@@ -1,5 +1,6 @@
 package zio.prelude
 
+import com.github.ghik.silencer.silent
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.ZStream
@@ -11,7 +12,10 @@ import scala.Predef.{identity => id}
  * Abstract over type constructor with 3 parameters: on first as contravariant
  * and on second and third as covariant.
  */
+@silent("unused import")
 trait Zivariant[Z[-_, +_, +_]] { self =>
+
+  // because of Dotty
 
   def deriveCovariant[R, E]: Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] =
     new Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] {
