@@ -5,11 +5,11 @@ import scala.collection.generic.CanBuildFrom
 trait InvariantVersionSpecific {
 
   /**
-   * Derives a `Traverable[F]` from an `Iterable[F]`.
+   * Derives a `ForEach[F]` from an `Iterable[F]`.
    */
-  implicit def IterableTraversable[F[+a] <: Iterable[a]](implicit derive: DeriveCanBuildFrom[F]): Traversable[F] =
-    new Traversable[F] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+  implicit def IterableForEach[F[+a] <: Iterable[a]](implicit derive: DeriveCanBuildFrom[F]): ForEach[F] =
+    new ForEach[F] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         fa.foldLeft(derive.derive[B](fa).succeed)((bs, a) => bs.zipWith(f(a))(_ += _)).map(_.result())
     }
 

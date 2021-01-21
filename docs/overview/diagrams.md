@@ -413,6 +413,46 @@ classDiagram
 [AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX49PjpbLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfj0-OlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA9PjogQywgQSA9PjogQik6IEEgPT46IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBID0-OiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-PT46Wy1fLCArX11-e1xuICBcbiAgICAodHlwZSkgOio6WytfLCArX11cbiAgICAoKSBmcm9tRmlyc3RbQV06IChBIDoqOiBBbnkpID0-OiBBXG4gICAgKCkgZnJvbVNlY29uZFtCXTogKEFueSA6KjogQikgPT46IEJcbiAgICAoKSB0b0JvdGhbQSwgQiwgQ10oQSA9PjogQikoQSA9PjogQyk6IEEgPT46IChCIDoqOiBDKVxuICB9XG4gIGNsYXNzIEFwcGxpY2F0aW9uQ29tcG9zZX49PjpbLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDoqOiA9IFR1cGxlMiA7IC0tPjogPSBGdW5jdGlvbiBdXG4gICAgXG4gICAgKHR5cGUpIC0tPjpbLV8sICtfXVxuICAgICgpIGFwcGxpY2F0aW9uW0EsIEJdOiAoKEEgLS0-OiBCKSA6KjogQSkgPT46IEJcbiAgICAoKSBjdXJyeVtBLCBCLCBDXSgoQSA6KjogQikgPT46IEMpOiBBID0-OiAoQiAtLT46IEMpXG4gICAgKCkgdW5jdXJyeVtBLCBCLCBDXShBID0-OiAoQiAtLT46IEMpKTogKEEgOio6IEIpID0-OiBDXG4gIH1cbiAgY2xhc3MgRWl0aGVyQ29tcG9zZX49PjpbLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDorOiA9IEVpdGhlciBdXG4gICAgXG4gICAgKHR5cGUpIDorOlsrXywgK19dXG4gICAgKCkgdG9MZWZ0W0FdOiBBID0-OiAoQSA6KzogTm90aGluZylcbiAgICAoKSB0b1JpZ2h0W0JdOiBCID0-OiAoTm90aGluZyA6KzogQilcbiAgICAoKSBmcm9tRWl0aGVyW0EsIEIsIENdKD0-IEEgPT46IEMpKD0-IEIgPT46IEMpOiAoQSA6KzogQikgPT46IENcbiAgfVxuIiwibWVybWFpZCI6e30sInVwZGF0ZUVkaXRvciI6ZmFsc2V9
 
 
+# AssociativeFlatten
+
+[![AssociativeFlatten hierarchy][AssociativeFlatten-image]][AssociativeFlatten-link]
+
+<details><summary>Mermaid</summary>
+
+```mermaid
+classDiagram
+  AssociativeFlatten~F<+_>~ <|-- IdentityFlatten~F<_>~
+  class AssociativeFlatten~F<+_>~{
+    Map[K, +*]
+    
+    () flatten[A](F[F[A]]): F[A]
+  }
+  class IdentityFlatten~F<+_>~{
+    Cause[+*]
+    Chunk[+*]
+    Either[L, +*]
+    Exit[E, +*]
+    Future[+*]
+    Id[+*]
+    List[+*]
+    NonEmptyChunk[+*]
+    Option[+*]
+    Try[+*]
+    Vector[+*]
+    ZIO[R, E, +*]
+    ZManaged[R, E, +*]
+    ZStream[R, E, +*]
+
+    () any: F[Any]
+  }
+```
+
+</details>
+
+[AssociativeFlatten-image]: https://user-images.githubusercontent.com/9019485/104860805-3f940e00-592d-11eb-94dc-d139098ef86d.png
+[AssociativeFlatten-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlRmxhdHRlbn5GPCtfPn4gPHwtLSBJZGVudGl0eUZsYXR0ZW5-RjxfPn5cbiAgY2xhc3MgQXNzb2NpYXRpdmVGbGF0dGVufkY8K18-fntcbiAgICBNYXBbSywgKypdXG4gICAgXG4gICAgKCkgZmxhdHRlbltBXShGW0ZbQV1dKTogRltBXVxuICB9XG4gIGNsYXNzIElkZW50aXR5RmxhdHRlbn5GPCtfPn57XG4gICAgQ2F1c2VbKypdXG4gICAgQ2h1bmtbKypdXG4gICAgRWl0aGVyW0wsICsqXVxuICAgIEV4aXRbRSwgKypdXG4gICAgRnV0dXJlWysqXVxuICAgIElkWysqXVxuICAgIExpc3RbKypdXG4gICAgTm9uRW1wdHlDaHVua1srKl1cbiAgICBPcHRpb25bKypdXG4gICAgVHJ5WysqXVxuICAgIFZlY3RvclsrKl1cbiAgICBaSU9bUiwgRSwgKypdXG4gICAgWk1hbmFnZWRbUiwgRSwgKypdXG4gICAgWlN0cmVhbVtSLCBFLCArKl1cblxuICAgICgpIGFueTogRltBbnldXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ
+
+
 # JoinMeet
 
 [![JoinMeet hierarchy][JoinMeet-image]][JoinMeet-link]

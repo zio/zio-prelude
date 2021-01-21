@@ -27,10 +27,10 @@ package object prelude
     with NewtypeExports
     with NewtypeFExports
     with NonEmptySetSyntax
-    with NonEmptyTraversableSyntax
+    with NonEmptyForEachSyntax
     with OrdSyntax
     with PartialOrdSyntax
-    with TraversableSyntax
+    with ForEachSyntax
     with ZivariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]

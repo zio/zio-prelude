@@ -28,11 +28,18 @@ object IdempotentSpec extends DefaultRunnableSpec {
     }
   }
 
+  private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
+  private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
+
   def spec: ZSpec[Environment, Failure] =
     suite("IdempotentSpec")(
       suite("laws")(
         testM("boolean conjuction")(checkAllLaws(Idempotent)(Gen.boolean.map(And(_)))),
         testM("boolean disjunction")(checkAllLaws(Idempotent)(Gen.boolean.map(Or(_)))),
+        testM("double max")(checkAllLaws(Idempotent)(Gen.anyDouble.map(Max(_)))),
+        testM("double min")(checkAllLaws(Idempotent)(Gen.anyDouble.map(Min(_)))),
+        testM("float max")(checkAllLaws(Idempotent)(Gen.anyFloat.map(Max(_)))),
+        testM("float min")(checkAllLaws(Idempotent)(Gen.anyFloat.map(Min(_)))),
         testM("map")(checkAllLaws(Idempotent)(Gen.mapOf(anyMaxInt, anyMaxInt))),
         testM("option")(checkAllLaws(Idempotent)(Gen.option(anyMaxInt))),
         testM("ordering")(checkAllLaws(Idempotent)(anyOrdering)),
