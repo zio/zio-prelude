@@ -67,9 +67,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= {
       val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
       Seq(
-        "dev.zio" %%% "zio"          % zioVersion,
-        "dev.zio" %%% "zio-test"     % zioVersion,
-        "dev.zio" %%% "zio-test-sbt" % zioVersion
+        "dev.zio" %%% "zio"      % zioVersion,
+        "dev.zio" %%% "zio-test" % zioVersion
       ) ++
         (scalaVersion.value match {
           case BuildHelper.Scala213   => spc
@@ -81,11 +80,13 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
-lazy val coreJS = core.js
+lazy val coreJS     = core.js
   .settings(jsSettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val coreJVM = core.jvm
+lazy val coreJVM    = core.jvm
   .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val coreNative = core.native
   .settings(nativeSettings)
@@ -100,11 +101,13 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental"))
 
-lazy val experimentalJVM = experimental.jvm
+lazy val experimentalJVM    = experimental.jvm
   .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val experimentalJS = experimental.js
+lazy val experimentalJS     = experimental.js
   .settings(jsSettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val experimentalNative = experimental.native
   .settings(nativeSettings)
