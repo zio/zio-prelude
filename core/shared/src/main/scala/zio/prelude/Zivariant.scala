@@ -16,6 +16,7 @@ import scala.Predef.{identity => id}
 trait Zivariant[Z[-_, +_, +_]] { self =>
 
   // because of Dotty
+  import zio.prelude.EqualOps
 
   def deriveCovariant[R, E]: Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] =
     new Covariant[({ type lambda[+A] = Z[R, E, A] })#lambda] {
