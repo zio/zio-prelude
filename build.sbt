@@ -38,7 +38,7 @@ addCommandAlias(
   ";coreNative/test:compile;experimentalJVM/test:compile"
 )
 
-val zioVersion = "1.0.3"
+val zioVersion = "1.0.4"
 
 lazy val root = project
   .in(file("."))
@@ -82,18 +82,14 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val coreJS     = core.js
   .settings(jsSettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val coreJVM    = core.jvm
   .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val coreNative = core.native
   .settings(nativeSettings)
-  .settings(
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-    dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
-  )
   .disablePlugins(
     ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
   )
@@ -104,21 +100,18 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(stdSettings("zio-prelude-experimental"))
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental"))
-
-lazy val experimentalJVM    = experimental.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
+  .enablePlugins(BuildInfoPlugin)
 
 lazy val experimentalJS     = experimental.js
   .settings(jsSettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+
+lazy val experimentalJVM    = experimental.jvm
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val experimentalNative = experimental.native
   .settings(nativeSettings)
-  .settings(
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-    dependencyOverrides += "dev.zio" %%% "zio" % "1.0.3+68-eaa7424f-SNAPSHOT"
-  )
   .disablePlugins(
     ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
   )

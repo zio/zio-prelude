@@ -57,7 +57,7 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
 
   // zimap id id id == id
   def zimapIdentity[R, E, A](rea: Z[R, E, A])(implicit eq: Equal[Z[R, E, A]]): Boolean =
-    zimap(id[R], id[E], id[A])(rea) === rea
+    EqualOps(zimap(id[R], id[E], id[A])(rea)) === rea // because of Dotty
 
   // zimap (r2 andThen r1) (e1 andThen e2) (a1 andThen a2) == zimap (r1 e1 a1) andThen zimap (r2 e2 a2)
   def zimapComposition[R, E, A, R1, R2, E1, E2, A1, A2](
@@ -71,7 +71,7 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
   )(implicit eq: Equal[Z[R2, E2, A2]]): Boolean = {
     val rhs: Z[R2, E2, A2] = zimap(r2 andThen r1, e1 andThen e2, a1 andThen a2)(rea)
     val lhs: Z[R2, E2, A2] = (zimap(r1, e1, a1) andThen zimap(r2, e2, a2))(rea)
-    lhs === rhs
+    EqualOps(lhs) === rhs // because of Dotty
   }
 
   // zimap r e a == contramap(r) andThen map(a) andThen mapLeft(e)
@@ -84,7 +84,7 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
     val lhs: Z[R1, E1, A1]                = zimap(r, e, a)(rea)
     val rhs1: Z[R, E, A] => Z[R1, E1, A1] = contramap(r) andThen map[R1, E, A, A1](a) andThen mapLeft(e)
     val rhs2: Z[R1, E1, A1]               = rhs1(rea)
-    lhs === rhs2
+    EqualOps(lhs) === rhs2 // because of Dotty
   }
 }
 
