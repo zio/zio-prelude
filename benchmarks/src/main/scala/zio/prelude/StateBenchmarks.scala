@@ -116,7 +116,7 @@ class StateBenchmarks {
   @Benchmark
   def zioEffectfulTraversal(): Int =
     State
-      .foreach(list) { el =>
+      .forEach(list) { el =>
         State.get[Int].flatMap(s => State.set(s + el))
       }
       .runState(0)

@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.test.Assertion.anything
 import zio.test.AssertionM.Render.param
-import zio.test.{Assertion, DefaultRunnableSpec, ZSpec, assert, suite, test}
+import zio.test._
 
 object NewtypeFSpec extends DefaultRunnableSpec {
 

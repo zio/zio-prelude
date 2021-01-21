@@ -247,6 +247,14 @@ object Equal extends Lawful[Equal] {
     Derive[F, Equal].derive(Equal[A])
 
   /**
+   * `Equal` instance for `Double` for imprecise equality with configurable tolerance.
+   */
+  def DoubleEqualWithEpsilon(epsilon: Double = 1 / (1024d * 1024 * 1024 * 1024)): Equal[Double] = {
+    (l: Double, r: Double) =>
+      (l - r).abs < epsilon
+  }
+
+  /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Double` values.
    *
    * Note that to honor the contract
@@ -265,6 +273,13 @@ object Equal extends Lawful[Equal] {
    */
   implicit def EitherEqual[A: Equal, B: Equal]: Equal[Either[A, B]] =
     Equal[A] either Equal[B]
+
+  /**
+   * `Equal` instance for `Float` for imprecise equality with configurable tolerance.
+   */
+  def FloatEqualWithEpsilon(epsilon: Float = 1 / (1024f * 1024)): Equal[Float] = { (l: Float, r: Float) =>
+    (l - r).abs < epsilon
+  }
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Float` values.
