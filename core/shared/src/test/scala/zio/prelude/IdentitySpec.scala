@@ -6,6 +6,9 @@ import zio.test.{DefaultRunnableSpec, _}
 
 object IdentitySpec extends DefaultRunnableSpec {
 
+  private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
+  private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
+
   def spec: ZSpec[Environment, Failure] =
     suite("IdentitySpec")(
       suite("laws")(
@@ -17,8 +20,14 @@ object IdentitySpec extends DefaultRunnableSpec {
         testM("char max")(checkAllLaws(Identity)(Gen.anyChar.map(Max(_)))),
         testM("char min")(checkAllLaws(Identity)(Gen.anyChar.map(Min(_)))),
         testM("char multiplication")(checkAllLaws(Identity)(Gen.anyChar.map(Prod(_)))),
-        testM("either")(checkAllLaws(Identity)(Gen.either(Gen.anyInt.map(Sum(_)), Gen.anyInt.map(Sum(_))))),
         testM("chunk")(checkAllLaws(Identity)(Gen.chunkOf(Gen.anyInt))),
+        testM("double max")(checkAllLaws(Identity)(Gen.anyDouble.map(Max(_)))),
+        testM("double min")(checkAllLaws(Identity)(Gen.anyDouble.map(Min(_)))),
+        testM("double multiplication")(checkAllLaws(Identity)(Gen.anyDouble.map(Prod(_)))),
+        testM("either")(checkAllLaws(Identity)(Gen.either(Gen.anyInt.map(Sum(_)), Gen.anyInt.map(Sum(_))))),
+        testM("float max")(checkAllLaws(Identity)(Gen.anyFloat.map(Max(_)))),
+        testM("float min")(checkAllLaws(Identity)(Gen.anyFloat.map(Min(_)))),
+        testM("float multiplication")(checkAllLaws(Identity)(Gen.anyFloat.map(Prod(_)))),
         testM("int max")(checkAllLaws(Identity)(Gen.anyInt.map(Max(_)))),
         testM("int min")(checkAllLaws(Identity)(Gen.anyInt.map(Min(_)))),
         testM("int multiplication")(checkAllLaws(Identity)(Gen.anyInt.map(Prod(_)))),
