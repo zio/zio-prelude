@@ -6,13 +6,11 @@ import scala.collection.parallel.{immutable => par}
 
 trait PlatformSpecificEqualInstances {
 
-  // not `implicit`, because of conflict with PlatformSpecificDerive
-
   /**
    * Derives an `Equal[ParMap[A, B]]` given an `Equal[B]`. Due to the limitations
    * of Scala's `ParMap`, this uses object equality and hash code on the keys.
    */
-  def ParMapEqual[A, B: Equal]: Equal[par.ParMap[A, B]] =
+  implicit def ParMapEqual[A, B: Equal]: Equal[par.ParMap[A, B]] =
     Equal.make { (map1, map2) =>
       map1.size === map2.size &&
       map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
@@ -21,7 +19,7 @@ trait PlatformSpecificEqualInstances {
   /**
    * Derives an `Equal[ParSeq[A]]` given an `Equal[A]`.
    */
-  def ParSeqEqual[A: Equal]: Equal[par.ParSeq[A]] =
+  implicit def ParSeqEqual[A: Equal]: Equal[par.ParSeq[A]] =
     Equal.make((l, r) => l.length === r.length && l.corresponds(r)(_ === _))
 
   /**
