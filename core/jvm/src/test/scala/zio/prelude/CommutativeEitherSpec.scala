@@ -6,6 +6,17 @@ import zio.test._
 import scala.concurrent.{Future, blocking}
 
 object CommutativeEitherSpec extends DefaultRunnableSpec {
+  private val ParallelCollectionCompatibility = {
+    object Compat {
+      object CollectionConverters
+    }
+    import Compat._
+    {
+      import scala.collection.parallel._
+      CollectionConverters
+    }
+  }
+  import ParallelCollectionCompatibility._
 
   def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
     suite("CommutativeEitherSpec")(

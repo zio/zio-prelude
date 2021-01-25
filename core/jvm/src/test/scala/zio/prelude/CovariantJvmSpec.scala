@@ -7,6 +7,17 @@ import zio.test.laws._
 import scala.collection.parallel.{immutable => par}
 
 object CovariantJvmSpec extends DefaultRunnableSpec {
+  private val ParallelCollectionCompatibility = {
+    object Compat {
+      object CollectionConverters
+    }
+    import Compat._
+    {
+      import scala.collection.parallel._
+      CollectionConverters
+    }
+  }
+  import ParallelCollectionCompatibility._
 
   def genParMap[R <: Random with Sized, K](k: Gen[R, K]): GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
     new GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] {
