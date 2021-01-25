@@ -1,6 +1,6 @@
 package zio.prelude
 
-import collection.parallel.immutable._
+import scala.collection.parallel.immutable._
 
 trait PlatformSpecificSyntax {
 
