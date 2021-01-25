@@ -1,8 +1,10 @@
 package zio.prelude
 
+import com.github.ghik.silencer.silent
 import zio.test._
 import zio.test.laws._
 
+@silent("Unused import")
 object OrdJvmSpec extends DefaultRunnableSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {

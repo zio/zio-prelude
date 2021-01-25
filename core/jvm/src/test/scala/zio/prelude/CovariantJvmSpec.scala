@@ -1,11 +1,13 @@
 package zio.prelude
 
+import com.github.ghik.silencer.silent
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
 
 import scala.collection.parallel.{immutable => par}
 
+@silent("Unused import")
 object CovariantJvmSpec extends DefaultRunnableSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
