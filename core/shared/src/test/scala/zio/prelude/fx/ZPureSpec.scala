@@ -1,10 +1,10 @@
 package zio.prelude.fx
 
-import zio.{Chunk, CanFail}
 import zio.prelude._
 import zio.random.Random
-import zio.test.Assertion.{ equalTo => _, _ }
+import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
+import zio.{CanFail, Chunk}
 
 import java.util.NoSuchElementException
 import scala.util.Try
@@ -225,7 +225,9 @@ object ZPureSpec extends DefaultRunnableSpec {
             },
             test("failure") {
               val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
-              assert(ZPure.modifyEither(f).repeatUntilState(_ == 10).getState.either.runResult(0))(isLeft(equalTo("error")))
+              assert(ZPure.modifyEither(f).repeatUntilState(_ == 10).getState.either.runResult(0))(
+                isLeft(equalTo("error"))
+              )
             }
           ),
           suite("repeatUntilStateEquals")(
@@ -239,7 +241,9 @@ object ZPureSpec extends DefaultRunnableSpec {
             },
             test("failure") {
               val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
-              assert(ZPure.modifyEither(f).repeatUntilStateEquals(10).getState.either.runResult(0))(isLeft(equalTo("error")))
+              assert(ZPure.modifyEither(f).repeatUntilStateEquals(10).getState.either.runResult(0))(
+                isLeft(equalTo("error"))
+              )
             }
           ),
           suite("repeatWhile")(
@@ -277,7 +281,9 @@ object ZPureSpec extends DefaultRunnableSpec {
             },
             test("failure") {
               val f = (s: Int) => if (s == 3) Left("error") else Right((s + 1, (s + 1) / 10))
-              assert(ZPure.modifyEither(f).repeatWhileState(_ < 10).getState.either.runResult(0))(isLeft(equalTo("error")))
+              assert(ZPure.modifyEither(f).repeatWhileState(_ < 10).getState.either.runResult(0))(
+                isLeft(equalTo("error"))
+              )
             }
           ),
           testM("run") {
@@ -378,7 +384,9 @@ object ZPureSpec extends DefaultRunnableSpec {
           suite("none")(
             testM("success") {
               check(genInt) { s =>
-                assert(ZPure.succeed[Int, Option[Int]](None).none.getState.either.runResult(s))(isRight(equalTo((s, ()))))
+                assert(ZPure.succeed[Int, Option[Int]](None).none.getState.either.runResult(s))(
+                  isRight(equalTo((s, ())))
+                )
               }
             },
             testM("failure") {
@@ -401,7 +409,8 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           testM("orElseOptional (None case)") {
             check(genInt, genString) { (s1, e) =>
-              val errorOrUpdate = ZPure.fail(Option.empty[String]).orElseOptional(ZPure.fail(Some(e))).getState.either.runResult(s1)
+              val errorOrUpdate =
+                ZPure.fail(Option.empty[String]).orElseOptional(ZPure.fail(Some(e))).getState.either.runResult(s1)
               assert(errorOrUpdate)(isLeft(equalTo(Option(e))))
             }
           },
@@ -828,7 +837,9 @@ object ZPureSpec extends DefaultRunnableSpec {
               assert(ZPure.modifyEither((_: Int) => Right((1, "success"))).run(0))(equalTo((1, "success")))
             },
             test("failure") {
-              assert(ZPure.modifyEither((_: Int) => Left("error")).getState.either.runResult(0))(isLeft(equalTo("error")))
+              assert(ZPure.modifyEither((_: Int) => Left("error")).getState.either.runResult(0))(
+                isLeft(equalTo("error"))
+              )
             }
           )
         ),
