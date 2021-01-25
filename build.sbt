@@ -63,35 +63,21 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
-  .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
+  .settings(
     libraryDependencies ++= {
-      val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
+      val spc = scalaVersion.value match {
+        case BuildHelper.Scala213 | BuildHelper.ScalaDotty =>
+          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
+        case _                                             =>
+          List()
+      }
       Seq(
         "dev.zio" %%% "zio"      % zioVersion,
         "dev.zio" %%% "zio-test" % zioVersion
-      ) ++
-        (scalaVersion.value match {
-          case BuildHelper.Scala213   => spc
-          case BuildHelper.ScalaDotty => spc.map(_.withDottyCompat(scalaVersion.value))
-          case _                      => List()
-        })
+      ) ++ spc
     }
   )
-//  .settings(
-//    libraryDependencies ++= {
-//      val spc = scalaVersion.value match {
-//        case BuildHelper.Scala213 | BuildHelper.ScalaDotty =>
-//          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
-//          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
-//        case _                                             =>
-//          List()
-//      }
-//      Seq(
-//        "dev.zio" %%% "zio"      % zioVersion,
-//        "dev.zio" %%% "zio-test" % zioVersion
-//      ) ++ spc
-//    }
-//  )
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
