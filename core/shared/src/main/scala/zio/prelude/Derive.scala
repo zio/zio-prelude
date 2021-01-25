@@ -23,7 +23,7 @@ trait Derive[F[_], Typeclass[_]] {
   def derive[A: Typeclass]: Typeclass[F[A]]
 }
 
-object Derive {
+object Derive extends PlatformSpecificDerive {
 
   /**
    * Summon an implicit `Derive[F, Typeclass]`

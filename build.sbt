@@ -77,6 +77,21 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
         })
     }
   )
+//  .settings(
+//    libraryDependencies ++= {
+//      val spc = scalaVersion.value match {
+//        case BuildHelper.Scala213 | BuildHelper.ScalaDotty =>
+//          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
+//          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
+//        case _                                             =>
+//          List()
+//      }
+//      Seq(
+//        "dev.zio" %%% "zio"      % zioVersion,
+//        "dev.zio" %%% "zio-test" % zioVersion
+//      ) ++ spc
+//    }
+//  )
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
@@ -100,6 +115,7 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(stdSettings("zio-prelude-experimental"))
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental"))
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
 lazy val experimentalJS     = experimental.js
@@ -124,10 +140,7 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      ("org.typelevel" %% "cats-core" % "2.3.1") match {
-        case cats if isDotty.value => cats.withDottyCompat(scalaVersion.value)
-        case cats                  => cats
-      }
+      "org.typelevel" %% "cats-core" % "2.3.1"
     )
   )
   .dependsOn(coreJVM)

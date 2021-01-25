@@ -30,6 +30,7 @@ package object prelude
     with NonEmptyForEachSyntax
     with OrdSyntax
     with PartialOrdSyntax
+    with PlatformSpecificSyntax
     with ForEachSyntax
     with ZivariantSyntax {
 

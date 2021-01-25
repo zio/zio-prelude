@@ -41,7 +41,10 @@ trait Invariant[F[_]] { self =>
     }
 }
 
-object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpecific {
+object Invariant
+    extends LowPriorityInvariantImplicits
+    with InvariantVersionSpecific
+    with PlatformSpecificInvariantInstances {
 
   def apply[F[_]](implicit invariant: Invariant[F]): Invariant[F] =
     invariant
@@ -692,6 +695,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       }
     }
 
+  /** The `Invariant` instance for `Set` */
   implicit val SetInvariant: Invariant[Set] =
     new Invariant[Set] {
       def invmap[A, B](f: A <=> B): Set[A] <=> Set[B] =

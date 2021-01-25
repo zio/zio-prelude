@@ -808,7 +808,7 @@ object Identity extends Lawful[EqualIdentity] {
     )
 }
 
-trait IdentitySyntax extends PlatformSpecificIdentitySyntax {
+trait IdentitySyntax {
 
   /**
    * Provides infix syntax for combining two values with an associative

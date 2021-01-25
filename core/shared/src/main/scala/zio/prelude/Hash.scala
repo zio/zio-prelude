@@ -83,7 +83,7 @@ trait Hash[-A] extends Equal[A] { self =>
     )
 }
 
-object Hash extends Lawful[Hash] {
+object Hash extends Lawful[Hash] with PlatformSpecificHashInstances {
 
   /**
    * For all values `a1` and `a2`, if `a1` is equal to `a2` then the hash of
