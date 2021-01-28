@@ -224,12 +224,12 @@ object BuildHelper {
   def stdSettings(prjName: String) = Seq(
     name := s"$prjName",
     crossScalaVersions := Seq(Scala211, Scala212, Scala213),
-    scalaVersion in ThisBuild := Scala212,
+    ThisBuild / scalaVersion := Scala213,
     scalacOptions := stdOptions ++ extraOptions(scalaVersion.value, isDotty.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
       if (isDotty.value)
         Seq(
-          ("com.github.ghik" % s"silencer-lib_$Scala213" % SilencerVersion % Provided)
+          ("com.github.ghik" %% "silencer-lib" % SilencerVersion % Provided)
             .withDottyCompat(scalaVersion.value)
         )
       else
