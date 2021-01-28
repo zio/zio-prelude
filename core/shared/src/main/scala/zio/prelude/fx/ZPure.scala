@@ -3,7 +3,7 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, ChunkBuilder, NeedsEnv}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
@@ -295,6 +295,12 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     foldCauseM((cause: Cause[E]) => failure(cause.first), success)
 
   /**
+   * Exposes the output state into the value channel.
+   */
+  final def getState: ZPure[W, S1, S2, R, E, (S2, A)] =
+    flatMap(a => get.map(s => (s, a)))
+
+  /**
    * Returns a successful computation with the head of the list if the list is
    * non-empty or fails with the error `None` if the list is empty.
    */
@@ -460,6 +466,12 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZPure.accessM(r0 => self.provide(f(r0)))
 
   /**
+   * Provides this computation with its initial state.
+   */
+  final def provideState(s: S1): ZPure[W, Any, S2, R, E, A] =
+    set(s) *> self
+
+  /**
    * Fail with the returned value if the `PartialFunction` matches, otherwise
    * continue with our held value.
    */
@@ -542,20 +554,24 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     repeatUntilState(!f(_))
 
   /**
+   * Runs this computation to produce its result.
+   */
+  final def run(implicit ev1: Unit <:< S1, ev2: Any <:< R, ev3: E <:< Nothing): A =
+    runResult(())
+
+  /**
    * Runs this computation with the specified initial state, returning both
    * the updated state and the result.
    */
   final def run(s: S1)(implicit ev1: Any <:< R, ev2: E <:< Nothing): (S2, A) =
-    runEither(s).fold(ev2, identity)
-
-  final def runEither(s: S1)(implicit ev: Any <:< R, ev1: CanFail[E]): Either[E, (S2, A)] =
-    runEitherCause(s).fold(cause => Left(cause.first), Right(_))
+    runAll(s)._2.fold(cause => ev2(cause.first), identity)
 
   /**
-   * Runs this computation with the specified initial state, returning either a
-   * failure or the updated state and the result
+   * Runs this computation with the specified initial state, returning both the
+   * log and either all the failures that occurred or the updated state and the
+   * result.
    */
-  final def runEitherCause(s: S1)(implicit ev: Any <:< R, ev1: CanFail[E]): Either[Cause[E], (S2, A)] = {
+  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) = {
     val _                                                        = ev
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
     val environments: Stack[AnyRef]                              = Stack()
@@ -650,8 +666,24 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
       }
     }
-    if (failed) Left(a.asInstanceOf[Cause[E]])
-    else Right((s0.asInstanceOf[S2], a.asInstanceOf[A]))
+    val log = builder.result().asInstanceOf[Chunk[W]]
+    if (failed) (log, Left(a.asInstanceOf[Cause[E]]))
+    else (log, Right((s0.asInstanceOf[S2], a.asInstanceOf[A])))
+  }
+
+  /**
+   * Runs this computation to produce its result or the first failure to
+   * occur.
+   */
+  final def runEither(implicit ev1: Unit <:< S1, ev2: Any <:< R): Either[E, A] =
+    runAll(())._2.fold(cause => Left(cause.first), { case (_, a) => Right(a) })
+
+  /**
+   * Runs this computation to produce its result and the log.
+   */
+  final def runLog(implicit ev1: Unit <:< S1, ev2: Any <:< R, ev3: E <:< Nothing): (Chunk[W], A) = {
+    val (log, either) = runAll(())
+    (log, either.fold(cause => ev3(cause.first), { case (_, a) => a }))
   }
 
   /**
@@ -667,6 +699,12 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def runState(s: S1)(implicit ev1: Any <:< R, ev2: E <:< Nothing): S2 =
     run(s)._1
+
+  /**
+   * Exposes the full cause of failures of this computation.
+   */
+  final def sandbox: ZPure[W, S1, S2, R, Cause[E], A] =
+    foldCauseM(ZPure.fail, ZPure.succeed)
 
   /**
    * Converts an option on values into an option on errors leaving the state unchanged.
@@ -714,6 +752,12 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     })
 
   def tag: Int
+
+  /**
+   * Submerges the full cause of failures of this computation.
+   */
+  def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
+    foldM(e => ZPure.halt(ev(e)), a => ZPure.succeed(a))
 
   /**
    * Combines this computation with the specified computation, passing the

@@ -178,6 +178,8 @@ package object prelude
     }
   }
 
+  val any: Any = ()
+
   implicit class AnySyntax[A](private val a: A) extends AnyVal {
 
     @silent("side-effecting nullary methods are discouraged")
