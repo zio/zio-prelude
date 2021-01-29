@@ -287,8 +287,6 @@ object BuildHelper {
   )
 
   def nativeSettings = Seq(
-    scalaVersion := Scala211,
-    crossScalaVersions := Seq(scalaVersion.value),
     Test / skip := true,
     doc / skip := true,
     SettingKey[Boolean](

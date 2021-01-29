@@ -272,6 +272,14 @@ jobs:
       - <<: *scala_212
       - <<: *jdk_8
 
+  test_212_jdk8_native:
+    <<: *testNative
+    <<: *machine_ubuntu
+    <<: *machine_resource
+    environment:
+      - <<: *scala_212
+      - <<: *jdk_8
+
   test_213_jdk8_jvm:
     <<: *testJVM
     <<: *machine_ubuntu
@@ -281,6 +289,14 @@ jobs:
 
   test_213_jdk8_js:
     <<: *testJS
+    <<: *machine_ubuntu
+    <<: *machine_resource
+    environment:
+      - <<: *scala_213
+      - <<: *jdk_8
+
+  test_213_jdk8_native:
+    <<: *testNative
     <<: *machine_ubuntu
     <<: *machine_resource
     environment:
@@ -352,12 +368,22 @@ workflows:
             - lint
           filters:
             <<: *filter_tags
+      - test_212_jdk8_native:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
       - test_213_jdk8_jvm:
           requires:
             - lint
           filters:
             <<: *filter_tags
       - test_213_jdk8_js:
+          requires:
+            - lint
+          filters:
+            <<: *filter_tags
+      - test_213_jdk8_native:
           requires:
             - lint
           filters:
@@ -380,8 +406,10 @@ workflows:
             - test_211_jdk8_native
             - test_212_jdk8_jvm
             - test_212_jdk8_js
+            - test_212_jdk8_native
             - test_213_jdk8_jvm
             - test_213_jdk8_js
+            - test_213_jdk8_native
             - test_213_jdk11_jvm
             - test_dotty_jdk8_jvm
             - mdoc
