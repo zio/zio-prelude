@@ -10,7 +10,7 @@ trait PlatformSpecificDerive {
   implicit def ParMapDeriveEqual[A]: DeriveEqual[({ type lambda[+x] = par.ParMap[A, x] })#lambda] =
     new DeriveEqual[({ type lambda[+x] = par.ParMap[A, x] })#lambda] {
       def derive[B: Equal]: Equal[par.ParMap[A, B]] =
-        Equal.ParMapEqual
+        Equal.ParMapPartialOrd
     }
 
   /**

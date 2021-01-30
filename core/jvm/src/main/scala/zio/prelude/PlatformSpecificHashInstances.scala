@@ -11,7 +11,7 @@ trait PlatformSpecificHashInstances {
    * Scala's `ParMap`, this uses object equality and hash code on the keys.
    */
   implicit def ParMapHash[A, B: Hash]: Hash[par.ParMap[A, B]] =
-    makeFrom(_.map { case (k, v) => (k, v.hash) }.hashCode, Equal.ParMapEqual)
+    makeFrom(_.map { case (k, v) => (k, v.hash) }.hashCode, Equal.ParMapPartialOrd)
 
   /**
    * Derives a `Hash[ParSeq[A]]` given a `Hash[A]`.
