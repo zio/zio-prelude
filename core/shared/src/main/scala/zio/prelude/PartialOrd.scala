@@ -278,13 +278,6 @@ object PartialOrd extends Lawful[PartialOrd] {
   }
 
   /**
-   * Derives an `PartialOrd[Map[A, B]]` given an `Equal[B]`.
-   * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
-   */
-  implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] =
-    PartialOrd.makeFrom(_.compareStrict(_), Equal.MapEqual)
-
-  /**
    * Derives an `PartialOrd[NonEmptyChunk[A]]` given an `PartialOrd[A]`.
    */
   implicit def NonEmptyChunkPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyChunk[A]] =

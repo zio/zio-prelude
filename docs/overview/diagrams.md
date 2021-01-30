@@ -20,7 +20,6 @@ classDiagram
     Exit[E: Equal, A: Equal]
     F[A: Equal]: DeriveEqual[_]
     List[A: Equal]
-    Map[A, B: Equal]
     NonEmptyChunk[A: Equal]
     NonEmptyList[A: Equal]
     Option[A: Equal]
