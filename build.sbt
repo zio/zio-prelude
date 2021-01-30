@@ -38,7 +38,9 @@ addCommandAlias(
   ";coreNative/test:compile;experimentalJVM/test:compile"
 )
 
-val zioVersion = "1.0.4"
+// TODO remove once a stable version of ZIO for Scala Native 0.4.0 is out
+ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
+val zioVersion = "1.0.4.1+10-baab7567-SNAPSHOT"
 
 lazy val root = project
   .in(file("."))
@@ -81,19 +83,17 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
-lazy val coreJS     = core.js
+lazy val coreJS  = core.js
   .settings(jsSettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val coreJVM    = core.jvm
+lazy val coreJVM = core.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .settings(scalaReflectTestSettings)
 
 lazy val coreNative = core.native
   .settings(nativeSettings)
-  .disablePlugins(
-    ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
-  )
 
 lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental"))
@@ -104,19 +104,17 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
-lazy val experimentalJS     = experimental.js
+lazy val experimentalJS  = experimental.js
   .settings(jsSettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val experimentalJVM    = experimental.jvm
+lazy val experimentalJVM = experimental.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .settings(scalaReflectTestSettings)
 
 lazy val experimentalNative = experimental.native
   .settings(nativeSettings)
-  .disablePlugins(
-    ScalafixPlugin // for some reason `ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)` isn't enough
-  )
 
 lazy val benchmarks = project
   .in(file("benchmarks"))
@@ -134,16 +132,16 @@ lazy val benchmarks = project
 
 lazy val docs = project
   .in(file("zio-prelude-docs"))
-  .settings(stdSettings("zio-prelude-docs"))
   .settings(
     publish / skip := true,
+    moduleName := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJS, coreJVM /*, coreNative */ ),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects( /* coreJS, */ coreJVM /* , coreNative */ ),
     ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
     docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .dependsOn(coreJS, coreJVM /*, coreNative */ )
+  .dependsOn( /* coreJS, */ coreJVM /* , coreNative */ )
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
