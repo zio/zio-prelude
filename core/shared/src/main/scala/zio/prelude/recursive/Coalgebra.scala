@@ -4,7 +4,7 @@ import zio.prelude._
 
 sealed trait Coalgebra[Case[+_], A] extends (A => Case[A]) { self =>
 
-  def zipWith[B](that: Coalgebra[Case, B])(implicit both: AssociativeBoth[Case]): Coalgebra[Case, (A, B)] =
+  def zip[B](that: Coalgebra[Case, B])(implicit both: AssociativeBoth[Case]): Coalgebra[Case, (A, B)] =
     Coalgebra { case (a, b) => self(a).zip(that(b)) }
 }
 
