@@ -1,11 +1,11 @@
-name: Auto approve Scala Steward's PRs
+name: Auto approve
 
 on:
   pull_request_target
 
 jobs:
-  auto-approve-scala-stewards-prs:
-    runs-on: ubuntu-latest
+  auto-approve:
+    runs-on: ubuntu-20.04
     steps:
       - uses: hmarr/auto-approve-action@v2.0.0
         if: github.actor == 'scala-steward'

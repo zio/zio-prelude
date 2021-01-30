@@ -287,14 +287,21 @@ object BuildHelper {
   )
 
   def nativeSettings = Seq(
-    scalaVersion := Scala211,
-    crossScalaVersions := Seq(scalaVersion.value),
     Test / skip := true,
     doc / skip := true,
     SettingKey[Boolean](
       "ide-skip-project" // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
     ) := true,
     Compile / doc / sources := Seq.empty
+  )
+
+  val scalaReflectTestSettings: List[Setting[_]] = List(
+    libraryDependencies ++= {
+      if (isDotty.value)
+        Seq(("org.scala-lang" % "scala-reflect" % Scala213 % Test).withDottyCompat(scalaVersion.value))
+      else
+        Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value % Test)
+    }
   )
 
   def welcomeMessage = onLoadMessage := {
