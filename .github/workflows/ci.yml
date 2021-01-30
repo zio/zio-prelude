@@ -22,14 +22,7 @@ jobs:
       - name: Setup Scala and Java
         uses: olafurpg/setup-scala@v10
       - name: Cache scala dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.m2
-            ~/.cache
-          key: sbt-cache-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
+        uses: coursier/cache-action@v5
       - name: Lint code
         run: sbt check
 
@@ -51,14 +44,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Cache scala dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.m2
-            ~/.cache
-          key: sbt-cache-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
+        uses: coursier/cache-action@v5
       - name: Run tests
         if: ${{ matrix.scala != '3.0.0-M3' }}
         run: sbt ++${{ matrix.scala }}! test${{ matrix.platform }}
@@ -78,16 +64,7 @@ jobs:
       - name: Setup Scala and Java 
         uses: olafurpg/setup-scala@v10
       - name: Cache scala dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.m2
-            ~/.cache
-          key: sbt-cache-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
-      - name: Setup GPG
-        uses: olafurpg/setup-gpg@v3
+        uses: coursier/cache-action@v5
       - name: Release artifacts
         run: sbt ci-release
         env:
