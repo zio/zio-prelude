@@ -60,7 +60,11 @@ jobs:
             ~/.cache
           key: sbt-cache-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
       - name: Run tests
+        if: ${{ matrix.scala != '3.0.0-M3' }}
         run: sbt ++${{ matrix.scala }}! test${{ matrix.platform }}
+      - name: Run dotty tests
+        if: ${{ matrix.scala == '3.0.0-M3' && matrix.platform == 'JVM' }}
+        run: sbt ++${{ matrix.scala }}! testJVM
 
   publish:
     runs-on: ubuntu-20.04
