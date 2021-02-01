@@ -11,14 +11,13 @@ trait PlatformSpecificEqualInstances {
    * Derives an `PartialOrd[ParMap[A, B]]` (and thus `Equal[ParMap[A, B]]`) given an `Equal[B]`.
    * Due to the limitations of Scala's `ParMap`, this uses object equality on the keys.
    */
-  implicit def ParMapPartialOrd[A, B: Equal]: PartialOrd[par.ParMap[A, B]] =
-    PartialOrd.makeFrom(
-      _.compareStrict(_),
-      make { (map1, map2) =>
-        map1.size === map2.size &&
-        map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
-      }
-    )
+  implicit def ParMapPartialOrd[A, B: Equal]: PartialOrd[par.ParMap[A, B]] = new PartialOrd[par.ParMap[A, B]] {
+    protected def checkCompare(l: par.ParMap[A, B], r: par.ParMap[A, B]): PartialOrdering = l.compareStrict(r)
+
+    override protected def checkEqual(l: par.ParMap[A, B], r: par.ParMap[A, B]): Boolean =
+      l.size === r.size &&
+        l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
+  }
 
   /**
    * Derives an `Equal[ParSeq[A]]` given an `Equal[A]`.

@@ -27,7 +27,7 @@ trait PlatformSpecificSyntax {
     /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
     def compareSoft(r: ParMap[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
       def compareValues(expected: Ordering, commonValues: ParIterable[(V, V)]): PartialOrdering =
-        commonValues.map { case (l, r) => l =??= r }.fold(expected)(_.unify(_))
+        commonValues.aggregate[PartialOrdering](expected)({ case (acc, (l, r)) => acc.unify(l =??= r) }, _.unify(_))
       compareWith(compareValues)(r)
     }
 
