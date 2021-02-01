@@ -328,9 +328,9 @@ object Equal extends Lawful[Equal] {
     protected def checkCompare(l: Map[A, B], r: Map[A, B]): PartialOrdering =
       l.compareStrict(r)
 
-    override protected def checkEqual(map1: Map[A, B], map2: Map[A, B]): Boolean =
-      map1.size === map2.size &&
-        map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
+    override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
+      l.size === r.size &&
+        l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
   }
 
   /**
