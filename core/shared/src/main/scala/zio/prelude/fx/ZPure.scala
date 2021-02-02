@@ -845,7 +845,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
 }
 
-object ZPure extends ZPureArities {
+object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
 
   implicit final class UnifiedSyntax[W, S, R, E, A](private val self: ZPure[W, S, S, R, E, A]) extends AnyVal {
     def <&>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                      =
@@ -1186,7 +1186,7 @@ object ZPure extends ZPureArities {
   }
 }
 
-trait LowPriorityZPureImplicits {
+trait ZPureLowPriorityImplicits {
 
   /**
    * The `CommutativeBoth` instance for `ZPure`.
