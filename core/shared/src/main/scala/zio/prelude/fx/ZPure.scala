@@ -845,33 +845,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
 }
 
-object ZPure {
-
-  implicit final class UnifiedSyntax[W, S, R, E, A](private val self: ZPure[W, S, S, R, E, A]) extends AnyVal {
-    def <&>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                      =
-      self zipPar that
-    def <&[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                            =
-      self zipParLeft that
-    def &>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                            =
-      self zipParRight that
-    def zipPar[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                   =
-      self.zipWithPar(that)((_, _))
-    def zipPar0[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                  =
-      self.zipWithPar(that)((_, _))
-    def zipParLeft[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                    =
-      self.zipWithPar(that)((a, _) => a)
-    def zipParRight[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                   =
-      self.zipWithPar(that)((_, b) => b)
-    def zipWithPar[B, C](that: ZPure[W, S, S, R, E, B])(f: (A, B) => C): ZPure[W, S, S, R, E, C] =
-      self.foldCauseM(
-        c1 =>
-          that.foldCauseM(
-            c2 => ZPure.halt(c1 && c2),
-            _ => ZPure.halt(c1)
-          ),
-        a => that.map(b => f(a, b))
-      )
-  }
+object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
 
   def access[R]: AccessPartiallyApplied[R] =
     new AccessPartiallyApplied
@@ -973,6 +947,31 @@ object ZPure {
     ZPure.Log(w)
 
   /**
+   * Combines the results of the specified `ZPure` values using the function
+   * `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[W, S, R, E, A, B, C](left: ZPure[W, S, S, R, E, A], right: ZPure[W, S, S, R, E, B])(
+    f: (A, B) => C
+  ): ZPure[W, S, S, R, E, C] =
+    left.foldCauseM(
+      c1 =>
+        right.foldCauseM(
+          c2 => ZPure.halt(c1 && c2),
+          _ => ZPure.halt(c1)
+        ),
+      a => right.map(b => f(a, b))
+    )
+
+  /**
+   * Combines the results of the specified `ZPure` values using the function
+   * `f`, failing with the first error if any fail.
+   */
+  def mapN[W, S, R, E, A, B, C](left: ZPure[W, S, S, R, E, A], right: ZPure[W, S, S, R, E, B])(
+    f: (A, B) => C
+  ): ZPure[W, S, S, R, E, C] =
+    left.zipWith(right)(f)
+
+  /**
    * Constructs a computation from the specified modify function.
    */
   def modify[S1, S2, A](f: S1 => (S2, A)): ZPure[Nothing, S1, S2, Any, Nothing, A] =
@@ -1011,6 +1010,26 @@ object ZPure {
    */
   def suspend[W, S1, S2, R, E, A](pure: => ZPure[W, S1, S2, R, E, A]): ZPure[W, S1, S2, R, E, A] =
     ZPure.unit.flatMap(_ => pure)
+
+  /**
+   * Combines the results of the specified `ZPure` values into a tuple, failing
+   * with the first error if any fail.
+   */
+  def tupled[W, S, R, E, A, B](
+    left: ZPure[W, S, S, R, E, A],
+    right: ZPure[W, S, S, R, E, B]
+  ): ZPure[W, S, S, R, E, (A, B)] =
+    mapN(left, right)((_, _))
+
+  /**
+   * Combines the results of the specified `ZPure` values into a tuple, failing
+   * with the accumulation of all errors if any fail.
+   */
+  def tupledPar[W, S, R, E, A0, A1](
+    zPure1: ZPure[W, S, S, R, E, A0],
+    zPure2: ZPure[W, S, S, R, E, A1]
+  ): ZPure[W, S, S, R, E, (A0, A1)] =
+    mapParN(zPure1, zPure2)((_, _))
 
   /**
    * Constructs a computation that always returns the `Unit` value, passing the
@@ -1150,7 +1169,7 @@ object ZPure {
   }
 }
 
-trait LowPriorityZPureImplicits {
+trait ZPureLowPriorityImplicits {
 
   /**
    * The `CommutativeBoth` instance for `ZPure`.
@@ -1159,6 +1178,6 @@ trait LowPriorityZPureImplicits {
     : CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
     new CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
       def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
-        fa.zipPar(fb)
+        ZPure.tupledPar(fa, fb)
     }
 }

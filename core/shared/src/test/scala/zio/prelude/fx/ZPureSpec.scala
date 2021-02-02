@@ -850,9 +850,22 @@ object ZPureSpec extends DefaultRunnableSpec {
             if (age >= 18) Validation.succeed(age) else Validation.fail("Under age")
           def validateAuthorized(authorized: Boolean): Validation[String, Unit] =
             if (authorized) Validation.unit else Validation.fail("Not authorized")
-          val validation                                                        = validateName("Jane Doe") zipPar0
-            validateAge(17) zipPar0
-            validateAuthorized(false)
+          val validation                                                        =
+            validateName("Jane Doe") zipPar validateAge(17) zipPar validateAuthorized(false)
+          val result                                                            = validation.sandbox.either.run
+          assert(result)(
+            isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
+          )
+        },
+        test("implicit syntax") {
+          def validateName(s: String): Validation[String, String]               =
+            if (s == "John Doe") Validation.succeed(s) else Validation.fail("Wrong name!")
+          def validateAge(age: Int): Validation[String, Int]                    =
+            if (age >= 18) Validation.succeed(age) else Validation.fail("Under age")
+          def validateAuthorized(authorized: Boolean): Validation[String, Unit] =
+            if (authorized) Validation.unit else Validation.fail("Not authorized")
+          val validation                                                        =
+            (validateName("Jane Doe"), validateAge(17), validateAuthorized(false)).tupledPar
           val result                                                            = validation.sandbox.either.run
           assert(result)(
             isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
