@@ -845,7 +845,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
 }
 
-object ZPure {
+object ZPure extends ZPureArities {
 
   implicit final class UnifiedSyntax[W, S, R, E, A](private val self: ZPure[W, S, S, R, E, A]) extends AnyVal {
     def <&>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                      =
@@ -855,8 +855,6 @@ object ZPure {
     def &>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                            =
       self zipParRight that
     def zipPar[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                   =
-      self.zipWithPar(that)((_, _))
-    def zipPar0[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                  =
       self.zipWithPar(that)((_, _))
     def zipParLeft[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                    =
       self.zipWithPar(that)((a, _) => a)
