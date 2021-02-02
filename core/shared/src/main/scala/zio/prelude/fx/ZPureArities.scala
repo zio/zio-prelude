@@ -1086,7 +1086,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1](
+  def tupled[W, S, R, E, A0, A1](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1]
   ): ZPure[W, S, S, R, E, (A0, A1)] =
@@ -1096,7 +1096,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2](
+  def tupled[W, S, R, E, A0, A1, A2](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2]
@@ -1107,7 +1107,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3](
+  def tupled[W, S, R, E, A0, A1, A2, A3](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1119,7 +1119,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1132,7 +1132,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1146,7 +1146,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1161,7 +1161,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1177,7 +1177,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1194,7 +1194,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1214,7 +1214,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1235,7 +1235,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1257,7 +1257,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1280,7 +1280,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1317,7 +1317,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1356,7 +1356,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1397,7 +1397,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1440,7 +1440,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1485,7 +1485,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1532,7 +1532,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1581,7 +1581,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20](
+  def tupled[W, S, R, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20](
     zPure1: ZPure[W, S, S, R, E, A0],
     zPure2: ZPure[W, S, S, R, E, A1],
     zPure3: ZPure[W, S, S, R, E, A2],
@@ -1639,7 +1639,7 @@ trait ZPureArities {
    * Combines the results of the specified `ZPure` values into a tuple, failing
    * with the accumulation of all errors if any fail.
    */
-  def tuples[
+  def tupled[
     W,
     S,
     R,
