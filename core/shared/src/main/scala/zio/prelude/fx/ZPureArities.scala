@@ -1,5 +1,7 @@
 package zio.prelude.fx
 
+import zio.prelude._
+
 trait ZPureArities {
 
   /**
