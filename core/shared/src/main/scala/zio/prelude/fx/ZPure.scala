@@ -971,6 +971,24 @@ object ZPure extends ZPureArities {
     ZPure.Log(w)
 
   /**
+   * Combines the results of the specified `ZPure` values using the function
+   * `f`, failing with the accumulation of all errors if any fail.
+   */
+  def mapParN[W, S, R, E, A0, A1, B](zPure1: ZPure[W, S, S, R, E, A0], zPure2: ZPure[W, S, S, R, E, A1])(
+    f: (A0, A1) => B
+  ): ZPure[W, S, S, R, E, B] =
+    zPure1.zipWithPar(zPure2)(f)
+
+  /**
+   * Combines the results of the specified `ZPure` values using the function
+   * `f`, failing with the first error if any fail.
+   */
+  def mapN[W, S, R, E, A0, A1, B](zPure1: ZPure[W, S, S, R, E, A0], zPure2: ZPure[W, S, S, R, E, A1])(
+    f: (A0, A1) => B
+  ): ZPure[W, S, S, R, E, B] =
+    zPure1.zipWith(zPure2)(f)
+
+  /**
    * Constructs a computation from the specified modify function.
    */
   def modify[S1, S2, A](f: S1 => (S2, A)): ZPure[Nothing, S1, S2, Any, Nothing, A] =
@@ -1009,6 +1027,26 @@ object ZPure extends ZPureArities {
    */
   def suspend[W, S1, S2, R, E, A](pure: => ZPure[W, S1, S2, R, E, A]): ZPure[W, S1, S2, R, E, A] =
     ZPure.unit.flatMap(_ => pure)
+
+  /**
+   * Combines the results of the specified `ZPure` values into a tuple, failing
+   * with the first error if any fail.
+   */
+  def tupled[W, S, R, E, A0, A1](
+    zPure1: ZPure[W, S, S, R, E, A0],
+    zPure2: ZPure[W, S, S, R, E, A1]
+  ): ZPure[W, S, S, R, E, (A0, A1)] =
+    mapN(zPure1, zPure2)((_, _))
+
+  /**
+   * Combines the results of the specified `ZPure` values into a tuple, failing
+   * with the accumulation of all errors if any fail.
+   */
+  def tupledPar[W, S, R, E, A0, A1](
+    zPure1: ZPure[W, S, S, R, E, A0],
+    zPure2: ZPure[W, S, S, R, E, A1]
+  ): ZPure[W, S, S, R, E, (A0, A1)] =
+    mapParN(zPure1, zPure2)((_, _))
 
   /**
    * Constructs a computation that always returns the `Unit` value, passing the
