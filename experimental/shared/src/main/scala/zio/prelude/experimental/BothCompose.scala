@@ -69,7 +69,7 @@ object BothCompose {
     def fromSecond[B]: URIO[(Any, B), B] = URIO.access[(Any, B)](_._2)
 
     def toBoth[A, B, C](a2b: URIO[A, B])(a2c: URIO[A, C]): URIO[A, (B, C)] =
-      URIO.accessM[A](a2b.zip(a2c).provide)
+      a2b &&& a2c
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
       AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
