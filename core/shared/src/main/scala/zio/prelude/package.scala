@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio
 
 import com.github.ghik.silencer.silent
@@ -163,7 +179,7 @@ package object prelude
     /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
     def compareSoft(r: Map[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
       def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
-        commonValues.map { case (l, r) => l =??= r }.fold(expected)(_.unify(_))
+        commonValues.foldLeft[PartialOrdering](expected) { case (acc, (l, r)) => acc.unify(l =??= r) }
       compareWith(compareValues)(r)
     }
 

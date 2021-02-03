@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 
 import zio._
@@ -1244,7 +1260,7 @@ trait CommutativeBothSyntax {
     def mapParN[R](f: (T1, T2) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2])(f)).tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2])).tupled(tf)
   }
 
@@ -1252,7 +1268,7 @@ trait CommutativeBothSyntax {
     def mapParN[R](f: (T1, T2, T3) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3])(f)).tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3])).tupled(tf)
   }
 
@@ -1260,7 +1276,7 @@ trait CommutativeBothSyntax {
     def mapParN[R](f: (T1, T2, T3, T4) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])(f)).tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])).tupled(tf)
   }
 
@@ -1268,7 +1284,7 @@ trait CommutativeBothSyntax {
     def mapParN[R](f: (T1, T2, T3, T4, T5) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5])(f)).tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5])).tupled(tf)
   }
 
@@ -1278,7 +1294,7 @@ trait CommutativeBothSyntax {
     def mapParN[R](f: (T1, T2, T3, T4, T5, T6) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6])(f)).tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6])).tupled(tf)
   }
 
@@ -1290,7 +1306,7 @@ trait CommutativeBothSyntax {
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7])(f)).tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7])).tupled(tf)
   }
 
@@ -1304,7 +1320,7 @@ trait CommutativeBothSyntax {
         .mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8])(f))
         .tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8)] =
       (CommutativeBoth
         .tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8]))
         .tupled(tf)
@@ -1320,7 +1336,7 @@ trait CommutativeBothSyntax {
         .mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8], _: F[T9])(f))
         .tupled(tf)
 
-    def tupleParN(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] =
+    def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] =
       (CommutativeBoth
         .tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8], _: F[T9]))
         .tupled(tf)
@@ -1338,7 +1354,7 @@ trait CommutativeBothSyntax {
         ))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)] =
@@ -1369,7 +1385,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)] =
@@ -1413,7 +1429,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)] =
@@ -1459,7 +1475,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)] =
@@ -1507,7 +1523,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)] =
@@ -1573,7 +1589,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)] =
@@ -1662,7 +1678,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16)] =
@@ -1755,7 +1771,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17)] =
@@ -1852,7 +1868,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18)] =
@@ -1953,7 +1969,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19)] =
@@ -2058,7 +2074,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20)] =
@@ -2167,7 +2183,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21)] =
@@ -2280,7 +2296,7 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
-    def tupleParN(implicit
+    def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
     ): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22)] =
