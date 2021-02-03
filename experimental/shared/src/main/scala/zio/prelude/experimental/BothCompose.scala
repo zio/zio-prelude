@@ -61,18 +61,7 @@ object BothCompose {
 
   }
 
-  implicit val URIOApplicationCompose: ApplicationCompose[URIO] = new ApplicationCompose[URIO] {
-
-    type -->:[-t, +r] = URIO[t, r]
-
-    def application[A, B]: URIO[(URIO[A, B], A), B] = URIO.accessM[(URIO[A, B], A)] { case (a2b, a) => a2b.provide(a) }
-
-    def curry[A, B, C](f: URIO[(A, B), C]): URIO[A, URIO[B, C]] =
-      URIO.access[A](a => URIO.accessM[B](b => f.provide((a, b))))
-
-    @silent("a type was inferred to be `Any`; this may indicate a programming error") // because of Scala 2.11
-    def uncurry[A, B, C](g: URIO[A, URIO[B, C]]): URIO[(A, B), C] =
-      URIO.accessM[(A, B)] { case (a, b) => g.provide(a).flatMap(_.provide(b)) }
+  implicit val URIOApplicationCompose: BothCompose[URIO] = new BothCompose[URIO] {
 
     type :*:[+f, +s] = Tuple2[f, s]
 
