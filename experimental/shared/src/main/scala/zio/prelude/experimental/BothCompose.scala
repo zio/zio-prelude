@@ -1,7 +1,6 @@
 package zio.prelude
 package experimental
 
-import com.github.ghik.silencer.silent
 import zio.URIO
 
 trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
