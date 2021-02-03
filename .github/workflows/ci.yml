@@ -51,9 +51,23 @@ jobs:
         if: ${{ matrix.scala == '3.0.0-M3' && matrix.platform == 'JVM' }}
         run: sbt ++${{ matrix.scala }}! testJVM
 
+  buildWebsite:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+      - name: Setup Scala and Java
+        uses: olafurpg/setup-scala@v10
+      - name: Cache scala dependencies
+        uses: coursier/cache-action@v5
+      - name: Build Website
+        run: sbt docs/docusaurusCreateSite
+
   publish:
     runs-on: ubuntu-20.04
-    needs: [lint, test]
+    needs: [lint, test, buildWebsite]
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout current branch
