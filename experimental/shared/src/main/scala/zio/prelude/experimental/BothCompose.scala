@@ -1,6 +1,7 @@
 package zio.prelude
 package experimental
 
+import com.github.ghik.silencer.silent
 import zio.URIO
 
 trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
@@ -69,6 +70,7 @@ object BothCompose {
     def curry[A, B, C](f: URIO[(A, B), C]): URIO[A, URIO[B, C]] =
       URIO.access[A](a => URIO.accessM[B](b => f.provide((a, b))))
 
+    @silent("a type was inferred to be `Any`; this may indicate a programming error") // because of Scala 2.11
     def uncurry[A, B, C](g: URIO[A, URIO[B, C]]): URIO[(A, B), C] =
       URIO.accessM[(A, B)] { case (a, b) => g.provide(a).flatMap(_.provide(b)) }
 
