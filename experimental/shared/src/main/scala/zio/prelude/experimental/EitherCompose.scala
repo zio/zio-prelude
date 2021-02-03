@@ -56,10 +56,7 @@ object EitherCompose {
     def toRight[B]: URIO[B, Either[Nothing, B]] = URIO.access(Right(_))
 
     def fromEither[A, B, C](a2c: => URIO[A, C])(b2c: => URIO[B, C]): URIO[Either[A, B], C] =
-      URIO.accessM[Either[A, B]] {
-        case Left(a)  => a2c.provide(a)
-        case Right(b) => b2c.provide(b)
-      }
+      a2c ||| b2c
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
       AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
