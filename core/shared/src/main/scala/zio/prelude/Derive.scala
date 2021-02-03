@@ -80,7 +80,7 @@ object Derive {
   implicit def MapDeriveEqual[A]: DeriveEqual[({ type lambda[+x] = Map[A, x] })#lambda] =
     new DeriveEqual[({ type lambda[+x] = Map[A, x] })#lambda] {
       def derive[B: Equal]: Equal[Map[A, B]] =
-        Equal.MapEqual
+        Equal.MapPartialOrd
     }
 
   /**

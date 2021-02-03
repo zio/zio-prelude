@@ -213,7 +213,7 @@ object Hash extends Lawful[Hash] {
    * Scala's `Map`, this uses object equality and hash code on the keys.
    */
   implicit def MapHash[A, B: Hash]: Hash[Map[A, B]] =
-    makeFrom(_.transform((_, v) => v.hash).hashCode, Equal.MapEqual)
+    makeFrom(_.transform((_, v) => v.hash).hashCode, Equal.MapPartialOrd)
 
   /**
    * Derives a `Hash[NonEmptyChunk[A]]` given a `Hash[A]`.

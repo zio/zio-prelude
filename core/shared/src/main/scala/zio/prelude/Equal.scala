@@ -336,14 +336,18 @@ object Equal extends Lawful[Equal] {
     HashOrd.default
 
   /**
-   * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations
-   * of Scala's `Map`, this uses object equality and hash code on the keys.
+   * Derives a `PartialOrd[Map[A, B]]` (and thus `Equal[Map[A, B]]`) given an `Equal[B]`.
+   * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def MapEqual[A, B: Equal]: Equal[Map[A, B]] =
-    make { (map1, map2) =>
-      map1.size === map2.size &&
-      map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
-    }
+  implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] = new PartialOrd[Map[A, B]] {
+
+    protected def checkCompare(l: Map[A, B], r: Map[A, B]): PartialOrdering =
+      l.compareStrict(r)
+
+    override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
+      l.size === r.size &&
+        l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
+  }
 
   /**
    * Derives an `Equal[NonEmptyChunk[A]]` given an `Equal[A]`.
