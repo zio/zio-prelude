@@ -17,6 +17,8 @@
 package zio.prelude
 package experimental
 
+import zio.URIO
+
 trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
 
   type :*:[+_, +_]
@@ -73,6 +75,22 @@ object BothCompose {
     }
 
   }
+
+  implicit val URIOApplicationCompose: BothCompose[URIO] = new BothCompose[URIO] {
+
+    type :*:[+f, +s] = Tuple2[f, s]
+
+    def fromFirst[A]: URIO[(A, Any), A] = URIO.access[(A, Any)](_._1)
+
+    def fromSecond[B]: URIO[(Any, B), B] = URIO.access[(Any, B)](_._2)
+
+    def toBoth[A, B, C](a2b: URIO[A, B])(a2c: URIO[A, C]): URIO[A, (B, C)] =
+      a2b &&& a2c
+
+    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
+      AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
+  }
+
 }
 
 trait BothComposeSyntax {
