@@ -31,7 +31,7 @@ object AssociativeCompose {
   implicit val URIOIdentityCompose: IdentityCompose[URIO] = new IdentityCompose[URIO] {
     def identity[A]: URIO[A, A] = URIO.environment
 
-    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab.flatMap(bc.provide)
+    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab >>> bc
   }
 }
 
