@@ -1,6 +1,8 @@
 package zio.prelude
 package experimental
 
+import zio.URIO
+
 trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
 
   type :*:[+_, +_]
@@ -57,6 +59,32 @@ object BothCompose {
     }
 
   }
+
+  implicit val URIOApplicationCompose: ApplicationCompose[URIO] = new ApplicationCompose[URIO] {
+
+    type -->:[-t, +r] = URIO[t, r]
+
+    def application[A, B]: URIO[(URIO[A, B], A), B] = URIO.accessM[(URIO[A, B], A)] { case (a2b, a) => a2b.provide(a) }
+
+    def curry[A, B, C](f: URIO[(A, B), C]): URIO[A, URIO[B, C]] =
+      URIO.access[A](a => URIO.accessM[B](b => f.provide((a, b))))
+
+    def uncurry[A, B, C](g: URIO[A, URIO[B, C]]): URIO[(A, B), C] =
+      URIO.accessM[(A, B)] { case (a, b) => g.provide(a).flatMap(_.provide(b)) }
+
+    type :*:[+f, +s] = Tuple2[f, s]
+
+    def fromFirst[A]: URIO[(A, Any), A] = URIO.access[(A, Any)](_._1)
+
+    def fromSecond[B]: URIO[(Any, B), B] = URIO.access[(Any, B)](_._2)
+
+    def toBoth[A, B, C](a2b: URIO[A, B])(a2c: URIO[A, C]): URIO[A, (B, C)] =
+      URIO.accessM[A](a2b.zip(a2c).provide)
+
+    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
+      AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
+  }
+
 }
 
 trait BothComposeSyntax {

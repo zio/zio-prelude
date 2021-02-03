@@ -379,6 +379,7 @@ classDiagram
   }
   class IdentityCompose~=>:[-_, +_]~{
     Function[-*, +*]
+    URIO[-*, +*]
 
     () identity[A]: A =>: A
   }
@@ -391,6 +392,7 @@ classDiagram
   }
   class ApplicationCompose~=>:[-_, +_]~{
     Function[-*, +*] [ :*: = Tuple2 ; -->: = Function ]
+    URIO[-*, +*] [ :*: = Tuple2 ; -->: = URIO ]
     
     (type) -->:[-_, +_]
     () application[A, B]: ((A -->: B) :*: A) =>: B
@@ -399,6 +401,7 @@ classDiagram
   }
   class EitherCompose~=>:[-_, +_]~{
     Function[-*, +*] [ :+: = Either ]
+    URIO[-*, +*] [ :+: = Either ]
     
     (type) :+:[+_, +_]
     () toLeft[A]: A =>: (A :+: Nothing)
@@ -409,8 +412,8 @@ classDiagram
 
 </details>
 
-[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/104252274-f5fd7c00-5471-11eb-97ea-7941bdf4b243.png
-[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX49PjpbLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfj0-OlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA9PjogQywgQSA9PjogQik6IEEgPT46IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBID0-OiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-PT46Wy1fLCArX11-e1xuICBcbiAgICAodHlwZSkgOio6WytfLCArX11cbiAgICAoKSBmcm9tRmlyc3RbQV06IChBIDoqOiBBbnkpID0-OiBBXG4gICAgKCkgZnJvbVNlY29uZFtCXTogKEFueSA6KjogQikgPT46IEJcbiAgICAoKSB0b0JvdGhbQSwgQiwgQ10oQSA9PjogQikoQSA9PjogQyk6IEEgPT46IChCIDoqOiBDKVxuICB9XG4gIGNsYXNzIEFwcGxpY2F0aW9uQ29tcG9zZX49PjpbLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDoqOiA9IFR1cGxlMiA7IC0tPjogPSBGdW5jdGlvbiBdXG4gICAgXG4gICAgKHR5cGUpIC0tPjpbLV8sICtfXVxuICAgICgpIGFwcGxpY2F0aW9uW0EsIEJdOiAoKEEgLS0-OiBCKSA6KjogQSkgPT46IEJcbiAgICAoKSBjdXJyeVtBLCBCLCBDXSgoQSA6KjogQikgPT46IEMpOiBBID0-OiAoQiAtLT46IEMpXG4gICAgKCkgdW5jdXJyeVtBLCBCLCBDXShBID0-OiAoQiAtLT46IEMpKTogKEEgOio6IEIpID0-OiBDXG4gIH1cbiAgY2xhc3MgRWl0aGVyQ29tcG9zZX49PjpbLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDorOiA9IEVpdGhlciBdXG4gICAgXG4gICAgKHR5cGUpIDorOlsrXywgK19dXG4gICAgKCkgdG9MZWZ0W0FdOiBBID0-OiAoQSA6KzogTm90aGluZylcbiAgICAoKSB0b1JpZ2h0W0JdOiBCID0-OiAoTm90aGluZyA6KzogQilcbiAgICAoKSBmcm9tRWl0aGVyW0EsIEIsIENdKD0-IEEgPT46IEMpKD0-IEIgPT46IEMpOiAoQSA6KzogQikgPT46IENcbiAgfVxuIiwibWVybWFpZCI6e30sInVwZGF0ZUVkaXRvciI6ZmFsc2V9
+[AssociativeCompose-image]: https://user-images.githubusercontent.com/9019485/106679949-ee874980-65bd-11eb-85e7-b33d555bb7b8.png
+[AssociativeCompose-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX49PjpbLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfj0-OlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA9PjogQywgQSA9PjogQik6IEEgPT46IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cbiAgICBVUklPWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBID0-OiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-PT46Wy1fLCArX11-e1xuICBcbiAgICAodHlwZSkgOio6WytfLCArX11cbiAgICAoKSBmcm9tRmlyc3RbQV06IChBIDoqOiBBbnkpID0-OiBBXG4gICAgKCkgZnJvbVNlY29uZFtCXTogKEFueSA6KjogQikgPT46IEJcbiAgICAoKSB0b0JvdGhbQSwgQiwgQ10oQSA9PjogQikoQSA9PjogQyk6IEEgPT46IChCIDoqOiBDKVxuICB9XG4gIGNsYXNzIEFwcGxpY2F0aW9uQ29tcG9zZX49PjpbLV8sICtfXX57XG4gICAgRnVuY3Rpb25bLSosICsqXSBbIDoqOiA9IFR1cGxlMiA7IC0tPjogPSBGdW5jdGlvbiBdXG4gICAgVVJJT1stKiwgKypdIFsgOio6ID0gVHVwbGUyIDsgLS0-OiA9IFVSSU8gXVxuICAgIFxuICAgICh0eXBlKSAtLT46Wy1fLCArX11cbiAgICAoKSBhcHBsaWNhdGlvbltBLCBCXTogKChBIC0tPjogQikgOio6IEEpID0-OiBCXG4gICAgKCkgY3VycnlbQSwgQiwgQ10oKEEgOio6IEIpID0-OiBDKTogQSA9PjogKEIgLS0-OiBDKVxuICAgICgpIHVuY3VycnlbQSwgQiwgQ10oQSA9PjogKEIgLS0-OiBDKSk6IChBIDoqOiBCKSA9PjogQ1xuICB9XG4gIGNsYXNzIEVpdGhlckNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl0gWyA6KzogPSBFaXRoZXIgXVxuICAgIFVSSU9bLSosICsqXSBbIDorOiA9IEVpdGhlciBdXG4gICAgXG4gICAgKHR5cGUpIDorOlsrXywgK19dXG4gICAgKCkgdG9MZWZ0W0FdOiBBID0-OiAoQSA6KzogTm90aGluZylcbiAgICAoKSB0b1JpZ2h0W0JdOiBCID0-OiAoTm90aGluZyA6KzogQilcbiAgICAoKSBmcm9tRWl0aGVyW0EsIEIsIENdKD0-IEEgPT46IEMpKD0-IEIgPT46IEMpOiAoQSA6KzogQikgPT46IENcbiAgfSIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2V9
 
 
 # AssociativeFlatten
