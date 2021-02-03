@@ -64,6 +64,8 @@ jobs:
         uses: olafurpg/setup-scala@v10
       - name: Cache scala dependencies
         uses: coursier/cache-action@v5
+      - name: Use correct gpg
+        uses: olafurpg/setup-gpg@v3
       - name: Release artifacts
         run: sbt ci-release
         env:
