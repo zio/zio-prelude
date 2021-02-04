@@ -307,7 +307,7 @@ classDiagram
 
 # Equal
 
-[![Equal hierarchy](https://user-images.githubusercontent.com/9019485/106370265-a0254100-6358-11eb-8156-871997509d49.png)][Equal-link]
+[![Equal hierarchy](https://user-images.githubusercontent.com/9019485/106907943-1500ce00-66ff-11eb-9049-081cd63e180d.png)][Equal-link]
 
 <details><summary>Mermaid</summary>
 
