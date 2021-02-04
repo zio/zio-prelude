@@ -396,10 +396,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     catchAll(e => fail(f(e)))
 
   /**
-    * Returns a computation with its full cause of failure mapped using the
-    * specified function. This can be users to transform errors while
-    * preserving the original structure of the `Cause`.
-    */
+   * Returns a computation with its full cause of failure mapped using the
+   * specified function. This can be users to transform errors while
+   * preserving the original structure of the `Cause`.
+   */
   final def mapErrorCause[E2](f: Cause[E] => Cause[E2]): ZPure[W, S1, S2, R, E2, A] =
     foldCauseM(cause => ZPure.halt(f(cause)), ZPure.succeed)
 
