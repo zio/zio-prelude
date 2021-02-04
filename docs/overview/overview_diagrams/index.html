@@ -1,11 +1,324 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Type Class diagrams · ZIO Prelude</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Equal"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Type Class diagrams · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="# Equal"/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Type Class diagrams · ZIO Prelude</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Associative"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Type Class diagrams · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="# Associative"/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
         document.addEventListener('DOMContentLoaded', function() {
           addBackToTop(
             {"zIndex":100,"cornerOffset":100}
           )
         });
-        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="api/index.html" target="_self">API</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Type Class diagrams</h1></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="equal"></a><a href="#equal" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Equal</h1>
-<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEVxdWFsfi1BfiA8fC0tIEhhc2h-LUF-XG4gIEVxdWFsfi1BfiA8fC0tIFBhcnRpYWxPcmR-LUF-XG4gIFBhcnRpYWxPcmR-LUF-IDx8LS0gT3Jkfi1BflxuICBjbGFzcyBFcXVhbH5BfntcbiAgICBDaHVua1tBOiBFcXVhbF1cbiAgICBFaXRoZXJbQTogRXF1YWwsIEI6IEVxdWFsXVxuICAgIEV4aXRbRTogRXF1YWwsIEE6IEVxdWFsXVxuICAgIEZbQTogRXF1YWxdOiBEZXJpdmVFcXVhbFtfXVxuICAgIExpc3RbQTogRXF1YWxdXG4gICAgTm9uRW1wdHlDaHVua1tBOiBFcXVhbF1cbiAgICBOb25FbXB0eUxpc3RbQTogRXF1YWxdXG4gICAgT3B0aW9uW0E6IEVxdWFsXVxuICAgIFRoZXNlW0E6IEVxdWFsLCBCOiBFcXVhbF1cbiAgICBUcnlbQTogRXF1YWxdXG4gICAg4p2oVDE6IEVxdWFsLCAuLi4sIFQyMjogRXF1YWzinalcbiAgICBWYWxpZGF0aW9uW0UsIEE6IEVxdWFsXVxuICAgIFZlY3RvcltBOiBFcXVhbF1cbiAgICBaTm9uRW1wdHlTZXRbQSwgQjogRXF1YWxdXG4gICAgWlNldFtBLCBCOiBFcXVhbF1cblxuICAgICgpIGJvdGhbQl0oPT4gRXF1YWxbQl0pOiBFcXVhbFsoQSwgQildXG4gICAgKCkgYm90aFdpdGhbQiwgQ10oPT4gRXF1YWxbQl0pKEMgPT4gKEEsIEIpKTogRXF1YWxbQ11cbiAgICAoKSBjb250cmFtYXBbQl0oQiA9PiBBKTogRXF1YWxbQl1cbiAgICAoKSBlaXRoZXJbQl0oPT4gRXF1YWxbQl0pOiBFcXVhbFtFaXRoZXJbQSwgQl1dXG4gICAgKCkgZWl0aGVyV2l0aFtCLCBDXSg9PiBFcXVhbFtCXSkoQyA9PiBFaXRoZXJbQSwgQl0pOiBFcXVhbFtDXVxuICAgICgpIGVxdWFsKEEsIEEpOiBCb29sZWFuXG4gICAgKCkgbm90RXF1YWwoQSwgQSk6IEJvb2xlYW5cbiAgICAoKSB0b1NjYWxhW0ExIDw6IEFdOiBzY2FsYS5tYXRoLkVxdWl2W0ExXVxuICB9XG4gIGNsYXNzIEhhc2h-LUF-IHtcbiAgICBCb29sZWFuXG4gICAgQnl0ZVxuICAgIENhdXNlW0FdXG4gICAgQ2hhclxuICAgIENodW5rW0E6IEhhc2hdXG4gICAgQ2xhc3NbX11cbiAgICBEb3VibGVcbiAgICBFaXRoZXJbQTogSGFzaCwgQjogSGFzaF1cbiAgICBGW0E6IEhhc2hdOiBEZXJpdmVbXywgSGFzaF1cbiAgICBGaWJlci5JZFxuICAgIEZsb2F0XG4gICAgSW50XG4gICAgTGlzdFtBOiBIYXNoXVxuICAgIExvbmdcbiAgICBNYXBbQSwgQjogSGFzaF1cbiAgICBOb25FbXB0eUNodW5rW0E6IEhhc2hdXG4gICAgTm9uRW1wdHlMaXN0W0E6IEhhc2hdXG4gICAgTm9uRW1wdHlTZXRbQV1cbiAgICBOb3RoaW5nXG4gICAgT3B0aW9uW0E6IEhhc2hdXG4gICAgT3JkZXJpbmdcbiAgICBQYXJ0aWFsT3JkZXJpbmdcbiAgICBTZXRbQV1cbiAgICBTaG9ydFxuICAgIFN0cmluZ1xuICAgIFRoZXNlW0E6IEhhc2gsIEI6IEhhc2hdXG4gICAg4p2oVDE6IEhhc2gsIC4uLiwgVDIyOiBIYXNo4p2pXG4gICAgVW5pdFxuICAgIFZhbGlkYXRpb25bRTogSGFzaCwgQTogSGFzaF1cbiAgICBWZWN0b3JbQTogSGFzaF1cbiAgICBaTm9uRW1wdHlTZXRbQSwgQjogSGFzaF1cbiAgICBaU2V0W0EsIEI6IEhhc2hdXG4gICAgWlRyYWNlXG5cbiAgICAoKSBib3RoW0JdKEhhc2hbQl0pOiBIYXNoWyhBLCBCKV1cbiAgICAoKSBib3RoV2l0aFtCLCBDXShIYXNoW0JdKShDID0-IChBLCBCKSk6IEhhc2hbQ11cbiAgICAoKSBjb250cmFtYXBbQl0oQiA9PiBBKTogSGFzaFtCXVxuICAgICgpIGVpdGhlcltCXShIYXNoW0JdKTogSGFzaFtFaXRoZXJbQSwgQl1dXG4gICAgKCkgZWl0aGVyV2l0aFtCLCBDXShIYXNoW0JdKShDID0-IEVpdGhlcltBLCBCXSk6IEhhc2hbQ11cbiAgICAoKSBoYXNoKEEpOiBJbnRcbiAgfVxuICBjbGFzcyBQYXJ0aWFsT3Jkfi1BfiB7XG4gICAgQ2h1bmtbQTogUGFydGlhbE9yZF1cbiAgICBFaXRoZXJbQTogUGFydGlhbE9yZCwgQjogUGFydGlhbE9yZF1cbiAgICBGW0E6IFBhcnRpYWxPcmRdOiBEZXJpdmVbXywgUGFydGlhbE9yZF1cbiAgICBMaXN0W0E6IFBhcnRpYWxPcmRdXG4gICAgTWFwW0EsIEI6IEVxdWFsXVxuICAgIE5vbkVtcHR5Q2h1bmtbQTogUGFydGlhbE9yZF1cbiAgICBOb25FbXB0eUxpc3RbQTogUGFydGlhbE9yZF1cbiAgICBOb25FbXB0eVNldFtBXVxuICAgIE9wdGlvbltBOiBQYXJ0aWFsT3JkXVxuICAgIFBhcnRpYWxPcmRlcmluZ1xuICAgIFNldFtBXVxuICAgIOKdqFQxOiBQYXJ0aWFsT3JkLCAuLi4sIFQyMjogUGFydGlhbE9yZOKdqVxuICAgIFZlY3RvcltBOiBQYXJ0aWFsT3JkXVxuICAgIFpOb25FbXB0eVNldFtBLCBCOiBQYXJ0aWFsT3JkXVxuICAgIFpTZXRbQSwgQjogUGFydGlhbE9yZF1cblxuICAgICgpIGJvdGhbQl0oPT4gUGFydGlhbE9yZFtCXSk6IFBhcnRpYWxPcmRbKEEsIEIpXVxuICAgICgpIGJvdGhXaXRoW0IsIENdKD0-IFBhcnRpYWxPcmRbQl0pKEMgPT4gKEEsIEIpKTogUGFydGlhbE9yZFtDXVxuICAgICgpIGNvbXBhcmUoQSwgQSk6IFBhcnRpYWxPcmRlcmluZ1xuICAgICgpIGNvbnRyYW1hcFtCXShCID0-IEEpOiBQYXJ0aWFsT3JkW0JdXG4gICAgKCkgZWl0aGVyW0JdKD0-IFBhcnRpYWxPcmRbQl0pOiBQYXJ0aWFsT3JkW0VpdGhlcltBLCBCXV1cbiAgICAoKSBlaXRoZXJXaXRoW0IsIENdKD0-IFBhcnRpYWxPcmRbQl0pKEMgPT4gRWl0aGVyW0EsIEJdKTogUGFydGlhbE9yZFtDXVxuICAgICgpIG1hcFBhcnRpYWxPcmRlcmluZyhQYXJ0aWFsT3JkZXJpbmcgPT4gUGFydGlhbE9yZGVyaW5nKTogUGFydGlhbE9yZFtBXVxuXG4gIH1cbiAgY2xhc3MgT3Jkfi1BfiB7XG4gICAgQm9vbGVhblxuICAgIEJ5dGVcbiAgICBDaGFyXG4gICAgQ2h1bmtbQTogT3JkXVxuICAgIERvdWJsZVxuICAgIEVpdGhlcltBOiBPcmQsIEI6IE9yZF1cbiAgICBGW0E6IE9yZF06IERlcml2ZVtfLCBPcmRdXG4gICAgRmliZXIuSWRcbiAgICBGbG9hdFxuICAgIEludFxuICAgIExpc3RbQTogT3JkXVxuICAgIExvbmdcbiAgICBOb25FbXB0eUNodW5rW0E6IE9yZF1cbiAgICBOb25FbXB0eUxpc3RbQTogT3JkXVxuICAgIE5vdGhpbmdcbiAgICBPcHRpb25bQTogT3JkXVxuICAgIE9yZGVyaW5nXG4gICAgU2hvcnRcbiAgICBTdHJpbmdcbiAgICDinahUMTogT3JkLCAuLi4sIFQyMjogT3Jk4p2pXG4gICAgVW5pdFxuICAgIFZlY3RvcltBOiBPcmRdXG5cbiAgICAoKSBib3RoW0JdKD0-IE9yZFtCXSk6IE9yZFsoQSwgQildXG4gICAgKCkgYm90aFdpdGhbQiwgQ10oPT4gT3JkW0JdKShDID0-IChBLCBCKSk6IE9yZFtDXVxuICAgICgpIGNvbXBhcmUoQSwgQSk6IE9yZGVyaW5nXG4gICAgKCkgY29udHJhbWFwW0JdKEIgPT4gQSk6IE9yZFtCXVxuICAgICgpIGVpdGhlcltCXSg9PiBPcmRbQl0pOiBPcmRbRWl0aGVyW0EsIEJdXVxuICAgICgpIGVpdGhlcldpdGhbQiwgQ10oPT4gT3JkW0JdKShDID0-IEVpdGhlcltBLCBCXSk6IE9yZFtDXVxuICAgICgpIG1hcE9yZGVyaW5nKE9yZGVyaW5nID0-IE9yZGVyaW5nKTogT3JkW0FdXG4gICAgKCkgcmV2ZXJzZTogT3JkW0FdXG4gICAgKCkgdG9TY2FsYVtBMSA8OiBBXTogc2NhbGEubWF0aC5PcmRlcmluZ1tBMV1cbiAgfVxuIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjpmYWxzZX0">![Equal hierarchy][Equal-image]</a></p>
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="api/index.html" target="_self">API</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Overview</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/overview/overview_index">Contents</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/overview/overview_diagrams">Type Class diagrams</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Type Class diagrams</h1></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="associative"></a><a href="#associative" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Associative</h1>
+<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlfkF-IDx8LS0gQ29tbXV0YXRpdmV-QX5cbiAgQXNzb2NpYXRpdmV-QX4gPHwtLSBJZGVtcG90ZW50fkF-XG4gIEFzc29jaWF0aXZlfkF-IDx8LS0gSWRlbnRpdHl-QX5cbiAgSWRlbnRpdHl-QX4gPHwtLSBJbnZlcnNlfkF-XG4gIGNsYXNzIEFzc29jaWF0aXZlfkF-e1xuICAgIEVpdGhlcltFLCBBOiBBc3NvY2lhdGl2ZV1cbiAgICBGW0E6IEFzc29jaWF0aXZlXTogRGVyaXZlW18sIEFzc29jaWF0aXZlXVxuICAgIEZpcnN0W0FdXG4gICAgTGFzdFtBXVxuICAgIE5vbkVtcHR5Q2h1bmtbQV1cbiAgICBOb25FbXB0eUxpc3RbQV1cbiAgICBUaGVzZVtBOiBBc3NvY2lhdGl2ZSwgQjogQXNzb2NpYXRpdmVdXG4gICAg4p2oVDE6IEFzc29jaWF0aXZlLCAuLi4sIFQyMjogQXNzb2NpYXRpdmXinalcbiAgICBWYWxpZGF0aW9uW0UsIEE6IEFzc29jaWF0aXZlXVxuICAgIFpOb25FbXB0eVNldFtBLCBCOiBBc3NvY2lhdGl2ZV1cblxuICAgICgpIGNvbWJpbmUoPT4gQSwgPT4gQSk6IEFcbiAgfVxuICBjbGFzcyBDb21tdXRhdGl2ZX5BfntcbiAgICBBbmRcbiAgICBGW0E6IENvbW11dGF0aXZlXTogRGVyaXZlW18sIENvbW11dGF0aXZlXVxuICAgIEVpdGhlcltFOiBDb21tdXRhdGl2ZSwgQTogQ29tbXV0YXRpdmVdXG4gICAgT3JcbiAgICBNYXBbSywgVjogQ29tbXV0YXRpdmVdXG4gICAgTWF4W0E6IE9yZF1cbiAgICBNYXhbQm9vbGVhbl1cbiAgICBNYXhbQnl0ZS9DaGFyL0RvdWJsZS9GbG9hdC9JbnQvTG9uZy9TaG9ydF1cbiAgICBNaW5bQTogT3JkXVxuICAgIE1pbltCb29sZWFuXVxuICAgIE1pbltCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE5vbkVtcHR5U2V0W0FdXG4gICAgT3B0aW9uW0E6IENvbW11dGF0aXZlXVxuICAgIFByb2RbQm9vbGVhbl1cbiAgICBQcm9kW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAgU2V0W0FdXG4gICAgU3VtW0Jvb2xlYW5dXG4gICAgU3VtW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAgVGhlc2VbQTogQ29tbXV0YXRpdmUsIEI6IENvbW11dGF0aXZlXVxuICAgIOKdqFQxOiBDb21tdXRhdGl2ZSwgLi4uLCBUMjI6IENvbW11dGF0aXZl4p2pXG4gICAgVmFsaWRhdGlvbltFLCBBOiBDb21tdXRhdGl2ZV1cbiAgICBaU2V0W0EsIEI6IENvbW11dGF0aXZlXVxuICAgIFpOb25FbXB0eVNldFtBLCBCOiBDb21tdXRhdGl2ZV1cblxuICAgICgpIGNvbW11dGU6IENvbW11dGF0aXZlW0FdXG4gIH1cbiAgY2xhc3MgSWRlbXBvdGVudH5BfntcbiAgICBBbmRcbiAgICBGW0E6IElkZW1wb3RlbnRdOiBEZXJpdmVbXywgSWRlbXBvdGVudF1cbiAgICBPclxuICAgIE1hcFtLLCBWOiBJZGVtcG90ZW50XVxuICAgIE1heFtCb29sZWFuXVxuICAgIE1heFtCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE1pbltCb29sZWFuXVxuICAgIE1pbltCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE5vbkVtcHR5U2V0W0FdXG4gICAgT3B0aW9uW0E6IElkZW1wb3RlbnRdXG4gICAgUHJvZFtCb29sZWFuXVxuICAgIFNldFtBXVxuICAgIFN1bVtCb29sZWFuXVxuICAgIFRoZXNlW0E6IElkZW1wb3RlbnQsIEI6IElkZW1wb3RlbnRdXG4gICAg4p2oVDE6IElkZW1wb3RlbnQsIC4uLiwgVDIyOiBJZGVtcG90ZW504p2pXG4gICAgVmFsaWRhdGlvbltFLCBBOiBJZGVtcG90ZW50XVxuICAgIFpTZXRbQSwgQjogSWRlbXBvdGVudF1cbiAgICBaTm9uRW1wdHlTZXRbQSwgQjogSWRlbXBvdGVudF1cblxuICAgICgpIGNvbWJpbmVJZGVtcG90ZW50KD0-IEEsID0-IEEpKEVxdWFsW0FdKTogQVxuICAgICgpIGlkZW1wb3RlbnQoRXF1YWxbQV0pOiBJZGVtcG90ZW50W0FdXG4gIH1cbiAgY2xhc3MgSWRlbnRpdHl-QX57XG4gICAgRltBOiBJZGVudGl0eV06IERlcml2ZVtfLCBJZGVudGl0eV1cbiAgICBDaHVua1tBXVxuICAgIEVpdGhlcltFLCBBOiBJZGVudGl0eV1cbiAgICBMaXN0W0FdXG4gICAgTWFwW0ssIFY6IEFzc29jaWF0aXZlXVxuICAgIE1heFtCb29sZWFuXVxuICAgIE1heFtCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE1pbltCb29sZWFuXVxuICAgIE1pbltCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE9wdGlvbltBOiBBc3NvY2lhdGl2ZV1cbiAgICBQcm9kW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAgU3RyaW5nXG4gICAg4p2oVDE6IElkZW50aXR5LCAuLi4sIFQyMjogSWRlbnRpdHninalcbiAgICBWYWxpZGF0aW9uW0UsIEE6IElkZW50aXR5XVxuICAgIFZlY3RvcltBXVxuICAgIFpTZXRbQSwgQjogQXNzb2NpYXRpdmVdXG5cbiAgICAoKSBpZGVudGl0eTogQVxuICB9XG4gIGNsYXNzIEludmVyc2V-QX57XG4gICAgQW5kXG4gICAgRltBOiBJbnZlcnNlXTogRGVyaXZlW18sIEludmVyc2VdXG4gICAgT3JcbiAgICBQcm9kW0Jvb2xlYW5dXG4gICAgU2V0W0FdXG4gICAgU3VtW0Jvb2xlYW5dXG4gICAgU3VtW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAg4p2oVDE6IEludmVyc2UsIC4uLiwgVDIyOiBJbnZlcnNl4p2pXG5cbiAgICAoKSBpbnZlcnNlKD0-IEEsID0-IEEpOiBBXG4gIH1cbiIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0IiwidGhlbWVWYXJpYWJsZXMiOnsiYmFja2dyb3VuZCI6IndoaXRlIiwicHJpbWFyeUNvbG9yIjoiI0VDRUNGRiIsInNlY29uZGFyeUNvbG9yIjoiI2ZmZmZkZSIsInRlcnRpYXJ5Q29sb3IiOiJoc2woODAsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsInByaW1hcnlCb3JkZXJDb2xvciI6ImhzbCgyNDAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwic2Vjb25kYXJ5Qm9yZGVyQ29sb3IiOiJoc2woNjAsIDYwJSwgODMuNTI5NDExNzY0NyUpIiwidGVydGlhcnlCb3JkZXJDb2xvciI6ImhzbCg4MCwgNjAlLCA4Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5VGV4dENvbG9yIjoiIzEzMTMwMCIsInNlY29uZGFyeVRleHRDb2xvciI6IiMwMDAwMjEiLCJ0ZXJ0aWFyeVRleHRDb2xvciI6InJnYig5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSwgOS41MDAwMDAwMDAxKSIsImxpbmVDb2xvciI6IiMzMzMzMzMiLCJ0ZXh0Q29sb3IiOiIjMzMzIiwibWFpbkJrZyI6IiNFQ0VDRkYiLCJzZWNvbmRCa2ciOiIjZmZmZmRlIiwiYm9yZGVyMSI6IiM5MzcwREIiLCJib3JkZXIyIjoiI2FhYWEzMyIsImFycm93aGVhZENvbG9yIjoiIzMzMzMzMyIsImZvbnRGYW1pbHkiOiJcInRyZWJ1Y2hldCBtc1wiLCB2ZXJkYW5hLCBhcmlhbCIsImZvbnRTaXplIjoiMTZweCIsImxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJub2RlQmtnIjoiI0VDRUNGRiIsIm5vZGVCb3JkZXIiOiIjOTM3MERCIiwiY2x1c3RlckJrZyI6IiNmZmZmZGUiLCJjbHVzdGVyQm9yZGVyIjoiI2FhYWEzMyIsImRlZmF1bHRMaW5rQ29sb3IiOiIjMzMzMzMzIiwidGl0bGVDb2xvciI6IiMzMzMiLCJlZGdlTGFiZWxCYWNrZ3JvdW5kIjoiI2U4ZThlOCIsImFjdG9yQm9yZGVyIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwiYWN0b3JCa2ciOiIjRUNFQ0ZGIiwiYWN0b3JUZXh0Q29sb3IiOiJibGFjayIsImFjdG9yTGluZUNvbG9yIjoiZ3JleSIsInNpZ25hbENvbG9yIjoiIzMzMyIsInNpZ25hbFRleHRDb2xvciI6IiMzMzMiLCJsYWJlbEJveEJrZ0NvbG9yIjoiI0VDRUNGRiIsImxhYmVsQm94Qm9yZGVyQ29sb3IiOiJoc2woMjU5LjYyNjE2ODIyNDMsIDU5Ljc3NjUzNjMxMjglLCA4Ny45MDE5NjA3ODQzJSkiLCJsYWJlbFRleHRDb2xvciI6ImJsYWNrIiwibG9vcFRleHRDb2xvciI6ImJsYWNrIiwibm90ZUJvcmRlckNvbG9yIjoiI2FhYWEzMyIsIm5vdGVCa2dDb2xvciI6IiNmZmY1YWQiLCJub3RlVGV4dENvbG9yIjoiYmxhY2siLCJhY3RpdmF0aW9uQm9yZGVyQ29sb3IiOiIjNjY2IiwiYWN0aXZhdGlvbkJrZ0NvbG9yIjoiI2Y0ZjRmNCIsInNlcXVlbmNlTnVtYmVyQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvciI6InJnYmEoMTAyLCAxMDIsIDI1NSwgMC40OSkiLCJhbHRTZWN0aW9uQmtnQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvcjIiOiIjZmZmNDAwIiwidGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsInRhc2tCa2dDb2xvciI6IiM4YTkwZGQiLCJ0YXNrVGV4dExpZ2h0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0RGFya0NvbG9yIjoiYmxhY2siLCJ0YXNrVGV4dE91dHNpZGVDb2xvciI6ImJsYWNrIiwidGFza1RleHRDbGlja2FibGVDb2xvciI6IiMwMDMxNjMiLCJhY3RpdmVUYXNrQm9yZGVyQ29sb3IiOiIjNTM0ZmJjIiwiYWN0aXZlVGFza0JrZ0NvbG9yIjoiI2JmYzdmZiIsImdyaWRDb2xvciI6ImxpZ2h0Z3JleSIsImRvbmVUYXNrQmtnQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JvcmRlckNvbG9yIjoiZ3JleSIsImNyaXRCb3JkZXJDb2xvciI6IiNmZjg4ODgiLCJjcml0QmtnQ29sb3IiOiJyZWQiLCJ0b2RheUxpbmVDb2xvciI6InJlZCIsImxhYmVsQ29sb3IiOiJibGFjayIsImVycm9yQmtnQ29sb3IiOiIjNTUyMjIyIiwiZXJyb3JUZXh0Q29sb3IiOiIjNTUyMjIyIiwiY2xhc3NUZXh0IjoiIzEzMTMwMCIsImZpbGxUeXBlMCI6IiNFQ0VDRkYiLCJmaWxsVHlwZTEiOiIjZmZmZmRlIiwiZmlsbFR5cGUyIjoiaHNsKDMwNCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGUzIjoiaHNsKDEyNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU0IjoiaHNsKDE3NiwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU1IjoiaHNsKC00LCAxMDAlLCA5My41Mjk0MTE3NjQ3JSkiLCJmaWxsVHlwZTYiOiJoc2woOCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU3IjoiaHNsKDE4OCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIn19fQ"><img src="https://user-images.githubusercontent.com/9019485/95663942-b312cc00-0b43-11eb-984d-b48acdb13738.png" alt="Associative hierarchy"></a></p>
+<p><details><summary>Mermaid</summary></p>
+<pre><code class="hljs css language-mermaid">classDiagram
+  Associative~A~ &lt;|-- Commutative~A~
+  Associative~A~ &lt;|-- Idempotent~A~
+  Associative~A~ &lt;|-- Identity~A~
+  Identity~A~ &lt;|-- Inverse~A~
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Associative</span>~<span class="hljs-title">A</span>~</span>{
+    Either[E, A: Associative]
+    F[A: Associative]: Derive[_, Associative]
+    First[A]
+    Last[A]
+    NonEmptyChunk[A]
+    NonEmptyList[A]
+    These[A: Associative, B: Associative]
+    ❨T1: Associative, ..., T22: Associative❩
+    Validation[E, A: Associative]
+    ZNonEmptySet[A, B: Associative]
+
+    () combine(=&gt; A, =&gt; A): A
+  }
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Commutative</span>~<span class="hljs-title">A</span>~</span>{
+    And
+    F[A: Commutative]: Derive[_, Commutative]
+    Either[E: Commutative, A: Commutative]
+    Or
+    Map[K, V: Commutative]
+    Max[A: Ord]
+    Max[<span class="hljs-built_in">Boolean</span>]
+    Max[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    Min[A: Ord]
+    Min[<span class="hljs-built_in">Boolean</span>]
+    Min[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    NonEmptySet[A]
+    Option[A: Commutative]
+    Prod[<span class="hljs-built_in">Boolean</span>]
+    Prod[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    Set[A]
+    Sum[<span class="hljs-built_in">Boolean</span>]
+    Sum[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    These[A: Commutative, B: Commutative]
+    ❨T1: Commutative, ..., T22: Commutative❩
+    Validation[E, A: Commutative]
+    ZSet[A, B: Commutative]
+    ZNonEmptySet[A, B: Commutative]
+
+    () commute: Commutative[A]
+  }
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Idempotent</span>~<span class="hljs-title">A</span>~</span>{
+    And
+    F[A: Idempotent]: Derive[_, Idempotent]
+    Or
+    Map[K, V: Idempotent]
+    Max[<span class="hljs-built_in">Boolean</span>]
+    Max[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    Min[<span class="hljs-built_in">Boolean</span>]
+    Min[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    NonEmptySet[A]
+    Option[A: Idempotent]
+    Prod[<span class="hljs-built_in">Boolean</span>]
+    Set[A]
+    Sum[<span class="hljs-built_in">Boolean</span>]
+    These[A: Idempotent, B: Idempotent]
+    ❨T1: Idempotent, ..., T22: Idempotent❩
+    Validation[E, A: Idempotent]
+    ZSet[A, B: Idempotent]
+    ZNonEmptySet[A, B: Idempotent]
+
+    () combineIdempotent(=&gt; A, =&gt; A)(Equal[A]): A
+    () idempotent(Equal[A]): Idempotent[A]
+  }
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Identity</span>~<span class="hljs-title">A</span>~</span>{
+    F[A: Identity]: Derive[_, Identity]
+    Chunk[A]
+    Either[E, A: Identity]
+    List[A]
+    Map[K, V: Associative]
+    Max[<span class="hljs-built_in">Boolean</span>]
+    Max[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    Min[<span class="hljs-built_in">Boolean</span>]
+    Min[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    Option[A: Associative]
+    Prod[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    String
+    ❨T1: Identity, ..., T22: Identity❩
+    Validation[E, A: Identity]
+    Vector[A]
+    ZSet[A, B: Associative]
+
+    () identity: A
+  }
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Inverse</span>~<span class="hljs-title">A</span>~</span>{
+    And
+    F[A: Inverse]: Derive[_, Inverse]
+    Or
+    Prod[<span class="hljs-built_in">Boolean</span>]
+    Set[A]
+    Sum[<span class="hljs-built_in">Boolean</span>]
+    Sum[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
+    ❨T1: Inverse, ..., T22: Inverse❩
+
+    () inverse(=&gt; A, =&gt; A): A
+  }
+</code></pre>
+<p></details></p>
+<h1><a class="anchor" aria-hidden="true" id="associativeboth"></a><a href="#associativeboth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeBoth</h1>
+<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQm90aH5GPF8-fiA8fC0tIENvbW11dGF0aXZlQm90aH5GPF8-flxuICBBc3NvY2lhdGl2ZUJvdGh-RjxfPn4gPHwtLSBJZGVudGl0eUJvdGh-RjxfPn5cbiAgY2xhc3MgQXNzb2NpYXRpdmVCb3RofkY8Xz5-e1xuICAgIEZpYmVyW0UsICsqXVxuICAgIFNUTVtSLCBFLCArKl1cblxuICAgICgpIGJvdGhbQSxCXSg9PiBGW0FdLCA9PiBGW0JdKTogRlsoQSxCKV1cbiAgfVxuICBjbGFzcyBDb21tdXRhdGl2ZUJvdGh-RjxfPn57XG4gICAgQ2h1bmtbKypdXG4gICAgRXhpdFtFLCArKl1cbiAgICBJZFsrKl1cbiAgICBMaXN0WysqXVxuICAgIE5vbkVtcHR5Q2h1bmtbKypdXG4gICAgT3B0aW9uWysqXVxuICAgIEFuZEZbU2NoZWR1bGVbUiwgRSwgKypdXVxuICAgIE9yRltTY2hlZHVsZVtSLCBFLCArKl1dXG4gICAgVmVjdG9yWysqXVxuICAgIFpJT1tSLCBFLCArKl1cbiAgICBGYWlsdXJlW1pJT1tSLCBFLCArKl1dXG4gICAgWkxheWVyW1IsIEUsICsqXVxuICAgIFpNYW5hZ2VkW1IsIEUsICsqXVxuICAgIEZhaWx1cmVbWk1hbmFnZWRbUiwgRSwgKypdXVxuICAgIFpTaW5rW1IsIEUsIEksIEksICsqXVxuICAgIFpTdHJlYW1bUiwgRSwgKypdXG4gIH1cbiAgY2xhc3MgSWRlbnRpdHlCb3RofkY8Xz5-e1xuICAgIEVpdGhlcltMLCArKl1cbiAgICBGYWlsdXJlW0VpdGhlclsrKiwgUl1dXG4gICAgT3B0aW9uWysqXVxuICAgIEZ1dHVyZVsrKl1cbiAgICBJZFsrKl1cbiAgICBMaXN0WysqXVxuICAgIFRyeVsrKl1cbiBcbiAgICAoKSBhbnk6IEZbQW55XVxuICB9IiwibWVybWFpZCI6e30sInVwZGF0ZUVkaXRvciI6ZmFsc2V9"><img src="https://user-images.githubusercontent.com/9019485/106826973-47231900-6688-11eb-91e7-929f3b25dca6.png" alt="AssociativeBoth hierarchy"></a></p>
+<p><details><summary>Mermaid</summary></p>
+<pre><code class="hljs css language-mermaid">classDiagram
+  AssociativeBoth~F&lt;_&gt;~ &lt;|-- CommutativeBoth~F&lt;_&gt;~
+  AssociativeBoth~F&lt;_&gt;~ &lt;|-- IdentityBoth~F&lt;_&gt;~
+  class AssociativeBoth~F&lt;_&gt;~{
+    Fiber<span class="hljs-comment">[E, +*]</span>
+    STM<span class="hljs-comment">[R, E, +*]</span>
+
+    () both<span class="hljs-comment">[A,B]</span>(=&gt; F<span class="hljs-comment">[A]</span>, =&gt; F<span class="hljs-comment">[B]</span>): F<span class="hljs-comment">[(A,B)]</span>
+  }
+  class CommutativeBoth~F&lt;_&gt;~{
+    Chunk<span class="hljs-comment">[+*]</span>
+    Exit<span class="hljs-comment">[E, +*]</span>
+    Id<span class="hljs-comment">[+*]</span>
+    List<span class="hljs-comment">[+*]</span>
+    NonEmptyChunk<span class="hljs-comment">[+*]</span>
+    Option<span class="hljs-comment">[+*]</span>
+    AndF<span class="hljs-comment">[Schedule<span class="hljs-comment">[R, E, +*]</span>]</span>
+    OrF<span class="hljs-comment">[Schedule<span class="hljs-comment">[R, E, +*]</span>]</span>
+    Vector<span class="hljs-comment">[+*]</span>
+    ZIO<span class="hljs-comment">[R, E, +*]</span>
+    Failure<span class="hljs-comment">[ZIO<span class="hljs-comment">[R, E, +*]</span>]</span>
+    ZLayer<span class="hljs-comment">[R, E, +*]</span>
+    ZManaged<span class="hljs-comment">[R, E, +*]</span>
+    Failure<span class="hljs-comment">[ZManaged<span class="hljs-comment">[R, E, +*]</span>]</span>
+    ZSink<span class="hljs-comment">[R, E, I, I, +*]</span>
+    ZStream<span class="hljs-comment">[R, E, +*]</span>
+  }
+  class IdentityBoth~F&lt;_&gt;~{
+    Either<span class="hljs-comment">[L, +*]</span>
+    Failure<span class="hljs-comment">[Either<span class="hljs-comment">[+*, R]</span>]</span>
+    Option<span class="hljs-comment">[+*]</span>
+    Future<span class="hljs-comment">[+*]</span>
+    Id<span class="hljs-comment">[+*]</span>
+    List<span class="hljs-comment">[+*]</span>
+    Try<span class="hljs-comment">[+*]</span>
+ 
+    () any: F<span class="hljs-comment">[Any]</span>
+  }
+</code></pre>
+<p></details></p>
+<h1><a class="anchor" aria-hidden="true" id="associativecompose"></a><a href="#associativecompose" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeCompose</h1>
+<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX49PjpbLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfj0-OlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA9PjogQywgQSA9PjogQik6IEEgPT46IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cbiAgICBVUklPWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBID0-OiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIFVSSU9bLSosICsqXSBbIDoqOiA9IFR1cGxlMiBdXG4gIFxuICAgICh0eXBlKSA6KjpbK18sICtfXVxuICAgICgpIGZyb21GaXJzdFtBXTogKEEgOio6IEFueSkgPT46IEFcbiAgICAoKSBmcm9tU2Vjb25kW0JdOiAoQW55IDoqOiBCKSA9PjogQlxuICAgICgpIHRvQm90aFtBLCBCLCBDXShBID0-OiBCKShBID0-OiBDKTogQSA9PjogKEIgOio6IEMpXG4gIH1cbiAgY2xhc3MgQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dfntcbiAgICBGdW5jdGlvblstKiwgKypdIFsgOio6ID0gVHVwbGUyIDsgLS0-OiA9IEZ1bmN0aW9uIF1cbiAgICBcbiAgICAodHlwZSkgLS0-OlstXywgK19dXG4gICAgKCkgYXBwbGljYXRpb25bQSwgQl06ICgoQSAtLT46IEIpIDoqOiBBKSA9PjogQlxuICAgICgpIGN1cnJ5W0EsIEIsIENdKChBIDoqOiBCKSA9PjogQyk6IEEgPT46IChCIC0tPjogQylcbiAgICAoKSB1bmN1cnJ5W0EsIEIsIENdKEEgPT46IChCIC0tPjogQykpOiAoQSA6KjogQikgPT46IENcbiAgfVxuICBjbGFzcyBFaXRoZXJDb21wb3Nlfj0-OlstXywgK19dfntcbiAgICBGdW5jdGlvblstKiwgKypdIFsgOis6ID0gRWl0aGVyIF1cbiAgICBVUklPWy0qLCArKl0gWyA6KzogPSBFaXRoZXIgXVxuICAgIFxuICAgICh0eXBlKSA6KzpbK18sICtfXVxuICAgICgpIHRvTGVmdFtBXTogQSA9PjogKEEgOis6IE5vdGhpbmcpXG4gICAgKCkgdG9SaWdodFtCXTogQiA9PjogKE5vdGhpbmcgOis6IEIpXG4gICAgKCkgZnJvbUVpdGhlcltBLCBCLCBDXSg9PiBBID0-OiBDKSg9PiBCID0-OiBDKTogKEEgOis6IEIpID0-OiBDXG4gIH0iLCJtZXJtYWlkIjp7fSwidXBkYXRlRWRpdG9yIjpmYWxzZX0"><img src="https://user-images.githubusercontent.com/9019485/106813134-e50ae980-6670-11eb-9fca-abde850f87cf.png" alt="AssociativeCompose hierarchy"></a></p>
+<p><details><summary>Mermaid</summary></p>
+<pre><code class="hljs css language-mermaid"><span class="hljs-title">classDiagram</span>
+  <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~ &lt;|<span class="hljs-comment">-- IdentityCompose~=&gt;:[-_, +_]~</span>
+  <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~ &lt;|<span class="hljs-comment">-- BothCompose~=&gt;:[-_, +_]~</span>
+  <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~ &lt;|<span class="hljs-comment">-- EitherCompose~=&gt;:[-_, +_]~</span>
+  <span class="hljs-type">BothCompose</span> &lt;|<span class="hljs-comment">-- ApplicationCompose~=&gt;:[-_, +_]~</span>
+<span class="hljs-class">  <span class="hljs-keyword">class</span> <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~{
+    () compose[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](<span class="hljs-type">B</span> =&gt;: <span class="hljs-type">C</span>, <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">B</span>): <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">C</span>
+  }
+  <span class="hljs-keyword">class</span> <span class="hljs-type">IdentityCompose</span>~=&gt;:[-_, +_]~{
+    <span class="hljs-type">Function</span>[-*, +*]
+    <span class="hljs-type">URIO</span>[-*, +*]
+
+    () identity[<span class="hljs-type">A</span>]: <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">A</span>
+  }
+  <span class="hljs-keyword">class</span> <span class="hljs-type">BothCompose</span>~=&gt;:[-_, +_]~{
+    <span class="hljs-type">URIO</span>[-*, +*] [ :*: = <span class="hljs-type">Tuple2</span> ]
+  
+    (<span class="hljs-title">type</span>) :*:[+_, +_]
+    () fromFirst[<span class="hljs-type">A</span>]: (<span class="hljs-type">A</span> :*: <span class="hljs-type">Any</span>) =&gt;: <span class="hljs-type">A</span>
+    () fromSecond[<span class="hljs-type">B</span>]: (<span class="hljs-type">Any</span> :*: <span class="hljs-type">B</span>) =&gt;: <span class="hljs-type">B</span>
+    () toBoth[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](<span class="hljs-type">A</span> =&gt;: <span class="hljs-type">B</span>)(<span class="hljs-type">A</span> =&gt;: <span class="hljs-type">C</span>): <span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">B</span> :*: <span class="hljs-type">C</span>)
+  }
+  <span class="hljs-keyword">class</span> <span class="hljs-type">ApplicationCompose</span>~=&gt;:[-_, +_]~{
+    <span class="hljs-type">Function</span>[-*, +*] [ :*: = <span class="hljs-type">Tuple2</span> ; <span class="hljs-comment">--&gt;: = Function ]</span>
+    
+    (<span class="hljs-title">type</span>) <span class="hljs-comment">--&gt;:[-_, +_]</span>
+    () application[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]: ((<span class="hljs-type">A</span> <span class="hljs-comment">--&gt;: B) :*: A) =&gt;: B</span>
+    () curry[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>]((<span class="hljs-type">A</span> :*: <span class="hljs-type">B</span>) =&gt;: <span class="hljs-type">C</span>): <span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">B</span> <span class="hljs-comment">--&gt;: C)</span>
+    () uncurry[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](<span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">B</span> <span class="hljs-comment">--&gt;: C)): (A :*: B) =&gt;: C</span>
+  }
+  <span class="hljs-title">class</span> <span class="hljs-type">EitherCompose</span>~=&gt;:[-<span class="hljs-title">_</span>, +<span class="hljs-title">_</span>]~{
+    <span class="hljs-type">Function</span>[-*, +*] [ :+: = <span class="hljs-type">Either</span> ]
+    <span class="hljs-type">URIO</span>[-*, +*] [ :+: = <span class="hljs-type">Either</span> ]
+    
+    (<span class="hljs-title">type</span>) :+:[+_, +_]
+    () toLeft[<span class="hljs-type">A</span>]: <span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">A</span> :+: <span class="hljs-type">Nothing</span>)
+    () toRight[<span class="hljs-type">B</span>]: <span class="hljs-type">B</span> =&gt;: (<span class="hljs-type">Nothing</span> :+: <span class="hljs-type">B</span>)
+    () fromEither[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](=&gt; <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">C</span>)(=&gt; <span class="hljs-type">B</span> =&gt;: <span class="hljs-type">C</span>): (<span class="hljs-type">A</span> :+: <span class="hljs-type">B</span>) =&gt;: <span class="hljs-type">C</span>
+  }
+</span></code></pre>
+<p></details></p>
+<h1><a class="anchor" aria-hidden="true" id="associativeeither"></a><a href="#associativeeither" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeEither</h1>
+<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlRWl0aGVyfkY8Xz5-IDx8LS0gQ29tbXV0YXRpdmVFaXRoZXJ-RjxfPn5cbiAgQXNzb2NpYXRpdmVFaXRoZXJ-RjxfPn4gPHwtLSBJZGVudGl0eUVpdGhlcn5GPF8-flxuICBjbGFzcyBBc3NvY2lhdGl2ZUVpdGhlcn5GPF8-fntcbiAgICBFaXRoZXJbTCwgKypdXG4gICAgRXhpdFtFLCArKl1cbiAgICBGaWJlcltFLCArKl1cbiAgICBTY2hlZHVsZVtSLCBFLCArKl1cbiAgICBUcnlbKypdXG4gICAgWkxheWVyW1IsIEUsICsqXVxuICAgIFpNYW5hZ2VkW1IsIEUsICsqXVxuICAgIFxuICAgICgpIGVpdGhlcltBLCBCXSg9PiBGW0FdLCA9PiBGW0JdKTogRltFaXRoZXJbQSwgQl1dXG4gIH1cbiAgY2xhc3MgQ29tbXV0YXRpdmVFaXRoZXJ-RjxfPn57XG4gICAgRnV0dXJlWysqXVxuICAgIFpJT1tSLCBFLCArKl0gXG4gICAgWlNpbmtbUiwgRSwgSSwgTCwgKypdXG4gICAgWlN0cmVhbVtSLCBFLCArKl1cbiAgICBFcXVhbFstKl1cbiAgfVxuICBjbGFzcyBJZGVudGl0eUVpdGhlcn5GPF8-fntcbiAgICBPcHRpb25bKypdXG4gICAgRXF1YWxbLSpdXG4gICAgSGFzaFstKl1cbiAgICBPcmRbLSpdXG5cbiAgICAoKSBub25lOiBGW05vdGhpbmddXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCIsInRoZW1lVmFyaWFibGVzIjp7ImJhY2tncm91bmQiOiJ3aGl0ZSIsInByaW1hcnlDb2xvciI6IiNFQ0VDRkYiLCJzZWNvbmRhcnlDb2xvciI6IiNmZmZmZGUiLCJ0ZXJ0aWFyeUNvbG9yIjoiaHNsKDgwLCAxMDAlLCA5Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5Qm9yZGVyQ29sb3IiOiJoc2woMjQwLCA2MCUsIDg2LjI3NDUwOTgwMzklKSIsInNlY29uZGFyeUJvcmRlckNvbG9yIjoiaHNsKDYwLCA2MCUsIDgzLjUyOTQxMTc2NDclKSIsInRlcnRpYXJ5Qm9yZGVyQ29sb3IiOiJoc2woODAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwicHJpbWFyeVRleHRDb2xvciI6IiMxMzEzMDAiLCJzZWNvbmRhcnlUZXh0Q29sb3IiOiIjMDAwMDIxIiwidGVydGlhcnlUZXh0Q29sb3IiOiJyZ2IoOS41MDAwMDAwMDAxLCA5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSkiLCJsaW5lQ29sb3IiOiIjMzMzMzMzIiwidGV4dENvbG9yIjoiIzMzMyIsIm1haW5Ca2ciOiIjRUNFQ0ZGIiwic2Vjb25kQmtnIjoiI2ZmZmZkZSIsImJvcmRlcjEiOiIjOTM3MERCIiwiYm9yZGVyMiI6IiNhYWFhMzMiLCJhcnJvd2hlYWRDb2xvciI6IiMzMzMzMzMiLCJmb250RmFtaWx5IjoiXCJ0cmVidWNoZXQgbXNcIiwgdmVyZGFuYSwgYXJpYWwiLCJmb250U2l6ZSI6IjE2cHgiLCJsYWJlbEJhY2tncm91bmQiOiIjZThlOGU4Iiwibm9kZUJrZyI6IiNFQ0VDRkYiLCJub2RlQm9yZGVyIjoiIzkzNzBEQiIsImNsdXN0ZXJCa2ciOiIjZmZmZmRlIiwiY2x1c3RlckJvcmRlciI6IiNhYWFhMzMiLCJkZWZhdWx0TGlua0NvbG9yIjoiIzMzMzMzMyIsInRpdGxlQ29sb3IiOiIjMzMzIiwiZWRnZUxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJhY3RvckJvcmRlciI6ImhzbCgyNTkuNjI2MTY4MjI0MywgNTkuNzc2NTM2MzEyOCUsIDg3LjkwMTk2MDc4NDMlKSIsImFjdG9yQmtnIjoiI0VDRUNGRiIsImFjdG9yVGV4dENvbG9yIjoiYmxhY2siLCJhY3RvckxpbmVDb2xvciI6ImdyZXkiLCJzaWduYWxDb2xvciI6IiMzMzMiLCJzaWduYWxUZXh0Q29sb3IiOiIjMzMzIiwibGFiZWxCb3hCa2dDb2xvciI6IiNFQ0VDRkYiLCJsYWJlbEJveEJvcmRlckNvbG9yIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwibGFiZWxUZXh0Q29sb3IiOiJibGFjayIsImxvb3BUZXh0Q29sb3IiOiJibGFjayIsIm5vdGVCb3JkZXJDb2xvciI6IiNhYWFhMzMiLCJub3RlQmtnQ29sb3IiOiIjZmZmNWFkIiwibm90ZVRleHRDb2xvciI6ImJsYWNrIiwiYWN0aXZhdGlvbkJvcmRlckNvbG9yIjoiIzY2NiIsImFjdGl2YXRpb25Ca2dDb2xvciI6IiNmNGY0ZjQiLCJzZXF1ZW5jZU51bWJlckNvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IiOiJyZ2JhKDEwMiwgMTAyLCAyNTUsIDAuNDkpIiwiYWx0U2VjdGlvbkJrZ0NvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IyIjoiI2ZmZjQwMCIsInRhc2tCb3JkZXJDb2xvciI6IiM1MzRmYmMiLCJ0YXNrQmtnQ29sb3IiOiIjOGE5MGRkIiwidGFza1RleHRMaWdodENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dERhcmtDb2xvciI6ImJsYWNrIiwidGFza1RleHRPdXRzaWRlQ29sb3IiOiJibGFjayIsInRhc2tUZXh0Q2xpY2thYmxlQ29sb3IiOiIjMDAzMTYzIiwiYWN0aXZlVGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsImFjdGl2ZVRhc2tCa2dDb2xvciI6IiNiZmM3ZmYiLCJncmlkQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JrZ0NvbG9yIjoibGlnaHRncmV5IiwiZG9uZVRhc2tCb3JkZXJDb2xvciI6ImdyZXkiLCJjcml0Qm9yZGVyQ29sb3IiOiIjZmY4ODg4IiwiY3JpdEJrZ0NvbG9yIjoicmVkIiwidG9kYXlMaW5lQ29sb3IiOiJyZWQiLCJsYWJlbENvbG9yIjoiYmxhY2siLCJlcnJvckJrZ0NvbG9yIjoiIzU1MjIyMiIsImVycm9yVGV4dENvbG9yIjoiIzU1MjIyMiIsImNsYXNzVGV4dCI6IiMxMzEzMDAiLCJmaWxsVHlwZTAiOiIjRUNFQ0ZGIiwiZmlsbFR5cGUxIjoiI2ZmZmZkZSIsImZpbGxUeXBlMiI6ImhzbCgzMDQsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlMyI6ImhzbCgxMjQsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSIsImZpbGxUeXBlNCI6ImhzbCgxNzYsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNSI6ImhzbCgtNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU2IjoiaHNsKDgsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNyI6ImhzbCgxODgsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSJ9fSwidXBkYXRlRWRpdG9yIjpmYWxzZX0"><img src="https://user-images.githubusercontent.com/10689197/99921919-9699b000-2cfb-11eb-9323-4210eb72d2f1.png" alt="AssociativeCompose hierarchy"></a></p>
+<p><details><summary>Mermaid</summary></p>
+<pre><code class="hljs css language-mermaid">classDiagram
+  AssociativeEither~F&lt;_&gt;~ &lt;|-- CommutativeEither~F&lt;_&gt;~
+  AssociativeEither~F&lt;_&gt;~ &lt;|-- IdentityEither~F&lt;_&gt;~
+  class AssociativeEither~F&lt;_&gt;~{
+    Either<span class="hljs-comment">[L, +*]</span>
+    Exit<span class="hljs-comment">[E, +*]</span>
+    Fiber<span class="hljs-comment">[E, +*]</span>
+    Schedule<span class="hljs-comment">[R, E, +*]</span>
+    Try<span class="hljs-comment">[+*]</span>
+    ZLayer<span class="hljs-comment">[R, E, +*]</span>
+    ZManaged<span class="hljs-comment">[R, E, +*]</span>
+    
+    () either<span class="hljs-comment">[A, B]</span>(=&gt; F<span class="hljs-comment">[A]</span>, =&gt; F<span class="hljs-comment">[B]</span>): F<span class="hljs-comment">[Either<span class="hljs-comment">[A, B]</span>]</span>
+  }
+  class CommutativeEither~F&lt;_&gt;~{
+    Future<span class="hljs-comment">[+*]</span>
+    ZIO<span class="hljs-comment">[R, E, +*]</span> 
+    ZSink<span class="hljs-comment">[R, E, I, L, +*]</span>
+    ZStream<span class="hljs-comment">[R, E, +*]</span>
+    Equal<span class="hljs-comment">[-*]</span>
+  }
+  class IdentityEither~F&lt;_&gt;~{
+    Option<span class="hljs-comment">[+*]</span>
+    Equal<span class="hljs-comment">[-*]</span>
+    Hash<span class="hljs-comment">[-*]</span>
+    Ord<span class="hljs-comment">[-*]</span>
+
+    () none: F<span class="hljs-comment">[Nothing]</span>
+  }
+</code></pre>
+<p></details></p>
+<h1><a class="anchor" aria-hidden="true" id="associativeflatten"></a><a href="#associativeflatten" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeFlatten</h1>
+<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlRmxhdHRlbn5GPCtfPn4gPHwtLSBJZGVudGl0eUZsYXR0ZW5-RjxfPn5cbiAgY2xhc3MgQXNzb2NpYXRpdmVGbGF0dGVufkY8K18-fntcbiAgICBNYXBbSywgKypdXG4gICAgXG4gICAgKCkgZmxhdHRlbltBXShGW0ZbQV1dKTogRltBXVxuICB9XG4gIGNsYXNzIElkZW50aXR5RmxhdHRlbn5GPCtfPn57XG4gICAgQ2F1c2VbKypdXG4gICAgQ2h1bmtbKypdXG4gICAgRWl0aGVyW0wsICsqXVxuICAgIEV4aXRbRSwgKypdXG4gICAgRnV0dXJlWysqXVxuICAgIElkWysqXVxuICAgIExpc3RbKypdXG4gICAgTm9uRW1wdHlDaHVua1srKl1cbiAgICBPcHRpb25bKypdXG4gICAgVHJ5WysqXVxuICAgIFZlY3RvclsrKl1cbiAgICBaSU9bUiwgRSwgKypdXG4gICAgWk1hbmFnZWRbUiwgRSwgKypdXG4gICAgWlN0cmVhbVtSLCBFLCArKl1cblxuICAgICgpIGFueTogRltBbnldXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ"><img src="https://user-images.githubusercontent.com/9019485/104860805-3f940e00-592d-11eb-94dc-d139098ef86d.png" alt="AssociativeFlatten hierarchy"></a></p>
+<p><details><summary>Mermaid</summary></p>
+<pre><code class="hljs css language-mermaid">classDiagram
+  AssociativeFlatten~F&lt;+_&gt;~ &lt;|-- IdentityFlatten~F&lt;_&gt;~
+  class AssociativeFlatten~F&lt;+_&gt;~{
+    Map<span class="hljs-comment">[K, +*]</span>
+    
+    () flatten<span class="hljs-comment">[A]</span>(F<span class="hljs-comment">[F<span class="hljs-comment">[A]</span>]</span>): F<span class="hljs-comment">[A]</span>
+  }
+  class IdentityFlatten~F&lt;+_&gt;~{
+    Cause<span class="hljs-comment">[+*]</span>
+    Chunk<span class="hljs-comment">[+*]</span>
+    Either<span class="hljs-comment">[L, +*]</span>
+    Exit<span class="hljs-comment">[E, +*]</span>
+    Future<span class="hljs-comment">[+*]</span>
+    Id<span class="hljs-comment">[+*]</span>
+    List<span class="hljs-comment">[+*]</span>
+    NonEmptyChunk<span class="hljs-comment">[+*]</span>
+    Option<span class="hljs-comment">[+*]</span>
+    Try<span class="hljs-comment">[+*]</span>
+    Vector<span class="hljs-comment">[+*]</span>
+    ZIO<span class="hljs-comment">[R, E, +*]</span>
+    ZManaged<span class="hljs-comment">[R, E, +*]</span>
+    ZStream<span class="hljs-comment">[R, E, +*]</span>
+
+    () any: F<span class="hljs-comment">[Any]</span>
+  }
+</code></pre>
+<p></details></p>
+<h1><a class="anchor" aria-hidden="true" id="equal"></a><a href="#equal" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Equal</h1>
+<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEVxdWFsfi1BfiA8fC0tIEhhc2h-LUF-XG4gIEVxdWFsfi1BfiA8fC0tIFBhcnRpYWxPcmR-LUF-XG4gIFBhcnRpYWxPcmR-LUF-IDx8LS0gT3Jkfi1BflxuICBjbGFzcyBFcXVhbH5BfntcbiAgICBDaHVua1tBOiBFcXVhbF1cbiAgICBFaXRoZXJbQTogRXF1YWwsIEI6IEVxdWFsXVxuICAgIEV4aXRbRTogRXF1YWwsIEE6IEVxdWFsXVxuICAgIEZbQTogRXF1YWxdOiBEZXJpdmVFcXVhbFtfXVxuICAgIExpc3RbQTogRXF1YWxdXG4gICAgTm9uRW1wdHlDaHVua1tBOiBFcXVhbF1cbiAgICBOb25FbXB0eUxpc3RbQTogRXF1YWxdXG4gICAgT3B0aW9uW0E6IEVxdWFsXVxuICAgIFRoZXNlW0E6IEVxdWFsLCBCOiBFcXVhbF1cbiAgICBUcnlbQTogRXF1YWxdXG4gICAg4p2oVDE6IEVxdWFsLCAuLi4sIFQyMjogRXF1YWzinalcbiAgICBWYWxpZGF0aW9uW0UsIEE6IEVxdWFsXVxuICAgIFZlY3RvcltBOiBFcXVhbF1cbiAgICBaTm9uRW1wdHlTZXRbQSwgQjogRXF1YWxdXG4gICAgWlNldFtBLCBCOiBFcXVhbF1cblxuICAgICgpIGJvdGhbQl0oPT4gRXF1YWxbQl0pOiBFcXVhbFsoQSwgQildXG4gICAgKCkgYm90aFdpdGhbQiwgQ10oPT4gRXF1YWxbQl0pKEMgPT4gKEEsIEIpKTogRXF1YWxbQ11cbiAgICAoKSBjb250cmFtYXBbQl0oQiA9PiBBKTogRXF1YWxbQl1cbiAgICAoKSBlaXRoZXJbQl0oPT4gRXF1YWxbQl0pOiBFcXVhbFtFaXRoZXJbQSwgQl1dXG4gICAgKCkgZWl0aGVyV2l0aFtCLCBDXSg9PiBFcXVhbFtCXSkoQyA9PiBFaXRoZXJbQSwgQl0pOiBFcXVhbFtDXVxuICAgICgpIGVxdWFsKEEsIEEpOiBCb29sZWFuXG4gICAgKCkgbm90RXF1YWwoQSwgQSk6IEJvb2xlYW5cbiAgICAoKSB0b1NjYWxhW0ExIDw6IEFdOiBzY2FsYS5tYXRoLkVxdWl2W0ExXVxuICB9XG4gIGNsYXNzIEhhc2h-LUF-IHtcbiAgICBCb29sZWFuXG4gICAgQnl0ZVxuICAgIENhdXNlW0FdXG4gICAgQ2hhclxuICAgIENodW5rW0E6IEhhc2hdXG4gICAgQ2xhc3NbX11cbiAgICBEb3VibGVcbiAgICBFaXRoZXJbQTogSGFzaCwgQjogSGFzaF1cbiAgICBGW0E6IEhhc2hdOiBEZXJpdmVbXywgSGFzaF1cbiAgICBGaWJlci5JZFxuICAgIEZsb2F0XG4gICAgSW50XG4gICAgTGlzdFtBOiBIYXNoXVxuICAgIExvbmdcbiAgICBNYXBbQSwgQjogSGFzaF1cbiAgICBOb25FbXB0eUNodW5rW0E6IEhhc2hdXG4gICAgTm9uRW1wdHlMaXN0W0E6IEhhc2hdXG4gICAgTm9uRW1wdHlTZXRbQV1cbiAgICBOb3RoaW5nXG4gICAgT3B0aW9uW0E6IEhhc2hdXG4gICAgT3JkZXJpbmdcbiAgICBQYXJ0aWFsT3JkZXJpbmdcbiAgICBTZXRbQV1cbiAgICBTaG9ydFxuICAgIFN0cmluZ1xuICAgIFRoZXNlW0E6IEhhc2gsIEI6IEhhc2hdXG4gICAg4p2oVDE6IEhhc2gsIC4uLiwgVDIyOiBIYXNo4p2pXG4gICAgVW5pdFxuICAgIFZhbGlkYXRpb25bRTogSGFzaCwgQTogSGFzaF1cbiAgICBWZWN0b3JbQTogSGFzaF1cbiAgICBaTm9uRW1wdHlTZXRbQSwgQjogSGFzaF1cbiAgICBaU2V0W0EsIEI6IEhhc2hdXG4gICAgWlRyYWNlXG5cbiAgICAoKSBib3RoW0JdKEhhc2hbQl0pOiBIYXNoWyhBLCBCKV1cbiAgICAoKSBib3RoV2l0aFtCLCBDXShIYXNoW0JdKShDID0-IChBLCBCKSk6IEhhc2hbQ11cbiAgICAoKSBjb250cmFtYXBbQl0oQiA9PiBBKTogSGFzaFtCXVxuICAgICgpIGVpdGhlcltCXShIYXNoW0JdKTogSGFzaFtFaXRoZXJbQSwgQl1dXG4gICAgKCkgZWl0aGVyV2l0aFtCLCBDXShIYXNoW0JdKShDID0-IEVpdGhlcltBLCBCXSk6IEhhc2hbQ11cbiAgICAoKSBoYXNoKEEpOiBJbnRcbiAgfVxuICBjbGFzcyBQYXJ0aWFsT3Jkfi1BfiB7XG4gICAgQ2h1bmtbQTogUGFydGlhbE9yZF1cbiAgICBFaXRoZXJbQTogUGFydGlhbE9yZCwgQjogUGFydGlhbE9yZF1cbiAgICBGW0E6IFBhcnRpYWxPcmRdOiBEZXJpdmVbXywgUGFydGlhbE9yZF1cbiAgICBMaXN0W0E6IFBhcnRpYWxPcmRdXG4gICAgTWFwW0EsIEI6IEVxdWFsXVxuICAgIE5vbkVtcHR5Q2h1bmtbQTogUGFydGlhbE9yZF1cbiAgICBOb25FbXB0eUxpc3RbQTogUGFydGlhbE9yZF1cbiAgICBOb25FbXB0eVNldFtBXVxuICAgIE9wdGlvbltBOiBQYXJ0aWFsT3JkXVxuICAgIFBhcnRpYWxPcmRlcmluZ1xuICAgIFNldFtBXVxuICAgIOKdqFQxOiBQYXJ0aWFsT3JkLCAuLi4sIFQyMjogUGFydGlhbE9yZOKdqVxuICAgIFZlY3RvcltBOiBQYXJ0aWFsT3JkXVxuICAgIFpOb25FbXB0eVNldFtBLCBCOiBQYXJ0aWFsT3JkXVxuICAgIFpTZXRbQSwgQjogUGFydGlhbE9yZF1cblxuICAgICgpIGJvdGhbQl0oPT4gUGFydGlhbE9yZFtCXSk6IFBhcnRpYWxPcmRbKEEsIEIpXVxuICAgICgpIGJvdGhXaXRoW0IsIENdKD0-IFBhcnRpYWxPcmRbQl0pKEMgPT4gKEEsIEIpKTogUGFydGlhbE9yZFtDXVxuICAgICgpIGNvbXBhcmUoQSwgQSk6IFBhcnRpYWxPcmRlcmluZ1xuICAgICgpIGNvbnRyYW1hcFtCXShCID0-IEEpOiBQYXJ0aWFsT3JkW0JdXG4gICAgKCkgZWl0aGVyW0JdKD0-IFBhcnRpYWxPcmRbQl0pOiBQYXJ0aWFsT3JkW0VpdGhlcltBLCBCXV1cbiAgICAoKSBlaXRoZXJXaXRoW0IsIENdKD0-IFBhcnRpYWxPcmRbQl0pKEMgPT4gRWl0aGVyW0EsIEJdKTogUGFydGlhbE9yZFtDXVxuICAgICgpIG1hcFBhcnRpYWxPcmRlcmluZyhQYXJ0aWFsT3JkZXJpbmcgPT4gUGFydGlhbE9yZGVyaW5nKTogUGFydGlhbE9yZFtBXVxuXG4gIH1cbiAgY2xhc3MgT3Jkfi1BfiB7XG4gICAgQm9vbGVhblxuICAgIEJ5dGVcbiAgICBDaGFyXG4gICAgQ2h1bmtbQTogT3JkXVxuICAgIERvdWJsZVxuICAgIEVpdGhlcltBOiBPcmQsIEI6IE9yZF1cbiAgICBGW0E6IE9yZF06IERlcml2ZVtfLCBPcmRdXG4gICAgRmliZXIuSWRcbiAgICBGbG9hdFxuICAgIEludFxuICAgIExpc3RbQTogT3JkXVxuICAgIExvbmdcbiAgICBOb25FbXB0eUNodW5rW0E6IE9yZF1cbiAgICBOb25FbXB0eUxpc3RbQTogT3JkXVxuICAgIE5vdGhpbmdcbiAgICBPcHRpb25bQTogT3JkXVxuICAgIE9yZGVyaW5nXG4gICAgU2hvcnRcbiAgICBTdHJpbmdcbiAgICDinahUMTogT3JkLCAuLi4sIFQyMjogT3Jk4p2pXG4gICAgVW5pdFxuICAgIFZlY3RvcltBOiBPcmRdXG5cbiAgICAoKSBib3RoW0JdKD0-IE9yZFtCXSk6IE9yZFsoQSwgQildXG4gICAgKCkgYm90aFdpdGhbQiwgQ10oPT4gT3JkW0JdKShDID0-IChBLCBCKSk6IE9yZFtDXVxuICAgICgpIGNvbXBhcmUoQSwgQSk6IE9yZGVyaW5nXG4gICAgKCkgY29udHJhbWFwW0JdKEIgPT4gQSk6IE9yZFtCXVxuICAgICgpIGVpdGhlcltCXSg9PiBPcmRbQl0pOiBPcmRbRWl0aGVyW0EsIEJdXVxuICAgICgpIGVpdGhlcldpdGhbQiwgQ10oPT4gT3JkW0JdKShDID0-IEVpdGhlcltBLCBCXSk6IE9yZFtDXVxuICAgICgpIG1hcE9yZGVyaW5nKE9yZGVyaW5nID0-IE9yZGVyaW5nKTogT3JkW0FdXG4gICAgKCkgcmV2ZXJzZTogT3JkW0FdXG4gICAgKCkgdG9TY2FsYVtBMSA8OiBBXTogc2NhbGEubWF0aC5PcmRlcmluZ1tBMV1cbiAgfVxuIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjpmYWxzZX0"><img src="https://user-images.githubusercontent.com/9019485/106370265-a0254100-6358-11eb-8156-871997509d49.png" alt="Equal hierarchy"></a></p>
 <p><details><summary>Mermaid</summary></p>
 <pre><code class="hljs css language-mermaid"><span class="hljs-title">classDiagram</span>
   <span class="hljs-type">Equal</span>~-<span class="hljs-type">A</span>~ &lt;|<span class="hljs-comment">-- Hash~-A~</span>
@@ -141,261 +454,4 @@
   }
 </span></code></pre>
 <p></details></p>
-<h1><a class="anchor" aria-hidden="true" id="associativeeither"></a><a href="#associativeeither" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeEither</h1>
-<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlRWl0aGVyfkY8Xz5-IDx8LS0gQ29tbXV0YXRpdmVFaXRoZXJ-RjxfPn5cbiAgQXNzb2NpYXRpdmVFaXRoZXJ-RjxfPn4gPHwtLSBJZGVudGl0eUVpdGhlcn5GPF8-flxuICBjbGFzcyBBc3NvY2lhdGl2ZUVpdGhlcn5GPF8-fntcbiAgICBFaXRoZXJbTCwgKypdXG4gICAgRXhpdFtFLCArKl1cbiAgICBGaWJlcltFLCArKl1cbiAgICBTY2hlZHVsZVtSLCBFLCArKl1cbiAgICBUcnlbKypdXG4gICAgWkxheWVyW1IsIEUsICsqXVxuICAgIFpNYW5hZ2VkW1IsIEUsICsqXVxuICAgIFxuICAgICgpIGVpdGhlcltBLCBCXSg9PiBGW0FdLCA9PiBGW0JdKTogRltFaXRoZXJbQSwgQl1dXG4gIH1cbiAgY2xhc3MgQ29tbXV0YXRpdmVFaXRoZXJ-RjxfPn57XG4gICAgRnV0dXJlWysqXVxuICAgIFpJT1tSLCBFLCArKl0gXG4gICAgWlNpbmtbUiwgRSwgSSwgTCwgKypdXG4gICAgWlN0cmVhbVtSLCBFLCArKl1cbiAgICBFcXVhbFstKl1cbiAgfVxuICBjbGFzcyBJZGVudGl0eUVpdGhlcn5GPF8-fntcbiAgICBPcHRpb25bKypdXG4gICAgRXF1YWxbLSpdXG4gICAgSGFzaFstKl1cbiAgICBPcmRbLSpdXG5cbiAgICAoKSBub25lOiBGW05vdGhpbmddXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCIsInRoZW1lVmFyaWFibGVzIjp7ImJhY2tncm91bmQiOiJ3aGl0ZSIsInByaW1hcnlDb2xvciI6IiNFQ0VDRkYiLCJzZWNvbmRhcnlDb2xvciI6IiNmZmZmZGUiLCJ0ZXJ0aWFyeUNvbG9yIjoiaHNsKDgwLCAxMDAlLCA5Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5Qm9yZGVyQ29sb3IiOiJoc2woMjQwLCA2MCUsIDg2LjI3NDUwOTgwMzklKSIsInNlY29uZGFyeUJvcmRlckNvbG9yIjoiaHNsKDYwLCA2MCUsIDgzLjUyOTQxMTc2NDclKSIsInRlcnRpYXJ5Qm9yZGVyQ29sb3IiOiJoc2woODAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwicHJpbWFyeVRleHRDb2xvciI6IiMxMzEzMDAiLCJzZWNvbmRhcnlUZXh0Q29sb3IiOiIjMDAwMDIxIiwidGVydGlhcnlUZXh0Q29sb3IiOiJyZ2IoOS41MDAwMDAwMDAxLCA5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSkiLCJsaW5lQ29sb3IiOiIjMzMzMzMzIiwidGV4dENvbG9yIjoiIzMzMyIsIm1haW5Ca2ciOiIjRUNFQ0ZGIiwic2Vjb25kQmtnIjoiI2ZmZmZkZSIsImJvcmRlcjEiOiIjOTM3MERCIiwiYm9yZGVyMiI6IiNhYWFhMzMiLCJhcnJvd2hlYWRDb2xvciI6IiMzMzMzMzMiLCJmb250RmFtaWx5IjoiXCJ0cmVidWNoZXQgbXNcIiwgdmVyZGFuYSwgYXJpYWwiLCJmb250U2l6ZSI6IjE2cHgiLCJsYWJlbEJhY2tncm91bmQiOiIjZThlOGU4Iiwibm9kZUJrZyI6IiNFQ0VDRkYiLCJub2RlQm9yZGVyIjoiIzkzNzBEQiIsImNsdXN0ZXJCa2ciOiIjZmZmZmRlIiwiY2x1c3RlckJvcmRlciI6IiNhYWFhMzMiLCJkZWZhdWx0TGlua0NvbG9yIjoiIzMzMzMzMyIsInRpdGxlQ29sb3IiOiIjMzMzIiwiZWRnZUxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJhY3RvckJvcmRlciI6ImhzbCgyNTkuNjI2MTY4MjI0MywgNTkuNzc2NTM2MzEyOCUsIDg3LjkwMTk2MDc4NDMlKSIsImFjdG9yQmtnIjoiI0VDRUNGRiIsImFjdG9yVGV4dENvbG9yIjoiYmxhY2siLCJhY3RvckxpbmVDb2xvciI6ImdyZXkiLCJzaWduYWxDb2xvciI6IiMzMzMiLCJzaWduYWxUZXh0Q29sb3IiOiIjMzMzIiwibGFiZWxCb3hCa2dDb2xvciI6IiNFQ0VDRkYiLCJsYWJlbEJveEJvcmRlckNvbG9yIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwibGFiZWxUZXh0Q29sb3IiOiJibGFjayIsImxvb3BUZXh0Q29sb3IiOiJibGFjayIsIm5vdGVCb3JkZXJDb2xvciI6IiNhYWFhMzMiLCJub3RlQmtnQ29sb3IiOiIjZmZmNWFkIiwibm90ZVRleHRDb2xvciI6ImJsYWNrIiwiYWN0aXZhdGlvbkJvcmRlckNvbG9yIjoiIzY2NiIsImFjdGl2YXRpb25Ca2dDb2xvciI6IiNmNGY0ZjQiLCJzZXF1ZW5jZU51bWJlckNvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IiOiJyZ2JhKDEwMiwgMTAyLCAyNTUsIDAuNDkpIiwiYWx0U2VjdGlvbkJrZ0NvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IyIjoiI2ZmZjQwMCIsInRhc2tCb3JkZXJDb2xvciI6IiM1MzRmYmMiLCJ0YXNrQmtnQ29sb3IiOiIjOGE5MGRkIiwidGFza1RleHRMaWdodENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dERhcmtDb2xvciI6ImJsYWNrIiwidGFza1RleHRPdXRzaWRlQ29sb3IiOiJibGFjayIsInRhc2tUZXh0Q2xpY2thYmxlQ29sb3IiOiIjMDAzMTYzIiwiYWN0aXZlVGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsImFjdGl2ZVRhc2tCa2dDb2xvciI6IiNiZmM3ZmYiLCJncmlkQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JrZ0NvbG9yIjoibGlnaHRncmV5IiwiZG9uZVRhc2tCb3JkZXJDb2xvciI6ImdyZXkiLCJjcml0Qm9yZGVyQ29sb3IiOiIjZmY4ODg4IiwiY3JpdEJrZ0NvbG9yIjoicmVkIiwidG9kYXlMaW5lQ29sb3IiOiJyZWQiLCJsYWJlbENvbG9yIjoiYmxhY2siLCJlcnJvckJrZ0NvbG9yIjoiIzU1MjIyMiIsImVycm9yVGV4dENvbG9yIjoiIzU1MjIyMiIsImNsYXNzVGV4dCI6IiMxMzEzMDAiLCJmaWxsVHlwZTAiOiIjRUNFQ0ZGIiwiZmlsbFR5cGUxIjoiI2ZmZmZkZSIsImZpbGxUeXBlMiI6ImhzbCgzMDQsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlMyI6ImhzbCgxMjQsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSIsImZpbGxUeXBlNCI6ImhzbCgxNzYsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNSI6ImhzbCgtNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU2IjoiaHNsKDgsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNyI6ImhzbCgxODgsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSJ9fSwidXBkYXRlRWRpdG9yIjpmYWxzZX0">![AssociativeCompose hierarchy][AssociativeEither-image]</a></p>
-<p><details><summary>Mermaid</summary></p>
-<pre><code class="hljs css language-mermaid">classDiagram
-  AssociativeEither~F&lt;_&gt;~ &lt;|-- CommutativeEither~F&lt;_&gt;~
-  AssociativeEither~F&lt;_&gt;~ &lt;|-- IdentityEither~F&lt;_&gt;~
-  class AssociativeEither~F&lt;_&gt;~{
-    Either<span class="hljs-comment">[L, +*]</span>
-    Exit<span class="hljs-comment">[E, +*]</span>
-    Fiber<span class="hljs-comment">[E, +*]</span>
-    Schedule<span class="hljs-comment">[R, E, +*]</span>
-    Try<span class="hljs-comment">[+*]</span>
-    ZLayer<span class="hljs-comment">[R, E, +*]</span>
-    ZManaged<span class="hljs-comment">[R, E, +*]</span>
-    
-    () either<span class="hljs-comment">[A, B]</span>(=&gt; F<span class="hljs-comment">[A]</span>, =&gt; F<span class="hljs-comment">[B]</span>): F<span class="hljs-comment">[Either<span class="hljs-comment">[A, B]</span>]</span>
-  }
-  class CommutativeEither~F&lt;_&gt;~{
-    Future<span class="hljs-comment">[+*]</span>
-    ZIO<span class="hljs-comment">[R, E, +*]</span> 
-    ZSink<span class="hljs-comment">[R, E, I, L, +*]</span>
-    ZStream<span class="hljs-comment">[R, E, +*]</span>
-    Equal<span class="hljs-comment">[-*]</span>
-  }
-  class IdentityEither~F&lt;_&gt;~{
-    Option<span class="hljs-comment">[+*]</span>
-    Equal<span class="hljs-comment">[-*]</span>
-    Hash<span class="hljs-comment">[-*]</span>
-    Ord<span class="hljs-comment">[-*]</span>
-
-    () none: F<span class="hljs-comment">[Nothing]</span>
-  }
-</code></pre>
-<p></details></p>
-<h1><a class="anchor" aria-hidden="true" id="associative"></a><a href="#associative" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Associative</h1>
-<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlfkF-IDx8LS0gQ29tbXV0YXRpdmV-QX5cbiAgQXNzb2NpYXRpdmV-QX4gPHwtLSBJZGVtcG90ZW50fkF-XG4gIEFzc29jaWF0aXZlfkF-IDx8LS0gSWRlbnRpdHl-QX5cbiAgSWRlbnRpdHl-QX4gPHwtLSBJbnZlcnNlfkF-XG4gIGNsYXNzIEFzc29jaWF0aXZlfkF-e1xuICAgIEVpdGhlcltFLCBBOiBBc3NvY2lhdGl2ZV1cbiAgICBGW0E6IEFzc29jaWF0aXZlXTogRGVyaXZlW18sIEFzc29jaWF0aXZlXVxuICAgIEZpcnN0W0FdXG4gICAgTGFzdFtBXVxuICAgIE5vbkVtcHR5Q2h1bmtbQV1cbiAgICBOb25FbXB0eUxpc3RbQV1cbiAgICBUaGVzZVtBOiBBc3NvY2lhdGl2ZSwgQjogQXNzb2NpYXRpdmVdXG4gICAg4p2oVDE6IEFzc29jaWF0aXZlLCAuLi4sIFQyMjogQXNzb2NpYXRpdmXinalcbiAgICBWYWxpZGF0aW9uW0UsIEE6IEFzc29jaWF0aXZlXVxuICAgIFpOb25FbXB0eVNldFtBLCBCOiBBc3NvY2lhdGl2ZV1cblxuICAgICgpIGNvbWJpbmUoPT4gQSwgPT4gQSk6IEFcbiAgfVxuICBjbGFzcyBDb21tdXRhdGl2ZX5BfntcbiAgICBBbmRcbiAgICBGW0E6IENvbW11dGF0aXZlXTogRGVyaXZlW18sIENvbW11dGF0aXZlXVxuICAgIEVpdGhlcltFOiBDb21tdXRhdGl2ZSwgQTogQ29tbXV0YXRpdmVdXG4gICAgT3JcbiAgICBNYXBbSywgVjogQ29tbXV0YXRpdmVdXG4gICAgTWF4W0E6IE9yZF1cbiAgICBNYXhbQm9vbGVhbl1cbiAgICBNYXhbQnl0ZS9DaGFyL0RvdWJsZS9GbG9hdC9JbnQvTG9uZy9TaG9ydF1cbiAgICBNaW5bQTogT3JkXVxuICAgIE1pbltCb29sZWFuXVxuICAgIE1pbltCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE5vbkVtcHR5U2V0W0FdXG4gICAgT3B0aW9uW0E6IENvbW11dGF0aXZlXVxuICAgIFByb2RbQm9vbGVhbl1cbiAgICBQcm9kW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAgU2V0W0FdXG4gICAgU3VtW0Jvb2xlYW5dXG4gICAgU3VtW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAgVGhlc2VbQTogQ29tbXV0YXRpdmUsIEI6IENvbW11dGF0aXZlXVxuICAgIOKdqFQxOiBDb21tdXRhdGl2ZSwgLi4uLCBUMjI6IENvbW11dGF0aXZl4p2pXG4gICAgVmFsaWRhdGlvbltFLCBBOiBDb21tdXRhdGl2ZV1cbiAgICBaU2V0W0EsIEI6IENvbW11dGF0aXZlXVxuICAgIFpOb25FbXB0eVNldFtBLCBCOiBDb21tdXRhdGl2ZV1cblxuICAgICgpIGNvbW11dGU6IENvbW11dGF0aXZlW0FdXG4gIH1cbiAgY2xhc3MgSWRlbXBvdGVudH5BfntcbiAgICBBbmRcbiAgICBGW0E6IElkZW1wb3RlbnRdOiBEZXJpdmVbXywgSWRlbXBvdGVudF1cbiAgICBPclxuICAgIE1hcFtLLCBWOiBJZGVtcG90ZW50XVxuICAgIE1heFtCb29sZWFuXVxuICAgIE1heFtCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE1pbltCb29sZWFuXVxuICAgIE1pbltCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE5vbkVtcHR5U2V0W0FdXG4gICAgT3B0aW9uW0E6IElkZW1wb3RlbnRdXG4gICAgUHJvZFtCb29sZWFuXVxuICAgIFNldFtBXVxuICAgIFN1bVtCb29sZWFuXVxuICAgIFRoZXNlW0E6IElkZW1wb3RlbnQsIEI6IElkZW1wb3RlbnRdXG4gICAg4p2oVDE6IElkZW1wb3RlbnQsIC4uLiwgVDIyOiBJZGVtcG90ZW504p2pXG4gICAgVmFsaWRhdGlvbltFLCBBOiBJZGVtcG90ZW50XVxuICAgIFpTZXRbQSwgQjogSWRlbXBvdGVudF1cbiAgICBaTm9uRW1wdHlTZXRbQSwgQjogSWRlbXBvdGVudF1cblxuICAgICgpIGNvbWJpbmVJZGVtcG90ZW50KD0-IEEsID0-IEEpKEVxdWFsW0FdKTogQVxuICAgICgpIGlkZW1wb3RlbnQoRXF1YWxbQV0pOiBJZGVtcG90ZW50W0FdXG4gIH1cbiAgY2xhc3MgSWRlbnRpdHl-QX57XG4gICAgRltBOiBJZGVudGl0eV06IERlcml2ZVtfLCBJZGVudGl0eV1cbiAgICBDaHVua1tBXVxuICAgIEVpdGhlcltFLCBBOiBJZGVudGl0eV1cbiAgICBMaXN0W0FdXG4gICAgTWFwW0ssIFY6IEFzc29jaWF0aXZlXVxuICAgIE1heFtCb29sZWFuXVxuICAgIE1heFtCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE1pbltCb29sZWFuXVxuICAgIE1pbltCeXRlL0NoYXIvRG91YmxlL0Zsb2F0L0ludC9Mb25nL1Nob3J0XVxuICAgIE9wdGlvbltBOiBBc3NvY2lhdGl2ZV1cbiAgICBQcm9kW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAgU3RyaW5nXG4gICAg4p2oVDE6IElkZW50aXR5LCAuLi4sIFQyMjogSWRlbnRpdHninalcbiAgICBWYWxpZGF0aW9uW0UsIEE6IElkZW50aXR5XVxuICAgIFZlY3RvcltBXVxuICAgIFpTZXRbQSwgQjogQXNzb2NpYXRpdmVdXG5cbiAgICAoKSBpZGVudGl0eTogQVxuICB9XG4gIGNsYXNzIEludmVyc2V-QX57XG4gICAgQW5kXG4gICAgRltBOiBJbnZlcnNlXTogRGVyaXZlW18sIEludmVyc2VdXG4gICAgT3JcbiAgICBQcm9kW0Jvb2xlYW5dXG4gICAgU2V0W0FdXG4gICAgU3VtW0Jvb2xlYW5dXG4gICAgU3VtW0J5dGUvQ2hhci9Eb3VibGUvRmxvYXQvSW50L0xvbmcvU2hvcnRdXG4gICAg4p2oVDE6IEludmVyc2UsIC4uLiwgVDIyOiBJbnZlcnNl4p2pXG5cbiAgICAoKSBpbnZlcnNlKD0-IEEsID0-IEEpOiBBXG4gIH1cbiIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0IiwidGhlbWVWYXJpYWJsZXMiOnsiYmFja2dyb3VuZCI6IndoaXRlIiwicHJpbWFyeUNvbG9yIjoiI0VDRUNGRiIsInNlY29uZGFyeUNvbG9yIjoiI2ZmZmZkZSIsInRlcnRpYXJ5Q29sb3IiOiJoc2woODAsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsInByaW1hcnlCb3JkZXJDb2xvciI6ImhzbCgyNDAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwic2Vjb25kYXJ5Qm9yZGVyQ29sb3IiOiJoc2woNjAsIDYwJSwgODMuNTI5NDExNzY0NyUpIiwidGVydGlhcnlCb3JkZXJDb2xvciI6ImhzbCg4MCwgNjAlLCA4Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5VGV4dENvbG9yIjoiIzEzMTMwMCIsInNlY29uZGFyeVRleHRDb2xvciI6IiMwMDAwMjEiLCJ0ZXJ0aWFyeVRleHRDb2xvciI6InJnYig5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSwgOS41MDAwMDAwMDAxKSIsImxpbmVDb2xvciI6IiMzMzMzMzMiLCJ0ZXh0Q29sb3IiOiIjMzMzIiwibWFpbkJrZyI6IiNFQ0VDRkYiLCJzZWNvbmRCa2ciOiIjZmZmZmRlIiwiYm9yZGVyMSI6IiM5MzcwREIiLCJib3JkZXIyIjoiI2FhYWEzMyIsImFycm93aGVhZENvbG9yIjoiIzMzMzMzMyIsImZvbnRGYW1pbHkiOiJcInRyZWJ1Y2hldCBtc1wiLCB2ZXJkYW5hLCBhcmlhbCIsImZvbnRTaXplIjoiMTZweCIsImxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJub2RlQmtnIjoiI0VDRUNGRiIsIm5vZGVCb3JkZXIiOiIjOTM3MERCIiwiY2x1c3RlckJrZyI6IiNmZmZmZGUiLCJjbHVzdGVyQm9yZGVyIjoiI2FhYWEzMyIsImRlZmF1bHRMaW5rQ29sb3IiOiIjMzMzMzMzIiwidGl0bGVDb2xvciI6IiMzMzMiLCJlZGdlTGFiZWxCYWNrZ3JvdW5kIjoiI2U4ZThlOCIsImFjdG9yQm9yZGVyIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwiYWN0b3JCa2ciOiIjRUNFQ0ZGIiwiYWN0b3JUZXh0Q29sb3IiOiJibGFjayIsImFjdG9yTGluZUNvbG9yIjoiZ3JleSIsInNpZ25hbENvbG9yIjoiIzMzMyIsInNpZ25hbFRleHRDb2xvciI6IiMzMzMiLCJsYWJlbEJveEJrZ0NvbG9yIjoiI0VDRUNGRiIsImxhYmVsQm94Qm9yZGVyQ29sb3IiOiJoc2woMjU5LjYyNjE2ODIyNDMsIDU5Ljc3NjUzNjMxMjglLCA4Ny45MDE5NjA3ODQzJSkiLCJsYWJlbFRleHRDb2xvciI6ImJsYWNrIiwibG9vcFRleHRDb2xvciI6ImJsYWNrIiwibm90ZUJvcmRlckNvbG9yIjoiI2FhYWEzMyIsIm5vdGVCa2dDb2xvciI6IiNmZmY1YWQiLCJub3RlVGV4dENvbG9yIjoiYmxhY2siLCJhY3RpdmF0aW9uQm9yZGVyQ29sb3IiOiIjNjY2IiwiYWN0aXZhdGlvbkJrZ0NvbG9yIjoiI2Y0ZjRmNCIsInNlcXVlbmNlTnVtYmVyQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvciI6InJnYmEoMTAyLCAxMDIsIDI1NSwgMC40OSkiLCJhbHRTZWN0aW9uQmtnQ29sb3IiOiJ3aGl0ZSIsInNlY3Rpb25Ca2dDb2xvcjIiOiIjZmZmNDAwIiwidGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsInRhc2tCa2dDb2xvciI6IiM4YTkwZGQiLCJ0YXNrVGV4dExpZ2h0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0Q29sb3IiOiJ3aGl0ZSIsInRhc2tUZXh0RGFya0NvbG9yIjoiYmxhY2siLCJ0YXNrVGV4dE91dHNpZGVDb2xvciI6ImJsYWNrIiwidGFza1RleHRDbGlja2FibGVDb2xvciI6IiMwMDMxNjMiLCJhY3RpdmVUYXNrQm9yZGVyQ29sb3IiOiIjNTM0ZmJjIiwiYWN0aXZlVGFza0JrZ0NvbG9yIjoiI2JmYzdmZiIsImdyaWRDb2xvciI6ImxpZ2h0Z3JleSIsImRvbmVUYXNrQmtnQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JvcmRlckNvbG9yIjoiZ3JleSIsImNyaXRCb3JkZXJDb2xvciI6IiNmZjg4ODgiLCJjcml0QmtnQ29sb3IiOiJyZWQiLCJ0b2RheUxpbmVDb2xvciI6InJlZCIsImxhYmVsQ29sb3IiOiJibGFjayIsImVycm9yQmtnQ29sb3IiOiIjNTUyMjIyIiwiZXJyb3JUZXh0Q29sb3IiOiIjNTUyMjIyIiwiY2xhc3NUZXh0IjoiIzEzMTMwMCIsImZpbGxUeXBlMCI6IiNFQ0VDRkYiLCJmaWxsVHlwZTEiOiIjZmZmZmRlIiwiZmlsbFR5cGUyIjoiaHNsKDMwNCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGUzIjoiaHNsKDEyNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU0IjoiaHNsKDE3NiwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU1IjoiaHNsKC00LCAxMDAlLCA5My41Mjk0MTE3NjQ3JSkiLCJmaWxsVHlwZTYiOiJoc2woOCwgMTAwJSwgOTYuMjc0NTA5ODAzOSUpIiwiZmlsbFR5cGU3IjoiaHNsKDE4OCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIn19fQ">![Associative hierarchy][Associative-image]</a></p>
-<p><details><summary>Mermaid</summary></p>
-<pre><code class="hljs css language-mermaid">classDiagram
-  Associative~A~ &lt;|-- Commutative~A~
-  Associative~A~ &lt;|-- Idempotent~A~
-  Associative~A~ &lt;|-- Identity~A~
-  Identity~A~ &lt;|-- Inverse~A~
-  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Associative</span>~<span class="hljs-title">A</span>~</span>{
-    Either[E, A: Associative]
-    F[A: Associative]: Derive[_, Associative]
-    First[A]
-    Last[A]
-    NonEmptyChunk[A]
-    NonEmptyList[A]
-    These[A: Associative, B: Associative]
-    ❨T1: Associative, ..., T22: Associative❩
-    Validation[E, A: Associative]
-    ZNonEmptySet[A, B: Associative]
-
-    () combine(=&gt; A, =&gt; A): A
-  }
-  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Commutative</span>~<span class="hljs-title">A</span>~</span>{
-    And
-    F[A: Commutative]: Derive[_, Commutative]
-    Either[E: Commutative, A: Commutative]
-    Or
-    Map[K, V: Commutative]
-    Max[A: Ord]
-    Max[<span class="hljs-built_in">Boolean</span>]
-    Max[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    Min[A: Ord]
-    Min[<span class="hljs-built_in">Boolean</span>]
-    Min[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    NonEmptySet[A]
-    Option[A: Commutative]
-    Prod[<span class="hljs-built_in">Boolean</span>]
-    Prod[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    Set[A]
-    Sum[<span class="hljs-built_in">Boolean</span>]
-    Sum[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    These[A: Commutative, B: Commutative]
-    ❨T1: Commutative, ..., T22: Commutative❩
-    Validation[E, A: Commutative]
-    ZSet[A, B: Commutative]
-    ZNonEmptySet[A, B: Commutative]
-
-    () commute: Commutative[A]
-  }
-  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Idempotent</span>~<span class="hljs-title">A</span>~</span>{
-    And
-    F[A: Idempotent]: Derive[_, Idempotent]
-    Or
-    Map[K, V: Idempotent]
-    Max[<span class="hljs-built_in">Boolean</span>]
-    Max[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    Min[<span class="hljs-built_in">Boolean</span>]
-    Min[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    NonEmptySet[A]
-    Option[A: Idempotent]
-    Prod[<span class="hljs-built_in">Boolean</span>]
-    Set[A]
-    Sum[<span class="hljs-built_in">Boolean</span>]
-    These[A: Idempotent, B: Idempotent]
-    ❨T1: Idempotent, ..., T22: Idempotent❩
-    Validation[E, A: Idempotent]
-    ZSet[A, B: Idempotent]
-    ZNonEmptySet[A, B: Idempotent]
-
-    () combineIdempotent(=&gt; A, =&gt; A)(Equal[A]): A
-    () idempotent(Equal[A]): Idempotent[A]
-  }
-  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Identity</span>~<span class="hljs-title">A</span>~</span>{
-    F[A: Identity]: Derive[_, Identity]
-    Chunk[A]
-    Either[E, A: Identity]
-    List[A]
-    Map[K, V: Associative]
-    Max[<span class="hljs-built_in">Boolean</span>]
-    Max[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    Min[<span class="hljs-built_in">Boolean</span>]
-    Min[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    Option[A: Associative]
-    Prod[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    String
-    ❨T1: Identity, ..., T22: Identity❩
-    Validation[E, A: Identity]
-    Vector[A]
-    ZSet[A, B: Associative]
-
-    () identity: A
-  }
-  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Inverse</span>~<span class="hljs-title">A</span>~</span>{
-    And
-    F[A: Inverse]: Derive[_, Inverse]
-    Or
-    Prod[<span class="hljs-built_in">Boolean</span>]
-    Set[A]
-    Sum[<span class="hljs-built_in">Boolean</span>]
-    Sum[<span class="hljs-built_in">Byte</span>/<span class="hljs-built_in">Char</span>/<span class="hljs-built_in">Double</span>/<span class="hljs-built_in">Float</span>/<span class="hljs-built_in">Int</span>/<span class="hljs-built_in">Long</span>/<span class="hljs-built_in">Short</span>]
-    ❨T1: Inverse, ..., T22: Inverse❩
-
-    () inverse(=&gt; A, =&gt; A): A
-  }
-</code></pre>
-<p></details></p>
-<h1><a class="anchor" aria-hidden="true" id="associativeboth"></a><a href="#associativeboth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeBoth</h1>
-<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/view/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQm90aH5GPF8-fiA8fC0tIENvbW11dGF0aXZlQm90aH5GPF8-flxuICBBc3NvY2lhdGl2ZUJvdGh-RjxfPn4gPHwtLSBJZGVudGl0eUJvdGh-RjxfPn5cbiAgY2xhc3MgQXNzb2NpYXRpdmVCb3RofkY8Xz5-e1xuICAgIEZpYmVyW0UsICsqXVxuICAgIFNUTVtSLCBFLCArKl1cblxuICAoKSBib3RoW0EsQl0oPT4gRltBXSwgPT4gRltCXSk6IEZbKEEsQildXG4gIH1cbiAgY2xhc3MgQ29tbXV0YXRpdmVCb3RofkY8Xz5-e1xuICAgIENodW5rWysqXVxuICAgIEV4aXRbRSwgKypdXG4gICAgSWRbKypdXG4gICAgTGlzdFsrKl1cbiAgICBOb25FbXB0eUNodW5rWysqXVxuICAgIE9wdGlvblsrKl1cbiAgICBBbmRGW1NjaGVkdWxlW1IsIEUsICsqXV1cbiAgICBPckZbU2NoZWR1bGVbUiwgRSwgKypdXVxuICAgIFZlY3RvclsrKl1cbiAgICBaSU9bUiwgRSwgKypdXG4gICAgRmFpbHVyZVtaSU9bUiwgRSwgKypdXVxuICAgIFpMYXllcltSLCBFLCArKl1cbiAgICBaTWFuYWdlZFtSLCBFLCArKl1cbiAgICBGYWlsdXJlW1pNYW5hZ2VkW1IsIEUsICsqXV1cbiAgICBaU2lua1tSLCBFLCBJLCBJLCArKl1cbiAgICBaU3RyZWFtW1IsIEUsICsqXVxuICB9XG4gIGNsYXNzIElkZW50aXR5Qm90aH5GPF8-fntcbiAgICBFaXRoZXJbTCwgKypdXG4gICAgRmFpbHVyZVtFaXRoZXJbKyosIFJdXVxuICAgIE9wdGlvblsrKl1cbiAgICBGdXR1cmVbKypdXG4gICAgSWRbKypdXG4gICAgTGlzdFsrKl1cbiAgICBUcnlbKypdXG4gXG4gICgpIGFueTogRltBbnldXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCIsInRoZW1lVmFyaWFibGVzIjp7ImJhY2tncm91bmQiOiJ3aGl0ZSIsInByaW1hcnlDb2xvciI6IiNFQ0VDRkYiLCJzZWNvbmRhcnlDb2xvciI6IiNmZmZmZGUiLCJ0ZXJ0aWFyeUNvbG9yIjoiaHNsKDgwLCAxMDAlLCA5Ni4yNzQ1MDk4MDM5JSkiLCJwcmltYXJ5Qm9yZGVyQ29sb3IiOiJoc2woMjQwLCA2MCUsIDg2LjI3NDUwOTgwMzklKSIsInNlY29uZGFyeUJvcmRlckNvbG9yIjoiaHNsKDYwLCA2MCUsIDgzLjUyOTQxMTc2NDclKSIsInRlcnRpYXJ5Qm9yZGVyQ29sb3IiOiJoc2woODAsIDYwJSwgODYuMjc0NTA5ODAzOSUpIiwicHJpbWFyeVRleHRDb2xvciI6IiMxMzEzMDAiLCJzZWNvbmRhcnlUZXh0Q29sb3IiOiIjMDAwMDIxIiwidGVydGlhcnlUZXh0Q29sb3IiOiJyZ2IoOS41MDAwMDAwMDAxLCA5LjUwMDAwMDAwMDEsIDkuNTAwMDAwMDAwMSkiLCJsaW5lQ29sb3IiOiIjMzMzMzMzIiwidGV4dENvbG9yIjoiIzMzMyIsIm1haW5Ca2ciOiIjRUNFQ0ZGIiwic2Vjb25kQmtnIjoiI2ZmZmZkZSIsImJvcmRlcjEiOiIjOTM3MERCIiwiYm9yZGVyMiI6IiNhYWFhMzMiLCJhcnJvd2hlYWRDb2xvciI6IiMzMzMzMzMiLCJmb250RmFtaWx5IjoiXCJ0cmVidWNoZXQgbXNcIiwgdmVyZGFuYSwgYXJpYWwiLCJmb250U2l6ZSI6IjE2cHgiLCJsYWJlbEJhY2tncm91bmQiOiIjZThlOGU4Iiwibm9kZUJrZyI6IiNFQ0VDRkYiLCJub2RlQm9yZGVyIjoiIzkzNzBEQiIsImNsdXN0ZXJCa2ciOiIjZmZmZmRlIiwiY2x1c3RlckJvcmRlciI6IiNhYWFhMzMiLCJkZWZhdWx0TGlua0NvbG9yIjoiIzMzMzMzMyIsInRpdGxlQ29sb3IiOiIjMzMzIiwiZWRnZUxhYmVsQmFja2dyb3VuZCI6IiNlOGU4ZTgiLCJhY3RvckJvcmRlciI6ImhzbCgyNTkuNjI2MTY4MjI0MywgNTkuNzc2NTM2MzEyOCUsIDg3LjkwMTk2MDc4NDMlKSIsImFjdG9yQmtnIjoiI0VDRUNGRiIsImFjdG9yVGV4dENvbG9yIjoiYmxhY2siLCJhY3RvckxpbmVDb2xvciI6ImdyZXkiLCJzaWduYWxDb2xvciI6IiMzMzMiLCJzaWduYWxUZXh0Q29sb3IiOiIjMzMzIiwibGFiZWxCb3hCa2dDb2xvciI6IiNFQ0VDRkYiLCJsYWJlbEJveEJvcmRlckNvbG9yIjoiaHNsKDI1OS42MjYxNjgyMjQzLCA1OS43NzY1MzYzMTI4JSwgODcuOTAxOTYwNzg0MyUpIiwibGFiZWxUZXh0Q29sb3IiOiJibGFjayIsImxvb3BUZXh0Q29sb3IiOiJibGFjayIsIm5vdGVCb3JkZXJDb2xvciI6IiNhYWFhMzMiLCJub3RlQmtnQ29sb3IiOiIjZmZmNWFkIiwibm90ZVRleHRDb2xvciI6ImJsYWNrIiwiYWN0aXZhdGlvbkJvcmRlckNvbG9yIjoiIzY2NiIsImFjdGl2YXRpb25Ca2dDb2xvciI6IiNmNGY0ZjQiLCJzZXF1ZW5jZU51bWJlckNvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IiOiJyZ2JhKDEwMiwgMTAyLCAyNTUsIDAuNDkpIiwiYWx0U2VjdGlvbkJrZ0NvbG9yIjoid2hpdGUiLCJzZWN0aW9uQmtnQ29sb3IyIjoiI2ZmZjQwMCIsInRhc2tCb3JkZXJDb2xvciI6IiM1MzRmYmMiLCJ0YXNrQmtnQ29sb3IiOiIjOGE5MGRkIiwidGFza1RleHRMaWdodENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dENvbG9yIjoid2hpdGUiLCJ0YXNrVGV4dERhcmtDb2xvciI6ImJsYWNrIiwidGFza1RleHRPdXRzaWRlQ29sb3IiOiJibGFjayIsInRhc2tUZXh0Q2xpY2thYmxlQ29sb3IiOiIjMDAzMTYzIiwiYWN0aXZlVGFza0JvcmRlckNvbG9yIjoiIzUzNGZiYyIsImFjdGl2ZVRhc2tCa2dDb2xvciI6IiNiZmM3ZmYiLCJncmlkQ29sb3IiOiJsaWdodGdyZXkiLCJkb25lVGFza0JrZ0NvbG9yIjoibGlnaHRncmV5IiwiZG9uZVRhc2tCb3JkZXJDb2xvciI6ImdyZXkiLCJjcml0Qm9yZGVyQ29sb3IiOiIjZmY4ODg4IiwiY3JpdEJrZ0NvbG9yIjoicmVkIiwidG9kYXlMaW5lQ29sb3IiOiJyZWQiLCJsYWJlbENvbG9yIjoiYmxhY2siLCJlcnJvckJrZ0NvbG9yIjoiIzU1MjIyMiIsImVycm9yVGV4dENvbG9yIjoiIzU1MjIyMiIsImNsYXNzVGV4dCI6IiMxMzEzMDAiLCJmaWxsVHlwZTAiOiIjRUNFQ0ZGIiwiZmlsbFR5cGUxIjoiI2ZmZmZkZSIsImZpbGxUeXBlMiI6ImhzbCgzMDQsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlMyI6ImhzbCgxMjQsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSIsImZpbGxUeXBlNCI6ImhzbCgxNzYsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNSI6ImhzbCgtNCwgMTAwJSwgOTMuNTI5NDExNzY0NyUpIiwiZmlsbFR5cGU2IjoiaHNsKDgsIDEwMCUsIDk2LjI3NDUwOTgwMzklKSIsImZpbGxUeXBlNyI6ImhzbCgxODgsIDEwMCUsIDkzLjUyOTQxMTc2NDclKSJ9fX0">![AssociativeBoth hierarchy][AssociativeBoth-image]</a></p>
-<p><details><summary>Mermaid</summary></p>
-<pre><code class="hljs css language-mermaid">classDiagram
-  AssociativeBoth~F&lt;_&gt;~ &lt;|-- CommutativeBoth~F&lt;_&gt;~
-  AssociativeBoth~F&lt;_&gt;~ &lt;|-- IdentityBoth~F&lt;_&gt;~
-  class AssociativeBoth~F&lt;_&gt;~{
-    Fiber<span class="hljs-comment">[E, +*]</span>
-    STM<span class="hljs-comment">[R, E, +*]</span>
-
-    () both<span class="hljs-comment">[A,B]</span>(=&gt; F<span class="hljs-comment">[A]</span>, =&gt; F<span class="hljs-comment">[B]</span>): F<span class="hljs-comment">[(A,B)]</span>
-  }
-  class CommutativeBoth~F&lt;_&gt;~{
-    Chunk<span class="hljs-comment">[+*]</span>
-    Exit<span class="hljs-comment">[E, +*]</span>
-    Id<span class="hljs-comment">[+*]</span>
-    List<span class="hljs-comment">[+*]</span>
-    NonEmptyChunk<span class="hljs-comment">[+*]</span>
-    Option<span class="hljs-comment">[+*]</span>
-    AndF<span class="hljs-comment">[Schedule<span class="hljs-comment">[R, E, +*]</span>]</span>
-    OrF<span class="hljs-comment">[Schedule<span class="hljs-comment">[R, E, +*]</span>]</span>
-    Vector<span class="hljs-comment">[+*]</span>
-    ZIO<span class="hljs-comment">[R, E, +*]</span>
-    Failure<span class="hljs-comment">[ZIO<span class="hljs-comment">[R, E, +*]</span>]</span>
-    ZLayer<span class="hljs-comment">[R, E, +*]</span>
-    ZManaged<span class="hljs-comment">[R, E, +*]</span>
-    Failure<span class="hljs-comment">[ZManaged<span class="hljs-comment">[R, E, +*]</span>]</span>
-    ZSink<span class="hljs-comment">[R, E, I, I, +*]</span>
-    ZStream<span class="hljs-comment">[R, E, +*]</span>
-  }
-  class IdentityBoth~F&lt;_&gt;~{
-    Either<span class="hljs-comment">[L, +*]</span>
-    Failure<span class="hljs-comment">[Either<span class="hljs-comment">[+*, R]</span>]</span>
-    Option<span class="hljs-comment">[+*]</span>
-    Future<span class="hljs-comment">[+*]</span>
-    Id<span class="hljs-comment">[+*]</span>
-    List<span class="hljs-comment">[+*]</span>
-    Try<span class="hljs-comment">[+*]</span>
- 
-    () any: F<span class="hljs-comment">[Any]</span>
-  }
-</code></pre>
-<p></details></p>
-<h1><a class="anchor" aria-hidden="true" id="associativecompose"></a><a href="#associativecompose" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeCompose</h1>
-<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEFzc29jaWF0aXZlQ29tcG9zZX49PjpbLV8sICtfXX4gPHwtLSBCb3RoQ29tcG9zZX49PjpbLV8sICtfXX5cbiAgQXNzb2NpYXRpdmVDb21wb3Nlfj0-OlstXywgK19dfiA8fC0tIEVpdGhlckNvbXBvc2V-PT46Wy1fLCArX11-XG4gIEJvdGhDb21wb3NlIDx8LS0gQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dflxuICBjbGFzcyBBc3NvY2lhdGl2ZUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgICgpIGNvbXBvc2VbQSwgQiwgQ10oQiA9PjogQywgQSA9PjogQik6IEEgPT46IENcbiAgfVxuICBjbGFzcyBJZGVudGl0eUNvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIEZ1bmN0aW9uWy0qLCArKl1cbiAgICBVUklPWy0qLCArKl1cblxuICAgICgpIGlkZW50aXR5W0FdOiBBID0-OiBBXG4gIH1cbiAgY2xhc3MgQm90aENvbXBvc2V-PT46Wy1fLCArX11-e1xuICAgIFVSSU9bLSosICsqXSBbIDoqOiA9IFR1cGxlMiBdXG4gIFxuICAgICh0eXBlKSA6KjpbK18sICtfXVxuICAgICgpIGZyb21GaXJzdFtBXTogKEEgOio6IEFueSkgPT46IEFcbiAgICAoKSBmcm9tU2Vjb25kW0JdOiAoQW55IDoqOiBCKSA9PjogQlxuICAgICgpIHRvQm90aFtBLCBCLCBDXShBID0-OiBCKShBID0-OiBDKTogQSA9PjogKEIgOio6IEMpXG4gIH1cbiAgY2xhc3MgQXBwbGljYXRpb25Db21wb3Nlfj0-OlstXywgK19dfntcbiAgICBGdW5jdGlvblstKiwgKypdIFsgOio6ID0gVHVwbGUyIDsgLS0-OiA9IEZ1bmN0aW9uIF1cbiAgICBcbiAgICAodHlwZSkgLS0-OlstXywgK19dXG4gICAgKCkgYXBwbGljYXRpb25bQSwgQl06ICgoQSAtLT46IEIpIDoqOiBBKSA9PjogQlxuICAgICgpIGN1cnJ5W0EsIEIsIENdKChBIDoqOiBCKSA9PjogQyk6IEEgPT46IChCIC0tPjogQylcbiAgICAoKSB1bmN1cnJ5W0EsIEIsIENdKEEgPT46IChCIC0tPjogQykpOiAoQSA6KjogQikgPT46IENcbiAgfVxuICBjbGFzcyBFaXRoZXJDb21wb3Nlfj0-OlstXywgK19dfntcbiAgICBGdW5jdGlvblstKiwgKypdIFsgOis6ID0gRWl0aGVyIF1cbiAgICBVUklPWy0qLCArKl0gWyA6KzogPSBFaXRoZXIgXVxuICAgIFxuICAgICh0eXBlKSA6KzpbK18sICtfXVxuICAgICgpIHRvTGVmdFtBXTogQSA9PjogKEEgOis6IE5vdGhpbmcpXG4gICAgKCkgdG9SaWdodFtCXTogQiA9PjogKE5vdGhpbmcgOis6IEIpXG4gICAgKCkgZnJvbUVpdGhlcltBLCBCLCBDXSg9PiBBID0-OiBDKSg9PiBCID0-OiBDKTogKEEgOis6IEIpID0-OiBDXG4gIH0iLCJtZXJtYWlkIjp7fSwidXBkYXRlRWRpdG9yIjpmYWxzZX0">![AssociativeCompose hierarchy][AssociativeCompose-image]</a></p>
-<p><details><summary>Mermaid</summary></p>
-<pre><code class="hljs css language-mermaid"><span class="hljs-title">classDiagram</span>
-  <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~ &lt;|<span class="hljs-comment">-- IdentityCompose~=&gt;:[-_, +_]~</span>
-  <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~ &lt;|<span class="hljs-comment">-- BothCompose~=&gt;:[-_, +_]~</span>
-  <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~ &lt;|<span class="hljs-comment">-- EitherCompose~=&gt;:[-_, +_]~</span>
-  <span class="hljs-type">BothCompose</span> &lt;|<span class="hljs-comment">-- ApplicationCompose~=&gt;:[-_, +_]~</span>
-<span class="hljs-class">  <span class="hljs-keyword">class</span> <span class="hljs-type">AssociativeCompose</span>~=&gt;:[-_, +_]~{
-    () compose[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](<span class="hljs-type">B</span> =&gt;: <span class="hljs-type">C</span>, <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">B</span>): <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">C</span>
-  }
-  <span class="hljs-keyword">class</span> <span class="hljs-type">IdentityCompose</span>~=&gt;:[-_, +_]~{
-    <span class="hljs-type">Function</span>[-*, +*]
-    <span class="hljs-type">URIO</span>[-*, +*]
-
-    () identity[<span class="hljs-type">A</span>]: <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">A</span>
-  }
-  <span class="hljs-keyword">class</span> <span class="hljs-type">BothCompose</span>~=&gt;:[-_, +_]~{
-    <span class="hljs-type">URIO</span>[-*, +*] [ :*: = <span class="hljs-type">Tuple2</span> ]
-  
-    (<span class="hljs-title">type</span>) :*:[+_, +_]
-    () fromFirst[<span class="hljs-type">A</span>]: (<span class="hljs-type">A</span> :*: <span class="hljs-type">Any</span>) =&gt;: <span class="hljs-type">A</span>
-    () fromSecond[<span class="hljs-type">B</span>]: (<span class="hljs-type">Any</span> :*: <span class="hljs-type">B</span>) =&gt;: <span class="hljs-type">B</span>
-    () toBoth[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](<span class="hljs-type">A</span> =&gt;: <span class="hljs-type">B</span>)(<span class="hljs-type">A</span> =&gt;: <span class="hljs-type">C</span>): <span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">B</span> :*: <span class="hljs-type">C</span>)
-  }
-  <span class="hljs-keyword">class</span> <span class="hljs-type">ApplicationCompose</span>~=&gt;:[-_, +_]~{
-    <span class="hljs-type">Function</span>[-*, +*] [ :*: = <span class="hljs-type">Tuple2</span> ; <span class="hljs-comment">--&gt;: = Function ]</span>
-    
-    (<span class="hljs-title">type</span>) <span class="hljs-comment">--&gt;:[-_, +_]</span>
-    () application[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]: ((<span class="hljs-type">A</span> <span class="hljs-comment">--&gt;: B) :*: A) =&gt;: B</span>
-    () curry[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>]((<span class="hljs-type">A</span> :*: <span class="hljs-type">B</span>) =&gt;: <span class="hljs-type">C</span>): <span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">B</span> <span class="hljs-comment">--&gt;: C)</span>
-    () uncurry[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](<span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">B</span> <span class="hljs-comment">--&gt;: C)): (A :*: B) =&gt;: C</span>
-  }
-  <span class="hljs-title">class</span> <span class="hljs-type">EitherCompose</span>~=&gt;:[-<span class="hljs-title">_</span>, +<span class="hljs-title">_</span>]~{
-    <span class="hljs-type">Function</span>[-*, +*] [ :+: = <span class="hljs-type">Either</span> ]
-    <span class="hljs-type">URIO</span>[-*, +*] [ :+: = <span class="hljs-type">Either</span> ]
-    
-    (<span class="hljs-title">type</span>) :+:[+_, +_]
-    () toLeft[<span class="hljs-type">A</span>]: <span class="hljs-type">A</span> =&gt;: (<span class="hljs-type">A</span> :+: <span class="hljs-type">Nothing</span>)
-    () toRight[<span class="hljs-type">B</span>]: <span class="hljs-type">B</span> =&gt;: (<span class="hljs-type">Nothing</span> :+: <span class="hljs-type">B</span>)
-    () fromEither[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](=&gt; <span class="hljs-type">A</span> =&gt;: <span class="hljs-type">C</span>)(=&gt; <span class="hljs-type">B</span> =&gt;: <span class="hljs-type">C</span>): (<span class="hljs-type">A</span> :+: <span class="hljs-type">B</span>) =&gt;: <span class="hljs-type">C</span>
-  }
-</span></code></pre>
-<p></details></p>
-<h1><a class="anchor" aria-hidden="true" id="associativeflatten"></a><a href="#associativeflatten" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>AssociativeFlatten</h1>
-<p><a href="https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlRmxhdHRlbn5GPCtfPn4gPHwtLSBJZGVudGl0eUZsYXR0ZW5-RjxfPn5cbiAgY2xhc3MgQXNzb2NpYXRpdmVGbGF0dGVufkY8K18-fntcbiAgICBNYXBbSywgKypdXG4gICAgXG4gICAgKCkgZmxhdHRlbltBXShGW0ZbQV1dKTogRltBXVxuICB9XG4gIGNsYXNzIElkZW50aXR5RmxhdHRlbn5GPCtfPn57XG4gICAgQ2F1c2VbKypdXG4gICAgQ2h1bmtbKypdXG4gICAgRWl0aGVyW0wsICsqXVxuICAgIEV4aXRbRSwgKypdXG4gICAgRnV0dXJlWysqXVxuICAgIElkWysqXVxuICAgIExpc3RbKypdXG4gICAgTm9uRW1wdHlDaHVua1srKl1cbiAgICBPcHRpb25bKypdXG4gICAgVHJ5WysqXVxuICAgIFZlY3RvclsrKl1cbiAgICBaSU9bUiwgRSwgKypdXG4gICAgWk1hbmFnZWRbUiwgRSwgKypdXG4gICAgWlN0cmVhbVtSLCBFLCArKl1cblxuICAgICgpIGFueTogRltBbnldXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ">![AssociativeFlatten hierarchy][AssociativeFlatten-image]</a></p>
-<p><details><summary>Mermaid</summary></p>
-<pre><code class="hljs css language-mermaid">classDiagram
-  AssociativeFlatten~F&lt;+_&gt;~ &lt;|-- IdentityFlatten~F&lt;_&gt;~
-  class AssociativeFlatten~F&lt;+_&gt;~{
-    Map<span class="hljs-comment">[K, +*]</span>
-    
-    () flatten<span class="hljs-comment">[A]</span>(F<span class="hljs-comment">[F<span class="hljs-comment">[A]</span>]</span>): F<span class="hljs-comment">[A]</span>
-  }
-  class IdentityFlatten~F&lt;+_&gt;~{
-    Cause<span class="hljs-comment">[+*]</span>
-    Chunk<span class="hljs-comment">[+*]</span>
-    Either<span class="hljs-comment">[L, +*]</span>
-    Exit<span class="hljs-comment">[E, +*]</span>
-    Future<span class="hljs-comment">[+*]</span>
-    Id<span class="hljs-comment">[+*]</span>
-    List<span class="hljs-comment">[+*]</span>
-    NonEmptyChunk<span class="hljs-comment">[+*]</span>
-    Option<span class="hljs-comment">[+*]</span>
-    Try<span class="hljs-comment">[+*]</span>
-    Vector<span class="hljs-comment">[+*]</span>
-    ZIO<span class="hljs-comment">[R, E, +*]</span>
-    ZManaged<span class="hljs-comment">[R, E, +*]</span>
-    ZStream<span class="hljs-comment">[R, E, +*]</span>
-
-    () any: F<span class="hljs-comment">[Any]</span>
-  }
-</code></pre>
-<p></details></p>
-</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/overview/overview_index"><span class="arrow-prev">← </span><span>Contents</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
