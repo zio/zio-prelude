@@ -1,5 +1,23 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 package experimental
+
+import zio.URIO
 
 trait EitherCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
 
@@ -43,6 +61,21 @@ object EitherCompose {
       case Left(a)  => a2c(a)
       case Right(b) => b2c(b)
     }
+  }
+
+  implicit val URIOEitherCompose: EitherCompose[URIO] = new EitherCompose[URIO] {
+
+    type :+:[+l, +r] = Either[l, r]
+
+    def toLeft[A]: URIO[A, Either[A, Nothing]] = URIO.access(Left(_))
+
+    def toRight[B]: URIO[B, Either[Nothing, B]] = URIO.access(Right(_))
+
+    def fromEither[A, B, C](a2c: => URIO[A, C])(b2c: => URIO[B, C]): URIO[Either[A, B], C] =
+      a2c ||| b2c
+
+    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
+      AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
   }
 }
 
