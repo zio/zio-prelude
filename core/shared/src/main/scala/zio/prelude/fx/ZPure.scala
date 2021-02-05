@@ -945,13 +945,13 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   /**
    * Constructs a `Validation` from a predicate, failing with None.
    */
-  def fromPredicate[A](value: A)(f: A => Boolean): Validation[None.type, A] =
-    fromPredicateWith(None, value)(f)
+  def fromPredicate[A](f: A => Boolean)(value: A): Validation[None.type, A] =
+    fromPredicateWith(None)(f)(value)
 
   /**
    * Constructs a `Validation` from a predicate, failing with the error provided.
    */
-  def fromPredicateWith[E, A](error: E, value: A)(f: A => Boolean): Validation[E, A] =
+  def fromPredicateWith[E, A](error: E)(f: A => Boolean)(value: A): Validation[E, A] =
     if (f(value)) Validation.succeed(value)
     else Validation.fail(error)
 
