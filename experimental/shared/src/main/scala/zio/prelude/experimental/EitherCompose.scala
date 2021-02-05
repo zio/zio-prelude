@@ -17,6 +17,8 @@
 package zio.prelude
 package experimental
 
+import zio.URIO
+
 trait EitherCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
 
   type :+:[+_, +_]
@@ -59,6 +61,21 @@ object EitherCompose {
       case Left(a)  => a2c(a)
       case Right(b) => b2c(b)
     }
+  }
+
+  implicit val URIOEitherCompose: EitherCompose[URIO] = new EitherCompose[URIO] {
+
+    type :+:[+l, +r] = Either[l, r]
+
+    def toLeft[A]: URIO[A, Either[A, Nothing]] = URIO.access(Left(_))
+
+    def toRight[B]: URIO[B, Either[Nothing, B]] = URIO.access(Right(_))
+
+    def fromEither[A, B, C](a2c: => URIO[A, C])(b2c: => URIO[B, C]): URIO[Either[A, B], C] =
+      a2c ||| b2c
+
+    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
+      AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
   }
 }
 

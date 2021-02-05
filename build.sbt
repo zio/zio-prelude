@@ -40,7 +40,7 @@ addCommandAlias(
 
 // TODO remove once a stable version of ZIO for Scala Native 0.4.0 is out
 ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
-val zioVersion = "1.0.4.1+10-baab7567-SNAPSHOT"
+val zioVersion = "1.0.4-2"
 
 lazy val root = project
   .in(file("."))
