@@ -31,15 +31,13 @@ addCommandAlias(
 )
 addCommandAlias(
   "testJS",
-  ";coreJS/test;experimentalJVM/test"
+  ";coreJS/test;experimentalJS/test"
 )
 addCommandAlias(
   "testNative",
-  ";coreNative/test:compile;experimentalJVM/test:compile"
+  ";coreNative/test:compile;experimentalNative/test:compile"
 )
 
-// TODO remove once a stable version of ZIO for Scala Native 0.4.0 is out
-ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
 val zioVersion = "1.0.4-2"
 
 lazy val root = project
