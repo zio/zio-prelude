@@ -11,7 +11,7 @@ trait PlatformSpecificInvariantInstances {
     new ForEach[({ type lambda[+v] = par.ParMap[K, v] })#lambda] {
       def forEach[G[+_]: IdentityBoth: Covariant, V, V2](map: par.ParMap[K, V])(f: V => G[V2]): G[par.ParMap[K, V2]] =
         map.aggregate[G[par.ParMap[K, V2]]](par.ParMap.empty[K, V2].succeed)(
-          { case (m, (k, v)) => m.zipWith(f(v))((m, v) => m + ((k, v))) },
+          { case (m, k -> v) => m.zipWith(f(v))((m, v) => m + (k -> v)) },
           _.zipWith(_)(_ ++ _)
         )
     }
