@@ -114,7 +114,7 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      ("org.typelevel" %% "cats-core" % "2.3.1") match {
+      ("org.typelevel" %% "cats-core" % "2.4.1") match {
         case cats if isDotty.value => cats.withDottyCompat(scalaVersion.value)
         case cats                  => cats
       }
