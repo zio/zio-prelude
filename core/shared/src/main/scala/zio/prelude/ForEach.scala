@@ -101,8 +101,10 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * summary using the `combine` operation of `Identity`, or the `identity`
    * element if the collection is empty.
    */
-  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B =
-    foldLeft(fa)(Identity[B].identity)((b: B, a: A) => b combine f(a))
+  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B = {
+    type ConstB[+A] = Const[B, A]
+    Const.unwrap(forEach[ConstB, A, B](fa)(a => Const(f(a))))
+  }
 
   /**
    * Folds over the elements of this collection from right to left to produce a

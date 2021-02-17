@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -202,9 +203,9 @@ object ForEachSpec extends DefaultRunnableSpec {
           }
         },
         testM("reduceOption") {
-          check(genList, genIntFunction2) { (as, f) =>
-            val actual   = ForEach[List].reduceOption(as)(f)
-            val expected = as.reduceOption(f)
+          check(genList) { as =>
+            val actual   = ForEach[List].reduceOption(as)((a, _) => a)
+            val expected = as.reduceOption((a, _) => a)
             assert(actual)(equalTo(expected))
           }
         },
@@ -249,6 +250,12 @@ object ForEachSpec extends DefaultRunnableSpec {
           val expected = as.foldLeft(s)(f)
           assert(actual)(equalTo(expected))
         }
+      },
+      test("foldMap is stacks safe") {
+        val as       = (1 to 100000).toList
+        val expected = as.sum
+        val actual   = as.foldMap(a => Sum(a))
+        assert(actual)(equalTo(expected))
       }
     )
 }
