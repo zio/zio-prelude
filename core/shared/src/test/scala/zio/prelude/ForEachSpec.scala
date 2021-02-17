@@ -203,9 +203,9 @@ object ForEachSpec extends DefaultRunnableSpec {
           }
         },
         testM("reduceOption") {
-          check(genList) { as =>
-            val actual   = ForEach[List].reduceOption(as)((a, _) => a)
-            val expected = as.reduceOption((a, _) => a)
+          check(genList, genIntFunction2) { (as, f) =>
+             val actual   = ForEach[List].reduceOption(as)(f)
+             val expected = as.reduceOption(f)
             assert(actual)(equalTo(expected))
           }
         },

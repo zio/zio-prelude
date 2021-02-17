@@ -253,10 +253,11 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Reduces the collection to a summary value using the binary function `f`,
    * returning `None` if the collection is empty.
    */
-  def reduceOption[A](fa: F[A])(f: (A, A) => A): Option[A] = {
-    implicit val associative: Associative[A] = Associative.make(f)
-    reduceMapOption(fa)(identity)
-  }
+  def reduceOption[A](fa: F[A])(f: (A, A) => A): Option[A] =
+    foldLeft[Option[A], A](fa)(None) {
+      case (Some(s), a) => Some(f(s, a))
+      case (None, a)    => Some(a)
+    }
 
   /**
    * Reverses the order of elements in the collection.
