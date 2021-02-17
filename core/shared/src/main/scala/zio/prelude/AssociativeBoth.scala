@@ -1086,6 +1086,15 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
+   * The `AssociativeBoth` instance for `Const`.
+   */
+  implicit def ConstAssociativeBoth[A: Associative]: AssociativeBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new AssociativeBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      def both[B, C](fb: => Const[A, B], fc: => Const[A, C]): Const[A, (B, C)] =
+        Const.wrap(Const.unwrap(fb) <> Const.unwrap(fc))
+    }
+
+  /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `Either`.
    */
   implicit def EitherIdentityBoth[L]: IdentityBoth[({ type lambda[+r] = Either[L, r] })#lambda] =

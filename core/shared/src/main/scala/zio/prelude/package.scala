@@ -29,6 +29,7 @@ package object prelude
     with BicovariantSyntax
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
+    with ConstExports
     with CovariantSyntax
     with ContravariantSyntax
     with DebugSyntax
