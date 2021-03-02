@@ -778,23 +778,20 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   def tag: Int
 
   /**
-   * Transforms ZPure to ZIO. `S1` is read from a `ZRef`, `S2` and `Chunk[W]` written to `ZRef`s.
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with the first error `E`.
+   * State is read and written from/to a `ZRef`, log is written to another `ZRef`.
    */
-  def toZIO(
-    s1: ZRef[Nothing, Nothing, Nothing, S1],
-    s2: ZRef[Nothing, Nothing, S2, Nothing],
-    log: ZRef[Nothing, Nothing, Chunk[W], Nothing]
-  ): zio.ZIO[R, E, A] =
+  def toZIO[E1 >: E](s: ZRef[E1, E1, S2, S1], log: ZRef[E1, E1, Chunk[W], Any]): zio.ZIO[R, E1, A] =
     zio.ZIO.accessM[R] { r =>
       for {
-        s1     <- s1.get
+        s1     <- s.get
         result  = provide(r).runAll(s1)
         _      <- log.set(result._1)
         result <- result._2 match {
-                    case Left(value)   =>
+                    case Left(value)    =>
                       zio.ZIO.fail(value.first)
-                    case Right((v, a)) =>
-                      s2.set(v).as(a)
+                    case Right((s2, a)) =>
+                      s.set(s2).as(a)
                   }
 
       } yield result
@@ -802,8 +799,28 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
   /**
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with the first error `E`.
+   * State is read and written from/to a `ZRef` and the log is discarded.
    */
-  def toZioSimple(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
+  def toZIO[E1 >: E](s: ZRef[E1, E1, S2, S1]): zio.ZIO[R, E1, A] =
+    zio.ZIO.accessM[R] { r =>
+      for {
+        s1     <- s.get
+        result  = provide(r).runAll(s1)
+        result <- result._2 match {
+                    case Left(value)    =>
+                      zio.ZIO.fail(value.first)
+                    case Right((s2, a)) =>
+                      s.set(s2).as(a)
+                  }
+
+      } yield result
+    }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with the first error `E`.
+   * The original state is supposed to be `()` and the log is discarded.
+   */
+  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
     zio.ZIO.fromEither(provide(r).runEither)
   }
 
