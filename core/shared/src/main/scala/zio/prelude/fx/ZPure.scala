@@ -778,50 +778,46 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   def tag: Int
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails with the first error `E`.
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * State is read and written from/to a `ZRef`, log is written to another `ZRef`.
    */
-  def toZIO[E1 >: E](s: ZRef[E1, E1, S2, S1], log: ZRef[E1, E1, Chunk[W], Any]): zio.ZIO[R, E1, A] =
+  def toZIO[E1 >: E](log: ZRef[E1, E1, Chunk[W], Any])(s: ZRef[E1, E1, S2, S1]): zio.ZIO[R, E1, A] =
     zio.ZIO.accessM[R] { r =>
       for {
         s1     <- s.get
         result  = provide(r).runAll(s1)
         _      <- log.set(result._1)
         result <- result._2 match {
-                    case Left(value)    =>
-                      zio.ZIO.fail(value.first)
-                    case Right((s2, a)) =>
-                      s.set(s2).as(a)
+                    case Left(cause)    => zio.ZIO.halt(ParSeq.toCause(cause))
+                    case Right((s2, a)) => s.set(s2).as(a)
                   }
-
       } yield result
     }
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails with the first error `E`.
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * State is read and written from/to a `ZRef` and the log is discarded.
    */
-  def toZIO[E1 >: E](s: ZRef[E1, E1, S2, S1]): zio.ZIO[R, E1, A] =
-    zio.ZIO.accessM[R] { r =>
-      for {
-        s1     <- s.get
-        result  = provide(r).runAll(s1)
-        result <- result._2 match {
-                    case Left(value)    =>
-                      zio.ZIO.fail(value.first)
-                    case Right((s2, a)) =>
-                      s.set(s2).as(a)
-                  }
-
-      } yield result
-    }
+  def toZIO[E1 >: E](s: ZRef[E1, E1, S2, S1]): zio.ZIO[R, E1, A] = zio.ZIO.accessM[R] { r =>
+    for {
+      s1     <- s.get
+      result  = provide(r).runAll(s1)
+      result <- result._2 match {
+                  case Left(cause)    => zio.ZIO.halt(ParSeq.toCause(cause))
+                  case Right((s2, a)) => s.set(s2).as(a)
+                }
+    } yield result
+  }
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails with the first error `E`.
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * The original state is supposed to be `()` and the log is discarded.
    */
   def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
-    zio.ZIO.fromEither(provide(r).runEither)
+    provide(r).runAll(())._2 match {
+      case Left(cause)   => zio.ZIO.halt(ParSeq.toCause(cause))
+      case Right((_, a)) => zio.ZIO.succeedNow(a)
+    }
   }
 
   /**
