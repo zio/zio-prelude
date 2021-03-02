@@ -778,6 +778,13 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   def tag: Int
 
   /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails on the first error `E`.
+   */
+  def toZio(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
+    zio.ZIO.fromEither(provide(r).runEither)
+  }
+
+  /**
    * Submerges the full cause of failures of this computation.
    */
   def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
