@@ -19,7 +19,7 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, Ref, ZRef}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
@@ -778,9 +778,32 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   def tag: Int
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails on the first error `E`.
+   * Transforms ZPure to ZIO. `S1` is read from a `ZRef`, `S2` and `Chunk[W]` written to `ZRef`s.
    */
-  def toZio(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
+  def toZIO(
+    s1: ZRef[Nothing, Nothing, Nothing, S1],
+    s2: ZRef[Nothing, Nothing, S2, Nothing],
+    log: ZRef[Nothing, Nothing, Chunk[W], Nothing]
+  ): zio.ZIO[R, E, A] =
+    zio.ZIO.accessM[R] { r =>
+      for {
+        s1     <- s1.get
+        result  = provide(r).runAll(s1)
+        _      <- log.set(result._1)
+        result <- result._2 match {
+                    case Left(value)   =>
+                      zio.ZIO.fail(value.first)
+                    case Right((v, a)) =>
+                      s2.set(v).as(a)
+                  }
+
+      } yield result
+    }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with the first error `E`.
+   */
+  def toZioSimple(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
     zio.ZIO.fromEither(provide(r).runEither)
   }
 
