@@ -943,6 +943,19 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     }
 
   /**
+   * Constructs a `Validation` from a predicate, failing with None.
+   */
+  def fromPredicate[A](f: A => Boolean)(value: A): Validation[None.type, A] =
+    fromPredicateWith(None)(f)(value)
+
+  /**
+   * Constructs a `Validation` from a predicate, failing with the error provided.
+   */
+  def fromPredicateWith[E, A](error: E)(f: A => Boolean)(value: A): Validation[E, A] =
+    if (f(value)) Validation.succeed(value)
+    else Validation.fail(error)
+
+  /**
    * Constructs a computation from a `scala.util.Try`.
    */
   def fromTry[S, A](t: Try[A]): ZPure[Nothing, S, S, Any, Throwable, A] =
