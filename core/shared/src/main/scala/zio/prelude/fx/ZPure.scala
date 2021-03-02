@@ -19,7 +19,7 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, Ref, ZRef}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, ZRef}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
