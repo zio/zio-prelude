@@ -136,7 +136,7 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
 
   def toCause: zio.Cause[A] = this match {
     case ParSeq.Both(left, right) => zio.Cause.Both(left.toCause, right.toCause)
-    case ParSeq.Empty             => zio.Cause.empty
+    case _: ParSeq.Empty.type     => zio.Cause.empty
     case ParSeq.Single(value)     => zio.Cause.Fail(value)
     case ParSeq.Then(left, right) => zio.Cause.Then(left.toCause, right.toCause)
   }

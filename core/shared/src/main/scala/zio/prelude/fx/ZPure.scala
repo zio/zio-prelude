@@ -19,7 +19,7 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, ZRef}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
@@ -809,6 +809,18 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       result._2 match {
         case Left(cause)   => zio.ZIO.halt(cause.toCause)
         case Right(result) => zio.ZIO.succeedNow(result)
+      }
+    }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   */
+  def toZIOWithAll(s1: S1): zio.ZIO[R, E, (Chunk[W], S2, A)] =
+    zio.ZIO.accessM[R] { r =>
+      val (log, result) = provide(r).runAll(s1)
+      result match {
+        case Left(cause)    => zio.ZIO.halt(cause.toCause)
+        case Right((s2, a)) => zio.ZIO.succeedNow((log, s2, a))
       }
     }
 
