@@ -134,6 +134,13 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
       _.zipWith(_)(_ && _)
     ).asInstanceOf[F[ParSeq[Z, B]]]
 
+  def toCause: zio.Cause[A] = this match {
+    case ParSeq.Both(left, right) => zio.Cause.Both(left.toCause, right.toCause)
+    case ParSeq.Empty             => zio.Cause.empty
+    case ParSeq.Single(value)     => zio.Cause.Fail(value)
+    case ParSeq.Then(left, right) => zio.Cause.Then(left.toCause, right.toCause)
+  }
+
   /**
    * Transforms the type of events in this collection of events with the
    * specified function.
@@ -411,11 +418,4 @@ object ParSeq {
     f: (ParSeq[Z, A], ParSeq[Z, A]) => Boolean
   ): (ParSeq[Z, A], ParSeq[Z, A]) => Boolean =
     (l, r) => f(l, r) || f(r, l)
-
-  def toCause[A](ps: ParSeq[Unit, A]): zio.Cause[A] = ps match {
-    case ParSeq.Both(left, right) => zio.Cause.Both(toCause(left), toCause(right))
-    case ParSeq.Empty             => zio.Cause.empty
-    case ParSeq.Single(value)     => zio.Cause.Fail(value)
-    case ParSeq.Then(left, right) => zio.Cause.Then(toCause(left), toCause(right))
-  }
 }
