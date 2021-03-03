@@ -329,7 +329,7 @@ object Validation {
    * Constructs a `Validation` from a predicate, failing with None.
    */
   def fromPredicate[A](f: A => Boolean)(value: A): Validation[None.type, A] =
-    fromPredicateWith(None, value)(f)
+    fromPredicateWith(None)(f)(value)
 
   /**
    * Constructs a `Validation` from a predicate, failing with the error provided.
