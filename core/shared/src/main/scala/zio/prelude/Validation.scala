@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.prelude.Validation._
 import zio.test.Assertion
-import zio.{IO, NonEmptyChunk, ZIO}
+import zio.{IO, ZIO}
 
 import scala.util.Try
 import scala.util.control.NonFatal
@@ -37,7 +37,7 @@ sealed trait Validation[+E, +A] { self =>
 
   def combine[E1 >: E, A1 >: A](that: Validation[E1, A1])(implicit A1: Associative[A1]): Validation[E1, A1] =
     (self, that) match {
-      case (Failure(es1), Failure(es2)) => Failure(es1 ++ es2)
+      case (Failure(es1), Failure(es2)) => Failure(es1 <> es2)
       case (l @ Failure(_), _)          => l
       case (_, r @ Failure(_))          => r
       case (Success(a1), Success(a2))   => Success(A1.combine(a1, a2))
@@ -66,7 +66,7 @@ sealed trait Validation[+E, +A] { self =>
   /**
    * Folds over the error and success values of this `Validation`.
    */
-  final def fold[B](failure: NonEmptyChunk[E] => B, success: A => B): B =
+  final def fold[B](failure: NonEmptyMultiSet[E] => B, success: A => B): B =
     self match {
       case Failure(es) => failure(es)
       case Success(a)  => success(a)
@@ -95,7 +95,7 @@ sealed trait Validation[+E, +A] { self =>
   /**
    * Transforms this `Validation` to an `Either`.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+  final def toEither[E1 >: E]: Either[NonEmptyMultiSet[E1], A] =
     fold(Left(_), Right(_))
 
   /**
@@ -114,7 +114,7 @@ sealed trait Validation[+E, +A] { self =>
   /**
    * Converts this `Validation` into a `ZIO` effect.
    */
-  final def toZIO: IO[NonEmptyChunk[E], A] = ZIO.fromEither(self.toEither)
+  final def toZIO: IO[NonEmptyMultiSet[E], A] = ZIO.fromEither(self.toEither)
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
@@ -148,7 +148,7 @@ sealed trait Validation[+E, +A] { self =>
    */
   final def zipWithPar[E1 >: E, B, C](that: Validation[E1, B])(f: (A, B) => C): Validation[E1, C] =
     (self, that) match {
-      case (Failure(es1), Failure(es2)) => Failure(es1 ++ es2)
+      case (Failure(es1), Failure(es2)) => Failure(es1 | es2)
       case (failure @ Failure(_), _)    => failure
       case (_, failure @ Failure(_))    => failure
       case (Success(a), Success(b))     => Success(f(a, b))
@@ -157,8 +157,8 @@ sealed trait Validation[+E, +A] { self =>
 
 object Validation {
 
-  final case class Failure[+E](errors: NonEmptyChunk[E]) extends Validation[E, Nothing]
-  final case class Success[+A](value: A)                 extends Validation[Nothing, A]
+  final case class Failure[+E](errors: NonEmptyMultiSet[E]) extends Validation[E, Nothing]
+  final case class Success[+A](value: A)                    extends Validation[Nothing, A]
 
   /** The `Associative` instance for `Validation`. */
   implicit def ValidationAssociative[E, A: Associative]: Associative[Validation[E, A]] =
@@ -199,9 +199,10 @@ object Validation {
   }
 
   /**
-   * Derives an `Equal[Validation[E, A]]` given an `Equal[E]` and an `Equal[A]`.
+   * Derives an `Equal[Validation[E, A]]` given an `Equal[A]`.
+   * Due to the limitations of Scala's `Set`, this uses object equality on `E`.
    */
-  implicit def ValidationEqual[E: Equal, A: Equal]: Equal[Validation[E, A]] =
+  implicit def ValidationEqual[E, A: Equal]: Equal[Validation[E, A]] =
     Equal.make {
       case (Failure(es), Failure(e1s)) => es === e1s
       case (Success(a), Success(a1))   => a === a1
@@ -211,7 +212,7 @@ object Validation {
   /**
    * The `DeriveEqual` instance for `Validation`.
    */
-  implicit def ValidationDeriveEqual[E: Equal]: DeriveEqual[({ type lambda[+x] = Validation[E, x] })#lambda] =
+  implicit def ValidationDeriveEqual[E]: DeriveEqual[({ type lambda[+x] = Validation[E, x] })#lambda] =
     new DeriveEqual[({ type lambda[+x] = Validation[E, x] })#lambda] {
       def derive[A: Equal]: Equal[Validation[E, A]] =
         ValidationEqual
@@ -240,8 +241,8 @@ object Validation {
   /**
    * Derives a `Hash[Validation[E, A]]` given a `Hash[E]` and a `Hash[A]`.
    */
-  implicit def ValidationHash[E: Hash, A: Hash]: Hash[Validation[E, A]] =
-    Hash[NonEmptyChunk[E]].eitherWith(Hash[A])(_.toEither)
+  implicit def ValidationHash[E, A: Hash]: Hash[Validation[E, A]] =
+    Hash[NonEmptyMultiSet[E]].eitherWith(Hash[A])(_.toEither)
 
   /** The `Idempotent` instance for `Validation`. */
   implicit def ValidationIdempotent[E, A: Idempotent]: Idempotent[Validation[E, A]] =
@@ -300,7 +301,7 @@ object Validation {
    * Constructs a `Validation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(NonEmptyChunk(error))
+    Failure(NonEmptyMultiSet(error))
 
   /**
    * Constructs a `Validation` from a value and an assertion about that value.

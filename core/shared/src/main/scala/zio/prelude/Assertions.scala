@@ -36,11 +36,9 @@ trait Assertions {
    * specified assertion.
    */
   def isFailureV[E](assertion: Assertion[E]): Assertion[Validation[E, Any]] =
-    Assertion.assertionRec("isFailureV")(param(assertion))(assertion) { validation =>
-      validation.either.run match {
-        case Left(e) => Some(e)
-        case _       => None
-      }
+    Assertion.assertionRec("isFailureV")(param(assertion))(assertion) {
+      case Validation.Failure(e) => Some(e.head)
+      case _                     => None
     }
 
   /**
@@ -76,10 +74,8 @@ trait Assertions {
    * specified assertion.
    */
   def isSuccessV[A](assertion: Assertion[A]): Assertion[Validation[Any, A]] =
-    Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) { validation =>
-      validation.either.run match {
-        case Right(a) => Some(a)
-        case _        => None
-      }
+    Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) {
+      case Validation.Success(a) => Some(a)
+      case _                     => None
     }
 }

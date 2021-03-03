@@ -69,8 +69,8 @@ object Gens {
    * A generator of `Validation` values.
    */
   def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
-    Gen.either(Gens.parSeq(Gen.empty, e), a).map {
-      case Left(es) => Validation.halt(es)
+    Gen.either(Gen.mapOf1(e, Gen.int(1, 9)), a).map {
+      case Left(es) => Validation.Failure(NonEmptyMultiSet.fromMapOption(es).get)
       case Right(a) => Validation.succeed(a)
     }
 }

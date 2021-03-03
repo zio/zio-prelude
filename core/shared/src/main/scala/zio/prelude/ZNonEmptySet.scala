@@ -93,6 +93,9 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   override def hashCode: Int =
     zset.hashCode
 
+  /** Returns an element */
+  def head: A = zset.toMap.head._1
+
   /**
    * Transforms the elements in the set using the specified function. If this
    * results in mapping two or more elements to the same values, the number of

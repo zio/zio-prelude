@@ -144,8 +144,8 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
   /**
    * Transforms a parSeq to a flat chunk of events.
    */
-  final def toChunk[Z <: Unit, A](parSeq: ParSeq[Z, A]): zio.Chunk[A] =
-    parSeq.fold(zio.Chunk.empty, zio.Chunk.single)(_ ++ _, _ ++ _)
+  final def toChunk: zio.Chunk[A] =
+    fold(zio.Chunk.empty, zio.Chunk.single)(_ ++ _, _ ++ _)
 
   /**
    * Combines this collection of events with that collection of events to
