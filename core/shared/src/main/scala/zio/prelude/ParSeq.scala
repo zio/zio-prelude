@@ -142,6 +142,12 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
     flatMap(a => ParSeq.single(f(a)))
 
   /**
+   * Transforms a parSeq to a flat chunk of events.
+   */
+  final def toChunk[Z <: Unit, A](parSeq: ParSeq[Z, A]): zio.Chunk[A] =
+    parSeq.fold(zio.Chunk.empty, zio.Chunk.single)(_ ++ _, _ ++ _)
+
+  /**
    * Combines this collection of events with that collection of events to
    * return the Cartesian product of events, combining the elements into a
    * tuple.

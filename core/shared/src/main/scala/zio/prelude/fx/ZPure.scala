@@ -19,7 +19,7 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
@@ -723,6 +723,15 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def runState(s: S1)(implicit ev1: Any <:< R, ev2: E <:< Nothing): S2 =
     run(s)._1
+
+  /**
+   * Runs this computation to produce its result or all the failures.
+   */
+  final def runValidation(implicit ev1: Unit <:< S1, ev2: Any <:< R): Validation[E, A] =
+    runAll(())._2.fold(
+      cause => Validation.Failure(NonEmptyChunk.fromChunk(cause.toChunk).get),
+      { case (_, a) => Validation.Success(a) }
+    )
 
   /**
    * Exposes the full cause of failures of this computation.
