@@ -16,6 +16,7 @@
 
 package zio.prelude.fx
 
+import com.github.ghik.silencer.silent
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
@@ -1161,6 +1162,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       }
   }
 
+  @silent("never used")
   private object Tags {
     final val FlatMap = 0
     final val Succeed = 1
