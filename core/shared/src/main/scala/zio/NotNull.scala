@@ -1,4 +1,4 @@
-package zio.prelude
+package zio
 
 /**
  * Proof that `A` does not have type `Null`.

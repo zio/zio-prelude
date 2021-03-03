@@ -788,6 +788,16 @@ object ZPureSpec extends DefaultRunnableSpec {
           }
         ),
         suite("constructors")(
+          testM("catchOnly (Success case)") {
+            check(genInt) { a =>
+              assert(ZPure.catchOnly[NumberFormatException](a.toString.toInt).runEither)(isRight(equalTo(a)))
+            }
+          },
+          test("catchOnly (Failure case)") {
+            implicit val throwableHash = Equal.ThrowableHash
+            val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
+            assert(ZPure.catchOnly[NumberFormatException]("a".toInt).runEither)(isLeft(equalTo(exception)))
+          },
           testM("fail") {
             check(genInt) { e =>
               assert(ZPure.fail(e).getState.either.run)(isLeft(equalTo(e)))

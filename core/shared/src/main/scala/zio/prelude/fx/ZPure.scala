@@ -20,7 +20,7 @@ import com.github.ghik.silencer.silent
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NotNull}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.reflect.ClassTag
@@ -879,22 +879,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def accessM[R]: AccessMPartiallyApplied[R] =
     new AccessMPartiallyApplied
 
-  def fromEffectCatching[E >: Null <: Throwable]: FromEffectCatchingPartiallyApplied[E] =
-    new FromEffectCatchingPartiallyApplied[E]
-
-  private[fx] final class FromEffectCatchingPartiallyApplied[E](private val ignored: Boolean = true) extends AnyVal {
-    /* `NT` ensures that the type parameter `E` is explicitly supplied
-     * https://github.com/typelevel/cats/pull/1867/files#r138381991
-     */
-    def apply[S, A](effect: => A)(implicit E: ClassTag[E], NT: NotNull[E]): ZPure[Nothing, S, S, Any, E, A] =
-      suspend {
-        try ZPure.succeed(effect)
-        catch {
-          case e if E.runtimeClass.isInstance(e) =>
-            ZPure.fail(e.asInstanceOf[E])
-        }
-      }
-  }
+  def catchOnly[E >: Null <: Throwable]: CatchOnlyPartiallyApplied[E] =
+    new CatchOnlyPartiallyApplied[E]
 
   /**
    * Combines a collection of computations into a single computation that
@@ -1095,6 +1081,20 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   final class AccessMPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[W, S1, S2, E, A](f: R => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
       Access(f)
+  }
+
+  private[fx] final class CatchOnlyPartiallyApplied[E](private val dummy: Boolean = true) extends AnyVal {
+    /* `NT` ensures that the type parameter `E` is explicitly supplied
+     * https://github.com/typelevel/cats/pull/1867/files#r138381991
+     */
+    def apply[S, A](effect: => A)(implicit E: ClassTag[E], NT: NotNull[E]): ZPure[Nothing, S, S, Any, E, A] =
+      suspend {
+        try ZPure.succeed(effect)
+        catch {
+          case e if E.runtimeClass.isInstance(e) =>
+            ZPure.fail(e.asInstanceOf[E])
+        }
+      }
   }
 
   @implicitNotFound(
