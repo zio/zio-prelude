@@ -22,6 +22,7 @@ import zio.test.Assertion
 import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
 
 import scala.annotation.{implicitNotFound, switch}
+import scala.reflect.ClassTag
 import scala.util.Try
 import scala.util.control.NonFatal
 
@@ -775,7 +776,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       case None        => ZPure.fail(new NoSuchElementException("None.get"))
     })
 
-  def tag: Int
+  protected def tag: Int
 
   /**
    * Submerges the full cause of failures of this computation.
@@ -876,6 +877,23 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
 
   def accessM[R]: AccessMPartiallyApplied[R] =
     new AccessMPartiallyApplied
+
+  def fromEffectCatching[E >: Null <: Throwable]: FromEffectCatchingPartiallyApplied[E] =
+    new FromEffectCatchingPartiallyApplied[E]
+
+  private[fx] final class FromEffectCatchingPartiallyApplied[E](private val ignored: Boolean = true) extends AnyVal {
+    /* `NT` ensures that the type parameter `E` is explicitly supplied
+     * https://github.com/typelevel/cats/pull/1867/files#r138381991
+     */
+    def apply[S, A](effect: => A)(implicit E: ClassTag[E], NT: NotNull[E]): ZPure[Nothing, S, S, Any, E, A] =
+      suspend {
+        try ZPure.succeed(effect)
+        catch {
+          case e if E.runtimeClass.isInstance(e) =>
+            ZPure.fail(e.asInstanceOf[E])
+        }
+      }
+  }
 
   /**
    * Combines a collection of computations into a single computation that
@@ -1143,7 +1161,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       }
   }
 
-  object Tags {
+  private object Tags {
     final val FlatMap = 0
     final val Succeed = 1
     final val Fail    = 2
