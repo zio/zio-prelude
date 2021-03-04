@@ -879,7 +879,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def accessM[R]: AccessMPartiallyApplied[R] =
     new AccessMPartiallyApplied
 
-  def catchOnly[E >: Null <: Throwable]: CatchOnlyPartiallyApplied[E] =
+  def catchOnly[E <: Throwable]: CatchOnlyPartiallyApplied[E] =
     new CatchOnlyPartiallyApplied[E]
 
   /**
@@ -1087,7 +1087,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     /* `NT` ensures that the type parameter `E` is explicitly supplied
      * https://github.com/typelevel/cats/pull/1867/files#r138381991
      */
-    def apply[S, A](effect: => A)(implicit E: ClassTag[E], NT: NotNull[E]): ZPure[Nothing, S, S, Any, E, A] =
+    def apply[S, A](effect: => A)(implicit E: ClassTag[E], NT: CanFail[E]): ZPure[Nothing, S, S, Any, E, A] =
       suspend {
         try ZPure.succeed(effect)
         catch {
