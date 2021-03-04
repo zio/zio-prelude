@@ -842,7 +842,35 @@ object ZPureSpec extends DefaultRunnableSpec {
               )
             }
           )
-        )
+        ),
+        test("parallel errors example") {
+          def validateName(s: String): ZPure[Nothing, Unit, Unit, Any, String, String]               =
+            if (s == "John Doe") ZPure.succeed(s) else ZPure.fail("Wrong name!")
+          def validateAge(age: Int): ZPure[Nothing, Unit, Unit, Any, String, Int]                    =
+            if (age >= 18) ZPure.succeed(age) else ZPure.fail("Under age")
+          def validateAuthorized(authorized: Boolean): ZPure[Nothing, Unit, Unit, Any, String, Unit] =
+            if (authorized) ZPure.unit else ZPure.fail("Not authorized")
+          val validation                                                                             =
+            validateName("Jane Doe") zipPar validateAge(17) zipPar validateAuthorized(false)
+          val result                                                                                 = validation.sandbox.either.run
+          assert(result)(
+            isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
+          )
+        },
+        test("implicit syntax") {
+          def validateName(s: String): ZPure[Nothing, Unit, Unit, Any, String, String]               =
+            if (s == "John Doe") ZPure.succeed(s) else ZPure.fail("Wrong name!")
+          def validateAge(age: Int): ZPure[Nothing, Unit, Unit, Any, String, Int]                    =
+            if (age >= 18) ZPure.succeed(age) else ZPure.fail("Under age")
+          def validateAuthorized(authorized: Boolean): ZPure[Nothing, Unit, Unit, Any, String, Unit] =
+            if (authorized) ZPure.unit else ZPure.fail("Not authorized")
+          val validation                                                                             =
+            (validateName("Jane Doe"), validateAge(17), validateAuthorized(false)).tupledPar
+          val result                                                                                 = validation.sandbox.either.run
+          assert(result)(
+            isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
+          )
+        }
       ),
       suite("log")(
         test("log example") {
