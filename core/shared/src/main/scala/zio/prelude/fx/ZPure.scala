@@ -801,7 +801,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     }
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
    */
   def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
     zio.ZIO.accessM[R] { r =>
@@ -813,7 +813,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     }
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
    */
   def toZIOWithAll(s1: S1): zio.ZIO[R, E, (Chunk[W], S2, A)] =
     zio.ZIO.accessM[R] { r =>
