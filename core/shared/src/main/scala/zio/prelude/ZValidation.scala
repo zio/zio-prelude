@@ -86,6 +86,15 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value of the log.
+   */
+  final def getLog: Chunk[W] =
+    self match {
+      case Failure(w, _) => w
+      case Success(w, _) => w
+    }
+
+  /**
    * Writes an entry to the log.
    */
   final def log[W1 >: W](w1: W1): ZValidation[W1, E, A] =
