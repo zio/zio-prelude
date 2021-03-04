@@ -59,7 +59,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
     libraryDependencies ++= {
-      val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
+      val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.1" % Optional)
       Seq(
         "dev.zio" %%% "zio"      % zioVersion,
         "dev.zio" %%% "zio-test" % zioVersion
