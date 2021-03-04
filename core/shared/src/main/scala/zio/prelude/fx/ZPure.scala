@@ -778,6 +778,53 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   def tag: Int
 
   /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   * The original state is supposed to be `()`.
+   */
+  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
+    provide(r).runAll(())._2 match {
+      case Left(cause)   => zio.ZIO.halt(cause.toCause)
+      case Right((_, a)) => zio.ZIO.succeedNow(a)
+    }
+  }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   */
+  def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
+    zio.ZIO.accessM[R] { r =>
+      val result = provide(r).runAll(s1)
+      result._2 match {
+        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Right((_, a)) => zio.ZIO.succeedNow(a)
+      }
+    }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
+   */
+  def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
+    zio.ZIO.accessM[R] { r =>
+      val result = provide(r).runAll(s1)
+      result._2 match {
+        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Right(result) => zio.ZIO.succeedNow(result)
+      }
+    }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
+   */
+  def toZIOWithAll(s1: S1): zio.ZIO[R, E, (Chunk[W], S2, A)] =
+    zio.ZIO.accessM[R] { r =>
+      val (log, result) = provide(r).runAll(s1)
+      result match {
+        case Left(cause)    => zio.ZIO.halt(cause.toCause)
+        case Right((s2, a)) => zio.ZIO.succeedNow((log, s2, a))
+      }
+    }
+
+  /**
    * Submerges the full cause of failures of this computation.
    */
   def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
