@@ -18,7 +18,7 @@ object NewtypeFSpec extends DefaultRunnableSpec {
         },
         test("invalid values") {
           val expected = "List(1, 2, 3, 4, 5) did not satisfy isShorterThan(5)"
-          assert(ShortList.make(List(1, 2, 3, 4, 5)))(isFailureV(equalTo(expected)))
+          assert(ShortList.make(List(1, 2, 3, 4, 5)))(isFailureV(equalTo(NonEmptyMultiSet(expected))))
         }
       ),
       suite("SubtypeSmartF")(

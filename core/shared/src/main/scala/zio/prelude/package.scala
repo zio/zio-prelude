@@ -72,11 +72,8 @@ package object prelude
   type EWriter[+W, +E, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, E, A]
   val EWriter: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
 
-  type ZValidation[+W, +E, +A] = zio.prelude.fx.ZPure[W, Unit, Unit, Any, E, A]
-  val ZValidation: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
-
-  type Validation[+E, +A] = zio.prelude.fx.ZPure[Nothing, Unit, Unit, Any, E, A]
-  val Validation: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+  type Validation[+E, +A] = ZValidation[Nothing, E, A]
+  val Validation: ZValidation.type = ZValidation
 
   type MultiSet[+A] = ZSet[A, Int]
   val MultiSet: ZSet.type = ZSet

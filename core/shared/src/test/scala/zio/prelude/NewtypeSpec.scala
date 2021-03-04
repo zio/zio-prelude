@@ -24,7 +24,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
         },
         test("invalid values") {
           val expected = "-1 did not satisfy isGreaterThanEqualTo(0)"
-          assert(Natural.make(-1))(isFailureV(equalTo(expected)))
+          assert(Natural.make(-1))(isFailureV(equalTo(NonEmptyMultiSet(expected))))
         }
       ),
       suite("SubtypeSmart")(

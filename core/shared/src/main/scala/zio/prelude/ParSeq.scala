@@ -16,6 +16,8 @@
 
 package zio.prelude
 
+import zio.Chunk
+
 import scala.annotation.tailrec
 
 /**
@@ -140,6 +142,13 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
    */
   final def map[B](f: A => B): ParSeq[Z, B] =
     flatMap(a => ParSeq.single(f(a)))
+
+  /**
+   * Converts this collection of events to a `NonEmptyMultiSet` of events,
+   * discarding information about the sequential structure of events.
+   */
+  final def toNonEmptyMultiSet(implicit ev: Z <:< Nothing): NonEmptyMultiSet[A] =
+    NonEmptyMultiSet.fromIterableOption(fold(Chunk.empty, Chunk.single)(_ ++ _, _ ++ _)).get
 
   /**
    * Combines this collection of events with that collection of events to
