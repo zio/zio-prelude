@@ -1,30 +1,20 @@
 package zio
 
+import scala.annotation.implicitAmbiguous
+
 /**
- * Proof that `A` does not have type `Null`.
- *
- * Ambiguous implicits trick ensures that there is not an instance for `Null`.
- * [[https://gist.github.com/milessabin/de58f3ba7024d51dcc1a More info]]
+ * A value of type `NotNull[A]` provides implicit evidence that the type `A` is not `Null`.
  */
-sealed trait NotNull[A]
+sealed abstract class NotNull[-A]
 
-object NotNull {
+object NotNull extends NotNull[Any] {
 
-  /**
-   * Since NotNull is just a marker trait with no functionality, it's safe to
-   * reuse a single instance of it. This helps prevent unnecessary allocations.
-   */
-  private[this] val AnyNotNull: NotNull[Any] = new NotNull[Any] {}
+  implicit def notNull[A]: NotNull[A] = NotNull
 
-  private[this] def exception: Exception =
-    new Exception(
-      "An instance of NotNull[Null] was used. This should never happen. Both ambiguous NotNull[Null] instances should always be in scope if one of them is."
-    )
-
-  implicit def `If you are seeing this, you probably need to add an explicit type parameter somewhere, because Null is being inferred.`
-    : NotNull[Null] = throw exception
-
-  implicit def NotNullNullAmbiguous: NotNull[Null] = throw exception
-
-  implicit def ANotNull[A]: NotNull[A] = AnyNotNull.asInstanceOf[NotNull[A]]
+  // Provide multiple ambiguous values so an implicit NotNull[Null] cannot be found.
+  @implicitAmbiguous(
+    "Null is being inferred, but it shouldn't. You probably need to add an explicit type parameter somewhere."
+  )
+  implicit val canFailAmbiguous1: NotNull[Null] = NotNull
+  implicit val canFailAmbiguous2: NotNull[Null] = NotNull
 }
