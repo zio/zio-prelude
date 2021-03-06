@@ -1322,14 +1322,14 @@ trait AssociativeBothSyntax {
     /**
      * A symbolic alias for `zip`.
      */
-    def <*>[F1[x] >: F[x], B](fb: => F1[B])(implicit both: AssociativeBoth[F1]): F1[(A, B)] =
+    def <*>[B](fb: => F[B])(implicit both: AssociativeBoth[F]): F[(A, B)] =
       zip(fb)
 
     /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]`.
      */
-    def zip[F1[x] >: F[x], B](fb: => F1[B])(implicit both: AssociativeBoth[F1]): F1[(A, B)] =
+    def zip[B](fb: => F[B])(implicit both: AssociativeBoth[F]): F[(A, B)] =
       both.both(fa, fb)
   }
 
@@ -1341,13 +1341,13 @@ trait AssociativeBothSyntax {
     /**
      * A symbolic alias for `zipLeft`.
      */
-    def <*[F1[+x] >: F[x], B](fb: => F1[B])(implicit both: AssociativeBoth[F1], covariant: Covariant[F1]): F1[A] =
+    def <*[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[A] =
       zipLeft(fb)
 
     /**
      * A symbolic alias for `zipRight`.
      */
-    def *>[F1[+x] >: F[x], B](fb: => F1[B])(implicit both: AssociativeBoth[F1], covariant: Covariant[F1]): F1[B] =
+    def *>[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[B] =
       zipRight(fb)
 
     /**
@@ -1360,23 +1360,21 @@ trait AssociativeBothSyntax {
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]`, keeping only the left value.
      */
-    def zipLeft[F1[+x] >: F[x], B](fb: => F1[B])(implicit both: AssociativeBoth[F1], covariant: Covariant[F1]): F1[A] =
+    def zipLeft[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[A] =
       zipWith(fb)((a, _) => a)
 
     /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]`, keeping only the right value.
      */
-    def zipRight[F1[+x] >: F[x], B](fb: => F1[B])(implicit both: AssociativeBoth[F1], covariant: Covariant[F1]): F1[B] =
+    def zipRight[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[B] =
       zipWith(fb)((_, b) => b)
 
     /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]` and then maps the result with the specified function.
      */
-    def zipWith[F1[+x] >: F[x], B, C](fb: => F1[B])(
-      f: (A, B) => C
-    )(implicit both: AssociativeBoth[F1], covariant: Covariant[F1]): F1[C] =
+    def zipWith[B, C](fb: => F[B])(f: (A, B) => C)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[C] =
       both.both(fa, fb).map(f.tupled)
   }
 
@@ -1389,9 +1387,9 @@ trait AssociativeBothSyntax {
      * Combines two values of types `F[A]` and `F[B]` to produce an
      * `F[(A, B)]` and then contramaps the result with the specified function.
      */
-    def bothWith[F1[-x] >: F[x], B, C](
-      fb: => F1[B]
-    )(f: C => (A, B))(implicit both: AssociativeBoth[F1], contravariant: Contravariant[F1]): F1[C] =
+    def bothWith[B, C](
+      fb: => F[B]
+    )(f: C => (A, B))(implicit both: AssociativeBoth[F], contravariant: Contravariant[F]): F[C] =
       both.both(fa, fb).contramap(f)
   }
 
