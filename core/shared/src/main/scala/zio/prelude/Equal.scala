@@ -282,7 +282,7 @@ object Equal extends Lawful[Equal] {
    * `Double.NaN` will be treated as greater than any other number.
    */
   implicit val DoubleHashOrd: Hash[Double] with Ord[Double] =
-    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
+    HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
@@ -309,7 +309,7 @@ object Equal extends Lawful[Equal] {
    * `Float.NaN` will be treated as greater than any other number.
    */
   implicit val FloatHashOrd: Hash[Float] with Ord[Float] =
-    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
+    HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
    * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
@@ -888,8 +888,7 @@ object Equal extends Lawful[Equal] {
    * Note, that it doesn't take `Hash[A]` nor `Equal[A]` into account.
    */
   implicit def CauseHash[A]: Hash[Cause[A]] =
-    // we have to resort to equals, because the structure is opaque, namely Cause.Internal.Meta
-    // `Equal` and `Hash` instances will be possible once this PR gets merged: https://github.com/zio/zio/pull/4179
+    // we have to resort to equals, because the structure uses `Set` internally
     Hash.default
 
   /**

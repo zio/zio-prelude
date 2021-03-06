@@ -350,6 +350,6 @@ object HashOrd {
    * the implementation of `hashCode` for values of type `A` and ordering from [[scala.math.Ordering]].
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Hash[A] with Ord[A] =
-    make(_.hashCode(), (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
+    make(_.##, (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
 
 }

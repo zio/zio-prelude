@@ -875,7 +875,7 @@ object Hash extends Lawful[Hash] {
    * equality and hashing embodied in `equals` and `hashCode`.
    */
   private lazy val DefaultHash: Hash[Any] =
-    Hash.make(_.hashCode, _ == _)
+    Hash.make(_.##, _ == _)
 }
 
 trait HashSyntax {
