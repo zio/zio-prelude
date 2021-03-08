@@ -114,6 +114,8 @@ object Debug {
         new Constructor(namespace, name, ListMap(repr :: reprs.toList: _*))
     }
     final case class VConstructor(namespace: List[SString], name: SString, reprs: List[Repr]) extends Repr
+
+    implicit def deriveRepr[A](x: A)(implicit A: Debug[A]): Repr = A.debug(x)
   }
 
   implicit val NothingDebug: Debug[Nothing] = n => n
@@ -791,5 +793,9 @@ object Debug {
 trait DebugSyntax {
   implicit class DebugOps[A](self: A) {
     def debug(implicit debug: Debug[A]): Debug.Repr = debug.debug(self)
+  }
+
+  implicit final class DebugInterpolator(_sc: StringContext) {
+    def dbg(args: Debug.Repr*): String = _sc.s(args.map(_.toString): _*)
   }
 }

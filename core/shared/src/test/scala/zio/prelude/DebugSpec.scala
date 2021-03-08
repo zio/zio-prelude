@@ -192,6 +192,16 @@ object DebugSpec extends DefaultRunnableSpec {
         testM("testTrait")(check(genTestTrait) { c =>
           assert(c.debug.render(Renderer.Full))(equalTo(s"DebugSpec.${c.getClass.getSimpleName.init}"))
         })
+      ),
+      suite("DebugInterpolator")(
+        test("String") {
+          val name = "World"
+          assert(dbg"Hello, my name is $name.")(equalTo("Hello, my name is \"World\"."))
+        },
+        test("Int") {
+          val sum = 1 + 1
+          assert(dbg"1 + 1 is $sum.")(equalTo("1 + 1 is 2."))
+        }
       )
     )
 }
