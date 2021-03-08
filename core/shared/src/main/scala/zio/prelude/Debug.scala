@@ -19,6 +19,7 @@ package zio.prelude
 import zio.{Chunk, NonEmptyChunk}
 
 import scala.collection.immutable.ListMap
+import scala.language.implicitConversions
 
 trait Debug[-A] {
   def debug(a: A): Debug.Repr
@@ -85,17 +86,17 @@ object Debug {
   }
 
   object Repr {
+    import java.lang.{String => SString}
     import scala.{
-      Int => SInt,
       Boolean => SBoolean,
-      Short => SShort,
+      Byte => SByte,
+      Char => SChar,
       Double => SDouble,
       Float => SFloat,
+      Int => SInt,
       Long => SLong,
-      Char => SChar,
-      Byte => SByte
+      Short => SShort
     }
-    import java.lang.{String => SString}
 
     final case class Int(value: SInt)                                                                    extends Repr
     final case class Double(value: SDouble)                                                              extends Repr
