@@ -1336,13 +1336,13 @@ trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
     /**
      * A symbolic alias for `combine`.
      */
-    def <>(r: => A)(implicit associative: Associative[A]): A =
+    def <>[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
      * Associatively combines this value with the specified value
      */
-    def combine(r: => A)(implicit associative: Associative[A]): A =
+    def combine[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
