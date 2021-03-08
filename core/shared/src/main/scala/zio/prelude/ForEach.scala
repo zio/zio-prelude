@@ -134,6 +134,13 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     forEach(fa)(f).as(())
 
+  /**
+   * Traverses each element in the collection with the specified effectual function `f`.
+   * In contrast to `forEach_`, you can be sure that you're not mistakenly discarding values.
+   */
+  def forEachUnit[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Unit]): G[Unit] =
+    forEach(fa)(f).as(())
+
   def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) { (m, v) =>
       val k = f(v)
@@ -351,6 +358,8 @@ trait ForEachSyntax {
       F.forall(self)(f)
     def forEach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: ForEach[F]): G[Unit]               =
       F.forEach_(self)(f)
+    def forEachUnit[G[+_]: IdentityBoth: Covariant](f: A => G[Unit])(implicit F: ForEach[F]): G[Unit]           =
+      F.forEachUnit(self)(f)
     def isEmpty(implicit F: ForEach[F]): Boolean                                                                =
       F.isEmpty(self)
     def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: ForEach[F]): (S, F[B])                            =
