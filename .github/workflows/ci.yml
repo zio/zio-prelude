@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         java: ['adopt@1.8', 'adopt@1.11']
-        scala: ['2.11.12', '2.12.13', '2.13.4', '3.0.0-M3']
+        scala: ['2.11.12', '2.12.13', '2.13.4', '3.0.0-RC1']
         platform: ['JVM', 'JS', 'Native']
     steps:
       - name: Checkout current branch
@@ -47,10 +47,10 @@ jobs:
       - name: Cache scala dependencies
         uses: coursier/cache-action@v5
       - name: Run tests
-        if: ${{ matrix.scala != '3.0.0-M3' }}
+        if: ${{ matrix.scala != '3.0.0-RC1' }}
         run: sbt ++${{ matrix.scala }}! test${{ matrix.platform }}
       - name: Run dotty tests
-        if: ${{ matrix.scala == '3.0.0-M3' && matrix.platform == 'JVM' }}
+        if: ${{ matrix.scala == '3.0.0-RC1' && matrix.platform == 'JVM' }}
         run: sbt ++${{ matrix.scala }}! testJVM
 
   publish:
