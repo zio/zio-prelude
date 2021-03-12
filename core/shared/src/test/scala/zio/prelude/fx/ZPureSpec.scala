@@ -874,7 +874,7 @@ object ZPureSpec extends DefaultRunnableSpec {
         test("state is restored after failure") {
           val foo: ZPure[Nothing, String, Int, Any, Nothing, Unit] = ZPure.set(3)
           val bar: ZPure[Nothing, Int, String, Any, Nothing, Unit] = ZPure.set("bar")
-          val zPure = for {
+          val zPure                                                = for {
             _ <- (foo *> ZPure.fail("baz") *> bar).either
             s <- ZPure.get
           } yield s
