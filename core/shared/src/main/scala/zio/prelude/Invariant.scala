@@ -103,6 +103,15 @@ object Invariant
     }
 
   /**
+   * The `ForEach` instance for `Const`.
+   */
+  implicit def ConstForEach[A]: ForEach[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new ForEach[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      def forEach[G[+_]: IdentityBoth: Covariant, B, C](fa: Const[A, B])(f: B => G[C]): G[Const[A, C]] =
+        Const.wrap(Const.unwrap(fa)).succeed
+    }
+
+  /**
    * The `Covariant` (and thus `Invariant`) for a failed `Either`
    */
   implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =

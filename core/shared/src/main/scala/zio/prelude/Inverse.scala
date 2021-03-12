@@ -915,13 +915,13 @@ trait InverseSyntax {
     /**
      * A symbolic alias for `inverse`.
      */
-    def ~~(r: => A)(implicit inverse: Inverse[A]): A =
+    def ~~[A1 >: A](r: => A1)(implicit inverse: Inverse[A1]): A1 =
       inverse.inverse(l, r)
 
     /**
      * Inverses this value with the specified value
      */
-    def inverse(r: => A)(implicit inverse: Inverse[A]): A =
+    def inverse[A1 >: A](r: => A1)(implicit inverse: Inverse[A1]): A1 =
       inverse.inverse(l, r)
 
     /**

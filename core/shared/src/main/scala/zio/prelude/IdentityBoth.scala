@@ -79,6 +79,16 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   def apply[F[_]](implicit identityBoth: IdentityBoth[F]): IdentityBoth[F] =
     identityBoth
 
+  /**
+   * The `IdentityBoth` instance for `Const`.
+   */
+  implicit def ConstIdentityeBoth[A: Identity]: IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      val any: Const[A, Any]                                                   = Const(Identity[A].identity)
+      def both[B, C](fb: => Const[A, B], fc: => Const[A, C]): Const[A, (B, C)] =
+        Const.wrap(Const.unwrap(fb) <> Const.unwrap(fc))
+    }
+
   def fromCovariantIdentityFlatten[F[+_]](implicit
     covariant: Covariant[F],
     identityFlatten: IdentityFlatten[F]

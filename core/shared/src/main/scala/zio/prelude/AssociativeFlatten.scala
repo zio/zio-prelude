@@ -90,6 +90,15 @@ object AssociativeFlatten
     }
 
   /**
+   * The `AssociativeFlatten` instance for `Const`.
+   */
+  implicit def ConstAssociativeFlatten[A]: AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      def flatten[B](ffb: Const[A, Const[A, B]]): Const[A, B] =
+        Const.wrap(Const.unwrap(ffb))
+    }
+
+  /**
    * The `AssociativeFlatten` and `IdentityFlatten` instance for `Either`.
    */
   implicit def EitherIdentityFlatten[E]: IdentityFlatten[({ type lambda[+a] = Either[E, a] })#lambda] =
