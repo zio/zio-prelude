@@ -105,7 +105,7 @@ trait Equal[-A] { self =>
   def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
-object Equal extends Lawful[Equal] with PlatformSpecificEqualInstances {
+object Equal extends Lawful[Equal] {
 
   /**
    * For all values `a1`, `a1` is equal to `a1`.

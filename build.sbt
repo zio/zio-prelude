@@ -21,7 +21,7 @@ addCommandAlias("check", "; scalafmtSbtCheck; scalafmtCheckAll; compile:scalafix
 
 addCommandAlias(
   "testJVM",
-  ";coreJVM/test;experimentalJVM/test"
+  ";coreJVM/test;experimentalJVM/test;scalaParallelCollections/test"
 )
 addCommandAlias(
   "testJS",
@@ -48,7 +48,8 @@ lazy val root = project
     docs,
     experimentalJS,
     experimentalJVM,
-    experimentalNative
+    experimentalNative,
+    scalaParallelCollections
   )
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -107,6 +108,28 @@ lazy val experimentalJVM = experimental.jvm
 
 lazy val experimentalNative = experimental.native
   .settings(nativeSettings)
+
+lazy val scalaParallelCollections = project
+  .in(file("scala-parallel-collections"))
+  .dependsOn(coreJVM % "compile->compile;test->test")
+  .settings(stdSettings("zio-prelude-scala-parallel-collections"))
+  .settings(buildInfoSettings("zio.prelude.scalaparallelcollections"))
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(
+    libraryDependencies ++= {
+      scalaVersion.value match {
+        case BuildHelper.Scala213 | BuildHelper.ScalaDotty =>
+          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.1" % Optional)
+        case _                                             =>
+          List()
+      }
+    }
+  )
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .settings(scalaReflectTestSettings)
+  .enablePlugins(BuildInfoPlugin)
 
 lazy val benchmarks = project
   .in(file("benchmarks"))

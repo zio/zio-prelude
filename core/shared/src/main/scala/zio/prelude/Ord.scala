@@ -122,7 +122,7 @@ trait Ord[-A] extends PartialOrd[A] { self =>
     }
 }
 
-object Ord extends Lawful[Ord] with PlatformSpecificOrdInstances {
+object Ord extends Lawful[Ord] {
 
   /**
    * For all values `a1` and `a2`, `a1` is less than or equal to `a2` or `a2`

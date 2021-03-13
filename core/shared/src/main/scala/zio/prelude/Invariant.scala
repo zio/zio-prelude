@@ -57,10 +57,7 @@ trait Invariant[F[_]] { self =>
     }
 }
 
-object Invariant
-    extends LowPriorityInvariantImplicits
-    with InvariantVersionSpecific
-    with PlatformSpecificInvariantInstances {
+object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpecific {
 
   def apply[F[_]](implicit invariant: Invariant[F]): Invariant[F] =
     invariant

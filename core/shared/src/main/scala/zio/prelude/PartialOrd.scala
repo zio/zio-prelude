@@ -108,7 +108,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
 
 }
 
-object PartialOrd extends Lawful[PartialOrd] with PlatformSpecificPartialOrdInstances {
+object PartialOrd extends Lawful[PartialOrd] {
 
   /**
    * For all values `a1`, `a2`, and `a3`, if `a1` is less than `a2` and `a2` is

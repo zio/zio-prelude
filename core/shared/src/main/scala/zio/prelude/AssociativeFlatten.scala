@@ -43,9 +43,7 @@ trait AssociativeFlatten[F[+_]] {
   def flatten[A](ffa: F[F[A]]): F[A]
 }
 
-object AssociativeFlatten
-    extends LawfulF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal]
-    with PlatformSpecificAssociativeFlattenInstances {
+object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] {
 
   /**
    * For all `fffa`, `flatten(flatten(fffa))` is equivalent to
