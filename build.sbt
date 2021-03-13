@@ -59,19 +59,10 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(buildInfoSettings("zio.prelude"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings(
-    libraryDependencies ++= {
-      val spc = scalaVersion.value match {
-        case BuildHelper.Scala213 | BuildHelper.ScalaDotty =>
-          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
-          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.1" % Optional)
-        case _                                             =>
-          List()
-      }
-      Seq(
-        "dev.zio" %%% "zio"      % zioVersion,
-        "dev.zio" %%% "zio-test" % zioVersion
-      ) ++ spc
-    }
+    libraryDependencies ++= Seq(
+      "dev.zio" %%% "zio"      % zioVersion,
+      "dev.zio" %%% "zio-test" % zioVersion
+    )
   )
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
