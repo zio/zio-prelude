@@ -870,6 +870,15 @@ object ZPureSpec extends DefaultRunnableSpec {
           assert(result)(
             isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
           )
+        },
+        test("state is restored after failure") {
+          val foo: ZPure[Nothing, String, Int, Any, Nothing, Unit] = ZPure.set(3)
+          val bar: ZPure[Nothing, Int, String, Any, Nothing, Unit] = ZPure.set("bar")
+          val zPure                                                = for {
+            _ <- (foo *> ZPure.fail("baz") *> bar).either
+            s <- ZPure.get
+          } yield s
+          assert(zPure.provideState("").run)(equalTo(""))
         }
       ),
       suite("log")(

@@ -663,8 +663,11 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
         case Tags.Fold    =>
           val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
+          val state = s0
+          val fold  =
+            ZPure.Fold(zPure.value, (cause: Cause[Any]) => ZPure.set(state) *> zPure.failure(cause), zPure.success)
+          stack.push(fold)
           curZPure = zPure.value
-          stack.push(zPure)
         case Tags.Access  =>
           val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any, Any]]
           curZPure = zPure.access(environments.peek())
