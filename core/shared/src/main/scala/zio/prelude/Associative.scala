@@ -1325,7 +1325,7 @@ object Associative extends Lawful[AssociativeEqual] {
     Identity.make(Vector.empty, _ ++ _)
 }
 
-trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
+trait AssociativeSyntax {
 
   /**
    * Provides infix syntax for combining two values with an associative
