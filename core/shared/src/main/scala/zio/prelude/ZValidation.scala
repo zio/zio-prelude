@@ -151,6 +151,12 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Transforms this `ZValidation` to an `Either`, transforming the accumulated errors and discarding the log.
+   */
+  final def toEitherWith[E1 >: E, E2](f: NonEmptyMultiSet[E1] => E2): Either[E2, A] =
+    toEither.left.map(f)
+
+  /**
    * Transforms this `ZValidation` to an `Option`, discarding information about
    * the errors and log.
    */
