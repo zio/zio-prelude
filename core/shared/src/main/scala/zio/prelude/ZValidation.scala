@@ -173,7 +173,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms this `ZValidation` to an `Either`, transforming the accumulated errors and discarding the log.
    */
-  final def toEitherWith[E1 >: E, E2](f: NonEmptyMultiSet[E1] => E2): Either[E2, A] =
+  final def toEitherWith[E2](f: NonEmptyMultiSet[E] => E2): Either[E2, A] =
     toEither.left.map(f)
 
   /**
