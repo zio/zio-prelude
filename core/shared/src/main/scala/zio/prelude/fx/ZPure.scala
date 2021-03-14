@@ -728,6 +728,15 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     run(s)._1
 
   /**
+   * Runs this computation to a `ZValidation` value.
+   */
+  final def runValidation(implicit ev1: Unit <:< S1, ev2: Any <:< R): ZValidation[W, E, A] =
+    runAll(()) match {
+      case (log, Left(cause))   => ZValidation.Failure(log, cause.toNonEmptyMultiSet)
+      case (log, Right((_, a))) => ZValidation.Success(log, a)
+    }
+
+  /**
    * Exposes the full cause of failures of this computation.
    */
   final def sandbox: ZPure[W, S1, S2, R, Cause[E], A] =
