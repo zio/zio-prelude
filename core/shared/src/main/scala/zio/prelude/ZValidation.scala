@@ -124,6 +124,16 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Transforms all the error values of this `ZValidation` with the specified
+   * function.
+   */
+  final def mapErrorAll[E2](f: NonEmptyMultiSet[E] => NonEmptyMultiSet[E2]): ZValidation[W, E2, A] =
+    self match {
+      case Failure(w, e) => Failure(w, f(e))
+      case Success(w, a) => Success(w, a)
+    }
+
+  /**
    * Transforms the log entries of this `ZValidation` with the specified
    * function.
    */
@@ -131,6 +141,16 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     self match {
       case Failure(w, e) => Failure(w.map(f), e)
       case Success(w, a) => Success(w.map(f), a)
+    }
+
+  /**
+   * Transforms all the log entries of this `ZValidation` with the specified
+   * function.
+   */
+  final def mapLogAll[W2](f: Chunk[W] => Chunk[W2]): ZValidation[W2, E, A] =
+    self match {
+      case Failure(w, e) => Failure(f(w), e)
+      case Success(w, a) => Success(f(w), a)
     }
 
   /**
@@ -241,7 +261,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * Derives an `Equal[ZValidation[W, E, A]]` given an `Equal[A]`.
    */
-  implicit def ZValidationEqual[W, E: Equal, A: Equal]: Equal[ZValidation[W, E, A]] =
+  implicit def ZValidationEqual[W, E, A: Equal]: Equal[ZValidation[W, E, A]] =
     Equal.make {
       case (Failure(_, e), Failure(_, e1)) => e == e1
       case (Success(_, a), Success(_, a1)) => a === a1
@@ -1441,8 +1461,8 @@ trait LowPriorityValidationImplicits {
     }
 
   /**
-   * Derives a `Hash[ZValidation[W, E, A]]` given a `Hash[E]` and a `Hash[A]`.
+   * Derives a `Hash[ZValidation[W, E, A]]` given a `Hash[A]`.
    */
-  implicit def ValidationHash[W, E: Hash, A: Hash]: Hash[ZValidation[W, E, A]] =
+  implicit def ValidationHash[W, E, A: Hash]: Hash[ZValidation[W, E, A]] =
     Hash[NonEmptyMultiSet[E]].eitherWith(Hash[A])(_.toEither)
 }
