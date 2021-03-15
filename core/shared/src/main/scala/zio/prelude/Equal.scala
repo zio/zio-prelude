@@ -345,7 +345,7 @@ object Equal extends Lawful[Equal] {
       l.compareStrict(r)
 
     override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
-      l.size === r.size &&
+      l.size == r.size &&
         l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
   }
 
