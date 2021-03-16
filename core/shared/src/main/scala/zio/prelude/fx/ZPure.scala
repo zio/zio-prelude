@@ -20,7 +20,7 @@ import com.github.ghik.silencer.silent
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.reflect.ClassTag
@@ -665,8 +665,11 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
         case Tags.Fold    =>
           val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
+          val state = s0
+          val fold  =
+            ZPure.Fold(zPure.value, (cause: Cause[Any]) => ZPure.set(state) *> zPure.failure(cause), zPure.success)
+          stack.push(fold)
           curZPure = zPure.value
-          stack.push(zPure)
         case Tags.Access  =>
           val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any, Any]]
           curZPure = zPure.access(environments.peek())
@@ -727,6 +730,15 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     run(s)._1
 
   /**
+   * Runs this computation to a `ZValidation` value.
+   */
+  final def runValidation(implicit ev1: Unit <:< S1, ev2: Any <:< R): ZValidation[W, E, A] =
+    runAll(()) match {
+      case (log, Left(cause))   => ZValidation.Failure(log, NonEmptyChunk.fromChunk(cause.toChunk).get)
+      case (log, Right((_, a))) => ZValidation.Success(log, a)
+    }
+
+  /**
    * Exposes the full cause of failures of this computation.
    */
   final def sandbox: ZPure[W, S1, S2, R, Cause[E], A] =
@@ -778,6 +790,53 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     })
 
   protected def tag: Int
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   * The original state is supposed to be `()`.
+   */
+  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
+    provide(r).runAll(())._2 match {
+      case Left(cause)   => zio.ZIO.halt(cause.toCause)
+      case Right((_, a)) => zio.ZIO.succeedNow(a)
+    }
+  }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   */
+  def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
+    zio.ZIO.accessM[R] { r =>
+      val result = provide(r).runAll(s1)
+      result._2 match {
+        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Right((_, a)) => zio.ZIO.succeedNow(a)
+      }
+    }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
+   */
+  def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
+    zio.ZIO.accessM[R] { r =>
+      val result = provide(r).runAll(s1)
+      result._2 match {
+        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Right(result) => zio.ZIO.succeedNow(result)
+      }
+    }
+
+  /**
+   * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
+   */
+  def toZIOWithAll(s1: S1): zio.ZIO[R, E, (Chunk[W], S2, A)] =
+    zio.ZIO.accessM[R] { r =>
+      val (log, result) = provide(r).runAll(s1)
+      result match {
+        case Left(cause)    => zio.ZIO.halt(cause.toCause)
+        case Right((s2, a)) => zio.ZIO.succeedNow((log, s2, a))
+      }
+    }
 
   /**
    * Submerges the full cause of failures of this computation.
@@ -946,6 +1005,19 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       case Some(a) => ZPure.succeed(a)
       case None    => ZPure.fail(())
     }
+
+  /**
+   * Constructs a `Validation` from a predicate, failing with None.
+   */
+  def fromPredicate[A](value: A)(f: A => Boolean): Validation[None.type, A] =
+    fromPredicateWith(None)(value)(f)
+
+  /**
+   * Constructs a `Validation` from a predicate, failing with the error provided.
+   */
+  def fromPredicateWith[E, A](error: E)(value: A)(f: A => Boolean): Validation[E, A] =
+    if (f(value)) Validation.succeed(value)
+    else Validation.fail(error)
 
   /**
    * Constructs a computation from a `scala.util.Try`.

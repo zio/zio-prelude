@@ -123,17 +123,21 @@ object GenFs {
         Gen.crossN(a, b, c)((a, b, c) => (a, b, c))
     }
 
-  def validation[R <: Random with Sized, E](e: Gen[R, E]): GenF[R, ({ type lambda[+x] = Validation[E, x] })#lambda] =
-    new GenF[R, ({ type lambda[+x] = Validation[E, x] })#lambda] {
-      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, Validation[E, A]] =
-        Gens.validation(e, a)
+  def validation[R <: Random with Sized, W, E](
+    w: Gen[R, W],
+    e: Gen[R, E]
+  ): GenF[R, ({ type lambda[+x] = ZValidation[W, E, x] })#lambda] =
+    new GenF[R, ({ type lambda[+x] = ZValidation[W, E, x] })#lambda] {
+      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, ZValidation[W, E, A]] =
+        Gens.validation(w, e, a)
     }
 
-  def validationFailure[R <: Random with Sized, A](
+  def validationFailure[R <: Random with Sized, W, A](
+    w: Gen[R, W],
     a: Gen[R, A]
-  ): GenF[R, ({ type lambda[+x] = Failure[Validation[x, A]] })#lambda] =
-    new GenF[R, ({ type lambda[+x] = Failure[Validation[x, A]] })#lambda] {
-      def apply[R1 <: R, E](e: Gen[R1, E]): Gen[R1, Failure[Validation[E, A]]] =
-        Gens.validation(e, a).map(Failure.wrap)
+  ): GenF[R, ({ type lambda[+x] = Failure[ZValidation[W, x, A]] })#lambda] =
+    new GenF[R, ({ type lambda[+x] = Failure[ZValidation[W, x, A]] })#lambda] {
+      def apply[R1 <: R, E](e: Gen[R1, E]): Gen[R1, Failure[ZValidation[W, E, A]]] =
+        Gens.validation(w, e, a).map(Failure.wrap)
     }
 }

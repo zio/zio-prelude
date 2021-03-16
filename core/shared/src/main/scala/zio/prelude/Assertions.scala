@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.NonEmptyChunk
 import zio.test.Assertion
 import zio.test.Assertion.Render._
 
@@ -35,12 +36,10 @@ trait Assertions {
    * Makes a new assertion that requires a validation failure satisfying a
    * specified assertion.
    */
-  def isFailureV[E](assertion: Assertion[E]): Assertion[Validation[E, Any]] =
-    Assertion.assertionRec("isFailureV")(param(assertion))(assertion) { validation =>
-      validation.either.run match {
-        case Left(e) => Some(e)
-        case _       => None
-      }
+  def isFailureV[E](assertion: Assertion[NonEmptyChunk[E]]): Assertion[ZValidation[Any, E, Any]] =
+    Assertion.assertionRec("isFailureV")(param(assertion))(assertion) {
+      case ZValidation.Failure(_, es) => Some(es)
+      case _                          => None
     }
 
   /**
@@ -75,11 +74,9 @@ trait Assertions {
    * Makes a new assertion that requires a validation failure satisfying a
    * specified assertion.
    */
-  def isSuccessV[A](assertion: Assertion[A]): Assertion[Validation[Any, A]] =
-    Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) { validation =>
-      validation.either.run match {
-        case Right(a) => Some(a)
-        case _        => None
-      }
+  def isSuccessV[A](assertion: Assertion[A]): Assertion[ZValidation[Any, Any, A]] =
+    Assertion.assertionRec("isSuccessV")(param(assertion))(assertion) {
+      case ZValidation.Success(_, a) => Some(a)
+      case _                         => None
     }
 }

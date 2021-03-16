@@ -717,6 +717,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       }
     }
 
+  /** The `Invariant` instance for `Set` */
   implicit val SetInvariant: Invariant[Set] =
     new Invariant[Set] {
       def invmap[A, B](f: A <=> B): Set[A] <=> Set[B] =

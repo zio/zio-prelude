@@ -60,6 +60,12 @@ object Gens {
     Gen.listOf1(a).map(NonEmptyList.fromCons)
 
   /**
+   * A generator of `NonEmptyMultiSet` values.
+   */
+  def nonEmptyMultiSetOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptyMultiSet[A]] =
+    Gen.mapOf1(a, Gen.size).map(NonEmptyMultiSet.fromMapOption(_).get)
+
+  /**
    * A generator of state transition functions.
    */
   def state[R, S, A](s: Gen[R, S], a: Gen[R, A]): Gen[R, State[S, A]] =
@@ -68,9 +74,15 @@ object Gens {
   /**
    * A generator of `Validation` values.
    */
-  def validation[R <: Random with Sized, E, A](e: Gen[R, E], a: Gen[R, A]): Gen[R, Validation[E, A]] =
-    Gen.either(Gens.parSeq(Gen.empty, e), a).map {
-      case Left(es) => Validation.halt(es)
-      case Right(a) => Validation.succeed(a)
+  def validation[R <: Random with Sized, W, E, A](
+    w: Gen[R, W],
+    e: Gen[R, E],
+    a: Gen[R, A]
+  ): Gen[R, ZValidation[W, E, A]] =
+    Gen.chunkOf(w).flatMap { w =>
+      Gen.either(Gen.chunkOf1(e), a).map {
+        case Left(e)  => Validation.Failure(w, e)
+        case Right(a) => Validation.Success(w, a)
+      }
     }
 }
