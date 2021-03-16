@@ -22,11 +22,11 @@ object ZSetSpec extends DefaultRunnableSpec {
   def genZSet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
     Gen.mapOf(a, b).map(ZSet.fromMap)
 
-  val smallInts: Gen[Random with Sized, Chunk[Int]] =
+  lazy val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  val naturals: Gen[Random with Sized, Natural] =
-    Gen.sized(n => Gens.natural(Natural.zero, Natural.unsafeMake(n)))
+  lazy val naturals: Gen[Random with Sized, Natural] =
+    Gen.small(n => Gens.natural(Natural.zero, Natural.unsafeMake(n)))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
     Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
@@ -54,7 +54,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             IntHashOrd
           )
         ),
-        // testM("foreach")(checkAllLaws(ForEach)(genFZSet(naturals), Gen.anyInt)),
+        testM("foreach")(checkAllLaws(ForEach)(genFZSet(naturals), Gen.anyInt)),
         testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt))),
         testM("intersect commutative")(
           checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))

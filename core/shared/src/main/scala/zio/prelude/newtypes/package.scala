@@ -119,35 +119,20 @@ package object newtypes {
     def successor(n: Natural): Natural =
       Natural(n + 1)
 
-    /**
-     * The `Commutative` and `Identity` instance for the product of `Natural` values.
-     */
-    implicit val NaturalProdCommutativeIdentity: Commutative[Prod[Natural]] with Identity[Prod[Natural]] =
-      new Commutative[Prod[Natural]] with Identity[Prod[Natural]] {
-        def combine(x: => Prod[Natural], y: => Prod[Natural]): Prod[Natural] = {
-          val product = x * y
-          if (x == 0 || product / x != y) Prod(Natural(Int.MaxValue)) else Prod(Natural(product))
-        }
-        val identity: Prod[Natural] =
-          Prod(one)
-      }
+    def times(x: Natural, y: Natural): Natural = {
+      val product = x * y
+      if (x == 0 || product / x != y) Natural(Int.MaxValue) else Natural(product)
+    }
 
-    /**
-     * The `Commutative` and `Inverse` instance for the sum of `Narutal` values.
-     */
-    implicit val NaturalSumCommutativeInverse: Commutative[Sum[Natural]] with Inverse[Sum[Natural]] =
-      new Commutative[Sum[Natural]] with Inverse[Sum[Natural]] {
-        def combine(x: => Sum[Natural], y: => Sum[Natural]): Sum[Natural] = {
-          val sum = x + y
-          if (sum < 0) Sum(Natural(Int.MaxValue)) else Sum(Natural(sum))
-        }
-        val identity: Sum[Natural] =
-          Sum(zero)
-        def inverse(x: => Sum[Natural], y: => Sum[Natural]): Sum[Natural] = {
-          val difference = x - y
-          if (difference < 0) Sum(zero) else Sum(Natural(difference))
-        }
-      }
+    def plus(x: Natural, y: Natural): Natural = {
+      val sum = x + y
+      if (sum < 0) Natural(Int.MaxValue) else Natural(sum)
+    }
+
+    def minus(x: Natural, y: Natural): Natural = {
+      val difference = x - y
+      if (difference < 0) zero else Natural(difference)
+    }
 
     private[prelude] def unsafeMake(n: Int): Natural =
       Natural(n)
