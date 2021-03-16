@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.prelude.ZValidation._
 import zio.test.Assertion
-import zio.{Chunk, IO, ZIO}
+import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
 
@@ -79,7 +79,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Folds over the error and success values of this `ZValidation`.
    */
-  final def fold[B](failure: NonEmptyMultiSet[E] => B, success: A => B): B =
+  final def fold[B](failure: NonEmptyChunk[E] => B, success: A => B): B =
     self match {
       case Failure(_, e) => failure(e)
       case Success(_, a) => success(a)
@@ -127,7 +127,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * Transforms all the error values of this `ZValidation` with the specified
    * function.
    */
-  final def mapErrorAll[E2](f: NonEmptyMultiSet[E] => NonEmptyMultiSet[E2]): ZValidation[W, E2, A] =
+  final def mapErrorAll[E2](f: NonEmptyChunk[E] => NonEmptyChunk[E2]): ZValidation[W, E2, A] =
     self match {
       case Failure(w, e) => Failure(w, f(e))
       case Success(w, a) => Success(w, a)
@@ -158,7 +158,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * a success of type `A` or a `Left` with one or more errors of type `E`,
    * along with the log.
    */
-  final def runLog[B]: (Chunk[W], Either[NonEmptyMultiSet[E], A]) =
+  final def runLog[B]: (Chunk[W], Either[NonEmptyChunk[E], A]) =
     self match {
       case Failure(w, e) => (w, Left(e))
       case Success(w, a) => (w, Right(a))
@@ -167,13 +167,13 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyMultiSet[E1], A] =
+  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
     fold(Left(_), Right(_))
 
   /**
    * Transforms this `ZValidation` to an `Either`, transforming the accumulated errors and discarding the log.
    */
-  final def toEitherWith[E2](f: NonEmptyMultiSet[E] => E2): Either[E2, A] =
+  final def toEitherWith[E2](f: NonEmptyChunk[E] => E2): Either[E2, A] =
     toEither.left.map(f)
 
   /**
@@ -188,12 +188,12 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * error and the log.
    */
   final def toTry(implicit ev: E <:< Throwable): scala.util.Try[A] =
-    fold(es => scala.util.Failure(ev(es.toMap.keys.head)), scala.util.Success(_))
+    fold(es => scala.util.Failure(ev(es.head)), scala.util.Success(_))
 
   /**
    * Converts this `ZValidation` into a `ZIO` effect, discarding the log.
    */
-  final def toZIO: IO[NonEmptyMultiSet[E], A] =
+  final def toZIO: IO[NonEmptyChunk[E], A] =
     ZIO.fromEither(self.toEither)
 
   /**
@@ -228,7 +228,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def zipWithPar[W1 >: W, E1 >: E, B, C](that: ZValidation[W1, E1, B])(f: (A, B) => C): ZValidation[W1, E1, C] =
     (self, that) match {
-      case (Failure(w, e), Failure(w1, e1)) => Failure(w ++ w1, e | e1)
+      case (Failure(w, e), Failure(w1, e1)) => Failure(w ++ w1, e ++ e1)
       case (Failure(w, e), Success(w1, _))  => Failure(w ++ w1, e)
       case (Success(w, _), Failure(w1, e1)) => Failure(w ++ w1, e1)
       case (Success(w, a), Success(w1, b))  => Success(w ++ w1, f(a, b))
@@ -237,8 +237,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 
 object ZValidation extends LowPriorityValidationImplicits {
 
-  final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyMultiSet[E]) extends ZValidation[W, E, Nothing]
-  final case class Success[+W, +A](log: Chunk[W], value: A)                    extends ZValidation[W, Nothing, A]
+  final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing]
+  final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
 
   /**
    * The `Covariant` instance for `ZValidation`.
@@ -263,7 +263,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    */
   implicit def ZValidationEqual[W, E, A: Equal]: Equal[ZValidation[W, E, A]] =
     Equal.make {
-      case (Failure(_, e), Failure(_, e1)) => e == e1
+      case (Failure(_, e), Failure(_, e1)) => MultiSet.fromIterable(e) === MultiSet.fromIterable(e1)
       case (Success(_, a), Success(_, a1)) => a === a1
       case _                               => false
     }
@@ -323,7 +323,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
    */
   implicit def ZValidationPartialOrd[W, E: PartialOrd, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
-    PartialOrd[NonEmptyMultiSet[E]].eitherWith(PartialOrd[A])(_.toEither)
+    PartialOrd[MultiSet[E]].eitherWith(PartialOrd[A])(_.fold(e => Left(MultiSet.fromIterable(e)), a => Right(a)))
 
   /**
    * Attempts to evaluate the specified value, catching any error that occurs
@@ -348,7 +348,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Constructs a `ZValidation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(Chunk.empty, NonEmptyMultiSet(error))
+    Failure(Chunk.empty, NonEmptyChunk(error))
 
   /**
    * Constructs a `ZValidation` from a value and an assertion about that value.
@@ -1477,5 +1477,5 @@ trait LowPriorityValidationImplicits {
    * Derives a `Hash[ZValidation[W, E, A]]` given a `Hash[A]`.
    */
   implicit def ValidationHash[W, E, A: Hash]: Hash[ZValidation[W, E, A]] =
-    Hash[NonEmptyMultiSet[E]].eitherWith(Hash[A])(_.toEither)
+    Hash[MultiSet[E]].eitherWith(Hash[A])(_.fold(e => Left(MultiSet.fromIterable(e)), a => Right(a)))
 }
