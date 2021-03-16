@@ -32,6 +32,14 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   @inline
   def destruct: (A, Set[A]) = (set.head, set.tail)
 
+  def destructEither: Either[A, (A, NonEmptySet[A])] = {
+    val (head, tail) = destruct
+    if (tail.isEmpty)
+      Left(head)
+    else
+      Right((head, new NonEmptySet(tail)))
+  }
+
   /**
    * Converts this `NonEmptySet` to a `NonEmptyChunk`.
    */
@@ -82,6 +90,11 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
 
   /** Removes the `elem` from this `NonEmptySet`. Alias for `-`. */
   def remove(elem: A): Set[A] = set - elem
+
+  /**
+   * Returns the tail of this `NonEmptySet` if it exists or `None` otherwise.
+   */
+  def tailOption: Option[NonEmptySet[A]] = destructEither.toOption.map(_._2)
 
   /**
    * Flattens a `NonEmptySet` of `NonEmptySet` values into a single
@@ -195,11 +208,18 @@ object NonEmptySet {
 }
 
 trait NonEmptySetSyntax {
-  implicit class IterableOps[A](private val iterable: Iterable[A]) {
+  implicit class NonEmptySetIterableOps[A](private val iterable: Iterable[A]) {
 
     /**
      * Constructs a `NonEmptySet` from an `Iterable` or `None` otherwise.
      */
     def toNonEmptySet: Option[NonEmptySet[A]] = NonEmptySet.fromIterableOption(iterable)
+  }
+  implicit class NonEmptySetSetOps[A](self: Set[A]) {
+
+    /**
+     * Constructs a `NonEmptySet` from a `Set` or `None` otherwise.
+     */
+    def toNonEmptySet: Option[NonEmptySet[A]] = NonEmptySet.fromSetOption(self)
   }
 }

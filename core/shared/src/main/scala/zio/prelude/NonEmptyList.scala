@@ -78,6 +78,16 @@ sealed trait NonEmptyList[+A] { self =>
       if (seen(a)) (as, seen) else (cons(a, as), seen + a)
     }._1.reverse
 
+  final def destruct: (A, List[A]) = self match {
+    case Single(head)     => (head, List())
+    case Cons(head, tail) => (head, tail.toList)
+  }
+
+  final def destructEither: Either[A, (A, NonEmptyList[A])] = self match {
+    case Single(head)     => Left(head)
+    case Cons(head, tail) => Right((head, tail))
+  }
+
   /**
    * Drops the first `n` elements from this `NonEmptyList` returning a `List`.
    */
@@ -619,4 +629,24 @@ trait LowPriorityNonEmptyListImplicits {
    */
   implicit def NonEmptyListPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyList[A]] =
     PartialOrd[List[A]].contramap(_.toList)
+}
+
+trait NonEmptyListSyntax {
+  implicit class NonEmptyListListOps[A](self: List[A]) {
+
+    /**
+     * Converts to a `NonEmptyList` or `None` if empty.
+     */
+    def toNonEmptyList: Option[NonEmptyList[A]] = self match {
+      case cons @ ::(_, _) => Some(NonEmptyList.fromCons(cons))
+      case Nil             => None
+    }
+  }
+  implicit class NonEmptyListConsOps[A](self: ::[A]) {
+
+    /**
+     * Converts to a `NonEmptyList`.
+     */
+    def toNonEmptyList: NonEmptyList[A] = NonEmptyList.fromCons(self)
+  }
 }

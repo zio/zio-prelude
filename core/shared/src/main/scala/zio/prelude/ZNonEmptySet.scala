@@ -65,6 +65,15 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   def combine[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Commutative[Sum[B1]]): ZNonEmptySet[A1, B1] =
     new ZNonEmptySet(zset.combine(that))
 
+  def destruct[B1 >: B: Ord](implicit B1: Inverse[Sum[B1]]): (A, ZSet[A, B1]) = zset.destruct[B1].get
+
+  def destructEither[B1 >: B: Ord](implicit B1: Inverse[Sum[B1]]): Either[A, (A, ZNonEmptySet[A, B1])] = {
+    val (head, tail) = destruct[B1]
+    if (tail.toMap.isEmpty)
+      Left(head)
+    else Right((head, new ZNonEmptySet(tail)))
+  }
+
   /**
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
@@ -87,6 +96,9 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   )(implicit ev1: Commutative[Sum[B1]], ev2: Commutative[Prod[B1]]): ZNonEmptySet[C, B1] =
     new ZNonEmptySet[C, B1](zset.flatMap(f(_).toZSet))
 
+  /** Returns an element */
+  def head: A = zset.toMap.head._1
+
   /**
    * Returns the hash code of this set.
    */
@@ -101,6 +113,11 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
    */
   def map[B1 >: B, C](f: A => C)(implicit ev: Commutative[Sum[B1]]): ZNonEmptySet[C, B1] =
     new ZNonEmptySet(zset.map[B1, C](f)(ev))
+
+  def tail[B1 >: B: Ord](implicit ev: Inverse[Sum[B1]]): ZSet[A, B1] = destruct[B1]._2
+
+  def tailOption[B1 >: B: Ord](implicit ev: Inverse[Sum[B1]]): Option[ZNonEmptySet[A, B1]] =
+    zset.tail[B1].map(new ZNonEmptySet(_))
 
   /**
    * Transforms the representation of how many times each element appears in
@@ -309,4 +326,10 @@ trait LowPriorityZNonEmptySetImplicits {
   implicit def ZNonEmptySetPartialOrd[A, B: PartialOrd]: PartialOrd[ZNonEmptySet[A, B]] =
     PartialOrd[ZSet[A, B]].contramap(_.toZSet)
 
+}
+
+trait ZNonEmptySetSyntax {
+  implicit class ZNonEmptySetMapOps[+A](self: Map[A, Int]) {
+    def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
+  }
 }

@@ -85,6 +85,13 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
       }
     })
 
+  def destruct[B1 >: B: Ord](implicit B1: Inverse[Sum[B1]]): Option[(A, ZSet[A, B1])] = map.headOption.map {
+    case (k, v) if v >= Sum.unwrap(B1.identity) =>
+      (k, ZSet.fromMap(map + (k -> Sum.unwrap(B1.inverse(Sum.wrap[B1](v), B1.identity)))))
+    case (k, _)                                 =>
+      (k, ZSet.fromMap(map - k))
+  }
+
   /**
    * Combines this set with the specified set to produce a new set where the
    * number of times each element appears is the difference between the number
@@ -128,6 +135,9 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   override def hashCode: Int =
     map.hashCode
 
+  /** Returns an element or `None` if empty */
+  def head: Option[A] = map.headOption.map(_._1)
+
   /**
    * Combines this set with the specified set to produce a new set where the
    * number of times each element appears is the minimum of the number of times
@@ -155,6 +165,9 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
       }
     })
 
+  def tail[B1 >: B: Ord](implicit B1: Inverse[Sum[B1]]): Option[ZSet[A, B1]] =
+    destruct[B1].map(_._2)
+
   /**
    * Transforms the representation of how many times each element appears in
    * the set with the specified function.
@@ -168,6 +181,9 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    */
   def toMap[A1 >: A]: Map[A1, B]          =
     map.asInstanceOf[Map[A1, B]]
+
+  /** Converts this set to a non-empty one. */
+  def toNonEmptyZSet: Option[ZNonEmptySet[A, B]] = ZNonEmptySet.fromMapOption(map)
 
   /**
    * Converts this set to a `Set`, discarding information about how many times
@@ -361,4 +377,10 @@ trait LowPriorityZSetImplicits {
   implicit def ZSetPartialOrd[A, B: PartialOrd]: PartialOrd[ZSet[A, B]] =
     PartialOrd.makeFrom((l, r) => l.toMap.compareSoft(r.toMap), ZSet.ZSetEqual)
 
+}
+
+trait ZSetSyntax {
+  implicit class ZSetMapOps[+A](self: Map[A, Int]) {
+    def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)
+  }
 }
