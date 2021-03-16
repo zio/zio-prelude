@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.NonEmptyChunk
 import zio.prelude.newtypes._
 import zio.test.Assertion._
 import zio.test._
@@ -24,7 +25,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
         },
         test("invalid values") {
           val expected = "-1 did not satisfy isGreaterThanEqualTo(0)"
-          assert(Natural.make(-1))(isFailureV(equalTo(NonEmptyMultiSet(expected))))
+          assert(Natural.make(-1))(isFailureV(equalTo(NonEmptyChunk(expected))))
         }
       ),
       suite("SubtypeSmart")(

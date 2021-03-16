@@ -80,7 +80,7 @@ object Gens {
     a: Gen[R, A]
   ): Gen[R, ZValidation[W, E, A]] =
     Gen.chunkOf(w).flatMap { w =>
-      Gen.either(nonEmptyMultiSetOf(e), a).map {
+      Gen.either(Gen.chunkOf1(e), a).map {
         case Left(e)  => Validation.Failure(w, e)
         case Right(a) => Validation.Success(w, a)
       }

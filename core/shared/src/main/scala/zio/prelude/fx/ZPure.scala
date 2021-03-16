@@ -19,7 +19,7 @@ package zio.prelude.fx
 import zio.internal.Stack
 import zio.prelude._
 import zio.test.Assertion
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
@@ -732,7 +732,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def runValidation(implicit ev1: Unit <:< S1, ev2: Any <:< R): ZValidation[W, E, A] =
     runAll(()) match {
-      case (log, Left(cause))   => ZValidation.Failure(log, cause.toNonEmptyMultiSet)
+      case (log, Left(cause))   => ZValidation.Failure(log, NonEmptyChunk.fromChunk(cause.toChunk).get)
       case (log, Right((_, a))) => ZValidation.Success(log, a)
     }
 
