@@ -78,7 +78,7 @@ object Associative extends Lawful[AssociativeEqual] {
    * (a1 * a2) * a3 === a1 * (a2 * a3)
    * }}}
    */
-  val associativityLaw: Laws[AssociativeEqual] =
+  lazy val associativityLaw: Laws[AssociativeEqual] =
     new Laws.Law3[AssociativeEqual]("associativityLaw") {
       def apply[A: AssociativeEqual](a1: A, a2: A, a3: A): TestResult =
         (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
@@ -87,7 +87,7 @@ object Associative extends Lawful[AssociativeEqual] {
   /**
    * The set of all laws that instances of `Associative` must satisfy.
    */
-  val laws: Laws[AssociativeEqual] =
+  lazy val laws: Laws[AssociativeEqual] =
     associativityLaw
 
   /**

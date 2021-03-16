@@ -1791,3 +1791,14 @@ trait LowPriorityInvariantImplicits {
   implicit def ZSTMZivariantContravariant[E, A]: Contravariant[({ type lambda[-x] = ZSTM[x, E, A] })#lambda] =
     Zivariant.ZSTMZivariant.deriveContravariant
 }
+
+trait InvariantSyntax {
+
+  /**
+   * Provides infix syntax for mapping over invariant values.
+   */
+  implicit class InvariantOps[F[_], A](private val self: F[A]) {
+    def invmap[B](f: A <=> B)(implicit F: Invariant[F]): F[B] =
+      F.invmap(f).to(self)
+  }
+}

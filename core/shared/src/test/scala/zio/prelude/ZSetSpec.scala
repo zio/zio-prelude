@@ -25,6 +25,12 @@ object ZSetSpec extends DefaultRunnableSpec {
   val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
+  val naturals: Gen[Random with Sized, Natural] =
+    Gen.sized(n => Gens.natural(Natural.zero, Natural.unsafeMake(n)))
+
+  implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
+    Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
+
   def spec: ZSpec[Environment, Failure] =
     suite("ZSetSpec")(
       suite("laws")(
@@ -43,11 +49,12 @@ object ZSetSpec extends DefaultRunnableSpec {
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
               ZSetCovariant(IntSumCommutativeInverse),
-              ZSetDeriveEqual(IntHashOrd)
+              ZSetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
             IntHashOrd
           )
         ),
+        // testM("foreach")(checkAllLaws(ForEach)(genFZSet(naturals), Gen.anyInt)),
         testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt))),
         testM("intersect commutative")(
           checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))

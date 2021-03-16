@@ -80,7 +80,7 @@ package object newtypes {
    */
   type Min[A] = Min.Type[A]
 
-  object Max extends SubtypeF
+  object Max extends SubtypeF {}
 
   /**
    * A newtype representing taking the max of two elements.
@@ -107,4 +107,51 @@ package object newtypes {
   object FailureOut extends NewtypeF
 
   type FailureOut[+A] = FailureOut.Type[A]
+
+  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+
+    val one: Natural =
+      Natural(1)
+
+    val zero: Natural =
+      Natural(0)
+
+    def successor(n: Natural): Natural =
+      Natural(n + 1)
+
+    /**
+     * The `Commutative` and `Identity` instance for the product of `Natural` values.
+     */
+    implicit val NaturalProdCommutativeIdentity: Commutative[Prod[Natural]] with Identity[Prod[Natural]] =
+      new Commutative[Prod[Natural]] with Identity[Prod[Natural]] {
+        def combine(x: => Prod[Natural], y: => Prod[Natural]): Prod[Natural] = {
+          val product = x * y
+          if (x == 0 || product / x != y) Prod(Natural(Int.MaxValue)) else Prod(Natural(product))
+        }
+        val identity: Prod[Natural] =
+          Prod(one)
+      }
+
+    /**
+     * The `Commutative` and `Inverse` instance for the sum of `Narutal` values.
+     */
+    implicit val NaturalSumCommutativeInverse: Commutative[Sum[Natural]] with Inverse[Sum[Natural]] =
+      new Commutative[Sum[Natural]] with Inverse[Sum[Natural]] {
+        def combine(x: => Sum[Natural], y: => Sum[Natural]): Sum[Natural] = {
+          val sum = x + y
+          if (sum < 0) Sum(Natural(Int.MaxValue)) else Sum(Natural(sum))
+        }
+        val identity: Sum[Natural] =
+          Sum(zero)
+        def inverse(x: => Sum[Natural], y: => Sum[Natural]): Sum[Natural] = {
+          val difference = x - y
+          if (difference < 0) Sum(zero) else Sum(Natural(difference))
+        }
+      }
+
+    private[prelude] def unsafeMake(n: Int): Natural =
+      Natural(n)
+  }
+
+  type Natural = Natural.Type
 }
