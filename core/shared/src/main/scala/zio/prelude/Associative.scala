@@ -492,7 +492,7 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
   implicit val NaturalProdCommutativeIdentity: Commutative[Prod[Natural]] with Identity[Prod[Natural]] =
     new Commutative[Prod[Natural]] with Identity[Prod[Natural]] {
       def combine(l: => Prod[Natural], r: => Prod[Natural]): Prod[Natural] = Prod(Natural.times(l, r))
-      val identity: Prod[Natural]                                  = Prod(Natural.one)
+      val identity: Prod[Natural]                                          = Prod(Natural.one)
     }
 
   /**
@@ -501,7 +501,7 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
   implicit val NaturalSumCommutativeInverse: Commutative[Sum[Natural]] with Inverse[Sum[Natural]] =
     new Commutative[Sum[Natural]] with Inverse[Sum[Natural]] {
       def combine(l: => Sum[Natural], r: => Sum[Natural]): Sum[Natural] = Sum(Natural.plus(l, r))
-      val identity: Sum[Natural]                                  = Sum(Natural.zero)
+      val identity: Sum[Natural]                                        = Sum(Natural.zero)
       def inverse(l: => Sum[Natural], r: => Sum[Natural]): Sum[Natural] = Sum(Natural.minus(l, r))
     }
 
@@ -1327,7 +1327,7 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
 
 trait AssociativeLowPriority {
 
- /**
+  /**
    * The `Commutative` and `Identity` instance for the product of `Int` values.
    */
   implicit val IntProdCommutativeIdentity: Commutative[Prod[Int]] with Identity[Prod[Int]] =
