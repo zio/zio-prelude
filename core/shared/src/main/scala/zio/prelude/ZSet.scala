@@ -85,12 +85,13 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
       }
     })
 
-  def destruct[B1 >: B: Ord](implicit B1: Inverse[Sum[B1]]): Option[(A, ZSet[A, B1])] = map.headOption.map {
-    case (k, v) if v >= Sum.unwrap(B1.identity) =>
-      (k, ZSet.fromMap(map + (k -> Sum.unwrap(B1.inverse(Sum.wrap[B1](v), B1.identity)))))
-    case (k, _)                                 =>
-      (k, ZSet.fromMap(map - k))
-  }
+  def destruct[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): Option[(A, ZSet[A, B1])] =
+    map.headOption.map {
+      case (k, v) if v !== Prod.unwrap(Idn.identity) =>
+        (k, ZSet.fromMap(map + (k -> Sum.unwrap(Inv.inverse(Sum.wrap[B1](v), Sum.wrap(Prod.unwrap(Idn.identity)))))))
+      case (k, _)                                    =>
+        (k, ZSet.fromMap(map - k))
+    }
 
   /**
    * Combines this set with the specified set to produce a new set where the
@@ -165,7 +166,10 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
       }
     })
 
-  def tail[B1 >: B: Ord](implicit B1: Inverse[Sum[B1]]): Option[ZSet[A, B1]] =
+  /**
+   * Returns the tail of this `ZSet` if it exists or `None` otherwise.
+   */
+  def tail[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): Option[ZSet[A, B1]] =
     destruct[B1].map(_._2)
 
   /**
@@ -381,6 +385,8 @@ trait LowPriorityZSetImplicits {
 
 trait ZSetSyntax {
   implicit class ZSetMapOps[+A](self: Map[A, Int]) {
+
+    /** Converts a `Map[A, Int]` to a `MultiSet` */
     def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)
   }
 }

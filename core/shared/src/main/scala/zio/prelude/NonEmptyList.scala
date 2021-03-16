@@ -78,11 +78,16 @@ sealed trait NonEmptyList[+A] { self =>
       if (seen(a)) (as, seen) else (cons(a, as), seen + a)
     }._1.reverse
 
+  /** Decomposes the `NonEmptyList` into an element and a (possibly empty) `List` */
   final def destruct: (A, List[A]) = self match {
     case Single(head)     => (head, List())
     case Cons(head, tail) => (head, tail.toList)
   }
 
+  /**
+   * Decomposes the `NonEmptyList` either into an element and the remaining `NonEmptyList`,
+   * or just a single element, if there aren't any other.
+   */
   final def destructEither: Either[A, (A, NonEmptyList[A])] = self match {
     case Single(head)     => Left(head)
     case Cons(head, tail) => Right((head, tail))

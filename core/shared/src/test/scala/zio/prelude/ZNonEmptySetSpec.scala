@@ -62,6 +62,21 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
           val die  = ZNonEmptySet(1, 2, 3, 4, 5, 6)
           val pair = die.zipWith(die)(_ + _)
           assert(pair(7))(equalTo(6))
+        },
+        test("destructEither left") {
+          val znes     = ZNonEmptySet("a")
+          val destruct = znes.destructEither
+          assert(destruct)(equalTo(Left("a")))
+        },
+        test("destructEither right 1") {
+          val znes     = ZNonEmptySet("a", "b")
+          val destruct = znes.destructEither
+          assert(destruct)(equalTo(Right(("a", ZNonEmptySet("b")))))
+        },
+        test("destructEither right 2") {
+          val znes     = ZNonEmptySet("a", "a")
+          val destruct = znes.destructEither
+          assert(destruct)(equalTo(Right(("a", ZNonEmptySet("a")))))
         }
       ),
       suite("set")(

@@ -32,6 +32,10 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   @inline
   def destruct: (A, Set[A]) = (set.head, set.tail)
 
+  /**
+   * Decomposes the `NonEmptySet` either into an element and the remaining `NonEmptySet`,
+   * or just a single element, if there aren't any other.
+   */
   def destructEither: Either[A, (A, NonEmptySet[A])] = {
     val (head, tail) = destruct
     if (tail.isEmpty)
