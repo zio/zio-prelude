@@ -961,7 +961,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     suspend {
       try ZPure.succeed(a)
       catch {
-        case e: VirtualMachineError => ZPure.fail(e)
+        case e: VirtualMachineError => throw e
+        case e                      => ZPure.fail(e)
       }
     }
 
