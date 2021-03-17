@@ -384,7 +384,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * Constructs a `Validation` from a predicate, failing with the error provided.
    */
-  def fromPredicateWith[E, A](error: E)(value: A)(f: A => Boolean): Validation[E, A] =
+  def fromPredicateWith[E, A](error: => E)(value: A)(f: A => Boolean): Validation[E, A] =
     if (f(value)) Validation.succeed(value)
     else Validation.fail(error)
 
