@@ -642,10 +642,7 @@ trait NonEmptyListSyntax {
     /**
      * Converts to a `NonEmptyList` or `None` if empty.
      */
-    def toNonEmptyList: Option[NonEmptyList[A]] = self match {
-      case cons @ ::(_, _) => Some(NonEmptyList.fromCons(cons))
-      case Nil             => None
-    }
+    def toNonEmptyList: Option[NonEmptyList[A]] = NonEmptyList.fromIterableOption(self)
   }
   implicit class NonEmptyListConsOps[A](self: ::[A]) {
 
