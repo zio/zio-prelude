@@ -498,6 +498,23 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     set(s) *> self
 
   /**
+   * Keeps some of the errors, and terminates the fiber with the rest
+   */
+  final def refineOrDie[E1](
+    pf: PartialFunction[E, E1]
+  )(implicit ev1: E <:< Throwable, ev2: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
+    refineOrDieWith(pf)(ev1)
+
+  /**
+   * Keeps some of the errors, and terminates the fiber with the rest, using
+   * the specified function to convert the `E` into a `Throwable`.
+   */
+  final def refineOrDieWith[E1](pf: PartialFunction[E, E1])(f: E => Throwable)(implicit
+    ev: CanFail[E]
+  ): ZPure[W, S1, S2, R, E1, A] =
+    self catchAll (err => (pf lift err).fold[ZPure[W, S1, S2, R, E1, A]](throw f(err))(ZPure.fail))
+
+  /**
    * Fail with the returned value if the `PartialFunction` matches, otherwise
    * continue with our held value.
    */
@@ -938,8 +955,16 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def accessM[R]: AccessMPartiallyApplied[R] =
     new AccessMPartiallyApplied
 
-  def catchOnly[E <: Throwable]: CatchOnlyPartiallyApplied[E] =
-    new CatchOnlyPartiallyApplied[E]
+  /**
+   * Constructs a computation, catching any `Throwable` that is thrown.
+   */
+  def attempt[S, A](a: => A): ZPure[Nothing, S, S, Any, Throwable, A] =
+    suspend {
+      try ZPure.succeed(a)
+      catch {
+        case NonFatal(e) => ZPure.fail(e)
+      }
+    }
 
   /**
    * Combines a collection of computations into a single computation that
@@ -973,17 +998,6 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def fromAssert[S, A](value: A)(assertion: Assertion[A]): ZPure[Nothing, S, S, Any, String, A] =
     if (assertion.test(value)) succeed(value)
     else fail(s"$value did not satisfy ${assertion.render}")
-
-  /**
-   * Constructs a computation from an effect that may throw.
-   */
-  def fromEffect[S, A](effect: => A): ZPure[Nothing, S, S, Any, Throwable, A] =
-    suspend {
-      try ZPure.succeed(effect)
-      catch {
-        case NonFatal(e) => ZPure.fail(e)
-      }
-    }
 
   /**
    * Constructs a computation from an `Either`.
@@ -1023,7 +1037,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation from a `scala.util.Try`.
    */
   def fromTry[S, A](t: Try[A]): ZPure[Nothing, S, S, Any, Throwable, A] =
-    fromEffect(t).flatMap {
+    attempt(t).flatMap {
       case scala.util.Success(v) => ZPure.succeed(v)
       case scala.util.Failure(t) => ZPure.fail(t)
     }
@@ -1155,20 +1169,6 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       Access(f)
   }
 
-  private[fx] final class CatchOnlyPartiallyApplied[E](private val dummy: Boolean = true) extends AnyVal {
-    /* `NT` ensures that the type parameter `E` is explicitly supplied
-     * https://github.com/typelevel/cats/pull/1867/files#r138381991
-     */
-    def apply[S, A](effect: => A)(implicit E: ClassTag[E], NT: CanFail[E]): ZPure[Nothing, S, S, Any, E, A] =
-      suspend {
-        try ZPure.succeed(effect)
-        catch {
-          case e if E.runtimeClass.isInstance(e) =>
-            ZPure.fail(e.asInstanceOf[E])
-        }
-      }
-  }
-
   @implicitNotFound(
     "Pattern guards are only supported when the error type is a supertype of NoSuchElementException. However, your effect has ${E} for the error type."
   )
@@ -1296,4 +1296,17 @@ trait ZPureLowPriorityImplicits {
       def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
         ZPure.tupledPar(fa, fb)
     }
+}
+
+trait ZPureSyntax {
+
+  implicit final class ZPureRefineToOrDieOps[W, S1, S2, R, E <: Throwable, A](self: ZPure[W, S1, S2, R, E, A]) {
+
+    /**
+     * Keeps some of the errors, and terminates the fiber with the rest.
+     */
+    def refineToOrDie[E1 <: E: ClassTag: CanFail](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
+      /* CanFail ensures user provides an explicit E1 type argument */
+      self.refineOrDie { case e: E1 => e }
+  }
 }

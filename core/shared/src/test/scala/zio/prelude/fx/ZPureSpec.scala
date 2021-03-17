@@ -790,13 +790,15 @@ object ZPureSpec extends DefaultRunnableSpec {
         suite("constructors")(
           testM("catchOnly (Success case)") {
             check(genInt) { a =>
-              assert(ZPure.catchOnly[NumberFormatException](a.toString.toInt).runEither)(isRight(equalTo(a)))
+              assert(ZPure.attempt(a.toString.toInt).refineToOrDie[NumberFormatException].runEither)(
+                isRight(equalTo(a))
+              )
             }
           },
           test("catchOnly (Failure case)") {
             implicit val throwableHash = Equal.ThrowableHash
             val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
-            assert(ZPure.catchOnly[NumberFormatException]("a".toInt).runEither)(isLeft(equalTo(exception)))
+            assert(ZPure.attempt("a".toInt).refineToOrDie[NumberFormatException].runEither)(isLeft(equalTo(exception)))
           },
           testM("fail") {
             check(genInt) { e =>
@@ -834,13 +836,13 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           testM("fromEffect (Success case)") {
             check(genInt) { a =>
-              assert(ZPure.fromEffect(a).runEither)(isRight(equalTo(a)))
+              assert(ZPure.attempt(a).runEither)(isRight(equalTo(a)))
             }
           },
           test("fromEffect (Failure case)") {
             implicit val throwableHash = Equal.ThrowableHash
             val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
-            assert(ZPure.fromEffect("a".toInt).runEither)(isLeft(equalTo(exception)))
+            assert(ZPure.attempt("a".toInt).runEither)(isLeft(equalTo(exception)))
           },
           suite("modifyEither")(
             test("success") {
