@@ -48,8 +48,7 @@ package object prelude
     with OrdSyntax
     with PartialOrdSyntax
     with ForEachSyntax
-    with ZivariantSyntax
-    with fx.ZPureSyntax {
+    with ZivariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
 

@@ -25,7 +25,6 @@ import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 import scala.annotation.{implicitNotFound, switch}
 import scala.reflect.ClassTag
 import scala.util.Try
-import scala.util.control.NonFatal
 
 /**
  * `ZPure[W, S1, S2, R, E, A]` is a purely functional description of a
@@ -498,7 +497,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     set(s) *> self
 
   /**
-   * Keeps some of the errors, and terminates the fiber with the rest
+   * Keeps some of the errors, and `throw` the rest
    */
   final def refineOrDie[E1](
     pf: PartialFunction[E, E1]
@@ -506,7 +505,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     refineOrDieWith(pf)(ev1)
 
   /**
-   * Keeps some of the errors, and terminates the fiber with the rest, using
+   * Keeps some of the errors, and `throw` the rest, using
    * the specified function to convert the `E` into a `Throwable`.
    */
   final def refineOrDieWith[E1](pf: PartialFunction[E, E1])(f: E => Throwable)(implicit
@@ -962,7 +961,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     suspend {
       try ZPure.succeed(a)
       catch {
-        case NonFatal(e) => ZPure.fail(e)
+        case e: VirtualMachineError => ZPure.fail(e)
       }
     }
 
@@ -1215,6 +1214,16 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
         ffa.flatten
     }
 
+  implicit final class ZPureRefineToOrDieOps[W, S1, S2, R, E <: Throwable, A](self: ZPure[W, S1, S2, R, E, A]) {
+
+    /**
+     * Keeps some of the errors, and `throw` the rest.
+     */
+    def refineToOrDie[E1 <: E: ClassTag: CanFail](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
+      /* CanFail ensures user provides an explicit E1 type argument */
+      self.refineOrDie { case e: E1 => e }
+  }
+
   implicit final class ZPureWithFilterOps[W, S1, S2, R, E, A](private val self: ZPure[W, S1, S2, R, E, A])
       extends AnyVal {
 
@@ -1296,17 +1305,4 @@ trait ZPureLowPriorityImplicits {
       def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
         ZPure.tupledPar(fa, fb)
     }
-}
-
-trait ZPureSyntax {
-
-  implicit final class ZPureRefineToOrDieOps[W, S1, S2, R, E <: Throwable, A](self: ZPure[W, S1, S2, R, E, A]) {
-
-    /**
-     * Keeps some of the errors, and terminates the fiber with the rest.
-     */
-    def refineToOrDie[E1 <: E: ClassTag: CanFail](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
-      /* CanFail ensures user provides an explicit E1 type argument */
-      self.refineOrDie { case e: E1 => e }
-  }
 }
