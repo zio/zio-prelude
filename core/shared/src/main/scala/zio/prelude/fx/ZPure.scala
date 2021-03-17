@@ -962,7 +962,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       try ZPure.succeed(a)
       catch {
         case e: VirtualMachineError => throw e
-        case e                      => ZPure.fail(e)
+        case e: Throwable           => ZPure.fail(e)
       }
     }
 
@@ -1220,8 +1220,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     /**
      * Keeps some of the errors, and `throw` the rest.
      */
-    def refineToOrDie[E1 <: E: ClassTag: CanFail](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
-      /* CanFail ensures user provides an explicit E1 type argument */
+    def refineToOrDie[E1 <: E: ClassTag](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
       self.refineOrDie { case e: E1 => e }
   }
 
