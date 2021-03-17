@@ -19,6 +19,7 @@ package zio.prelude
 import zio.{Chunk, NonEmptyChunk}
 
 import scala.collection.immutable.ListMap
+import scala.language.implicitConversions
 
 trait Debug[-A] {
   def debug(a: A): Debug.Repr
@@ -85,17 +86,17 @@ object Debug {
   }
 
   object Repr {
+    import java.lang.{String => SString}
     import scala.{
-      Int => SInt,
       Boolean => SBoolean,
-      Short => SShort,
+      Byte => SByte,
+      Char => SChar,
       Double => SDouble,
       Float => SFloat,
+      Int => SInt,
       Long => SLong,
-      Char => SChar,
-      Byte => SByte
+      Short => SShort
     }
-    import java.lang.{String => SString}
 
     final case class Int(value: SInt)                                                                    extends Repr
     final case class Double(value: SDouble)                                                              extends Repr
@@ -114,6 +115,8 @@ object Debug {
         new Constructor(namespace, name, ListMap(repr :: reprs.toList: _*))
     }
     final case class VConstructor(namespace: List[SString], name: SString, reprs: List[Repr]) extends Repr
+
+    implicit def deriveRepr[A](x: A)(implicit A: Debug[A]): Repr = A.debug(x)
   }
 
   implicit val NothingDebug: Debug[Nothing] = n => n
@@ -791,5 +794,9 @@ object Debug {
 trait DebugSyntax {
   implicit class DebugOps[A](self: A) {
     def debug(implicit debug: Debug[A]): Debug.Repr = debug.debug(self)
+  }
+
+  implicit final class DebugInterpolator(_sc: StringContext) {
+    def dbg(args: Debug.Repr*): String = _sc.s(args.map(_.toString): _*)
   }
 }
