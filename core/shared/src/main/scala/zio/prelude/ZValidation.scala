@@ -195,7 +195,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def toZIO: IO[E, A] =
     self.fold(
-      nec => ZIO.halt(nec.foldLeft[zio.Cause[E]](zio.Cause.empty)((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
+      nec => ZIO.halt(nec.reduceMapLeft(zio.Cause.fail)((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
       ZIO.succeedNow
     )
 
