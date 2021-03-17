@@ -193,8 +193,11 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Converts this `ZValidation` into a `ZIO` effect, discarding the log.
    */
-  final def toZIO: IO[NonEmptyChunk[E], A] =
-    ZIO.fromEither(self.toEither)
+  final def toZIO: IO[E, A] =
+    self.fold(
+      nec => ZIO.halt(nec.reduceMapLeft(zio.Cause.fail)((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
+      ZIO.succeedNow
+    )
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
@@ -263,7 +266,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    */
   implicit def ZValidationEqual[W, E, A: Equal]: Equal[ZValidation[W, E, A]] =
     Equal.make {
-      case (Failure(_, e), Failure(_, e1)) => MultiSet.fromIterable(e) === MultiSet.fromIterable(e1)
+      case (Failure(_, e), Failure(_, e1)) => MultiSet.fromIterable(e) == MultiSet.fromIterable(e1)
       case (Success(_, a), Success(_, a1)) => a === a1
       case _                               => false
     }

@@ -136,7 +136,7 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
       _.zipWith(_)(_ && _)
     ).asInstanceOf[F[ParSeq[Z, B]]]
 
-  def toCause: zio.Cause[A] = this match {
+  final def toCause: zio.Cause[A] = this match {
     case ParSeq.Both(left, right) => zio.Cause.Both(left.toCause, right.toCause)
     case _: ParSeq.Empty.type     => zio.Cause.empty
     case ParSeq.Single(value)     => zio.Cause.Fail(value)
