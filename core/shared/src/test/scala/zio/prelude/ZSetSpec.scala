@@ -4,7 +4,7 @@ import zio.Chunk
 import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZSet._
-import zio.prelude.coherent.CovariantDeriveEqual
+import zio.prelude.coherent.{CovariantDeriveEqual, DeriveEqualForEach}
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test.Assertion._
@@ -54,7 +54,23 @@ object ZSetSpec extends DefaultRunnableSpec {
             IntHashOrd
           )
         ),
-        testM("foreach")(checkAllLaws(ForEach)(genFZSet(naturals), Gen.anyInt)),
+        testM("foreach")(
+          checkAllLaws[
+            DeriveEqualForEach,
+            Equal,
+            TestConfig,
+            Random with Sized with TestConfig,
+            MultiSet,
+            Int
+          ](ForEach)(genFZSet(naturals), Gen.anyInt)(
+            // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
+            DeriveEqualForEach.derive[MultiSet](
+              ZSetDeriveEqual(IntHashOrd, Identity[Sum[Natural]]),
+              MultiSetForEach
+            ),
+            IntHashOrd
+          )
+        ),
         testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt))),
         testM("intersect commutative")(
           checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))
