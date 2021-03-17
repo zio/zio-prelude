@@ -98,7 +98,7 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   /**
    * Returns the tail of this `NonEmptySet` if it exists or `None` otherwise.
    */
-  def tailOption: Option[NonEmptySet[A]] = destructEither.toOption.map(_._2)
+  def tailOption: Option[NonEmptySet[A]] = destructEither.fold(_ => None, p => Some(p._2))
 
   /**
    * Flattens a `NonEmptySet` of `NonEmptySet` values into a single
