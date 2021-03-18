@@ -418,7 +418,7 @@ trait LowPriorityZSetImplicits {
 }
 
 trait ZSetSyntax {
-  implicit class ZSetMapOps[+A](self: Map[A, Int]) {
+  implicit class ZSetMapOps[+A](self: Map[A, Natural]) {
 
     /** Converts a `Map[A, Int]` to a `MultiSet` */
     def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)

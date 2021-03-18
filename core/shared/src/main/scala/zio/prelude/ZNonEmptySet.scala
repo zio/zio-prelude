@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Max, Prod, Sum}
+import zio.prelude.newtypes.{Max, Natural, Prod, Sum}
 
 import scala.language.implicitConversions
 
@@ -346,7 +346,7 @@ trait LowPriorityZNonEmptySetImplicits {
 }
 
 trait ZNonEmptySetSyntax {
-  implicit class ZNonEmptySetMapOps[+A](self: Map[A, Int]) {
+  implicit class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
 
     /** Returns a `NonEmptyMultiSet` or `None` if the original Multiset is empty */
     def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
