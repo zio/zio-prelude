@@ -80,7 +80,7 @@ package object newtypes {
    */
   type Min[A] = Min.Type[A]
 
-  object Max extends SubtypeF
+  object Max extends SubtypeF {}
 
   /**
    * A newtype representing taking the max of two elements.
@@ -107,4 +107,36 @@ package object newtypes {
   object FailureOut extends NewtypeF
 
   type FailureOut[+A] = FailureOut.Type[A]
+
+  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+
+    val one: Natural =
+      Natural(1)
+
+    val zero: Natural =
+      Natural(0)
+
+    def successor(n: Natural): Natural =
+      Natural(n + 1)
+
+    def times(x: Natural, y: Natural): Natural = {
+      val product = x * y
+      if (x == 0 || product / x != y) Natural(Int.MaxValue) else Natural(product)
+    }
+
+    def plus(x: Natural, y: Natural): Natural = {
+      val sum = x + y
+      if (sum < 0) Natural(Int.MaxValue) else Natural(sum)
+    }
+
+    def minus(x: Natural, y: Natural): Natural = {
+      val difference = x - y
+      if (difference < 0) zero else Natural(difference)
+    }
+
+    private[prelude] def unsafeMake(n: Int): Natural =
+      Natural(n)
+  }
+
+  type Natural = Natural.Type
 }
