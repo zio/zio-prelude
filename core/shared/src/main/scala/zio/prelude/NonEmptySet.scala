@@ -30,14 +30,14 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
    * Returns an element of this `NonEmptySet` and the remainder, which is a (possibly empty) `Set`.
    */
   @inline
-  def destruct: (A, Set[A]) = (set.head, set.tail)
+  def peel: (A, Set[A]) = (set.head, set.tail)
 
   /**
    * Decomposes the `NonEmptySet` either into an element and the remaining `NonEmptySet`,
    * or just a single element, if there aren't any other.
    */
-  def destructEither: Either[A, (A, NonEmptySet[A])] = {
-    val (head, tail) = destruct
+  def peelEither: Either[A, (A, NonEmptySet[A])] = {
+    val (head, tail) = peel
     if (tail.isEmpty)
       Left(head)
     else
@@ -47,12 +47,12 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   /**
    * Converts this `NonEmptySet` to a `NonEmptyChunk`.
    */
-  def toNonEmptyChunk: NonEmptyChunk[A] = destruct match { case (head, tail) => NonEmptyChunk.fromIterable(head, tail) }
+  def toNonEmptyChunk: NonEmptyChunk[A] = peel match { case (head, tail) => NonEmptyChunk.fromIterable(head, tail) }
 
   /**
    * Converts this `NonEmptySet` to a `NonEmptyList`.
    */
-  def toNonEmptyList: NonEmptyList[A] = destruct match { case (head, tail) => NonEmptyList.fromIterable(head, tail) }
+  def toNonEmptyList: NonEmptyList[A] = peel match { case (head, tail) => NonEmptyList.fromIterable(head, tail) }
 
   /**
    * Creates a new `NonEmptySet` with an additional element, unless the element is
@@ -98,7 +98,7 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   /**
    * Returns the tail of this `NonEmptySet` if it exists or `None` otherwise.
    */
-  def tailOption: Option[NonEmptySet[A]] = destructEither.fold(_ => None, p => Some(p._2))
+  def tailOption: Option[NonEmptySet[A]] = peelEither.fold(_ => None, p => Some(p._2))
 
   /**
    * Flattens a `NonEmptySet` of `NonEmptySet` values into a single
@@ -131,7 +131,7 @@ object NonEmptySet {
    */
   def apply[A](elem: A, others: A*): NonEmptySet[A] = apply(elem, others.toSet)
 
-  def unapply[A](arg: NonEmptySet[A]): Some[(A, Set[A])] = Some(arg.destruct)
+  def unapply[A](arg: NonEmptySet[A]): Some[(A, Set[A])] = Some(arg.peel)
 
   /**
    * Constructs a `NonEmptyChunk` from a `NonEmptyList`.
@@ -173,7 +173,7 @@ object NonEmptySet {
 
   /** Creates a `NonEmptySet` containing elements from `l` and `r` */
   def union[A](l: NonEmptySet[A], r: Set[A]): NonEmptySet[A] = {
-    val (head, tail) = l.destruct
+    val (head, tail) = l.peel
     NonEmptySet.fromSet(head, tail.union(r))
   }
 

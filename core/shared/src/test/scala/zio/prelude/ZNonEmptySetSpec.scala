@@ -65,17 +65,17 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
         },
         test("destructEither left") {
           val znes     = ZNonEmptySet("a")
-          val destruct = znes.destructEither
+          val destruct = znes.peelEither
           assert(destruct)(equalTo(Left("a")))
         },
         test("destructEither right 1") {
           val znes     = ZNonEmptySet("a", "b")
-          val destruct = znes.destructEither
+          val destruct = znes.peelEither
           assert(destruct)(equalTo(Right(("a", ZNonEmptySet("b")))))
         },
         test("destructEither right 2") {
           val znes     = ZNonEmptySet("a", "a")
-          val destruct = znes.destructEither
+          val destruct = znes.peelEither
           assert(destruct)(equalTo(Right(("a", ZNonEmptySet("a")))))
         }
       ),

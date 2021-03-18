@@ -66,18 +66,18 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
     new ZNonEmptySet(zset.combine(that))
 
   /** Decomposes the `ZNonEmptySet` into an element and a (possibly empty) `ZSet` */
-  def destruct[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): (A, ZSet[A, B1]) =
+  def peel[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): (A, ZSet[A, B1]) =
     zset.destruct[B1].get
 
   /**
    * Decomposes the `ZNonEmptySet` either into an element and the remaining `ZNonEmptySet`,
    * or just a single element, if there aren't any other.
    */
-  def destructEither[B1 >: B: Equal](implicit
+  def peelEither[B1 >: B: Equal](implicit
     Inv: Inverse[Sum[B1]],
     Idn: Identity[Prod[B1]]
   ): Either[A, (A, ZNonEmptySet[A, B1])] = {
-    val (head, tail) = destruct[B1]
+    val (head, tail) = peel[B1]
     if (tail.toMap.isEmpty)
       Left(head)
     else Right((head, new ZNonEmptySet(tail)))
@@ -126,7 +126,7 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   /**
    * Returns the tail of this `ZNonEmptySet` as `ZSet` (which always exists).
    */
-  def tail[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): ZSet[A, B1] = destruct[B1]._2
+  def tail[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): ZSet[A, B1] = peel[B1]._2
 
   /**
    * Returns the tail of this `ZNonEmptySet` if it exists or `None` otherwise.
