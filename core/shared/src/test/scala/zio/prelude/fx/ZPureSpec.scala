@@ -539,6 +539,22 @@ object ZPureSpec extends DefaultRunnableSpec {
               }
             )
           ),
+          suite("refineToOrDie")(
+            testM("success case") {
+              check(genInt) { a =>
+                assert(ZPure.attempt(a.toString.toInt).refineToOrDie[NumberFormatException].runEither)(
+                  isRight(equalTo(a))
+                )
+              }
+            },
+            test("failure case") {
+              implicit val throwableHash = Equal.ThrowableHash
+              val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
+              assert(ZPure.attempt("a".toInt).refineToOrDie[NumberFormatException].runEither)(
+                isLeft(equalTo(exception))
+              )
+            }
+          ),
           suite("right methods")(
             suite("right")(
               test("failure") {
@@ -824,13 +840,13 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           testM("fromEffect (Success case)") {
             check(genInt) { a =>
-              assert(ZPure.fromEffect(a).runEither)(isRight(equalTo(a)))
+              assert(ZPure.attempt(a).runEither)(isRight(equalTo(a)))
             }
           },
           test("fromEffect (Failure case)") {
             implicit val throwableHash = Equal.ThrowableHash
             val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
-            assert(ZPure.fromEffect("a".toInt).runEither)(isLeft(equalTo(exception)))
+            assert(ZPure.attempt("a".toInt).runEither)(isLeft(equalTo(exception)))
           },
           suite("modifyEither")(
             test("success") {
