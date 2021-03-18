@@ -196,11 +196,11 @@ object DebugSpec extends DefaultRunnableSpec {
       suite("DebugInterpolator")(
         test("String") {
           val name = "World"
-          assert(dbg"Hello, my name is $name.")(equalTo("Hello, my name is \"World\"."))
+          assert(d"Hello, my name is $name.")(equalTo("Hello, my name is \"World\"."))
         },
         test("Int") {
           val sum = 1 + 1
-          assert(dbg"1 + 1 is $sum.")(equalTo("1 + 1 is 2."))
+          assert(d"1 + 1 is $sum.")(equalTo("1 + 1 is 2."))
         }
       )
     )
