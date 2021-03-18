@@ -17,6 +17,7 @@
 package zio
 
 import com.github.ghik.silencer.silent
+import zio.prelude.newtypes.Natural
 import zio.test.{TestResult, assert}
 
 package object prelude
@@ -40,6 +41,7 @@ package object prelude
     with IdentitySyntax
     with IdentityBothSyntax
     with IdentityEitherSyntax
+    with InvariantSyntax
     with InverseSyntax
     with NewtypeExports
     with NewtypeFExports
@@ -78,9 +80,9 @@ package object prelude
   type Validation[+E, +A] = ZValidation[Nothing, E, A]
   val Validation: ZValidation.type = ZValidation
 
-  type MultiSet[+A] = ZSet[A, Int]
+  type MultiSet[+A] = ZSet[A, Natural]
   val MultiSet: ZSet.type = ZSet
-  type NonEmptyMultiSet[+A] = ZNonEmptySet[A, Int]
+  type NonEmptyMultiSet[+A] = ZNonEmptySet[A, Natural]
   val NonEmptyMultiSet: ZNonEmptySet.type = ZNonEmptySet
 
   type DeriveAssociative[F[_]] = Derive[F, Associative]

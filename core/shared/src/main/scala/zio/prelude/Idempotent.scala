@@ -61,7 +61,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
    * a * a === a
    * }}}
    */
-  val idempotentLaw: Laws[EqualIdempotent] =
+  lazy val idempotentLaw: Laws[EqualIdempotent] =
     new Laws.Law1[EqualIdempotent]("idempotentLaw") {
       def apply[A: EqualIdempotent](a: A): TestResult =
         (a <> a) <-> a
@@ -70,7 +70,7 @@ object Idempotent extends Lawful[EqualIdempotent] {
   /**
    * The set of all laws that instances of `Idempotent` must satisfy.
    */
-  val laws: Laws[EqualIdempotent] =
+  lazy val laws: Laws[EqualIdempotent] =
     idempotentLaw + Associative.laws
 
   /**

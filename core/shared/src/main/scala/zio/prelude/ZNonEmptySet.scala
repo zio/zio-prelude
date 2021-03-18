@@ -273,13 +273,15 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
    * Derives an `Equal[ZNonEmptySet[A, B]]` given an `Equal[B]`. Due to the
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZNonEmptySetEqual[A, B: Equal]: Equal[ZNonEmptySet[A, B]] =
+  implicit def ZNonEmptySetEqual[A, B: Equal](implicit ev: Identity[Sum[B]]): Equal[ZNonEmptySet[A, B]] =
     Equal[ZSet[A, B]].contramap(_.toZSet)
 
   /**
    * The `EqualF` instance for `ZNonEmptySet`.
    */
-  implicit def ZNonEmptySetDeriveEqual[B: Equal]: DeriveEqual[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
+  implicit def ZNonEmptySetDeriveEqual[B: Equal](implicit
+    ev: Identity[Sum[B]]
+  ): DeriveEqual[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new DeriveEqual[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
       def derive[A: Equal]: Equal[ZNonEmptySet[A, B]] =
         ZNonEmptySetEqual
@@ -321,7 +323,7 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
    * Derives a `Hash[ZNonEmptySet[A, B]]` given a `Hash[B]`. Due to the
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZNonEmptySetHash[A, B: Hash]: Hash[ZNonEmptySet[A, B]] =
+  implicit def ZNonEmptySetHash[A, B: Hash](implicit ev: Identity[Sum[B]]): Hash[ZNonEmptySet[A, B]] =
     Hash[ZSet[A, B]].contramap(_.zset)
 
   /**
@@ -338,7 +340,7 @@ trait LowPriorityZNonEmptySetImplicits {
    * Derives a `PartialOrd[ZNonEmptySet[A, B]]` given a `PartialOrd[B]`.
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZNonEmptySetPartialOrd[A, B: PartialOrd]: PartialOrd[ZNonEmptySet[A, B]] =
+  implicit def ZNonEmptySetPartialOrd[A, B: PartialOrd](implicit ev: Identity[Sum[B]]): PartialOrd[ZNonEmptySet[A, B]] =
     PartialOrd[ZSet[A, B]].contramap(_.toZSet)
 
 }

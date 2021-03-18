@@ -37,7 +37,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
   /**
    * For all `fa` and `fb`, `either(fa, fb)` is equivalent to `either(fb, fa)`.
    */
-  val commutativeLaw: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
+  lazy val commutativeLaw: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
     new LawsF.Invariant.Law2[CommutativeEitherDeriveEqualInvariant, Equal]("commutativeLaw") {
       def apply[F[_]: CommutativeEitherDeriveEqualInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
         val left  = fa.orElseEitherPar(fb)
@@ -50,7 +50,7 @@ object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualI
   /**
    * The set of law laws that instances of `CommutativeEither` must satisfy.
    */
-  val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
+  lazy val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
     commutativeLaw + AssociativeEither.laws
 
   /**

@@ -16,8 +16,9 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Max, Min, Prod, Sum}
+import zio.prelude.newtypes.{Max, Min, Natural, Prod, Sum}
 
+import scala.annotation.tailrec
 import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.immutable.HashMap
 
@@ -129,6 +130,23 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
     map.foldLeft[ZSet[C, B1]](ZSet.empty) { case (set, (a, b)) =>
       set <> f(a).transform(b1 => ev2.combine(Prod(b), Prod(b1)))
     }
+
+  def forEach[G[+_]: IdentityBoth: Covariant, C](f: A => G[C])(implicit ev: B <:< Natural): G[MultiSet[C]] = {
+
+    @tailrec
+    def loop(g: G[HashMap[C, Natural]], a: A, n: Int): G[HashMap[C, Natural]] =
+      if (n <= 0) g
+      else {
+        val updated = g.zipWith(f(a)) { (map, c) =>
+          map.get(c).fold(map.updated(c, Natural.one))(n => map.updated(c, Natural.successor(n)))
+        }
+        loop(updated, a, n - 1)
+      }
+
+    map
+      .foldLeft[G[HashMap[C, Natural]]](HashMap.empty.succeed) { case (g, (a, b)) => loop(g, a, ev(b)) }
+      .map(new ZSet(_))
+  }
 
   /**
    * Returns the hash code of this set.
@@ -254,15 +272,17 @@ object ZSet extends LowPriorityZSetImplicits {
    * times a value occurs in the set will be an integer representing how many
    * times the value occurred in the specified `Iterable`.
    */
-  def fromIterable[A](iterable: Iterable[A]): ZSet[A, Int] =
-    new ZSet(iterable.foldLeft(HashMap.empty[A, Int])((map, a) => map + (a -> map.get(a).fold(1)(_ + 1))))
+  def fromIterable[A](iterable: Iterable[A]): MultiSet[A] =
+    new ZSet(iterable.foldLeft(HashMap.empty[A, Natural]) { (map, a) =>
+      map + (a -> map.get(a).fold(Natural.one)(Natural.successor))
+    })
 
   /**
    * Constructs a set from the specified `Set`. The measure of how many times
    * a value occurs in the set will be a boolean representing whether a value
    * occurs at all.
    */
-  def fromSet[A](set: Set[A]): ZSet[A, Boolean]            =
+  def fromSet[A](set: Set[A]): ZSet[A, Boolean] =
     new ZSet(set.foldLeft(HashMap.empty[A, Boolean])((map, a) => map + (a -> true)))
 
   /**
@@ -270,13 +290,22 @@ object ZSet extends LowPriorityZSetImplicits {
    * the `Map` and the measure of how many times a value occurs will be the
    * keys value.
    */
-  def fromMap[A, B](map: Map[A, B]): ZSet[A, B]            =
+  def fromMap[A, B](map: Map[A, B]): ZSet[A, B] =
     new ZSet(
       map match {
         case map: HashMap[A, B] => map
         case _                  => map.foldLeft(HashMap.empty[A, B])(_ + _)
       }
     )
+
+  /**
+   * The `ForEach` instance for `MultiSet`.
+   */
+  implicit lazy val MultiSetForEach: ForEach[MultiSet] =
+    new ForEach[MultiSet] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: MultiSet[A])(f: A => G[B]): G[MultiSet[B]] =
+        fa.forEach(f)
+    }
 
   /**
    * Derives a `Commutative[ZSet[A, B]]` given a `Commutative[B]`.
@@ -300,13 +329,15 @@ object ZSet extends LowPriorityZSetImplicits {
    * Derives an `Equal[ZSet[A, B]]` given an `Equal[B]`. Due to the
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZSetEqual[A, B: Equal]: Equal[ZSet[A, B]] =
-    Equal[HashMap[A, B]].contramap(_.map)
+  implicit def ZSetEqual[A, B](implicit ev1: Equal[B], ev: Identity[Sum[B]]): Equal[ZSet[A, B]] =
+    Equal[HashMap[A, B]].contramap(_.map.filterNot(_._2 === ev.identity))
 
   /**
    * The `EqualF` instance for `ZSet`.
    */
-  implicit def ZSetDeriveEqual[B: Equal]: DeriveEqual[({ type lambda[+x] = ZSet[x, B] })#lambda] =
+  implicit def ZSetDeriveEqual[B: Equal](implicit
+    ev: Identity[Sum[B]]
+  ): DeriveEqual[({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new DeriveEqual[({ type lambda[+x] = ZSet[x, B] })#lambda] {
       def derive[A: Equal]: Equal[ZSet[A, B]] =
         ZSetEqual
@@ -367,8 +398,8 @@ object ZSet extends LowPriorityZSetImplicits {
    * Derives a `Hash[ZSet[A, B]]` given a `Hash[B]`. Due to the
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZSetHash[A, B: Hash]: Hash[ZSet[A, B]] =
-    Hash[HashMap[A, B]].contramap(_.map)
+  implicit def ZSetHash[A, B: Hash](implicit ev: Identity[Sum[B]]): Hash[ZSet[A, B]] =
+    Hash[HashMap[A, B]].contramap(_.map.filterNot(_._2 === ev.identity))
 
 }
 
@@ -378,8 +409,11 @@ trait LowPriorityZSetImplicits {
    * Derives a `PartialOrd[ZSet[A, B]]` given a `PartialOrd[B]`.
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZSetPartialOrd[A, B: PartialOrd]: PartialOrd[ZSet[A, B]] =
-    PartialOrd.makeFrom((l, r) => l.toMap.compareSoft(r.toMap), ZSet.ZSetEqual)
+  implicit def ZSetPartialOrd[A, B: PartialOrd](implicit ev: Identity[Sum[B]]): PartialOrd[ZSet[A, B]] =
+    PartialOrd.makeFrom(
+      (l, r) => l.toMap.filterNot(_._2 === ev.identity).compareSoft(r.toMap.filterNot(_._2 === ev.identity)),
+      ZSet.ZSetEqual
+    )
 
 }
 

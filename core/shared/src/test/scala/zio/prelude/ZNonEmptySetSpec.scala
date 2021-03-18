@@ -26,6 +26,9 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
   val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
+  implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
+    Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
+
   def spec: ZSpec[Environment, Failure] =
     suite("ZNonEmptySetSpec")(
       suite("laws")(
@@ -44,7 +47,7 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda](
               ZNonEmptySetCovariant(IntSumCommutativeInverse),
-              ZNonEmptySetDeriveEqual(IntHashOrd)
+              ZNonEmptySetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
             IntHashOrd
           )
