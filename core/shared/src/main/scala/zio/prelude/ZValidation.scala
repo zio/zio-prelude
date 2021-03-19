@@ -88,7 +88,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
-   * Folds over the error and success values of this `ZValidation`.
+   * Folds over the ordered errors and success values of this `ZValidation`.
    */
   final def foldOrdered[B](failure: NonEmptyChunk[E] => B, success: A => B): B =
     self match {
