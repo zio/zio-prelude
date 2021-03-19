@@ -47,7 +47,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
    * For all `fa`, `fb`, and `fc`, `either(fa, either(fb, fc))` is
    * equivalent to `either(either(fa, fb), fc)`.
    */
-  val associativityLaw: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
+  lazy val associativityLaw: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
     new LawsF.Invariant.Law3[AssociativeEitherDeriveEqualInvariant, Equal]("associativityLaw") {
       def apply[F[_]: AssociativeEitherDeriveEqualInvariant, A: Equal, B: Equal, C: Equal](
         fa: F[A],
@@ -65,7 +65,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
    * The set of law laws that instances of `AssociativeEither` must
    * satisfy.
    */
-  val laws: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
+  lazy val laws: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
     associativityLaw
 
   /**

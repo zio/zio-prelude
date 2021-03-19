@@ -15,7 +15,7 @@ object BuildHelper {
   val Scala213   = "2.13.4"
   val ScalaDotty = "3.0.0-M3"
 
-  val SilencerVersion = "1.7.2"
+  val SilencerVersion = "1.7.3"
 
   private val stdOptions = Seq(
     "-deprecation",
@@ -244,7 +244,7 @@ object BuildHelper {
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
     ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
     ThisBuild / scalafixDependencies ++= List(
-      "com.github.liancheng" %% "organize-imports" % "0.4.4",
+      "com.github.liancheng" %% "organize-imports" % "0.5.0",
       "com.github.vovapolu"  %% "scaluzzi"         % "0.1.16"
     ),
     parallelExecution in Test := true,
@@ -282,8 +282,8 @@ object BuildHelper {
   )
 
   def jsSettings = Seq(
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"      % "2.1.0",
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.1.0"
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"      % "2.2.0",
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.2.0"
   )
 
   def nativeSettings = Seq(

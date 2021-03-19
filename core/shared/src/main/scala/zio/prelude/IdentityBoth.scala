@@ -44,7 +44,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   /**
    * For all `fa`, `both(identity, fa)` is equivalent to `fa`.
    */
-  val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+  lazy val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
     new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("leftIdentityLaw") {
       def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityBoth[F].both(IdentityBoth[F].any, fa)
@@ -57,7 +57,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   /**
    * For all `fa`, `both(fa, identity)` is equivalent to `fa`.
    */
-  val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+  lazy val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
     new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("rightIdentityLaw") {
       def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityBoth[F].both(fa, IdentityBoth[F].any)
@@ -70,7 +70,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   /**
    * The set of law laws that instances of `IdentityBoth` must satisfy.
    */
-  val laws: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+  lazy val laws: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
     leftIdentityLaw + rightIdentityLaw + AssociativeBoth.laws
 
   /**
@@ -78,6 +78,16 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
    */
   def apply[F[_]](implicit identityBoth: IdentityBoth[F]): IdentityBoth[F] =
     identityBoth
+
+  /**
+   * The `IdentityBoth` instance for `Const`.
+   */
+  implicit def ConstIdentityeBoth[A: Identity]: IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      val any: Const[A, Any]                                                   = Const(Identity[A].identity)
+      def both[B, C](fb: => Const[A, B], fc: => Const[A, C]): Const[A, (B, C)] =
+        Const.wrap(Const.unwrap(fb) <> Const.unwrap(fc))
+    }
 
   def fromCovariantIdentityFlatten[F[+_]](implicit
     covariant: Covariant[F],

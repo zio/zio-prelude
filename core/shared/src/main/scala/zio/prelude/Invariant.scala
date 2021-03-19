@@ -100,6 +100,15 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
+   * The `ForEach` instance for `Const`.
+   */
+  implicit def ConstForEach[A]: ForEach[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new ForEach[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      def forEach[G[+_]: IdentityBoth: Covariant, B, C](fa: Const[A, B])(f: B => G[C]): G[Const[A, C]] =
+        Const.wrap(Const.unwrap(fa)).succeed
+    }
+
+  /**
    * The `Covariant` (and thus `Invariant`) for a failed `Either`
    */
   implicit def EitherFailureCovariant[R]: Covariant[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
@@ -708,6 +717,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       }
     }
 
+  /** The `Invariant` instance for `Set` */
   implicit val SetInvariant: Invariant[Set] =
     new Invariant[Set] {
       def invmap[A, B](f: A <=> B): Set[A] <=> Set[B] =
@@ -1780,4 +1790,15 @@ trait LowPriorityInvariantImplicits {
    */
   implicit def ZSTMZivariantContravariant[E, A]: Contravariant[({ type lambda[-x] = ZSTM[x, E, A] })#lambda] =
     Zivariant.ZSTMZivariant.deriveContravariant
+}
+
+trait InvariantSyntax {
+
+  /**
+   * Provides infix syntax for mapping over invariant values.
+   */
+  implicit class InvariantOps[F[_], A](private val self: F[A]) {
+    def invmap[B](f: A <=> B)(implicit F: Invariant[F]): F[B] =
+      F.invmap(f).to(self)
+  }
 }

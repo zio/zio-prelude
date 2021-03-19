@@ -110,7 +110,7 @@ object Equal extends Lawful[Equal] {
   /**
    * For all values `a1`, `a1` is equal to `a1`.
    */
-  val reflexiveLaw: Laws.Law1[Equal] =
+  lazy val reflexiveLaw: Laws.Law1[Equal] =
     new Laws.Law1[Equal]("reflexiveLaw") {
       def apply[A: Equal](a1: A): TestResult =
         a1 <-> a1
@@ -120,7 +120,7 @@ object Equal extends Lawful[Equal] {
    * For all values `a1` and `a2`, if `a1` is equal to `a2` then `a2` is equal
    * to `a1`.
    */
-  val symmetryLaw: Laws.Law2[Equal] =
+  lazy val symmetryLaw: Laws.Law2[Equal] =
     new Laws.Law2[Equal]("symmetryLaw") {
       def apply[A: Equal](a1: A, a2: A): TestResult =
         (a1 <-> a2) ==> (a2 <-> a1)
@@ -130,7 +130,7 @@ object Equal extends Lawful[Equal] {
    * For all values `a1`, `a2`, and `a3`, if `a1` is equal to `a2` and `a2` is
    * equal `a3`, then `a1` is equal to `a3`.
    */
-  val transitivityLaw: Laws.Law3[Equal] =
+  lazy val transitivityLaw: Laws.Law3[Equal] =
     new Laws.Law3[Equal]("transitivityLaw") {
       def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
         ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
@@ -139,7 +139,7 @@ object Equal extends Lawful[Equal] {
   /**
    * The set of all laws that instances of `Equal` must satisfy.
    */
-  val laws: Laws[Equal] =
+  lazy val laws: Laws[Equal] =
     reflexiveLaw + symmetryLaw + transitivityLaw
 
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
@@ -282,7 +282,7 @@ object Equal extends Lawful[Equal] {
    * `Double.NaN` will be treated as greater than any other number.
    */
   implicit val DoubleHashOrd: Hash[Double] with Ord[Double] =
-    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
+    HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
@@ -309,7 +309,7 @@ object Equal extends Lawful[Equal] {
    * `Float.NaN` will be treated as greater than any other number.
    */
   implicit val FloatHashOrd: Hash[Float] with Ord[Float] =
-    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
+    HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
    * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
@@ -345,7 +345,7 @@ object Equal extends Lawful[Equal] {
       l.compareStrict(r)
 
     override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
-      l.size === r.size &&
+      l.size == r.size &&
         l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
   }
 
@@ -888,8 +888,7 @@ object Equal extends Lawful[Equal] {
    * Note, that it doesn't take `Hash[A]` nor `Equal[A]` into account.
    */
   implicit def CauseHash[A]: Hash[Cause[A]] =
-    // we have to resort to equals, because the structure is opaque, namely Cause.Internal.Meta
-    // `Equal` and `Hash` instances will be possible once this PR gets merged: https://github.com/zio/zio/pull/4179
+    // we have to resort to equals, because the structure uses `Set` internally
     Hash.default
 
   /**

@@ -81,7 +81,7 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   /**
    * Contramapping with the identity function must not change the structure.
    */
-  val identityLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
+  lazy val identityLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
     new LawsF.Contravariant.Law1[ContravariantDeriveEqual, Equal]("identityLaw") {
       def apply[F[-_]: ContravariantDeriveEqual, A: Equal](fa: F[A]): TestResult =
         fa.contramap(identity[A]) <-> fa
@@ -91,7 +91,7 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
    * Contramapping by `f` followed by `g` must be the same as contramapping
    * with the composition of `f` and `g`.
    */
-  val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
+  lazy val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
     new LawsF.Contravariant.ComposeLaw[ContravariantDeriveEqual, Equal]("compositionLaw") {
       def apply[F[-_]: ContravariantDeriveEqual, A: Equal, B: Equal, C: Equal](
         fa: F[A],
@@ -107,7 +107,7 @@ object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equ
   /**
    * The set of all laws that instances of `Contravariant` must satisfy.
    */
-  val laws: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
+  lazy val laws: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
     identityLaw + compositionLaw
 
   /**

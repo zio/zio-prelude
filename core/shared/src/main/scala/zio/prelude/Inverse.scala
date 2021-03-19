@@ -67,7 +67,7 @@ object Inverse extends Lawful[EqualInverse] {
    * a * a === identity
    * }}}
    */
-  val inverseLaw: Laws[EqualInverse] =
+  lazy val inverseLaw: Laws[EqualInverse] =
     new Laws.Law1[EqualInverse]("rightPartialInverseLaw") {
       def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
         I.inverse(a, a) <-> I.identity
@@ -76,7 +76,7 @@ object Inverse extends Lawful[EqualInverse] {
   /**
    * The set of all laws that instances of `Inverse` must satisfy.
    */
-  val laws: Laws[EqualInverse] =
+  lazy val laws: Laws[EqualInverse] =
     inverseLaw + PartialInverse.laws
 
   /**
@@ -918,13 +918,13 @@ trait InverseSyntax {
     /**
      * A symbolic alias for `inverse`.
      */
-    def ~~(r: => A)(implicit inverse: Inverse[A]): A =
+    def ~~[A1 >: A](r: => A1)(implicit inverse: Inverse[A1]): A1 =
       inverse.inverse(l, r)
 
     /**
      * PartialInverses this value with the specified value
      */
-    def inverse(r: => A)(implicit inverse: Inverse[A]): A =
+    def inverse[A1 >: A](r: => A1)(implicit inverse: Inverse[A1]): A1 =
       inverse.inverse(l, r)
 
     /**
