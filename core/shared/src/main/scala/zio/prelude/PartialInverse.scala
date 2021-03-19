@@ -51,7 +51,7 @@ object PartialInverse extends Lawful[EqualPartialInverse] {
    * a * a === identity
    * }}}
    */
-  val partialInverseLaw: Laws[EqualPartialInverse] =
+  lazy val partialInverseLaw: Laws[EqualPartialInverse] =
     new Laws.Law1[EqualPartialInverse]("rightPartialInverseLaw") {
       def apply[A](a: A)(implicit I: EqualPartialInverse[A]): TestResult =
         I.inverseOption(a, a) match {
@@ -63,7 +63,7 @@ object PartialInverse extends Lawful[EqualPartialInverse] {
   /**
    * The set of all laws that instances of `PartialInverse` must satisfy.
    */
-  val laws: Laws[EqualPartialInverse] =
+  lazy val laws: Laws[EqualPartialInverse] =
     partialInverseLaw + Identity.laws
 
   /**

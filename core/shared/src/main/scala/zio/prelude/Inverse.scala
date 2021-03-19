@@ -61,14 +61,14 @@ object Inverse extends Lawful[EqualInverse] {
 
   /**
    * The inverse law states that for some binary operator `*`, for all
-   * values `a`, with the exception of the `zero` element, the following must hold:
+   * values `a`, the following must hold:
    *
    * {{{
    * a * a === identity
    * }}}
    */
   lazy val inverseLaw: Laws[EqualInverse] =
-    new Laws.Law1[EqualInverse]("rightPartialInverseLaw") {
+    new Laws.Law1[EqualInverse]("rightInverseLaw") {
       def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
         I.inverse(a, a) <-> I.identity
     }
@@ -922,7 +922,7 @@ trait InverseSyntax {
       inverse.inverse(l, r)
 
     /**
-     * PartialInverses this value with the specified value
+     * Inverses this value with the specified value
      */
     def inverse[A1 >: A](r: => A1)(implicit inverse: Inverse[A1]): A1 =
       inverse.inverse(l, r)

@@ -28,7 +28,7 @@ object Annihilation extends Lawful[AnnihilationEqual] {
    * 0 * a === 0
    * }}}
    */
-  val leftAnnihilationLaw: Laws[AnnihilationEqual] =
+  lazy val leftAnnihilationLaw: Laws[AnnihilationEqual] =
     new Laws.Law1[AnnihilationEqual]("leftAnnihilationLaw") {
       def apply[A](a: A)(implicit A: AnnihilationEqual[A]): TestResult =
         (A.annihilation *** a) <-> A.annihilation
@@ -42,7 +42,7 @@ object Annihilation extends Lawful[AnnihilationEqual] {
    * a * 0 === 0
    * }}}
    */
-  val rightAnnihilationLaw: Laws[AnnihilationEqual] =
+  lazy val rightAnnihilationLaw: Laws[AnnihilationEqual] =
     new Laws.Law1[AnnihilationEqual]("rightAnnihilationLaw") {
       def apply[A](a: A)(implicit A: AnnihilationEqual[A]): TestResult =
         (a *** A.annihilation) <-> A.annihilation
@@ -51,7 +51,7 @@ object Annihilation extends Lawful[AnnihilationEqual] {
   /**
    * The set of all laws that instances of `Annihilation` must satisfy.
    */
-  val laws: Laws[AnnihilationEqual] =
+  lazy val laws: Laws[AnnihilationEqual] =
     leftAnnihilationLaw + rightAnnihilationLaw
 
   /**

@@ -22,7 +22,7 @@ object DistributiveMultiply extends Lawful[DistributiveMultiplyEqual] {
    * a1 * (a2 + a3) === (a1 * a2) + (a1 * a3)
    * }}}
    */
-  val leftDistributivityLaw: Laws[DistributiveMultiplyEqual] =
+  lazy val leftDistributivityLaw: Laws[DistributiveMultiplyEqual] =
     new Laws.Law3[DistributiveMultiplyEqual]("leftDistributivityLaw") {
       def apply[A: DistributiveMultiplyEqual](a1: A, a2: A, a3: A): TestResult =
         (a1 *** (a2 +++ a3)) <-> ((a1 *** a2) +++ (a1 *** a3))
@@ -36,7 +36,7 @@ object DistributiveMultiply extends Lawful[DistributiveMultiplyEqual] {
    * (a1 + a2) * a3 === (a1 * a3) + (a2 * a3)
    * }}}
    */
-  val rightDistributivityLaw: Laws[DistributiveMultiplyEqual] =
+  lazy val rightDistributivityLaw: Laws[DistributiveMultiplyEqual] =
     new Laws.Law3[DistributiveMultiplyEqual]("rightDistributivityLaw") {
       def apply[A: DistributiveMultiplyEqual](a1: A, a2: A, a3: A): TestResult =
         ((a1 +++ a2) *** a3) <-> ((a1 *** a3) +++ (a2 *** a3))
@@ -45,7 +45,7 @@ object DistributiveMultiply extends Lawful[DistributiveMultiplyEqual] {
   /**
    * The set of all laws that instances of `DistributiveMultiply` must satisfy.
    */
-  val laws: Laws[DistributiveMultiplyEqual] =
+  lazy val laws: Laws[DistributiveMultiplyEqual] =
     leftDistributivityLaw + rightDistributivityLaw
 
   /**
