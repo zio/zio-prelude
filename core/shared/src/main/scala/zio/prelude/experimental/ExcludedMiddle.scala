@@ -22,7 +22,7 @@ object ExcludedMiddle extends Lawful[ExcludedMiddleEqual] {
    * !a vvv a === 1
    * }}}
    */
-  val excludedMiddleLaw: Laws[ExcludedMiddleEqual] =
+  lazy val excludedMiddleLaw: Laws[ExcludedMiddleEqual] =
     new Laws.Law1[ExcludedMiddleEqual]("excludedMiddleLaw") {
       def apply[A](a: A)(implicit A: ExcludedMiddleEqual[A]): TestResult =
         (!a vvv a) <-> A.top
@@ -31,7 +31,7 @@ object ExcludedMiddle extends Lawful[ExcludedMiddleEqual] {
   /**
    * The set of all laws that instances of `ExcludedMiddle` must satisfy.
    */
-  val laws: Laws[ExcludedMiddleEqual] =
+  lazy val laws: Laws[ExcludedMiddleEqual] =
     excludedMiddleLaw
 
   /**

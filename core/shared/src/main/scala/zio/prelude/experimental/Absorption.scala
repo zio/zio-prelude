@@ -22,7 +22,7 @@ object Absorption extends Lawful[AbsorptionEqual] {
    * a1 vvv (a1 ^^^ a2) === a1
    * }}}
    */
-  val joinAbsorptionLaw: Laws[AbsorptionEqual] =
+  lazy val joinAbsorptionLaw: Laws[AbsorptionEqual] =
     new Laws.Law2[AbsorptionEqual]("joinAbsorptionLaw") {
       def apply[A](a1: A, a2: A)(implicit A: AbsorptionEqual[A]): TestResult =
         (a1 vvv (a1 ^^^ a2)) <-> a1
@@ -36,7 +36,7 @@ object Absorption extends Lawful[AbsorptionEqual] {
    * a1 ^^^ (a1 vvv a2) === a1
    * }}}
    */
-  val meetAbsorptionLaw: Laws[AbsorptionEqual] =
+  lazy val meetAbsorptionLaw: Laws[AbsorptionEqual] =
     new Laws.Law2[AbsorptionEqual]("meetAbsorptionLaw") {
       def apply[A](a1: A, a2: A)(implicit A: AbsorptionEqual[A]): TestResult =
         (a1 ^^^ (a1 vvv a2)) <-> a1
@@ -45,7 +45,7 @@ object Absorption extends Lawful[AbsorptionEqual] {
   /**
    * The set of all laws that instances of `Absorption` must satisfy.
    */
-  val laws: Laws[AbsorptionEqual] =
+  lazy val laws: Laws[AbsorptionEqual] =
     joinAbsorptionLaw + meetAbsorptionLaw
 
   /**

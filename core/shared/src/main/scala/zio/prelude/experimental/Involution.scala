@@ -22,7 +22,7 @@ object Involution extends Lawful[InvolutionEqual] {
    * !(!a) === a
    * }}}
    */
-  val involutionLaw: Laws[InvolutionEqual] =
+  lazy val involutionLaw: Laws[InvolutionEqual] =
     new Laws.Law1[InvolutionEqual]("involutionLaw") {
       def apply[A](a: A)(implicit A: InvolutionEqual[A]): TestResult =
         A.complement(A.complement(a)) <-> a
@@ -31,7 +31,7 @@ object Involution extends Lawful[InvolutionEqual] {
   /**
    * The set of all laws that instances of `Involution` must satisfy.
    */
-  val laws: Laws[InvolutionEqual] =
+  lazy val laws: Laws[InvolutionEqual] =
     involutionLaw
 
   /**

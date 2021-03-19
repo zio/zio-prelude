@@ -22,7 +22,7 @@ object Noncontradiction extends Lawful[NoncontradictionEqual] {
    * !a ^^^ a === 0
    * }}}
    */
-  val noncontradictionLaw: Laws[NoncontradictionEqual] =
+  lazy val noncontradictionLaw: Laws[NoncontradictionEqual] =
     new Laws.Law1[NoncontradictionEqual]("noncontradictionLaw") {
       def apply[A](a: A)(implicit A: NoncontradictionEqual[A]): TestResult =
         (!a ^^^ a) <-> A.bottom
@@ -31,7 +31,7 @@ object Noncontradiction extends Lawful[NoncontradictionEqual] {
   /**
    * The set of all laws that instances of `Noncontradiction` must satisfy.
    */
-  val laws: Laws[NoncontradictionEqual] =
+  lazy val laws: Laws[NoncontradictionEqual] =
     noncontradictionLaw
 
   /**
