@@ -167,14 +167,20 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+  final lazy val toEither: Either[NonEmptyMultiSet[E], A] =
+    fold(es => Left(NonEmptyMultiSet.fromIterable(es.head, es.tail)), Right(_))
+
+  /**
+   * Transforms this `ZValidation` to an `Either` with errors in the order they occurred, discarding the log.
+   */
+  final def toEitherOrdered[E1 >: E]: Either[NonEmptyChunk[E1], A] =
     fold(Left(_), Right(_))
 
   /**
    * Transforms this `ZValidation` to an `Either`, transforming the accumulated errors and discarding the log.
    */
   final def toEitherWith[E2](f: NonEmptyChunk[E] => E2): Either[E2, A] =
-    toEither.left.map(f)
+    toEitherOrdered.left.map(f)
 
   /**
    * Transforms this `ZValidation` to an `Option`, discarding information about
@@ -265,11 +271,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Derives an `Equal[ZValidation[W, E, A]]` given an `Equal[A]`.
    */
   implicit def ZValidationEqual[W, E, A: Equal]: Equal[ZValidation[W, E, A]] =
-    Equal.make {
-      case (Failure(_, e), Failure(_, e1)) => MultiSet.fromIterable(e) == MultiSet.fromIterable(e1)
-      case (Success(_, a), Success(_, a1)) => a === a1
-      case _                               => false
-    }
+    Equal.make((l, r) => l.toEither === r.toEither)
 
   /**
    * The `DeriveEqual` instance for `ZValidation`.
@@ -310,6 +312,12 @@ object ZValidation extends LowPriorityValidationImplicits {
       )(f: A => F[B]): F[ZValidation[W, E, B]] =
         fa.forEach(f)
     }
+
+  /**
+   * Derives an `Hash[ZValidation[W, E, A]]` given an `Hash[A]`.
+   */
+  implicit def ZValidationHash[W, E, A: Hash]: Hash[ZValidation[W, E, A]] =
+    Hash[Either[NonEmptyMultiSet[E], A]].contramap(_.toEither)
 
   /**
    * The `IdentityBoth` instance for `ZValidation`.
