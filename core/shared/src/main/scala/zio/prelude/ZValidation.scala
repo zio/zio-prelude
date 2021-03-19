@@ -46,11 +46,13 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * equal to each other.
    */
   override final def equals(that: Any): Boolean =
-    (self, that) match {
-      case (Failure(_, e), Failure(_, e1)) => e == e1
-      case (Success(_, a), Success(_, a1)) => a == a1
-      case _                               => false
+    that match {
+      case that: AnyRef if self.eq(that) => true
+      case that: ZValidation[_, _, _]    => self.toEither == that.toEither
+      case _                             => false
     }
+
+  override final def hashCode(): Int = toEither.hashCode()
 
   /**
    * Transforms the value of this `ZValidation` with the specified validation
