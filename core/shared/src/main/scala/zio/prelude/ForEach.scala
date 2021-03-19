@@ -101,8 +101,10 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * summary using the `combine` operation of `Identity`, or the `identity`
    * element if the collection is empty.
    */
-  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B =
-    foldLeft(fa)(Identity[B].identity)((b: B, a: A) => b combine f(a))
+  def foldMap[A, B: Identity](fa: F[A])(f: A => B): B = {
+    type ConstB[+A] = Const[B, A]
+    Const.unwrap(forEach[ConstB, A, B](fa)(a => Const(f(a))))
+  }
 
   /**
    * Folds over the elements of this collection from right to left to produce a
@@ -251,10 +253,11 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Reduces the collection to a summary value using the binary function `f`,
    * returning `None` if the collection is empty.
    */
-  def reduceOption[A](fa: F[A])(f: (A, A) => A): Option[A] = {
-    implicit val associative: Associative[A] = Associative.make(f)
-    reduceMapOption(fa)(identity)
-  }
+  def reduceOption[A](fa: F[A])(f: (A, A) => A): Option[A] =
+    foldLeft[Option[A], A](fa)(None) {
+      case (Some(s), a) => Some(f(s, a))
+      case (None, a)    => Some(a)
+    }
 
   /**
    * Reverses the order of elements in the collection.
@@ -308,7 +311,7 @@ object ForEach extends LawfulF.Covariant[DeriveEqualForEach, Equal] {
   /**
    * The set of all laws that instances of `ForEach` must satisfy.
    */
-  val laws: LawsF.Covariant[DeriveEqualForEach, Equal] =
+  lazy val laws: LawsF.Covariant[DeriveEqualForEach, Equal] =
     Covariant.laws
 
   /**

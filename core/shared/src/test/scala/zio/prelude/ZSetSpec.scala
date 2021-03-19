@@ -4,7 +4,7 @@ import zio.Chunk
 import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZSet._
-import zio.prelude.coherent.CovariantDeriveEqual
+import zio.prelude.coherent.{CovariantDeriveEqual, DeriveEqualForEach}
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test.Assertion._
@@ -22,8 +22,14 @@ object ZSetSpec extends DefaultRunnableSpec {
   def genZSet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
     Gen.mapOf(a, b).map(ZSet.fromMap)
 
-  val smallInts: Gen[Random with Sized, Chunk[Int]] =
+  lazy val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
+
+  lazy val naturals: Gen[Random with Sized, Natural] =
+    Gen.small(n => Gens.natural(Natural.zero, Natural.unsafeMake(n)))
+
+  implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
+    Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
 
   def spec: ZSpec[Environment, Failure] =
     suite("ZSetSpec")(
@@ -43,7 +49,24 @@ object ZSetSpec extends DefaultRunnableSpec {
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
               ZSetCovariant(IntSumCommutativeInverse),
-              ZSetDeriveEqual(IntHashOrd)
+              ZSetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
+            ),
+            IntHashOrd
+          )
+        ),
+        testM("foreach")(
+          checkAllLaws[
+            DeriveEqualForEach,
+            Equal,
+            TestConfig,
+            Random with Sized with TestConfig,
+            MultiSet,
+            Int
+          ](ForEach)(genFZSet(naturals), Gen.anyInt)(
+            // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
+            DeriveEqualForEach.derive[MultiSet](
+              ZSetDeriveEqual(IntHashOrd, Identity[Sum[Natural]]),
+              MultiSetForEach
             ),
             IntHashOrd
           )

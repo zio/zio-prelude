@@ -49,7 +49,7 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
    * For all `fffa`, `flatten(flatten(fffa))` is equivalent to
    * `flatten(fffa.map(flatten))`.
    */
-  val associativityLaw: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
+  lazy val associativityLaw: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
     new LawsF.Covariant.FlattenLaw[AssociativeFlattenCovariantDeriveEqual, Equal]("associativityLaw") {
       def apply[F[+_]: AssociativeFlattenCovariantDeriveEqual, A: Equal](fffa: F[F[F[A]]]): TestResult =
         fffa.flatten.flatten <-> fffa.map(_.flatten).flatten
@@ -58,7 +58,7 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
   /**
    * The set of all laws that instances of `AssociativeFlatten` must satisfy.
    */
-  val laws: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
+  lazy val laws: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
     associativityLaw
 
   /**
@@ -85,6 +85,15 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
       def any: Chunk[Any] = Chunk.unit
 
       def flatten[A](ffa: Chunk[Chunk[A]]): Chunk[A] = ffa.flatten
+    }
+
+  /**
+   * The `AssociativeFlatten` instance for `Const`.
+   */
+  implicit def ConstAssociativeFlatten[A]: AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      def flatten[B](ffb: Const[A, Const[A, B]]): Const[A, B] =
+        Const.wrap(Const.unwrap(ffb))
     }
 
   /**

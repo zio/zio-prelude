@@ -53,7 +53,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
    * For all `fa`, `fb`, and `fc`, `both(fa, both(fb, fc))` is equivalent
    * to `both(both(fa, fb), fc)`.
    */
-  val associativityLaw: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
+  lazy val associativityLaw: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
     new LawsF.Invariant.Law3[AssociativeBothDeriveEqualInvariant, Equal]("associativityLaw") {
       def apply[F[_]: AssociativeBothDeriveEqualInvariant, A: Equal, B: Equal, C: Equal](
         fa: F[A],
@@ -70,7 +70,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The set of law laws that instances of `AssociativeBoth` must satisfy.
    */
-  val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
+  lazy val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
     associativityLaw
 
   def fromCovariantAssociativeFlatten[F[+_]](implicit
@@ -1083,6 +1083,15 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   implicit val ChunkAssociativeBoth: AssociativeBoth[Chunk] =
     new AssociativeBoth[Chunk] {
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
+   * The `AssociativeBoth` instance for `Const`.
+   */
+  implicit def ConstAssociativeBoth[A: Associative]: AssociativeBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new AssociativeBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      def both[B, C](fb: => Const[A, B], fc: => Const[A, C]): Const[A, (B, C)] =
+        Const.wrap(Const.unwrap(fb) <> Const.unwrap(fc))
     }
 
   /**

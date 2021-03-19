@@ -12,12 +12,6 @@ inThisBuild(
         "john@degoes.net",
         url("http://degoes.net")
       )
-    ),
-    pgpPassphrase := sys.env.get("PGP_PASSWORD").map(_.toArray),
-    pgpPublicRing := file("/tmp/public.asc"),
-    pgpSecretRing := file("/tmp/secret.asc"),
-    scmInfo := Some(
-      ScmInfo(url("https://github.com/zio/zio-prelude/"), "scm:git:git@github.com:zio/zio-prelude.git")
     )
   )
 )
@@ -27,19 +21,17 @@ addCommandAlias("check", "; scalafmtSbtCheck; scalafmtCheckAll; compile:scalafix
 
 addCommandAlias(
   "testJVM",
-  ";coreJVM/test;experimentalJVM/test"
+  ";coreJVM/test;experimentalJVM/test;scalaParallelCollections/test"
 )
 addCommandAlias(
   "testJS",
-  ";coreJS/test;experimentalJVM/test"
+  ";coreJS/test;experimentalJS/test"
 )
 addCommandAlias(
   "testNative",
-  ";coreNative/test:compile;experimentalJVM/test:compile"
+  ";coreNative/test:compile;experimentalNative/test:compile"
 )
 
-// TODO remove once a stable version of ZIO for Scala Native 0.4.0 is out
-ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
 val zioVersion = "1.0.4-2"
 
 lazy val root = project
@@ -56,7 +48,8 @@ lazy val root = project
     docs,
     experimentalJS,
     experimentalJVM,
-    experimentalNative
+    experimentalNative,
+    scalaParallelCollections
   )
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -65,19 +58,11 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
-  .settings( // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
-    libraryDependencies ++= {
-      val spc = List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % Optional)
-      Seq(
-        "dev.zio" %%% "zio"      % zioVersion,
-        "dev.zio" %%% "zio-test" % zioVersion
-      ) ++
-        (scalaVersion.value match {
-          case BuildHelper.Scala213   => spc
-          case BuildHelper.ScalaDotty => spc.map(_.withDottyCompat(scalaVersion.value))
-          case _                      => List()
-        })
-    }
+  .settings(
+    libraryDependencies ++= Seq(
+      "dev.zio" %%% "zio"      % zioVersion,
+      "dev.zio" %%% "zio-test" % zioVersion
+    )
   )
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
@@ -100,6 +85,7 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(stdSettings("zio-prelude-experimental"))
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental"))
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
 lazy val experimentalJS  = experimental.js
@@ -114,6 +100,28 @@ lazy val experimentalJVM = experimental.jvm
 lazy val experimentalNative = experimental.native
   .settings(nativeSettings)
 
+lazy val scalaParallelCollections = project
+  .in(file("scala-parallel-collections"))
+  .dependsOn(coreJVM % "compile->compile;test->test")
+  .settings(stdSettings("zio-prelude-scala-parallel-collections"))
+  .settings(buildInfoSettings("zio.prelude.scalaparallelcollections"))
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(
+    libraryDependencies ++= {
+      scalaVersion.value match {
+        case BuildHelper.Scala213 | BuildHelper.ScalaDotty =>
+          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.1")
+        case _                                             =>
+          List()
+      }
+    }
+  )
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .settings(scalaReflectTestSettings)
+  .enablePlugins(BuildInfoPlugin)
+
 lazy val benchmarks = project
   .in(file("benchmarks"))
   .settings(stdSettings("zio-prelude-benchmarks"))
@@ -122,10 +130,7 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      ("org.typelevel" %% "cats-core" % "2.3.1") match {
-        case cats if isDotty.value => cats.withDottyCompat(scalaVersion.value)
-        case cats                  => cats
-      }
+      "org.typelevel" %% "cats-core" % "2.4.2"
     )
   )
   .dependsOn(coreJVM)

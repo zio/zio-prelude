@@ -16,6 +16,8 @@
 
 package zio.prelude
 
+import zio.Chunk
+
 import scala.annotation.tailrec
 
 /**
@@ -134,12 +136,26 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
       _.zipWith(_)(_ && _)
     ).asInstanceOf[F[ParSeq[Z, B]]]
 
+  final def toCause: zio.Cause[A] = this match {
+    case ParSeq.Both(left, right) => zio.Cause.Both(left.toCause, right.toCause)
+    case _: ParSeq.Empty.type     => zio.Cause.empty
+    case ParSeq.Single(value)     => zio.Cause.Fail(value)
+    case ParSeq.Then(left, right) => zio.Cause.Then(left.toCause, right.toCause)
+  }
+
   /**
    * Transforms the type of events in this collection of events with the
    * specified function.
    */
   final def map[B](f: A => B): ParSeq[Z, B] =
     flatMap(a => ParSeq.single(f(a)))
+
+  /**
+   * Converts this collection of events to a `NonEmptyMultiSet` of events,
+   * discarding information about the sequential structure of events.
+   */
+  final def toNonEmptyMultiSet(implicit ev: Z <:< Nothing): NonEmptyMultiSet[A] =
+    NonEmptyMultiSet.fromIterableOption(fold(Chunk.empty, Chunk.single)(_ ++ _, _ ++ _)).get
 
   /**
    * Combines this collection of events with that collection of events to

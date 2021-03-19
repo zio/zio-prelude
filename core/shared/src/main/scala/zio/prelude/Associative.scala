@@ -18,7 +18,7 @@ package zio.prelude
 
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.experimental.JoinMeetShape
-import zio.prelude.newtypes.{AndF, First, Last, Max, Min, OrF, Prod, Sum}
+import zio.prelude.newtypes.{AndF, First, Last, Max, Min, Natural, OrF, Prod, Sum}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
@@ -69,7 +69,7 @@ trait Associative[A] {
   }
 }
 
-object Associative extends Lawful[AssociativeEqual] {
+object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] {
 
   /**
    * The associativity law states that for some binary operator `*`, for all
@@ -79,7 +79,7 @@ object Associative extends Lawful[AssociativeEqual] {
    * (a1 * a2) * a3 === a1 * (a2 * a3)
    * }}}
    */
-  val associativityLaw: Laws[AssociativeEqual] =
+  lazy val associativityLaw: Laws[AssociativeEqual] =
     new Laws.Law3[AssociativeEqual]("associativityLaw") {
       def apply[A: AssociativeEqual](a1: A, a2: A, a3: A): TestResult =
         (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
@@ -88,7 +88,7 @@ object Associative extends Lawful[AssociativeEqual] {
   /**
    * The set of all laws that instances of `Associative` must satisfy.
    */
-  val laws: Laws[AssociativeEqual] =
+  lazy val laws: Laws[AssociativeEqual] =
     associativityLaw
 
   /**
@@ -395,25 +395,6 @@ object Associative extends Lawful[AssociativeEqual] {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Int` values.
-   */
-  implicit val IntProdCommutativeIdentity: Commutative[Prod[Int]] with Identity[Prod[Int]] =
-    new Commutative[Prod[Int]] with Identity[Prod[Int]] {
-      def combine(l: => Prod[Int], r: => Prod[Int]): Prod[Int] = Prod(l * r)
-      val identity: Prod[Int]                                  = Prod(1)
-    }
-
-  /**
-   * The `Commutative` and `Inverse` instance for the sum of `Int` values.
-   */
-  implicit val IntSumCommutativeInverse: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
-    new Commutative[Sum[Int]] with Inverse[Sum[Int]] {
-      def combine(l: => Sum[Int], r: => Sum[Int]): Sum[Int] = Sum(l + r)
-      val identity: Sum[Int]                                = Sum(0)
-      def inverse(l: => Sum[Int], r: => Sum[Int]): Sum[Int] = Sum(l - r)
-    }
-
-  /**
    * The `Associative` instance for the last of `A` values.
    */
   implicit def LastAssociative[A]: Associative[Last[A]] =
@@ -489,6 +470,25 @@ object Associative extends Lawful[AssociativeEqual] {
    */
   implicit def MinCommutative[A: Ord]: Commutative[Min[A]] =
     Commutative.make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
+
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Natural` values.
+   */
+  implicit val NaturalProdCommutativeIdentity: Commutative[Prod[Natural]] with Identity[Prod[Natural]] =
+    new Commutative[Prod[Natural]] with Identity[Prod[Natural]] {
+      def combine(l: => Prod[Natural], r: => Prod[Natural]): Prod[Natural] = Prod(Natural.times(l, r))
+      val identity: Prod[Natural]                                          = Prod(Natural.one)
+    }
+
+  /**
+   * The `Commutative` and `Inverse` instance for the sum of `Narutal` values.
+   */
+  implicit val NaturalSumCommutativeInverse: Commutative[Sum[Natural]] with Inverse[Sum[Natural]] =
+    new Commutative[Sum[Natural]] with Inverse[Sum[Natural]] {
+      def combine(l: => Sum[Natural], r: => Sum[Natural]): Sum[Natural] = Sum(Natural.plus(l, r))
+      val identity: Sum[Natural]                                        = Sum(Natural.zero)
+      def inverse(l: => Sum[Natural], r: => Sum[Natural]): Sum[Natural] = Sum(Natural.minus(l, r))
+    }
 
   /**
    * The `Associative` instance for the concatenation of `NonEmptyChunk[A]`
@@ -1305,7 +1305,29 @@ object Associative extends Lawful[AssociativeEqual] {
     Identity.make(Vector.empty, _ ++ _)
 }
 
-trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
+trait AssociativeLowPriority {
+
+  /**
+   * The `Commutative` and `Identity` instance for the product of `Int` values.
+   */
+  implicit val IntProdCommutativeIdentity: Commutative[Prod[Int]] with Identity[Prod[Int]] =
+    new Commutative[Prod[Int]] with Identity[Prod[Int]] {
+      def combine(l: => Prod[Int], r: => Prod[Int]): Prod[Int] = Prod(l * r)
+      val identity: Prod[Int]                                  = Prod(1)
+    }
+
+  /**
+   * The `Commutative` and `Inverse` instance for the sum of `Int` values.
+   */
+  implicit val IntSumCommutativeInverse: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
+    new Commutative[Sum[Int]] with Inverse[Sum[Int]] {
+      def combine(l: => Sum[Int], r: => Sum[Int]): Sum[Int] = Sum(l + r)
+      val identity: Sum[Int]                                = Sum(0)
+      def inverse(l: => Sum[Int], r: => Sum[Int]): Sum[Int] = Sum(l - r)
+    }
+}
+
+trait AssociativeSyntax {
 
   /**
    * Provides infix syntax for combining two values with an associative
@@ -1316,13 +1338,13 @@ trait AssociativeSyntax extends PlatformSpecificAssociativeSyntax {
     /**
      * A symbolic alias for `combine`.
      */
-    def <>(r: => A)(implicit associative: Associative[A]): A =
+    def <>[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
      * Associatively combines this value with the specified value
      */
-    def combine(r: => A)(implicit associative: Associative[A]): A =
+    def combine[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**

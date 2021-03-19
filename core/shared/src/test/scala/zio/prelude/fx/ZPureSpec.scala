@@ -539,6 +539,22 @@ object ZPureSpec extends DefaultRunnableSpec {
               }
             )
           ),
+          suite("refineToOrDie")(
+            testM("success case") {
+              check(genInt) { a =>
+                assert(ZPure.attempt(a.toString.toInt).refineToOrDie[NumberFormatException].runEither)(
+                  isRight(equalTo(a))
+                )
+              }
+            },
+            test("failure case") {
+              implicit val throwableHash = Equal.ThrowableHash
+              val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
+              assert(ZPure.attempt("a".toInt).refineToOrDie[NumberFormatException].runEither)(
+                isLeft(equalTo(exception))
+              )
+            }
+          ),
           suite("right methods")(
             suite("right")(
               test("failure") {
@@ -824,13 +840,13 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           testM("fromEffect (Success case)") {
             check(genInt) { a =>
-              assert(ZPure.fromEffect(a).runEither)(isRight(equalTo(a)))
+              assert(ZPure.attempt(a).runEither)(isRight(equalTo(a)))
             }
           },
           test("fromEffect (Failure case)") {
             implicit val throwableHash = Equal.ThrowableHash
             val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
-            assert(ZPure.fromEffect("a".toInt).runEither)(isLeft(equalTo(exception)))
+            assert(ZPure.attempt("a".toInt).runEither)(isLeft(equalTo(exception)))
           },
           suite("modifyEither")(
             test("success") {
@@ -844,32 +860,41 @@ object ZPureSpec extends DefaultRunnableSpec {
           )
         ),
         test("parallel errors example") {
-          def validateName(s: String): Validation[String, String]               =
-            if (s == "John Doe") Validation.succeed(s) else Validation.fail("Wrong name!")
-          def validateAge(age: Int): Validation[String, Int]                    =
-            if (age >= 18) Validation.succeed(age) else Validation.fail("Under age")
-          def validateAuthorized(authorized: Boolean): Validation[String, Unit] =
-            if (authorized) Validation.unit else Validation.fail("Not authorized")
-          val validation                                                        =
+          def validateName(s: String): ZPure[Nothing, Unit, Unit, Any, String, String]               =
+            if (s == "John Doe") ZPure.succeed(s) else ZPure.fail("Wrong name!")
+          def validateAge(age: Int): ZPure[Nothing, Unit, Unit, Any, String, Int]                    =
+            if (age >= 18) ZPure.succeed(age) else ZPure.fail("Under age")
+          def validateAuthorized(authorized: Boolean): ZPure[Nothing, Unit, Unit, Any, String, Unit] =
+            if (authorized) ZPure.unit else ZPure.fail("Not authorized")
+          val validation                                                                             =
             validateName("Jane Doe") zipPar validateAge(17) zipPar validateAuthorized(false)
-          val result                                                            = validation.sandbox.either.run
+          val result                                                                                 = validation.sandbox.either.run
           assert(result)(
             isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
           )
         },
         test("implicit syntax") {
-          def validateName(s: String): Validation[String, String]               =
-            if (s == "John Doe") Validation.succeed(s) else Validation.fail("Wrong name!")
-          def validateAge(age: Int): Validation[String, Int]                    =
-            if (age >= 18) Validation.succeed(age) else Validation.fail("Under age")
-          def validateAuthorized(authorized: Boolean): Validation[String, Unit] =
-            if (authorized) Validation.unit else Validation.fail("Not authorized")
-          val validation                                                        =
+          def validateName(s: String): ZPure[Nothing, Unit, Unit, Any, String, String]               =
+            if (s == "John Doe") ZPure.succeed(s) else ZPure.fail("Wrong name!")
+          def validateAge(age: Int): ZPure[Nothing, Unit, Unit, Any, String, Int]                    =
+            if (age >= 18) ZPure.succeed(age) else ZPure.fail("Under age")
+          def validateAuthorized(authorized: Boolean): ZPure[Nothing, Unit, Unit, Any, String, Unit] =
+            if (authorized) ZPure.unit else ZPure.fail("Not authorized")
+          val validation                                                                             =
             (validateName("Jane Doe"), validateAge(17), validateAuthorized(false)).tupledPar
-          val result                                                            = validation.sandbox.either.run
+          val result                                                                                 = validation.sandbox.either.run
           assert(result)(
             isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
           )
+        },
+        test("state is restored after failure") {
+          val foo: ZPure[Nothing, String, Int, Any, Nothing, Unit] = ZPure.set(3)
+          val bar: ZPure[Nothing, Int, String, Any, Nothing, Unit] = ZPure.set("bar")
+          val zPure                                                = for {
+            _ <- (foo *> ZPure.fail("baz") *> bar).either
+            s <- ZPure.get
+          } yield s
+          assert(zPure.provideState("").run)(equalTo(""))
         }
       ),
       suite("log")(
