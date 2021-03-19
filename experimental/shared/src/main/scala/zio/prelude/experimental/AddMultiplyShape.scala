@@ -48,8 +48,8 @@ object AddMultiplyShape {
     override def Addition: Commutative[Sum[Int]] with Inverse[Sum[Int]] =
       Associative.IntSumCommutativeInverse
 
-    override def Multiplication: Commutative[Prod[Int]] with Identity[Prod[Int]] =
-      Associative.IntProdCommutativeIdentity
+    override def Multiplication: Commutative[Prod[Int]] with PartialInverse[Prod[Int]] =
+      Associative.IntProdCommutativePartialInverse
   }
 
   implicit val DoubleAnnihilationDistributiveMultiply: classic.Field[Double] = new Field[Double] {
@@ -63,7 +63,7 @@ object AddMultiplyShape {
       Associative.DoubleSumCommutativeInverse
 
     override def Multiplication: Commutative[Prod[Double]] with PartialInverse[Prod[Double]] =
-      Associative.DoubleProdCommutativeIdentity
+      Associative.DoubleProdCommutativePartialInverse
   }
 }
 
