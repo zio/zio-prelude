@@ -1515,7 +1515,7 @@ trait LowPriorityValidationImplicits {
     }
 
   /**
-   * Derives an `Hash[ZValidation[W, E, A]]` given an `Hash[A]`.
+   * Derives a `Hash[ZValidation[W, E, A]]` given a `Hash[A]`.
    */
   implicit def ZValidationHash[W, E, A: Hash]: Hash[ZValidation[W, E, A]] =
     Hash[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherUnordered)
