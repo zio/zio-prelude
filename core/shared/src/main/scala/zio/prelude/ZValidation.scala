@@ -341,7 +341,7 @@ object ZValidation extends LowPriorityValidationImplicits {
 
   /**
    * Combine a collection of `ZValidation` values into a single `ZValidation`
-   * that either returns the values of all of them, if their all succeed, or
+   * that either returns the values of all of them, if they all succeed, or
    * else fails with all of their errors.
    */
   def collectAllPar[W, E, A](validations: Iterable[ZValidation[W, E, A]]): ZValidation[W, E, List[A]] =
