@@ -173,7 +173,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
-   * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors ocurred and discarding the log.
+   * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
   final def toEitherUnordered[E1 >: E]: Either[NonEmptyMultiSet[E], A] =
     self match {
