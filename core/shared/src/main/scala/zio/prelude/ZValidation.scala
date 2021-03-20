@@ -79,7 +79,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
-   * Folds over the ordered errors and success values of this `ZValidation`.
+   * Folds over the error and success values of this `ZValidation`.
    */
   final def fold[B](failure: NonEmptyChunk[E] => B, success: A => B): B =
     self match {
@@ -169,10 +169,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms this `ZValidation` to an `Either` with errors in the order they occurred, discarding the log.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] = this match {
-    case Failure(_, errors) => Left(errors)
-    case Success(_, value)  => Right(value)
-  }
+  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+    fold(Left(_), Right(_))
 
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
@@ -256,8 +254,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
   }
-
-  final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
+  final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
 
   /**
    * The `Covariant` instance for `ZValidation`.
