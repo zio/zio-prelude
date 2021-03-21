@@ -48,11 +48,11 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   override final def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
-      case that: ZValidation[_, _, _]    => self.toEitherUnordered == that.toEitherUnordered
+      case that: ZValidation[_, _, _]    => self.toEitherMultiSet == that.toEitherMultiSet
       case _                             => false
     }
 
-  override final def hashCode(): Int = toEitherUnordered.hashCode()
+  override final def hashCode(): Int = toEitherMultiSet.hashCode()
 
   /**
    * Transforms the value of this `ZValidation` with the specified validation
@@ -175,7 +175,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
-  final def toEitherUnordered[E1 >: E]: Either[NonEmptyMultiSet[E], A] =
+  final def toEitherMultiSet[E1 >: E]: Either[NonEmptyMultiSet[E], A] =
     self match {
       case failure @ Failure(_, _) => Left(failure.errorsUnordered)
       case Success(_, value)       => Right(value)
@@ -278,7 +278,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Derives an `Equal[ZValidation[W, E, A]]` given an `Equal[A]`.
    */
   implicit def ZValidationEqual[W, E, A: Equal]: Equal[ZValidation[W, E, A]] =
-    Equal[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherUnordered)
+    Equal[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 
   /**
    * The `DeriveEqual` instance for `ZValidation`.
@@ -335,7 +335,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
    */
   implicit def ZValidationPartialOrd[W, E: PartialOrd, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
-    PartialOrd[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherUnordered)
+    PartialOrd[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 
   /**
    * Attempts to evaluate the specified value, catching any error that occurs
@@ -1518,5 +1518,5 @@ trait LowPriorityValidationImplicits {
    * Derives a `Hash[ZValidation[W, E, A]]` given a `Hash[A]`.
    */
   implicit def ZValidationHash[W, E, A: Hash]: Hash[ZValidation[W, E, A]] =
-    Hash[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherUnordered)
+    Hash[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 }
