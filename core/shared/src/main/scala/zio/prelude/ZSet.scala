@@ -407,7 +407,7 @@ trait ZSetSyntax {
   implicit final class ZSetMapOps[+A](self: Map[A, Natural]) {
 
     /** Converts a `Map[A, Int]` to a `MultiSet` */
-    def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)
+    def toMultiSet[A1 >: A]: MultiSet[A1] = MultiSet.fromMap(self)
   }
 
   implicit final class ZSetMultiSetOps[+A](self: MultiSet[A]) {

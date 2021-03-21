@@ -320,7 +320,7 @@ trait ZNonEmptySetSyntax {
   implicit final class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
 
     /** Returns a `NonEmptyMultiSet` or `None` if the original Multiset is empty */
-    def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
+    def toNonEmptyMultiSetOption[A1 >: A]: Option[NonEmptyMultiSet[A1]] = NonEmptyMultiSet.fromMapOption(self)
   }
 
   implicit final class ZNonEmptySetNonEmptyMultiSetOps[+A](self: NonEmptyMultiSet[A]) {
