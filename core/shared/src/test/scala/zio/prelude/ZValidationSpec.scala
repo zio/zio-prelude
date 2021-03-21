@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.ZIO
 import zio.prelude.Equal._
 import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.ZValidation._
