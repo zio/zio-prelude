@@ -150,9 +150,9 @@ sbt test
 If all the tests are passing, then you can format your code:
 
 ```bash
-# If you are already in a SBT session you can type only 'fmt'
+# If you are already in a SBT session you can type only 'fix'
 
-sbt fmt
+sbt fix
 ```
 
 If your changes altered an API, then you may need to rebuild the microsite to make sure none of the (compiled) documentation breaks:
