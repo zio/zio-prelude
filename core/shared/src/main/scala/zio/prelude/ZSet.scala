@@ -416,8 +416,8 @@ trait ZSetSyntax {
      * Returns an element of this `MultiSet` and the remainder, which is a (possibly empty) `MultiSet`,
      * or `None` if empty.
      */
-    def peel: Option[(A, MultiSet[A])] =
-      self.toMap.headOption.map {
+    def peel[A1 >: A]: Option[(A1, MultiSet[A1])] =
+      self.toMap[A1].headOption.map[(A1, MultiSet[A1])] {
         case (k, v) if v > 1 =>
           (k, ZSet.fromMap(self.toMap + (k -> Natural.unsafeMake(v - 1))))
         case (k, _)          =>
@@ -427,7 +427,7 @@ trait ZSetSyntax {
     /**
      * Returns the tail of this `MultiSet` if it exists or `None` otherwise.
      */
-    def tail: Option[MultiSet[A]] =
-      peel.map(_._2)
+    def tail[A1 >: A]: Option[MultiSet[A1]] =
+      peel.map[MultiSet[A1]](_._2)
   }
 }

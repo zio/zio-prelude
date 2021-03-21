@@ -328,14 +328,14 @@ trait ZNonEmptySetSyntax {
     /**
      * Returns an element of this `NonEmptyMultiSet` and the remainder, which is a (possibly empty) `MultiSet`.
      */
-    def peel: (A, MultiSet[A]) =
+    def peel[A1 >: A]: (A, MultiSet[A1]) =
       self.toZSet.peel.get
 
     /**
      * Returns an element of this `NonEmptyMultiSet`
      * and the remainder or `None`, if the remainder is empty.
      */
-    def peelNonEmpty: (A, Option[NonEmptyMultiSet[A]]) = {
+    def peelNonEmpty[A1 >: A]: (A1, Option[NonEmptyMultiSet[A1]]) = {
       val (head, tail) = peel
       (head, tail.toNonEmptyZSet)
     }
@@ -343,13 +343,13 @@ trait ZNonEmptySetSyntax {
     /**
      * Returns the tail of this `NonEmptyMultiSet` as a (possibly empty) `MultiSet`.
      */
-    def tail: MultiSet[A] =
+    def tail[A1 >: A]: MultiSet[A1] =
       peel._2
 
     /**
      * Returns the tail of this `NonEmptyMultiSet` if it exists or `None` otherwise.
      */
-    def tailNonEmpty: Option[NonEmptyMultiSet[A]] =
+    def tailNonEmpty[A1 >: A]: Option[NonEmptyMultiSet[A1]] =
       peelNonEmpty._2
   }
 }
