@@ -73,7 +73,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def flatten[W1 >: W, E1 >: E, B](implicit ev1: A <:< ZValidation[W1, E1, B]): ZValidation[W1, E1, B] =
     self.flatMap(a => ev1(a))
-  
+
   /**
    * Transforms the value of this `ZValidation` with the specified effectual
    * function if it is a success or returns the value unchanged otherwise.
