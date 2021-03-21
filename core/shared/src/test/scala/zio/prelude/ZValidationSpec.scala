@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.prelude.Equal._
+import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.ZValidation._
 import zio.random.Random
 import zio.test._
@@ -27,6 +28,9 @@ object ZValidationSpec extends DefaultRunnableSpec {
       testM("hash")(checkAllLaws(Hash)(genValidation)),
       testM("identityBoth")(checkAllLaws(IdentityBoth)(genFValidation, Gen.anyInt)),
       testM("partialOrd")(checkAllLaws(PartialOrd)(genValidation))
+    ),
+    suite("ScalaHashCode consistency")(
+      testM("ZValidation")(scalaHashCodeConsistency(genValidation))
     )
   )
 }
