@@ -33,15 +33,15 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   def peel: (A, Set[A]) = (set.head, set.tail)
 
   /**
-   * Decomposes the `NonEmptySet` either into an element and the remaining `NonEmptySet`,
-   * or just a single element, if there aren't any other.
+   * Returns an element of this `NonEmptySet`
+   * and the remainder or `None`, if the remainder is empty.
    */
-  def peelEither: Either[A, (A, NonEmptySet[A])] = {
+  def peelNonEmpty: (A, Option[NonEmptySet[A]]) = {
     val (head, tail) = peel
     if (tail.isEmpty)
-      Left(head)
+      (head, None)
     else
-      Right((head, new NonEmptySet(tail)))
+      (head, Some(new NonEmptySet(tail)))
   }
 
   /**
@@ -98,7 +98,7 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   /**
    * Returns the tail of this `NonEmptySet` if it exists or `None` otherwise.
    */
-  def tailOption: Option[NonEmptySet[A]] = peelEither.fold(_ => None, p => Some(p._2))
+  def tailNonEmpty: Option[NonEmptySet[A]] = peelNonEmpty._2
 
   /**
    * Flattens a `NonEmptySet` of `NonEmptySet` values into a single
@@ -212,14 +212,14 @@ object NonEmptySet {
 }
 
 trait NonEmptySetSyntax {
-  implicit class NonEmptySetIterableOps[A](private val iterable: Iterable[A]) {
+  implicit final class NonEmptySetIterableOps[A](private val iterable: Iterable[A]) {
 
     /**
      * Constructs a `NonEmptySet` from an `Iterable` or `None` otherwise.
      */
     def toNonEmptySet: Option[NonEmptySet[A]] = NonEmptySet.fromIterableOption(iterable)
   }
-  implicit class NonEmptySetSetOps[A](self: Set[A]) {
+  implicit final class NonEmptySetSetOps[A](self: Set[A]) {
 
     /**
      * Constructs a `NonEmptySet` from a `Set` or `None` otherwise.

@@ -65,24 +65,6 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   def combine[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Commutative[Sum[B1]]): ZNonEmptySet[A1, B1] =
     new ZNonEmptySet(zset.combine(that))
 
-  /** Decomposes the `ZNonEmptySet` into an element and a (possibly empty) `ZSet` */
-  def peel[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): (A, ZSet[A, B1]) =
-    zset.destruct[B1].get
-
-  /**
-   * Decomposes the `ZNonEmptySet` either into an element and the remaining `ZNonEmptySet`,
-   * or just a single element, if there aren't any other.
-   */
-  def peelEither[B1 >: B: Equal](implicit
-    Inv: Inverse[Sum[B1]],
-    Idn: Identity[Prod[B1]]
-  ): Either[A, (A, ZNonEmptySet[A, B1])] = {
-    val (head, tail) = peel[B1]
-    if (tail.toMap.isEmpty)
-      Left(head)
-    else Right((head, new ZNonEmptySet(tail)))
-  }
-
   /**
    * Returns whether this set is equal to the specified set, meaning that the
    * same elements appear in both sets the same number of times.
@@ -122,17 +104,6 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
    */
   def map[B1 >: B, C](f: A => C)(implicit ev: Commutative[Sum[B1]]): ZNonEmptySet[C, B1] =
     new ZNonEmptySet(zset.map[B1, C](f)(ev))
-
-  /**
-   * Returns the tail of this `ZNonEmptySet` as `ZSet` (which always exists).
-   */
-  def tail[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): ZSet[A, B1] = peel[B1]._2
-
-  /**
-   * Returns the tail of this `ZNonEmptySet` if it exists or `None` otherwise.
-   */
-  def tailOption[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): Option[ZNonEmptySet[A, B1]] =
-    zset.tail[B1].map(new ZNonEmptySet(_))
 
   /**
    * Transforms the representation of how many times each element appears in
@@ -346,9 +317,39 @@ trait LowPriorityZNonEmptySetImplicits {
 }
 
 trait ZNonEmptySetSyntax {
-  implicit class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
+  implicit final class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
 
     /** Returns a `NonEmptyMultiSet` or `None` if the original Multiset is empty */
     def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
+  }
+
+  implicit final class ZNonEmptySetNonEmptyMultiSetOps[+A](self: NonEmptyMultiSet[A]) {
+
+    /**
+     * Returns an element of this `NonEmptyMultiSet` and the remainder, which is a (possibly empty) `MultiSet`.
+     */
+    def peel: (A, MultiSet[A]) =
+      self.toZSet.peel.get
+
+    /**
+     * Returns an element of this `NonEmptyMultiSet`
+     * and the remainder or `None`, if the remainder is empty.
+     */
+    def peelNonEmpty: (A, Option[NonEmptyMultiSet[A]]) = {
+      val (head, tail) = peel
+      (head, tail.toNonEmptyZSet)
+    }
+
+    /**
+     * Returns the tail of this `NonEmptyMultiSet` as a (possibly empty) `MultiSet`.
+     */
+    def tail: MultiSet[A] =
+      peel._2
+
+    /**
+     * Returns the tail of this `NonEmptyMultiSet` if it exists or `None` otherwise.
+     */
+    def tailNonEmpty: Option[NonEmptyMultiSet[A]] =
+      peelNonEmpty._2
   }
 }

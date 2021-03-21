@@ -85,12 +85,12 @@ sealed trait NonEmptyList[+A] { self =>
   }
 
   /**
-   * Decomposes the `NonEmptyList` either into an element and the remaining `NonEmptyList`,
-   * or just a single element, if there aren't any other.
+   * Returns an element of this `NonEmptyList`
+   * and the remainder or `None`, if the remainder is empty.
    */
-  final def peelEither: Either[A, (A, NonEmptyList[A])] = self match {
-    case Single(head)     => Left(head)
-    case Cons(head, tail) => Right((head, tail))
+  final def peelNonEmpty: (A, Option[NonEmptyList[A]]) = self match {
+    case Single(head)     => (head, None)
+    case Cons(head, tail) => (head, Some(tail))
   }
 
   /**
@@ -354,7 +354,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Returns the tail of this `NonEmptyList` if it exists or `None` otherwise.
    */
-  final def tailOption: Option[NonEmptyList[A]] =
+  final def tailNonEmpty: Option[NonEmptyList[A]] =
     self match {
       case Cons(_, t) => Some(t)
       case _          => None
@@ -365,7 +365,7 @@ sealed trait NonEmptyList[+A] { self =>
    * each of its tails, ending with a singleton `NonEmptyList`.
    */
   final def tails: NonEmptyList[NonEmptyList[A]] =
-    unfold(self)(identity)(_.tailOption)
+    unfold(self)(identity)(_.tailNonEmpty)
 
   /**
    * Takes the first `n` elements from this `NonEmptyList` returning a `List`.
@@ -637,14 +637,14 @@ trait LowPriorityNonEmptyListImplicits {
 }
 
 trait NonEmptyListSyntax {
-  implicit class NonEmptyListListOps[A](self: List[A]) {
+  implicit final class NonEmptyListListOps[A](self: List[A]) {
 
     /**
      * Converts to a `NonEmptyList` or `None` if empty.
      */
     def toNonEmptyList: Option[NonEmptyList[A]] = NonEmptyList.fromIterableOption(self)
   }
-  implicit class NonEmptyListConsOps[A](self: ::[A]) {
+  implicit final class NonEmptyListConsOps[A](self: ::[A]) {
 
     /**
      * Converts to a `NonEmptyList`.

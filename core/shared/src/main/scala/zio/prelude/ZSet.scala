@@ -86,14 +86,6 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
       }
     })
 
-  def destruct[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): Option[(A, ZSet[A, B1])] =
-    map.headOption.map {
-      case (k, v) if v !== Prod.unwrap(Idn.identity) =>
-        (k, ZSet.fromMap(map + (k -> Sum.unwrap(Inv.inverse(Sum.wrap[B1](v), Sum.wrap(Prod.unwrap(Idn.identity)))))))
-      case (k, _)                                    =>
-        (k, ZSet.fromMap(map - k))
-    }
-
   /**
    * Combines this set with the specified set to produce a new set where the
    * number of times each element appears is the difference between the number
@@ -183,12 +175,6 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
         case None    => map + (c -> b1)
       }
     })
-
-  /**
-   * Returns the tail of this `ZSet` if it exists or `None` otherwise.
-   */
-  def tail[B1 >: B: Equal](implicit Inv: Inverse[Sum[B1]], Idn: Identity[Prod[B1]]): Option[ZSet[A, B1]] =
-    destruct[B1].map(_._2)
 
   /**
    * Transforms the representation of how many times each element appears in
@@ -418,9 +404,30 @@ trait LowPriorityZSetImplicits {
 }
 
 trait ZSetSyntax {
-  implicit class ZSetMapOps[+A](self: Map[A, Natural]) {
+  implicit final class ZSetMapOps[+A](self: Map[A, Natural]) {
 
     /** Converts a `Map[A, Int]` to a `MultiSet` */
     def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)
+  }
+
+  implicit final class ZSetMultiSetOps[+A](self: MultiSet[A]) {
+
+    /**
+     * Returns an element of this `MultiSet` and the remainder, which is a (possibly empty) `MultiSet`,
+     * or `None` if empty.
+     */
+    def peel: Option[(A, MultiSet[A])] =
+      self.toMap.headOption.map {
+        case (k, v) if v > 1 =>
+          (k, ZSet.fromMap(self.toMap + (k -> Natural.unsafeMake(v - 1))))
+        case (k, _)          =>
+          (k, ZSet.fromMap(self.toMap - k))
+      }
+
+    /**
+     * Returns the tail of this `MultiSet` if it exists or `None` otherwise.
+     */
+    def tail: Option[MultiSet[A]] =
+      peel.map(_._2)
   }
 }
