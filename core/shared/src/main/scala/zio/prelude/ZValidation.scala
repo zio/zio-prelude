@@ -67,6 +67,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns a ZValidation that is this ZValidation if failing or the inner ZValidation if the outer one succeeds.
+   * In particular, the sequential aspect of this combinator precludes combining error values of outer and inner ZValidations.
+   * This method can be used to "flatten" nested ZValidation.
+   */
+  final def flatten[W1 >: W, E1 >: E, B](implicit ev1: A <:< ZValidation[W1, E1, B]): ZValidation[W1, E1, B] =
+    self.flatMap(a => ev1(a))
+  
+  /**
    * Transforms the value of this `ZValidation` with the specified effectual
    * function if it is a success or returns the value unchanged otherwise.
    */
