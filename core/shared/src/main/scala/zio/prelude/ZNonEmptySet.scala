@@ -87,9 +87,6 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   )(implicit ev1: Commutative[Sum[B1]], ev2: Commutative[Prod[B1]]): ZNonEmptySet[C, B1] =
     new ZNonEmptySet[C, B1](zset.flatMap(f(_).toZSet))
 
-  /** Returns an element */
-  def head: A = zset.toMap.head._1
-
   /**
    * Returns the hash code of this set.
    */
@@ -320,22 +317,25 @@ trait ZNonEmptySetSyntax {
   implicit final class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
 
     /** Returns a `NonEmptyMultiSet` or `None` if the original Multiset is empty */
-    def toNonEmptyMultiSetOption[A1 >: A]: Option[NonEmptyMultiSet[A1]] = NonEmptyMultiSet.fromMapOption(self)
+    def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
   }
 
   implicit final class ZNonEmptySetNonEmptyMultiSetOps[+A](self: NonEmptyMultiSet[A]) {
 
+    /** Returns an element */
+    def head: A = peel._1
+
     /**
      * Returns an element of this `NonEmptyMultiSet` and the remainder, which is a (possibly empty) `MultiSet`.
      */
-    def peel[A1 >: A]: (A, MultiSet[A1]) =
+    def peel: (A, MultiSet[A]) =
       self.toZSet.peel.get
 
     /**
      * Returns an element of this `NonEmptyMultiSet`
      * and the remainder or `None`, if the remainder is empty.
      */
-    def peelNonEmpty[A1 >: A]: (A1, Option[NonEmptyMultiSet[A1]]) = {
+    def peelNonEmpty: (A, Option[NonEmptyMultiSet[A]]) = {
       val (head, tail) = peel
       (head, tail.toNonEmptyZSet)
     }
@@ -343,13 +343,13 @@ trait ZNonEmptySetSyntax {
     /**
      * Returns the tail of this `NonEmptyMultiSet` as a (possibly empty) `MultiSet`.
      */
-    def tail[A1 >: A]: MultiSet[A1] =
+    def tail: MultiSet[A] =
       peel._2
 
     /**
      * Returns the tail of this `NonEmptyMultiSet` if it exists or `None` otherwise.
      */
-    def tailNonEmpty[A1 >: A]: Option[NonEmptyMultiSet[A1]] =
+    def tailNonEmpty: Option[NonEmptyMultiSet[A]] =
       peelNonEmpty._2
   }
 }

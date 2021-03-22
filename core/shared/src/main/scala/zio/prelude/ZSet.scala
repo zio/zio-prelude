@@ -146,9 +146,6 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   override def hashCode: Int =
     map.hashCode
 
-  /** Returns an element or `None` if empty */
-  def head: Option[A] = map.headOption.map(_._1)
-
   /**
    * Combines this set with the specified set to produce a new set where the
    * number of times each element appears is the minimum of the number of times
@@ -407,17 +404,22 @@ trait ZSetSyntax {
   implicit final class ZSetMapOps[+A](self: Map[A, Natural]) {
 
     /** Converts a `Map[A, Int]` to a `MultiSet` */
-    def toMultiSet[A1 >: A]: MultiSet[A1] = MultiSet.fromMap(self)
+    def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)
   }
 
   implicit final class ZSetMultiSetOps[+A](self: MultiSet[A]) {
+
+    private def headFiltered: Option[(A, Natural)] = self.toMap[A].find { case (_, n) => n > 0 }
+
+    /** Returns an element or `None` if empty */
+    def head: Option[A] = headFiltered.map(_._1)
 
     /**
      * Returns an element of this `MultiSet` and the remainder, which is a (possibly empty) `MultiSet`,
      * or `None` if empty.
      */
-    def peel[A1 >: A]: Option[(A1, MultiSet[A1])] =
-      self.toMap[A1].headOption.map[(A1, MultiSet[A1])] {
+    def peel: Option[(A, MultiSet[A])] =
+      headFiltered.map {
         case (k, v) if v > 1 =>
           (k, ZSet.fromMap(self.toMap + (k -> Natural.unsafeMake(v - 1))))
         case (k, _)          =>
@@ -427,7 +429,7 @@ trait ZSetSyntax {
     /**
      * Returns the tail of this `MultiSet` if it exists or `None` otherwise.
      */
-    def tail[A1 >: A]: Option[MultiSet[A1]] =
-      peel.map[MultiSet[A1]](_._2)
+    def tail: Option[MultiSet[A]] =
+      peel.map(_._2)
   }
 }
