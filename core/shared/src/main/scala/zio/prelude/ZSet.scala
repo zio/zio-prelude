@@ -187,6 +187,9 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   def toMap[A1 >: A]: Map[A1, B]          =
     map.asInstanceOf[Map[A1, B]]
 
+  /** Converts this set to a non-empty one. */
+  def toNonEmptyZSet: Option[ZNonEmptySet[A, B]] = ZNonEmptySet.fromMapOption(map)
+
   /**
    * Converts this set to a `Set`, discarding information about how many times
    * an element appears in the set beyond whether it appears at all.
@@ -395,4 +398,38 @@ trait LowPriorityZSetImplicits {
       ZSet.ZSetEqual
     )
 
+}
+
+trait ZSetSyntax {
+  implicit final class ZSetMapOps[+A](self: Map[A, Natural]) {
+
+    /** Converts a `Map[A, Int]` to a `MultiSet` */
+    def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)
+  }
+
+  implicit final class ZSetMultiSetOps[+A](self: MultiSet[A]) {
+
+    private def headFiltered: Option[(A, Natural)] = self.toMap[A].find { case (_, n) => n > 0 }
+
+    /** Returns an element or `None` if empty */
+    def head: Option[A] = headFiltered.map(_._1)
+
+    /**
+     * Returns an element of this `MultiSet` and the remainder, which is a (possibly empty) `MultiSet`,
+     * or `None` if empty.
+     */
+    def peel: Option[(A, MultiSet[A])] =
+      headFiltered.map {
+        case (k, v) if v > 1 =>
+          (k, ZSet.fromMap(self.toMap + (k -> Natural.unsafeMake(v - 1))))
+        case (k, _)          =>
+          (k, ZSet.fromMap(self.toMap - k))
+      }
+
+    /**
+     * Returns the tail of this `MultiSet` if it exists or `None` otherwise.
+     */
+    def tail: Option[MultiSet[A]] =
+      peel.map(_._2)
+  }
 }

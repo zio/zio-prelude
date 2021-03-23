@@ -78,6 +78,21 @@ sealed trait NonEmptyList[+A] { self =>
       if (seen(a)) (as, seen) else (cons(a, as), seen + a)
     }._1.reverse
 
+  /** Decomposes the `NonEmptyList` into an element and a (possibly empty) `List` */
+  final def peel: (A, List[A]) = self match {
+    case Single(head)     => (head, List())
+    case Cons(head, tail) => (head, tail.toList)
+  }
+
+  /**
+   * Returns an element of this `NonEmptyList`
+   * and the remainder or `None`, if the remainder is empty.
+   */
+  final def peelNonEmpty: (A, Option[NonEmptyList[A]]) = self match {
+    case Single(head)     => (head, None)
+    case Cons(head, tail) => (head, Some(tail))
+  }
+
   /**
    * Drops the first `n` elements from this `NonEmptyList` returning a `List`.
    */
@@ -339,7 +354,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Returns the tail of this `NonEmptyList` if it exists or `None` otherwise.
    */
-  final def tailOption: Option[NonEmptyList[A]] =
+  final def tailNonEmpty: Option[NonEmptyList[A]] =
     self match {
       case Cons(_, t) => Some(t)
       case _          => None
@@ -350,7 +365,7 @@ sealed trait NonEmptyList[+A] { self =>
    * each of its tails, ending with a singleton `NonEmptyList`.
    */
   final def tails: NonEmptyList[NonEmptyList[A]] =
-    unfold(self)(identity)(_.tailOption)
+    unfold(self)(identity)(_.tailNonEmpty)
 
   /**
    * Takes the first `n` elements from this `NonEmptyList` returning a `List`.
@@ -619,4 +634,21 @@ trait LowPriorityNonEmptyListImplicits {
    */
   implicit def NonEmptyListPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyList[A]] =
     PartialOrd[List[A]].contramap(_.toList)
+}
+
+trait NonEmptyListSyntax {
+  implicit final class NonEmptyListListOps[A](self: List[A]) {
+
+    /**
+     * Converts to a `NonEmptyList` or `None` if empty.
+     */
+    def toNonEmptyList: Option[NonEmptyList[A]] = NonEmptyList.fromIterableOption(self)
+  }
+  implicit final class NonEmptyListConsOps[A](self: ::[A]) {
+
+    /**
+     * Converts to a `NonEmptyList`.
+     */
+    def toNonEmptyList: NonEmptyList[A] = NonEmptyList.fromCons(self)
+  }
 }
