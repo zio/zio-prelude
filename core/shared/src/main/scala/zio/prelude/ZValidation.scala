@@ -168,10 +168,13 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * the result of the second.  The second will combine the warnings and errors of the first
    * into the warnings of the second, then append any new warnings from the second.
    */
-  final def or[W1 >: W, E1, E2 >: E, W2, B >: A](that: ZValidation[W1, E1, B])(implicit lub: Lub[E2, W1, W2]): ZValidation[W2, E1, B] =
+  final def or[W1 >: W, E1, E2 >: E, W2, B >: A](
+    that: ZValidation[W1, E1, B]
+  )(implicit lub: Lub[E2, W1, W2]): ZValidation[W2, E1, B] =
     self match {
-      case Failure(log, errors) => that.mapLogAll(w1log => (errors.map(lub.left) ++ log.map(lub.right)) ++ w1log.map(lub.right))
-      case Success(log, value) => Success(log.map(lub.right), value)
+      case Failure(log, errors) =>
+        that.mapLogAll(w1log => (errors.map(lub.left) ++ log.map(lub.right)) ++ w1log.map(lub.right))
+      case Success(log, value)  => Success(log.map(lub.right), value)
     }
 
   /**
