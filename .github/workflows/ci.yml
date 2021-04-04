@@ -1,6 +1,5 @@
 name: CI
 
-# Keep this consistent with the versions in project/BuildHelper.scala
 env:
   JAVA8: adopt@1.8
   JAVA11: adopt@1.11
@@ -40,8 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ ${{ env.JAVA8 }} , ${{ env.JAVA11 }} ]
-        scala: [${{ env.SCALA_211 }} , ${{ env.SCALA_212 }} , ${{ env.SCALA_213 }} , ${{ env.SCALA_3 }} ]
+        java: [ env.JAVA8 , env.JAVA11 ]
+        scala: [ env.SCALA_211 , env.SCALA_212 , env.SCALA_213 , env.SCALA_3 ]
         platform: ['JVM', 'JS', 'Native']
     steps:
       - name: Checkout current branch
