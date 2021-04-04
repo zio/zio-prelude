@@ -1,7 +1,6 @@
 import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 import explicitdeps.ExplicitDepsPlugin.autoImport._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import org.snakeyaml.engine.v2.api.{Load, LoadSettings}
 import sbt.Keys._
 import sbt._
 import sbtbuildinfo.BuildInfoKeys._
@@ -9,14 +8,15 @@ import sbtbuildinfo._
 import sbtcrossproject.CrossPlugin.autoImport._
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
-import java.util.{List => JList, Map => JMap}
-import scala.io.Source
-import scala.jdk.CollectionConverters._
-
 object BuildHelper {
   private val versions: Map[String, String] = {
+    import org.snakeyaml.engine.v2.api.{Load, LoadSettings}
+
+    import java.util.{List => JList, Map => JMap}
+    import scala.jdk.CollectionConverters._
+
     val doc  = new Load(LoadSettings.builder().build())
-      .loadFromReader(Source.fromFile(".github/workflows/ci.yml").bufferedReader())
+      .loadFromReader(scala.io.Source.fromFile(".github/workflows/ci.yml").bufferedReader())
     val yaml = doc.asInstanceOf[JMap[String, JMap[String, JMap[String, JMap[String, JMap[String, JList[String]]]]]]]
     val list = yaml.get("jobs").get("test").get("strategy").get("matrix").get("scala").asScala
     list.map(v => (v.split('.').take(2).mkString("."), v)).toMap
