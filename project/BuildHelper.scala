@@ -1,29 +1,30 @@
-import sbt._
-import Keys._
-import explicitdeps.ExplicitDepsPlugin.autoImport._
-import sbtcrossproject.CrossPlugin.autoImport._
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import sbtbuildinfo._
 import dotty.tools.sbtplugin.DottyPlugin.autoImport._
-import BuildInfoKeys._
+import explicitdeps.ExplicitDepsPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.snakeyaml.engine.v2.api.{Load, LoadSettings}
+import sbt.Keys._
+import sbt._
+import sbtbuildinfo.BuildInfoKeys._
+import sbtbuildinfo._
+import sbtcrossproject.CrossPlugin.autoImport._
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
+import java.util.{List => JList, Map => JMap}
 import scala.io.Source
+import scala.jdk.CollectionConverters._
 
 object BuildHelper {
-  val versions: Map[String, String] = {
-    val source = Source.fromFile(".github/workflows/ci.yml")
-    val result = source
-      .getLines()
-      .flatMap("(.*):(.*)".r.findFirstMatchIn(_).map(m => (m.group(1).trim, m.group(2).trim)))
-      .toArray
-    source.close()
-    result.reverse.toMap
+  private val versions: Map[String, String] = {
+    val doc  = new Load(LoadSettings.builder().build())
+      .loadFromReader(Source.fromFile(".github/workflows/ci.yml").bufferedReader())
+    val yaml = doc.asInstanceOf[JMap[String, JMap[String, JMap[String, JMap[String, JMap[String, JList[String]]]]]]]
+    val list = yaml.get("jobs").get("test").get("strategy").get("matrix").get("scala").asScala
+    list.map(v => (v.split('.').take(2).mkString("."), v)).toMap
   }
-  val Scala211: String   = versions("SCALA_211")
-  val Scala212: String   = versions("SCALA_212")
-  val Scala213: String   = versions("SCALA_213")
-  val ScalaDotty: String = versions("SCALA_3")
+  val Scala211: String   = versions("2.11")
+  val Scala212: String   = versions("2.12")
+  val Scala213: String   = versions("2.13")
+  val ScalaDotty: String = versions("3.0")
 
   val SilencerVersion = "1.7.3"
 
