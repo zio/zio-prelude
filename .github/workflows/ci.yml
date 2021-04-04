@@ -39,8 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ $JAVA8 , $JAVA11 ]
-        scala: [ $SCALA_211 , $SCALA_212 , $SCALA_213 , $SCALA_3 ]
+        java: [ ${JAVA8} , ${JAVA11} ]
+        scala: [ ${SCALA_211} , ${SCALA_212} , ${SCALA_213} , ${SCALA_3} ]
         platform: ['JVM', 'JS', 'Native']
     steps:
       - name: Checkout current branch
