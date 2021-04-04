@@ -1,5 +1,15 @@
 name: CI
 
+# Keep this consistent with the versions in project/BuildHelper.scala
+env:
+  JAVA8: adopt@1.8
+  JAVA11: adopt@1.11
+  SCALA_211: 2.11.12
+  SCALA_212: 2.12.13
+  SCALA_213: 2.13.5
+  SCALA_3: 3.0.0-M3
+  JDK_JAVA_OPTIONS: -Xms2048M -Xmx3072M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+
 on:
   pull_request:
   push:
@@ -12,8 +22,6 @@ jobs:
   lint:
     runs-on: ubuntu-20.04
     timeout-minutes: 30
-    strategy:
-      fail-fast: false
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v2.3.4
@@ -32,8 +40,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: ['adopt@1.8', 'adopt@1.11']
-        scala: ['2.11.12', '2.12.13', '2.13.4', '3.0.0-M3']
+        java: [ ${{ env.JAVA8 }} , ${{ env.JAVA11 }} ]
+        scala: [${{ env.SCALA_211 }} , ${{ env.SCALA_212 }} , ${{ env.SCALA_213 }} , ${{ env.SCALA_3 }} ]
         platform: ['JVM', 'JS', 'Native']
     steps:
       - name: Checkout current branch
@@ -47,16 +55,23 @@ jobs:
       - name: Cache scala dependencies
         uses: coursier/cache-action@v5
       - name: Run tests
-        if: ${{ matrix.scala != '3.0.0-M3' }}
+        if: ${{ matrix.scala != env.SCALA_3 }}
         run: sbt ++${{ matrix.scala }}! test${{ matrix.platform }}
       - name: Run dotty tests
-        if: ${{ matrix.scala == '3.0.0-M3' && matrix.platform == 'JVM' }}
+        if: ${{ matrix.scala == env.SCALA_3 && matrix.platform == 'JVM' }}
         run: sbt ++${{ matrix.scala }}! testJVM
+
+  ci:
+    runs-on: ubuntu-20.04
+    needs: [lint, test]
+    steps:
+      - name: Aggregate of lint, and all tests
+        run: echo "ci passed"
 
   publish:
     runs-on: ubuntu-20.04
     timeout-minutes: 30
-    needs: [lint, test]
+    needs: [ci]
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout current branch

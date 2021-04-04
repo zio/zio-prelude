@@ -8,12 +8,22 @@ import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 import BuildInfoKeys._
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
+import scala.io.Source
+
 object BuildHelper {
-  // Keep this consistent with the version in .circleci/config.yml
-  val Scala211   = "2.11.12"
-  val Scala212   = "2.12.13"
-  val Scala213   = "2.13.4"
-  val ScalaDotty = "3.0.0-M3"
+  val versions: Map[String, String] = {
+    val source = Source.fromFile(".github/workflows/ci.yml")
+    val result = source
+      .getLines()
+      .flatMap("(.*):(.*)".r.findFirstMatchIn(_).map(m => (m.group(1).trim, m.group(2).trim)))
+      .toArray
+    source.close()
+    result.reverse.toMap
+  }
+  val Scala211: String   = versions("SCALA_211")
+  val Scala212: String   = versions("SCALA_212")
+  val Scala213: String   = versions("SCALA_213")
+  val ScalaDotty: String = versions("SCALA_3")
 
   val SilencerVersion = "1.7.3"
 
