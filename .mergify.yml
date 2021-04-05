@@ -7,6 +7,13 @@ pull_request_rules:
         users: [adamgfraser]
       label:
         add: ["type: dependencies"]
+  - name: label scala-steward's breaking PRs
+    conditions:
+      - author=scala-steward
+      - "body~=(labels: library-update, semver-major)|(labels: sbt-plugin-update, semver-major)"
+    actions:
+      label:
+        add: ["type: breaking"]
   - name: merge Scala Steward's PRs
     conditions:
       - base=master
