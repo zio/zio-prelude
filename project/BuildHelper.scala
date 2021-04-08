@@ -80,7 +80,7 @@ object BuildHelper {
       else
         Seq()
     },
-    sources in (Compile, doc) := {
+    Compile / doc / sources := {
       val old = (Compile / doc / sources).value
       if (isDotty.value) {
         Nil
@@ -88,7 +88,7 @@ object BuildHelper {
         old
       }
     },
-    parallelExecution in Test := {
+    Test / parallelExecution := {
       val old = (Test / parallelExecution).value
       if (isDotty.value) {
         false
@@ -130,7 +130,7 @@ object BuildHelper {
     // One of -Ydelambdafy:inline or -Yrepl-class-based must be given to
     // avoid deadlocking on parallel operations, see
     //   https://issues.scala-lang.org/browse/SI-9076
-    scalacOptions in Compile in console := Seq(
+    Compile / console / scalacOptions := Seq(
       "-Ypartial-unification",
       "-language:higherKinds",
       "-language:existentials",
@@ -138,7 +138,7 @@ object BuildHelper {
       "-Xsource:2.13",
       "-Yrepl-class-based"
     ),
-    initialCommands in Compile in console := initialCommandsStr
+    Compile / console / initialCommands := initialCommandsStr
   )
 
   def extraOptions(scalaVersion: String, isDotty: Boolean, optimize: Boolean) =
@@ -256,9 +256,9 @@ object BuildHelper {
     ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
     ThisBuild / scalafixDependencies ++= List(
       "com.github.liancheng" %% "organize-imports" % "0.5.0",
-      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.16"
+      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.18"
     ),
-    parallelExecution in Test := true,
+    Test / parallelExecution := true,
     incOptions ~= (_.withLogRecompileOnMacro(false)),
     autoAPIMappings := true,
     unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
