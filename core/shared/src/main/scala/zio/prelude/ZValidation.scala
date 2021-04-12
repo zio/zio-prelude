@@ -183,7 +183,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception`.
    */
-  final def toEitherException: Either[Failure.Exception[W, E], A] = this match {
+  final def toEitherException: Either[ZValidationFailureException[W, E], A] = this match {
     case Success(_, value)       => Right(value)
     case failure @ Failure(_, _) => Left(failure.toException)
   }
@@ -191,7 +191,9 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception` with the first error as `cause`.
    */
-  final def toEitherExceptionWithCause(implicit ev: E <:< Throwable): Either[Failure.Exception[W, E], A] = this match {
+  final def toEitherExceptionWithCause(implicit
+    ev: E <:< Throwable
+  ): Either[ZValidationFailureException[W, E], A] = this match {
     case Success(_, value)       => Right(value)
     case failure @ Failure(_, _) => Left(failure.toExceptionWithCause)
   }
@@ -281,19 +283,19 @@ object ZValidation extends LowPriorityValidationImplicits {
     lazy val message: String =
       s"errors:\n  ${errors.map(_.toString).mkString("\n  ")}\nlog:\n  ${log.map(_.toString).mkString("\n  ")}"
 
-    def toException: Failure.Exception[W, E] = Failure.Exception(this)
+    def toException: ZValidationFailureException[W, E] = ZValidationFailureException(this)
 
-    def toExceptionWithCause(implicit ev: E <:< Throwable): Failure.Exception[W, E] = {
+    def toExceptionWithCause(implicit ev: E <:< Throwable): ZValidationFailureException[W, E] = {
       val exn = toException
       errors.tail.foreach(exn.addSuppressed(_))
       val _   = exn.initCause(errors.head)
       exn
     }
   }
-  final object Failure {
-    final case class Exception[+W, +E](failure: Failure[W, E]) extends IllegalArgumentException(failure.message)
-  }
-  final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
+
+  final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
+
+  final case class ZValidationFailureException[+W, +E](failure: Failure[W, E]) extends RuntimeException(failure.message)
 
   /**
    * The `Covariant` instance for `ZValidation`.
