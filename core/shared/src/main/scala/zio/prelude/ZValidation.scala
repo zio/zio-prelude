@@ -181,6 +181,22 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception`.
+   */
+  final def toEitherException: Either[Failure.Exception[W, E], A] = this match {
+    case Success(_, value)       => Right(value)
+    case failure @ Failure(_, _) => Left(failure.toException)
+  }
+
+  /**
+   * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception` with the first error as `cause`.
+   */
+  final def toEitherExceptionWithCause(implicit ev: E <:< Throwable): Either[Failure.Exception[W, E], A] = this match {
+    case Success(_, value)       => Right(value)
+    case failure @ Failure(_, _) => Left(failure.toExceptionWithCause)
+  }
+
+  /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
   final def toEitherMultiSet[E1 >: E]: Either[NonEmptyMultiSet[E], A] =
@@ -217,16 +233,6 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       nec => ZIO.halt(nec.reduceMapLeft(zio.Cause.fail)((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
       ZIO.succeedNow
     )
-
-  final def unsafeGetOrThrow: A = this match {
-    case Success(_, value)       => value
-    case failure @ Failure(_, _) => throw failure.toException
-  }
-
-  final def unsafeGetOrThrowWithCause(implicit ev: E <:< Throwable): A = this match {
-    case Success(_, value)       => value
-    case failure @ Failure(_, _) => throw failure.toExceptionWithCause
-  }
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
