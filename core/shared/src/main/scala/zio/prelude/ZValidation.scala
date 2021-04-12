@@ -261,6 +261,21 @@ object ZValidation extends LowPriorityValidationImplicits {
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
+
+    lazy val message: String =
+      s"errors:\n  ${errors.map(_.toString).mkString("\n  ")}\nlog:\n  ${log.map(_.toString).mkString("\n  ")}"
+
+    def toException: Failure.Exception[W, E] = Failure.Exception(this)
+
+    def toExceptionWithCause(implicit ev: E <:< Throwable): Failure.Exception[W, E] = {
+      val exn = toException
+      errors.tail.foreach(exn.addSuppressed(_))
+      val _   = exn.initCause(errors.head)
+      exn
+    }
+  }
+  final object Failure {
+    final case class Exception[+W, +E](failure: Failure[W, E]) extends IllegalArgumentException(failure.message)
   }
   final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
 
