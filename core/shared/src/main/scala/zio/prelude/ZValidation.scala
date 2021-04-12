@@ -218,6 +218,16 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       ZIO.succeedNow
     )
 
+  final def unsafeGetOrThrow: A = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => throw failure.toException
+  }
+
+  final def unsafeGetOrThrowWithCause(implicit ev: E <:< Throwable): A = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => throw failure.toExceptionWithCause
+  }
+
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
    * a failure with all errors if either this `ZValidation` or the specified
