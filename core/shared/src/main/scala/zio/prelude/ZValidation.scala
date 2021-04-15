@@ -105,6 +105,24 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, if successful, or the transformed (using `f`) failure represented as an exception.
+   */
+  final def getOrHandleException[A1 >: A](f: ZValidationFailureException[W, E] => A1): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure.toException)
+  }
+
+  /**
+   * Returns the value, if successful, or the transformed (using `f`) failure represented as an exception with a set `cause`.
+   */
+  final def getOrHandleExceptionWithCause[A1 >: A](
+    f: ZValidationFailureException[W, E] => A1
+  )(implicit ev: E <:< Throwable): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure.toExceptionWithCause)
+  }
+
+  /**
    * Writes an entry to the log.
    */
   final def log[W1 >: W](w1: W1): ZValidation[W1, E, A] =
@@ -278,13 +296,18 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 object ZValidation extends LowPriorityValidationImplicits {
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
+
+    /** The errors represented in a way which discards the order in which they occurred. */
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
 
+    /** The description of the failure. */
     lazy val message: String =
       s"errors:\n  ${errors.map(_.toString).mkString("\n  ")}\nlog:\n  ${log.map(_.toString).mkString("\n  ")}"
 
+    /** The same failure, but represented as an `Exception` */
     def toException: ZValidationFailureException[W, E] = ZValidationFailureException(this)
 
+    /** The same failure, but represented as an `Exception` which also has the `cause` set to the first error that occurred */
     def toExceptionWithCause(implicit ev: E <:< Throwable): ZValidationFailureException[W, E] = {
       val exn = toException
       errors.tail.foreach(exn.addSuppressed(_))
@@ -292,7 +315,6 @@ object ZValidation extends LowPriorityValidationImplicits {
       exn
     }
   }
-
   final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
 
   final case class ZValidationFailureException[+W, +E](failure: Failure[W, E]) extends RuntimeException(failure.message)
