@@ -105,6 +105,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, if successful, or the transformed (using `f`) failure.
+   */
+  final def getOrElse[A1 >: A](f: Failure[W, E] => A1): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure)
+  }
+
+  /**
    * Returns the value, if successful, or the transformed (using `f`) failure represented as an exception.
    */
   final def getOrHandleException[A1 >: A](f: ZValidationFailureException[W, E] => A1): A1 = this match {
