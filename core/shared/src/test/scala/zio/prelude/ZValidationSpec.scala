@@ -31,6 +31,29 @@ object ZValidationSpec extends DefaultRunnableSpec {
     ),
     suite("ScalaHashCode consistency")(
       testM("ZValidation")(scalaHashCodeConsistency(genValidation))
+    ),
+    suite("Or")(
+      test("Transfer Error to Log if its of the same type") {
+        val a = ZValidation.fail("fail").log("jim")
+        val b = ZValidation.succeed(1).log("two")
+
+        val result = a or b
+
+        val expected = ZValidation.succeed(1).log("bad").log("one").log("two")
+
+        assert(result)(equalTo(expected)(ZValidation.ZValidationEqual))
+      },
+//      test("Blah") {
+//        val a: ZValidation[Nothing, "bad", Nothing] = ZValidation.fail("bad": "bad")
+//        val a1: ZValidation["one", "bad", Nothing] = a.log("one": "one") // because .log wants to widen W if its not specified in the type before hand
+//        val b: ZValidation["two", Nothing, Int] = ZValidation.succeed(1).log("two": "two")
+//
+//        val c = a1 meh b
+//
+//        val res: ZValidation[Any, Nothing, Int] = ZValidation.succeed(1).log("bad").log("one").log("two")
+//
+//        assert(c)(equalTo(res)(ZValidation.ZValidationEqual))
+//      }
     )
   )
 }
