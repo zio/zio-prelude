@@ -32,28 +32,63 @@ object ZValidationSpec extends DefaultRunnableSpec {
     suite("ScalaHashCode consistency")(
       testM("ZValidation")(scalaHashCodeConsistency(genValidation))
     ),
-    suite("Or")(
-      test("Transfer Error to Log if its of the same type") {
-        val a = ZValidation.fail("fail").log("jim")
-        val b = ZValidation.succeed(1).log("two")
+    suite("combinators")(
+      suite("orElse")(
+        test("If first Validation fails use the second") {
+          val first: ZValidation[String, String, Nothing] = ZValidation.fail("fail").log("one")
+          val second: ZValidation[String, Nothing, Int] = ZValidation.succeed(1).log("two")
 
-        val result = a or b
+          // NOTE: Requires Unit to find Equal instance, see #113
+          val result: ZValidation[String, Unit, Int] = first orElse second
 
-        val expected = ZValidation.succeed(1).log("bad").log("one").log("two")
+          val expected: ZValidation[String, Nothing, Int] =
+            ZValidation
+              .succeed(1)
+              .log("one")
+              .log("two")
 
-        assert(result)(equalTo(expected)(ZValidation.ZValidationEqual))
-      },
-//      test("Blah") {
-//        val a: ZValidation[Nothing, "bad", Nothing] = ZValidation.fail("bad": "bad")
-//        val a1: ZValidation["one", "bad", Nothing] = a.log("one": "one") // because .log wants to widen W if its not specified in the type before hand
-//        val b: ZValidation["two", Nothing, Int] = ZValidation.succeed(1).log("two": "two")
-//
-//        val c = a1 meh b
-//
-//        val res: ZValidation[Any, Nothing, Int] = ZValidation.succeed(1).log("bad").log("one").log("two")
-//
-//        assert(c)(equalTo(res)(ZValidation.ZValidationEqual))
-//      }
+          assert(result)(equalTo(expected))
+          assert(result.getLog)(equalTo(expected.getLog))
+        }
+      ),
+      suite(label = "orElseLog")(
+        test("Transfer Error to Log if its of the same type") {
+          val first: ZValidation[String, String, Nothing] = ZValidation.fail("fail").log("one")
+          val second: ZValidation[String, Nothing, Int] = ZValidation.succeed(1).log("two")
+
+          // NOTE: Requires Unit to find Equal instance, see #113
+          val result: ZValidation[String, Unit, Int] = first orElseLog second
+
+          val expected: ZValidation[String, Nothing, Int] =
+            ZValidation
+              .succeed(1)
+              .log("one")
+              .log("fail")
+              .log("two")
+
+          assert(result)(equalTo(expected))
+          assert(result.getLog)(equalTo(expected.getLog))
+        },
+        test("Transfer error to log if using the super of both W and E") {
+          val firstA: ZValidation[Nothing, "fail", Nothing] = ZValidation.fail("fail": "fail")
+          // because .log wants to widen W if its not specified in the type before hand
+          val firstB: ZValidation["one", "fail", Nothing] = firstA.log("one": "one")
+          val second: ZValidation["two", Nothing, Int] = ZValidation.succeed(1).log("two": "two")
+
+          // NOTE: Requires Unit to find Equal instance, see #113
+          val result: ZValidation[String, Unit, Int] = firstB orElseLog second
+
+          val expected: ZValidation[String, Nothing, Int] =
+            ZValidation
+              .succeed(1)
+              .log("one")
+              .log("fail")
+              .log("two")
+
+          assert(result)(equalTo(expected))
+          assert(result.getLog)(equalTo(expected.getLog))
+        }
+      )
     )
   )
 }

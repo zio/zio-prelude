@@ -163,15 +163,6 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case Success(w, a) => Success(f(w), a)
     }
 
-  final def or[E1, W1 >: W, A1 >: A](that: ZValidation[W1, E1, A1])(implicit ev: E <:< W1): ZValidation[W1, E1, A1] =
-    orWith[W1, E1, A1](_.map(ev))(that)
-
-  final def orWith[W1 >: W, E1, A1 >: A](convert: Chunk[E] => Chunk[W1])(that: ZValidation[W1, E1, A1]): ZValidation[W1, E1, A1] =
-    self match {
-      case Failure(log, errors) => that.mapLogAll(log ++ convert(errors) ++ _)
-      case Success(log, value) => Success(log, value)
-    }
-
   /**
    * Exposes the result of this validation function as either a `Right` with
    * a success of type `A` or a `Left` with one or more errors of type `E`,
@@ -181,6 +172,18 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     self match {
       case Failure(w, e) => (w, Left(e))
       case Success(w, a) => (w, Right(a))
+    }
+
+  final def orElse[W1 >: W, E1, A1 >: A](that: ZValidation[W1, E1, A1]): ZValidation[W1, E1, A1] =
+    self match {
+      case Failure(log, _)     => that.mapLogAll(log ++ _)
+      case Success(log, value) => Success(log, value)
+    }
+
+  final def orElseLog[W1 >: W, E1, A1 >: A](that: ZValidation[W1, E1, A1])(implicit ev: E <:< W1): ZValidation[W1, E1, A1] =
+    self match {
+      case Failure(log, errors) =>  that.mapLogAll(log ++ errors.map(ev) ++ _)
+      case Success(log, value)  =>  Success(log, value)
     }
 
   /**
