@@ -68,25 +68,6 @@ object ZValidationSpec extends DefaultRunnableSpec {
 
           assert(result)(equalTo(expected))
           assert(result.getLog)(equalTo(expected.getLog))
-        },
-        test("Transfer error to log if using the super of both W and E") {
-          val firstA: ZValidation[Nothing, "fail", Nothing] = ZValidation.fail("fail": "fail")
-          // because .log wants to widen W if its not specified in the type before hand
-          val firstB: ZValidation["one", "fail", Nothing] = firstA.log("one": "one")
-          val second: ZValidation["two", Nothing, Int] = ZValidation.succeed(1).log("two": "two")
-
-          // NOTE: Requires Unit to find Equal instance, see #113
-          val result: ZValidation[String, Unit, Int] = firstB orElseLog second
-
-          val expected: ZValidation[String, Nothing, Int] =
-            ZValidation
-              .succeed(1)
-              .log("one")
-              .log("fail")
-              .log("two")
-
-          assert(result)(equalTo(expected))
-          assert(result.getLog)(equalTo(expected.getLog))
         }
       )
     )
