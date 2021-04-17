@@ -180,10 +180,12 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case Success(log, value) => Success(log, value)
     }
 
-  final def orElseLog[W1 >: W, E1, A1 >: A](that: ZValidation[W1, E1, A1])(implicit ev: E <:< W1): ZValidation[W1, E1, A1] =
+  final def orElseLog[W1 >: W, E1, A1 >: A](
+    that: ZValidation[W1, E1, A1]
+  )(implicit ev: E <:< W1): ZValidation[W1, E1, A1] =
     self match {
-      case Failure(log, errors) =>  that.mapLogAll(log ++ errors.map(ev) ++ _)
-      case Success(log, value)  =>  Success(log, value)
+      case Failure(log, errors) => that.mapLogAll(log ++ errors.map(ev) ++ _)
+      case Success(log, value)  => Success(log, value)
     }
 
   /**
