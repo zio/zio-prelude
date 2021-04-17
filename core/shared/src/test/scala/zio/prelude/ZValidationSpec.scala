@@ -36,7 +36,7 @@ object ZValidationSpec extends DefaultRunnableSpec {
       suite("orElse")(
         test("If first Validation fails use the second") {
           val first: ZValidation[String, String, Nothing] = ZValidation.fail("fail").log("one")
-          val second: ZValidation[String, Nothing, Int] = ZValidation.succeed(1).log("two")
+          val second: ZValidation[String, Nothing, Int]   = ZValidation.succeed(1).log("two")
 
           // NOTE: Requires Unit to find Equal instance, see #113
           val result: ZValidation[String, Unit, Int] = first orElse second
@@ -54,7 +54,7 @@ object ZValidationSpec extends DefaultRunnableSpec {
       suite(label = "orElseLog")(
         test("Transfer Error to Log if its of the same type") {
           val first: ZValidation[String, String, Nothing] = ZValidation.fail("fail").log("one")
-          val second: ZValidation[String, Nothing, Int] = ZValidation.succeed(1).log("two")
+          val second: ZValidation[String, Nothing, Int]   = ZValidation.succeed(1).log("two")
 
           // NOTE: Requires Unit to find Equal instance, see #113
           val result: ZValidation[String, Unit, Int] = first orElseLog second
