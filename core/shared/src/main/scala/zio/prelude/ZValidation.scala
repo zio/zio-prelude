@@ -105,6 +105,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, if successful, or the transformed (using `f`) failure.
+   */
+  final def getOrElse[A1 >: A](f: Failure[W, E] => A1): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure)
+  }
+
+  /**
    * Writes an entry to the log.
    */
   final def log[W1 >: W](w1: W1): ZValidation[W1, E, A] =
@@ -274,9 +282,15 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 object ZValidation extends LowPriorityValidationImplicits {
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
+
+    /** The errors represented in a way which discards the order in which they occurred. */
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
+
+    /** The description of the failure. */
+    lazy val message: String =
+      s"errors:\n  ${errors.map(_.toString).mkString("\n  ")}\nlog:\n  ${log.map(_.toString).mkString("\n  ")}"
   }
-  final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
+  final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
 
   /**
    * The `Covariant` instance for `ZValidation`.
