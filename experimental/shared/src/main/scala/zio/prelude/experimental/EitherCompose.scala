@@ -87,15 +87,10 @@ object EitherCompose {
     def toRight[B]: URLayer[B, Either[Nothing, B]] = ZLayer.identity[B].map(Right(_))
 
     def fromEither[A, B, C](a2c: => URLayer[A, C])(b2c: => URLayer[B, C]): URLayer[Either[A, B], C] =
-      ZLayer.fromManagedMany(
-        for {
-          either <- ZManaged.access[Either[A, B]](identity)
-          result <- either match {
-                      case Left(a)  => a2c.build.provide(a)
-                      case Right(b) => b2c.build.provide(b)
-                    }
-        } yield result
-      )
+      ZLayer.fromFunctionManyManaged {
+        case Left(a)  => a2c.build.provide(a)
+        case Right(b) => b2c.build.provide(b)
+      }
 
     def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] =
       AssociativeCompose.URLayerIdentityCompose.compose(bc, ab)
