@@ -95,9 +95,9 @@ object BothCompose {
 
     type :*:[+f, +s] = Tuple2[f, s]
 
-    def fromFirst[A]: URLayer[(A, Any), A] = ZLayer.identity[(A, Any)].map(_._1)
+    def fromFirst[A]: URLayer[(A, Any), A] = ZLayer.first
 
-    def fromSecond[B]: URLayer[(Any, B), B] = ZLayer.identity[(Any, B)].map(_._2)
+    def fromSecond[B]: URLayer[(Any, B), B] = ZLayer.second
 
     def toBoth[A, B, C](a2b: URLayer[A, B])(a2c: URLayer[A, C]): URLayer[A, (B, C)] =
       a2b <&> a2c
@@ -110,9 +110,9 @@ object BothCompose {
 
     type :*:[+f, +s] = Tuple2[f, s]
 
-    def fromFirst[A]: URManaged[(A, Any), A] = ZManaged.access[(A, Any)](_._1)
+    def fromFirst[A]: URManaged[(A, Any), A] =  ZManaged.first
 
-    def fromSecond[B]: URManaged[(Any, B), B] = ZManaged.access[(Any, B)](_._2)
+    def fromSecond[B]: URManaged[(Any, B), B] = ZManaged.second
 
     def toBoth[A, B, C](a2b: URManaged[A, B])(a2c: URManaged[A, C]): URManaged[A, (B, C)] =
       a2b &&& a2c
