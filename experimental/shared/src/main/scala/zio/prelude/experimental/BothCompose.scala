@@ -110,7 +110,7 @@ object BothCompose {
 
     type :*:[+f, +s] = Tuple2[f, s]
 
-    def fromFirst[A]: URManaged[(A, Any), A] =  ZManaged.first
+    def fromFirst[A]: URManaged[(A, Any), A] = ZManaged.first
 
     def fromSecond[B]: URManaged[(Any, B), B] = ZManaged.second
 
