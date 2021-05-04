@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.URIO
+import zio._
 
 trait AssociativeCompose[=>:[-_, +_]] {
   def compose[A, B, C](bc: B =>: C, ab: A =>: B): A =>: C
@@ -48,6 +48,18 @@ object AssociativeCompose {
     def identity[A]: URIO[A, A] = URIO.environment
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab >>> bc
+  }
+
+  implicit val URLayerIdentityCompose: IdentityCompose[URLayer] = new IdentityCompose[URLayer] {
+    def identity[A]: URLayer[A, A] = ZLayer.identity
+
+    def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] = ab >>> bc
+  }
+
+  implicit val URManagedIdentityCompose: IdentityCompose[URManaged] = new IdentityCompose[URManaged] {
+    def identity[A]: URManaged[A, A] = ZManaged.identity
+
+    def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] = ab >>> bc
   }
 }
 
