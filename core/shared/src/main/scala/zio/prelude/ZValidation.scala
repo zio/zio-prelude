@@ -105,11 +105,11 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
-   * Returns the value, if successful, or the transformed (using `f`) failure.
+   * Returns the value, if successful, or the provided `fallback` value.
    */
-  final def getOrElse[A1 >: A](f: Failure[W, E] => A1): A1 = this match {
-    case Success(_, value)       => value
-    case failure @ Failure(_, _) => f(failure)
+  final def getOrElse[A1 >: A](fallback: => A1): A1 = this match {
+    case Success(_, value) => value
+    case Failure(_, _)     => fallback
   }
 
   /**
@@ -239,6 +239,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       nec => ZIO.halt(nec.reduceMapLeft(zio.Cause.fail)((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
       ZIO.succeedNow
     )
+
+  /**
+   * Returns the value, if successful, or the transformed (using `f`) failure.
+   */
+  final def valueOr[A1 >: A](f: Failure[W, E] => A1): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure)
+  }
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
