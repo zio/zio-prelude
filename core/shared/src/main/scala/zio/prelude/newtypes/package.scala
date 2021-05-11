@@ -108,6 +108,16 @@ package object newtypes {
 
   type FailureOut[+A] = FailureOut.Type[A]
 
+  /**
+   * A newtype representing Right-to-left composition of functors.
+   * If F[_] and G[_] are both Covariant, then Nested[F, G, *] is also a Covariant
+   * If F[_] and G[_] are both IdentityBoth, then Nested[F, G, *] is also an IdentityBoth
+   * If F[_] and G[_] are both Traversable, then Nested[F, G, *] is also a Traversable
+   */
+  object Nested extends NewtypeF
+
+  type Nested[F[+_], G[+_], +A] = Nested.Type[F[G[A]]]
+
   object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
 
     val one: Natural =

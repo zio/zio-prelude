@@ -18,7 +18,7 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
-import zio.prelude.newtypes.{AndF, Failure, OrF}
+import zio.prelude.newtypes.{AndF, Failure, Nested, OrF}
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
 import zio.test.TestResult
@@ -1156,6 +1156,21 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
 
       def both[A, B](fa: => Id[A], fb: => Id[B]): Id[(A, B)] =
         Id(Id.unwrap(fa) -> Id.unwrap(fb))
+    }
+
+  /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Nested[F, G, A]`.
+   */
+  implicit def NestedIdentityBoth[F[+_]: IdentityBoth: Covariant, G[+_]](implicit
+    G: IdentityBoth[G]
+  ): IdentityBoth[({ type lambda[+A] = Nested[F, G, A] })#lambda] =
+    new IdentityBoth[({ type lambda[+A] = Nested[F, G, A] })#lambda] {
+      override def any: Nested[F, G, Any] = Nested(G.any.succeed[F])
+
+      override def both[A, B](fa: => Nested[F, G, A], fb: => Nested[F, G, B]): Nested[F, G, (A, B)] =
+        Nested {
+          Nested.unwrap[F[G[A]]](fa).zipWith(Nested.unwrap[F[G[B]]](fb))(_ zip _)
+        }
     }
 
   /**

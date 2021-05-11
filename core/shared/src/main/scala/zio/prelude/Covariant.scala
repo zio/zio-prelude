@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio.prelude.coherent.CovariantDeriveEqual
+import zio.prelude.newtypes.Nested
 import zio.test.TestResult
 import zio.test.laws._
 
@@ -111,6 +112,22 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
   def apply[F[+_]](implicit covariant: Covariant[F]): Covariant[F] =
     covariant
 
+  /**
+   * Constructs the instance for `Covariant[({ type lambda[+A] = Nested[F, G, A] })#lambda]`
+   * given a pair of pre-existing `Covariant` instances for covariant, higher-kinded type
+   * parameters `F[+_]` and `G[+_]`.
+   */
+  implicit def NestedCovariant[F[+_], G[+_]](implicit
+    F: Covariant[F],
+    G: Covariant[G]
+  ): Covariant[({ type lambda[+A] = Nested[F, G, A] })#lambda] =
+    new Covariant[({ type lambda[+A] = Nested[F, G, A] })#lambda] {
+      private lazy val composedCovariant = F.compose(G)
+
+      override def map[A, B](f: A => B): Nested[F, G, A] => Nested[F, G, B] = { x: Nested[F, G, A] =>
+        Nested(composedCovariant.map(f)(Nested.unwrap[F[G[A]]](x)))
+      }
+    }
 }
 
 trait CovariantSyntax {
