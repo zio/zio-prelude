@@ -143,11 +143,11 @@ lazy val docs = project
     moduleName := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects( /* coreJS, */ coreJVM /* , coreNative */ ),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJVM, experimentalJVM),
     ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
     docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .dependsOn( /* coreJS, */ coreJVM /* , coreNative */ )
+  .dependsOn(coreJVM, experimentalJVM)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
