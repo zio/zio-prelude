@@ -375,8 +375,8 @@ object ZValidation extends LowPriorityValidationImplicits {
    * that either returns the values of all of them, if they all succeed, or
    * else fails with all of their errors.
    */
-  def collectAllPar[W, E, A](validations: Iterable[ZValidation[W, E, A]]): ZValidation[W, E, List[A]] =
-    validations.foldRight[ZValidation[W, E, List[A]]](succeed(List.empty))(_.zipWithPar(_)(_ :: _))
+  def collectAllPar[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
+    validations.flip
 
   /**
    * Constructs a `ZValidation` that fails with the specified error.
