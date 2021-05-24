@@ -294,7 +294,7 @@ object BuildHelper {
   )
 
   def nativeSettings = Seq(
-    Test / skip := true,
+    Test / test / skip := true,
     doc / skip := true,
     Compile / doc / sources := Seq.empty
   )
