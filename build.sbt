@@ -29,7 +29,7 @@ addCommandAlias(
 )
 addCommandAlias(
   "testNative",
-  ";coreNative/test:compile;experimentalNative/test:compile"
+  ";coreNative/test;experimentalNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
 val zioVersion = "1.0.8"
