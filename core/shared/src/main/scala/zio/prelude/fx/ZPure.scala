@@ -17,7 +17,7 @@
 package zio.prelude.fx
 
 import com.github.ghik.silencer.silent
-import zio.internal.Stack
+import zio.internal.{Stack, StackBool}
 import zio.prelude._
 import zio.test.Assertion
 import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
@@ -47,7 +47,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self zip that
 
   /**
-   * Splits the environment, providing the first part to this computaiton and
+   * Splits the environment, providing the first part to this computation and
    * the second part to that computation.
    */
   final def ***[W1 >: W, S3, R1, E1 >: E, B](
@@ -195,6 +195,13 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     catchAll(pf.applyOrElse[E, ZPure[W1, S0, S3, R1, E1, A1]](_, fail))
 
   /**
+   * Modifies the behavior of the inner computation regarding logs, so that
+   * logs written in a failed computation will be cleared.
+   */
+  final def clearLogOnError: ZPure[W, S1, S2, R, E, A] =
+    Flag(FlagType.ClearLogOnError, value = true, self)
+
+  /**
    * Transforms the result of this computation with the specified partial
    * function, failing with the `e` value if the partial function is not
    * defined for the given input.
@@ -340,6 +347,13 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     that: ZPure[W1, S0, S3, R1, E1, A1]
   ): ZPure[W1, S0, S3, Either[R, R1], E1, A1] =
     ZPure.accessM(_.fold(self.provide, that.provide))
+
+  /**
+   * Modifies the behavior of the inner computation regarding logs, so that
+   * logs written in a failed computation will be kept (this is the default behavior).
+   */
+  final def keepLogOnError: ZPure[W, S1, S2, R, E, A] =
+    Flag(FlagType.ClearLogOnError, value = false, self)
 
   /**
    * Returns a successful computation if the value is `Left`, or fails with error `None`.
@@ -617,9 +631,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     val _                                                        = ev
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
     val environments: Stack[AnyRef]                              = Stack()
+    val logs: Stack[ChunkBuilder[Any]]                           = Stack(ChunkBuilder.make())
+    val clearLogOnError: StackBool                               = StackBool()
     var s0: Any                                                  = s
     var a: Any                                                   = null
-    val builder: ChunkBuilder[Any]                               = ChunkBuilder.make()
     var failed                                                   = false
     var curZPure: ZPure[Any, Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
 
@@ -683,8 +698,22 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
           val state = s0
           val fold  =
-            ZPure.Fold(zPure.value, (cause: Cause[Any]) => ZPure.set(state) *> zPure.failure(cause), zPure.success)
+            ZPure.Fold(
+              zPure.value,
+              (cause: Cause[Any]) =>
+                ZPure.suspend(Succeed({
+                  val clear   = clearLogOnError.peekOrElse(false)
+                  val builder = logs.pop()
+                  if (!clear) logs.peek() ++= builder.result()
+                })) *> ZPure.set(state) *> zPure.failure(cause),
+              (a: Any) =>
+                ZPure.suspend(Succeed({
+                  val builder = logs.pop()
+                  logs.peek() ++= builder.result()
+                })) *> zPure.success(a)
+            )
           stack.push(fold)
+          logs.push(ChunkBuilder.make())
           curZPure = zPure.value
         case Tags.Access  =>
           val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any, Any]]
@@ -705,13 +734,23 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
         case Tags.Log     =>
           val zPure     = curZPure.asInstanceOf[Log[Any, Any]]
-          builder += zPure.log
+          logs.peek() += zPure.log
           val nextInstr = stack.pop()
           a = ()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+        case Tags.Flag    =>
+          val zPure = curZPure.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
+          zPure.flag match {
+            case FlagType.ClearLogOnError =>
+              clearLogOnError.push(zPure.value)
+              curZPure = zPure.continue.fold(
+                e => { clearLogOnError.popOrElse(false); e },
+                a => { clearLogOnError.popOrElse(false); a }
+              )
+          }
       }
     }
-    val log = builder.result().asInstanceOf[Chunk[W]]
+    val log = logs.peek().result().asInstanceOf[Chunk[W]]
     if (failed) (log, Left(a.asInstanceOf[Cause[E]]))
     else (log, Right((s0.asInstanceOf[S2], a.asInstanceOf[A])))
   }
@@ -1253,6 +1292,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     final val Provide = 5
     final val Modify  = 6
     final val Log     = 7
+    final val Flag    = 8
   }
 
   private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A] {
@@ -1288,9 +1328,20 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       extends ZPure[W, S1, S2, Any, E, A]          {
     override def tag: Int = Tags.Provide
   }
-
   private final case class Log[S, +W](log: W) extends ZPure[W, S, S, Any, Nothing, Unit] {
     override def tag: Int = Tags.Log
+  }
+  private final case class Flag[W, S1, S2, R, E, A](
+    flag: FlagType,
+    value: Boolean,
+    continue: ZPure[W, S1, S2, R, E, A]
+  ) extends ZPure[W, S1, S2, R, E, A] {
+    override def tag: Int = Tags.Flag
+  }
+
+  sealed trait FlagType
+  object FlagType {
+    case object ClearLogOnError extends FlagType
   }
 }
 
