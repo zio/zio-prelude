@@ -744,7 +744,11 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
             case FlagType.ClearLogOnError =>
               clearLogOnError.push(zPure.value)
               curZPure = zPure.continue.fold(
-                e => { clearLogOnError.popOrElse(false); e },
+                e => {
+                  if (zPure.value) logs.peek().clear()
+                  clearLogOnError.popOrElse(false)
+                  e
+                },
                 a => { clearLogOnError.popOrElse(false); a }
               )
           }
