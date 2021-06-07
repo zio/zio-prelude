@@ -56,6 +56,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
   .settings(stdSettings("zio-prelude"))
   .settings(crossProjectSettings)
+  .settings(macroDefinitionSettings)
   .settings(buildInfoSettings("zio.prelude"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings(
@@ -151,3 +152,10 @@ lazy val docs = project
   )
   .dependsOn(coreJVM, experimentalJVM)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
+
+lazy val examples =
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
+    .settings(dottySettings)
+    .in(file("examples"))
+    .settings(macroExpansionSettings)
+    .dependsOn(core)
