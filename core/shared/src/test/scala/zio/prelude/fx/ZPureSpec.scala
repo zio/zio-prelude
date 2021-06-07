@@ -959,6 +959,11 @@ object ZPureSpec extends DefaultRunnableSpec {
           def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
           val zPure                                                       = log(1) *> ZPure.fail("baz")
           assert(zPure.clearLogOnError.runAll("")._1)(equalTo(Chunk()))
+        },
+        test("clearLogOnError should not affect the overall result") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       = log(1) *> ZPure.fail("baz")
+          assert(zPure.clearLogOnError.runAll("")._2)(isLeft(anything))
         }
       )
     )
