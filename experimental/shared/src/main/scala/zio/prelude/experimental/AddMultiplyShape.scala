@@ -109,7 +109,7 @@ object AddMultiplyShape {
       }
 
       val Multiplication: Multiplication[Prod[fx.Cause[A]]] = new Associative[Prod[fx.Cause[A]]] {
-        def combine(l: => Prod[fx.Cause[A]], r: => Prod[fx.Cause[A]]): Prod[fx.Cause[A]] = Prod(l && r)
+        def combine(l: => Prod[fx.Cause[A]], r: => Prod[fx.Cause[A]]): Prod[fx.Cause[A]] = Prod(l ++ r)
       }
     }
 }
