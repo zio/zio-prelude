@@ -46,11 +46,14 @@ package object prelude
     with PartialInverseSyntax
     with NewtypeExports
     with NewtypeFExports
+    with NonEmptyListSyntax
     with NonEmptySetSyntax
     with NonEmptyForEachSyntax
     with OrdSyntax
     with PartialOrdSyntax
     with ForEachSyntax
+    with ZNonEmptySetSyntax
+    with ZSetSyntax
     with ZivariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]

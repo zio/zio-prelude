@@ -1235,18 +1235,22 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
-   * The `AssociativeBoth` instance for `ZIO`.
+   * The `IdentityBoth` instance for `ZIO`.
    */
-  implicit def ZIOAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+  implicit def ZIOIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      val any: ZIO[R, E, Any] = ZIO.succeed(())
+
       def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zip fb
     }
 
   /**
-   * The `AssociativeBoth` instance for failed `ZIO`.
+   * The `IdentityBoth` instance for failed `ZIO`.
    */
-  implicit def ZIOFailureAssociativeBoth[R, A]: AssociativeBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
-    new AssociativeBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
+  implicit def ZIOFailureIdentityBoth[R, A]: IdentityBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
+    new IdentityBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
+      val any: Failure[ZIO[R, Any, A]] = Failure.wrap(ZIO.fail(()))
+
       def both[EA, EB](
         fa: => Failure[ZIO[R, EA, A]],
         fb: => Failure[ZIO[R, EB, A]]
@@ -1257,10 +1261,12 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
-   * The `AssociativeBoth` instance for `ZLayer`.
+   * The `IdentityBoth` instance for `ZLayer`.
    */
-  implicit def ZLayerAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
+  implicit def ZLayerIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
+    new IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
+      val any: ZLayer[R, E, Any] = ZLayer.succeed(())
+
       def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
     }
 

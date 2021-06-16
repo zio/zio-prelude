@@ -166,7 +166,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit def Function2Covariant[T1, T2]: Covariant[({ type lambda[+x] = (T1, T2) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2) => x })#lambda] {
-      override def map[A, B](f: A => B): ((T1, T2) => A) => ((T1, T2) => B) =
+      override def map[A, B](f: A => B): ((T1, T2) => A) => (T1, T2) => B =
         function => (t1, t2) => f(function(t1, t2))
     }
 
@@ -175,7 +175,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit def Function3Covariant[T1, T2, T3]: Covariant[({ type lambda[+x] = (T1, T2, T3) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3) => x })#lambda] {
-      override def map[A, B](f: A => B): ((T1, T2, T3) => A) => ((T1, T2, T3) => B) =
+      override def map[A, B](f: A => B): ((T1, T2, T3) => A) => (T1, T2, T3) => B =
         function => (t1, t2, t3) => f(function(t1, t2, t3))
     }
 
@@ -184,7 +184,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit def Function4Covariant[T1, T2, T3, T4]: Covariant[({ type lambda[+x] = (T1, T2, T3, T4) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4) => x })#lambda] {
-      override def map[A, B](f: A => B): ((T1, T2, T3, T4) => A) => ((T1, T2, T3, T4) => B) =
+      override def map[A, B](f: A => B): ((T1, T2, T3, T4) => A) => (T1, T2, T3, T4) => B =
         function => (t1, t2, t3, t4) => f(function(t1, t2, t3, t4))
     }
 
@@ -194,7 +194,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit def Function5Covariant[T1, T2, T3, T4, T5]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5) => x })#lambda] {
-      override def map[A, B](f: A => B): ((T1, T2, T3, T4, T5) => A) => ((T1, T2, T3, T4, T5) => B) =
+      override def map[A, B](f: A => B): ((T1, T2, T3, T4, T5) => A) => (T1, T2, T3, T4, T5) => B =
         function => (t1, t2, t3, t4, t5) => f(function(t1, t2, t3, t4, t5))
     }
 
@@ -204,7 +204,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit def Function6Covariant[T1, T2, T3, T4, T5, T6]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6) => x })#lambda] {
-      override def map[A, B](f: A => B): ((T1, T2, T3, T4, T5, T6) => A) => ((T1, T2, T3, T4, T5, T6) => B) =
+      override def map[A, B](f: A => B): ((T1, T2, T3, T4, T5, T6) => A) => (T1, T2, T3, T4, T5, T6) => B =
         function => (t1, t2, t3, t4, t5, t6) => f(function(t1, t2, t3, t4, t5, t6))
     }
 
@@ -214,7 +214,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit def Function7Covariant[T1, T2, T3, T4, T5, T6, T7]
     : Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7) => x })#lambda] =
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7) => x })#lambda] {
-      override def map[A, B](f: A => B): ((T1, T2, T3, T4, T5, T6, T7) => A) => ((T1, T2, T3, T4, T5, T6, T7) => B) =
+      override def map[A, B](f: A => B): ((T1, T2, T3, T4, T5, T6, T7) => A) => (T1, T2, T3, T4, T5, T6, T7) => B =
         function => (t1, t2, t3, t4, t5, t6, t7) => f(function(t1, t2, t3, t4, t5, t6, t7))
     }
 
@@ -226,7 +226,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8) => x })#lambda] {
       override def map[A, B](
         f: A => B
-      ): ((T1, T2, T3, T4, T5, T6, T7, T8) => A) => ((T1, T2, T3, T4, T5, T6, T7, T8) => B) =
+      ): ((T1, T2, T3, T4, T5, T6, T7, T8) => A) => (T1, T2, T3, T4, T5, T6, T7, T8) => B =
         function => (t1, t2, t3, t4, t5, t6, t7, t8) => f(function(t1, t2, t3, t4, t5, t6, t7, t8))
     }
 
@@ -238,7 +238,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9) => x })#lambda] {
       override def map[A, B](
         f: A => B
-      ): ((T1, T2, T3, T4, T5, T6, T7, T8, T9) => A) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9) => B) =
+      ): ((T1, T2, T3, T4, T5, T6, T7, T8, T9) => A) => (T1, T2, T3, T4, T5, T6, T7, T8, T9) => B =
         function => (t1, t2, t3, t4, t5, t6, t7, t8, t9) => f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9))
     }
 
@@ -250,7 +250,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new Covariant[({ type lambda[+x] = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => x })#lambda] {
       override def map[A, B](
         f: A => B
-      ): ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => A) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => B) =
+      ): ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => A) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => B =
         function => (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) => f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10))
     }
 
@@ -264,7 +264,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) => f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11))
     }
@@ -279,7 +279,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12))
@@ -295,7 +295,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13))
@@ -311,7 +311,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14))
@@ -330,7 +330,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15))
@@ -349,7 +349,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16))
@@ -369,7 +369,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17))
@@ -393,7 +393,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18))
@@ -417,7 +417,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19))
@@ -462,7 +462,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20))
@@ -509,7 +509,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         f: A => B
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) => A
-      ) => ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) => B) =
+      ) => (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) =>
             f(function(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21))
@@ -558,31 +558,29 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       ): (
         (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22) => A
       ) => (
-        (
-          T1,
-          T2,
-          T3,
-          T4,
-          T5,
-          T6,
-          T7,
-          T8,
-          T9,
-          T10,
-          T11,
-          T12,
-          T13,
-          T14,
-          T15,
-          T16,
-          T17,
-          T18,
-          T19,
-          T20,
-          T21,
-          T22
-        ) => B
-      ) =
+        T1,
+        T2,
+        T3,
+        T4,
+        T5,
+        T6,
+        T7,
+        T8,
+        T9,
+        T10,
+        T11,
+        T12,
+        T13,
+        T14,
+        T15,
+        T16,
+        T17,
+        T18,
+        T19,
+        T20,
+        T21,
+        T22
+      ) => B =
         function =>
           (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) =>
             f(
@@ -1463,7 +1461,7 @@ trait LowPriorityInvariantImplicits {
    */
   implicit def Function2Contravariant[B, C]: Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B) => C })#lambda] {
-      def contramap[A, D](function: D => A): ((A, B) => C) => ((D, B) => C) =
+      def contramap[A, D](function: D => A): ((A, B) => C) => (D, B) => C =
         apply => (d, b) => apply(function(d), b)
     }
 
@@ -1472,7 +1470,7 @@ trait LowPriorityInvariantImplicits {
    */
   implicit def Function3Contravariant[B, C, D]: Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C) => D })#lambda] {
-      def contramap[A, E](function: E => A): ((A, B, C) => D) => ((E, B, C) => D) =
+      def contramap[A, E](function: E => A): ((A, B, C) => D) => (E, B, C) => D =
         apply => (e, b, c) => apply(function(e), b, c)
     }
 
@@ -1481,7 +1479,7 @@ trait LowPriorityInvariantImplicits {
    */
   implicit def Function4Contravariant[B, C, D, E]: Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D) => E })#lambda] {
-      def contramap[A, F](function: F => A): ((A, B, C, D) => E) => ((F, B, C, D) => E) =
+      def contramap[A, F](function: F => A): ((A, B, C, D) => E) => (F, B, C, D) => E =
         apply => (f, b, c, d) => apply(function(f), b, c, d)
     }
 
@@ -1491,7 +1489,7 @@ trait LowPriorityInvariantImplicits {
   implicit def Function5Contravariant[B, C, D, E, F]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E) => F })#lambda] {
-      def contramap[A, G](function: G => A): ((A, B, C, D, E) => F) => ((G, B, C, D, E) => F) =
+      def contramap[A, G](function: G => A): ((A, B, C, D, E) => F) => (G, B, C, D, E) => F =
         apply => (g, b, c, d, e) => apply(function(g), b, c, d, e)
     }
 
@@ -1501,7 +1499,7 @@ trait LowPriorityInvariantImplicits {
   implicit def Function6Contravariant[B, C, D, E, F, G]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F) => G })#lambda] {
-      def contramap[A, H](function: H => A): ((A, B, C, D, E, F) => G) => ((H, B, C, D, E, F) => G) =
+      def contramap[A, H](function: H => A): ((A, B, C, D, E, F) => G) => (H, B, C, D, E, F) => G =
         apply => (h, b, c, d, e, f) => apply(function(h), b, c, d, e, f)
     }
 
@@ -1511,7 +1509,7 @@ trait LowPriorityInvariantImplicits {
   implicit def Function7Contravariant[B, C, D, E, F, G, H]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G) => H })#lambda] {
-      def contramap[A, I](function: I => A): ((A, B, C, D, E, F, G) => H) => ((I, B, C, D, E, F, G) => H) =
+      def contramap[A, I](function: I => A): ((A, B, C, D, E, F, G) => H) => (I, B, C, D, E, F, G) => H =
         apply => (i, b, c, d, e, f, g) => apply(function(i), b, c, d, e, f, g)
     }
 
@@ -1521,7 +1519,7 @@ trait LowPriorityInvariantImplicits {
   implicit def Function8Contravariant[B, C, D, E, F, G, H, I]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H) => I })#lambda] {
-      def contramap[A, J](function: J => A): ((A, B, C, D, E, F, G, H) => I) => ((J, B, C, D, E, F, G, H) => I) =
+      def contramap[A, J](function: J => A): ((A, B, C, D, E, F, G, H) => I) => (J, B, C, D, E, F, G, H) => I =
         apply => (j, b, c, d, e, f, g, h) => apply(function(j), b, c, d, e, f, g, h)
     }
 
@@ -1531,7 +1529,7 @@ trait LowPriorityInvariantImplicits {
   implicit def Function9Contravariant[B, C, D, E, F, G, H, I, J]
     : Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] =
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I) => J })#lambda] {
-      def contramap[A, K](function: K => A): ((A, B, C, D, E, F, G, H, I) => J) => ((K, B, C, D, E, F, G, H, I) => J) =
+      def contramap[A, K](function: K => A): ((A, B, C, D, E, F, G, H, I) => J) => (K, B, C, D, E, F, G, H, I) => J =
         apply => (k, b, c, d, e, f, g, h, i) => apply(function(k), b, c, d, e, f, g, h, i)
     }
 
@@ -1543,7 +1541,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J) => K })#lambda] {
       def contramap[A, L](
         function: L => A
-      ): ((A, B, C, D, E, F, G, H, I, J) => K) => ((L, B, C, D, E, F, G, H, I, J) => K) =
+      ): ((A, B, C, D, E, F, G, H, I, J) => K) => (L, B, C, D, E, F, G, H, I, J) => K =
         apply => (l, b, c, d, e, f, g, h, i, j) => apply(function(l), b, c, d, e, f, g, h, i, j)
     }
 
@@ -1555,7 +1553,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K) => L })#lambda] {
       def contramap[A, M](
         function: M => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K) => L) => ((M, B, C, D, E, F, G, H, I, J, K) => L) =
+      ): ((A, B, C, D, E, F, G, H, I, J, K) => L) => (M, B, C, D, E, F, G, H, I, J, K) => L =
         apply => (m, b, c, d, e, f, g, h, i, j, k) => apply(function(m), b, c, d, e, f, g, h, i, j, k)
     }
 
@@ -1567,7 +1565,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L) => M })#lambda] {
       def contramap[A, N](
         function: N => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L) => M) => ((N, B, C, D, E, F, G, H, I, J, K, L) => M) =
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L) => M) => (N, B, C, D, E, F, G, H, I, J, K, L) => M =
         apply => (n, b, c, d, e, f, g, h, i, j, k, l) => apply(function(n), b, c, d, e, f, g, h, i, j, k, l)
     }
 
@@ -1579,7 +1577,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M) => N })#lambda] {
       def contramap[A, O](
         function: O => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M) => N) => ((O, B, C, D, E, F, G, H, I, J, K, L, M) => N) =
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M) => N) => (O, B, C, D, E, F, G, H, I, J, K, L, M) => N =
         apply => (o, b, c, d, e, f, g, h, i, j, k, l, m) => apply(function(o), b, c, d, e, f, g, h, i, j, k, l, m)
     }
 
@@ -1591,7 +1589,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N) => O })#lambda] {
       def contramap[A, P](
         function: P => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) => ((P, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) =
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N) => O) => (P, B, C, D, E, F, G, H, I, J, K, L, M, N) => O =
         apply => (p, b, c, d, e, f, g, h, i, j, k, l, m, n) => apply(function(p), b, c, d, e, f, g, h, i, j, k, l, m, n)
     }
 
@@ -1603,7 +1601,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P })#lambda] {
       def contramap[A, Q](
         function: Q => A
-      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) => ((Q, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) =
+      ): ((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P) => (Q, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => P =
         apply =>
           (q, b, c, d, e, f, g, h, i, j, k, l, m, n, o) => apply(function(q), b, c, d, e, f, g, h, i, j, k, l, m, n, o)
     }
@@ -1616,7 +1614,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q })#lambda] {
       def contramap[A, R](function: R => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q
-      ) => ((R, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q) =
+      ) => (R, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Q =
         apply =>
           (r, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) =>
             apply(function(r), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
@@ -1630,7 +1628,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R })#lambda] {
       def contramap[A, S](function: S => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R
-      ) => ((S, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R) =
+      ) => (S, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => R =
         apply =>
           (s, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) =>
             apply(function(s), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
@@ -1644,7 +1642,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S })#lambda] {
       def contramap[A, T](function: T => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S
-      ) => ((T, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S) =
+      ) => (T, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => S =
         apply =>
           (t, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r) =>
             apply(function(t), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
@@ -1658,7 +1656,7 @@ trait LowPriorityInvariantImplicits {
     new Contravariant[({ type lambda[-x] = (x, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T })#lambda] {
       def contramap[A, U](function: U => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T
-      ) => ((U, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T) =
+      ) => (U, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => T =
         apply =>
           (u, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s) =>
             apply(function(u), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
@@ -1674,7 +1672,7 @@ trait LowPriorityInvariantImplicits {
     ] {
       def contramap[A, V](function: V => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U
-      ) => ((V, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U) =
+      ) => (V, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => U =
         apply =>
           (v, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t) =>
             apply(function(v), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
@@ -1691,7 +1689,7 @@ trait LowPriorityInvariantImplicits {
     ] {
       def contramap[A, W](function: W => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V
-      ) => ((W, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V) =
+      ) => (W, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => V =
         apply =>
           (w, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) =>
             apply(function(w), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
@@ -1708,7 +1706,7 @@ trait LowPriorityInvariantImplicits {
     ] {
       def contramap[A, X](function: X => A): (
         (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W
-      ) => ((X, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W) =
+      ) => (X, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => W =
         apply =>
           (x, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) =>
             apply(function(x), b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
