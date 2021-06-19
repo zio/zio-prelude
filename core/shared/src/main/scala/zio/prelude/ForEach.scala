@@ -134,7 +134,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     forEach(fa)(f).as(())
 
-  def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
+  def groupByNonEmpty[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) { (m, v) =>
       val k = f(v)
       m.get(k) match {
@@ -143,7 +143,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
       }
     }
 
-  def groupByM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
+  def groupByNonEmptyM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]].succeed) { (m, v) =>
       val k = f(v)
       AssociativeBoth.mapN(m, k) { (m, k) =>

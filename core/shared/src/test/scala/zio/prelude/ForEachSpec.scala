@@ -115,9 +115,9 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("groupBy") {
+        testM("groupByNonEmpty") {
           check(genList, genIntFunction) { (as, f) =>
-            val actual   = ForEach[List].groupBy(as)(f)
+            val actual   = ForEach[List].groupByNonEmpty(as)(f)
             val expected = as
               .groupBy(f)
               .toList
@@ -126,10 +126,10 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("groupByM") {
+        testM("groupByNonEmptyM") {
           check(genList, genIntFunction) { (as, f) =>
             // Dotty can't infer Function1Covariant: 'Required: zio.prelude.Covariant[[R] =>> Int => R]'
-            val actual   = ForEach[List].groupByM(as)(f.map(Option(_))(Invariant.Function1Covariant))
+            val actual   = ForEach[List].groupByNonEmptyM(as)(f.map(Option(_))(Invariant.Function1Covariant))
             val expected = Option(
               as.groupBy(f)
                 .toList
