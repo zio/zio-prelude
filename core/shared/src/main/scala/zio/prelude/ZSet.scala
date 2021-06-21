@@ -16,11 +16,12 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Max, Min, Natural, Prod, Sum}
+import zio.prelude.newtypes._
 
 import scala.annotation.tailrec
 import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.immutable.HashMap
+import zio.prelude.newtypes._
 
 /**
  * A `ZSet[A, B]` is a set of `A` values where `B` represents some notion of
@@ -409,7 +410,7 @@ trait ZSetSyntax {
 
   implicit final class ZSetMultiSetOps[+A](self: MultiSet[A]) {
 
-    private def headFiltered: Option[(A, Natural)] = self.toMap[A].find { case (_, n) => n > 0 }
+    private def headFiltered: Option[(A, Natural)] = self.toMap[A].find { case (_, n) => n.intValue > 0 }
 
     /** Returns an element or `None` if empty */
     def head: Option[A] = headFiltered.map(_._1)
@@ -420,8 +421,8 @@ trait ZSetSyntax {
      */
     def peel: Option[(A, MultiSet[A])] =
       headFiltered.map {
-        case (k, v) if v > 1 =>
-          (k, ZSet.fromMap(self.toMap + (k -> Natural.unsafeMake(v - 1))))
+        case (k, v) if v.intValue > 1 =>
+          (k, ZSet.fromMap(self.toMap + (k -> Natural.unsafeApply(v.intValue - 1))))
         case (k, _)          =>
           (k, ZSet.fromMap(self.toMap - k))
       }
