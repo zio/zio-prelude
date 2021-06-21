@@ -17,7 +17,8 @@
 package zio.prelude
 
 import zio.prelude.coherent.AssociativeEqual
-import zio.prelude.newtypes.{And, First, Last, Max, Min, Natural, Or, Prod, Sum}
+import zio.prelude.newtypes._
+import zio.prelude.newtypes._
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}

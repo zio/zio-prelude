@@ -10,6 +10,7 @@ sealed trait Assertion[-A] { self =>
   def unary_! : Assertion[A] = Not(this)
 
   def apply(a: A): Either[AssertionError, Unit] = apply(a, negated = false)
+
   protected def apply(a: A, negated: Boolean): Either[AssertionError, Unit]
 }
 
@@ -67,7 +68,7 @@ object Assertion {
 
   case class Matches(regex: String) extends Assertion[String] {
     override def apply(a: String, negated: Boolean): Either[AssertionError, Unit] =
-      if (regex.r.matches(a)) Right(())
+      if (regex.r.findAllMatchIn(a).nonEmpty) Right(())
       else Left(AssertionError.Failure(s"""matches("$regex")""", a))
   }
 }

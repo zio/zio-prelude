@@ -49,7 +49,10 @@ lazy val root = project
     experimentalJS,
     experimentalJVM,
     experimentalNative,
-    scalaParallelCollections
+    scalaParallelCollections,
+    macros.js,
+    macros.jvm,
+    macros.native,
   )
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -67,6 +70,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
+  .dependsOn(macros)
 
 lazy val coreJS  = core.js
   .settings(jsSettings)
@@ -79,6 +83,15 @@ lazy val coreJVM = core.jvm
 
 lazy val coreNative = core.native
   .settings(nativeSettings)
+
+lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("macros"))
+  .settings(stdSettings("zio-prelude-macros"))
+  .settings(crossProjectSettings)
+  .settings(macroDefinitionSettings)
+  .settings(buildInfoSettings("zio.prelude.macros"))
+  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .enablePlugins(BuildInfoPlugin)
 
 lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental"))

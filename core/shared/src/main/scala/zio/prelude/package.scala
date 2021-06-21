@@ -17,7 +17,7 @@
 package zio
 
 import com.github.ghik.silencer.silent
-import zio.prelude.newtypes.Natural
+import zio.prelude.newtypes._
 import zio.test.{TestResult, assert}
 
 package object prelude
