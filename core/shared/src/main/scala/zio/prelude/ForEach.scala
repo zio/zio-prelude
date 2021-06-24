@@ -76,7 +76,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Folds over the elements of this collection using an associative operation
-   * and an identity.
+   * and an identity. Alias for `reduceIdentity`.
    */
   def fold[A: Identity](fa: F[A]): A =
     foldMap(fa)(identity)
@@ -237,6 +237,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Reduces the collection to a summary value using the associative operation.
+   * Alias for `fold`.
    */
   def reduceIdentity[A: Identity](fa: F[A]): A =
     foldMap(fa)(identity[A])
