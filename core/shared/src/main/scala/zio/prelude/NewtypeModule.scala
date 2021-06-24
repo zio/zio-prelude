@@ -116,7 +116,7 @@ import zio.test.Assertion
  *
  * {{{
  * object Natural extends NewtypeSmart[Int](isGreaterThanEqualTo(0))
- * type Natural = Natural
+ * type Natural = Natural.Type
  * }}}
  *
  * In this case, attempting to convert an integer to a natural number will
@@ -312,11 +312,8 @@ private[prelude] object NewtypeModule {
     }
 }
 
-
 trait NewtypeExports {
   import NewtypeModule._
-
-
 
   /**
    * The class of objects corresponding to newtypes. Users should implement an
@@ -349,7 +346,7 @@ trait NewtypeExports {
    *
    * {{{
    * object Natural extends NewtypeSmart[Int](isGreaterThanEqualTo(0))
-   * type Natural = Natural
+   * type Natural = Natural.Type
    * }}}
    */
   abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
@@ -399,7 +396,7 @@ trait NewtypeExports {
    *
    * {{{
    * object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0))
-   * type Natural = Natural
+   * type Natural = Natural.Type
    * }}}
    */
   abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {

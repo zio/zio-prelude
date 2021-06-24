@@ -2,7 +2,6 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 import zio.prelude.newtypes._
-import zio.prelude.macros.Refined
 import zio.test.Assertion._
 import zio.test._
 
@@ -16,8 +15,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
   // Age.newtype.Type with Age.Instances
   type Age = Age.Type
 
-  val dummy                                     = implicitly[Dummy[Age]]
-  def removingAnsiCodes(string: String): String = string.replaceAll("\u001B\\[[;\\d]*m", "");
+  val dummy = implicitly[Dummy[Age]]
 
   def spec =
     suite("NewtypeSpec")(
@@ -26,17 +24,9 @@ object NewtypeSpec extends DefaultRunnableSpec {
           assert(Natural.make(0))(isSuccessV(anything))
         },
         test("invalid values") {
-          val expected = "• -1 did not satisfy greaterThan(-1)"
-          assert(Natural.make(-1).mapError(removingAnsiCodes))(isFailureV(equalTo(NonEmptyChunk(expected))))
-        },
-        test("valid values at compile time") {
-          assert(Natural(0))(anything)
-        },
-        testM("invalid values at compile time") {
-          assertM(typeCheck("Natural(-1)"))(
-            isLeft(containsString("greaterThan(-1)") && containsString("Assertion Failed"))
-          )
-        },
+          val expected = "-1 did not satisfy isGreaterThanEqualTo(0)"
+          assert(Natural.make(-1))(isFailureV(equalTo(NonEmptyChunk(expected))))
+        }
       ),
       suite("SubtypeSmart")(
         test("subtypes values") {
@@ -87,15 +77,10 @@ object NewtypeSpec extends DefaultRunnableSpec {
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
     And.unwrap(foldMap(as)(a => And(f(a))))
 
-  val NaturalType = Refined[Int](zio.prelude.refined.Assertion.greaterThan(-1) )
-  object Natural extends NaturalType.Subtype {
-    val two: Natural = Natural(10)
+  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+    val two: Natural = Natural(2)
   }
   type Natural = Natural.Type
-
-  val newValue = Natural(10) + 3
-  val hash = implicitly[Hash[Natural]]
-  hash.hash(Natural(8))
 
   object IntSum extends Newtype[Int]
   type IntSum = IntSum.Type
@@ -106,11 +91,3 @@ object NewtypeSpec extends DefaultRunnableSpec {
   def sum[A](as: List[A])(implicit A: Identity[Sum[A]]): A =
     Sum.unwrap(Sum.wrapAll(as).foldLeft(A.identity)((b, a) => A.combine(b, a)))
 }
-
-
-object Cool {
-  import NewtypeSpec.Natural
-  val hash = implicitly[Hash[Natural]]
-  Natural(10)
-}
-

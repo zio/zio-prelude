@@ -16,8 +16,6 @@
 
 package zio.prelude
 
-import zio.prelude.macros.Refined
-
 package object newtypes {
   object Sum extends SubtypeF
 
@@ -110,9 +108,7 @@ package object newtypes {
 
   type FailureOut[+A] = FailureOut.Type[A]
 
-  val NaturalType = Refined[Int](zio.prelude.refined.Assertion.greaterThan(-1))
-  object Natural extends NaturalType.Subtype {
-    type Type <: Int
+  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
 
     val one: Natural =
       Natural(1)
@@ -121,25 +117,25 @@ package object newtypes {
       Natural(0)
 
     def successor(n: Natural): Natural =
-      Natural.unsafeApply(n + 1)
+      Natural(n + 1)
 
     def times(x: Natural, y: Natural): Natural = {
       val product = x * y
-      if (x == 0 || product / x != y) Natural.unsafeApply(Int.MaxValue) else Natural.unsafeApply(product)
+      if (x == 0 || product / x != y) Natural(Int.MaxValue) else Natural(product)
     }
 
     def plus(x: Natural, y: Natural): Natural = {
       val sum = x + y
-      if (sum < 0) Natural.unsafeApply(Int.MaxValue) else Natural.unsafeApply(sum)
+      if (sum < 0) Natural(Int.MaxValue) else Natural(sum)
     }
 
     def minus(x: Natural, y: Natural): Natural = {
       val difference = x - y
-      if (difference < 0) zero else Natural.unsafeApply(difference)
+      if (difference < 0) zero else Natural(difference)
     }
 
     private[prelude] def unsafeMake(n: Int): Natural =
-      Natural.unsafeApply(n)
+      Natural(n)
   }
 
   type Natural = Natural.Type
