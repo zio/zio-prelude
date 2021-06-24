@@ -11,17 +11,18 @@ sealed trait AssertionError { self =>
       case (f1, f2)               => Many(Vector(f1, f2))
     }
 
-  def render: String = self match {
-    case Failure(condition, value) =>
+  def render(value: String): String = self match {
+    case Failure(condition) =>
       scala.Console.RED + "• " + scala.Console.BLUE + value + scala.Console.RESET +
-        " did not satisfy " + scala.Console.YELLOW +
-        condition + scala.Console.RESET
-    case Many(vector)              =>
-      vector.mkString("\n")
+        " did not satisfy " + scala.Console.YELLOW + condition + scala.Console.RESET
+    case Many(vector)       =>
+      vector.map(_.render(value)).mkString("\n")
   }
 }
 
 object AssertionError {
-  case class Failure(condition: String, value: String) extends AssertionError
-  case class Many(vector: Vector[AssertionError])      extends AssertionError
+  def failure(condition: String): AssertionError = Failure(condition)
+
+  final case class Failure(condition: String)           extends AssertionError
+  final case class Many(vector: Vector[AssertionError]) extends AssertionError
 }
