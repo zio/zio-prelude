@@ -13,9 +13,7 @@ object DistributiveMultiplySpec extends DefaultRunnableSpec {
       suite("laws")(
         testM("double distributive multiply")(checkAllLaws(DistributiveMultiply)(Gen.anyDouble)),
         testM("int distributive multiply")(checkAllLaws(DistributiveMultiply)(Gen.anyInt)),
-//        TODO: should Cause satisfy distributivity???
-//        Then(Fail(257),Both(Empty,Empty)) did not satisfy (equalTo(Both(Fail(257),Fail(257))) ?? "leftDistributivityLaw")
-//        Then(Both(Empty,Empty),Fail(0)) did not satisfy (equalTo(Both(Fail(0),Fail(0))) ?? "rightDistributivityLaw")
+//        depends on https://github.com/zio/zio/pull/5242
 //        testM("Cause distributive multiply")(checkAllLaws(DistributiveMultiply)(Gen.causes(Gen.anyInt, Gen.throwable))),
         testM("ParSeq distributive multiply")(checkAllLaws(DistributiveMultiply)(Gens.parSeq(Gen.unit, Gen.anyInt)))
       )
