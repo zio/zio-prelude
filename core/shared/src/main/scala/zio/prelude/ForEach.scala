@@ -76,7 +76,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Folds over the elements of this collection using an associative operation
-   * and an identity.
+   * and an identity. Alias for `reduceIdentity`.
    */
   def fold[A: Identity](fa: F[A]): A =
     foldMap(fa)(identity)
@@ -134,7 +134,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     forEach(fa)(f).as(())
 
-  def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
+  def groupByNonEmpty[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) { (m, v) =>
       val k = f(v)
       m.get(k) match {
@@ -143,7 +143,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
       }
     }
 
-  def groupByM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
+  def groupByNonEmptyM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]].succeed) { (m, v) =>
       val k = f(v)
       AssociativeBoth.mapN(m, k) { (m, k) =>
@@ -237,6 +237,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Reduces the collection to a summary value using the associative operation.
+   * Alias for `fold`.
    */
   def reduceIdentity[A: Identity](fa: F[A]): A =
     foldMap(fa)(identity[A])

@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Max, Prod, Sum}
+import zio.prelude.newtypes.{Max, Natural, Prod, Sum}
 
 import scala.language.implicitConversions
 
@@ -311,4 +311,45 @@ trait LowPriorityZNonEmptySetImplicits {
   implicit def ZNonEmptySetPartialOrd[A, B: PartialOrd](implicit ev: Identity[Sum[B]]): PartialOrd[ZNonEmptySet[A, B]] =
     PartialOrd[ZSet[A, B]].contramap(_.toZSet)
 
+}
+
+trait ZNonEmptySetSyntax {
+  implicit final class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
+
+    /** Returns a `NonEmptyMultiSet` or `None` if the original Multiset is empty */
+    def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
+  }
+
+  implicit final class ZNonEmptySetNonEmptyMultiSetOps[+A](self: NonEmptyMultiSet[A]) {
+
+    /** Returns an element */
+    def head: A = peel._1
+
+    /**
+     * Returns an element of this `NonEmptyMultiSet` and the remainder, which is a (possibly empty) `MultiSet`.
+     */
+    def peel: (A, MultiSet[A]) =
+      self.toZSet.peel.get
+
+    /**
+     * Returns an element of this `NonEmptyMultiSet`
+     * and the remainder or `None`, if the remainder is empty.
+     */
+    def peelNonEmpty: (A, Option[NonEmptyMultiSet[A]]) = {
+      val (head, tail) = peel
+      (head, tail.toNonEmptyZSet)
+    }
+
+    /**
+     * Returns the tail of this `NonEmptyMultiSet` as a (possibly empty) `MultiSet`.
+     */
+    def tail: MultiSet[A] =
+      peel._2
+
+    /**
+     * Returns the tail of this `NonEmptyMultiSet` if it exists or `None` otherwise.
+     */
+    def tailNonEmpty: Option[NonEmptyMultiSet[A]] =
+      peelNonEmpty._2
+  }
 }

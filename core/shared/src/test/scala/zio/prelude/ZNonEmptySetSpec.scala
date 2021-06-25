@@ -65,6 +65,21 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
           val die  = ZNonEmptySet(1, 2, 3, 4, 5, 6)
           val pair = die.zipWith(die)(_ + _)
           assert(pair(7))(equalTo(6))
+        },
+        test("peelNonEmpty none") {
+          val znes     = ZNonEmptySet("a")
+          val destruct = znes.peelNonEmpty
+          assert(destruct)(equalTo(("a", None)))
+        },
+        test("peelNonEmpty some 1") {
+          val znes     = ZNonEmptySet("a", "b")
+          val destruct = znes.peelNonEmpty
+          assert(destruct)(equalTo(("a", Some(ZNonEmptySet("b")))))
+        },
+        test("peelNonEmpty some 2") {
+          val znes     = ZNonEmptySet("a", "a")
+          val destruct = znes.peelNonEmpty
+          assert(destruct)(equalTo(("a", Some(ZNonEmptySet("a")))))
         }
       ),
       suite("set")(

@@ -906,6 +906,64 @@ object ZPureSpec extends DefaultRunnableSpec {
             _ <- ZPure.log("times")
           } yield b
           assert(computation.runLog)(equalTo((Chunk("plus", "times"), 6)))
+        },
+        test("log is not cleared after failure") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either
+              _ <- (log(4) *> (if (false) ZPure.fail("baz") else ZPure.unit)).either
+            } yield ()
+          assert(zPure.keepLogOnError.provideState("").runLog)(equalTo((Chunk(1, 2, 3, 4), ())))
+        },
+        test("log is not cleared after failure with keepLogOnError") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either
+              _ <- (log(4) *> (if (false) ZPure.fail("baz") else ZPure.unit)).either
+            } yield ()
+          assert(zPure.keepLogOnError.provideState("").runLog)(equalTo((Chunk(1, 2, 3, 4), ())))
+        },
+        test("log is cleared after failure with clearLogOnError") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either
+              _ <- (log(4) *> (if (false) ZPure.fail("baz") else ZPure.unit)).either
+            } yield ()
+          assert(zPure.clearLogOnError.provideState("").runLog)(equalTo((Chunk(2, 4), ())))
+        },
+        test("combine clearLogOnError and keepLogOnError") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either.keepLogOnError
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either.clearLogOnError
+            } yield ()
+          assert(zPure.provideState("").runLog)(equalTo((Chunk(1, 2), ())))
+        },
+        test("log is not cleared after failure with keepLogOnError when the whole computation fails") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       = log(1) *> ZPure.fail("baz")
+          assert(zPure.keepLogOnError.runAll("")._1)(equalTo(Chunk(1)))
+        },
+        test("log is cleared after failure with clearLogOnError when the whole computation fails") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       = log(1) *> ZPure.fail("baz")
+          assert(zPure.clearLogOnError.runAll("")._1)(equalTo(Chunk()))
+        },
+        test("clearLogOnError should not affect the overall result") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       = log(1) *> ZPure.fail("baz")
+          assert(zPure.clearLogOnError.runAll("")._2)(isLeft(anything))
         }
       )
     )
