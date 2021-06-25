@@ -72,13 +72,17 @@ object AddMultiplyShape {
       type Multiplication[x] = Identity[x]
 
       val Addition: Addition[Sum[zio.Cause[A]]] = new Commutative[Sum[zio.Cause[A]]] with Identity[Sum[zio.Cause[A]]] {
-        def identity: Sum[zio.Cause[A]]                                                  = Sum(zio.Cause.empty)
-        def combine(l: => Sum[zio.Cause[A]], r: => Sum[zio.Cause[A]]): Sum[zio.Cause[A]] = Sum(l.&&[A](r))
+        def identity: Sum[zio.Cause[A]]                                                  =
+          Sum(zio.Cause.empty)
+        def combine(l: => Sum[zio.Cause[A]], r: => Sum[zio.Cause[A]]): Sum[zio.Cause[A]] =
+          Sum(Sum.unwrap(l) && Sum.unwrap(r))
       }
 
       val Multiplication: Multiplication[Prod[zio.Cause[A]]] = new Identity[Prod[zio.Cause[A]]] {
-        def identity: Prod[zio.Cause[A]]                                                    = Prod(zio.Cause.empty)
-        def combine(l: => Prod[zio.Cause[A]], r: => Prod[zio.Cause[A]]): Prod[zio.Cause[A]] = Prod(l.++[A](r))
+        def identity: Prod[zio.Cause[A]]                                                    =
+          Prod(zio.Cause.empty)
+        def combine(l: => Prod[zio.Cause[A]], r: => Prod[zio.Cause[A]]): Prod[zio.Cause[A]] =
+          Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
       }
     }
 
@@ -92,14 +96,14 @@ object AddMultiplyShape {
         def identity: Sum[ParSeq[Unit, A]]                                                        =
           Sum(ParSeq.empty)
         def combine(l: => Sum[ParSeq[Unit, A]], r: => Sum[ParSeq[Unit, A]]): Sum[ParSeq[Unit, A]] =
-          Sum(l.&&[Unit, A](r))
+          Sum(Sum.unwrap(l) && Sum.unwrap(r))
       }
 
       val Multiplication: Multiplication[Prod[ParSeq[Unit, A]]] = new Identity[Prod[ParSeq[Unit, A]]] {
         def identity: Prod[ParSeq[Unit, A]]                                                          =
           Prod(ParSeq.empty)
         def combine(l: => Prod[ParSeq[Unit, A]], r: => Prod[ParSeq[Unit, A]]): Prod[ParSeq[Unit, A]] =
-          Prod(l.++[Unit, A](r))
+          Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
       }
     }
 
@@ -109,11 +113,13 @@ object AddMultiplyShape {
       type Multiplication[x] = Associative[x]
 
       val Addition: Addition[Sum[fx.Cause[A]]] = new Commutative[Sum[fx.Cause[A]]] {
-        def combine(l: => Sum[fx.Cause[A]], r: => Sum[fx.Cause[A]]): Sum[fx.Cause[A]] = Sum(l.&&[Nothing, A](r))
+        def combine(l: => Sum[fx.Cause[A]], r: => Sum[fx.Cause[A]]): Sum[fx.Cause[A]] =
+          Sum(Sum.unwrap(l) && Sum.unwrap(r))
       }
 
       val Multiplication: Multiplication[Prod[fx.Cause[A]]] = new Associative[Prod[fx.Cause[A]]] {
-        def combine(l: => Prod[fx.Cause[A]], r: => Prod[fx.Cause[A]]): Prod[fx.Cause[A]] = Prod(l.++[Nothing, A](r))
+        def combine(l: => Prod[fx.Cause[A]], r: => Prod[fx.Cause[A]]): Prod[fx.Cause[A]] =
+          Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
       }
     }
 }
