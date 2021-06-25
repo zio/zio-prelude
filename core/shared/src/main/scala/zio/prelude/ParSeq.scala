@@ -223,12 +223,9 @@ object ParSeq {
       }
     private def distribute(l: ParSeq[Unit, Any], r: ParSeq[Unit, Any]): Boolean =
       (l, r) match {
-        case (Both(Then(al1, bl), Then(al2, cl)), Then(ar, Both(br, cr))) =>
-          al1 == al2 && al1 == ar && bl == br && cl == cr
-        case (Both(Then(al, cl1), Then(bl, cl2)), Then(Both(ar, br), cr)) =>
-          cl1 == cl2 && al == ar && bl == br && cl1 == cr
-        case _                                                            =>
-          false
+        case (Both(al, bl), Then(ar, Both(br, cr))) if al == Then(ar, br) && bl == Then(ar, cr) => true
+        case (Both(al, bl), Then(Both(ar, br), cr)) if al == Then(ar, cr) && bl == Then(br, cr) => true
+        case _                                                                                  => false
       }
     private def equal(that: ParSeq[Unit, Any]): Boolean                         =
       (self, that) match {
@@ -265,13 +262,9 @@ object ParSeq {
       case _                                                => false
     }
     private def distribute(l: ParSeq[Unit, Any], r: ParSeq[Unit, Any]): Boolean = (l, r) match {
-      case (Then(al, Both(bl, cl)), Both(Then(ar1, br), Then(ar2, cr)))
-          if ar1 == ar2 && al == ar1 && bl == br && cl == cr =>
-        true
-      case (Then(Both(al, bl), cl), Both(Then(ar, cr1), Then(br, cr2)))
-          if cr1 == cr2 && al == ar && bl == br && cl == cr1 =>
-        true
-      case _ => false
+      case (Then(al, Both(bl, cl)), Both(ar, br)) if Then(al, bl) == ar && Then(al, cl) == br => true
+      case (Then(Both(al, bl), cl), Both(ar, br)) if Then(al, cl) == ar && Then(bl, cl) == br => true
+      case _                                                                                  => false
     }
     private def equal(that: ParSeq[Unit, Any]): Boolean                         = (self, that) match {
       case (tl: Then[Unit, Any], tr: Then[Unit, Any]) => tl.left == tr.left && tl.right == tr.right
