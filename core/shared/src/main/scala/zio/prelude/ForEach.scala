@@ -107,6 +107,15 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   }
 
   /**
+   * Effectfully maps each element of the collection to a type `B` for which an
+   * `Identity` is defined using the function `f`, then reduces those values to
+   * a single summary using the `combine` operation of `Identity`, or the
+   * `identity` element if the collection is empty.
+   */
+  def foldMapM[G[+_]: Covariant: IdentityFlatten, A, B: Identity](fa: F[A])(f: A => G[B]): G[B] =
+    foldLeftM[G, B, A](fa)(Identity[B].identity)((accu, a) => f(a).map(aa => accu.combine(aa)))
+
+  /**
    * Folds over the elements of this collection from right to left to produce a
    * summary value, maintaining some internal state along the way.
    */
@@ -344,6 +353,8 @@ trait ForEachSyntax {
       F.foldLeftM(self)(s)(f)
     def foldMap[B: Identity](f: A => B)(implicit F: ForEach[F]): B                                              =
       F.foldMap(self)(f)
+    def foldMapM[G[+_]: Covariant: IdentityFlatten, B: Identity](f: A => G[B])(implicit F: ForEach[F]): G[B]    =
+      F.foldMapM(self)(f)
     def foldRight[S](s: S)(f: (A, S) => S)(implicit F: ForEach[F]): S                                           =
       F.foldRight(self)(s)(f)
     def foldRightM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (A, S) => G[S])(implicit F: ForEach[F]): G[S] =
