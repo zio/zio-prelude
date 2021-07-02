@@ -52,7 +52,7 @@ lazy val root = project
     scalaParallelCollections,
     macros.js,
     macros.jvm,
-    macros.native,
+    macros.native
   )
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
