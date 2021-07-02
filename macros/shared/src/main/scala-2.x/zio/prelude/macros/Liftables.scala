@@ -169,7 +169,7 @@ trait Liftables {
       case q"${int: Int}"       => Some(int)
       case q"${string: String}" => Some(string)
       case q"${double: Double}" => Some(double)
-      case q"${float: Double}"  => Some(float)
+      case q"${float: Float}"   => Some(float)
       case q"${long: Long}"     => Some(long)
       case q"${short: Short}"   => Some(short)
       case q"${byte: Byte}"     => Some(byte)
