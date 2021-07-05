@@ -1,5 +1,6 @@
 package zio.prelude.macros
 
+import com.github.ghik.silencer.silent
 import zio.prelude.refined.Assertion
 
 import scala.reflect.macros.whitebox
@@ -101,6 +102,7 @@ trait Liftables {
         left | right
     }
 
+  @silent("Implicit resolves to enclosing method")
   implicit def assertionLiftable[A: c.WeakTypeTag]: Liftable[Assertion[A]] =
     Liftable[Assertion[A]] {
       case Assertion.Always                          => q"$AssertionPrefix.Always"
@@ -111,8 +113,10 @@ trait Liftables {
       case Assertion.Matches(regex)                  => q"$AssertionPrefix.Matches($regex)"
       case Assertion.Not(assertion)                  => q"$AssertionPrefix.Not($assertion)"
       case Assertion.Or(left, right)                 => q"$AssertionPrefix.Or($left, $right)"
+      case other                                     => c.abort(c.enclosingPosition, s"COULD NOT MATCH ASSERTION: $other")
     }
 
+  @silent("Implicit resolves to enclosing method")
   implicit def assertionUnliftable[A: c.WeakTypeTag]: Unliftable[Assertion[A]] =
     Unliftable[Assertion[A]] {
       case q"zio.prelude.refined.Assertion.Always" =>
@@ -205,8 +209,8 @@ trait Liftables {
   private def orderingForValue(any: Any): Ordering[Any] = any match {
     case _: Int    => scala.Ordering.Int.asInstanceOf[Ordering[Any]]
     case _: String => scala.Ordering.String.asInstanceOf[Ordering[Any]]
-    case _: Double => scala.Ordering.Double.IeeeOrdering.asInstanceOf[Ordering[Any]]
-    case _: Float  => scala.Ordering.Float.IeeeOrdering.asInstanceOf[Ordering[Any]]
+    case _: Double => scala.Ordering.Double.TotalOrdering.asInstanceOf[Ordering[Any]]
+    case _: Float  => scala.Ordering.Float.TotalOrdering.asInstanceOf[Ordering[Any]]
     case _: Long   => scala.Ordering.Long.asInstanceOf[Ordering[Any]]
     case _: Short  => scala.Ordering.Short.asInstanceOf[Ordering[Any]]
     case _: Byte   => scala.Ordering.Byte.asInstanceOf[Ordering[Any]]

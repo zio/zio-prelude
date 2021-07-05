@@ -1,5 +1,7 @@
 package zio.prelude.refined
 
+import scala.language.implicitConversions
+
 sealed trait Assertion[-A] { self =>
   import Assertion._
 
