@@ -1,5 +1,6 @@
 package zio.prelude.macros
 
+import com.github.ghik.silencer.silent
 import zio.prelude.refined._
 import zio.prelude.refined.macros.QuotedAssertion
 
@@ -28,6 +29,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
         c.abort(c.enclosingPosition, s"FAILED TO UNLIFT ASSERTION: $assertion")
     }
 
+  @silent("match may not be exhaustive")
   def smartApply[A: c.WeakTypeTag, Meta: WeakTypeTag](value: c.Tree): c.Tree = {
     val assertion = c.weakTypeOf[Meta].decls.flatMap(_.annotations).headOption.flatMap(_.tree.children.lastOption)
 
@@ -53,6 +55,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
     }
   }
 
+  @silent("match may not be exhaustive")
   def wrap_impl[A: c.WeakTypeTag](valueTree: c.Expr[A]): c.Tree = {
     val assertionTree = astTree(c.prefix.tree)
     (assertionTree, valueTree) match {

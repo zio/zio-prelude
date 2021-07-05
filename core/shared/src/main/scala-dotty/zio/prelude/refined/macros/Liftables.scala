@@ -155,8 +155,8 @@ trait Liftables {
     any match {
       case _: Int    => Ordering.Int.asInstanceOf[Ordering[Any]]
       case _: String => Ordering.String.asInstanceOf[Ordering[Any]]
-      case _: Double => Ordering.Double.IeeeOrdering.asInstanceOf[Ordering[Any]]
-      case _: Float  => Ordering.Float.IeeeOrdering.asInstanceOf[Ordering[Any]]
+      case _: Double => Ordering.Double.TotalOrdering.asInstanceOf[Ordering[Any]]
+      case _: Float  => Ordering.Float.TotalOrdering.asInstanceOf[Ordering[Any]]
       case _: Long   => Ordering.Long.asInstanceOf[Ordering[Any]]
       case _: Short  => Ordering.Short.asInstanceOf[Ordering[Any]]
       case _: Byte   => Ordering.Byte.asInstanceOf[Ordering[Any]]
@@ -170,8 +170,8 @@ trait Liftables {
     any match {
       case _: Int    => '{ Ordering.Int.asInstanceOf[Ordering[Any]] }
       case _: String => '{ Ordering.String.asInstanceOf[Ordering[Any]] }
-      case _: Double => '{ Ordering.Double.IeeeOrdering.asInstanceOf[Ordering[Any]] }
-      case _: Float  => '{ Ordering.Float.IeeeOrdering.asInstanceOf[Ordering[Any]] }
+      case _: Double => '{ Ordering.Double.TotalOrdering.asInstanceOf[Ordering[Any]] }
+      case _: Float  => '{ Ordering.Float.TotalOrdering.asInstanceOf[Ordering[Any]] }
       case _: Long   => '{ Ordering.Long.asInstanceOf[Ordering[Any]] }
       case _: Short  => '{ Ordering.Short.asInstanceOf[Ordering[Any]] }
       case _: Byte   => '{ Ordering.Byte.asInstanceOf[Ordering[Any]] }
