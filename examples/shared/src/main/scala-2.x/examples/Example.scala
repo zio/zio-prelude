@@ -24,18 +24,6 @@ object Example extends App {
   import Jorge._
   val jorge: Jorge = Jorge("Jorge")
 
-//  val RegexRefined = Refined[String] {
-//    matches {
-//      any ~ anyChar
-//    }
-//  }
-//  object MyRegex extends RegexRefined.Newtype {
-//    type MyRegex = MyRegex.Type
-//  }
-//
-//  import MyRegex._
-//  val myRegex: MyRegex = MyRegex("a")
-
   val RegexRefined = Refined[String] {
     matches {
       anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
@@ -47,6 +35,6 @@ object Example extends App {
     type MyRegex = MyRegex.Type
   }
 
-  import MyRegex._
-  val myRegex: MyRegex = MyRegex("a")
+//  import MyRegex._
+//  val myRegex: MyRegex = MyRegex("a")
 }

@@ -46,6 +46,7 @@ lazy val root = project
     coreJVM,
     coreNative,
     docs,
+    examplesJVM,
     experimentalJS,
     experimentalJVM,
     experimentalNative,
@@ -168,7 +169,11 @@ lazy val docs = project
 
 lazy val examples =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)
-    .settings(dottySettings)
     .in(file("examples"))
-    .settings(macroExpansionSettings)
     .dependsOn(core)
+    .settings(stdSettings("zio-prelude-examples"))
+    .settings(crossProjectSettings)
+    .settings(macroExpansionSettings)
+
+lazy val examplesJVM = examples.jvm
+  .settings(dottySettings)

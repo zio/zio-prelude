@@ -87,10 +87,10 @@ trait Liftables {
         Assertion.Regex.start
       case q"zio.prelude.refined.Assertion.Regex.Repeat.apply(${regex: Assertion.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
         Assertion.Regex.Repeat(regex, min, max)
-      case q"${assertion: Assertion.Regex}.min(${n: Int})"                                                                          =>
-        assertion.min(n)
-      case q"${assertion: Assertion.Regex}.max(${n: Int})"                                                                          =>
-        assertion.max(n)
+      case q"${regex: Assertion.Regex}.min(${n: Int})"                                                                              =>
+        regex.min(n)
+      case q"${regex: Assertion.Regex}.max(${n: Int})"                                                                              =>
+        regex.max(n)
       case q"zio.prelude.refined.Assertion.Regex.AndThen.apply(${first: Assertion.Regex}, ${second: Assertion.Regex})"              =>
         Assertion.Regex.AndThen(first, second)
       case q"${left: Assertion.Regex}.~(${right: Assertion.Regex})"                                                                 =>
@@ -119,7 +119,10 @@ trait Liftables {
         Assertion.Always
 
       case q"zio.prelude.refined.Assertion.always" =>
-        Assertion.Always
+        Assertion.always
+
+      case q"zio.prelude.refined.Assertion.never" =>
+        Assertion.never
 
       case q"zio.prelude.refined.Assertion.And.apply[$_](${left: Assertion[A]}, ${right: Assertion[A]})" =>
         Assertion.And(left, right)
@@ -131,19 +134,28 @@ trait Liftables {
         Assertion.EqualTo(value.asInstanceOf[A])
 
       case q"zio.prelude.refined.Assertion.equalTo[$_](${LiteralUnlift(value)})" =>
-        Assertion.EqualTo(value.asInstanceOf[A])
+        Assertion.equalTo(value.asInstanceOf[A])
+
+      case q"zio.prelude.refined.Assertion.notEqualTo[$_](${LiteralUnlift(value)})" =>
+        Assertion.notEqualTo(value.asInstanceOf[A])
 
       case q"zio.prelude.refined.Assertion.GreaterThan.apply[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.GreaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
       case q"zio.prelude.refined.Assertion.greaterThan[$_](${LiteralUnlift(value)})($_)" =>
-        Assertion.GreaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
+        Assertion.greaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
+
+      case q"zio.prelude.refined.Assertion.greaterThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
+        Assertion.greaterThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
       case q"zio.prelude.refined.Assertion.LessThan.apply[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.LessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
       case q"zio.prelude.refined.Assertion.lessThan[$_](${LiteralUnlift(value)})($_)" =>
-        Assertion.LessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
+        Assertion.lessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
+
+      case q"zio.prelude.refined.Assertion.lessThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
+        Assertion.lessThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
       case q"zio.prelude.refined.Assertion.Matches.apply(${regex: Assertion.Regex})" =>
         Assertion.Matches(regex).asInstanceOf[Assertion[A]]
