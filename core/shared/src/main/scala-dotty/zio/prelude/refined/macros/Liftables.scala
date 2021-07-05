@@ -29,20 +29,39 @@ trait Liftables {
       import quotes.reflect.*
 
       assertion match {
-        case '{ Assertion.Regex.AnyChar }                                                => Some(Assertion.Regex.AnyChar)
-        case '{ Assertion.Regex.Anything }                                               => Some(Assertion.Regex.Anything)
-        case '{ Assertion.Regex.End }                                                    => Some(Assertion.Regex.End)
-        case '{ Assertion.Regex.Alphanumeric(${Expr(reversed)}) }                        => Some(Assertion.Regex.Alphanumeric(reversed))
-        case '{ Assertion.Regex.Whitespace(${Expr(reversed)}) }                          => Some(Assertion.Regex.Whitespace(reversed))
-        case '{ Assertion.Regex.Digit(${Expr(reversed)}) }                               => Some(Assertion.Regex.Digit(reversed))
-        case '{ Assertion.Regex.Literal(${Expr(char)}) }                                 => Some(Assertion.Regex.Literal(char))
-        case '{ Assertion.Regex.CharacterSet(${Expr(set)}, ${Expr(reversed)}) }          => Some(Assertion.Regex.CharacterSet(set, reversed))
-        case '{ Assertion.Regex.Range(${Expr(start)}, ${Expr(end)}, ${Expr(reversed)}) } => Some(Assertion.Regex.Range(start, end, reversed))
-        case '{ Assertion.Regex.Start }                                                  => Some(Assertion.Regex.Start)
-        case '{ Assertion.Regex.Repeat(${Expr(regex)}, ${Expr(min)}, ${Expr(max)}) }     => Some(Assertion.Regex.Repeat(regex, min, max))
-        case '{ Assertion.Regex.AndThen(${Expr(first)}, ${Expr(second)}) }               => Some(Assertion.Regex.AndThen(first, second))
-        case '{ Assertion.Regex.OrElse(${Expr(first)}, ${Expr(second)}) }                => Some(Assertion.Regex.OrElse(first, second))
-        case _                                                                           => None
+        case '{ Assertion.Regex.AnyChar }                                                  => Some(Assertion.Regex.AnyChar)
+        case '{ Assertion.Regex.anyChar }                                                  => Some(Assertion.Regex.anyChar)
+        case '{ Assertion.Regex.Anything }                                                 => Some(Assertion.Regex.Anything)
+        case '{ Assertion.Regex.anything }                                                 => Some(Assertion.Regex.anything)
+        case '{ Assertion.Regex.End }                                                      => Some(Assertion.Regex.End)
+        case '{ Assertion.Regex.end }                                                      => Some(Assertion.Regex.end)
+        case '{ Assertion.Regex.Alphanumeric(${Expr(reversed)}) }                          => Some(Assertion.Regex.Alphanumeric(reversed))
+        case '{ Assertion.Regex.alphanumeric }                                             => Some(Assertion.Regex.alphanumeric)
+        case '{ Assertion.Regex.nonAlphanumeric }                                          => Some(Assertion.Regex.nonAlphanumeric)
+        case '{ Assertion.Regex.Whitespace(${Expr(reversed)}) }                            => Some(Assertion.Regex.Whitespace(reversed))
+        case '{ Assertion.Regex.whitespace }                                               => Some(Assertion.Regex.whitespace)
+        case '{ Assertion.Regex.nonWhitespace }                                            => Some(Assertion.Regex.nonWhitespace)
+        case '{ Assertion.Regex.Digit(${Expr(reversed)}) }                                 => Some(Assertion.Regex.Digit(reversed))
+        case '{ Assertion.Regex.digit }                                                    => Some(Assertion.Regex.digit)
+        case '{ Assertion.Regex.nonDigit }                                                 => Some(Assertion.Regex.nonDigit)
+        case '{ Assertion.Regex.Literal(${Expr(char)}) }                                   => Some(Assertion.Regex.Literal(char))
+        case '{ Assertion.Regex.literal(${Expr(str)}) }                                    => Some(Assertion.Regex.literal(str))
+        case '{ Assertion.Regex.CharacterSet(${Expr(set)}, ${Expr(reversed)}) }            => Some(Assertion.Regex.CharacterSet(set, reversed))
+        case '{ Assertion.Regex.anyOf(${Expr(first)}, ${Expr(second)}, ${Expr(rest)}) }    => Some(Assertion.Regex.anyOf(first, second, rest))
+        case '{ Assertion.Regex.notAnyOf(${Expr(first)}, ${Expr(second)}, ${Expr(rest)}) } => Some(Assertion.Regex.notAnyOf(first, second, rest))
+        case '{ Assertion.Regex.Range(${Expr(start)}, ${Expr(end)}, ${Expr(reversed)}) }   => Some(Assertion.Regex.Range(start, end, reversed))
+        case '{ Assertion.Regex.inRange(${Expr(start)}, ${Expr(end)}) }                    => Some(Assertion.Regex.inRange(start, end))
+        case '{ Assertion.Regex.notInRange(${Expr(start)}, ${Expr(end)}) }                 => Some(Assertion.Regex.notInRange(start, end))
+        case '{ Assertion.Regex.Start }                                                    => Some(Assertion.Regex.Start)
+        case '{ Assertion.Regex.start }                                                    => Some(Assertion.Regex.start)
+        case '{ Assertion.Regex.Repeat(${Expr(regex)}, ${Expr(min)}, ${Expr(max)}) }       => Some(Assertion.Regex.Repeat(regex, min, max))
+        case '{ (${Expr(regex)}: Assertion.Regex).min(${Expr(n)}) }                        => Some(regex.min(n))
+        case '{ (${Expr(regex)}: Assertion.Regex).max(${Expr(n)}) }                        => Some(regex.max(n))
+        case '{ Assertion.Regex.AndThen(${Expr(first)}, ${Expr(second)}) }                 => Some(Assertion.Regex.AndThen(first, second))
+        case '{ (${Expr(left)}: Assertion.Regex).~(${Expr(right)}: Assertion.Regex) }      => Some(left ~ right)
+        case '{ Assertion.Regex.OrElse(${Expr(first)}, ${Expr(second)}) }                  => Some(Assertion.Regex.OrElse(first, second))
+        case '{ (${Expr(left)}: Assertion.Regex).|(${Expr(right)}: Assertion.Regex) }      => Some(left | right)
+        case _                                                                             => None
       }
     }
   }
@@ -70,22 +89,26 @@ trait Liftables {
       import quotes.reflect.*
 
       assertion match {
-        case '{ Assertion.Always }                                => Some(Assertion.Always)
-        case '{ Assertion.always }                                => Some(Assertion.Always)
-        case '{ Assertion.And[A](${Expr(left)}, ${Expr(right)}) } => Some(Assertion.And(left, right))
-        case '{ ($left: Assertion[A]).&&($right) }                => Some(Assertion.And(left.valueOrError, right.valueOrError))
-        case '{ Assertion.EqualTo[A]($value) }                    => Some(Assertion.EqualTo(value))
-        case '{ Assertion.equalTo[A]($value) }                    => Some(Assertion.equalTo(value))
-        case '{ Assertion.GreaterThan[A]($value)($_) }            => Some(Assertion.GreaterThan(value)(orderingForValue(value)))
-        case '{ Assertion.greaterThan[A]($value)($_) }            => Some(Assertion.greaterThan(value)(orderingForValue(value)))
-        case '{ Assertion.LessThan[A]($value)($_) }               => Some(Assertion.LessThan(value)(orderingForValue(value)))
-        case '{ Assertion.lessThan[A]($value)($_) }               => Some(Assertion.lessThan(value)(orderingForValue(value)))
-        case '{ Assertion.Matches($regex) }                       => Some(Assertion.Matches(regex.valueOrError).asInstanceOf[Assertion[A]])
-        case '{ Assertion.matches($regex) }                       => Some(Assertion.matches(regex.valueOrError).asInstanceOf[Assertion[A]])
-        case '{ Assertion.Not[A](${Expr(assertion)}) }            => Some(Assertion.Not(assertion))
-        case '{ !($assertion: Assertion[A]) }                     => Some(Assertion.Not(assertion.valueOrError))
-        case '{ Assertion.Or[A](${Expr(left)}, ${Expr(right)}) }  => Some(Assertion.Or(left, right))
-        case '{ ($left: Assertion[A]).||($right) }                => Some(Assertion.Or(left.valueOrError, right.valueOrError))
+        case '{ Assertion.Always }                                                 => Some(Assertion.Always)
+        case '{ Assertion.always }                                                 => Some(Assertion.always)
+        case '{ Assertion.never }                                                  => Some(Assertion.never)
+        case '{ Assertion.And[A](${Expr(left)}, ${Expr(right)}) }                  => Some(Assertion.And(left, right))
+        case '{ (${Expr(left)}: Assertion[A]).&&(${Expr(right)}) }                 => Some(Assertion.And(left, right))
+        case '{ Assertion.EqualTo[A](${LiteralUnlift(value)}) }                    => Some(Assertion.EqualTo(value))
+        case '{ Assertion.equalTo[A](${LiteralUnlift(value)}) }                    => Some(Assertion.equalTo(value))
+        case '{ Assertion.notEqualTo[A](${LiteralUnlift(value)}) }                 => Some(Assertion.notEqualTo(value))
+        case '{ Assertion.GreaterThan[A](${LiteralUnlift(value)})($_) }            => Some(Assertion.GreaterThan(value)(orderingForValue(value)))
+        case '{ Assertion.greaterThan[A](${LiteralUnlift(value)})($_) }            => Some(Assertion.greaterThan(value)(orderingForValue(value)))
+        case '{ Assertion.greaterThanOrEqualTo[A](${LiteralUnlift(value)})($_) }   => Some(Assertion.greaterThanOrEqualTo(value)(orderingForValue(value)))
+        case '{ Assertion.LessThan[A](${LiteralUnlift(value)})($_) }               => Some(Assertion.LessThan(value)(orderingForValue(value)))
+        case '{ Assertion.lessThan[A](${LiteralUnlift(value)})($_) }               => Some(Assertion.lessThan(value)(orderingForValue(value)))
+        case '{ Assertion.lessThanOrEqualTo[A](${LiteralUnlift(value)})($_) }      => Some(Assertion.lessThanOrEqualTo(value)(orderingForValue(value)))
+        case '{ Assertion.Matches(${Expr(regex)}) }                                => Some(Assertion.Matches(regex).asInstanceOf[Assertion[A]])
+        case '{ Assertion.matches(${Expr(regex)}) }                                => Some(Assertion.matches(regex).asInstanceOf[Assertion[A]])
+        case '{ Assertion.Not[A](${Expr(assertion)}) }                             => Some(Assertion.Not(assertion))
+        case '{ !(${Expr(assertion)}: Assertion[A]) }                              => Some(Assertion.Not(assertion))
+        case '{ Assertion.Or[A](${Expr(left)}, ${Expr(right)}) }                   => Some(Assertion.Or(left, right))
+        case '{ (${Expr(left)}: Assertion[A]).||(${Expr(right)}) }                 => Some(Assertion.Or(left, right))
         case _ => None
       }
     }
@@ -115,14 +138,14 @@ trait Liftables {
 
   object LiteralUnlift {
     def unapply(expr: Expr[Any])(using Quotes): Option[Any] = expr match {
-      case '{ ${int}: Int }       => Some(int)
-      case '{ ${string}: String } => Some(string)
-      case '{ ${double}: Double } => Some(double)
-      case '{ ${float}: Float }   => Some(float)
-      case '{ ${long}: Long }     => Some(long)
-      case '{ ${short}: Short }   => Some(short)
-      case '{ ${byte}: Byte }     => Some(byte)
-      case _                      => None
+      case '{ ${Expr(int)}: Int }       => Some(int)
+      case '{ ${Expr(string)}: String } => Some(string)
+      case '{ ${Expr(double)}: Double } => Some(double)
+      case '{ ${Expr(float)}: Float }   => Some(float)
+      case '{ ${Expr(long)}: Long }     => Some(long)
+      case '{ ${Expr(short)}: Short }   => Some(short)
+      case '{ ${Expr(byte)}: Byte }     => Some(byte)
+      case _                            => None
     }
   }
 

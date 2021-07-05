@@ -29,7 +29,7 @@ object Refined extends Liftables {
       case LiteralUnlift(x) =>
         assertion(x.asInstanceOf[A]) match {
           case Right(_)    => '{ $a.asInstanceOf[T] }
-          case Left(error) => report.throwError(error.render(a.toString))
+          case Left(error) => report.throwError(error.render(x.toString))
         }
       case _               =>
         '{
