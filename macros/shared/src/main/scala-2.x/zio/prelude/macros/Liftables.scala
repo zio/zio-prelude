@@ -10,7 +10,7 @@ trait Liftables {
 
   import c.universe._
 
-  final val AssertionPrefix = q"_root_.zio.prelude.refined.Assertion"
+  final val AssertionPrefix: Select = q"_root_.zio.prelude.refined.Assertion"
 
   implicit def optionUnliftable[T](implicit u: Unliftable[T]): Unliftable[Option[T]] = Unliftable[Option[T]] {
     case q"scala.None"               => None

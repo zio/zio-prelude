@@ -1,3 +1,4 @@
+// scalafix:off
 package examples
 
 import zio.prelude.macros.Refined
@@ -38,3 +39,4 @@ object Example extends App {
 //  import MyRegex._
 //  val myRegex: MyRegex = MyRegex("a")
 }
+// scalafix:on

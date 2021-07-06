@@ -8,7 +8,7 @@ object Test extends App {
 
   type Natural <: Int
 
-  // MUST be defined as transparent
+  // MUST be defined as transparent!
   // https://github.com/lampepfl/dotty/issues/12368
   transparent inline def Natural: Int Refined Natural = Refined {
     greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
