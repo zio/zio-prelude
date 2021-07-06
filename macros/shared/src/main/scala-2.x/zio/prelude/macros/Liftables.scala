@@ -209,11 +209,25 @@ trait Liftables {
   private def orderingForValue(any: Any): Ordering[Any] = any match {
     case _: Int    => scala.Ordering.Int.asInstanceOf[Ordering[Any]]
     case _: String => scala.Ordering.String.asInstanceOf[Ordering[Any]]
-    case _: Double => scala.Ordering.Double.TotalOrdering.asInstanceOf[Ordering[Any]]
-    case _: Float  => scala.Ordering.Float.TotalOrdering.asInstanceOf[Ordering[Any]]
+    case _: Double => DoubleOrdering.asInstanceOf[Ordering[Any]]
+    case _: Float  => FloatOrdering.asInstanceOf[Ordering[Any]]
     case _: Long   => scala.Ordering.Long.asInstanceOf[Ordering[Any]]
     case _: Short  => scala.Ordering.Short.asInstanceOf[Ordering[Any]]
     case _: Byte   => scala.Ordering.Byte.asInstanceOf[Ordering[Any]]
     case other     => c.abort(c.enclosingPosition, s"NO ORDERING FOR $other")
+  }
+
+  /**
+   * This Ordering instance exists for compatibility between 2.11, 2.12 and 2.13.
+   */
+  object DoubleOrdering extends Ordering[Double] {
+    def compare(x: Double, y: Double): Int = java.lang.Double.compare(x, y)
+  }
+
+  /**
+   * This Ordering instance exists for compatibility between 2.11, 2.12 and 2.13.
+   */
+  object FloatOrdering extends Ordering[Float] {
+    def compare(x: Float, y: Float): Int = java.lang.Float.compare(x, y)
   }
 }
