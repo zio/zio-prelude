@@ -2,7 +2,9 @@
   "overview-sidebar": {
     "Overview": [
       "overview/overview_index",
-      "overview/overview_diagrams"
+      "overview/overview_diagrams",
+      "overview/overview_phantomtypes",
+      "overview/overview_validation"
     ]
   },
   "usecases-sidebar": {

@@ -18,4 +18,41 @@ The ZIO Prelude Microsite is currently under development. In the meantime you ca
 
 ## Installation
 
-TODO: Installation details
+In general, to add ZIO-Prelude to your project, follow the instructions given by your build tool. 
+As a convenience, we've added sample configurations for the following build tools:
+
+
+### SBT
+```
+libraryDependencies += "dev.zio" %% "zio-prelude" % "1.0.0-RC5"
+```
+
+### Gradle
+```
+implementation group: 'dev.zio', name: 'zio-prelude_2.13', version: '1.0.0-RC5'
+```
+
+respectively for Scala 3
+
+```
+implementation group: 'dev.zio', name: 'zio-prelude_3', version: '1.0.0-RC5'
+```
+
+### Maven
+```xml
+<dependency>
+    <groupId>dev.zio</groupId>
+    <artifactId>zio-prelude_2.13</artifactId>
+    <version>1.0.0-RC5</version>
+</dependency>
+```
+
+respectively for Scala 3
+
+```xml
+<dependency>
+    <groupId>dev.zio</groupId>
+    <artifactId>zio-prelude_3</artifactId>
+    <version>1.0.0-RC5</version>
+</dependency>
+```
