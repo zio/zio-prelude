@@ -23,24 +23,24 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v12
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Lint code
         run: sbt check
 
-  doc:
+  mdoc:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v2.3.4
       - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v12
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Check Document Generation
-        run: sbt +coreJVM/doc +experimentalJVM/doc +scalaParallelCollections/doc docs/docusaurusCreateSite
+        run: sbt docs/docusaurusCreateSite
 
   test:
     runs-on: ubuntu-20.04
@@ -57,7 +57,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v12
         with:
           java-version: ${{ matrix.java }}
       - name: Cache scala dependencies
@@ -71,7 +71,7 @@ jobs:
 
   ci:
     runs-on: ubuntu-20.04
-    needs: [lint, doc, test]
+    needs: [lint, mdoc, test]
     steps:
       - name: Aggregate of lint, and all tests
         run: echo "ci passed"
@@ -87,7 +87,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Scala and Java 
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v12
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Release artifacts
