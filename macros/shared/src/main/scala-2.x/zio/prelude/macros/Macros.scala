@@ -1,6 +1,5 @@
 package zio.prelude.macros
 
-import com.github.ghik.silencer.silent
 import zio.prelude.refined._
 import zio.prelude.refined.macros.QuotedAssertion
 
@@ -29,54 +28,56 @@ class Macros(val c: whitebox.Context) extends Liftables {
         c.abort(c.enclosingPosition, s"FAILED TO UNLIFT ASSERTION: $assertion")
     }
 
-  @silent("match may not be exhaustive")
   def smartApply[A: c.WeakTypeTag, Meta: WeakTypeTag](value: c.Tree): c.Tree = {
     val assertion = c.weakTypeOf[Meta].decls.flatMap(_.annotations).headOption.flatMap(_.tree.children.lastOption)
 
-    (assertion, value) match {
-      case (Some(q"${assertion: Assertion[A]}"), q"${LiteralUnlift(value)}") =>
-        assertion(value.asInstanceOf[A]) match {
-          case Left(error) => c.abort(c.enclosingPosition, error.render(value.toString))
-          case Right(_)    => q"${c.prefix}.unsafeApply(${LiteralLift.unapply(value).get})"
+    assertion match {
+      case Some(q"${assertion: Assertion[A]}") =>
+        LiteralUnlift.unapply(value) match {
+          case Some(value) =>
+            assertion(value.asInstanceOf[A]) match {
+              case Left(error) => c.abort(c.enclosingPosition, error.render(value.toString))
+              case Right(_)    => q"${c.prefix}.unsafeApply(${LiteralLift.unapply(value).get})"
+            }
+          case _           =>
+            val message =
+              s"""
+                 |${Console.BOLD + Console.RED + Console.REVERSED}Assertion Failed${Console.RESET}
+                 |Could not validate Smart Assertion at compile-time.
+                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.wrapEither($value)"${Console.RESET}
+                 |""".stripMargin
+
+            c.abort(c.enclosingPosition, message)
         }
-
-      case (Some(q"${_: Assertion[A]}"), _) =>
-        val message =
-          s"""
-             |${Console.BOLD + Console.RED + Console.REVERSED}Assertion Failed${Console.RESET}
-             |Could not validate Smart Assertion at compile-time.
-             |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.wrapEither($value)"${Console.RESET}
-             |""".stripMargin
-
-        c.abort(c.enclosingPosition, message)
 
       case _ =>
         c.abort(c.enclosingPosition, s"FAILED TO UNLIFT ASSERTION: $assertion")
     }
   }
 
-  @silent("match may not be exhaustive")
-  def wrap_impl[A: c.WeakTypeTag](valueTree: c.Expr[A]): c.Tree = {
-    val assertionTree = astTree(c.prefix.tree)
-    (assertionTree, valueTree) match {
-      case (Some(q"${assertion: Assertion[A]}"), q"${LiteralUnlift(value)}") =>
-        assertion(value.asInstanceOf[A]) match {
-          case Left(error) => c.abort(c.enclosingPosition, error.render(value.toString))
-          case Right(_)    => q"${c.prefix}.unsafeApply(${LiteralLift.unapply(value).get})"
+  def wrap_impl[A: c.WeakTypeTag](value: c.Expr[A]): c.Tree = {
+    val assertion = astTree(c.prefix.tree)
+    assertion match {
+      case Some(q"${assertion: Assertion[A]}") =>
+        LiteralUnlift.unapply(value.tree) match {
+          case Some(value) =>
+            assertion(value.asInstanceOf[A]) match {
+              case Left(error) => c.abort(c.enclosingPosition, error.render(value.toString))
+              case Right(_)    => q"${c.prefix}.unsafeApply(${LiteralLift.unapply(value).get})"
+            }
+          case _           =>
+            val message =
+              s"""
+                 |${Console.BOLD + Console.RED + Console.REVERSED}Assertion Failed${Console.RESET}
+                 |Could not validate Smart Assertion at compile-time.
+                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.wrapEither($value)"${Console.RESET}
+                 |""".stripMargin
+
+            c.abort(c.enclosingPosition, message)
         }
 
-      case (Some(q"${_: Assertion[A]}"), _) =>
-        val message =
-          s"""
-             |${Console.BOLD + Console.RED + Console.REVERSED}Assertion Failed${Console.RESET}
-             |Could not validate Smart Assertion at compile-time.
-             |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.wrapEither($valueTree)"${Console.RESET}
-             |""".stripMargin
-
-        c.abort(c.enclosingPosition, message)
-
       case _ =>
-        c.abort(c.enclosingPosition, "MISSING ASSERTION")
+        c.abort(c.enclosingPosition, s"FAILED TO UNLIFT ASSERTION: $assertion")
     }
   }
 
