@@ -28,6 +28,8 @@ In cases like this it would be useful to have some way of capturing these warnin
 To model this we can represent a `ZValidation` as follows:
 
 ```scala mdoc
+import zio.{Chunk, NonEmptyChunk}
+
 trait ZValidation[+W, +E, +A]
 
 object ZValidation {
@@ -44,7 +46,7 @@ Since a `Validation` is a `ZValidation` all of the operators we learned about be
 
 To write values to the log we can just use the `log` operator on the `ZValidation` trait.
 
-```scala mdoc
+```scala mdoc:nest
 trait ZValidation[+W, +E, +A] {
   def log[W1 >: W](w: W1): ZValidation[W1, E, A]
 }
@@ -54,8 +56,8 @@ This will just append the specified value to the log without changing the succes
 
 For example, we could add a warning that the `Person` is a child like this:
 
-```scala mdoc
-import zio.ZValidation
+```scala mdoc:reset
+import zio.prelude.ZValidation
 
 def validateAge(age: Int): ZValidation[String, String, Int] =
   if (age < 0) ZValidation.fail(s"Age $age was less than zero")
@@ -82,8 +84,10 @@ This can be useful to transform the log values into some common data model, for 
 We can get values from the log by using the `getLog` operator, which just returns the current contents of the log.
 
 ```scala mdoc:nest
+import zio.Chunk
+
 trait ZValidation[+W, +E, +A] {
-  def getLog[W2]: Chunk[W]
+  def getLog: Chunk[W]
 }
 ```
 
