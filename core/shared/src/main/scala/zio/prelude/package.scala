@@ -43,6 +43,7 @@ package object prelude
     with IdentityEitherSyntax
     with InvariantSyntax
     with InverseSyntax
+    with PartialInverseSyntax
     with NewtypeExports
     with NewtypeFExports
     with NonEmptyListSyntax
