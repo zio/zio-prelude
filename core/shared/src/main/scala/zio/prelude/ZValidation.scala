@@ -119,6 +119,32 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, if successful, or the transformed (using `f`) failure.
+   */
+  final def getOrElse[A1 >: A](f: Failure[W, E] => A1): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure)
+  }
+
+  /**
+   * Returns the value, if successful, or the transformed (using `f`) failure represented as an exception.
+   */
+  final def getOrHandleException[A1 >: A](f: ZValidationFailureException[W, E] => A1): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure.toException)
+  }
+
+  /**
+   * Returns the value, if successful, or the transformed (using `f`) failure represented as an exception with a set `cause`.
+   */
+  final def getOrHandleExceptionWithCause[A1 >: A](
+    f: ZValidationFailureException[W, E] => A1
+  )(implicit ev: E <:< Throwable): A1 = this match {
+    case Success(_, value)       => value
+    case failure @ Failure(_, _) => f(failure.toExceptionWithCause)
+  }
+
+  /**
    * Writes an entry to the log.
    */
   final def log[W1 >: W](w1: W1): ZValidation[W1, E, A] =
@@ -209,6 +235,24 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception`.
+   */
+  final def toEitherException: Either[ZValidationFailureException[W, E], A] = this match {
+    case Success(_, value)       => Right(value)
+    case failure @ Failure(_, _) => Left(failure.toException)
+  }
+
+  /**
+   * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception` with the first error as `cause`.
+   */
+  final def toEitherExceptionWithCause(implicit
+    ev: E <:< Throwable
+  ): Either[ZValidationFailureException[W, E], A] = this match {
+    case Success(_, value)       => Right(value)
+    case failure @ Failure(_, _) => Left(failure.toExceptionWithCause)
+  }
+
+  /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
   final def toEitherMultiSet: Either[NonEmptyMultiSet[E], A] =
@@ -288,9 +332,28 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 object ZValidation extends LowPriorityValidationImplicits {
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
+
+    /** The errors represented in a way which discards the order in which they occurred. */
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
+
+    /** The description of the failure. */
+    lazy val message: String =
+      s"errors:\n  ${errors.map(_.toString).mkString("\n  ")}\nlog:\n  ${log.map(_.toString).mkString("\n  ")}"
+
+    /** The same failure, but represented as an `Exception` */
+    def toException: ZValidationFailureException[W, E] = ZValidationFailureException(this)
+
+    /** The same failure, but represented as an `Exception` which also has the `cause` set to the first error that occurred */
+    def toExceptionWithCause(implicit ev: E <:< Throwable): ZValidationFailureException[W, E] = {
+      val exn = toException
+      errors.tail.foreach(exn.addSuppressed(_))
+      val _   = exn.initCause(errors.head)
+      exn
+    }
   }
-  final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
+  final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
+
+  final case class ZValidationFailureException[+W, +E](failure: Failure[W, E]) extends RuntimeException(failure.message)
 
   /**
    * The `Covariant` instance for `ZValidation`.
