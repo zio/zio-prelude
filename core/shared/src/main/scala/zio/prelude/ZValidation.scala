@@ -42,6 +42,20 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     log(w1)
 
   /**
+   * Maps the successful value of this `ZValidation` to the specified constant
+   * value.
+   */
+  final def as[B](b: B): ZValidation[W, E, B] =
+    map(_ => b)
+
+  /**
+   * Maps the error value of this `ZValidation` to the specified constant
+   * value.
+   */
+  final def asError[E2](e: E2): ZValidation[W, E2, A] =
+    mapError(_ => e)
+
+  /**
    * Returns whether this `ZValidation` and the specified `ZValidation` are
    * equal to each other.
    */
@@ -191,13 +205,13 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+  final def toEither: Either[NonEmptyChunk[E], A] =
     fold(Left(_), Right(_))
 
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
-  final def toEitherMultiSet[E1 >: E]: Either[NonEmptyMultiSet[E], A] =
+  final def toEitherMultiSet: Either[NonEmptyMultiSet[E], A] =
     self match {
       case failure @ Failure(_, _) => Left(failure.errorsUnordered)
       case Success(_, value)       => Right(value)
@@ -375,7 +389,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * that either returns the values of all of them, if they all succeed, or
    * else fails with all of their errors.
    */
-  def collectAllPar[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
+  def validateAll[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
     validations.flip
 
   /**
