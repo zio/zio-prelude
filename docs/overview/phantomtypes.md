@@ -4,7 +4,7 @@ title: "Phantom Types"
 ---
 
 
-ZIO-Prelude contains so-called "Phantom Types". 
+ZIO Prelude contains so-called "Phantom Types". 
 
 Simplified, Phantom Types are types that are only visible during compilation, but disappear during runtime and therefor have no runtime overhead. 
 
@@ -18,7 +18,7 @@ case class MyId(value: Long) extends AnyVal
 While most of the time the Scala compiler is able to optimize away the `MyId`, sometimes it can't and unnecessary "boxing" (= object allocation) happens
 at Runtime, hurting the performance of your application. 
 
-In ZIO-Prelude, we have two Phantom types - `Newtype` and `Subtype` - that make sure that no boxing occurs at runtime, yet give you compile time safety while
+In ZIO Prelude, we have two Phantom types - `Newtype` and `Subtype` - that make sure that no boxing occurs at runtime, yet give you compile time safety while
 developing.
 
 # How to create a Phantom Type
@@ -46,7 +46,7 @@ package domain {
 
 # Difference between `Subtype` and `Newtype` 
 
-As you've seen, defining phantom types with ZIO-Prelude is pretty straight-forward. 
+As you've seen, defining phantom types with ZIO Prelude is pretty straight-forward. 
 But what is the difference between `Subtype` and `Newtype` ? 
 
 Simply speaking, you can use a `Subtype[A]` everywhere, where your program accepts an `A`, whereas an instance of a `NewType[A]` can only be used where exactly a `Newtype[A]` is specified. 
@@ -87,7 +87,7 @@ object Example2 {
     logSpecific(CorrelationId.random, "test1"))
 
     // this doesn't compile, as we're now more strict
-    logSpecific(UUID.randomUUID(), "test2)
+    logSpecific(UUID.randomUUID(), "test2")
 
 }
 ```

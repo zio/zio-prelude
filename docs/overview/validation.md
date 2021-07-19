@@ -56,7 +56,7 @@ val myEffect: ZIO[Any, Chunk[ValidationError], User] = for {
 
 The code above should be straight-forward, but you might be wondering what is going on with the `logs` returned by `runLog` ? 
 
-While other validation libraries only allow you to collect errors occured during validation, ZIO-Prelude gives you another channel to 
+While other validation libraries only allow you to collect errors occured during validation, ZIO Prelude gives you another channel to 
 collect information that e.g. might be helpful to debug your program. 
 
 We can leverage this channel by using the `ZValidation` type, e.g. like this:

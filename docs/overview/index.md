@@ -14,11 +14,11 @@ The ZIO Prelude Microsite is currently under development. In the meantime you ca
 - [SF Scala: Reimagining Functional Type Classes](https://youtu.be/OwmHgL9F_9Q) - a talk by John A. De Goes and Adam Fraser
 - [The Terror-Free Guide to Introducing Functional Scala at Work](https://www.slideshare.net/jv2301/the-terrorfree-guide-to-introducing-functional-scala-at-work) - slides by Jorge Vásquez,
 - [Exploring ZIO Prelude The game-changer for type classes in Scala](https://youtu.be/OzoMofqsPg8) - talk by Jorge Vásquez
-- [What's Ap with zio-prelude?](https://justinhj.github.io/2020/08/02/whats-ap-with-zio-prelude.html) - an article by justinhj
+- [What's Ap with ZIO Prelude?](https://justinhj.github.io/2020/08/02/whats-ap-with-zio-prelude.html) - an article by justinhj
 
 ## Installation
 
-In general, to add ZIO-Prelude to your project, follow the instructions given by your build tool. 
+In general, to add ZIO Prelude to your project, follow the instructions given by your build tool. 
 As a convenience, we've added sample configurations for the following build tools:
 
 
