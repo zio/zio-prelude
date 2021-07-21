@@ -36,7 +36,7 @@ If we import `zio.prelude._` we can use the same `<>` operator as we did to comb
 
 Since the `identity` value is a single value and not an operator we access it slightly different. Typically we will use the `apply` method on the `Identity` companion object.
 
-```scala mdoc
+```scala mdoc:reset
 import zio.prelude._
 import zio.prelude.newtypes._
 
@@ -89,7 +89,7 @@ One way to think of this is that the `None` case of the `Option` handles the pos
 ```scala mdoc
 implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
   new Identity[Option[A]] {
-    def combine(left: => A, right: => A): Option[A] =
+    def combine(left: => Option[A], right: => Option[A]): Option[A] =
       (left, right) match {
         case (Some(a1), Some(a2)) => Some(a1 <> a2)
         case (_, None)            => left
@@ -97,6 +97,7 @@ implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
         case (_, _)               => None
       }
     def identity: Option[A] = None
+  }
 ```
 
 This says that we can define an `Identity` instance for any `Option[A]` as long as there is an `Associative` instance defined for `A`. The `Option` provides the "free" structure of an identity element to go from just having an associative `combine` operator to having an `identity` element.
