@@ -25,7 +25,7 @@ The law is that the lifting of this equivalence relationship can transform `A` a
 
 ```scala
 fa.invmap(Equivalence.identity) === fa
-fa.invmap(f).invmap(g) === fa.invmap(f >>> g)
+fa.invmap(f).invmap(g) === fa.invmap(f.andThen(g))
 ```
 
 An example of a data type that is invariant is a JSON codec.
