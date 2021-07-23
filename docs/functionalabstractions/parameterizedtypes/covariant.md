@@ -23,7 +23,7 @@ type <=>[A, B] = Equivalence[A, B]
 case class Equivalence[A, B](to: A => B, from: B => A)
 ```
 
-The `map` operator says we can "lift" a function `A => B` to a function `F[A] => F[B]`. If we import `zio.prelude._` we can use the `map` operator to transform an `F[A]` into an `F[B]` with a function.
+The `map` operator says we can "lift" a function `A => B` to a function `F[A] => F[B]`. If we import `zio.prelude._` we can use the `map` operator to transform an `F[A]` into an `F[B]` with a function `A => B`.
 
 The law is that the lifting of this function can transform `A` values into `B` values but cannot otherwise change the structure of `F`, so using `map` with the identity function is an identity and separately using `map` with two functions is the same as doing it with the composition of those functions.
 

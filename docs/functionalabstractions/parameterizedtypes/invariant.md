@@ -19,7 +19,7 @@ case class Equivalence[A, B](to: A => B, from: B => A)
 
 The `invmap` operator says we can "lift" an equivalence relationship between `A` and `B` into an equivalence relationship between `F[A]` and `F[B]`. An equivalence relationship says we can transform back and forth between `A` and `B` values without losing any information and is described by the `Equivalence` data type in ZIO Prelude.
 
-If we import `zio.prelude._` we can use the `invmap` operator in infix form to transform an `F[A]` into an `F[B]` with an equivalence relationship.
+If we import `zio.prelude._` we can use the `invmap` operator in infix form to transform an `F[A]` into an `F[B]` with an equivalence relationship `A <=> B`.
 
 The law is that the lifting of this equivalence relationship can transform `A` and `B` values but cannot otherwise change the structure of `F`, so using `invmap` with the identity equivalence relationship is an identity and separately using `invmap` with two equivalence relationships is the same as doing it with the composition of those equivalence relationships.
 
