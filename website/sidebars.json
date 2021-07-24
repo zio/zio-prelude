@@ -32,7 +32,8 @@
       "functionalabstractions/parameterizedtypes/identityboth",
       "functionalabstractions/parameterizedtypes/identityeither",
       "functionalabstractions/parameterizedtypes/identityflatten",
-      "functionalabstractions/parameterizedtypes/invariant"
+      "functionalabstractions/parameterizedtypes/invariant",
+      "functionalabstractions/parameterizedtypes/nonemptyforeach"
     ]
   },
   "functionaldatatypes-sidebar": {

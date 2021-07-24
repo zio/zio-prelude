@@ -14,7 +14,7 @@ trait Covariant[F[+_]] {
 
 trait ForEach[F[+_]] extends Covariant[F] {
   def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
-  def map[A, B](f: A => B): F[A] => F[B] =
+  final def map[A, B](f: A => B): F[A] => F[B] =
     ???
 }
 
@@ -84,9 +84,13 @@ trait Covariant[F[+_]] {
 The `IdentityBoth` abstraction defines a `both` operator that allows us to combine an `F[A]` and an `F[B]` into an `F[(A, B)]` as well as an `any` value of type `F[Any]` that is an identity element for that operator.
 
 ```scala mdoc
-trait IdentityBoth[F[_]] {
-  def any: F[Any]
+trait AssociativeBoth[F[_]] {
   def both[A, B](fa: => F[A], b: => F[B]): F[(A, B)]
+}
+
+trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
+  def any: F[Any]
+
 }
 ```
 
@@ -99,7 +103,7 @@ def succeed[F[+_], A](a: => A)(implicit covariant: Covariant[F], both: IdentityB
 def zipWith[F[+_], A, B, C](
   fa: F[A],
   fb: F[B]
-)(f: (A, B) => C)(implicit covariant: Covariant[F], both: IdentityBoth[F]): F[C] =
+)(f: (A, B) => C)(implicit covariant: Covariant[F], both: AssociativeBoth[F]): F[C] =
   covariant.map(f.tupled)(both.both(fa, fb))
 ```
 
@@ -113,7 +117,7 @@ trait ForEach[F[+_]]{
 implicit val ListForEach: ForEach[List] =
   new ForEach[List] {
     def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: List[A])(f: A => G[B]): G[List[B]] =
-      fa.foldRight[G[List[B]]](succeed(List.empty)) { (a, gbs) =>
+      fa.foldRight(succeed[G, List[B]](List.empty)) { (a, gbs) =>
         zipWith(f(a), gbs)(_ :: _)
       }
   }
@@ -252,7 +256,7 @@ def sum[F[+_]: ForEach, A](as: F[A])(implicit identity: Identity[Sum[A]]): A =
 Here is how we could implement a fold that computes the sum and product of the values of a collection in a single pass:
 
 ```scala mdoc
-def sumAndProduct[F[+_]: ForEach, A](as: F[A])(implicit sum: Identity[Sum[A]], product: Identity[Prod[A]]): (A, A) =
+def sumProd[F[+_]: ForEach, A](as: F[A])(implicit sum: Identity[Sum[A]], product: Identity[Prod[A]]): (A, A) =
   foldMap(as)(a => (Sum[A](a), Prod[A](a)))
 ```
 
