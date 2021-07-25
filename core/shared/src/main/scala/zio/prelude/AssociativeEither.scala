@@ -75,6 +75,17 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     associativeEither
 
   /**
+   * The `IdentityEither` instance for `Chunk`.
+   */
+  implicit val ChunkIdentityEither: IdentityEither[Chunk] =
+    new IdentityEither[Chunk] {
+      def either[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[Either[A, B]] =
+        fa.map(Left(_)) ++ fb.map(Right(_))
+      val none: Chunk[Nothing]                                                =
+        Chunk.empty
+    }
+
+  /**
    * The `AssociativeEither` instance for `Either`.
    */
   implicit def EitherAssociativeEither[L]: AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] =
@@ -143,6 +154,17 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
+   * The `IdentityEither` instance for `List`.
+   */
+  implicit val ListIdentityEither: IdentityEither[List] =
+    new IdentityEither[List] {
+      def either[A, B](fa: => List[A], fb: => List[B]): List[Either[A, B]] =
+        fa.map(Left(_)) ::: fb.map(Right(_))
+      val none: List[Nothing]                                              =
+        List.empty
+    }
+
+  /**
    * The `IdentityEither` (and `AssociativeEither`) instance for `Option`.
    */
   implicit val OptionIdentityEither: IdentityEither[Option] =
@@ -170,6 +192,17 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     new AssociativeEither[Try] {
       def either[A, B](fa: => Try[A], fb: => Try[B]): Try[Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
+    }
+
+  /**
+   * The `IdentityEither` instance for `Vector`.
+   */
+  implicit val VectorIdentityEither: IdentityEither[Vector] =
+    new IdentityEither[Vector] {
+      def either[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[Either[A, B]] =
+        fa.map(Left(_)) ++ fb.map(Right(_))
+      val none: Vector[Nothing]                                                  =
+        Vector.empty
     }
 
   /**
