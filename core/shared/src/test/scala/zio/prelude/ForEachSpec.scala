@@ -115,9 +115,9 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("groupBy") {
+        testM("groupByNonEmpty") {
           check(genList, genIntFunction) { (as, f) =>
-            val actual   = ForEach[List].groupBy(as)(f)
+            val actual   = ForEach[List].groupByNonEmpty(as)(f)
             val expected = as
               .groupBy(f)
               .toList
@@ -126,10 +126,10 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("groupByM") {
+        testM("groupByNonEmptyM") {
           check(genList, genIntFunction) { (as, f) =>
             // Dotty can't infer Function1Covariant: 'Required: zio.prelude.Covariant[[R] =>> Int => R]'
-            val actual   = ForEach[List].groupByM(as)(f.map(Option(_))(Invariant.Function1Covariant))
+            val actual   = ForEach[List].groupByNonEmptyM(as)(f.map(Option(_))(Invariant.Function1Covariant))
             val expected = Option(
               as.groupBy(f)
                 .toList
@@ -256,6 +256,49 @@ object ForEachSpec extends DefaultRunnableSpec {
         val expected = as.sum
         val actual   = as.foldMap(a => Sum(a))
         assert(actual)(equalTo(expected))
-      }
+      },
+      suite("foldMapM")(
+        test("is stack safe") {
+          def passThrough(i: Int): Either[Int, Sum[Int]] = Right(Sum(i))
+
+          val as       = (1 to 100000).toList
+          val expected = Right(Sum(as.sum))
+          val actual   = as.foldMapM(passThrough)
+          assert(actual)(equalTo(expected))
+        },
+        test("yields the right result") {
+          def errorOnOddNumber(i: Int): Either[Int, Sum[Int]] =
+            if (i % 2 == 0) Right(Sum(i))
+            else Left(i)
+
+          val mixedValues   = List(1, 2, 3, 4)
+          val expectedMixed = Left(1)
+          val actualMixed   = mixedValues.foldMapM(errorOnOddNumber)
+
+          val evenValues   = mixedValues.filter(_ % 2 == 0)
+          val expectedEven = Right(Sum(6))
+          val actualEven   = evenValues.foldMapM(errorOnOddNumber)
+
+          assert(actualMixed)(equalTo(expectedMixed)) &&
+          assert(actualEven)(equalTo(expectedEven))
+        },
+        test("shortcircuits sideffects according to effect") {
+          var calledOn: List[Int] = Nil
+
+          def errorOnOddNumber(i: Int): Either[Int, Sum[Int]] = {
+            calledOn = i :: calledOn
+
+            if (i % 2 == 0) Right(Sum(i))
+            else Left(i)
+          }
+
+          val values   = List(2, 3, 4)
+          val expected = Left(3)
+          val actual   = values.foldMapM(errorOnOddNumber)
+
+          assert(actual)(equalTo(expected)) &&
+          assert(calledOn)(equalTo(List(3, 2)))
+        }
+      )
     )
 }

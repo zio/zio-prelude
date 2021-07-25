@@ -118,6 +118,16 @@ object CommutativeEqual {
     }
 }
 
+trait CommutativeIdentity[A] extends Commutative[A] with Identity[A]
+
+object CommutativeIdentity {
+  implicit def derive[A](implicit commutative0: Commutative[A], identity0: Identity[A]): CommutativeIdentity[A] =
+    new CommutativeIdentity[A] {
+      def combine(l: => A, r: => A): A = commutative0.combine(l, r)
+      def identity: A                  = identity0.identity
+    }
+}
+
 trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 
 object CovariantDeriveEqual {
