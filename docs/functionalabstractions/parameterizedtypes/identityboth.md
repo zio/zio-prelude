@@ -9,7 +9,7 @@ Its signature is:
 
 ```scala mdoc
 trait AssociativeBoth[F[_]] {
-  def both(fa: => F[A], fb: => F[B]): F[(A, B)]
+  def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
 trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
@@ -79,11 +79,14 @@ For example, consider the `Predicate` data type.
 ```scala mdoc
 trait Predicate[-A] {
   def run(a: A): Boolean
+}
 ```
 
 We could define an `IdentityBoth` instance for it like this:
 
 ```scala mdoc
+import zio.prelude._
+
 object Predicate {
   implicit val PredicateIdentityBoth: IdentityBoth[Predicate] =
     new IdentityBoth[Predicate] {
@@ -98,6 +101,7 @@ object Predicate {
             left.run(tuple._1) && right.run(tuple._2)
         }
     }
+}
 ```
 
 The `both` operator for `Predicate` combines two predicates to return a new predicate that is true if both of the original predicates are true. So we can always combine any predicate with the predicate that is always true without changing the result.
@@ -108,7 +112,7 @@ When a data type has both a `IdentityBoth` and a `Covariant` instance we can def
 
 ```scala mdoc
 def succeed[F[+_]: IdentityBoth : Covariant, A](a: => A): F[A] =
-  IdentityBoth[F].identity.map(_ => a)
+  IdentityBoth[F].any.map(_ => a)
 ```
 
 This says that if a data type is also covariant we can always "lift" any value into the data type by starting with the identity value and using `map` to transform the output type to the specified value.

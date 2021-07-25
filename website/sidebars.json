@@ -23,6 +23,7 @@
     "Parameterized Types": [
       "functionalabstractions/parameterizedtypes/index",
       "functionalabstractions/parameterizedtypes/associativeboth",
+      "functionalabstractions/parameterizedtypes/associativeeither",
       "functionalabstractions/parameterizedtypes/associativeflatten",
       "functionalabstractions/parameterizedtypes/commutativeboth",
       "functionalabstractions/parameterizedtypes/commutativeeither",
