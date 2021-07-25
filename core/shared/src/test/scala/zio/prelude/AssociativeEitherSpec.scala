@@ -9,7 +9,6 @@ object AssociativeEitherSpec extends DefaultRunnableSpec {
     suite("AssociativeEitherSpec")(
       suite("laws")(
         testM("either")(checkAllLaws(AssociativeEither)(GenF.either(Gen.anyInt), Gen.anyInt)),
-        testM("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.nonEmptyList, Gen.anyInt))
       )
     )
 }
