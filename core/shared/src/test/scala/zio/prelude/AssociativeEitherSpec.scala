@@ -8,7 +8,8 @@ object AssociativeEitherSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("AssociativeEitherSpec")(
       suite("laws")(
-        testM("either")(checkAllLaws(AssociativeEither)(GenF.either(Gen.anyInt), Gen.anyInt))
+        testM("either")(checkAllLaws(AssociativeEither)(GenF.either(Gen.anyInt), Gen.anyInt)),
+        testM("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.nonEmptyList, Gen.anyInt))
       )
     )
 }

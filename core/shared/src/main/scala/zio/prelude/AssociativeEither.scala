@@ -192,7 +192,7 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     new CommutativeEither[Set] with IdentityEither[Set] {
       def either[A, B](fa: => Set[A], fb: => Set[B]): Set[Either[A, B]] =
         fa.map[Either[A, B]](Left(_)) | fb.map(Right(_))
-      val none: Set[Nothing]                                              =
+      val none: Set[Nothing]                                            =
         Set.empty
     }
 
