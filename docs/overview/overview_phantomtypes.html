@@ -1,0 +1,242 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Phantom Types · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="ZIO Prelude contains so-called &quot;Phantom Types&quot;. "/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Phantom Types · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="ZIO Prelude contains so-called &quot;Phantom Types&quot;. "/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="api/zio/prelude/index.html" target="_self">API</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Overview</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/overview/overview_index">Summary</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/overview/overview_diagrams">Type Class diagrams</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/overview/overview_phantomtypes">Phantom Types</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/overview/overview_validation">Validation</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Phantom Types</h1></header><article><div><span><p>ZIO Prelude contains so-called &quot;Phantom Types&quot;.</p>
+<p>Simplified, Phantom Types are types that are only visible during compilation, but disappear during runtime and therefor have no runtime overhead.</p>
+<h1><a class="anchor" aria-hidden="true" id="intuition"></a><a href="#intuition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Intuition</h1>
+<p>You probably already know the principle of phantom types from code like this, creating <a href="https://docs.scala-lang.org/overviews/core/value-classes.html">Value Classes</a>:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyId</span>(<span class="hljs-params">value: <span class="hljs-type">Long</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">AnyVal</span></span>
+</code></pre>
+<p>While most of the time the Scala compiler is able to optimize away the <code>MyId</code>, sometimes it can't and unnecessary &quot;boxing&quot; (= object allocation) happens
+at Runtime, hurting the performance of your application.</p>
+<p>In ZIO Prelude, we have two Phantom types - <code>Newtype</code> and <code>Subtype</code> - that make sure that no boxing occurs at runtime, yet give you compile time safety while
+developing.</p>
+<h1><a class="anchor" aria-hidden="true" id="how-to-create-a-phantom-type"></a><a href="#how-to-create-a-phantom-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>How to create a Phantom Type</h1>
+<p>You define your own phantom types like this, usually in a <code>package object</code>:</p>
+<pre><code class="hljs css language-scala">
+<span class="hljs-keyword">package</span> com.acme.myapp
+
+<span class="hljs-keyword">import</span> java.util.<span class="hljs-type">UUID</span>
+
+<span class="hljs-keyword">package</span> domain {
+
+    <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">CorrelationId</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">zio</span>.<span class="hljs-title">prelude</span>.<span class="hljs-title">Subtype</span>[<span class="hljs-type">UUID</span>] </span>{
+        <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">random</span></span>: <span class="hljs-type">CorrelationId</span> = <span class="hljs-type">CorrelationId</span>(<span class="hljs-type">UUID</span>.randomUUID())
+    }
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">CorrelationId</span> </span>= <span class="hljs-type">CorrelationId</span>.<span class="hljs-type">Type</span>
+
+    <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">UserId</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">zio</span>.<span class="hljs-title">prelude</span>.<span class="hljs-title">Newtype</span>[<span class="hljs-type">String</span>]</span>
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">UserId</span> </span>= <span class="hljs-type">UserId</span>.<span class="hljs-type">Type</span>
+}
+
+</code></pre>
+<h1><a class="anchor" aria-hidden="true" id="difference-between-subtype-and-newtype"></a><a href="#difference-between-subtype-and-newtype" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Difference between <code>Subtype</code> and <code>Newtype</code></h1>
+<p>As you've seen, defining phantom types with ZIO Prelude is pretty straight-forward.
+But what is the difference between <code>Subtype</code> and <code>Newtype</code> ?</p>
+<p>Simply speaking, you can use a <code>Subtype[A]</code> everywhere, where your program accepts an <code>A</code>, whereas an instance of a <code>NewType[A]</code> can only be used where exactly a <code>Newtype[A]</code> is specified.</p>
+<h2><a class="anchor" aria-hidden="true" id="examples-with-subtype"></a><a href="#examples-with-subtype" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples with Subtype</h2>
+<p>We can use a instance of <code>Subtype[A]</code> everywhere an <code>A</code> would be accepted:</p>
+<h3><a class="anchor" aria-hidden="true" id="usage-as-a-parameter"></a><a href="#usage-as-a-parameter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage as a parameter</h3>
+<pre><code class="hljs css language-scala">
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Example1</span> </span>{
+    <span class="hljs-keyword">import</span> com.acme.myapp.domain._
+    <span class="hljs-keyword">import</span> java.util.<span class="hljs-type">UUID</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">logGenerally</span></span>(correlationId: <span class="hljs-type">UUID</span>, message: <span class="hljs-type">String</span>): <span class="hljs-type">Unit</span> = ???
+
+    <span class="hljs-comment">// this works, as CorrelationId is a "Subtype" of UUID</span>
+    logGenerally(<span class="hljs-type">CorrelationId</span>.random, <span class="hljs-string">"test1"</span>) 
+
+    <span class="hljs-comment">// this of course still works</span>
+    logGenerally(<span class="hljs-type">UUID</span>.randomUUID(), <span class="hljs-string">"test2"</span>)
+
+}
+</code></pre>
+<p>This allows us to refactor our codebase, add type information and step by step make our code more strict:</p>
+<pre><code class="hljs css language-scala">
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Example2</span> </span>{
+    <span class="hljs-keyword">import</span> com.acme.myapp.domain._
+    <span class="hljs-keyword">import</span> java.util.<span class="hljs-type">UUID</span>
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">logSpecific</span></span>(correlationId: <span class="hljs-type">CorrelationId</span>, message: <span class="hljs-type">String</span>): <span class="hljs-type">Unit</span> = ???
+    <span class="hljs-comment">// this works</span>
+    logSpecific(<span class="hljs-type">CorrelationId</span>.random, <span class="hljs-string">"test1"</span>))
+
+    <span class="hljs-comment">// this doesn't compile, as we're now more strict</span>
+    logSpecific(<span class="hljs-type">UUID</span>.randomUUID(), <span class="hljs-string">"test2"</span>)
+
+}
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="accessing-underlying-methods"></a><a href="#accessing-underlying-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Accessing underlying methods</h3>
+<p>If you have an instance of a <code>Subtype[A]</code>, you're able to access any method of the underlying type <code>A</code> is if the &quot;wrapper&quot; would not be there, e.g.</p>
+<pre><code class="hljs css language-scala">
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Example3</span> </span>{
+    <span class="hljs-keyword">import</span> com.acme.myapp.domain._
+    <span class="hljs-keyword">import</span> java.util.<span class="hljs-type">UUID</span>
+
+    <span class="hljs-keyword">val</span> c = <span class="hljs-type">CorrelationId</span>(<span class="hljs-type">UUID</span>.randomUUID())
+    println(<span class="hljs-string">s"variant of UUID = <span class="hljs-subst">${c.variant}</span>"</span>)
+    println(<span class="hljs-string">s"clockSequence of UUID = <span class="hljs-subst">${c.clockSequence}</span>"</span>)
+    println(<span class="hljs-string">s"getLeastSignificantBits of UUID = <span class="hljs-subst">${c.getLeastSignificantBits}</span>"</span>)
+    println(<span class="hljs-string">s"getMostSignificantBits of UUID = <span class="hljs-subst">${c.getMostSignificantBits}</span>"</span>)
+
+    <span class="hljs-comment">// toString also delegates to the underlying object</span>
+    println(c)
+    println(c.toString)
+
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="examples-with-newtype"></a><a href="#examples-with-newtype" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples with Newtype</h2>
+<p>We can only use a instance of <code>Newtype[A]</code> where such an instance is explicitely specified:</p>
+<pre><code class="hljs css language-scala">
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Example4</span> </span>{
+    <span class="hljs-keyword">import</span> com.acme.myapp.domain._
+    <span class="hljs-keyword">import</span> java.util.<span class="hljs-type">UUID</span>
+
+    
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">traceUser</span></span>(userId: <span class="hljs-type">UserId</span>, message: <span class="hljs-type">String</span>): <span class="hljs-type">Unit</span> = ???
+
+    <span class="hljs-comment">// reminder: object UserId extends zio.prelude.Newtype[String] </span>
+
+    <span class="hljs-comment">// this works</span>
+    traceUser(<span class="hljs-type">UserId</span>(<span class="hljs-string">"michelle"</span>), <span class="hljs-string">"has entered the room"</span>) 
+
+    <span class="hljs-comment">// this doesn't, as we require an instance of UserId</span>
+    traceuser(<span class="hljs-string">"michelle"</span>, <span class="hljs-string">"leaves the room"</span>)
+}
+</code></pre>
+<p>Also, we can't directly access methods of the underlying type. To enable access, we have to <code>unwrap</code> the value.
+Again, this gets optimized away during compilation, so no runtime overhead!</p>
+<pre><code class="hljs css language-scala">
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Example5</span> </span>{
+    <span class="hljs-keyword">import</span> com.acme.myapp.domain._
+    <span class="hljs-keyword">import</span> java.util.<span class="hljs-type">UUID</span>
+
+    <span class="hljs-keyword">val</span> user = <span class="hljs-type">UserId</span>(<span class="hljs-string">"nouschin"</span>)
+
+    <span class="hljs-comment">// this doesn't compile</span>
+    println(userId.length)
+
+    <span class="hljs-comment">// this does</span>
+    println(<span class="hljs-type">UserId</span>.unwrap(user).length)
+    
+}
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="wrapping-and-unwrapping"></a><a href="#wrapping-and-unwrapping" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wrapping and unwrapping</h2>
+<p>There are a few best practices when it comes to working with Prelude types:</p>
+<pre><code class="hljs css language-scala">
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Example6</span> </span>{
+
+    <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">MW</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">zio</span>.<span class="hljs-title">prelude</span>.<span class="hljs-title">Subtype</span>[<span class="hljs-type">Double</span>] </span>{
+        <span class="hljs-keyword">val</span> zero: <span class="hljs-type">MW</span> = <span class="hljs-type">MW</span>(<span class="hljs-number">0.0</span>d)
+    }
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MW</span> </span>= <span class="hljs-type">MW</span>.<span class="hljs-type">Type</span>
+
+    <span class="hljs-keyword">val</span> singlePower = <span class="hljs-type">MW</span>(<span class="hljs-number">5.0</span>d) <span class="hljs-comment">// 5 megawatt</span>
+    
+    <span class="hljs-comment">// as Subtype allows access to the underlying methods, we have wrap on common operations</span>
+    <span class="hljs-keyword">val</span> doublePower: <span class="hljs-type">Double</span> = singlePower + singlePower <span class="hljs-comment">// the + operator exposes the default return type of Double</span>
+    <span class="hljs-keyword">val</span> doublePowerTyped: <span class="hljs-type">MW</span> = <span class="hljs-type">MW</span>( singlePower + singlePower ) 
+    
+    <span class="hljs-comment">// handling collections:</span>
+
+    <span class="hljs-comment">// don't do this:</span>
+    <span class="hljs-keyword">val</span> badExample = <span class="hljs-type">List</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>).map(<span class="hljs-type">MW</span>(_)) <span class="hljs-comment">// List( MW(3.0), MW(4.0), MW(5.0))</span>
+    <span class="hljs-comment">// -&gt;  this would be translated to </span>
+    <span class="hljs-keyword">val</span> badExample = <span class="hljs-type">List</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>).map(identity) <span class="hljs-comment">// which the compiler cannot optimize away</span>
+
+    <span class="hljs-comment">// instead do this</span>
+    <span class="hljs-keyword">val</span> listOfPowers = <span class="hljs-type">MW</span>.wrapAll(<span class="hljs-type">List</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>)) <span class="hljs-comment">// List( MW(3.0), MW(4.0), MW(5.0))</span>
+
+    <span class="hljs-comment">// same for other wrappers:</span>
+    <span class="hljs-keyword">val</span> maybePower = <span class="hljs-type">MW</span>.wrapAll(<span class="hljs-type">Option</span>(<span class="hljs-number">5.0</span>)) <span class="hljs-comment">// Option[MW]</span>
+
+    <span class="hljs-comment">// make use of constants</span>
+    <span class="hljs-keyword">val</span> isZeroPower = <span class="hljs-type">MW</span>.zero == <span class="hljs-type">MW</span>(<span class="hljs-number">0</span>) <span class="hljs-comment">// true</span>
+    <span class="hljs-keyword">val</span> isZeroPower2 = <span class="hljs-type">MW</span>.zero == <span class="hljs-number">0.0</span>d <span class="hljs-comment">// also true (as MW is a Subtype and goes away during runtime)</span>
+
+
+}
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="using-scala-collections-aggregate-functions"></a><a href="#using-scala-collections-aggregate-functions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using Scala collections aggregate functions</h3>
+<p>For numerical data types, the Scala collections feature handy helper functions like <code>.sum</code>, <code>.min</code>, <code>.max</code> etc.
+By default, the compiler is unable to figure out that your Phantom Type is the same as one that already has the
+proper definitions for these aggregate functions, like e.g. a Double has.</p>
+<p>To make these available in your program, you can do something like this:</p>
+<pre><code class="hljs css language-scala">
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Example7</span> </span>{
+
+    <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">MW</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">zio</span>.<span class="hljs-title">prelude</span>.<span class="hljs-title">Subtype</span>[<span class="hljs-type">Double</span>] </span>{
+        <span class="hljs-keyword">val</span> zero: <span class="hljs-type">MW</span> = <span class="hljs-type">MW</span>(<span class="hljs-number">0.0</span>d)
+        <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> numeric: <span class="hljs-type">Numeric</span>[<span class="hljs-type">MW</span>] = <span class="hljs-type">MW</span>.wrapAll(implicitly[<span class="hljs-type">Numeric</span>[<span class="hljs-type">Double</span>]])
+    }
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MW</span> </span>= <span class="hljs-type">MW</span>.<span class="hljs-type">Type</span>
+
+    <span class="hljs-keyword">val</span> powers = <span class="hljs-type">MW</span>.wrapAll(<span class="hljs-type">List</span>(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>)) <span class="hljs-comment">// List( MW(1), MW(2), MW(3), MW(4), MW(5))</span>
+    <span class="hljs-keyword">val</span> sum = powers.sum <span class="hljs-comment">// MW(15)</span>
+    <span class="hljs-keyword">val</span> min = powers.min <span class="hljs-comment">// MW(1)</span>
+    <span class="hljs-keyword">val</span> max = powers.max <span class="hljs-comment">// MW(5)</span>
+
+}
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/overview/overview_diagrams"><span class="arrow-prev">← </span><span>Type Class diagrams</span></a><a class="docs-next button" href="/zio-prelude/docs/overview/overview_validation"><span>Validation</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#examples-with-subtype">Examples with Subtype</a><ul class="toc-headings"><li><a href="#usage-as-a-parameter">Usage as a parameter</a></li><li><a href="#accessing-underlying-methods">Accessing underlying methods</a></li></ul></li><li><a href="#examples-with-newtype">Examples with Newtype</a></li><li><a href="#wrapping-and-unwrapping">Wrapping and unwrapping</a><ul class="toc-headings"><li><a href="#using-scala-collections-aggregate-functions">Using Scala collections aggregate functions</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
