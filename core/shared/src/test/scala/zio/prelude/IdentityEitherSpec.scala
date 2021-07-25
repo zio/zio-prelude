@@ -11,6 +11,7 @@ object IdentityEitherSpec extends DefaultRunnableSpec {
         testM("chunk")(checkAllLaws(IdentityEither)(GenF.chunk, Gen.anyInt)),
         testM("list")(checkAllLaws(IdentityEither)(GenF.list, Gen.anyInt)),
         testM("option")(checkAllLaws(IdentityEither)(GenF.option, Gen.anyInt)),
+        testM("set")(checkAllLaws(IdentityEither)(GenF.set, Gen.anyInt)),
         testM("vector")(checkAllLaws(IdentityEither)(GenF.vector, Gen.anyInt))
       )
     )

@@ -186,6 +186,17 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
+   * The `CommutativeEither` and `IdentityEither` instance for `Set`.
+   */
+  implicit val SetCommutativeEitherIdentityEither: CommutativeEither[Set] with IdentityEither[Set] =
+    new CommutativeEither[Set] with IdentityEither[Set] {
+      def either[A, B](fa: => Set[A], fb: => Set[B]): Set[Either[A, B]] =
+        fa.map[Either[A, B]](Left(_)) | fb.map(Right(_))
+      val none: Set[Nothing]                                              =
+        Set.empty
+    }
+
+  /**
    * The `AssociativeEither` instance for `Try`.
    */
   implicit val TryAssociativeEither: AssociativeEither[Try] =

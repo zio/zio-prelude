@@ -5,10 +5,10 @@ import zio.test._
 
 import scala.concurrent.{Future, blocking}
 
-object CommutativeEitherSpec extends DefaultRunnableSpec {
+object FutureCommutativeEitherSpec extends DefaultRunnableSpec {
 
   def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
-    suite("CommutativeEitherSpec")(
+    suite("FutureCommutativeEitherSpec")(
       testM("FutureCommutativeEither returns the first future that is completed") {
         for {
           l <- ZIO.fromFuture { implicit ec =>
