@@ -106,7 +106,7 @@ We could implement an instance of the `AssociativeEither` abstraction for `Predi
 
 ```scala mdoc
 object Predicate {
-  implicit val PredicateAAssociativeEither: AssociativeEither[Predicate] =
+  implicit val PredicateAssociativeEither: AssociativeEither[Predicate] =
     new AssociativeEither[Predicate] {
       def either[A, B](left: => Predicate[A], right: => Predicate[B]): Predicate[Either[A, B]] =
         new Predicate[Either[A, B]] {
