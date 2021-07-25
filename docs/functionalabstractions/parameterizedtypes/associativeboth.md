@@ -155,6 +155,7 @@ def zipLeft[F[+_]: AssociativeBoth : Covariant, A, B, C](
   fb: => F[B]
 ): F[A] =
   zipWith(fa, fb)((a, _) => a)
+  
 def zipRight[F[+_]: AssociativeBoth : Covariant, A, B, C](
   fa: => F[A],
   fb: => F[B]
@@ -164,7 +165,7 @@ def zipRight[F[+_]: AssociativeBoth : Covariant, A, B, C](
 
 The `zipWith` operator uses `zip` to combine two parameterized types and then `map` to combine the outputs with a function. For example, we can generate two random numbers with `ZIO` and then combine their results by adding them.
 
-The `zipLeft` and `zipRight` operators are specialized variants of this that throw away the left or right results. These are useful when we want to include a value of a parameterized type in the larger data type we are building but don't care about its result.
+The `zipLeft` and `zipRight` operators and their symbolic aliases `<*` and `*>` are specialized variants of this that throw away the left or right results. These are useful when we want to include a value of a parameterized type in the larger data type we are building but don't care about its result.
 
 For example, we could avoid creating unnecessary nested tuples when we combine `ZIO` workflows like this:
 
