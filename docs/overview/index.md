@@ -12,41 +12,12 @@ ZIO Prelude is a library focused on providing a core set of functional data type
 
 ## Installation
 
-In general, to add ZIO Prelude to your project, follow the instructions given by your build tool. 
+Include ZIO Prelude in your project by adding the following to your build.sbt file:
 
-As a convenience, we've added sample configurations for the following build tools:
-
-### SBT
-```
-libraryDependencies += "dev.zio" %% "zio-prelude" % "1.0.0-RC5"
-```
-
-### Gradle
-```
-implementation group: 'dev.zio', name: 'zio-prelude_2.13', version: '1.0.0-RC5'
-```
-
-respectively for Scala 3
-
-```
-implementation group: 'dev.zio', name: 'zio-prelude_3', version: '1.0.0-RC5'
-```
-
-### Maven
-```xml
-<dependency>
-    <groupId>dev.zio</groupId>
-    <artifactId>zio-prelude_2.13</artifactId>
-    <version>1.0.0-RC5</version>
-</dependency>
-```
-
-respectively for Scala 3
-
-```xml
-<dependency>
-    <groupId>dev.zio</groupId>
-    <artifactId>zio-prelude_3</artifactId>
-    <version>1.0.0-RC5</version>
-</dependency>
+```scala mdoc:passthrough
+println(s"""```""")
+if (zio.prelude.BuildInfo.isSnapshot)
+  println(s"""resolvers += Resolver.sonatypeRepo("snapshots")""")
+println(s"""libraryDependencies += "dev.zio" %% "zio" % "${zio.prelude.BuildInfo.version}"""")
+println(s"""```""")
 ```
