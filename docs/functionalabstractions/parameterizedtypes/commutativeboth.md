@@ -122,10 +122,10 @@ val right: List[Int] =
   List(4, 5, 6, 7, 8)
 
 val leftRight: List[(Int, Int)] =
-  left.zip(right) // List(1, 4), List(2, 5), List(3, 6)
+  left.zip(right)
 
 val rightLeft: List[(Int, Int)] =
-  right.zip(left) // List(4, 1), List(5, 2), List(6, 3)
+  right.zip(left)
 ```
 
 The zipped lists are identical after rearranging the order of tuples.

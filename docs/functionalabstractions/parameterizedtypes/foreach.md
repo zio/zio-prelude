@@ -213,8 +213,6 @@ The only collection operators we can't implement in terms of `ForEach` are those
 
 For example, the data type might be a tree that does not have a well defined notion of adding an element without specifying where it should be added. Or it might be a data type like `Option` or `Either` that doesn't support appending at all.
 
-// flip, foldLeftM, foldRightM
-
 In addition to the standard Scala collection operators, `ForEach` allows us to define additional operators that take advantage of the functional abstractions and data structure in ZIO Prelude.
 
 One variant of `forEach` that you may be familiar with is `flip`.

@@ -102,7 +102,7 @@ val peopleIOwe: Map[String, Sum[Int]] =
   Map("Alice" -> Sum(1000), "Carol" -> Sum(1000))
 
 val myNetFinancialPosition: Map[String, Int] =
-  diff(peopleWhoOweMe, peopleIOwe) // Map("Bob" -> 1000, "Carol" -> -1000)
+  diff(peopleWhoOweMe, peopleIOwe)
 
 val friends: Map[String, Set[String]] =
   Map("Alice" -> Set("Bob", "Carol"), "Bob" -> Set("Alice", "Carol"))
@@ -111,7 +111,7 @@ val unfriends: Map[String, Set[String]] =
   Map("Alice" -> Set("Bob", "Carol"), "Bob" -> Set("Alice"))
 
 val updatedFriends: Map[String, Set[String]] =
-  diff(friends, unfriends) // Map("Bob" -> Set("Carol"))
+  diff(friends, unfriends)
 ```
 
 In the first example the two maps represent assets and liabilities. The difference between them is our net financial position with each of our counterparties.

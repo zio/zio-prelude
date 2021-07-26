@@ -199,7 +199,10 @@ The most common way to do this is with the `validateWith` operator we saw above.
 
 ```scala mdoc
 object Validation {
-  def validateWith[E, A, B, C](left: Validation[E, A], right: Validation[E, B])(f: (A, B) => C): Validation[E, C] =
+  def validateWith[E, A, B, C](
+    left: Validation[E, A],
+    right: Validation[E, B]
+  )(f: (A, B) => C): Validation[E, C] =
     ???
 }
 ```

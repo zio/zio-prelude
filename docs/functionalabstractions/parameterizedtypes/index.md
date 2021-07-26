@@ -65,7 +65,7 @@ We'll talk more about `AssociativeBoth` in the section on that abstraction. For 
 
 Just like for concrete types, the abstractions for parameterized types fall into two categories.
 
-## Properties
+## Properties Of Parameterized Types
 
 The first set of abstractions define properties of single values of a parameterized type `F[A]`. All of them describe the fundamental nature of the `A` parameter with respect to `F`.
 

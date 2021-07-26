@@ -26,7 +26,7 @@ We can describe this common structure using the `Associative` trait.
 
 ```scala mdoc
 trait Associative[A] {
-  def combine(left: A, right: A): A
+  def combine(left: => A, right: => A): A
 }
 ```
 
@@ -35,7 +35,7 @@ We can then define various concrete values that extend this trait to describe ho
 ```scala mdoc
 val IntAssociative: Associative[Int] =
   new Associative[Int] {
-    def combine(left: Int, right: Int): Int =
+    def combine(left: => Int, right: => Int): Int =
       left + right
   }
 ```
@@ -49,7 +49,7 @@ With just that signature we could do anything we want in the implementation of `
 ```scala mdoc
 val IntNotAssociative: Associative[Int] =
   new Associative[Int] {
-    def combine(left: Int, right: Int): Int =
+    def combine(left: => Int, right: => Int): Int =
       left - right // don't do this
   }
 ```
@@ -126,20 +126,20 @@ Type classes are a way of encoding functional abstractions in Scala and other pr
 import zio.Chunk
 
 trait Associative[A] {
-  def combine(left: A, right: A): A
+  def combine(left: => A, right: => A): A
 }
 
 object Associative {
 
   implicit val IntAssociative: Associative[Int] =
     new Associative[Int] {
-      def combine(left: Int, right: Int): Int =
+      def combine(left: => Int, right: => Int): Int =
         left + right
     }
 
   implicit def ListAssociative[A]: Associative[List[A]] =
     new Associative[List[A]] {
-      def combine(left: List[A], right: List[A]): List[A] =
+      def combine(left: => List[A], right: => List[A]): List[A] =
         left ::: right
     }
 }
@@ -153,7 +153,7 @@ In the type class pattern we also typically define extension methods that will b
 
 ```scala mdoc
 implicit final class AssociativeSyntax[A](private val self: A) {
-  def <>(that: A)(implicit associative: Associative[A]): A =
+  def <>(that: => A)(implicit associative: Associative[A]): A =
     associative.combine(self, that)
 }
 ```

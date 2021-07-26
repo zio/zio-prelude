@@ -55,13 +55,11 @@ The `JsonCodec` data type is naturally invariant in the `A` type parameter becau
 
 Let's try adding a `+` before the `A` type parameter to indicate that `JsonCodec` is covariant with respect to this type parameter.
 
-```scala mdoc:fail
+```scala mdoc:nest:fail
 trait JsonCodec[+A] {
   def decode(json: String): Either[String, A]
   def encode(a: A): String
 }
-
-// does not compile
 ```
 
 This code does not compile!

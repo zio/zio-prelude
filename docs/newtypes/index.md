@@ -47,20 +47,24 @@ object SequenceNumber extends Newtype[Int]
 type SequenceNumber = SequenceNumber.Type
 ```
 
-The `AccountNumber` and `SequenceNumber` types are now completely distinct from the `Int` type at compile time, even though at runtime they are all `Int` values. We can see this if we try to supply an `AccountNumber` somewhere that a `SequenceNumber` is expected:
+The `AccountNumber` and `SequenceNumber` types are now completely distinct from the `Int` type at compile time, even though at runtime they are all `Int` values. 
 
-```scala mdoc:compile-only
+```scala mdoc:nest
 val accountNumber: AccountNumber =
-  ???
+  AccountNumber(1)
 
 val sequenceNumber: SequenceNumber =
-  ???
+  SequenceNumber(2)
 
 def lookup(accountNumber: AccountNumber, sequenceNumber: SequenceNumber) =
   ???
+```
 
-lookup(accountNumber, sequenceNumber)    // okay
-// lookup(sequenceNumber, accountNumber) // does not compile
+We can see this if we try to supply an `AccountNumber` somewhere that a `SequenceNumber` is expected:
+
+
+```scala mdoc:fail
+lookup(sequenceNumber, accountNumber)
 ```
 
 This is great but how do we construct `AccountNumber` and `SequenceNumber` values and how do we access the underlying `Int` values to work with them?
@@ -69,7 +73,7 @@ This is great but how do we construct `AccountNumber` and `SequenceNumber` value
 
 The easiest way to construct an instance of the new type is to use the `apply` method on the new type object.
 
-```scala mdoc
+```scala mdoc:nest
 val accountNumber: AccountNumber =
   AccountNumber(1)
 ```
@@ -205,9 +209,14 @@ object AccountNumber extends Newtype[Int] {
 }
 type AccountNumber = AccountNumber.Type
 
-AccountNumber(1) === AccountNumber(1) // true
-AccountNumber(1) === AccountNumber(2) // false
-// AccountNumber(1) === 1             // does not compile
+AccountNumber(1) === AccountNumber(1)
+AccountNumber(1) === AccountNumber(2)
+```
+
+Attempting to compare two unrelated types results in a compilation error.
+
+```scala mdoc:fail
+AccountNumber(1) === 1
 ```
 
 This can be particularly useful because since the representations of the new type and the underlying types are the same at runtime, operators that are not strongly typed like `println` and `==` will not respect the difference between the new type and the underlying type. Using the functional abstractions in ZIO Prelude we can avoid this problem.
@@ -220,8 +229,13 @@ However, it can lead to boilerplate in some cases where we need to explicitly un
 
 For example, say we want to test whether one `SequenceNumber` is after another. Right now this will not work:
 
-```scala
-SequenceNumber(2) > SequenceNumber(1) // does not compile
+```scala mdoc:fail
+import zio.prelude.Subtype
+
+object SequenceNumber extends Newtype[Int]
+type SequenceNumber = SequenceNumber.Type
+
+SequenceNumber(2) > SequenceNumber(1)
 ```
 
 The `>` operator is defined on `Int` and as far as the Scala compiler is concerned `SequenceNumber` and `Int` are completely unrelated types. Of course we could unwrap each of our sequence numbers or define a new `>` operator on sequence numbers but here we are not taking advantage of the fact that we know that every `SequenceNumber` is an `Int`.
@@ -234,7 +248,7 @@ import zio.prelude.Subtype
 object SequenceNumber extends Subtype[Int]
 type SequenceNumber = SequenceNumber.Type
 
-SequenceNumber(2) > SequenceNumber(1) // okay
+SequenceNumber(2) > SequenceNumber(1)
 ```
 
 Now `SequenceNumber` is a type that is different from `Int` but is still a subtype of `Int`.
@@ -261,7 +275,7 @@ type SequenceNumber = SequenceNumber.Type
 
 Here we created a simple assertion that requires the value be equal to or greater than zero but we can use much more complex assertions. For example, we could valid an `Email` with the `matchesRegex` assertion.
 
-When we create a smart type the `apply`, `wrap`, and `wrapAll` operators will be `protected` and will only be accessible within the scope of the smart type object unless we choose to expose them. This prevents the users of our smart type from creating invalid instances of the smart type.
+When we create a smart type the `apply`, `wrap`, and `wrapAll` operators will be `protected` and will only be accessible within the scope of the smart type object unless we choose to expose them.
 
 ```scala mdoc:reset-object
 import zio.prelude.{SubtypeSmart, Validation}
@@ -269,12 +283,16 @@ import zio.test.Assertion._
 
 object SequenceNumber extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
   val initial: SequenceNumber =
-    SequenceNumber(0) // okay
+    SequenceNumber(0)
 }
 type SequenceNumber = SequenceNumber.Type
+```
 
-// val invalid: SequenceNumber =
-//   SequenceNumber(-1) // does not compile
+This prevents the users of our smart type from creating invalid instances of the smart type.
+
+```scala mdoc:fail
+val invalid: SequenceNumber =
+  SequenceNumber(-1)
 ```
 
 Instead, the `make` or `makeAll` operators can be used to construct instances of the smart type with validation.
@@ -308,7 +326,7 @@ object SequenceNumber extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
 type SequenceNumber = SequenceNumber.Type
 
 val sequenceNumber: SequenceNumber =
-  SequenceNumber.unsafeMake(1) // okay
+  SequenceNumber.unsafeMake(1)
 ```
 
 Thus, smart types give us full ability to implement our own operators and to expose whatever interface we want for our type, from requiring all construction to go through `Validation` to allowing users to create instances of the smart type directly.

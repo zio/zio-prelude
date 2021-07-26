@@ -7,7 +7,7 @@ ZIO Prelude features a set of fundamental functional abstractions for working wi
 
 These abstractions fall into two categories.
 
-## Properties
+## Properties Of Concrete Types
 
 The first set of abstractions describe different properties that values of a data type may have. For example, we may be able to compare them for equality, hash them, or order them.
 

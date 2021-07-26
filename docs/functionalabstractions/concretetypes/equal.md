@@ -45,7 +45,7 @@ object SequenceNumber {
 }
 
 def isInitial(sequenceNumber: SequenceNumber): Boolean =
-  sequenceNumber === 0 // does not compile
+  sequenceNumber === 0
 ```
 
 To get the code to compile we have to fix the bug.
@@ -65,7 +65,7 @@ object SequenceNumber {
 }
 
 def isFirst(sequenceNumber: SequenceNumber): Boolean =
-  sequenceNumber === SequenceNumber.initial // okay
+  sequenceNumber === SequenceNumber.initial
 ```
 
 A second advantage is catching bugs when we try to compare two values of a type that doesn't have a meaningful notion of equality. For example, it doesn't make sense to compare two Scala functions for equality, but we can still do it with `==`.
@@ -83,11 +83,11 @@ Equal instances are automatically available for data types from the Scala librar
 We can always check if an instance of a type class exists for a given data type by using the `apply` operator to tell the Scala compiler to find the appropriate instance for us. This will result in a compilation error if the instance cannot be found.
 
 ```scala mdoc
-Equal[List[Either[String, Int]]] // okay
+Equal[List[Either[String, Int]]]
 ```
 
 ```scala mdoc:fail
-Equal[String => Int] // does not compile
+Equal[String => Int]
 ```
 
 Defining `Equal` instances for your own data types is generally quite easy.

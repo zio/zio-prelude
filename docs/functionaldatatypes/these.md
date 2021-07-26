@@ -31,13 +31,16 @@ val right: Chunk[Int] =
   Chunk(4, 5, 6, 7, 8)
 
 val zip: Chunk[Int] =
-  left.zipWith(right)(_ + _) // Chunk(5, 7, 9)
+  left.zipWith(right)(_ + _)
 ```
 
 We can use the `zipAll` operator to allow the caller to specify how they want to handle the situation where the two collections have different sizes. Normally the signature would look something like this:
 
 ```scala mdoc
-def zipAllWith[A, B, C](as: Chunk[A], bs: Chunk[B])(left: A => C, right: B => C, both: (A, B) => C): Chunk[C] =
+def zipAllWith[A, B, C](
+  as: Chunk[A],
+  bs: Chunk[B]
+)(left: A => C, right: B => C, both: (A, B) => C): Chunk[C] =
   ???
 ```
 
@@ -48,7 +51,10 @@ This works and is basically the signature of the `zipAllWith` operator on `Chunk
 With `These` we can do just that. We could rewrite the signature of `zipAllWith` like this:
 
 ```scala mdoc
-def zipAllWith[A, B, C](as: Chunk[A], bs: Chunk[B])(f: These[A, B] => C): Chunk[C] =
+def zipAllWith[A, B, C](
+  as: Chunk[A],
+  bs: Chunk[B]
+)(f: These[A, B] => C): Chunk[C] =
   ???
 ```
 

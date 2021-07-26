@@ -87,8 +87,6 @@ def reduce[A: Associative](as: NonEmptyChunk[A]): A =
 
 We can then reduce any `NonEmptyChunk` to a summary value as long as there is a way of combining the elements of the `NonEmptyChunk`, whether those elements are strings or vote maps.
 
-## New Types
-
 So far we have not described some very basic ways of combining that are associative, such as integer addition.
 
 The reason for this is that some data types support more than one way of combining them that is associative. For example, both integer addition and multiplication are associative.
@@ -110,7 +108,7 @@ implicit val IntProdAssociative: Associative[Int] =
       left * right
   }
 
-2 <> 3 // does not compile
+2 <> 3
 ```
 
 This makes sense because there are indeed two different instances of `Associative[Int]` and there is no basis for choosing between them.
@@ -156,10 +154,10 @@ Let's use these types to solve our problem from above.
 
 ```scala mdoc
 val sum: Int =
-  Sum(2) <> Sum(3) // 5
+  Sum(2) <> Sum(3)
 
 val product: Int =
-  Prod(2) <> Prod(3) // 6
+  Prod(2) <> Prod(3)
 ```
 
 These variants don't just work for `Int`, they work for any numeric data type in the Scala standard library.

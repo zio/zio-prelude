@@ -84,7 +84,7 @@ val customerAccount1: CustomerAccount = BusinessAccount("abc")
 val customerAccount2: CustomerAccount = ConsumerAccount("def")
 
 val compareCustomerAccounts: Boolean =
-  customerAccount1 < customerAccount2 // okay
+  customerAccount1 < customerAccount2
 ```
 
 We can also use it to compare two business accounts or two consumer accounts.
@@ -94,7 +94,7 @@ val consumerAccount1: ConsumerAccount = ConsumerAccount("abc")
 val consumerAccount2: ConsumerAccount = ConsumerAccount("def")
 
 val compareConsumerAccounts: Boolean =
-  consumerAccount1 < consumerAccount2 // okay
+  consumerAccount1 < consumerAccount2
 ```
 
 This just works because a consumer account is a customer account and we know how to order customer accounts.
@@ -128,7 +128,7 @@ val customerAccount1: CustomerAccount = BusinessAccount("abc")
 val customerAccount2: CustomerAccount = ConsumerAccount("def")
 
 val compareCustomerAccounts: Boolean =
-  customerAccount1 < customerAccount2 // okay
+  customerAccount1 < customerAccount2
 ```
 
 But look what happens when we try to compare two consumer accounts.
@@ -138,7 +138,7 @@ val consumerAccount1: ConsumerAccount = ConsumerAccount("abc")
 val consumerAccount2: ConsumerAccount = ConsumerAccount("def")
 
 val compareConsumerAccounts: Boolean =
-  consumerAccount1 < consumerAccount2 // does not compile
+  consumerAccount1 < consumerAccount2
 ```
 
 This code doesn't compile! The Scala compiler is unable to compare the consumer accounts because of the lack of variance on `scala.math.Ordering`.
@@ -156,7 +156,7 @@ ZIO Prelude is also very good at automatically deriving `Ord` instances for more
 ```scala mdoc:reset
 import zio.prelude._
 
-Ord[(Double, Double)] // okay
+Ord[(Double, Double)]
 ```
 
 The default instance for tuples will order values by the first field and then if the first field is the same by the second field and so on.

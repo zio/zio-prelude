@@ -178,7 +178,7 @@ def myExistingAPI(as: List[Int]): String =
 val nonEmptyList: NonEmptyList[Int] =
   NonEmptyList(1, 2, 3)
 
-myExistingAPI(nonEmptyList) // okay
+myExistingAPI(nonEmptyList)
 ```
 
 This is also extremely convenient because it means all operators available on `List` are available on `NonEmptyList`.
@@ -187,7 +187,7 @@ For example, the `filter` operator is not implemented directly on `NonEmptyList`
 
 ```scala mdoc
 val filtered: List[Int] =
-  nonEmptyList.filter(_ % 2 == 0) // okay
+  nonEmptyList.filter(_ % 2 == 0)
 ```
 
 The return type of `List[Int]` is as specific as possible because the `filter` operator could filter out all the elements of the list and return a list that is empty.

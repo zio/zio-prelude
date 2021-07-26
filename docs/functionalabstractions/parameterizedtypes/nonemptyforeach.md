@@ -1,6 +1,6 @@
 ---
-id: foreach
-title: "ForEach"
+id: nonemptyforeach
+title: "NonEmptyForEach"
 ---
 
 `NomEmptyForEach[F]` describes a parameterized type `F[A]` that contains one or more values of type `A`.
