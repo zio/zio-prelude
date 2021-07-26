@@ -10,19 +10,22 @@ object RefinedTypes extends App {
   val Natural = Refined[Int, Natural] {
     greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
   }
+  implicit class NaturalOps(private val self: Natural) extends AnyVal {
+    def add(that: Natural): Natural = Natural.unsafeApply(Natural.unwrap(self) + Natural.unwrap(that))
+  }
 
   type Age <: Int
   val Age = Refined[Int, Age] {
     greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
   }
 
-  val natural: Natural = Natural(5)
+  val natural: Natural = Natural(5) add Natural(6)
 
   val age: Age = Age(60)
 
-  def add(a: Int, b: Int): Int = a + b
+  def sum(a: Int, b: Int): Int = a + b
 
-  println(add(natural, age))
+  println(sum(natural, age))
 
   val x: Natural                 = Natural(0)
   val y: Either[String, Natural] = Natural.make(scala.util.Random.nextInt)

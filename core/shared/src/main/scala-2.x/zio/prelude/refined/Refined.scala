@@ -12,6 +12,8 @@ trait Refined[Meta, A, T] { self =>
     }
 
   def unsafeApply(a: A): T = a.asInstanceOf[T]
+
+  def unwrap(t: T): A = t.asInstanceOf[A]
 }
 
 object Refined {
