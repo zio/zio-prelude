@@ -133,6 +133,12 @@ object Debug {
 
   def keyValueDebug[A: Debug, B: Debug]: Debug[(A, B)] = n => Repr.KeyValue(n._1.debug, n._2.debug)
 
+  /**
+    * Derives a `Debug[Array[A]]` given a `Debug[A]`.
+    */
+  implicit def ArrayDebug[A: Debug]: Debug[Array[A]] =
+    array => Repr.VConstructor(List("scala"), "Array", array.map(_.debug).toList)
+
   implicit def ChunkDebug[A: Debug]: Debug[Chunk[A]] =
     chunk => Repr.VConstructor(List("zio"), "Chunk", chunk.map(_.debug).toList)
 
