@@ -1,14 +1,11 @@
-package zio.prelude.macros
-
-import zio.prelude.refined._
-import zio.prelude.refined.macros.QuotedAssertion
+package zio.prelude.refined
 
 import scala.reflect.macros.whitebox
 
 class Macros(val c: whitebox.Context) extends Liftables {
   import c.universe._
 
-  def makeRefined[A: c.WeakTypeTag](assertion: c.Tree): c.Tree =
+  def makeRefined[A: c.WeakTypeTag, T: c.WeakTypeTag](assertion: c.Tree): c.Tree =
     assertion match {
       case q"${assertion: Assertion[A]}" =>
         val anonTrait = TypeName(c.freshName("anonTrait"))
@@ -18,7 +15,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
             def fun: Int = ???
           }
           
-          new _root_.zio.prelude.macros.Refined[${c.weakTypeOf[A]}, $anonTrait] {
+          new _root_.zio.prelude.refined.Refined[$anonTrait, ${c.weakTypeOf[A]}, ${c.weakTypeOf[T]}] {
             @${c.weakTypeOf[QuotedAssertion]}($assertion)
             def assertion = $assertion
           }
@@ -28,7 +25,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
         c.abort(c.enclosingPosition, s"FAILED TO UNLIFT ASSERTION: $assertion")
     }
 
-  def smartApply[A: c.WeakTypeTag, Meta: WeakTypeTag](value: c.Tree): c.Tree = {
+  def smartApply[Meta: WeakTypeTag, A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Tree): c.Tree = {
     val assertion = c.weakTypeOf[Meta].decls.flatMap(_.annotations).headOption.flatMap(_.tree.children.lastOption)
 
     assertion match {
@@ -44,7 +41,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
               s"""
                  |${Console.BOLD + Console.RED + Console.REVERSED}Assertion Failed${Console.RESET}
                  |Could not validate Smart Assertion at compile-time.
-                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.wrapEither($value)"${Console.RESET}
+                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.make($value)"${Console.RESET}
                  |""".stripMargin
 
             c.abort(c.enclosingPosition, message)

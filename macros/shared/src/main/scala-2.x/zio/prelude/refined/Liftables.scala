@@ -1,7 +1,6 @@
-package zio.prelude.macros
+package zio.prelude.refined
 
 import com.github.ghik.silencer.silent
-import zio.prelude.refined.Assertion
 
 import scala.reflect.macros.whitebox
 

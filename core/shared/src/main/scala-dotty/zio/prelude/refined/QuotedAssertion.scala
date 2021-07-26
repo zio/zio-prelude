@@ -1,6 +1,4 @@
-package zio.prelude.refined.macros
-
-import zio.prelude.refined.Assertion
+package zio.prelude.refined
 
 final case class QuotedAssertion[-A, T](assertion: Assertion[A])
 

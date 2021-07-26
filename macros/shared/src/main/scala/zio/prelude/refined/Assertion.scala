@@ -228,7 +228,7 @@ object Assertion {
         (first, second) match {
           case (first, Anything)  => first.compile
           case (Anything, second) => second.compile
-          case _                  => raw"${first.compile}|${second.compile}"
+          case _                  => raw"(${first.compile}|${second.compile})"
         }
     }
   }

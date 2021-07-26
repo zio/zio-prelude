@@ -1,21 +1,20 @@
 package examples
 
-import zio.prelude.refined.Assertion.*
-import zio.prelude.refined.macros.*
+import zio.prelude.refined.*
 
-object Test extends App {
-  import Regex.*
+object RefinedTypes extends App {
+  import Assertion.*
 
   type Natural <: Int
 
   // MUST be defined as transparent!
   // https://github.com/lampepfl/dotty/issues/12368
-  transparent inline def Natural: Int Refined Natural = Refined {
+  transparent inline def Natural = Refined[Int, Natural] {
     greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
   }
 
   type Age <: Int
-  transparent inline def Age: Int Refined Age = Refined {
+  transparent inline def Age = Refined[Int, Age] {
     greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
   }
 
@@ -30,14 +29,16 @@ object Test extends App {
   val x: Natural                 = Natural(0)
   val y: Either[String, Natural] = Natural(scala.util.Random.nextInt)
 
-  type RegexRefined <: String
-  transparent inline def RegexRefined: String Refined RegexRefined = Refined {
+  import Regex.*
+
+  type MyRegex <: String
+  transparent inline def MyRegex = Refined[String, MyRegex] {
     matches {
-      anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
+      start ~ anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
         "hello" ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
-        inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3)
+        inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3) ~ end
     }
   }
 
-  //val myRegex: RegexRefined = RegexRefined("a")
+  val myRegex: MyRegex = MyRegex("ab#l*helloccayj678")
 }
