@@ -86,6 +86,10 @@ We can always check if an instance of a type class exists for a given data type 
 Equal[List[Either[String, Int]]] // okay
 ```
 
+```scala mdoc:fail
+Equal[String => Int] // does not compile
+```
+
 Defining `Equal` instances for your own data types is generally quite easy.
 
 If you have already defined a sensible `equals` method for your data type then you can just use the `default` operator to construct an `Equal` instance as we saw in the example above involving the `SequenceNumber`.

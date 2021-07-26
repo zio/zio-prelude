@@ -56,7 +56,7 @@ Normally this is what we want because there is no point in doing further work if
 
 However, it is not what we want here.
 
-We could imagine that the `name` and `age` were transmitted by an internal business customer. They would probably not be happy if we told them the name was invalid, they corrected that and sent it again, and then we failed again because the age was invalid.
+We could imagine that the `name` and `age` were transmitted by a customer. They would probably not be happy if we told them the name was invalid, they corrected that and sent it again, and then we failed again because the age was invalid.
 
 "Why didn't you tell me about all the problems up front?" we can see them saying. `Validation` does just that.
 
@@ -232,11 +232,11 @@ def validateAgeString(s: String): Validation[String, Int] =
   } yield n
 ```
 
-Here the second validation depended on the first one because if we could not parse the string into an integer then we would not even have an integer to validate. Just like with other data types we can express this with the `flatMap` operator and use a _for comprehension_ to chain multiple validations together.
+Here the second validation depended on the first one because if we could not parse the string into an integer then we would not even have an integer to validate. Just like with other data types we can express this with the `flatMap` operator and use a for comprehension to chain multiple validations together.
 
 Note that when we chain validations like this we only do the second validation if the first one is successful so we will never see both errors here. If all we are doing is chaining then we don't actually need `Validation` and could just use `Either`.
 
-However, frequently we want to do some validations "in parallel" and other "sequentially" and having `flatMap` on `Validation` makes it very easy for us to do this. Note that when we say in parallel here no actual parallelism is going on here, we just mean that we are performing both validations even if one of them fails.
+However, frequently we want to do some validations with error accumulating semantics and chain others. Having `flatMap` on `Validation` makes it very easy for us to do this.
 
 To see this, let's expand on our example of validating a `Person` data type from above. Now we will validate the person based on two `String` inputs using the logic we implemented above.
 
@@ -245,7 +245,7 @@ def validatePerson(name: String, age: String): Validation[String, Person] =
   Validation.validateWith(validateName(name), validateAgeString(age))(Person)
 ```
 
-Now we are combining "parallel" and "sequential" validations.
+Now we are combining accumulating errors and chaining validations.
 
 Validating the age will proceed by validating that the age can be parsed into an `Int` and then that the age is not negative. This will return either a validated age or a validation error if either of these steps failed.
 

@@ -59,7 +59,7 @@ val multiSet: MultiSet[Int] =
  ZSet.fromIterable(List(1, 1, 2))
 ```
 
-Finally, we can just construct an empty `ZSet` using the `empty` operator and add elements to it later.
+Finally, we can just construct an empty `ZSet` using the `empty` operator and combine `ZSet` with other `ZSet` values later.
 
 ```scala mdoc
 val empty: ZSet[Nothing, Nothing] =
@@ -76,7 +76,7 @@ We can determine how many times an element appears in the set using the `apply` 
 
 If the element exists in the set the measure of how many times it appears will be returned. Otherwise the identity element will be returned.
 
-Thus, `shoppingList("apples)` will return `2` and `shoppingList("eggs")` will return `0` while `set(1)` will return `true` and `set(4)` will return `false`.
+Thus, `shoppingList("apples")` will return `2` and `shoppingList("eggs")` will return `0` while `set(1)` will return `true` and `set(4)` will return `false`.
 
 ### Set Union
 
@@ -217,11 +217,11 @@ The resulting set has eleven elements, corresponding to the possible sums from t
 
 So for example the probability of seven is about 16.7% whereas the probability of rolling two or twelve is only about 2.8%.
 
-We can take this even further using the `flatMap`.
+We can take this even further using the `flatMap` operator.
 
 The `zipWith` operator lets us combine two sets when the sets are independent of each other. With the `flatMap` operator we can create a new set based on each element of the first set and then "flatten" the resulting set down.
 
-We could rewrite the example above using `flatMap` and a _for comprehension_ like this:
+We could rewrite the example above using `flatMap` and a for comprehension like this:
 
 ```scala mdoc:nest
 val sum: ZSet[Int, Double] =
@@ -246,7 +246,7 @@ val setPlusOne: ZSet[Int, Boolean] =
 
 This requires a `Commutative` instance defined for the `Sum` of the measure type so that we can combine the measures if we map two elements to the same value.
 
-## Transforming The Measure
+## Transforming Measures
 
 We can also transform the measure we use to represent how many times an item appears using the `transform` operator. For example, perhaps we have constructed a set where the measure is an `Int` but we would like to transform it to a `Double` so we can compose it with other `ZSet` values with `Double` as the measure type.
 

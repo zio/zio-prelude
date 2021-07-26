@@ -9,7 +9,7 @@ Its signature is:
 
 ```scala mdoc
 trait Associative[A] {
-  def combine(left: A, right: A): A
+  def combine(left: => A, right: => A): A
 }
 
 trait Commutative[A] extends Associative[A]

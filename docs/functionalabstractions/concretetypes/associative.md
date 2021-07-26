@@ -156,10 +156,10 @@ Let's use these types to solve our problem from above.
 
 ```scala mdoc
 val sum: Int =
-  Sum(2) <> Sum(3)
+  Sum(2) <> Sum(3) // 5
 
 val product: Int =
-  Prod(2) <> Prod(3)
+  Prod(2) <> Prod(3) // 6
 ```
 
 These variants don't just work for `Int`, they work for any numeric data type in the Scala standard library.

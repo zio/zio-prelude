@@ -7,9 +7,9 @@ title: "NonEmptyList"
 
 This is useful to allow more accurate domain modeling in situations where we know a collection is not empty.
 
-For example, we might be handling a collection of errors.
+For example, we might be handling a collection of errors. If an error has occurred at all then we know the collection is not empty.
 
-If an error has occurred at all then we know the collection is not empty. However, the Scala compiler does not know that and so we are forced to handle the case where the collection is empty even though we know that cannot occur.
+However, if we are working with a collection type from the Scala standard library such as `List`, `Vector`, or `Iterable` then the Scala compiler does not know that. It will force us to handle the case where the collection is empty even though we know that cannot occur.
 
 Or perhaps we are implementing a batched API and need to handle a collection of requests. We know the collection is not empty or we would not have been called at all, but now we have to handle the case of an empty collection.
 
@@ -60,7 +60,7 @@ object NonEmptyList {
 
 Notice that `fromIterableOption` returns an `Option[NonEmptyList[A]]` because the original collection might be empty and so we might not be able to construct a `NonEmptyList` from it.
 
-If we know the collection is not empty we can use the `fromIterable` operator and provide the first element of the collection to "prove" that it is not empty.
+If we know the collection is not empty we can use the `fromIterable` operator and provide the first element of the collection to establish that it is not empty.
 
 ```scala mdoc:nest
 object NonEmptyList {
@@ -192,4 +192,4 @@ val filtered: List[Int] =
 
 The return type of `List[Int]` is as specific as possible because the `filter` operator could filter out all the elements of the list and return a list that is empty.
 
-Thus, `NonEmptyList` lets us work in a way that is as close as possible to being as if `NonEmptyList` was a subtype of `List`, which conceptually it is, without us being able to actually rewrite the Scala standard library.
+Thus, `NonEmptyList` lets us work in a way that is as close as possible to being as if `NonEmptyList` was a subtype of `List`, which conceptually it is.

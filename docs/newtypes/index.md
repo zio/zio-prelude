@@ -111,7 +111,7 @@ val initial: SequenceNumber =
   SequenceNumber.initial
 ```
 
-This let's us construct instances of the new type in a very ergonomic way, where constructors for the new type are on the new type companion object just like constructors for any other type would be.
+This lets us construct instances of the new type in a very ergonomic way, where constructors for the new type are on the new type companion object just like constructors for any other type would be.
 
 ## Deconstructing New Types
 
@@ -135,6 +135,8 @@ val sequenceNumbers: Chunk[SequenceNumber] =
 val ints: Chunk[Int] =
   SequenceNumber.unwrapAll(sequenceNumbers)
 ```
+
+Again this is extremely efficient because we don't have to traverse the collection at all. Internally we know that a `Chunk[SequenceNumber]` is a `Chunk[Int]` so we can just immediately return the original collection unchanged.
 
 ## Defining Operators On New Types
 
@@ -218,8 +220,8 @@ However, it can lead to boilerplate in some cases where we need to explicitly un
 
 For example, say we want to test whether one `SequenceNumber` is after another. Right now this will not work:
 
-```scala mdoc
-// SequenceNumber(2) > SequenceNumber(1) // does not compile
+```scala
+SequenceNumber(2) > SequenceNumber(1) // does not compile
 ```
 
 The `>` operator is defined on `Int` and as far as the Scala compiler is concerned `SequenceNumber` and `Int` are completely unrelated types. Of course we could unwrap each of our sequence numbers or define a new `>` operator on sequence numbers but here we are not taking advantage of the fact that we know that every `SequenceNumber` is an `Int`.
@@ -237,7 +239,7 @@ SequenceNumber(2) > SequenceNumber(1) // okay
 
 Now `SequenceNumber` is a type that is different from `Int` but is still a subtype of `Int`.
 
-This means that we can use a `SequenceNumber` any time we need an `Int` and can use operators defined on `Int` on `SequenceNumber`. However, we still get the type safety os not being able to use an `Int` or `AccountNumber` when a `SequenceNumber` is expected.
+This means that we can use a `SequenceNumber` any time we need an `Int` and can use operators defined on `Int` on `SequenceNumber`. However, we still get the type safety of not being able to use an `Int` or `AccountNumber` when a `SequenceNumber` is expected.
 
 ## Smart Types
 
@@ -256,6 +258,8 @@ import zio.test.Assertion._
 object SequenceNumber extends SubtypeSmart[Int](isGreaterThanEqualTo(0))
 type SequenceNumber = SequenceNumber.Type
 ```
+
+Here we created a simple assertion that requires the value be equal to or greater than zero but we can use much more complex assertions. For example, we could valid an `Email` with the `matchesRegex` assertion.
 
 When we create a smart type the `apply`, `wrap`, and `wrapAll` operators will be `protected` and will only be accessible within the scope of the smart type object unless we choose to expose them. This prevents the users of our smart type from creating invalid instances of the smart type.
 

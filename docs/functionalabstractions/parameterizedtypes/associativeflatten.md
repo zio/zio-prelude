@@ -86,7 +86,7 @@ val greet: ZIO[Random with Console, IOException, Unit] =
   }
 ```
 
-The `flatMap` operator is extremely convenient, especially in combination with Scala's syntax for _for comprehensions_. However, we are now in a position to see that there isn't really anything special about the `flatMap` operator itself.
+The `flatMap` operator is extremely convenient, especially in combination with Scala's syntax for for comprehensions. However, we are now in a position to see that there isn't really anything special about the `flatMap` operator itself.
 
 The `flatMap` operator is just a combination of `map` and `flatten` and `map` is a very basic operator defined on all covariant data types. The real work here is in the `flatten` operator.
 

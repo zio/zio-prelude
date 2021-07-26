@@ -151,7 +151,7 @@ The `Ord` abstraction helps us avoid problems like this and integrates seamlessl
 
 `Ord` instances are already defined for all the types in `ZIO` and the Scala standard library that have a total ordering.
 
-ZIO Prelude is also very good at automatically deriving `Ord` instances for more complex data types like tuples. For example if we have a pair of `Double` values representing x and y coordinates an ordering is already automatically defined for it.
+ZIO Prelude is also very good at automatically deriving `Ord` instances for more complex data types like tuples. For example if we have a pair of `Double` values representing `x` and `y` coordinates an ordering is already automatically defined for it.
 
 ```scala mdoc:reset
 import zio.prelude._
@@ -176,7 +176,7 @@ object Point {
 
 The `<>` operator combines two `Ordering` values, using the result of the first one if it is `GreaterThan` or `LessThan` and otherwise using the result of the second one. You can think of this like sorting by last name and then first name.
 
-So now we are sorting by the y coordinate and then the x coordinate.
+So now we are sorting by the `y` coordinate and then the `x` coordinate.
 
 Just like the `Equal` abstraction, the `Ord` abstraction supports a `contramap` operator, so we can define a total ordering on a data type as long as we can transform it into another data type that has a total ordering in a way that preserves information.
 

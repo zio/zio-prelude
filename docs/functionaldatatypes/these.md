@@ -17,7 +17,7 @@ You can think of `These` as like `Either` except that it has one additional case
 
 A simple example of a situation where `These` might arise is in merging two upstreams in a streaming application. We could be signaled when at least one upstream has data for us and could have a situation where either only the left upstream has data for us, only the right upstream has data for us, or both upstreams have data for us.
 
-Another example of using the `These` data type is in implementing the `zipAll` operator on collections.
+Another example of using the `These` data type is in implementing a variant of the `zipAll` operator on collections.
 
 When we zip two collections, if the two collections have different sizes the default `zipWith` operator will just drop the "extra" elements from the ledger collection.
 

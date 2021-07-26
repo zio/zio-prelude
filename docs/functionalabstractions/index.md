@@ -9,12 +9,12 @@ ZIO Prelude features a next generation approach to functional abstractions. This
 2. **Compositional** - These abstractions should describe properties that are orthogonal to each other, allowing definition of higher level abstractions as the composition of more basic ones.
 3. **Lawful** - Abstractions should be defined in terms of laws.
 
-The functional abstractions in ZIO Prelude can be broadly divided into two types.
+The functional abstractions in ZIO Prelude can be broadly divided into two categories.
 
 - **[Abstractions For Concrete Types](concretetypes/index.md)** - These abstractions define properties of concrete types, such as `Int` and `String`, as well as ways of combining those values.
 - **[Abstractions For Parameterized Types](parameterizedtypes/index.md)** - These abstractions define properties of parameterized types such as `List` and `ZIO` and ways of combining them.
 
-As we will see, there is a deep symmetry between the abstractions defined on concrete and parameterized types, such as concepts of associative operations, commutative operations, and identity . This reflects the fundamental nature of these algebraic properties and their ability to unify what were previously separate concepts.
+As we will see, there is a deep symmetry between the abstractions defined on concrete and parameterized types, such as concepts of associative operations, commutative operations, and identity. This reflects the fundamental nature of these algebraic properties and their ability to unify what were previously separate concepts.
 
 ## Abstractions
 
@@ -202,7 +202,7 @@ This isn't the worst but it isn't really the kind of code we want to be writing.
 
 This is where ZIO Prelude can help.
 
-The way we're combining these maps actually follows a pattern. If a value is in either map we include it in the combined map and if a value appears in both maps we combine the keys.
+The way we're combining these maps actually follows a pattern. If a key is in a single map we include it in the combined map with its associated key and if a key is in both maps we include it in the combined map with the result of combining the values associated with that key.
 
 We might see that ourselves but it would be hard to generalize that logic in a way that is worth factoring out. How often are we going to combine maps like this and what exactly does it mean to combine the keys?
 

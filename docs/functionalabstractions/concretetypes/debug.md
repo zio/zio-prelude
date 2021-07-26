@@ -35,7 +35,7 @@ We can call `toString` on anything including classes whose string representation
 
 Related to this, we can define our own way of rendering for data types that are not under our control. For example, if we are debugging code involving arrays we can frequently be frustrated when the string representation of the array consists of its memory location rather than the elements actually in the array.
 
-With ZIO Prelude, we can easily define a `Debug` instance for `Array`. We can even handle nested arrays in a principled way.
+With ZIO Prelude, we can easily define a `Debug` instance for `Array`. We can even handle nested arrays.
 
 The final advantage that the `Debug` abstraction has over the Scala standard library and older functional programming libraries is that it captures rendering information in a structured data format instead of just a `String`.
 
@@ -51,9 +51,9 @@ In contrast, in ZIO Prelude `Debug` follows a well defined law that the Scala re
 
 ## Structured Rendering
 
-The `Repr` data type preserves all the information we need to render a data type to a `String` in various ways. There is nothing magic about this data type, it is just a sealed trait with a variety of cases representing the different possible pieces of information we could need for rendering.
+The `Repr` data type preserves all the information we need to render a data type to a `String` in various ways. There is nothing magic about this data type, it is just an algebraic data type with a variety of cases representing the different possible pieces of information we could need for rendering.
 
-If you just want to render data types from ZIO or the Scala standard library that have meaningful string representations then you can just use the `debug` operator but if you want to define `Debug` instances for your own data type it is helpful to understand something about `Repr`.
+If you just want to render data types from ZIO or the Scala standard library that have meaningful string representations then you can just use the `debug` operator but if you want to define `Debug` instances for your own data type it is helpful to understand usage of `Repr`.
 
 Most of the cases of `Repr` are "simple" cases that just describe existing primitive data types.
 

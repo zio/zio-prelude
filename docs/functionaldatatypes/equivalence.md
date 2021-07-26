@@ -48,7 +48,7 @@ def vectorListEquivalence[A]: Equivalence[Vector[A], List[A]] =
 Given these two equivalence relationships we can then define an equivalence relationship between a `Vector[A]` and a `Chunk[A]`.
 
 ```scala mdoc
-def vectorChunkEquivelence[A]: Equivalence[Vector[A], Chunk[A]] =
+def vectorChunkEquivalence[A]: Equivalence[Vector[A], Chunk[A]] =
   vectorListEquivalence.andThen(listChunkEquivalence)
 ```
 

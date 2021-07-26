@@ -7,7 +7,7 @@ ZIO Prelude features a set of fundamental functional abstractions for working wi
 
 These abstractions fall into two categories.
 
-## Properties Of Concrete Types
+## Properties
 
 The first set of abstractions describe different properties that values of a data type may have. For example, we may be able to compare them for equality, hash them, or order them.
 
@@ -41,7 +41,7 @@ The `Debug` abstraction describes a type that can be rendered for debugging purp
 
 The `Debug` abstraction allows us to define how a data type should be rendered, for example rendering an `Array` to display its values rather than just its memory location. The more structured representation also allows rendering in different formats, for example including fully qualified names in the rendering of the data type so the rendering is itself valid Scala code.
 
-## Ways Of Combining Concrete Types
+## Combining Concrete Types
 
 The second set of abstractions describe different ways of combining two values of a given type. These can all be thought of as functions `(A, A) => A`.
 
@@ -102,12 +102,14 @@ An identity element gives us a "starting point" for combining values that we kno
 
 ### Inverse
 
-The `Inverse` abstraction further builds on the `Identity` abstraction with the concept of an inverse operation.
+The `Inverse` abstraction further builds on the `Identity` abstraction with the concept of an inverse to the combining operation.
 
 ```scala
 inverse(a, a) === identity
 ```
 
-Whereas the combining operation adds structure the inverse operation removes structure, so that combining any value with itself using the inverse operation removes all structure and just returns the identity element.
+Whereas the combining operation adds structure the inverse operation takes it away, so that combining any value with itself using the inverse operation removes all structure and just returns the identity element.
 
-Subtraction would be an example of an inverse operation with addition being the combining operation and zero being the identity element.
+Defining the inverse as a binary operator rather than a unary operator like this allows us to define an inverse operation even for types that do not have inverse values. 
+
+For example subtraction would be an inverse operation with addition being the combining operation and zero being the identity element. And we can define it on the natural numbers as well as the integers.

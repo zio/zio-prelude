@@ -95,7 +95,7 @@ val three: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] =
   one.zipWith(two)(_ + _)
 ```
 
-We can also chain computations using the `flatMap` operator and Scala's _for comprehension_ syntax.
+We can also chain computations using the `flatMap` operator and Scala's for comprehension syntax.
 
 ```scala mdoc
 val six: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] =
@@ -152,8 +152,6 @@ Now the error type is `Nothing`, indicating that we have handled all our errors.
 There are many other error handling operators defined on `ZPure`. The `catchSome` operator allows us to only recover from certain errors.
 
 The `fold` and `foldM` operators allow us to handle both the failure and success cases at the same time. And the `orElse` operator allows us to specify a fallback computation that will be run if the original computation fails.
-
-Since these operators are the same as the ones on `ZIO` we will not cover them all in detail here.
 
 One other concept from `ZIO` that carries over to `ZPure` is the ability to accumulate multiple errors.
 
@@ -288,7 +286,7 @@ def withdraw(amount: Int): ZPure[Nothing, AccountState, AccountState, Any, Accou
 
 This example combines a couple of the features we have talked about so far.
 
-First, we are using a _for comprehension_ to chain together multiple computations
+First, we are using a for comprehension to chain together multiple computations
 
 Second, we are using both the error type and the state type here. If the customer has insufficient funds we fail immediately, otherwise we update the state.
 
@@ -296,7 +294,7 @@ One important thing to note here is that since `ZPure` computations are never co
 
 For example, in the context of `ZIO` code analogous to the above would not be safe because the `get` and `set` would not be performed atomically so we would need to do the entire transaction in a single `modify` operation, returning a value indicating whether there were sufficient funds. In `ZPure` we don't have to do any of that so our code can be simpler.
 
-There are also `update` and `modify` operators on `ZPure` so for example we could factor out the logic of updating the account balance like this:
+There are also `update` and `modify` operators on `ZPure`. So for example we could factor out the logic of updating the account balance in the `withdraw` method like this:
 
 ```scala mdoc
 def decrementBalance(amount: Int): ZPure[Nothing, AccountState, AccountState, Any, Nothing, Unit] =
@@ -310,7 +308,7 @@ val withdrawalComputation: ZPure[Nothing, Any, AccountState, Any, AccountError, 
   withdraw(10).provideState(AccountState(100, true))
 ```
 
-We will use the `runEither` operator, which is a variant of `run` that allows the computation to fail and just converts the failure to the left side of an `Either`. The `run` and `runEither` operators just return the final value, so let's use the `get` operator to get the final state before we run our computation.
+We will use the `runEither` operator, which is a variant of `run` that allows the computation to fail and just converts the failure to the left side of an `Either`. The `run` and `runEither` operators just return the final value, so let's use the `get` operator to get the final state before we run our computation since we only care about the final state.
 
 ```scala moc
 val updatedAccountState: Either[AccountError, AccountState] =

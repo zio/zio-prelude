@@ -65,7 +65,7 @@ We'll talk more about `AssociativeBoth` in the section on that abstraction. For 
 
 Just like for concrete types, the abstractions for parameterized types fall into two categories.
 
-## Properties Of Parameterized Types
+## Properties
 
 The first set of abstractions define properties of single values of a parameterized type `F[A]`. All of them describe the fundamental nature of the `A` parameter with respect to `F`.
 
@@ -115,7 +115,7 @@ The `NonEmptyForEach` abstraction further builds on `ForEach` to describe a para
 
 Because a data type with a `NonEmptyForEach` instance must always contain at least one existing `A` value we can define certain operators for it that would not be safe to define for a data type that might not contain any `A` values. For example, we can define a `reduce` operator that reduces the collection to a summary value with an associative operator whereas with a `ForEach` instance we can only define a `fold` operator that also requires an identity value to handle the empty case.
 
-## Ways Of Combining Parameterized Types
+## Combining Parameterized Types
 
 The second set of abstractions describe ways of combining parameterized types.
 
