@@ -133,7 +133,7 @@ object Zivariant {
 
   implicit val ZioZivariant: Zivariant[ZIO] = new Zivariant[ZIO] {
     override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): ZIO[R, E, A] => ZIO[R1, E1, A1] =
-      rea => rea.bimap(e, a).provideSome(r)
+      rea => rea.mapBoth(e, a).provideSome(r)
   }
 
   implicit val ZLayerZivariant: Zivariant[ZLayer] =
@@ -153,7 +153,7 @@ object Zivariant {
         e: A => AA,
         a: R => RR
       ): ZManaged[E, A, R] => ZManaged[EE, AA, RR] =
-        rea => rea.bimap(e, a).provideSome(r)
+        rea => rea.mapBoth(e, a).provideSome(r)
     }
 
   implicit val ZStreamZivariant: Zivariant[ZStream] =
@@ -163,13 +163,13 @@ object Zivariant {
         e: A => AA,
         a: R => RR
       ): ZStream[E, A, R] => ZStream[EE, AA, RR] =
-        rea => rea.bimap(e, a).provideSome(r)
+        rea => rea.mapBoth(e, a).provideSome(r)
     }
 
   implicit val ZSTMZivariant: Zivariant[ZSTM] =
     new Zivariant[ZSTM] {
       override def zimap[E, A, R, EE, AA, RR](r: EE => E, e: A => AA, a: R => RR): ZSTM[E, A, R] => ZSTM[EE, AA, RR] =
-        rea => rea.bimap(e, a).provideSome(r)
+        rea => rea.mapBoth(e, a).provideSome(r)
     }
 }
 
