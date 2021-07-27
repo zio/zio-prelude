@@ -32,7 +32,7 @@ addCommandAlias(
   ";coreNative/test;experimentalNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-val zioVersion = "1.0.9"
+val zioVersion = "1.0.10"
 
 lazy val root = project
   .in(file("."))
