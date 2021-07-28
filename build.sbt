@@ -69,6 +69,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val coreJS  = core.js
   .settings(jsSettings)
+  .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val coreJVM = core.jvm
@@ -90,6 +91,7 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val experimentalJS  = experimental.js
   .settings(jsSettings)
+  .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val experimentalJVM = experimental.jvm
