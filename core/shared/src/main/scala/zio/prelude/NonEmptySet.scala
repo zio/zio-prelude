@@ -107,6 +107,8 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   def flatten[B](implicit ev: A <:< NonEmptySet[B]): NonEmptySet[B] =
     new NonEmptySet[B](set.foldLeft[Set[B]](Set.empty)((b, a) => b union ev(a)))
 
+  def map[B](f: A => B): NonEmptySet[B] = new NonEmptySet(set.map(f))
+
   override def hashCode: Int = set.hashCode ^ NonEmptySet.NonEmptySetSeed
 
   override def equals(that: Any): Boolean =
@@ -180,6 +182,15 @@ object NonEmptySet {
   /** Creates a `NonEmptySet` containing elements from `l` and `r` */
   def union[A](l: Set[A], r: NonEmptySet[A]): NonEmptySet[A] =
     union(r, l)
+
+  /**
+   * The `CommutativeEither` instance for `NonEmptySet`.
+   */
+  implicit val NonEmptySetCommutativeEither: CommutativeEither[NonEmptySet] =
+    new CommutativeEither[NonEmptySet] {
+      def either[A, B](fa: => NonEmptySet[A], fb: => NonEmptySet[B]): NonEmptySet[Either[A, B]] =
+        fa.map[Either[A, B]](Left(_)).union(fb.map[Either[A, B]](Right(_)))
+    }
 
   /**
    * The `Commutative` and `Idempotent` (and thus `Associative`) instance for `NonEmptySet`.
