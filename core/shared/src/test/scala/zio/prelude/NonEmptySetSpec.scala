@@ -1,80 +1,80 @@
 package zio.prelude
 
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 object NonEmptySetSpec extends DefaultRunnableSpec {
 
-  private lazy val genSet: Gen[Random with Sized, Set[Int]] =
+  private lazy val genSet: Gen[Has[Random] with Has[Sized], Set[Int]] =
     Gen.setOf1(genInt)
 
-  private lazy val genSetFunction: Gen[Random with Sized, Int => Set[Int]] =
+  private lazy val genSetFunction: Gen[Has[Random] with Has[Sized], Int => Set[Int]] =
     Gen.function(genSet)
 
-  private lazy val genInt: Gen[Random, Int] =
+  private lazy val genInt: Gen[Has[Random], Int] =
     Gen.int(-10, 10)
 
-  private lazy val genNonEmptySet: Gen[Random with Sized, NonEmptySet[Int]] =
+  private lazy val genNonEmptySet: Gen[Has[Random] with Has[Sized], NonEmptySet[Int]] =
     genSet.map(NonEmptySet.fromSetOption(_).get)
 
   def spec: ZSpec[Environment, Failure] =
     suite("NonEmptySetSpec")(
       suite("laws")(
-        testM("commutativeEither")(checkAllLaws(CommutativeEither)(GenFs.nonEmptySet, Gen.anyInt)),
-        testM("commutative")(checkAllLaws(Commutative)(genNonEmptySet)),
-        testM("idempotent")(checkAllLaws(Idempotent)(genNonEmptySet)),
-        testM("hash")(checkAllLaws(Hash)(genNonEmptySet))
+        test("commutativeEither")(checkAllLaws(CommutativeEither)(GenFs.nonEmptySet, Gen.anyInt)),
+        test("commutative")(checkAllLaws(Commutative)(genNonEmptySet)),
+        test("idempotent")(checkAllLaws(Idempotent)(genNonEmptySet)),
+        test("hash")(checkAllLaws(Hash)(genNonEmptySet))
       ),
       suite("methods")(
-        testM("++") {
+        test("++") {
           check(genSet, genSet) { (as, bs) =>
             val actual   = (NonEmptySet.fromSetOption(as).get ++ NonEmptySet.fromSetOption(bs).get).toSet
             val expected = as ++ bs
             actual <-> expected
           }
         },
-        testM("--") {
+        test("--") {
           check(genSet, genSet) { (as, bs) =>
             val actual   = (NonEmptySet.fromSetOption(as).get -- NonEmptySet.fromSetOption(bs).get).toSet
             val expected = as -- bs
             actual <-> expected
           }
         },
-        testM("&") {
+        test("&") {
           check(genSet, genSet) { (as, bs) =>
             val actual   = (NonEmptySet.fromSetOption(as).get & NonEmptySet.fromSetOption(bs).get).toSet
             val expected = as & bs
             actual <-> expected
           }
         },
-        testM("contains") {
+        test("contains") {
           check(genSet, genInt) { (as, a) =>
             NonEmptySet.fromSetOption(as).get.contains(a) <-> as.contains(a)
           }
         },
-        testM("+") {
+        test("+") {
           check(genSet, genInt) { (as, a) =>
             val actual   = (NonEmptySet.fromSetOption(as).get + a).toSet
             val expected = as + a
             actual <-> expected
           }
         },
-        testM("-") {
+        test("-") {
           check(genSet, genInt) { (as, a) =>
             val actual   = NonEmptySet.fromSetOption(as).get - a
             val expected = as - a
             actual <-> expected
           }
         },
-        testM("size") {
+        test("size") {
           check(genSet) { as =>
             val actual   = NonEmptySet.fromSetOption(as).get.size
             val expected = as.size
             actual <-> expected
           }
         },
-        testM("flatten") {
+        test("flatten") {
           check(genSet, genSetFunction) { (as, f) =>
             val actual   = NonEmptySet
               .fromIterableOption(as.toList.map(a => NonEmptySet.fromSetOption(f(a)).get))
@@ -87,7 +87,7 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
         }
       ),
       suite("constructors")(
-        testM("fromSetOption") {
+        test("fromSetOption") {
           check(genSet) { as =>
             val nonEmptySet = NonEmptySet.fromSetOption(as).get
             val set         = nonEmptySet.toSet

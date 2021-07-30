@@ -69,7 +69,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def +++[W1 >: W, S0 <: S1, S3 >: S2, R1, B, E1 >: E](
     that: ZPure[W1, S0, S3, R1, E1, B]
   ): ZPure[W1, S0, S3, Either[R, R1], E1, Either[A, B]] =
-    ZPure.accessM(_.fold(self.provide(_).map(Left(_)), that.provide(_).map(Right(_))))
+    ZPure.accessZIO(_.fold(self.provide(_).map(Left(_)), that.provide(_).map(Right(_))))
 
   /**
    * A symbolic alias for `zipLeft`.
@@ -346,7 +346,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def join[W1 >: W, S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
     that: ZPure[W1, S0, S3, R1, E1, A1]
   ): ZPure[W1, S0, S3, Either[R, R1], E1, A1] =
-    ZPure.accessM(_.fold(self.provide, that.provide))
+    ZPure.accessZIO(_.fold(self.provide, that.provide))
 
   /**
    * Modifies the behavior of the inner computation regarding logs, so that
@@ -416,7 +416,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * preserving the original structure of the `Cause`.
    */
   final def mapErrorCause[E2](f: Cause[E] => Cause[E2]): ZPure[W, S1, S2, R, E2, A] =
-    foldCauseM(cause => ZPure.halt(f(cause)), ZPure.succeed)
+    foldCauseM(cause => ZPure.failCause(f(cause)), ZPure.succeed)
 
   /**
    * Transforms the updated state of this computation with the specified
@@ -502,7 +502,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * the remainder.
    */
   final def provideSome[R0](f: R0 => R): ZPure[W, S1, S2, R0, E, A] =
-    ZPure.accessM(r0 => self.provide(f(r0)))
+    ZPure.accessZIO(r0 => self.provide(f(r0)))
 
   /**
    * Provides this computation with its initial state.
@@ -854,9 +854,9 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * The original state is supposed to be `()`.
    */
-  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
+  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessZIO[R] { r =>
     provide(r).runAll(())._2 match {
-      case Left(cause)   => zio.ZIO.halt(cause.toCause)
+      case Left(cause)   => zio.ZIO.failCause(cause.toCause)
       case Right((_, a)) => zio.ZIO.succeedNow(a)
     }
   }
@@ -865,10 +865,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    */
   def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
-    zio.ZIO.accessM[R] { r =>
+    zio.ZIO.accessZIO[R] { r =>
       val result = provide(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Left(cause)   => zio.ZIO.failCause(cause.toCause)
         case Right((_, a)) => zio.ZIO.succeedNow(a)
       }
     }
@@ -877,10 +877,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
    */
   def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
-    zio.ZIO.accessM[R] { r =>
+    zio.ZIO.accessZIO[R] { r =>
       val result = provide(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Left(cause)   => zio.ZIO.failCause(cause.toCause)
         case Right(result) => zio.ZIO.succeedNow(result)
       }
     }
@@ -889,10 +889,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
    */
   def toZIOWithAll(s1: S1): zio.ZIO[R, E, (Chunk[W], S2, A)] =
-    zio.ZIO.accessM[R] { r =>
+    zio.ZIO.accessZIO[R] { r =>
       val (log, result) = provide(r).runAll(s1)
       result match {
-        case Left(cause)    => zio.ZIO.halt(cause.toCause)
+        case Left(cause)    => zio.ZIO.failCause(cause.toCause)
         case Right((s2, a)) => zio.ZIO.succeedNow((log, s2, a))
       }
     }
@@ -901,7 +901,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Submerges the full cause of failures of this computation.
    */
   def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
-    foldM(e => ZPure.halt(ev(e)), a => ZPure.succeed(a))
+    foldM(e => ZPure.failCause(ev(e)), a => ZPure.succeed(a))
 
   /**
    * Combines this computation with the specified computation, passing the
@@ -994,8 +994,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def access[R]: AccessPartiallyApplied[R] =
     new AccessPartiallyApplied
 
-  def accessM[R]: AccessMPartiallyApplied[R] =
-    new AccessMPartiallyApplied
+  def accessZIO[R]: AccessZIOPartiallyApplied[R] =
+    new AccessZIOPartiallyApplied
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
@@ -1021,9 +1021,9 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     access(r => r)
 
   def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
-    halt(Cause(e))
+    failCause(Cause(e))
 
-  def halt[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
+  def failCause[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
     ZPure.Fail(cause)
 
   /**
@@ -1114,8 +1114,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     left.foldCauseM(
       c1 =>
         right.foldCauseM(
-          c2 => ZPure.halt(c1 && c2),
-          _ => ZPure.halt(c1)
+          c2 => ZPure.failCause(c1 && c2),
+          _ => ZPure.failCause(c1)
         ),
       a => right.map(b => f(a, b))
     )
@@ -1207,7 +1207,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       Access(r => succeed(f(r)))
   }
 
-  final class AccessMPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+  final class AccessZIOPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[W, S1, S2, E, A](f: R => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
       Access(f)
   }

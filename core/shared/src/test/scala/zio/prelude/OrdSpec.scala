@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.ZIO
 import zio.test._
 import zio.test.laws._
+import zio.{Has, ZIO}
 
 object OrdSpec extends DefaultRunnableSpec {
 
@@ -11,7 +11,7 @@ object OrdSpec extends DefaultRunnableSpec {
 
   def scalaOrderingConsistency[R, A: Ord](
     gen: Gen[R, A]
-  )(implicit ord: scala.math.Ordering[A]): ZIO[R with TestConfig, Nothing, TestResult] =
+  )(implicit ord: scala.math.Ordering[A]): ZIO[R with Has[TestConfig], Nothing, TestResult] =
     check(gen, gen) { (a1, a2) =>
       assert(a1 =?= a2)(equalTo(Ordering.fromCompare(ord.compare(a1, a2)))) &&
       assert(sign(Ord[A].toScala.compare(a1, a2)))(equalTo(sign(ord.compare(a1, a2))))
@@ -41,36 +41,36 @@ object OrdSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("OrdSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(Ord)(Gen.boolean)),
-        testM("byte")(checkAllLaws(Ord)(Gen.anyByte)),
-        testM("char")(checkAllLaws(Ord)(Gen.anyChar)),
-        testM("chunk")(checkAllLaws(Ord)(Gen.chunkOf(Gen.anyInt))),
-        testM("double")(checkAllLaws(Ord)(Gen.anyDouble)),
-        testM("either")(checkAllLaws(Ord)(Gen.either(Gen.anyInt, Gen.anyInt))),
-        testM("float")(checkAllLaws(Ord)(Gen.anyFloat)),
-        testM("int")(checkAllLaws(Ord)(Gen.anyInt)),
-        testM("list")(checkAllLaws(Ord)(Gen.listOf(Gen.anyInt))),
-        testM("long")(checkAllLaws(Ord)(Gen.anyLong)),
-        testM("option")(checkAllLaws(Ord)(Gen.option(Gen.anyInt))),
-        testM("string")(checkAllLaws(Ord)(Gen.anyString)),
-        testM("tuple2")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt))),
-        testM("tuple3")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("unit")(checkAllLaws(Ord)(Gen.unit)),
-        testM("vector")(checkAllLaws(Ord)(Gen.vectorOf(Gen.anyInt)))
+        test("boolean")(checkAllLaws(Ord)(Gen.boolean)),
+        test("byte")(checkAllLaws(Ord)(Gen.anyByte)),
+        test("char")(checkAllLaws(Ord)(Gen.anyChar)),
+        test("chunk")(checkAllLaws(Ord)(Gen.chunkOf(Gen.anyInt))),
+        test("double")(checkAllLaws(Ord)(Gen.anyDouble)),
+        test("either")(checkAllLaws(Ord)(Gen.either(Gen.anyInt, Gen.anyInt))),
+        test("float")(checkAllLaws(Ord)(Gen.anyFloat)),
+        test("int")(checkAllLaws(Ord)(Gen.anyInt)),
+        test("list")(checkAllLaws(Ord)(Gen.listOf(Gen.anyInt))),
+        test("long")(checkAllLaws(Ord)(Gen.anyLong)),
+        test("option")(checkAllLaws(Ord)(Gen.option(Gen.anyInt))),
+        test("string")(checkAllLaws(Ord)(Gen.anyString)),
+        test("tuple2")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt))),
+        test("tuple3")(checkAllLaws(Ord)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
+        test("unit")(checkAllLaws(Ord)(Gen.unit)),
+        test("vector")(checkAllLaws(Ord)(Gen.vectorOf(Gen.anyInt)))
       ),
       suite("ScalaOrdering consistency")(
-        testM("unit")(scalaOrderingConsistency(Gen.unit)),
-        testM("boolean")(scalaOrderingConsistency(Gen.boolean)),
-        testM("byte")(scalaOrderingConsistency(Gen.anyByte)),
-        testM("char")(scalaOrderingConsistency(Gen.anyChar)),
-        testM("string")(scalaOrderingConsistency(Gen.anyString)),
-        testM("int")(scalaOrderingConsistency(Gen.anyInt)),
-        testM("long")(scalaOrderingConsistency(Gen.anyLong)),
-        testM("option")(scalaOrderingConsistency(Gen.option(Gen.anyInt))),
-        testM("tuple2")(scalaOrderingConsistency(Gen.anyInt.zip(Gen.anyInt))),
-        testM("tuple3")(scalaOrderingConsistency(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("list")(scalaOrderingConsistency(Gen.listOf(Gen.anyInt))),
-        testM("vector")(scalaOrderingConsistency(Gen.vectorOf(Gen.anyInt)))
+        test("unit")(scalaOrderingConsistency(Gen.unit)),
+        test("boolean")(scalaOrderingConsistency(Gen.boolean)),
+        test("byte")(scalaOrderingConsistency(Gen.anyByte)),
+        test("char")(scalaOrderingConsistency(Gen.anyChar)),
+        test("string")(scalaOrderingConsistency(Gen.anyString)),
+        test("int")(scalaOrderingConsistency(Gen.anyInt)),
+        test("long")(scalaOrderingConsistency(Gen.anyLong)),
+        test("option")(scalaOrderingConsistency(Gen.option(Gen.anyInt))),
+        test("tuple2")(scalaOrderingConsistency(Gen.anyInt.zip(Gen.anyInt))),
+        test("tuple3")(scalaOrderingConsistency(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
+        test("list")(scalaOrderingConsistency(Gen.listOf(Gen.anyInt))),
+        test("vector")(scalaOrderingConsistency(Gen.vectorOf(Gen.anyInt)))
       )
     )
 }

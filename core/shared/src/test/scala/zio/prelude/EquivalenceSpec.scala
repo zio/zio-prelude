@@ -15,44 +15,44 @@ object EquivalenceSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("EquivalenceSpec")(
       suite("laws")(
-        testM("either") {
+        test("either") {
           implicit val equivalence = Equivalence.either[Int, Int, Int]
           val left                 = Gen.either(Gen.anyInt, Gen.either(Gen.anyInt, Gen.anyInt))
           val right                = Gen.either(Gen.either(Gen.anyInt, Gen.anyInt), Gen.anyInt)
           checkAllLaws(Equivalence)(left, right)
         },
-        testM("eitherFlip") {
+        test("eitherFlip") {
           implicit val equivalence = Equivalence.eitherFlip[Int, Int]
           val left                 = Gen.either(Gen.anyInt, Gen.anyInt)
           val right                = Gen.either(Gen.anyInt, Gen.anyInt)
           checkAllLaws(Equivalence)(left, right)
         },
-        testM("eitherNothing") {
+        test("eitherNothing") {
           implicit val equal       = Equal.EitherEqual[Int, Nothing](Equal.IntHashOrd, Equal.NothingHashOrd)
           implicit val equivalence = Equivalence.eitherNothing[Int]
           val left                 = Gen.either(Gen.anyInt, genNothing)
           val right                = Gen.anyInt
           checkAllLaws(Equivalence)(left, right)
         },
-        testM("identity") {
+        test("identity") {
           implicit val equivalence = Equivalence.identity[Int]
           val left                 = Gen.anyInt
           val right                = Gen.anyInt
           checkAllLaws(Equivalence)(left, right)
         },
-        testM("tuple") {
+        test("tuple") {
           implicit val equivalence = Equivalence.tuple[Int, Int, Int]
           val left                 = Gen.anyInt <*> (Gen.anyInt <*> Gen.anyInt)
-          val right                = (Gen.anyInt <*> Gen.anyInt) <*> Gen.anyInt
+          val right                = ((Gen.anyInt <*> Gen.anyInt) <*> Gen.anyInt).map { case (a, b, c) => ((a, b), c) }
           checkAllLaws(Equivalence)(left, right)
         },
-        testM("tupleFlip") {
+        test("tupleFlip") {
           implicit val equivalence = Equivalence.tupleFlip[Int, Int]
           val left                 = Gen.anyInt <*> Gen.anyInt
           val right                = Gen.anyInt <*> Gen.anyInt
           checkAllLaws(Equivalence)(left, right)
         },
-        testM("tupleAny") {
+        test("tupleAny") {
           implicit val equal       = Equal.AnyHashOrd
           implicit val equivalence = Equivalence.tupleAny[Int]
           val left                 = Gen.anyInt <*> genAny

@@ -1,39 +1,39 @@
 package zio.prelude
 
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 object NonEmptyListSpec extends DefaultRunnableSpec {
 
-  lazy val genBooleanFunction: Gen[Random, Int => Boolean] =
+  lazy val genBooleanFunction: Gen[Has[Random], Int => Boolean] =
     Gen.function(Gen.boolean)
 
-  lazy val genBooleanFunction2: Gen[Random, (Int, Int) => Boolean] =
+  lazy val genBooleanFunction2: Gen[Has[Random], (Int, Int) => Boolean] =
     Gen.function2(Gen.boolean)
 
-  lazy val genCons: Gen[Random with Sized, ::[Int]] =
+  lazy val genCons: Gen[Has[Random] with Has[Sized], ::[Int]] =
     Gen.listOf1(genInt)
 
-  lazy val genConsFunction: Gen[Random with Sized, Int => ::[Int]] =
+  lazy val genConsFunction: Gen[Has[Random] with Has[Sized], Int => ::[Int]] =
     Gen.function(genCons)
 
-  lazy val genFunction: Gen[Random, Int => Int] =
+  lazy val genFunction: Gen[Has[Random], Int => Int] =
     Gen.function(genInt)
 
-  lazy val genFunction2: Gen[Random with Sized, (Int, Int) => Int] =
+  lazy val genFunction2: Gen[Has[Random] with Has[Sized], (Int, Int) => Int] =
     Gen.function2(genInt)
 
-  lazy val genInt: Gen[Random, Int] =
+  lazy val genInt: Gen[Has[Random], Int] =
     Gen.int(-10, 10)
 
-  lazy val genNonEmptyList: Gen[Random with Sized, NonEmptyList[Int]] =
+  lazy val genNonEmptyList: Gen[Has[Random] with Has[Sized], NonEmptyList[Int]] =
     genCons.map(NonEmptyList.fromCons)
 
-  lazy val genString: Gen[Random with Sized, String] =
+  lazy val genString: Gen[Has[Random] with Has[Sized], String] =
     Gen.alphaNumericString
 
-  lazy val genConsWithIndex: Gen[Random with Sized, (::[Int], Int)] =
+  lazy val genConsWithIndex: Gen[Has[Random] with Has[Sized], (::[Int], Int)] =
     for {
       cons  <- genCons
       index <- Gen.int(-2, cons.length + 2)
@@ -42,205 +42,205 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("NonEmptyListSpec")(
       suite("laws")(
-        testM("associative")(checkAllLaws(Associative)(genNonEmptyList)),
-        testM("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.nonEmptyList, Gen.anyInt)),
-        testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(GenFs.nonEmptyList, Gen.anyInt)),
-        testM("hash")(checkAllLaws(Hash)(genNonEmptyList)),
-        testM("identityBoth")(checkAllLaws(IdentityBoth)(GenFs.nonEmptyList, Gen.anyInt)),
-        testM("identityFlatten")(checkAllLaws(IdentityFlatten)(GenFs.nonEmptyList, Gen.anyInt)),
-        testM("nonEmptyForEach")(checkAllLaws(NonEmptyForEach)(GenFs.nonEmptyList, Gen.anyInt)),
-        testM("ord")(checkAllLaws(Ord)(genNonEmptyList))
+        test("associative")(checkAllLaws(Associative)(genNonEmptyList)),
+        test("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.nonEmptyList, Gen.anyInt)),
+        test("commutativeBoth")(checkAllLaws(CommutativeBoth)(GenFs.nonEmptyList, Gen.anyInt)),
+        test("hash")(checkAllLaws(Hash)(genNonEmptyList)),
+        test("identityBoth")(checkAllLaws(IdentityBoth)(GenFs.nonEmptyList, Gen.anyInt)),
+        test("identityFlatten")(checkAllLaws(IdentityFlatten)(GenFs.nonEmptyList, Gen.anyInt)),
+        test("nonEmptyForEach")(checkAllLaws(NonEmptyForEach)(GenFs.nonEmptyList, Gen.anyInt)),
+        test("ord")(checkAllLaws(Ord)(genNonEmptyList))
       ),
       suite("methods")(
-        testM("++") {
+        test("++") {
           check(genCons, genCons) { (as, bs) =>
             val actual   = (NonEmptyList.fromCons(as) ++ NonEmptyList.fromCons(bs)).toCons
             val expected = as ::: bs
             actual <-> expected
           }
         },
-        testM("contains") {
+        test("contains") {
           check(genCons, genInt) { (as, a) =>
             NonEmptyList.fromCons(as).contains(a) <-> as.contains(a)
           }
         },
-        testM("corresponds") {
+        test("corresponds") {
           check(genCons, genCons, genBooleanFunction2) { (as, bs, f) =>
             val actual   = NonEmptyList.fromCons(as).corresponds(NonEmptyList.fromCons(bs))(f)
             val expected = as.corresponds(bs)(f)
             actual <-> expected
           }
         },
-        testM("count") {
+        test("count") {
           check(genCons, genBooleanFunction) { (as, f) =>
             NonEmptyList.fromCons(as).count(f) <-> as.count(f)
           }
         },
-        testM("distinct") {
+        test("distinct") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).distinct.toCons <-> as.distinct
           }
         },
-        testM("drop") {
+        test("drop") {
           check(genConsWithIndex) { case (as, i) =>
             NonEmptyList.fromCons(as).drop(i) <-> as.drop(i)
           }
         },
-        testM("dropRight") {
+        test("dropRight") {
           check(genConsWithIndex) { case (as, i) =>
             NonEmptyList.fromCons(as).dropRight(i) <-> as.dropRight(i)
           }
         },
-        testM("dropWhile") {
+        test("dropWhile") {
           check(genCons, genBooleanFunction) { (as, f) =>
             NonEmptyList.fromCons(as).dropWhile(f) <-> as.dropWhile(f)
 
           }
         },
-        testM("exists") {
+        test("exists") {
           check(genCons, genBooleanFunction) { (as, f) =>
             NonEmptyList.fromCons(as).exists(f) <-> as.exists(f)
           }
         },
-        testM("find") {
+        test("find") {
           check(genCons, genBooleanFunction) { (as, f) =>
             NonEmptyList.fromCons(as).find(f) <-> as.find(f)
           }
         },
-        testM("flatMap") {
+        test("flatMap") {
           check(genCons, genConsFunction) { (as, f) =>
             val actual   = NonEmptyList.fromCons(as).flatMap(a => NonEmptyList.fromCons(f(a))).toCons
             val expected = as.flatMap(f)
             actual <-> expected
           }
         },
-        testM("flatten") {
+        test("flatten") {
           check(genCons, genConsFunction) { (as, f) =>
             val actual   = NonEmptyList.fromCons(as).map(a => NonEmptyList.fromCons(f(a))).flatten.toCons
             val expected = as.map(f).flatten
             actual <-> expected
           }
         },
-        testM("foldLeft") {
+        test("foldLeft") {
           check(genCons, genInt, genFunction2) { (as, z, f) =>
             NonEmptyList.fromCons(as).foldLeft(z)(f) <-> as.foldLeft(z)(f)
           }
         },
-        testM("foldRight") {
+        test("foldRight") {
           check(genCons, genInt, genFunction2) { (as, z, f) =>
             NonEmptyList.fromCons(as).foldRight(z)(f) <-> as.foldRight(z)(f)
           }
         },
-        testM("forall") {
+        test("forall") {
           check(genCons, genBooleanFunction) { (as, f) =>
             NonEmptyList.fromCons(as).forall(f) <-> as.forall(f)
           }
         },
-        testM("head") {
+        test("head") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).head <-> as.head
           }
         },
-        testM("length") {
+        test("length") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).length <-> as.length
           }
         },
-        testM("map") {
+        test("map") {
           check(genCons, genFunction) { (as, f) =>
             NonEmptyList.fromCons(as).map(f).toCons <-> as.map(f)
           }
         },
-        testM("max") {
+        test("max") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).max <-> as.max
           }
         },
-        testM("maxBy") {
+        test("maxBy") {
           check(genCons, genFunction) { (as, f) =>
             NonEmptyList.fromCons(as).maxBy(f) <-> as.maxBy(f)
           }
         },
-        testM("min") {
+        test("min") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).min <-> as.min
           }
         },
-        testM("minBy") {
+        test("minBy") {
           check(genCons, genFunction) { (as, f) =>
             NonEmptyList.fromCons(as).minBy(f) <-> as.minBy(f)
           }
         },
-        testM("mkString") {
+        test("mkString") {
           check(genCons, genString, genString, genString) { (as, start, sep, end) =>
             NonEmptyList.fromCons(as).mkString(start, sep, end) <-> as.mkString(start, sep, end)
           }
         },
-        testM("product") {
+        test("product") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).product <-> as.product
           }
         },
-        testM("reduceLeft") {
+        test("reduceLeft") {
           check(genCons, genFunction2) { (as, f) =>
             NonEmptyList.fromCons(as).reduceLeft(f) <-> as.reduceLeft(f)
           }
         },
-        testM("reduceRight") {
+        test("reduceRight") {
           check(genCons, genFunction2) { (as, f) =>
             NonEmptyList.fromCons(as).reduceRight(f) <-> as.reduceRight(f)
           }
         },
-        testM("reverse") {
+        test("reverse") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).reverse.toCons <-> as.reverse
           }
         },
-        testM("sum") {
+        test("sum") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).sum <-> as.sum
           }
         },
-        testM("tails") {
+        test("tails") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).tails.map(_.toCons).toCons <-> as.tails.toList.init
           }
         },
-        testM("take") {
+        test("take") {
           check(genConsWithIndex) { case (as, i) =>
             NonEmptyList.fromCons(as).take(i) <-> as.take(i)
           }
         },
-        testM("takeRight") {
+        test("takeRight") {
           check(genConsWithIndex) { case (as, i) =>
             NonEmptyList.fromCons(as).takeRight(i) <-> as.takeRight(i)
           }
         },
-        testM("takeWhile") {
+        test("takeWhile") {
           check(genCons, genBooleanFunction) { (as, f) =>
             NonEmptyList.fromCons(as).takeWhile(f) <-> as.takeWhile(f)
           }
         },
-        testM("toCons") {
+        test("toCons") {
           check(genNonEmptyList) { as =>
             val cons         = as.toCons
             val nonEmptyList = NonEmptyList.fromCons(cons)
             assert(nonEmptyList)(equalTo(as))
           }
         },
-        testM("toString") {
+        test("toString") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).toString <-> as.mkString("NonEmptyList(", ", ", ")")
           }
         },
-        testM("zip") {
+        test("zip") {
           check(genCons, genCons) { (as, bs) =>
             val actual   = NonEmptyList.fromCons(as).zip(NonEmptyList.fromCons(bs)).toCons
             val expected = as.zip(bs)
             actual <-> expected
           }
         },
-        testM("zipWithIndex") {
+        test("zipWithIndex") {
           check(genCons) { as =>
             val actual   = NonEmptyList.fromCons(as).zipWithIndex.toCons
             val expected = as.zipWithIndex
@@ -249,7 +249,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
         }
       ),
       suite("constructors")(
-        testM("fromCons") {
+        test("fromCons") {
           check(genCons) { as =>
             val nonEmptyList = NonEmptyList.fromCons(as)
             val cons         = nonEmptyList.toCons

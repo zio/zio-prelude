@@ -19,21 +19,7 @@ package zio.prelude
 import zio.prelude.newtypes.{Failure, FailureIn, FailureOut}
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
-import zio.{
-  Cause,
-  Chunk,
-  ChunkBuilder,
-  Exit,
-  Fiber,
-  NonEmptyChunk,
-  Schedule,
-  ZIO,
-  ZLayer,
-  ZManaged,
-  ZQueue,
-  ZRef,
-  ZRefM
-}
+import zio.{Cause, Chunk, ChunkBuilder, Exit, Fiber, NonEmptyChunk, Schedule, ZIO, ZLayer, ZManaged, ZQueue, ZRef}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -1357,20 +1343,22 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   /**
    * The `Covariant` (and thus `Invariant`) for `ZRef`
    */
-  implicit def ZRefCovariant[EA, EB, A]: Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] =
-    new Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] {
-      override def map[B, C](f: B => C): ZRef[EA, EB, A, B] => ZRef[EA, EB, A, C] = { zref =>
-        zref.map(f)
+  implicit def ZRefCovariant[RA, RB, EA, EB, A]: Covariant[({ type lambda[+b] = ZRef[RA, RB, EA, EB, A, b] })#lambda] =
+    new Covariant[({ type lambda[+b] = ZRef[RA, RB, EA, EB, A, b] })#lambda] {
+      override def map[B, C](f: B => C): ZRef[RA, RB, EA, EB, A, B] => ZRef[RA, RB, EA, EB, A, C] = { zref =>
+        zref.map[C](f)
       }
     }
 
   /**
    * The `Covariant` (and thus `Invariant`) for a failed `ZRef` on its input
    */
-  implicit def ZRefFailureInCovariant[EB, A, B]
-    : Covariant[({ type lambda[+ea] = FailureIn[ZRef[ea, EB, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+ea] = FailureIn[ZRef[ea, EB, A, B]] })#lambda] {
-      override def map[E, E1](f: E => E1): FailureIn[ZRef[E, EB, A, B]] => FailureIn[ZRef[E1, EB, A, B]] = { zref =>
+  implicit def ZRefFailureInCovariant[RA, RB, EB, A, B]
+    : Covariant[({ type lambda[+ea] = FailureIn[ZRef[RA, RB, ea, EB, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+ea] = FailureIn[ZRef[RA, RB, ea, EB, A, B]] })#lambda] {
+      override def map[E, E1](
+        f: E => E1
+      ): FailureIn[ZRef[RA, RB, E, EB, A, B]] => FailureIn[ZRef[RA, RB, E1, EB, A, B]] = { zref =>
         FailureIn.wrap(FailureIn.unwrap(zref).dimapError(f, identity))
       }
     }
@@ -1378,48 +1366,54 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   /**
    * The `Covariant` (and thus `Invariant`) for a failed `ZRef` on its output
    */
-  implicit def ZRefFailureOutCovariant[EA, A, B]
-    : Covariant[({ type lambda[+eb] = FailureOut[ZRef[EA, eb, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+eb] = FailureOut[ZRef[EA, eb, A, B]] })#lambda] {
-      override def map[E, E1](f: E => E1): FailureOut[ZRef[EA, E, A, B]] => FailureOut[ZRef[EA, E1, A, B]] = { zref =>
+  implicit def ZRefFailureOutCovariant[RA, RB, EA, A, B]
+    : Covariant[({ type lambda[+eb] = FailureOut[ZRef[RA, RB, EA, eb, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+eb] = FailureOut[ZRef[RA, RB, EA, eb, A, B]] })#lambda] {
+      override def map[E, E1](
+        f: E => E1
+      ): FailureOut[ZRef[RA, RB, EA, E, A, B]] => FailureOut[ZRef[RA, RB, EA, E1, A, B]] = { zref =>
         FailureOut.wrap(FailureOut.unwrap(zref).dimapError(identity, f))
       }
     }
 
   /**
-   * The `Covariant` (and thus `Invariant`) for `ZRefM`
+   * The `Covariant` (and thus `Invariant`) for `ZRef.Synchronized`
    */
-  implicit def ZRefMCovariant[RA, RB, EA, EB, A]
-    : Covariant[({ type lambda[+b] = ZRefM[RA, RB, EA, EB, A, b] })#lambda] =
-    new Covariant[({ type lambda[+b] = ZRefM[RA, RB, EA, EB, A, b] })#lambda] {
-      override def map[B, C](f: B => C): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, A, C] = { zref =>
+  implicit def ZRefSynchronizedCovariant[RA, RB, EA, EB, A]
+    : Covariant[({ type lambda[+b] = ZRef.Synchronized[RA, RB, EA, EB, A, b] })#lambda] =
+    new Covariant[({ type lambda[+b] = ZRef.Synchronized[RA, RB, EA, EB, A, b] })#lambda] {
+      override def map[B, C](
+        f: B => C
+      ): ZRef.Synchronized[RA, RB, EA, EB, A, B] => ZRef.Synchronized[RA, RB, EA, EB, A, C] = { zref =>
         zref.map(f)
       }
     }
 
   /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZRefM` on its input
+   * The `Covariant` (and thus `Invariant`) for a failed `ZRef.Synchronized` on its input
    */
-  implicit def ZRefMFailureInACovariant[RA, RB, EB, A, B]
-    : Covariant[({ type lambda[+ea] = FailureIn[ZRefM[RA, RB, ea, EB, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+ea] = FailureIn[ZRefM[RA, RB, ea, EB, A, B]] })#lambda] {
+  implicit def ZRefSynchronizedFailureInACovariant[RA, RB, EB, A, B]
+    : Covariant[({ type lambda[+ea] = FailureIn[ZRef.Synchronized[RA, RB, ea, EB, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+ea] = FailureIn[ZRef.Synchronized[RA, RB, ea, EB, A, B]] })#lambda] {
       override def map[E, E1](
         f: E => E1
-      ): FailureIn[ZRefM[RA, RB, E, EB, A, B]] => FailureIn[ZRefM[RA, RB, E1, EB, A, B]] = { zref =>
-        FailureIn.wrap(FailureIn.unwrap(zref).dimapError(f, identity))
+      ): FailureIn[ZRef.Synchronized[RA, RB, E, EB, A, B]] => FailureIn[ZRef.Synchronized[RA, RB, E1, EB, A, B]] = {
+        zref =>
+          FailureIn.wrap(FailureIn.unwrap(zref).dimapError(f, identity))
       }
     }
 
   /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZRefM` on its output
+   * The `Covariant` (and thus `Invariant`) for a failed `ZRef.Synchronized` on its output
    */
-  implicit def ZRefMFailureOutCovariant[RA, RB, EA, A, B]
-    : Covariant[({ type lambda[+eb] = FailureOut[ZRefM[RA, RB, EA, eb, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+eb] = FailureOut[ZRefM[RA, RB, EA, eb, A, B]] })#lambda] {
+  implicit def ZRefSynchronizedFailureOutCovariant[RA, RB, EA, A, B]
+    : Covariant[({ type lambda[+eb] = FailureOut[ZRef.Synchronized[RA, RB, EA, eb, A, B]] })#lambda] =
+    new Covariant[({ type lambda[+eb] = FailureOut[ZRef.Synchronized[RA, RB, EA, eb, A, B]] })#lambda] {
       override def map[E, E1](
         f: E => E1
-      ): FailureOut[ZRefM[RA, RB, EA, E, A, B]] => FailureOut[ZRefM[RA, RB, EA, E1, A, B]] = { zref =>
-        FailureOut.wrap(FailureOut.unwrap(zref).dimapError(identity, f))
+      ): FailureOut[ZRef.Synchronized[RA, RB, EA, E, A, B]] => FailureOut[ZRef.Synchronized[RA, RB, EA, E1, A, B]] = {
+        zref =>
+          FailureOut.wrap(FailureOut.unwrap(zref).dimapError(identity, f))
       }
     }
 
@@ -1752,19 +1746,22 @@ trait LowPriorityInvariantImplicits {
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `ZRef`.
    */
-  implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRef[EA, EB, A, B] => ZRef[EA, EB, C, B] =
-        ref => ref.contramap(f)
+  implicit def ZRefContravariant[RA, RB, EA, EB, B]
+    : Contravariant[({ type lambda[-x] = ZRef[RA, RB, EA, EB, x, B] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZRef[RA, RB, EA, EB, x, B] })#lambda] {
+      def contramap[A, C](f: C => A): ZRef[RA, RB, EA, EB, A, B] => ZRef[RA, RB, EA, EB, C, B] =
+        ref => ref.contramap[C](f)
     }
 
   /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZRefM`.
+   * The `Contravariant` (and thus `Invariant`) instance for `ZRef.Synchronized`.
    */
-  implicit def ZRefMContravariant[RA, RB, EA, EB, B]
-    : Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, C, B] =
+  implicit def ZRefSynchronizedContravariant[RA, RB, EA, EB, B]
+    : Contravariant[({ type lambda[-x] = ZRef.Synchronized[RA, RB, EA, EB, x, B] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZRef.Synchronized[RA, RB, EA, EB, x, B] })#lambda] {
+      def contramap[A, C](
+        f: C => A
+      ): ZRef.Synchronized[RA, RB, EA, EB, A, B] => ZRef.Synchronized[RA, RB, EA, EB, C, B] =
         ref => ref.contramap(f)
     }
 

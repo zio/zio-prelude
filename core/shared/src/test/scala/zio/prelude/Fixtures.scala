@@ -1,16 +1,15 @@
 package zio.prelude
 
-import zio.Chunk
-import zio.random.Random
 import zio.test.laws.GenF
 import zio.test.{Gen, Sized}
+import zio.{Chunk, Has, Random}
 
 object Fixtures {
   type ChunkOption[+A] = Chunk[Option[A]]
 
-  val chunkOptionGenF: GenF[Random with Sized, ChunkOption] =
-    new GenF[Random with Sized, ChunkOption] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]) =
+  val chunkOptionGenF: GenF[Has[Random] with Has[Sized], ChunkOption] =
+    new GenF[Has[Random] with Has[Sized], ChunkOption] {
+      def apply[R1 <: Has[Random] with Has[Sized], A](gen: Gen[R1, A]) =
         Gen.chunkOf(Gen.option(gen))
     }
 

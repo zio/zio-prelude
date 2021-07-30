@@ -88,13 +88,13 @@ object EitherCompose {
 
     def fromEither[A, B, C](a2c: => URLayer[A, C])(b2c: => URLayer[B, C]): URLayer[Either[A, B], C] = {
       val right: ZLayer[Either[A, B], A, B]                   =
-        ZLayer.fromFunctionManyM[Either[A, B], A, B] {
+        ZLayer.fromFunctionManyZIO[Either[A, B], A, B] {
           case Left(a)  => ZIO.fail(a)
           case Right(b) => ZIO.succeed(b)
         }
       val unright: URLayer[(Either[A, B], Cause[A]), A]       =
-        ZLayer.fromFunctionManyM[(Either[A, B], Cause[A]), Nothing, A] { case (_, cause) =>
-          cause.failureOrCause.fold(ZIO.succeed(_), ZIO.halt(_))
+        ZLayer.fromFunctionManyZIO[(Either[A, B], Cause[A]), Nothing, A] { case (_, cause) =>
+          cause.failureOrCause.fold(ZIO.succeed(_), ZIO.failCause(_))
         }
       val handleFailure: URLayer[(Either[A, B], Cause[A]), C] = unright >>> a2c
       right.fold(handleFailure, b2c)

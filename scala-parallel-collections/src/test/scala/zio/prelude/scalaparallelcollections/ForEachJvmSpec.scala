@@ -2,9 +2,9 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 import scala.collection.parallel.{immutable => par}
 
@@ -22,23 +22,25 @@ object ForEachJvmSpec extends DefaultRunnableSpec {
   }
   import ParallelCollectionCompatibility._
 
-  def genParMap[R <: Random with Sized, K](k: Gen[R, K]): GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
+  def genParMap[R <: Has[Random] with Has[Sized], K](
+    k: Gen[R, K]
+  ): GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
     new GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] {
       def apply[R1 <: R, V](v: Gen[R1, V]): Gen[R1, par.ParMap[K, V]] =
         Gen.mapOf(k, v).map(_.par)
     }
 
-  val genParSeq: GenF[Random with Sized, par.ParSeq] =
-    new GenF[Random with Sized, par.ParSeq] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, par.ParSeq[A]] =
+  val genParSeq: GenF[Has[Random] with Has[Sized], par.ParSeq] =
+    new GenF[Has[Random] with Has[Sized], par.ParSeq] {
+      def apply[R1 <: Has[Random] with Has[Sized], A](gen: Gen[R1, A]): Gen[R1, par.ParSeq[A]] =
         Gen.listOf(gen).map(_.par)
     }
 
   def spec: ZSpec[Environment, Failure] =
     suite("ForEachJvmSpec")(
       suite("laws")(
-        testM("parMap")(checkAllLaws(ForEach)(genParMap(Gen.anyInt), Gen.anyInt)),
-        testM("parSeq")(checkAllLaws(ForEach)(genParSeq, Gen.anyInt))
+        test("parMap")(checkAllLaws(ForEach)(genParMap(Gen.anyInt), Gen.anyInt)),
+        test("parSeq")(checkAllLaws(ForEach)(genParSeq, Gen.anyInt))
       )
     )
 }

@@ -9,7 +9,7 @@ object FutureCommutativeEitherSpec extends DefaultRunnableSpec {
 
   def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
     suite("FutureCommutativeEitherSpec")(
-      testM("FutureCommutativeEither returns the first future that is completed") {
+      test("FutureCommutativeEither returns the first future that is completed") {
         for {
           l <- ZIO.fromFuture { implicit ec =>
                  Future.successful("immediate") <|> Future(blocking { Thread.sleep(60 * 1000); "long 1" })
