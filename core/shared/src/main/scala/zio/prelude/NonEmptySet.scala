@@ -207,10 +207,28 @@ object NonEmptySet {
     chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptySet", chunk.toNonEmptyList.map(_.debug).toCons)
 
   /**
+   * The `DeriveEqual` instance for `NonEmptySet`.
+   */
+  implicit val NonEmptySetDeriveEqual: DeriveEqual[NonEmptySet] =
+    new DeriveEqual[NonEmptySet] {
+      def derive[A: Equal]: Equal[NonEmptySet[A]] =
+        NonEmptySetHashPartialOrd
+    }
+
+  /**
    * Derives a `Hash[NonEmptySet[A]]` and `PartialOrd[NonEmptySet[A]]` (and thus `Equal[NonEmptyList[A]]`) instance.
    */
   implicit def NonEmptySetHashPartialOrd[A]: Hash[NonEmptySet[A]] with PartialOrd[NonEmptySet[A]] =
     HashPartialOrd.derive[Set[A]].contramap(_.toSet)
+
+  /**
+   * The `Invariant` instance for `NonEmptySet`.
+   */
+  implicit val NonEmptySetInvariant: Invariant[NonEmptySet] =
+    new Invariant[NonEmptySet] {
+      def invmap[A, B](f: A <=> B): NonEmptySet[A] <=> NonEmptySet[B] =
+        Equivalence[NonEmptySet[A], NonEmptySet[B]](a => a.map(f.to), b => b.map(f.from))
+    }
 
   /**
    * Provides an implicit conversion from `NonEmptySet` to the `Set`

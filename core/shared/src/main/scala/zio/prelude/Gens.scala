@@ -80,6 +80,12 @@ object Gens {
     Gen.mapOf1(a, Gen.size.map(Natural.unsafeMake)).map(NonEmptyMultiSet.fromMapOption(_).get)
 
   /**
+   * A generator of `NonEmptySet` values.
+   */
+  def nonEmptySetOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptySet[A]] =
+    Gen.setOf1(a).map(NonEmptySet.fromSetOption(_).get)
+
+  /**
    * A generator of state transition functions.
    */
   def state[R, S, A](s: Gen[R, S], a: Gen[R, A]): Gen[R, State[S, A]] =
