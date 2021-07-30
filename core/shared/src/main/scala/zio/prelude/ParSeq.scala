@@ -368,7 +368,7 @@ object ParSeq {
   private def flatten[Z <: Unit, A](parSeq: ParSeq[Z, A]): List[Set[A]] = {
 
     @tailrec
-    def loop[A](parSeqs: List[ParSeq[Z, A]], flattened: List[Set[A]]): List[Set[A]] = {
+    def loop(parSeqs: List[ParSeq[Z, A]], flattened: List[Set[A]]): List[Set[A]] = {
       val (parallel, sequential) = parSeqs.foldLeft((Set.empty[A], List.empty[ParSeq[Z, A]])) {
         case ((parallel, sequential), parSeq) =>
           val (set, seq) = step(parSeq)
