@@ -1,9 +1,9 @@
 package zio.prelude
 
 import zio.prelude.newtypes.{And, Max, Min, Or, Prod, Sum}
-import zio.{Has, Random}
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 object CommutativeSpec extends DefaultRunnableSpec {
 

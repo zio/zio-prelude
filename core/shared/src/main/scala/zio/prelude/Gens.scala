@@ -18,8 +18,8 @@ package zio.prelude
 
 import zio.prelude.fx.Cause
 import zio.prelude.newtypes.Natural
-import zio.{Has, Random}
 import zio.test._
+import zio.{Has, Random}
 
 /**
  * Provides generators for data types from _ZIO Prelude_.

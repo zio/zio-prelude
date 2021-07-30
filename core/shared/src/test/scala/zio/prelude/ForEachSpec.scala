@@ -1,9 +1,9 @@
 package zio.prelude
 
 import zio.prelude.newtypes._
-import zio.{Chunk, Has, NonEmptyChunk, Random, Ref}
 import zio.test._
 import zio.test.laws._
+import zio.{Chunk, Has, NonEmptyChunk, Random, Ref}
 
 object ForEachSpec extends DefaultRunnableSpec {
   import Fixtures._

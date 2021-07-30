@@ -1,9 +1,9 @@
 package zio.prelude.fx
 
 import zio.prelude._
-import zio.{CanFail, Chunk, Has, Random}
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
+import zio.{CanFail, Chunk, Has, Random}
 
 import java.util.NoSuchElementException
 import scala.util.Try

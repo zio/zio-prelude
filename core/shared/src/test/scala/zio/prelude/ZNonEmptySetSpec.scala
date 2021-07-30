@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.{Chunk, Has, Random}
 import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZNonEmptySet._
@@ -8,6 +7,7 @@ import zio.prelude.coherent.CovariantDeriveEqual
 import zio.prelude.newtypes._
 import zio.test._
 import zio.test.laws._
+import zio.{Chunk, Has, Random}
 
 object ZNonEmptySetSpec extends DefaultRunnableSpec {
 

@@ -3,9 +3,9 @@ package zio.prelude
 import zio.prelude.Equal._
 import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.ZValidation._
-import zio.{Has, Random}
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 object ZValidationSpec extends DefaultRunnableSpec {
 

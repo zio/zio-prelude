@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.{Has, Random}
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 object NonEmptyListSpec extends DefaultRunnableSpec {
 

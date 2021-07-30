@@ -1,9 +1,9 @@
 package zio.prelude
 
 import zio.prelude.newtypes._
-import zio.{Has, Random}
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 import scala.math.abs
 

@@ -17,10 +17,10 @@
 package zio.prelude
 
 import zio.prelude.newtypes.Failure
-import zio.{Cause, Exit, Has, NonEmptyChunk, Random}
 import zio.test.Gen.oneOf
 import zio.test._
 import zio.test.laws.GenF
+import zio.{Cause, Exit, Has, NonEmptyChunk, Random}
 
 import scala.concurrent.Future
 import scala.util.Try

@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.{Chunk, Has, Random}
 import zio.test.laws.GenF
 import zio.test.{Gen, Sized}
+import zio.{Chunk, Has, Random}
 
 object Fixtures {
   type ChunkOption[+A] = Chunk[Option[A]]

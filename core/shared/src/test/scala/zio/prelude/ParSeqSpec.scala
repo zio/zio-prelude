@@ -1,9 +1,9 @@
 package zio.prelude
 
-import zio.{Has, Random}
 import zio.prelude.ParSeq._
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 object ParSeqSpec extends DefaultRunnableSpec {
 

@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.{Has, ZIO}
 import zio.test._
 import zio.test.laws._
+import zio.{Has, ZIO}
 
 object HashSpec extends DefaultRunnableSpec {
 

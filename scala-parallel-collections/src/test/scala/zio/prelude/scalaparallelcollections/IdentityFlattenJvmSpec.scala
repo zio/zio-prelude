@@ -2,9 +2,9 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
-import zio.{Has, Random}
 import zio.test._
 import zio.test.laws._
+import zio.{Has, Random}
 
 import scala.collection.parallel.{immutable => par}
 
