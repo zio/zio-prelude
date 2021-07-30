@@ -1,65 +1,65 @@
 package zio.prelude
 
-import zio.random.Random
+import zio.{Has, Random}
 import zio.test._
 import zio.test.laws._
 
 object NonEmptyForEachSpec extends DefaultRunnableSpec {
 
-  val genInt: Gen[Random, Int] =
+  val genInt: Gen[Has[Random], Int] =
     Gen.anyInt
 
-  val genNonEmptyList: Gen[Random with Sized, NonEmptyList[Int]] =
+  val genNonEmptyList: Gen[Has[Random] with Has[Sized], NonEmptyList[Int]] =
     Gens.nonEmptyListOf(genInt)
 
-  val genIntFunction: Gen[Random, Int => Int] =
+  val genIntFunction: Gen[Has[Random], Int => Int] =
     Gen.function(genInt)
 
-  val genIntFunction2: Gen[Random, (Int, Int) => Int] =
+  val genIntFunction2: Gen[Has[Random], (Int, Int) => Int] =
     Gen.function2(genInt)
 
   def spec: ZSpec[Environment, Failure] =
     suite("NonEmptyForEachSpec")(
       suite("laws")(
-        testM("nonEmptyChunk")(checkAllLaws(NonEmptyForEach)(GenFs.nonEmptyChunk, Gen.anyInt))
+        test("nonEmptyChunk")(checkAllLaws(NonEmptyForEach)(GenFs.nonEmptyChunk, Gen.anyInt))
       ),
       suite("combinators")(
-        testM("max") {
+        test("max") {
           check(genNonEmptyList) { (as) =>
             val actual   = NonEmptyForEach[NonEmptyList].max(as)
             val expected = as.max
             assert(actual)(equalTo(expected))
           }
         },
-        testM("maxBy") {
+        test("maxBy") {
           check(genNonEmptyList, genIntFunction) { (as, f) =>
             val actual   = NonEmptyForEach[NonEmptyList].maxBy(as)(f)
             val expected = as.maxBy(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("min") {
+        test("min") {
           check(genNonEmptyList) { (as) =>
             val actual   = NonEmptyForEach[NonEmptyList].min(as)
             val expected = as.min
             assert(actual)(equalTo(expected))
           }
         },
-        testM("minBy") {
+        test("minBy") {
           check(genNonEmptyList, genIntFunction) { (as, f) =>
             val actual   = NonEmptyForEach[NonEmptyList].minBy(as)(f)
             val expected = as.minBy(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("reduceAll") {
+        test("reduceAll") {
           check(genNonEmptyList, genIntFunction2) { (as, f) =>
             val actual   = NonEmptyForEach[NonEmptyList].reduceAll(as)(f)
             val expected = as.reduce(Associative.make(f))
             assert(actual)(equalTo(expected))
           }
         },
-        testM("toNonEmptyChunk") {
+        test("toNonEmptyChunk") {
           check(genNonEmptyList) { (as) =>
             val actual   = NonEmptyForEach[NonEmptyList].toNonEmptyChunk(as)
             val expected = as.toNonEmptyChunk

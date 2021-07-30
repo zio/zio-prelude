@@ -11,9 +11,9 @@ object EqualSpec extends DefaultRunnableSpec {
       suite("laws")(
         {
           implicit val ThrowableEqual: Equal[Throwable] = Equal.ThrowableHash
-          testM("throwable")(checkAllLaws(Equal)(Gen.throwable))
+          test("throwable")(checkAllLaws(Equal)(Gen.throwable))
         },
-        testM("try")(
+        test("try")(
           checkAllLaws(Equal)(oneOf(Gen.throwable.map(scala.util.Failure(_)), Gen.anyInt.map(scala.util.Success(_))))
         )
       ),

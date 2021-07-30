@@ -8,11 +8,11 @@ object IdentityFlattenSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("IdentityFlattenSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(IdentityFlatten)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
-        testM("either")(checkAllLaws(IdentityFlatten)(GenFs.either(Gen.anyInt), Gen.anyInt)),
-        testM("list")(checkAllLaws(IdentityFlatten)(GenF.list, Gen.anyInt)),
-        testM("option")(checkAllLaws(IdentityFlatten)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(IdentityFlatten)(GenF.vector, Gen.anyInt))
+        test("chunk")(checkAllLaws(IdentityFlatten)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
+        test("either")(checkAllLaws(IdentityFlatten)(GenFs.either(Gen.anyInt), Gen.anyInt)),
+        test("list")(checkAllLaws(IdentityFlatten)(GenF.list, Gen.anyInt)),
+        test("option")(checkAllLaws(IdentityFlatten)(GenF.option, Gen.anyInt)),
+        test("vector")(checkAllLaws(IdentityFlatten)(GenF.vector, Gen.anyInt))
       )
     )
 

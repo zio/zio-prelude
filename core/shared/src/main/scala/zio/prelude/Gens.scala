@@ -18,7 +18,7 @@ package zio.prelude
 
 import zio.prelude.fx.Cause
 import zio.prelude.newtypes.Natural
-import zio.random.Random
+import zio.{Has, Random}
 import zio.test._
 
 /**
@@ -29,17 +29,17 @@ object Gens {
   /**
    * A generator of natural numbers. Shrinks toward '0'.
    */
-  val anyNatural: Gen[Random, Natural] =
+  val anyNatural: Gen[Has[Random], Natural] =
     natural(Natural.zero, Natural.unsafeMake(Int.MaxValue))
 
   /**
    * A generator of natural numbers inside the specified range: [start, end].
    * The shrinker will shrink toward the lower end of the range ("smallest").
    */
-  def natural(min: Natural, max: Natural): Gen[Random, Natural] =
+  def natural(min: Natural, max: Natural): Gen[Has[Random], Natural] =
     Gen.int(min, max).map(Natural.unsafeMake)
 
-  def parSeq[R <: Random with Sized, Z <: Unit, A](z: Gen[R, Z], a: Gen[R, A]): Gen[R, ParSeq[Z, A]] = {
+  def parSeq[R <: Has[Random] with Has[Sized], Z <: Unit, A](z: Gen[R, Z], a: Gen[R, A]): Gen[R, ParSeq[Z, A]] = {
     val failure = a.map(Cause.single)
     val empty   = z.map(_ => Cause.empty.asInstanceOf[ParSeq[Nothing, Nothing]])
 
@@ -70,19 +70,19 @@ object Gens {
   /**
    * A generator of `NonEmptyList` values.
    */
-  def nonEmptyListOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptyList[A]] =
+  def nonEmptyListOf[R <: Has[Random] with Has[Sized], A](a: Gen[R, A]): Gen[R, NonEmptyList[A]] =
     Gen.listOf1(a).map(NonEmptyList.fromCons)
 
   /**
    * A generator of `NonEmptyMultiSet` values.
    */
-  def nonEmptyMultiSetOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptyMultiSet[A]] =
+  def nonEmptyMultiSetOf[R <: Has[Random] with Has[Sized], A](a: Gen[R, A]): Gen[R, NonEmptyMultiSet[A]] =
     Gen.mapOf1(a, Gen.size.map(Natural.unsafeMake)).map(NonEmptyMultiSet.fromMapOption(_).get)
 
   /**
    * A generator of `NonEmptySet` values.
    */
-  def nonEmptySetOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptySet[A]] =
+  def nonEmptySetOf[R <: Has[Random] with Has[Sized], A](a: Gen[R, A]): Gen[R, NonEmptySet[A]] =
     Gen.setOf1(a).map(NonEmptySet.fromSetOption(_).get)
 
   /**
@@ -94,7 +94,7 @@ object Gens {
   /**
    * A generator of `Validation` values.
    */
-  def validation[R <: Random with Sized, W, E, A](
+  def validation[R <: Has[Random] with Has[Sized], W, E, A](
     w: Gen[R, W],
     e: Gen[R, E],
     a: Gen[R, A]
