@@ -124,7 +124,7 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
     new Covariant[({ type lambda[+A] = Nested[F, G, A] })#lambda] {
       private lazy val composedCovariant = F.compose(G)
 
-      override def map[A, B](f: A => B): Nested[F, G, A] => Nested[F, G, B] = { x: Nested[F, G, A] =>
+      override def map[A, B](f: A => B): Nested[F, G, A] => Nested[F, G, B] = { (x: Nested[F, G, A]) =>
         Nested(composedCovariant.map(f)(Nested.unwrap[F[G[A]]](x)))
       }
     }
