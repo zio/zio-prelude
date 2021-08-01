@@ -16,8 +16,8 @@
 
 package zio.prelude
 
-import zio.{Cause, Chunk, Exit, NonEmptyChunk}
 import zio.prelude.newtypes.Nested
+import zio.{Cause, Chunk, Exit, NonEmptyChunk}
 
 import scala.util.Try
 
@@ -48,8 +48,7 @@ object Derive {
   def apply[F[_], Typeclass[_]](implicit derive: Derive[F, Typeclass]): Derive[F, Typeclass] =
     derive
 
-  
-    /**
+  /**
    * The `DeriveEqual` instance for `Id`.
    */
   implicit val IdDeriveEqual: Derive[Id, Equal] =
