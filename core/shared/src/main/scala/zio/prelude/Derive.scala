@@ -134,9 +134,9 @@ object Derive {
   /**
    * The `DeriveEqual` instance for `Set`.
    */
-  implicit def SetDeriveEqual[A]: DeriveEqual[({ type lambda[x] = Set[A] })#lambda] =
-    new DeriveEqual[({ type lambda[x] = Set[A] })#lambda] {
-      def derive[B: Equal]: Equal[Set[A]] =
+  implicit val SetDeriveEqual: DeriveEqual[Set] =
+    new DeriveEqual[Set] {
+      def derive[A: Equal]: Equal[Set[A]] =
         Equal.SetHashPartialOrd
     }
 

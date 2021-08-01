@@ -29,10 +29,10 @@ addCommandAlias(
 )
 addCommandAlias(
   "testNative",
-  ";coreNative/test:compile;experimentalNative/test:compile"
+  ";coreNative/test;experimentalNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-val zioVersion = "1.0.7"
+val zioVersion = "1.0.10"
 
 lazy val root = project
   .in(file("."))
@@ -69,6 +69,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val coreJS  = core.js
   .settings(jsSettings)
+  .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val coreJVM = core.jvm
@@ -90,6 +91,7 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val experimentalJS  = experimental.js
   .settings(jsSettings)
+  .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val experimentalJVM = experimental.jvm
@@ -112,7 +114,7 @@ lazy val scalaParallelCollections = project
       scalaVersion.value match {
         case BuildHelper.Scala213 | BuildHelper.ScalaDotty =>
           // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
-          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.2")
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.3")
         case _                                             =>
           List()
       }
@@ -143,11 +145,11 @@ lazy val docs = project
     moduleName := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects( /* coreJS, */ coreJVM /* , coreNative */ ),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJVM, experimentalJVM),
     ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
     docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .dependsOn( /* coreJS, */ coreJVM /* , coreNative */ )
+  .dependsOn(coreJVM, experimentalJVM)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)

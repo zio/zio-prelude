@@ -76,7 +76,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Folds over the elements of this collection using an associative operation
-   * and an identity.
+   * and an identity. Alias for `reduceIdentity`.
    */
   def fold[A: Identity](fa: F[A]): A =
     foldMap(fa)(identity)
@@ -107,6 +107,15 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   }
 
   /**
+   * Effectfully maps each element of the collection to a type `B` for which an
+   * `Identity` is defined using the function `f`, then reduces those values to
+   * a single summary using the `combine` operation of `Identity`, or the
+   * `identity` element if the collection is empty.
+   */
+  def foldMapM[G[+_]: Covariant: IdentityFlatten, A, B: Identity](fa: F[A])(f: A => G[B]): G[B] =
+    foldLeftM[G, B, A](fa)(Identity[B].identity)((accu, a) => f(a).map(aa => accu.combine(aa)))
+
+  /**
    * Folds over the elements of this collection from right to left to produce a
    * summary value, maintaining some internal state along the way.
    */
@@ -134,7 +143,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     forEach(fa)(f).as(())
 
-  def groupBy[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
+  def groupByNonEmpty[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) { (m, v) =>
       val k = f(v)
       m.get(k) match {
@@ -143,7 +152,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
       }
     }
 
-  def groupByM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
+  def groupByNonEmptyM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]].succeed) { (m, v) =>
       val k = f(v)
       AssociativeBoth.mapN(m, k) { (m, k) =>
@@ -237,6 +246,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
 
   /**
    * Reduces the collection to a summary value using the associative operation.
+   * Alias for `fold`.
    */
   def reduceIdentity[A: Identity](fa: F[A]): A =
     foldMap(fa)(identity[A])
@@ -343,6 +353,8 @@ trait ForEachSyntax {
       F.foldLeftM(self)(s)(f)
     def foldMap[B: Identity](f: A => B)(implicit F: ForEach[F]): B                                              =
       F.foldMap(self)(f)
+    def foldMapM[G[+_]: Covariant: IdentityFlatten, B: Identity](f: A => G[B])(implicit F: ForEach[F]): G[B]    =
+      F.foldMapM(self)(f)
     def foldRight[S](s: S)(f: (A, S) => S)(implicit F: ForEach[F]): S                                           =
       F.foldRight(self)(s)(f)
     def foldRightM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (A, S) => G[S])(implicit F: ForEach[F]): G[S] =
