@@ -7,7 +7,7 @@ ZIO Prelude is a library focused on providing a core set of functional data type
 
 - **[Functional Abstractions](functionalabstractions/index.md)** - Functional abstractions to describe different ways of combining data, making it easy for you to combine complex data types in a principled way.
 - **[Functional Data Types](functionaldatatypes/index.md)** - Additional data types to supplement the ones in the Scala standard library such as `Validation` and `NonEmptyList` to enable more accurate domain modeling and handle common problems like data validation.
-- **[New Types*](newtypes/index.md)** - Zero overhead new types and smart types to allow you to increase the type safety of your code base with zero overhead and minimal boilerplate.
+- **[New Types](newtypes/index.md)** - Zero overhead new types and smart types to allow you to increase the type safety of your code base with zero overhead and minimal boilerplate.
 - **[ZPure](zpure/index.md)** - A description of a computation that supports logging, context, state, and errors, providing all the functionality traditionally offered by monad transformers with dramatically better performance and ergonomics.
 
 ## Installation
