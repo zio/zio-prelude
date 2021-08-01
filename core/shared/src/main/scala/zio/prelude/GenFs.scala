@@ -88,6 +88,12 @@ object GenFs {
         Gens.nonEmptyListOf(gen)
     }
 
+  def nonEmptySet: GenF[Random with Sized, NonEmptySet] =
+    new GenF[Random with Sized, NonEmptySet] {
+      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, NonEmptySet[A]] =
+        Gens.nonEmptySetOf(gen)
+    }
+
   /**
    * A generator of `ParSeq` values.
    */

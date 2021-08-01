@@ -43,6 +43,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
     suite("NonEmptyListSpec")(
       suite("laws")(
         testM("associative")(checkAllLaws(Associative)(genNonEmptyList)),
+        testM("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.nonEmptyList, Gen.anyInt)),
         testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(GenFs.nonEmptyList, Gen.anyInt)),
         testM("hash")(checkAllLaws(Hash)(genNonEmptyList)),
         testM("identityBoth")(checkAllLaws(IdentityBoth)(GenFs.nonEmptyList, Gen.anyInt)),

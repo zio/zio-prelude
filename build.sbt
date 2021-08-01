@@ -32,7 +32,7 @@ addCommandAlias(
   ";coreNative/test;experimentalNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-val zioVersion = "1.0.9"
+val zioVersion = "1.0.10"
 
 lazy val root = project
   .in(file("."))
@@ -69,6 +69,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val coreJS  = core.js
   .settings(jsSettings)
+  .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val coreJVM = core.jvm
@@ -90,6 +91,7 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val experimentalJS  = experimental.js
   .settings(jsSettings)
+  .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
 lazy val experimentalJVM = experimental.jvm
