@@ -861,6 +861,18 @@ trait OrdSyntax {
      * Returns the result of comparing this value with the specified value.
      */
     def =?=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Ordering = ord.compare(l, r)
+
+    /**
+     * Returns the maximum of this value and the specified value.
+     */
+    def max[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
+      if (l >= r) l else r
+
+    /**
+     * Returns the minimum of this value and the specified value.
+     */
+    def min[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
+      if (l <= r) l else r
   }
 }
 
