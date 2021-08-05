@@ -19,7 +19,7 @@ A simple example of a situation where `These` might arise is in merging two upst
 
 Another example of using the `These` data type is in implementing a variant of the `zipAll` operator on collections.
 
-When we zip two collections, if the two collections have different sizes the default `zipWith` operator will just drop the "extra" elements from the ledger collection.
+When we zip two collections, if the two collections have different sizes the default `zipWith` operator will just drop the "extra" elements from the larger collection.
 
 ```scala mdoc
 import zio.Chunk
@@ -44,7 +44,7 @@ def zipAllWith[A, B, C](
   ???
 ```
 
-Now the `both` function will be called as long as there are elements of both collections to zip together. If the left collection is longer than the `left` function will be called for the extra elements of the left collection, and if the right collection is longer than the `right` operator will be called for the extra elements of the right collection.
+Now the `both` function will be called as long as there are elements of both collections to zip together. If the left collection is longer then the `left` function will be called for the extra elements of the left collection, and if the right collection is longer then the `right` operator will be called for the extra elements of the right collection.
 
 This works and is basically the signature of the `zipAllWith` operator on `Chunk`, but there is something a little less than ideal here that now we need to spread out the logic for handling these cases across three different functions. It would be nice if we could describe this as a single function.
 
