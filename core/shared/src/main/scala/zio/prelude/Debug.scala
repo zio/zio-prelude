@@ -25,7 +25,7 @@ trait Debug[-A] {
   def debug(a: A): Debug.Repr
 }
 
-object Debug {
+object Debug extends DebugVersionSpecific {
   type Renderer = Repr => String
   object Renderer {
     val Scala: Renderer = {
