@@ -201,8 +201,7 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
    * The `Commutative` and `Idempotent` instance for the max of `BigInt`
    * values.
    */
-  implicit val BigIntMaxCommutativeIdempotentIdentity
-    : Commutative[Max[BigInt]] with Idempotent[Max[BigInt]] =
+  implicit val BigIntMaxCommutativeIdempotentIdentity: Commutative[Max[BigInt]] with Idempotent[Max[BigInt]] =
     new Commutative[Max[BigInt]] with Idempotent[Max[BigInt]] {
       def combine(l: => Max[BigInt], r: => Max[BigInt]): Max[BigInt] =
         Max(l max r)
@@ -212,8 +211,7 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
    * The `Commutative` and `Idempotent` instance for the min of `BigInt`
    * values.
    */
-  implicit val BigIntMinCommutativeIdempotentIdentity
-    : Commutative[Min[BigInt]] with Idempotent[Min[BigInt]] =
+  implicit val BigIntMinCommutativeIdempotentIdentity: Commutative[Min[BigInt]] with Idempotent[Min[BigInt]] =
     new Commutative[Min[BigInt]] with Idempotent[Min[BigInt]] {
       def combine(l: => Min[BigInt], r: => Min[BigInt]): Min[BigInt] =
         Min(l min r)
