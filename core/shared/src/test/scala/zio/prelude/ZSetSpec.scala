@@ -71,13 +71,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             IntHashOrd
           )
         ),
-        testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt))),
-        testM("intersect commutative")(
-          checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))
-        ),
-        testM("union commutative")(
-          checkAllLaws(Commutative)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Max(_))))
-        )
+        testM("hash")(checkAllLaws(Hash)(genZSet(Gen.anyInt, Gen.anyInt)))
       ),
       suite("methods")(
         test("zipWith") {
