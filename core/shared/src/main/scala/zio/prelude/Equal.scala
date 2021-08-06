@@ -221,6 +221,18 @@ object Equal extends Lawful[Equal] {
     DefaultEqual
 
   /**
+   * The `Hash` and `Ord` instance for `BigDecimal`.
+   */
+  implicit val BigDecimalHashOrd: Hash[BigDecimal] with Ord[BigDecimal] =
+    HashOrd.default
+
+  /**
+   * The `Hash` and `Ord` instance for `BigInt`.
+   */
+  implicit val BigIntHashOrd: Hash[BigInt] with Ord[BigInt] =
+    HashOrd.default
+
+  /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
    */
   implicit val BooleanHashOrd: Hash[Boolean] with Ord[Boolean] =

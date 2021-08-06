@@ -133,6 +133,38 @@ object Debug {
 
   def keyValueDebug[A: Debug, B: Debug]: Debug[(A, B)] = n => Repr.KeyValue(n._1.debug, n._2.debug)
 
+  /**
+    * The `Debug` instance for `BigDecimal`.
+    */
+  implicit val BigDecimalDebug: Debug[BigDecimal] =
+    bigDecimal => Repr.VConstructor(List("scala", "math"), "BigDecimal", List(bigDecimal.toString.debug, bigDecimal.mc.debug))
+
+  /**
+   * The `Debug` instance for `BigInt`.
+   */
+  implicit val BigIntDebug: Debug[BigInt] =
+    bigInt => Repr.VConstructor(List("scala", "math"), "BigInt", List(bigInt.toString.debug))
+
+  /**
+   * The `Debug` instance for `java.math.MathContext`.
+   */
+  implicit val MathContextDebug: Debug[java.math.MathContext] =
+    mc => Repr.VConstructor(List("java", "math"), "MathContext", List(mc.getPrecision.debug, mc.getRoundingMode.debug))
+
+  /**
+   * The `Debug` instance for `java.math.RoundingMode`.
+   */
+  implicit val RoundingModeDebug: Debug[java.math.RoundingMode] = {
+    case java.math.RoundingMode.CEILING => Repr.Object(List("java", "math"), "RoundingMode.CEILING")
+    case java.math.RoundingMode.DOWN   => Repr.Object(List("java", "math"), "RoundingMode.DOWN")
+    case java.math.RoundingMode.FLOOR   => Repr.Object(List("java", "math"), "RoundingMode.FLOOR")
+    case java.math.RoundingMode.HALF_DOWN => Repr.Object(List("java", "math"), "RoundingMode.HALF_DOWN")
+    case java.math.RoundingMode.HALF_EVEN   => Repr.Object(List("java", "math"), "RoundingMode.HALF_EVEN")
+    case java.math.RoundingMode.HALF_UP   => Repr.Object(List("java", "math"), "RoundingMode.HALF_UP")
+    case java.math.RoundingMode.UNNECESSARY => Repr.Object(List("java", "math"), "RoundingMode.UNNECESSARY")
+    case java.math.RoundingMode.UP => Repr.Object(List("java", "math"), "RoundingMode.UP")
+  }
+
   implicit def ChunkDebug[A: Debug]: Debug[Chunk[A]] =
     chunk => Repr.VConstructor(List("zio"), "Chunk", chunk.map(_.debug).toList)
 
