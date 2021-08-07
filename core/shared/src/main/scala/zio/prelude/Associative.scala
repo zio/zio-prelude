@@ -198,6 +198,46 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
     }
 
   /**
+   * The `Commutative` and `Idempotent` instance for the max of `BigInt`
+   * values.
+   */
+  implicit val BigIntMaxCommutativeIdempotentIdentity: Commutative[Max[BigInt]] with Idempotent[Max[BigInt]] =
+    new Commutative[Max[BigInt]] with Idempotent[Max[BigInt]] {
+      def combine(l: => Max[BigInt], r: => Max[BigInt]): Max[BigInt] =
+        Max(l max r)
+    }
+
+  /**
+   * The `Commutative` and `Idempotent` instance for the min of `BigInt`
+   * values.
+   */
+  implicit val BigIntMinCommutativeIdempotentIdentity: Commutative[Min[BigInt]] with Idempotent[Min[BigInt]] =
+    new Commutative[Min[BigInt]] with Idempotent[Min[BigInt]] {
+      def combine(l: => Min[BigInt], r: => Min[BigInt]): Min[BigInt] =
+        Min(l min r)
+    }
+
+  /**
+   * The `Commutative` and `Identity` instance for the product of `BigInt`
+   * values.
+   */
+  implicit val BigIntProdCommutativeIdentity: Commutative[Prod[BigInt]] with Identity[Prod[BigInt]] =
+    new Commutative[Prod[BigInt]] with Identity[Prod[BigInt]] {
+      def combine(l: => Prod[BigInt], r: => Prod[BigInt]): Prod[BigInt] = Prod(l * r)
+      val identity: Prod[BigInt]                                        = Prod(1)
+    }
+
+  /**
+   * The `Commutative` and `Inverse` instance for the sum of `BigInt` values.
+   */
+  implicit val BigIntSumCommutativeInverse: Commutative[Sum[BigInt]] with Inverse[Sum[BigInt]] =
+    new Commutative[Sum[BigInt]] with Inverse[Sum[BigInt]] {
+      def combine(l: => Sum[BigInt], r: => Sum[BigInt]): Sum[BigInt] = Sum(l + r)
+      val identity: Sum[BigInt]                                      = Sum(0)
+      def inverse(l: => Sum[BigInt], r: => Sum[BigInt]): Sum[BigInt] = Sum(l - r)
+    }
+
+  /**
    * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Byte` values.
    */
   implicit val ByteMaxIdempotentIdentity: Commutative[Max[Byte]] with Idempotent[Max[Byte]] with Identity[Max[Byte]] =
