@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.Common.anyFiniteDurationScala
 import zio.prelude.newtypes.Sum
 import zio.test.laws._
 import zio.test.{DefaultRunnableSpec, _}
@@ -15,6 +16,7 @@ object InverseSpec extends DefaultRunnableSpec {
         testM("byte addition")(checkAllLaws(Inverse)(Gen.anyByte.map(Sum(_)))),
         testM("char addition")(checkAllLaws(Inverse)(Gen.anyChar.map(Sum(_)))),
         testM("double addition")(checkAllLaws(Inverse)(Gen.anyDouble.map(Sum(_)))),
+        testM("duration Scala")(checkAllLaws(Inverse)(anyFiniteDurationScala)),
         testM("float addition")(checkAllLaws(Inverse)(Gen.anyFloat.map(Sum(_)))),
         testM("int addition")(checkAllLaws(Inverse)(Gen.anyInt.map(Sum(_)))),
         testM("long addition")(checkAllLaws(Inverse)(Gen.anyLong.map(Sum(_)))),

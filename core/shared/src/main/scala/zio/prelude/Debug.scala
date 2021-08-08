@@ -16,9 +16,11 @@
 
 package zio.prelude
 
+import zio.duration.{Duration => ZIODuration}
 import zio.{Chunk, NonEmptyChunk}
 
 import scala.collection.immutable.ListMap
+import scala.concurrent.duration.{Duration => ScalaDuration}
 import scala.language.implicitConversions
 
 trait Debug[-A] {
@@ -147,6 +149,44 @@ object Debug extends DebugVersionSpecific {
    */
   implicit def DeriveDebug[F[_], A](implicit derive: Derive[F, Debug], debug: Debug[A]): Debug[F[A]] =
     derive.derive(debug)
+
+  implicit val DurationScalaDebug: Debug[ScalaDuration] = {
+    val namespace            = List("scala", "concurrent", "duration")
+    val constructor          = "Duration"
+    val namespaceConstructor = namespace ++ List(constructor)
+
+    {
+      case ScalaDuration.Zero      => Repr.Object(namespaceConstructor, "Zero")
+      case ScalaDuration.Inf       => Repr.Object(namespaceConstructor, "Inf")
+      case ScalaDuration.MinusInf  => Repr.Object(namespaceConstructor, "MinusInf")
+      case ScalaDuration.Undefined => Repr.Object(namespaceConstructor, "Undefined")
+      case d                       =>
+        Repr.Constructor(
+          namespace,
+          constructor,
+          ("length", Repr.Long(d.toNanos)),
+          ("unit", Repr.Object(List("java", "util", "concurrent"), "NANOSECONDS"))
+        )
+    }
+  }
+
+  implicit val DurationZIODebug: Debug[ZIODuration] = {
+    val namespace            = List("zio", "duration")
+    val constructor          = "Duration"
+    val namespaceConstructor = namespace ++ List(constructor)
+
+    {
+      case ZIODuration.Zero     => Repr.Object(namespaceConstructor, "Zero")
+      case ZIODuration.Infinity => Repr.Object(namespaceConstructor, "Infinity")
+      case d                    =>
+        Repr.Constructor(
+          namespace,
+          constructor,
+          ("amount", Repr.Long(d.toNanos)),
+          ("unit", Repr.Object(List("java", "util", "concurrent"), "NANOSECONDS"))
+        )
+    }
+  }
 
   implicit def EitherDebug[E: Debug, A: Debug]: Debug[Either[E, A]] = {
     case Left(e)  => Repr.VConstructor(List("scala"), "Left", List(e.debug))

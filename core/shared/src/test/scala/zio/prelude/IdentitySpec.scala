@@ -24,6 +24,7 @@ object IdentitySpec extends DefaultRunnableSpec {
         testM("double max")(checkAllLaws(Identity)(Gen.anyDouble.map(Max(_)))),
         testM("double min")(checkAllLaws(Identity)(Gen.anyDouble.map(Min(_)))),
         testM("double multiplication")(checkAllLaws(Identity)(Gen.anyDouble.map(Prod(_)))),
+        testM("duration ZIO")(checkAllLaws(Identity)(Gen.anyFiniteDuration)),
         testM("either")(checkAllLaws(Identity)(Gen.either(Gen.anyInt.map(Sum(_)), Gen.anyInt.map(Sum(_))))),
         testM("float max")(checkAllLaws(Identity)(Gen.anyFloat.map(Max(_)))),
         testM("float min")(checkAllLaws(Identity)(Gen.anyFloat.map(Min(_)))),

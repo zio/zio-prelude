@@ -17,12 +17,14 @@
 package zio.prelude
 
 import zio.Exit.{Failure, Success}
+import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace}
 
 import scala.annotation.implicitNotFound
+import scala.concurrent.duration.{Duration => ScalaDuration}
 import scala.util.Try
 import scala.{math => sm}
 
@@ -283,6 +285,18 @@ object Equal extends Lawful[Equal] {
    */
   implicit val DoubleHashOrd: Hash[Double] with Ord[Double] =
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
+
+  /**
+   * `Hash` and `Ord` (and thus also `Equal`) instance for Scala `Duration` values.
+   */
+  implicit val DurationScalaHashOrd: Hash[ScalaDuration] with Ord[ScalaDuration] =
+    HashOrd.default
+
+  /**
+   * `Hash` and `Ord` (and thus also `Equal`) instance for ZIO `Duration` values.
+   */
+  implicit val DurationZIOHashOrd: Hash[ZIODuration] with Ord[ZIODuration] =
+    HashOrd.default
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.

@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{And, First, Last, Max, Min, Natural, Or, Prod, Sum}
 import zio.test.TestResult
@@ -23,6 +24,7 @@ import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
 
 import scala.annotation.tailrec
+import scala.concurrent.duration.{Duration => ScalaDuration}
 
 /**
  * The `Associative[A]` type class describes an associative binary operator
@@ -327,6 +329,27 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
       def combine(l: => Sum[Double], r: => Sum[Double]): Sum[Double] = Sum(l + r)
       val identity: Sum[Double]                                      = Sum(0)
       def inverse(l: => Sum[Double], r: => Sum[Double]): Sum[Double] = Sum(l - r)
+    }
+
+  /**
+   * The `Commutative` and `Inverse` instance for Scala `Duration` values.
+   */
+  implicit val DurationScalaCommutativeInverse: Commutative[ScalaDuration] with Inverse[ScalaDuration] =
+    new Commutative[ScalaDuration] with Inverse[ScalaDuration] {
+      def combine(l: => ScalaDuration, r: => ScalaDuration): ScalaDuration = Sum(l + r)
+      val identity: ScalaDuration                                          = Sum(ScalaDuration.Zero)
+      def inverse(l: => ScalaDuration, r: => ScalaDuration): ScalaDuration = Sum(l - r)
+    }
+
+  /**
+   * The `Commutative` and `Identity` instance for ZIO `Duration` values.
+   */
+  implicit val DurationZIOCommutativeInverse: Commutative[ZIODuration] with Identity[ZIODuration] =
+    new Commutative[ZIODuration] with Identity[ZIODuration] {
+      import zio.duration._
+
+      def combine(l: => ZIODuration, r: => ZIODuration): ZIODuration = Sum(l + r)
+      val identity: ZIODuration                                      = Sum(ZIODuration.Zero)
     }
 
   /**
