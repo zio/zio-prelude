@@ -9,7 +9,8 @@ import scala.util.matching.Regex
 
 trait Read[A] extends Debug[A] {
   def fromDebug(debug: Debug.Repr): Either[Read.ReadException.ReprMismatch, A]
-  final def read(string: String): Either[Read.ReadException, A] = Read.parse(string).flatMap(fromDebug)
+  final def read(string: String): Either[Read.ReadException, A] =
+    Read.parse(string).flatMap[Read.ReadException, A](fromDebug)
 }
 
 object Read extends Lawful[ReadEqual] {
