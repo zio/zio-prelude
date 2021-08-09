@@ -4,6 +4,7 @@ import zio.prelude.coherent.ReadEqual
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 
+import scala.util.Try
 import scala.util.matching.Regex
 
 trait Read[A] extends Debug[A] {
@@ -52,28 +53,28 @@ object Read extends Lawful[ReadEqual] {
     case Pattern.String(value) => Right(Debug.Repr.String(StringContext.processEscapes(value)))
     case Pattern.Char(value)   => Right(Debug.Repr.Char(value.charAt(0)))
     case _                     =>
-      val boolean = string.toBooleanOption
-      if (boolean.isDefined) {
+      val boolean = Try(string.toBoolean)
+      if (boolean.isSuccess) {
         return Right(Debug.Repr.Boolean(boolean.get))
       }
-      val int     = string.toIntOption
-      if (int.isDefined) {
+      val int     = Try(string.toInt)
+      if (int.isSuccess) {
         return Right(Debug.Repr.Int(int.get))
       }
       if (string.lastOption.contains('L')) {
-        val long = string.init.toLongOption
-        if (long.isDefined) {
+        val long = Try(string.init.toLong)
+        if (long.isSuccess) {
           return Right(Debug.Repr.Long(long.get))
         }
       }
       if (string.lastOption.contains('f')) {
-        val float = string.toFloatOption
-        if (float.isDefined) {
+        val float = Try(string.toFloat)
+        if (float.isSuccess) {
           return Right(Debug.Repr.Float(float.get))
         }
       }
-      val double  = string.toDoubleOption
-      if (double.isDefined) {
+      val double  = Try(string.toDouble)
+      if (double.isSuccess) {
         return Right(Debug.Repr.Double(double.get))
       }
       Left(ReadException.ParseError(string))
