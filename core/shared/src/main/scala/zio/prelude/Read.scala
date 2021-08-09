@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.EitherCompat
 import zio.prelude.coherent.ReadEqual
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
@@ -7,7 +8,7 @@ import zio.test.laws.{Lawful, Laws}
 import scala.util.Try
 import scala.util.matching.Regex
 
-trait Read[A] extends Debug[A] {
+trait Read[A] extends Debug[A] with EitherCompat {
   def fromDebug(debug: Debug.Repr): Either[Read.ReadException.ReprMismatch, A]
   final def read(string: String): Either[Read.ReadException, A] =
     Read.parse(string).flatMap[Read.ReadException, A](fromDebug)
