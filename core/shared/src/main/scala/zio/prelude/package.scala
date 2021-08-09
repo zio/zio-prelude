@@ -50,6 +50,7 @@ package object prelude
     with NonEmptyForEachSyntax
     with OrdSyntax
     with PartialOrdSyntax
+    with ReadSyntax
     with ForEachSyntax
     with ZNonEmptySetSyntax
     with ZSetSyntax

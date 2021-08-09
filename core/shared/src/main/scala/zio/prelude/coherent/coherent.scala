@@ -16,6 +16,7 @@
 
 package zio.prelude.coherent
 
+import zio.prelude.Read.ReadException
 import zio.prelude._
 
 trait AssociativeBothDeriveEqualInvariant[F[_]] extends AssociativeBoth[F] with DeriveEqual[F] with Invariant[F]
@@ -362,4 +363,15 @@ object HashOrd {
   def default[A](implicit ord: scala.math.Ordering[A]): Hash[A] with Ord[A] =
     make(_.##, (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
 
+}
+
+trait ReadEqual[A] extends Read[A] with Equal[A]
+
+object ReadEqual {
+  implicit def derive[A](implicit read0: Read[A], equal0: Equal[A]): ReadEqual[A] =
+    new ReadEqual[A] {
+      def fromDebug(debug: Debug.Repr): Either[ReadException.ReprMismatch, A] = read0.fromDebug(debug)
+      def debug(a: A): Debug.Repr                                             = read0.debug(a)
+      protected def checkEqual(l: A, r: A): Boolean                           = equal0.equal(l, r)
+    }
 }

@@ -143,15 +143,92 @@ object Debug extends DebugVersionSpecific {
 
   implicit val NothingDebug: Debug[Nothing] = n => n
   implicit val UnitDebug: Debug[Unit]       = _ => Repr.Object("scala" :: Nil, "()")
-  implicit val IntDebug: Debug[Int]         = Repr.Int(_)
-  implicit val DoubleDebug: Debug[Double]   = Repr.Double(_)
-  implicit val FloatDebug: Debug[Float]     = Repr.Float(_)
-  implicit val LongDebug: Debug[Long]       = Repr.Long(_)
-  implicit val ByteDebug: Debug[Byte]       = Repr.Byte(_)
-  implicit val CharDebug: Debug[Char]       = Repr.Char(_)
-  implicit val BooleanDebug: Debug[Boolean] = Repr.Boolean(_)
-  implicit val ShortDebug: Debug[Short]     = Repr.Short(_)
-  implicit val StringDebug: Debug[String]   = Repr.String(_)
+
+  implicit val IntRead: Read[Int] = new Read[Int] {
+    def debug(value: Int): Repr                                              = Repr.Int(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Int] = debug match {
+      case Repr.Int(value)                                                    => Right(value)
+      case Repr.Long(value) if Int.MinValue <= value && value <= Int.MaxValue => Right(value.toInt)
+      case Repr.Short(value)                                                  => Right(value.toInt)
+      case Repr.Byte(value)                                                   => Right(value.toInt)
+      case _                                                                  => Left(Read.ReadException.ReprMismatch("Int", debug))
+    }
+  }
+
+  implicit val DoubleRead: Read[Double] = new Read[Double] {
+    def debug(value: Double): Repr                                              = Repr.Double(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Double] = debug match {
+      case Repr.Double(value) => Right(value)
+      case Repr.Float(value)  => Right(value.toDouble)
+      case _                  => Left(Read.ReadException.ReprMismatch("Double", debug))
+    }
+  }
+
+  implicit val FloatRead: Read[Float] = new Read[Float] {
+    def debug(value: Float): Repr                                              = Repr.Float(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Float] = debug match {
+      case Repr.Float(value) => Right(value)
+      case _                 => Left(Read.ReadException.ReprMismatch("Float", debug))
+    }
+  }
+
+  implicit val LongRead: Read[Long] = new Read[Long] {
+    def debug(value: Long): Repr                                              = Repr.Long(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Long] = debug match {
+      case Repr.Long(value)  => Right(value)
+      case Repr.Int(value)   => Right(value.toLong)
+      case Repr.Short(value) => Right(value.toLong)
+      case Repr.Byte(value)  => Right(value.toLong)
+      case _                 => Left(Read.ReadException.ReprMismatch("Long", debug))
+    }
+  }
+
+  implicit val ByteRead: Read[Byte] = new Read[Byte] {
+    def debug(value: Byte): Repr                                              = Repr.Byte(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Byte] = debug match {
+      case Repr.Byte(value)                                                      => Right(value)
+      case Repr.Short(value) if Byte.MinValue <= value && value <= Byte.MaxValue => Right(value.toByte)
+      case Repr.Int(value) if Byte.MinValue <= value && value <= Byte.MaxValue   => Right(value.toByte)
+      case Repr.Long(value) if Byte.MinValue <= value && value <= Byte.MaxValue  => Right(value.toByte)
+      case _                                                                     => Left(Read.ReadException.ReprMismatch("Byte", debug))
+    }
+  }
+
+  implicit val CharRead: Read[Char] = new Read[Char] {
+    def debug(value: Char): Repr                                              = Repr.Char(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Char] = debug match {
+      case Repr.Char(value) => Right(value)
+      case _                => Left(Read.ReadException.ReprMismatch("Char", debug))
+    }
+  }
+
+  implicit val BooleanRead: Read[Boolean] = new Read[Boolean] {
+    def debug(value: Boolean): Repr                                              = Repr.Boolean(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Boolean] = debug match {
+      case Repr.Boolean(value) => Right(value)
+      case _                   => Left(Read.ReadException.ReprMismatch("Boolean", debug))
+    }
+  }
+
+  implicit val ShortRead: Read[Short] = new Read[Short] {
+    def debug(value: Short): Repr                                              = Repr.Short(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, Short] = debug match {
+      case Repr.Short(value)                                                      => Right(value)
+      case Repr.Byte(value)                                                       => Right(value.toShort)
+      case Repr.Int(value) if Short.MinValue <= value && value <= Short.MaxValue  => Right(value.toShort)
+      case Repr.Long(value) if Short.MinValue <= value && value <= Short.MaxValue => Right(value.toShort)
+      case _                                                                      => Left(Read.ReadException.ReprMismatch("Short", debug))
+    }
+  }
+
+  implicit val StringRead: Read[String] = new Read[String] {
+    def debug(value: String): Repr                                              = Repr.String(value)
+    def fromDebug(debug: Repr): Either[Read.ReadException.ReprMismatch, String] = debug match {
+      case Repr.String(value) => Right(value)
+      case _                  => Left(Read.ReadException.ReprMismatch("String", debug))
+    }
+
+  }
 
   def keyValueDebug[A: Debug, B: Debug]: Debug[(A, B)] = n => Repr.KeyValue(n._1.debug, n._2.debug)
 
