@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.prelude.Common.anyFiniteDurationScala
 import zio.prelude.newtypes.{And, Max, Min, Or, Prod, Sum}
 import zio.random.Random
 import zio.test._
@@ -26,7 +25,6 @@ object CommutativeSpec extends DefaultRunnableSpec {
         testM("double max")(checkAllLaws(Commutative)(Gen.anyDouble.map(Max(_)))),
         testM("double min")(checkAllLaws(Commutative)(Gen.anyDouble.map(Min(_)))),
         testM("double multiplication")(checkAllLaws(Commutative)(Gen.anyDouble.map(Prod(_)))),
-        testM("duration Scala")(checkAllLaws(Commutative)(anyFiniteDurationScala)),
         testM("duration ZIO")(checkAllLaws(Commutative)(Gen.anyFiniteDuration)),
         testM("either")(checkAllLaws(Commutative)(Gen.either(anySumInt, anySumInt))),
         testM("float addition")(checkAllLaws(Commutative)(Gen.anyFloat.map(Sum(_)))),
