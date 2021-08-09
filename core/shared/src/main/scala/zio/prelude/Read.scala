@@ -4,6 +4,8 @@ import zio.prelude.coherent.ReadEqual
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 
+import scala.util.matching.Regex
+
 trait Read[A] extends Debug[A] {
   def fromDebug(debug: Debug.Repr): Either[Read.ReadException.ReprMismatch, A]
   final def read(string: String): Either[Read.ReadException, A] = Read.parse(string).flatMap(fromDebug)
@@ -42,8 +44,8 @@ object Read extends Lawful[ReadEqual] {
   }
 
   private object Pattern {
-    val String = "\"(.*)\"".r
-    val Char   = "'(.)'".r
+    val String: Regex = "\"(.*)\"".r
+    val Char: Regex   = "'(.)'".r
   }
 
   def parse(string: String): Either[ReadException.ParseError, Debug.Repr] = string match {
