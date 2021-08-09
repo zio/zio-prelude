@@ -16,9 +16,12 @@
 
 package zio.prelude
 
+import zio.duration.{Duration => ZIODuration}
 import zio.{Chunk, NonEmptyChunk}
 
+import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
+import scala.concurrent.duration.{Duration => ScalaDuration}
 import scala.language.implicitConversions
 
 trait Debug[-A] {
@@ -119,6 +122,25 @@ object Debug extends DebugVersionSpecific {
     implicit def deriveRepr[A](x: A)(implicit A: Debug[A]): Repr = A.debug(x)
   }
 
+  private val nanosToPrettyUnit: Long => (Long, TimeUnit) = {
+    val ns_per_us  = 1000L
+    val ns_per_ms  = ns_per_us * 1000
+    val ns_per_s   = ns_per_ms * 1000
+    val ns_per_min = ns_per_s * 60
+    val ns_per_h   = ns_per_min * 60
+    val ns_per_d   = ns_per_h * 24
+
+    (nanos: Long) =>
+      import java.util.concurrent.TimeUnit._
+      if (nanos % ns_per_d == 0) (nanos / ns_per_d, DAYS)
+      else if (nanos % ns_per_h == 0) (nanos / ns_per_h, HOURS)
+      else if (nanos % ns_per_min == 0) (nanos / ns_per_min, MINUTES)
+      else if (nanos % ns_per_s == 0) (nanos / ns_per_s, SECONDS)
+      else if (nanos % ns_per_ms == 0) (nanos / ns_per_ms, MILLISECONDS)
+      else if (nanos % ns_per_us == 0) (nanos / ns_per_us, MICROSECONDS)
+      else (nanos, NANOSECONDS)
+  }
+
   implicit val NothingDebug: Debug[Nothing] = n => n
   implicit val UnitDebug: Debug[Unit]       = _ => Repr.Object("scala" :: Nil, "()")
   implicit val IntDebug: Debug[Int]         = Repr.Int(_)
@@ -181,6 +203,46 @@ object Debug extends DebugVersionSpecific {
   implicit def DeriveDebug[F[_], A](implicit derive: Derive[F, Debug], debug: Debug[A]): Debug[F[A]] =
     derive.derive(debug)
 
+  implicit val DurationScalaDebug: Debug[ScalaDuration] = {
+    val namespace            = List("scala", "concurrent", "duration")
+    val constructor          = "Duration"
+    val namespaceConstructor = namespace ++ List(constructor)
+
+    {
+      case ScalaDuration.Zero      => Repr.Object(namespaceConstructor, "Zero")
+      case ScalaDuration.Inf       => Repr.Object(namespaceConstructor, "Inf")
+      case ScalaDuration.MinusInf  => Repr.Object(namespaceConstructor, "MinusInf")
+      case ScalaDuration.Undefined => Repr.Object(namespaceConstructor, "Undefined")
+      case d                       =>
+        val (length, unit) = nanosToPrettyUnit(d.toNanos)
+        Repr.Constructor(
+          namespace,
+          constructor,
+          ("length", Repr.Long(length)),
+          ("unit", unit.debug)
+        )
+    }
+  }
+
+  implicit val DurationZIODebug: Debug[ZIODuration] = {
+    val namespace            = List("zio", "duration")
+    val constructor          = "Duration"
+    val namespaceConstructor = namespace ++ List(constructor)
+
+    {
+      case ZIODuration.Zero     => Repr.Object(namespaceConstructor, "Zero")
+      case ZIODuration.Infinity => Repr.Object(namespaceConstructor, "Infinity")
+      case d                    =>
+        val (amount, unit) = nanosToPrettyUnit(d.toNanos)
+        Repr.Constructor(
+          namespace,
+          constructor,
+          ("amount", Repr.Long(amount)),
+          ("unit", unit.debug)
+        )
+    }
+  }
+
   implicit def EitherDebug[E: Debug, A: Debug]: Debug[Either[E, A]] = {
     case Left(e)  => Repr.VConstructor(List("scala"), "Left", List(e.debug))
     case Right(a) => Repr.VConstructor(List("scala"), "Right", List(a.debug))
@@ -202,6 +264,20 @@ object Debug extends DebugVersionSpecific {
 
   implicit def MapDebug[K: Debug, V: Debug]: Debug[Map[K, V]] =
     map => Repr.VConstructor(List("scala"), "Map", map.map(_.debug(keyValueDebug)).toList)
+
+  implicit val TimeUnitDebug: Debug[TimeUnit] = tu =>
+    Repr.Object(
+      List("java", "util", "concurrent", "TimeUnit"),
+      tu match {
+        case TimeUnit.NANOSECONDS  => "NANOSECONDS"
+        case TimeUnit.MICROSECONDS => "MICROSECONDS"
+        case TimeUnit.MILLISECONDS => "MILLISECONDS"
+        case TimeUnit.SECONDS      => "SECONDS"
+        case TimeUnit.MINUTES      => "SECONDS"
+        case TimeUnit.HOURS        => "HOURS"
+        case TimeUnit.DAYS         => "DAYS"
+      }
+    )
 
   implicit def Tuple2Debug[A: Debug, B: Debug]: Debug[(A, B)] =
     tup2 => Repr.VConstructor(List("scala"), "Tuple2", List(tup2._1.debug, tup2._2.debug))

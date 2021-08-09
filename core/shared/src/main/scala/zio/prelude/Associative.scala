@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{And, First, Last, Max, Min, Natural, Or, Prod, Sum}
 import zio.test.TestResult
@@ -355,6 +356,16 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
       def combine(l: => Sum[Double], r: => Sum[Double]): Sum[Double] = Sum(l + r)
       val identity: Sum[Double]                                      = Sum(0)
       def inverse(l: => Sum[Double], r: => Sum[Double]): Sum[Double] = Sum(l - r)
+    }
+
+  /**
+   * The `Commutative` and `Identity` instance for ZIO `Duration` values.
+   */
+  implicit val DurationZIOCommutativeIdentity: Commutative[ZIODuration] with Identity[ZIODuration] =
+    new Commutative[ZIODuration] with Identity[ZIODuration] {
+      import zio.duration._
+      def combine(l: => ZIODuration, r: => ZIODuration): ZIODuration = l + r
+      val identity: ZIODuration                                      = ZIODuration.Zero
     }
 
   /**

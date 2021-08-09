@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.ZIO
+import zio.prelude.Common.anyFiniteDurationScala
 import zio.test._
 import zio.test.laws._
 
@@ -17,6 +18,8 @@ object HashSpec extends DefaultRunnableSpec {
         testM("char")(checkAllLaws(Hash)(Gen.anyChar)),
         testM("chunk")(checkAllLaws(Hash)(Gen.chunkOf(Gen.anyInt))),
         testM("double")(checkAllLaws(Hash)(Gen.anyDouble)),
+        testM("duration Scala")(checkAllLaws(Hash)(anyFiniteDurationScala)),
+        testM("duration ZIO")(checkAllLaws(Hash)(Gen.anyFiniteDuration)),
         testM("either")(checkAllLaws(Hash)(Gen.either(Gen.anyInt, Gen.anyInt))),
         testM("float")(checkAllLaws(Hash)(Gen.anyFloat)),
         testM("int")(checkAllLaws(Hash)(Gen.anyInt)),
@@ -36,6 +39,8 @@ object HashSpec extends DefaultRunnableSpec {
         testM("boolean")(scalaHashCodeConsistency(Gen.boolean)),
         testM("byte")(scalaHashCodeConsistency(Gen.anyByte)),
         testM("char")(scalaHashCodeConsistency(Gen.anyChar)),
+        testM("duration Scala")(scalaHashCodeConsistency(anyFiniteDurationScala)),
+        testM("duration ZIO")(scalaHashCodeConsistency(Gen.anyFiniteDuration)),
         testM("string")(scalaHashCodeConsistency(Gen.anyString)),
         testM("int")(scalaHashCodeConsistency(Gen.anyInt)),
         testM("long")(scalaHashCodeConsistency(Gen.anyLong)),

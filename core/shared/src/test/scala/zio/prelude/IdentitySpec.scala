@@ -18,6 +18,7 @@ object IdentitySpec extends DefaultRunnableSpec {
         testM("char multiplication")(checkAllLaws(Identity)(Gen.anyChar.map(Prod(_)))),
         testM("chunk")(checkAllLaws(Identity)(Gen.chunkOf(Gen.anyInt))),
         testM("double multiplication")(checkAllLaws(Identity)(Gen.anyDouble.map(Prod(_)))),
+        testM("duration ZIO")(checkAllLaws(Identity)(Gen.anyFiniteDuration)),
         testM("either")(checkAllLaws(Identity)(Gen.either(Gen.anyInt.map(Sum(_)), Gen.anyInt.map(Sum(_))))),
         testM("float multiplication")(checkAllLaws(Identity)(Gen.anyFloat.map(Prod(_)))),
         testM("int multiplication")(checkAllLaws(Identity)(Gen.anyInt.map(Prod(_)))),
