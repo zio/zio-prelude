@@ -1,0 +1,111 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Equivalence · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="An `Equivalence[A, B]` describes an equivalence relationship between two types `A` and `B`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Equivalence · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="An `Equivalence[A, B]` describes an equivalence relationship between two types `A` and `B`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Functional Data Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Functional Data Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/">Summary</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/equivalence">Equivalence</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/nonemptylist">NonEmptyList</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/these">These</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/validation">Validation</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zset">ZSet</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zvalidation">ZValidation</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Equivalence</h1></header><article><div><span><p>An <code>Equivalence[A, B]</code> describes an equivalence relationship between two types <code>A</code> and <code>B</code>.</p>
+<p>An equivalence relationship is defined in terms of two functions <code>to</code> and <code>from</code> that convert a value of type <code>A</code> to a value of type <code>B</code> and vice versa.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Equivalence</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](<span class="hljs-params">to: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>, from: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span></span>)</span>
+</code></pre>
+<p>To be a valid <code>Equivalence</code> the functions <code>to</code> and <code>from</code> must satisfy an identity law, which says that for any value of type <code>A</code>, if we transform it to a <code>B</code> using <code>to</code> and then back using <code>from</code> we get the same value. The same property must also apply for the reverse.</p>
+<p>Simple examples of an equivalence relationship would be between an <code>List[A]</code> and a <code>Chunk[A]</code>. We can transform any <code>List</code> into a <code>Chunk</code> using the <code>Chunk.fromIterable</code> operator and we can transform any <code>Chunk</code> into a <code>List</code> using the <code>toList</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+<span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Equivalence</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">listChunkEquivalence</span></span>[<span class="hljs-type">A</span>]: <span class="hljs-type">Equivalence</span>[<span class="hljs-type">List</span>[<span class="hljs-type">A</span>], <span class="hljs-type">Chunk</span>[<span class="hljs-type">A</span>]] =
+  <span class="hljs-type">Equivalence</span>(<span class="hljs-type">Chunk</span>.fromIterable, _.toList)
+</code></pre>
+<p>This essentially represents the fact that <code>List</code> and <code>Chunk</code> contain the same information. They represent it in different ways internally and have different performance characteristics but both of them model zero or more values of some type <code>A</code>.</p>
+<p>We can see from the example above that the order of describing <code>List</code> and <code>Chunk</code> in the equivalence relationship was somewhat arbitrary. We could just as well have described this as an equivalence between <code>Chunk[A]</code> and <code>List[A]</code>.</p>
+<p>The <code>Equivalence</code> data type lets us express that through the <code>flip</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">chunkListEquivalence</span></span>[<span class="hljs-type">A</span>]: <span class="hljs-type">Equivalence</span>[<span class="hljs-type">Chunk</span>[<span class="hljs-type">A</span>], <span class="hljs-type">List</span>[<span class="hljs-type">A</span>]] =
+  listChunkEquivalence.flip
+</code></pre>
+<p>In addition to being able to reverse equivalence relationships we can also compose them. If <code>A</code> is equivalent to <code>B</code> and <code>B</code> is equivalent to <code>C</code> then <code>A</code> is equivalent to <code>C</code>.</p>
+<p>We can express this using the <code>andThen</code> operator on <code>Equivalence</code> or its symbolic alias <code>&gt;&gt;&gt;</code>.</p>
+<p>To demonstrate this let's define another equivalence relationship <code>Vector[A]</code> and <code>List[A]</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">vectorListEquivalence</span></span>[<span class="hljs-type">A</span>]: <span class="hljs-type">Equivalence</span>[<span class="hljs-type">Vector</span>[<span class="hljs-type">A</span>], <span class="hljs-type">List</span>[<span class="hljs-type">A</span>]] =
+  <span class="hljs-type">Equivalence</span>(_.toList, _.toVector)
+</code></pre>
+<p>Given these two equivalence relationships we can then define an equivalence relationship between a <code>Vector[A]</code> and a <code>Chunk[A]</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">vectorChunkEquivalence</span></span>[<span class="hljs-type">A</span>]: <span class="hljs-type">Equivalence</span>[<span class="hljs-type">Vector</span>[<span class="hljs-type">A</span>], <span class="hljs-type">Chunk</span>[<span class="hljs-type">A</span>]] =
+  vectorListEquivalence.andThen(listChunkEquivalence)
+</code></pre>
+<p>This is not a particularly interesting example because we could have easily converted directly from <code>Vector</code> to <code>Chunk</code> in a more performant way without going through <code>List</code>. But we can imagine that if <code>A</code>, <code>B</code>, and <code>C</code> were equivalent but different representations of some more complex data type, being able to build up these conversions incrementally could be quite useful.</p>
+<p>Beyond this there are not a lot of operators on the <code>Equivalence</code> data type itself. The main power of this data type is the ability to express the fact that two types are equivalent and capture this as a data type that we can test and reuse.</p>
+<p>In particular, if we have what we believe to be an equivalence relationship between two types <code>A</code> and <code>B</code> ZIO Prelude makes it easy for us to test this.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.test._
+<span class="hljs-keyword">import</span> zio.test.laws._
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">EquivalenceSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DefaultRunnableSpec</span> </span>{
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">spec</span> </span>= suite(<span class="hljs-string">"EquivalenceSpec"</span>) {
+    testM(<span class="hljs-string">"chunkListEquivalence"</span>) {
+      <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> equivalence = listChunkEquivalence[<span class="hljs-type">Int</span>]
+      <span class="hljs-keyword">val</span> listGen = <span class="hljs-type">Gen</span>.listOf(<span class="hljs-type">Gen</span>.anyInt)
+      <span class="hljs-keyword">val</span> chunkGen = <span class="hljs-type">Gen</span>.chunkOf(<span class="hljs-type">Gen</span>.anyInt)
+      checkAllLaws(<span class="hljs-type">Equivalence</span>)(listGen, chunkGen)
+    }
+  }
+}
+</code></pre>
+<p>ZIO Test will generate a large number of <code>A</code> and <code>B</code> values and check that the identity law holds. This can be helpful to catch corner cases where we think two things are equivalent but they are really not.</p>
+<p>With these equivalence relationships in hand we can then convert between different representations of our data in a straightforward and principled way. This is helpful when we need to implement higher level logic that needs to rely on this equivalence relationship existing between certain data types.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionaldatatypes/index"><span class="arrow-prev">← </span><span>Summary</span></a><a class="docs-next button" href="/zio-prelude/docs/functionaldatatypes/nonemptylist"><span class="function-name-prevnext">NonEmptyList</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>New Types · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="ZIO Prelude provides functionality for creating zero overhead new types to allow you to increase the type safety of your application without compromising performance or ergonomics."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="New Types · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="ZIO Prelude provides functionality for creating zero overhead new types to allow you to increase the type safety of your application without compromising performance or ergonomics."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>New types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">New types</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/newtypes/">New Types</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">New Types</h1></header><article><div><span><p>ZIO Prelude provides functionality for creating zero overhead new types to allow you to increase the type safety of your application without compromising performance or ergonomics.</p>
+<p>A common situation in domain modeling is that we have multiple types in our business domain with the same underlying representation in Scala. For example:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">AccountNumber</span>  </span>= <span class="hljs-type">Int</span>
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">Int</span>
+</code></pre>
+<p>This is not a great situation. We can easily mix up values that represent different types in our business domain, for example providing an <code>AccountNumber</code> where we are supposed to use a <code>SequenceNumber</code> or vice versa.</p>
+<p>The Scala compiler will not help us avoid bugs in these situations because from the perspective of the compiler <code>AccountNumber</code> and <code>SequenceNumber</code> are the same type, namely <code>Int</code>.</p>
+<p>To avoid this, we might be tempted to create a separate case class for each of these types like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AccountNumber</span>(<span class="hljs-params">value: <span class="hljs-type">Int</span></span>)</span>
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SequenceNumber</span>(<span class="hljs-params">value: <span class="hljs-type">Int</span></span>)</span>
+</code></pre>
+<p>This is an improvement in type safety because <code>AccountNumber</code> and <code>SequenceNumber</code> are now separate types so providing an <code>AccountNumber</code> when we are supposed to use a <code>SequenceNumber</code> will result in a compilation error.</p>
+<p>However, it comes with costs of its own. Every one of these account numbers and sequence numbers will now allocate an additional object, which can add up over the course of a large application with a complex domain model.</p>
+<p>We can try to minimize these allocations using techniques such as extending <code>AnyVal</code>, but these approaches can be extremely fragile and can actually result in worse performance than the original code if we are not careful.</p>
+<p>Let's see how ZIO Prelude helps us get the best of both worlds here.</p>
+<h2><a class="anchor" aria-hidden="true" id="new-types"></a><a href="#new-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>New Types</h2>
+<p>A new type in ZIO Prelude is a type that has the same underlying representation as another type at runtime but is a separate type at compile time.</p>
+<p>We create new types by creating an object that extends <code>Newtype</code> and specifying the type that our new type wraps. We then export that type by defining a new type alias that refers to the <code>Type</code> within our new object.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Newtype</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">AccountNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Newtype</span>[<span class="hljs-type">Int</span>]</span>
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">AccountNumber</span> </span>= <span class="hljs-type">AccountNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Newtype</span>[<span class="hljs-type">Int</span>]</span>
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+</code></pre>
+<p>The <code>AccountNumber</code> and <code>SequenceNumber</code> types are now completely distinct from the <code>Int</code> type at compile time, even though at runtime they are all <code>Int</code> values.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> accountNumber: <span class="hljs-type">AccountNumber</span> =
+  <span class="hljs-type">AccountNumber</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// accountNumber: AccountNumber = 1</span>
+
+<span class="hljs-keyword">val</span> sequenceNumber: <span class="hljs-type">SequenceNumber</span> =
+  <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">2</span>)
+<span class="hljs-comment">// sequenceNumber: SequenceNumber = 2</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">lookup</span></span>(accountNumber: <span class="hljs-type">AccountNumber</span>, sequenceNumber: <span class="hljs-type">SequenceNumber</span>) =
+  ???
+</code></pre>
+<p>We can see this if we try to supply an <code>AccountNumber</code> somewhere that a <code>SequenceNumber</code> is expected:</p>
+<pre><code class="hljs css language-scala">lookup(sequenceNumber, accountNumber)
+<span class="hljs-comment">// error: type mismatch;</span>
+<span class="hljs-comment">//  found   : SequenceNumber</span>
+<span class="hljs-comment">//     (which expands to)  SequenceNumber.newtype.Type with SequenceNumber.Tag</span>
+<span class="hljs-comment">//  required: AccountNumber</span>
+<span class="hljs-comment">//     (which expands to)  AccountNumber.newtype.Type with AccountNumber.Tag</span>
+<span class="hljs-comment">// error: type mismatch;</span>
+<span class="hljs-comment">//  found   : AccountNumber</span>
+<span class="hljs-comment">//     (which expands to)  AccountNumber.newtype.Type with AccountNumber.Tag</span>
+<span class="hljs-comment">//  required: SequenceNumber</span>
+<span class="hljs-comment">//     (which expands to)  SequenceNumber.newtype.Type with SequenceNumber.Tag</span>
+</code></pre>
+<p>This is great but how do we construct <code>AccountNumber</code> and <code>SequenceNumber</code> values and how do we access the underlying <code>Int</code> values to work with them?</p>
+<h2><a class="anchor" aria-hidden="true" id="constructing-new-types"></a><a href="#constructing-new-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constructing New Types</h2>
+<p>The easiest way to construct an instance of the new type is to use the <code>apply</code> method on the new type object.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> accountNumber: <span class="hljs-type">AccountNumber</span> =
+  <span class="hljs-type">AccountNumber</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// accountNumber: AccountNumber = 1</span>
+</code></pre>
+<p>You can think of the new type object as being the &quot;companion object&quot; of the new type and it comes included with an <code>apply</code> method to make it easy for us to construct instances of the new type.</p>
+<p>If we want to be more explicit we can also always use the <code>wrap</code> operator on the new type object to &quot;wrap&quot; a value of the underlying type in the new type. For example:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> sequenceNumber: <span class="hljs-type">SequenceNumber</span> =
+  <span class="hljs-type">SequenceNumber</span>.wrap(<span class="hljs-number">2</span>)
+<span class="hljs-comment">// sequenceNumber: SequenceNumber = 2</span>
+</code></pre>
+<p>If you want to construct a collection of values of the new type from values of the underlying type you can use the <code>wrapAll</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-keyword">val</span> accountNumbers: <span class="hljs-type">Chunk</span>[<span class="hljs-type">AccountNumber</span>] =
+  <span class="hljs-type">AccountNumber</span>.wrapAll(<span class="hljs-type">Chunk</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>))
+<span class="hljs-comment">// accountNumbers: Chunk[AccountNumber] = IndexedSeq(3, 4, 5)</span>
+</code></pre>
+<p>The <code>wrapAll</code> operator is extremely efficient because it does not have to traverse the collection at all. Internally we know that <code>AccountNumber</code> and <code>Int</code> are the same type so we can freely convert a <code>Chunk[Int]</code> to a <code>Chunk[AccountNumber]</code> without having to traverse the collection.</p>
+<p>We can also define our own more specialized constructors for our new type in terms of <code>apply</code>, <code>wrap</code>, and <code>wrapAll</code>. The new type object provides a convenient place for us to do this.</p>
+<p>For example, we could define a simple constructor for an initial sequence number like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Newtype</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Newtype</span>[<span class="hljs-type">Int</span>] </span>{
+  <span class="hljs-keyword">val</span> initial: <span class="hljs-type">SequenceNumber</span> =
+    <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">0</span>)
+}
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-keyword">val</span> initial: <span class="hljs-type">SequenceNumber</span> =
+  <span class="hljs-type">SequenceNumber</span>.initial
+<span class="hljs-comment">// initial: SequenceNumber = 0</span>
+</code></pre>
+<p>This lets us construct instances of the new type in a very ergonomic way, where constructors for the new type are on the new type companion object just like constructors for any other type would be.</p>
+<h2><a class="anchor" aria-hidden="true" id="deconstructing-new-types"></a><a href="#deconstructing-new-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deconstructing New Types</h2>
+<p>In addition to constructing instances of the new type we want to be able to access the value underlying the new type to perform operations on it.</p>
+<p>We can do this using the <code>unwrap</code> operator on the new type companion object.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> zero: <span class="hljs-type">Int</span> =
+  <span class="hljs-type">SequenceNumber</span>.unwrap(initial)
+<span class="hljs-comment">// zero: Int = 0</span>
+</code></pre>
+<p>We can also use the <code>unwrapAll</code> operator to convert a collection of values of the new type into the underlying type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-keyword">val</span> sequenceNumbers: <span class="hljs-type">Chunk</span>[<span class="hljs-type">SequenceNumber</span>] =
+  <span class="hljs-type">SequenceNumber</span>.wrapAll(<span class="hljs-type">Chunk</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>))
+<span class="hljs-comment">// sequenceNumbers: Chunk[SequenceNumber] = IndexedSeq(1, 2, 3)</span>
+
+<span class="hljs-keyword">val</span> ints: <span class="hljs-type">Chunk</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-type">SequenceNumber</span>.unwrapAll(sequenceNumbers)
+<span class="hljs-comment">// ints: Chunk[Int] = IndexedSeq(1, 2, 3)</span>
+</code></pre>
+<p>Again this is extremely efficient because we don't have to traverse the collection at all. Internally we know that a <code>Chunk[SequenceNumber]</code> is a <code>Chunk[Int]</code> so we can just immediately return the original collection unchanged.</p>
+<h2><a class="anchor" aria-hidden="true" id="defining-operators-on-new-types"></a><a href="#defining-operators-on-new-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining Operators On New Types</h2>
+<p>By wrapping and unwrapping values of the new type we can define our own operators on new types.</p>
+<p>The easiest way to do this is by defining our operators as extension methods inside the new type companion object. These extension methods will automatically be available when we are working with instances of the new type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Newtype</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Newtype</span>[<span class="hljs-type">Int</span>] </span>{
+
+  <span class="hljs-keyword">implicit</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SequenceNumberSyntax</span>(<span class="hljs-params">private val self: <span class="hljs-type">SequenceNumber</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">AnyVal</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">next</span></span>: <span class="hljs-type">SequenceNumber</span> =
+      <span class="hljs-type">SequenceNumber</span>.wrap(<span class="hljs-type">SequenceNumber</span>.unwrap(self) + <span class="hljs-number">1</span>)
+  }
+}
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-keyword">val</span> sequenceNumber: <span class="hljs-type">SequenceNumber</span> =
+  <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// sequenceNumber: SequenceNumber = 1</span>
+
+<span class="hljs-keyword">val</span> nextSequenceNumber: <span class="hljs-type">SequenceNumber</span> =
+  sequenceNumber.next
+<span class="hljs-comment">// nextSequenceNumber: SequenceNumber = 2</span>
+</code></pre>
+<p>Notice that the <code>next</code> operator was available on <code>SequenceNumber</code> without having to do any imports because we defined it as an extension method within the <code>SequenceNumber</code> object.</p>
+<p>The new type companion object is also a convenient place for other operators that we would normally define on the companion object of a type. For example, we could define a <code>continuous</code> operator that returns whether a collection of <code>SequenceNumber</code> values are continuous.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Newtype</span>[<span class="hljs-type">Int</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">continuous</span></span>(sequenceNumbers: <span class="hljs-type">Iterable</span>[<span class="hljs-type">SequenceNumber</span>]): <span class="hljs-type">Boolean</span> =
+    <span class="hljs-type">SequenceNumber</span>.unwrapAll(sequenceNumbers).foldLeft[(<span class="hljs-type">Option</span>[<span class="hljs-type">Int</span>], <span class="hljs-type">Boolean</span>)]((<span class="hljs-type">None</span>, <span class="hljs-literal">true</span>)) {
+      <span class="hljs-keyword">case</span> ((<span class="hljs-type">None</span>, continuous), current) =&gt; (<span class="hljs-type">Some</span>(current), continuous)
+      <span class="hljs-keyword">case</span> ((<span class="hljs-type">Some</span>(previous), continuous), current) =&gt; (<span class="hljs-type">Some</span>(current), continuous &amp;&amp; current == previous + <span class="hljs-number">1</span>)
+    }._2
+}
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-keyword">val</span> sequenceNumbers: <span class="hljs-type">Chunk</span>[<span class="hljs-type">SequenceNumber</span>] =
+  <span class="hljs-type">Chunk</span>(<span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">1</span>), <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">2</span>), <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">3</span>))
+<span class="hljs-comment">// sequenceNumbers: Chunk[SequenceNumber] = IndexedSeq(1, 2, 3)</span>
+
+<span class="hljs-keyword">val</span> continuous: <span class="hljs-type">Boolean</span> =
+  <span class="hljs-type">SequenceNumber</span>.continuous(sequenceNumbers)
+<span class="hljs-comment">// continuous: Boolean = true</span>
+</code></pre>
+<p>Here <code>continuous</code> is an operator on a collection of sequence numbers so it didn't make sense to define it as an extension method on an individual sequence number. Defining it in the new type companion object makes it feel like an operator on the companion object of any ordinary data type.</p>
+<h2><a class="anchor" aria-hidden="true" id="defining-instances-of-functional-abstractions-for-new-types"></a><a href="#defining-instances-of-functional-abstractions-for-new-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining Instances Of Functional Abstractions For New Types</h2>
+<p>We can also define instances of functional abstractions for new types such as <code>Equal</code>, <code>Ord</code>, and <code>Associative</code>.</p>
+<p>The new type companion object again provides a convenient place to define these instances and ensures that they will automatically be available so that we don't have to import them.</p>
+<p>Let's see how we can do this to define an <code>Equal</code> instance for <code>AccountNumber</code>:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">AccountNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Newtype</span>[<span class="hljs-type">Int</span>] </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">AccountNumberEqual</span>: <span class="hljs-type">Equal</span>[<span class="hljs-type">AccountNumber</span>] =
+    <span class="hljs-type">Equal</span>.<span class="hljs-keyword">default</span>
+}
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">AccountNumber</span> </span>= <span class="hljs-type">AccountNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-type">AccountNumber</span>(<span class="hljs-number">1</span>) === <span class="hljs-type">AccountNumber</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// res4: Boolean = true</span>
+<span class="hljs-type">AccountNumber</span>(<span class="hljs-number">1</span>) === <span class="hljs-type">AccountNumber</span>(<span class="hljs-number">2</span>)
+<span class="hljs-comment">// res5: Boolean = false</span>
+</code></pre>
+<p>Attempting to compare two unrelated types results in a compilation error.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-type">AccountNumber</span>(<span class="hljs-number">1</span>) === <span class="hljs-number">1</span>
+<span class="hljs-comment">// error: No implicit Equal defined for Any.</span>
+<span class="hljs-comment">// AccountNumber(1) === 1</span>
+<span class="hljs-comment">// ^^^^^^^^^^^^^^^^^^^^^^</span>
+</code></pre>
+<p>This can be particularly useful because since the representations of the new type and the underlying types are the same at runtime, operators that are not strongly typed like <code>println</code> and <code>==</code> will not respect the difference between the new type and the underlying type. Using the functional abstractions in ZIO Prelude we can avoid this problem.</p>
+<h2><a class="anchor" aria-hidden="true" id="subtypes"></a><a href="#subtypes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Subtypes</h2>
+<p>When we use <code>Newtype</code> the new type we are creating is completely distinct from the underlying type. This can be useful when we want to &quot;hide&quot; the underlying representation of the new type except when we explicitly unwrap it.</p>
+<p>However, it can lead to boilerplate in some cases where we need to explicitly unwrap the new type or reimplement functionality that already exists on the underlying type.</p>
+<p>For example, say we want to test whether one <code>SequenceNumber</code> is after another. Right now this will not work:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Subtype</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Newtype</span>[<span class="hljs-type">Int</span>]</span>
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">2</span>) &gt; <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// error: No implicit PartialOrd defined for repl.MdocSession.App2.SequenceNumber.Type.</span>
+<span class="hljs-comment">// SequenceNumber(2) &gt; SequenceNumber(1)</span>
+<span class="hljs-comment">// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+</code></pre>
+<p>The <code>&gt;</code> operator is defined on <code>Int</code> and as far as the Scala compiler is concerned <code>SequenceNumber</code> and <code>Int</code> are completely unrelated types. Of course we could unwrap each of our sequence numbers or define a new <code>&gt;</code> operator on sequence numbers but here we are not taking advantage of the fact that we know that every <code>SequenceNumber</code> is an <code>Int</code>.</p>
+<p>We can fix this by extending <code>Subtype</code> instead of <code>Newtype</code> when creating our new type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Subtype</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Subtype</span>[<span class="hljs-type">Int</span>]</span>
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">2</span>) &gt; <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// res9: Boolean = true</span>
+</code></pre>
+<p>Now <code>SequenceNumber</code> is a type that is different from <code>Int</code> but is still a subtype of <code>Int</code>.</p>
+<p>This means that we can use a <code>SequenceNumber</code> any time we need an <code>Int</code> and can use operators defined on <code>Int</code> on <code>SequenceNumber</code>. However, we still get the type safety of not being able to use an <code>Int</code> or <code>AccountNumber</code> when a <code>SequenceNumber</code> is expected.</p>
+<h2><a class="anchor" aria-hidden="true" id="smart-types"></a><a href="#smart-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Smart Types</h2>
+<p>So far, all the new types we have created have been distinct from the underlying types but have not imposed any additional constraints on the values that the underlying type can take. For example, the <code>SequenceNumber</code> above could in principle be any <code>Int</code> value, whether that is <code>42</code> or <code>-1</code>.</p>
+<p>In many cases that makes sense. We often want to use a new type to denote that this particular <code>Int</code> value represents a sequence number and shouldn't be confused with another <code>Int</code> value that represents an account number without imposing other constraints.</p>
+<p>However, in other cases we may want to restrict the values that the underlying type can take. For instance, perhaps a <code>SequenceNumber</code> should never be negative.</p>
+<p>We can model this in ZIO Prelude by extending <code>NewtypeSmart</code> and <code>SubtypeSmart</code> when creating our new type and providing an <code>Assertion</code> that describes the constraints on the underlying value. We call these types smart types because they build in the logic for their own validation.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">SubtypeSmart</span>
+<span class="hljs-keyword">import</span> zio.test.<span class="hljs-type">Assertion</span>._
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SubtypeSmart</span>[<span class="hljs-type">Int</span>](<span class="hljs-params">isGreaterThanEqualTo(0</span>))</span>
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+</code></pre>
+<p>Here we created a simple assertion that requires the value be equal to or greater than zero but we can use much more complex assertions. For example, we could valid an <code>Email</code> with the <code>matchesRegex</code> assertion.</p>
+<p>When we create a smart type the <code>apply</code>, <code>wrap</code>, and <code>wrapAll</code> operators will be <code>protected</code> and will only be accessible within the scope of the smart type object unless we choose to expose them.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.{<span class="hljs-type">SubtypeSmart</span>, <span class="hljs-type">Validation</span>}
+<span class="hljs-keyword">import</span> zio.test.<span class="hljs-type">Assertion</span>._
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SubtypeSmart</span>[<span class="hljs-type">Int</span>](<span class="hljs-params">isGreaterThanEqualTo(0</span>)) </span>{
+  <span class="hljs-keyword">val</span> initial: <span class="hljs-type">SequenceNumber</span> =
+    <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">0</span>)
+}
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+</code></pre>
+<p>This prevents the users of our smart type from creating invalid instances of the smart type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> invalid: <span class="hljs-type">SequenceNumber</span> =
+  <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">-1</span>)
+<span class="hljs-comment">// error: method apply in trait NewtypeSmart cannot be accessed as a member of object repl.MdocSession.App5.SequenceNumber from object App5 in object MdocSession</span>
+<span class="hljs-comment">//  Access to protected method apply not permitted because</span>
+<span class="hljs-comment">//  enclosing object App5 in object MdocSession is not a subclass of</span>
+<span class="hljs-comment">//  trait NewtypeSmart in trait NewtypeModule where target is defined</span>
+<span class="hljs-comment">// error after rewriting to App5.this.SequenceNumber.&lt;apply: error&gt;</span>
+<span class="hljs-comment">// possible cause: maybe a wrong Dynamic method signature?</span>
+<span class="hljs-comment">//   SequenceNumber.unsafeMake(1)</span>
+<span class="hljs-comment">//   ^^^^^^^^^^^^^^</span>
+</code></pre>
+<p>Instead, the <code>make</code> or <code>makeAll</code> operators can be used to construct instances of the smart type with validation.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-keyword">val</span> validatedSequenceNumber: <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">SequenceNumber</span>] =
+  <span class="hljs-type">SequenceNumber</span>.make(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// validatedSequenceNumber: Validation[String, SequenceNumber] = Success(</span>
+<span class="hljs-comment">//   log = IndexedSeq(),</span>
+<span class="hljs-comment">//   value = 1</span>
+<span class="hljs-comment">// )</span>
+
+<span class="hljs-keyword">val</span> validateSequenceNumbers: <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Chunk</span>[<span class="hljs-type">SequenceNumber</span>]] =
+  <span class="hljs-type">SequenceNumber</span>.makeAll(<span class="hljs-type">Chunk</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>))
+<span class="hljs-comment">// validateSequenceNumbers: Validation[String, Chunk[SequenceNumber]] = Success(</span>
+<span class="hljs-comment">//   log = IndexedSeq(),</span>
+<span class="hljs-comment">//   value = IndexedSeq(1, 2, 3)</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>We can see that <code>make</code> and <code>makeAll</code> return a <code>Validation</code> that will either be a success with a valid instance of the smart type or a failure with a helpful error message indicating why a valid instance of the smart type could not be constructed.</p>
+<p>Because we have access to the <code>apply</code>, <code>wrap</code>, and <code>wrapAll</code> constructors within the smart type object we can implement operators that allow us to create instances of the smart type internally with zero overhead when we know that the underlying data is valid.</p>
+<p>For example, we might want to expose an <code>unsafeMake</code> operator for our users to allow them to construct instances of the smart type directly without going through <code>Validation</code>. As its name implies this places responsibility on the user to ensure that the underlying data is valid but could be necessary for performance or ergonomics in some situations.</p>
+<p>We can do that quite easily like this:.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.{<span class="hljs-type">SubtypeSmart</span>, <span class="hljs-type">Validation</span>}
+<span class="hljs-keyword">import</span> zio.test.<span class="hljs-type">Assertion</span>._
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SubtypeSmart</span>[<span class="hljs-type">Int</span>](<span class="hljs-params">isGreaterThanEqualTo(0</span>)) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">unsafeMake</span></span>(n: <span class="hljs-type">Int</span>): <span class="hljs-type">SequenceNumber</span> =
+    <span class="hljs-type">SequenceNumber</span>(n)
+}
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
+
+<span class="hljs-keyword">val</span> sequenceNumber: <span class="hljs-type">SequenceNumber</span> =
+  <span class="hljs-type">SequenceNumber</span>.unsafeMake(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// sequenceNumber: SequenceNumber = 1</span>
+</code></pre>
+<p>Thus, smart types give us full ability to implement our own operators and to expose whatever interface we want for our type, from requiring all construction to go through <code>Validation</code> to allowing users to create instances of the smart type directly.</p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#new-types">New Types</a></li><li><a href="#constructing-new-types">Constructing New Types</a></li><li><a href="#deconstructing-new-types">Deconstructing New Types</a></li><li><a href="#defining-operators-on-new-types">Defining Operators On New Types</a></li><li><a href="#defining-instances-of-functional-abstractions-for-new-types">Defining Instances Of Functional Abstractions For New Types</a></li><li><a href="#subtypes">Subtypes</a></li><li><a href="#smart-types">Smart Types</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

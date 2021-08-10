@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>IdentityFlatten · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`IdentityFlatten[F]` describes a way of combining two layers of a value of type `F[F[A]]` into a `F[A]` in a way that is associative and has an identity value `any` of type `F[Any]`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="IdentityFlatten · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`IdentityFlatten[F]` describes a way of combining two layers of a value of type `F[F[A]]` into a `F[A]` in a way that is associative and has an identity value `any` of type `F[Any]`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">IdentityFlatten</h1></header><article><div><span><p><code>IdentityFlatten[F]</code> describes a way of combining two layers of a value of type <code>F[F[A]]</code> into a <code>F[A]</code> in a way that is associative and has an identity value <code>any</code> of type <code>F[Any]</code>.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">AssociativeFlatten</span>[<span class="hljs-type">F</span>[+_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">flatten</span></span>[<span class="hljs-type">A</span>](f: <span class="hljs-type">F</span>[<span class="hljs-type">F</span>[<span class="hljs-type">A</span>]]): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">IdentityFlatten</span>[<span class="hljs-type">F</span>[+_]] <span class="hljs-keyword">extends</span> <span class="hljs-title">AssociativeFlatten</span>[<span class="hljs-type">F</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">any</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">Any</span>]
+}
+</code></pre>
+<p>The <code>any</code> value must be an identity with respect to the <code>flatten</code> operator. So if we add a new layer of nesting by mapping a value into the <code>any</code> value and then remove that layer with <code>flatten</code> we should get the original value back unchanged.</p>
+<pre><code class="hljs css language-scala">fa.map(a =&gt; any.map(_ =&gt; a)).flatten === fa
+any.map(_ =&gt; fa).flatten === fa
+
+</code></pre>
+<p>This may look slightly different than the normal identity law because we have to map over the value but it is the same as the identity laws for the <code>Identity</code>, <code>IdentityBoth</code> and <code>IdentityEither</code> abstractions. Note how the two laws say whether we add the additional layer on the inside or the outside doesn't matter.</p>
+<p>To be an identity element, the <code>any</code> value must not do anything when run other than return a value with no information content. This way we can always add a layer and remove it by using <code>flatten</code> to get back to the original value.</p>
+<p>For example the <code>any</code> value for <code>ZIO</code> is <code>unit</code>. The <code>unit</code> workflow doesn't do anything and always succeeds.</p>
+<p>So we can always <code>flatten</code> a <code>ZIO</code> workflow constructed by mapping over the <code>unit</code> value to the original workflow back.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+<span class="hljs-keyword">import</span> zio.console._
+
+<span class="hljs-keyword">import</span> java.io.<span class="hljs-type">IOException</span>
+
+<span class="hljs-keyword">val</span> helloIdentity: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">ZIO</span>.unit.map { _ =&gt;
+    console.putStrLn(<span class="hljs-string">"Hello from an identity!"</span>)
+  }.flatten
+<span class="hljs-comment">// helloIdentity: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@440fe95f</span>
+</code></pre>
+<p>Recall from our discussion of <code>AssociativeFlatten</code> that the <code>flatten</code> operator corresponds to running a workflow, which returns a new workflow, and then running the workflow. Here the <code>unit</code> workflow doesn't do anything and always succeeds so we can simply eliminate it.</p>
+<p>Just like the <code>any</code> value that is an identity with respect to the <code>both</code> operator of a <code>IdentityBoth</code>, the <code>any</code> value represents a successful value that contains no information. So other examples of the <code>any</code> value would include:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> anyOption: <span class="hljs-type">Option</span>[<span class="hljs-type">Any</span>] =
+  <span class="hljs-type">Some</span>(())
+<span class="hljs-comment">// anyOption: Option[Any] = Some(value = ())</span>
+
+<span class="hljs-keyword">val</span> anyEither: <span class="hljs-type">Either</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Any</span>] =
+  <span class="hljs-type">Right</span>(())
+<span class="hljs-comment">// anyEither: Either[Nothing, Any] = Right(value = ())</span>
+
+<span class="hljs-keyword">val</span> anyList: <span class="hljs-type">List</span>[<span class="hljs-type">Any</span>] =
+  <span class="hljs-type">List</span>(())
+<span class="hljs-comment">// anyList: List[Any] = List(())</span>
+</code></pre>
+<p>By combining the structure described by the <code>IdentityFlatten</code> abstraction and the <code>Covariant</code> abstraction we can also define the <code>succeed</code> operator we saw from <code>IdentityBoth</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">succeed</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">IdentityFlatten</span> : <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>](a: =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =
+  <span class="hljs-type">IdentityFlatten</span>[<span class="hljs-type">F</span>].any.map(_ =&gt; a)
+</code></pre>
+<p>As discussed in the section on <code>IdentityBoth</code>, the <code>succeed</code> operator is helpful because it lets us &quot;lift&quot; any normal value into the context of the parameterized type.</p>
+<p>For example, using the <code>succeed</code> operator on <code>ZIO</code> we can import an arbitrary block of Scala code into a <code>ZIO</code> workflow.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">helloScala</span></span>: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">ZIO</span>.succeed(println(<span class="hljs-string">"Hello Scala!"</span>))
+</code></pre>
+<p>For this operator to be well defined we have to be able to construct a value <code>any</code> that doesn't do anything and has no information content. If all values of the parameterized type required some additional information, for example, we would not be able to define the <code>IdentityFlatten</code> abstraction or <code>succeed</code> for it.</p>
+<p>In addition to the <code>succeed</code> operator being generally useful, there are some other operators that require an <code>IdentityFlatten</code> instance so that they can use it in their own implementations.</p>
+<p>In particular, the <code>ForEach</code> abstraction defines a set of operators that allow us to fold over a collection in the context of a parameterized type. These require that we have an <code>IdentityFlatten</code> instance so that if the collection is empty we can simply succeed with an empty collection in the context of the parameterized type.</p>
+<p>The <code>IdentityFlatten</code> abstraction is quite powerful, combining the flexibility of the <code>AssociativeFlatten</code> abstraction to run one value and then use its result to run another value with the ability to lift arbitrary values into the context of the parameterized type.</p>
+<p>If you are using data types from ZIO or the standard library there are some operators defined on the <code>ForEach</code> abstraction that can be helpful but otherwise the operators defined in terms of <code>IdentityFlatten</code> are likely already implemented directly on the data types you are using.</p>
+<p>If you are implementing your own data type you should certainly consider whether your data type can implement <code>flatMap</code>, or whether you explicitly don't want to. Either way being able to lift a value into the parameterized type with <code>succeed</code> using either the <code>IdentityBoth</code> or <code>IdentityFlatten</code> abstraction is extremely useful so you should either implement one of those abstractions or have very specific reasons why that is not possible.</p>
+<p>Finally, for writing generic code the combination of the <code>IdentityFlatten</code> and <code>Covariant</code> abstractions is also quite powerful, allowing modeling imperative code in a functional context.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither"><span class="arrow-prev">← </span><span class="function-name-prevnext">IdentityEither</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant"><span>Invariant</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

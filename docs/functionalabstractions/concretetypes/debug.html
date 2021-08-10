@@ -1,0 +1,191 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Debug · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`Debug[A]` describes the ability to render a value of type `A` to a human readable format for debugging purposes."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Debug · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`Debug[A]` describes the ability to render a value of type `A` to a human readable format for debugging purposes."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concrete Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Debug</h1></header><article><div><span><p><code>Debug[A]</code> describes the ability to render a value of type <code>A</code> to a human readable format for debugging purposes.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Debug</span>[-<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">debug</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">Debug</span>.<span class="hljs-type">Repr</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Debug</span> </span>{
+
+  <span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Renderer</span></span>
+
+  <span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Repr</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">render</span></span>: <span class="hljs-type">String</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">render</span></span>(renderer: <span class="hljs-type">Renderer</span>): <span class="hljs-type">String</span>
+  }
+}
+</code></pre>
+<p><code>Repr</code> here is a data structure that captures the information needed to render a data type in a structured format so that it can be displayed in different ways. A <code>Renderer</code> is a data type that knows how to render a <code>Repr</code> to a particular string representation, for example using short names for readability or fully qualified names for using the rendered output as valid code.</p>
+<p>If we import <code>zio.prelude._</code> then we can use the <code>debug</code> operator on any date type with a <code>Debug</code> instance defined for it.</p>
+<p>The <code>Debug</code> abstraction is the functional equivalent of the <code>toString</code> operator but it has several advantages over just using <code>toString</code>.</p>
+<p>First, as with other functional abstractions we can define when it makes sense to render a data type at all.</p>
+<p>We can call <code>toString</code> on anything including classes whose string representation only points to their memory address. Fortunately this is more often the cause of annoyance than real bugs but it is certainly nice to know when there isn't much point in trying to render something.</p>
+<p>Related to this, we can define our own way of rendering for data types that are not under our control. For example, if we are debugging code involving arrays we can frequently be frustrated when the string representation of the array consists of its memory location rather than the elements actually in the array.</p>
+<p>With ZIO Prelude, we can easily define a <code>Debug</code> instance for <code>Array</code>. We can even handle nested arrays.</p>
+<p>The final advantage that the <code>Debug</code> abstraction has over the Scala standard library and older functional programming libraries is that it captures rendering information in a structured data format instead of just a <code>String</code>.</p>
+<p>When we render a data type we may want to do it in various ways. We may want to do it using short names for a readable description in the context of a discussion like this one, rendering it as something like <code>Validation[String, Int]</code>.</p>
+<p>In another context like being able to copy and paste our rendering into a REPL, IDE, or worksheet and having it compile we may want to use fully qualified names, such as <code>zio.prelude.Validation[scala.String, scala.Int]</code>. Or we may decide that including the fully qualified name for standard library types is a little too much, and want to render this as <code>zio.prelude.Validation[String, Int]</code>.</p>
+<p>All of these are valid choices, but just rendering values as a <code>String</code> forces us to choose one. A <code>String</code> does not have enough structure to preserve all the information we need for rendering different ways so we are forced to choose one arbitrarily.</p>
+<p>This also allows us to define meaningful laws for the <code>Debug</code> abstraction. In other functional programming libraries interfaces that provide similar functionality are essentially lawless since there is nothing describing what this string representation should look like.</p>
+<p>In contrast, in ZIO Prelude <code>Debug</code> follows a well defined law that the Scala rendering of any data type should itself be valid Scala code.</p>
+<h2><a class="anchor" aria-hidden="true" id="structured-rendering"></a><a href="#structured-rendering" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Structured Rendering</h2>
+<p>The <code>Repr</code> data type preserves all the information we need to render a data type to a <code>String</code> in various ways. There is nothing magic about this data type, it is just an algebraic data type with a variety of cases representing the different possible pieces of information we could need for rendering.</p>
+<p>If you just want to render data types from ZIO or the Scala standard library that have meaningful string representations then you can just use the <code>debug</code> operator but if you want to define <code>Debug</code> instances for your own data type it is helpful to understand usage of <code>Repr</code>.</p>
+<p>Most of the cases of <code>Repr</code> are &quot;simple&quot; cases that just describe existing primitive data types.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Repr</span></span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Repr</span> </span>{
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Int</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Int</span></span>)           <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Double</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Double</span></span>)     <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Float</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Long</span></span>)        <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Long</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Long</span></span>)         <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Byte</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Byte</span></span>)         <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Char</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Char</span></span>)         <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Boolean</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Boolean</span></span>)   <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Short</span>(<span class="hljs-params">value: scala.<span class="hljs-type">Short</span></span>)       <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">String</span>(<span class="hljs-params">value: java.lang.<span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+}
+</code></pre>
+<p>As you can see these cases are indeed quite straightforward other than the minor complexity of avoiding name collisions with the underlying data types.</p>
+<p>With these representations we can describe the structure of primitive values in a way that supports structured rendering. For example, the <code>Repr</code> of <code>42</code> would be <code>Repr.Int(42)</code> and we could match on it to render it in various ways such as <code>42</code> or <code>Int: 42</code>.</p>
+<p>The next case, <code>Object</code>, lets us define our own primitive types.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Repr</span> </span>{
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Object</span>(<span class="hljs-params">namespace: <span class="hljs-type">List</span>[java.lang.<span class="hljs-type">String</span>], name: java.lang.<span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+}
+</code></pre>
+<p>As its name implies, this lets us define representations for data types like objects that aren't existing primitive types but also do not depend on other data types for their rendering. The information needed to render an object is just the name of the object and its namespace.</p>
+<p>For example, the <code>Repr</code> of <code>None</code> would be <code>Repr.Object(List(&quot;scala&quot;), &quot;None&quot;)</code>. Note how the namespace gives us the information we need to render the <code>Repr</code> as valid Scala code and gives us the ability to decide at the time of rendering whether we want to include some or all of this or just the name itself.</p>
+<p>The final cases of <code>Repr</code> let us build more complex data types such as sum types, product types, and collections from simpler ones.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> scala.collection.immutable.<span class="hljs-type">ListMap</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Repr</span> </span>{
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VConstructor</span>(<span class="hljs-params">
+    namespace: <span class="hljs-type">List</span>[java.lang.<span class="hljs-type">String</span>],
+    name: java.lang.<span class="hljs-type">String</span>,
+    reprs: <span class="hljs-type">List</span>[<span class="hljs-type">Repr</span>]
+  </span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Constructor</span>(<span class="hljs-params">
+    namespace: <span class="hljs-type">List</span>[java.lang.<span class="hljs-type">String</span>],
+    name: java.lang.<span class="hljs-type">String</span>,
+    reprs: <span class="hljs-type">ListMap</span>[java.lang.<span class="hljs-type">String</span>, <span class="hljs-type">Repr</span>]
+  </span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">KeyValue</span>(<span class="hljs-params">
+    key: <span class="hljs-type">Repr</span>,
+    value: <span class="hljs-type">Repr</span>
+  </span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Repr</span></span>
+}
+</code></pre>
+<p>The <code>VConstructor</code> case mirrors the constructor arguments of a class or case class. Just like the <code>Object</code> constructor it contains a namespace and name but now it also has a list of <code>Repr</code> values describing how each of the constructor parameters can be rendered.</p>
+<p>For example, the <code>Repr</code> of <code>Some(42)</code> would be <code>Repr.VConstructor(List(&quot;scala&quot;), &quot;Some&quot;, List(Repr.Int(42)))</code>. Again, this gives us everything we need to render the value in different ways.</p>
+<p>The <code>Constructor</code> case is like <code>VConstructor</code> but mirrors a data type like a case class with named fields. The list of constructor arguments now included the name of each constructor argument along with its representation.</p>
+<p>For example, the <code>Repr</code> of <code>Person(&quot;John&quot;, 42)</code> would be <code>Repr.Constructor(List.empty, &quot;Person&quot;, Map(&quot;name&quot; -&gt; Repr.String(&quot;John&quot;), &quot;age&quot; -&gt; Repr.Int(42)))</code>. The names of the constructor arguments may or may not be shown depending on the renderer used.</p>
+<p>The final case is <code>KeyValue</code>, which covers situations where the constructor arguments are key value pairs, like in a <code>Map</code>. We capture this separately so we can render them appropriately, for example using <code>-&gt;</code> to ensure that we can render the key value pairs as valid code.</p>
+<p>Most of the time you won't have to use most of these constructors yourself but it is helpful to know what they are since you will often have to use one or two in defining your own <code>Debug</code> instances, typically the <code>Object</code>, <code>VConstructor</code>, and <code>Constructor</code> cases.</p>
+<h2><a class="anchor" aria-hidden="true" id="defining-debug-instances"></a><a href="#defining-debug-instances" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining Debug Instances</h2>
+<p>ZIO Prelude comes with <code>Debug</code> instances defined for all data types with meaningful string representations in ZIO and the Scala standard library, as well as data types composed of those types.</p>
+<p>To define a <code>Debug</code> instance for your own data type you can use the <code>make</code> operator which requires you to specify how to create a representation of your own data type. Typically you can do this just by using one of the <code>Repr</code> constructors such as <code>Constructor</code>, <code>Object</code>, or <code>VConstructor</code> and using the <code>debug</code> operator on any values that are inside your data type.</p>
+<p>For example, here is how we could define a <code>Debug</code> instance for a <code>Person</code> data type:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span></span>)</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Person</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">PersonDebug</span>: <span class="hljs-type">Debug</span>[<span class="hljs-type">Person</span>] =
+    <span class="hljs-type">Debug</span>.make { <span class="hljs-keyword">case</span> <span class="hljs-type">Person</span>(name, age) =&gt;
+      <span class="hljs-type">Debug</span>.<span class="hljs-type">Repr</span>.<span class="hljs-type">Constructor</span>(
+        <span class="hljs-type">List</span>.empty,
+        <span class="hljs-string">"Person"</span>,
+        <span class="hljs-string">"name"</span> -&gt; name.debug,
+        <span class="hljs-string">"age"</span>  -&gt; age.debug
+      )
+    }
+}
+</code></pre>
+<p>Notice how we used the <code>debug</code> operator on <code>name</code> and <code>age</code>. In this simple case we could have used <code>Repr.String(name)</code> and <code>Repr.Int(age)</code> but this would not have worked if the constructor values were more complex and would have forced us to spend more time working with <code>Repr</code> directly.</p>
+<p>We can use the same strategy to define <code>Debug</code> instances for polymorphic data types. We just need to add a constraint that there is a <code>Debug</code> instance for the different types that we want to render.</p>
+<p>For example, here is how we could define a <code>Debug</code> instance for a simplified version of the <code>Validation</code> data type from ZIO Prelude.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">NonEmptyChunk</span>
+
+<span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>]</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Success</span>[+<span class="hljs-type">A</span>](<span class="hljs-params">a: <span class="hljs-type">A</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Validation</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>]</span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failure</span>[+<span class="hljs-type">E</span>](<span class="hljs-params">es: <span class="hljs-type">NonEmptyChunk</span>[<span class="hljs-type">E</span>]</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">Nothing</span>]</span>
+
+  <span class="hljs-keyword">implicit</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">ValidationDebug</span></span>[<span class="hljs-type">E</span>: <span class="hljs-type">Debug</span>, <span class="hljs-type">A</span>: <span class="hljs-type">Debug</span>]: <span class="hljs-type">Debug</span>[<span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>]] =
+    <span class="hljs-type">Debug</span>.make {
+      <span class="hljs-keyword">case</span> <span class="hljs-type">Success</span>(a)  =&gt; <span class="hljs-type">Debug</span>.<span class="hljs-type">Repr</span>.<span class="hljs-type">VConstructor</span>(<span class="hljs-type">List</span>(<span class="hljs-string">"zio"</span>, <span class="hljs-string">"prelude"</span>), <span class="hljs-string">"Validation.Success"</span>, <span class="hljs-type">List</span>(a.debug))
+      <span class="hljs-keyword">case</span> <span class="hljs-type">Failure</span>(es) =&gt; <span class="hljs-type">Debug</span>.<span class="hljs-type">Repr</span>.<span class="hljs-type">VConstructor</span>(<span class="hljs-type">List</span>(<span class="hljs-string">"zio"</span>, <span class="hljs-string">"prelude"</span>), <span class="hljs-string">"Validation.Failure"</span>, <span class="hljs-type">List</span>(es.debug))
+    }
+}
+</code></pre>
+<p>Here we used context bounds of <code>Debug</code> for the <code>E</code> and <code>A</code> type parameters to require that <code>Debug</code> instances for them exist. This makes sense because there is no way we can create a meaningful string representation of a value if we can't create meaningful string representations of its components.</p>
+<h2><a class="anchor" aria-hidden="true" id="rendering"></a><a href="#rendering" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Rendering</h2>
+<p>The <code>Repr</code> data type returned by the <code>debug</code> operator is just a representation of the data type in a way that supports meaningful string rendering. To actually get a string we still need to render it with its <code>render</code> operator.</p>
+<p>The easiest way to do that is to call the <code>render</code> operator directly, which uses a default renderer that renders data in a simple way that is being read by humans but is not necessarily valid Scala code. If we want to, we can call <code>render</code> with an argument and provide a <code>Renderer</code> to render the representation in a different way.</p>
+<p>ZIO Prelude comes with two other renderers.</p>
+<p>The <code>Scala</code> renderer renders data as valid Scala code that you can copy and paste into an IDE, REPL, or worksheet. The <code>Full</code> renderer renders data with as much detail as possible, including information like field names where available, and can be helpful for debugging purposes.</p>
+<p>A <code>Renderer</code> is just a function that takes a <code>Repr</code> and returns a <code>String</code>, so you can also define your own <code>Renderer</code> if you want to. ZIO Prelude's <code>Debug</code> abstraction preserves all the information so you can render your data types the way you want to.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative"><span class="arrow-prev">← </span><span>Commutative</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal"><span>Equal</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#structured-rendering">Structured Rendering</a></li><li><a href="#defining-debug-instances">Defining Debug Instances</a></li><li><a href="#rendering">Rendering</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

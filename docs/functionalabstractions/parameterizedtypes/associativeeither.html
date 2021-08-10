@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>AssociativeEither · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`AssociativeEither` describes a way of combining two values `F[A]` and `F[B]` into a value `F[Either[A, B]]` that is associative."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="AssociativeEither · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`AssociativeEither` describes a way of combining two values `F[A]` and `F[B]` into a value `F[Either[A, B]]` that is associative."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">AssociativeEither</h1></header><article><div><span><p><code>AssociativeEither</code> describes a way of combining two values <code>F[A]</code> and <code>F[B]</code> into a value <code>F[Either[A, B]]</code> that is associative.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">AssociativeEither</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">F</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]]
+}
+</code></pre>
+<p>If we import <code>zio.prelude._</code> we can use the <code>orElseEither</code> operator or its symbolic alias <code>&lt;+&gt;</code> to combine any two values of a parameterized type <code>F</code> that have an <code>AssociativeEither</code> instance defined for them.</p>
+<p>The <code>either</code> operator must be associative, so if we combine two values <code>fa</code> and <code>fb</code> and then combine the result with <code>fc</code>, that must be the same as combining <code>fb</code> with <code>fc</code> and then combining <code>fa</code> with the result. That is, after reassociating <code>Either</code> values the following property must hold:</p>
+<pre><code class="hljs css language-scala">(fa &lt;+&gt; fb) &lt;+&gt; fc === fa &lt;+&gt; (fb &lt;+&gt; fc)
+</code></pre>
+<p>This is the same associative law we saw for concrete types described by the <code>Associative</code> abstraction, but lifted to the context of parameterized types.</p>
+<p>The <code>either</code> operator corresponds to running the left value and if that fails running the right value.</p>
+<p>To see this, we can observe that since the <code>either</code> operator must return an <code>Either[A, B]</code> we must choose on some basis whether to return the left value or the right value. Furthermore, we must choose on some consistent basis so that the order of operations does not matter.</p>
+<p>There are a couple of trivial ways we could do this, like always running the left value or always running the right value. However, the way we can do this that preserves information is to run the right value and then if it fails in some way to run the right value.</p>
+<p>What it means to run the left value and then if it fails run the right value depends on the parameterized type.</p>
+<p>For <code>ZIO</code> the meaning is quite straightforward. The <code>orElseEither</code> operator runs the left <code>ZIO</code> workflow and returns its result if it succeeds, otherwise it runs the right <code>ZIO</code> workflow and returns its result.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">orElseEither</span></span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+  left.foldM(_ =&gt; right.map(b =&gt; <span class="hljs-type">Right</span>(b)), a =&gt; <span class="hljs-type">ZIO</span>.succeed(<span class="hljs-type">Left</span>(a)))
+</code></pre>
+<p>Here we run the <code>left</code> workflow and if it is successful we just wrap it up in a <code>Left</code>. If the <code>left</code> workflow fails we recover from its failure and run the <code>Right</code> effect, packaging its result up in a <code>Right</code>.</p>
+<p>We can see that this is associative because no matter how many <code>ZIO</code> workflows we combine with <code>orElseEither</code> the result will always be the first one from left to right to successfully complete execution.</p>
+<p>Notice here that if the <code>left</code> workflow succeeds we never run the right workflow at all or even need to construct it. The fact that <code>either</code> and the other binary operators in ZIO Prelude are by name gives us the freedom to model that instead of having to introduce additional interfaces.</p>
+<p>Other data types that model failure have similar implementations of the <code>orElseEither</code> operator. For example, here are the implementations of <code>orElseEither</code> for <code>Either</code> and <code>Option</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">orElseEither</span></span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>], =&gt; right: <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, <span class="hljs-type">B</span>])]): <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, <span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+  left <span class="hljs-keyword">match</span> {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Left</span>(e) =&gt;
+      that <span class="hljs-keyword">match</span> {
+        <span class="hljs-keyword">case</span> <span class="hljs-type">Left</span>(e)  =&gt; <span class="hljs-type">Left</span>(e)
+        <span class="hljs-keyword">case</span> <span class="hljs-type">Right</span>(b) =&gt; <span class="hljs-type">Right</span>(<span class="hljs-type">Right</span>(b))
+      }
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Right</span>(a) =&gt; <span class="hljs-type">Right</span>(<span class="hljs-type">Left</span>(a))
+  }
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">orElseEither</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">Option</span>[<span class="hljs-type">A</span>], =&gt; right: <span class="hljs-type">Option</span>[<span class="hljs-type">B</span>])]): <span class="hljs-type">Option</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+  left <span class="hljs-keyword">match</span> {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">None</span> =&gt;
+      that <span class="hljs-keyword">match</span> {
+        <span class="hljs-keyword">case</span> <span class="hljs-type">None</span>     =&gt; <span class="hljs-type">None</span>
+        <span class="hljs-keyword">case</span> <span class="hljs-type">Right</span>(b) =&gt; <span class="hljs-type">Some</span>(<span class="hljs-type">Right</span>(b))
+      }
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Some</span>(a) =&gt; <span class="hljs-type">Some</span>(<span class="hljs-type">Left</span>(a))
+  }
+</code></pre>
+<p>In both cases if the <code>left</code> value is a success we return its result in a <code>Left</code>. Otherwise if the <code>right</code> value is a success we return its result in a <code>Right</code> and if it is a failure we fail with that error.</p>
+<p>Notice in both cases we did not need to evaluate the <code>right</code> value if the <code>left</code> value was a success. We could have just made the <code>right</code> parameter lazy but we could flip any of these binary operators so for correctness it is important that both arguments be lazy.</p>
+<p>Another interpretation of <code>orElseEither</code> comes from collections. Consider the following implementation of the <code>orElseEither</code> operator for <code>Chunk</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">ChunkAssociativeEither</span>: <span class="hljs-type">AssociativeEither</span>[<span class="hljs-type">Chunk</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">AssociativeEither</span>[<span class="hljs-type">Chunk</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: =&gt; <span class="hljs-type">Chunk</span>[<span class="hljs-type">A</span>], bs: =&gt; <span class="hljs-type">Chunk</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Chunk</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+      as.map(<span class="hljs-type">Left</span>(_)) ++ bs.map(<span class="hljs-type">Right</span>(_))
+  }
+<span class="hljs-comment">// ChunkAssociativeEither: AssociativeEither[Chunk] = repl.MdocSession$App0$$anon$1@4c76016f</span>
+</code></pre>
+<p>Here we are concatenating the two <code>Chunk</code> values, putting the elements from the left <code>Chunk</code> in a <code>Left</code> and the elements from the right <code>Chunk</code> in a <code>Right</code>. We can think of this as running the left <code>Chunk</code> until it fails by running out of elements and then running the right <code>Chunk</code>.</p>
+<p>We can see a similar interpretation in the implementation of the <code>orElseEither</code> operator for the <code>Schedule</code> data type from <code>ZIO</code>. It runs the left schedule while it wants to continue and when it stops runs the right schedule, emitting either a <code>Left</code> with the output of the left schedule or a <code>Right</code> with the output of the right schedule each time.</p>
+<p>The <code>AssociativeEither</code> abstraction isn't limited to covariant data types.</p>
+<p>Let's see how we can use the <code>orElseEither</code> operator to combine values of a contravariant type.</p>
+<p>The <code>Predicate</code> type knows how to evaluate a value of type <code>A</code> to return a <code>Boolean</code>. This <code>Boolean</code> could describe whether the value of type <code>A</code> is valid data for example, or whether we should take some further action.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Predicate</span>[-<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">Boolean</span>
+}
+</code></pre>
+<p>We could implement an instance of the <code>AssociativeEither</code> abstraction for <code>Predicate</code> like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Predicate</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">PredicateAssociativeEither</span>: <span class="hljs-type">AssociativeEither</span>[<span class="hljs-type">Predicate</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">AssociativeEither</span>[<span class="hljs-type">Predicate</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">Predicate</span>[<span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">Predicate</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Predicate</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+        <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] {
+          <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(either: <span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">Boolean</span> =
+            either <span class="hljs-keyword">match</span> {
+              <span class="hljs-keyword">case</span> <span class="hljs-type">Left</span>(a) =&gt; left.run(a)
+              <span class="hljs-keyword">case</span> <span class="hljs-type">Right</span>(b) =&gt; right.run(b)
+            }
+        }
+    }
+}
+</code></pre>
+<p>The interpretation is slightly different here. Now failing means not being able to handle a value at all.</p>
+<p>The left <code>Predicate</code> knows how to determine whether <code>A</code> values satisfy the condition and the right <code>Predicate</code> knows how to determine whether <code>B</code> values satisfy the condition. So when we get an <code>Either[A, B]</code> we have to match on it to determine whether it is an <code>A</code> that the left <code>Predicate</code> can handle at all.</p>
+<p>If so, we send it to the left <code>Predicate</code> and return its result. Otherwise we send it to the right <code>Predicate</code> and return its result.</p>
+<p>Just like the <code>AssociativeBoth</code> abstraction, if a data type with an <code>AssociativeEither</code> instance is covariant there are additional operators we can define on it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">orElse</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">AssociativeEither</span> : <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>](fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>]): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =
+  fa.orElseEither(fb).map(_.merge)
+</code></pre>
+<p>The <code>orElse</code> operator just combines two <code>F[A]</code> values with <code>orElseEither</code> and then maps the result to merge the left and right sides of the <code>Either</code>. This is probably the version of the <code>orElse</code> operator we are most familiar with.</p>
+<p>We can also define additional operators if a data type that has a <code>AssociativeEither</code> instance defined for it is contravariant.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">eitherWith</span></span>[<span class="hljs-type">F</span>[-_]: <span class="hljs-type">AssociativeEither</span> : <span class="hljs-type">Contravariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](fa: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], fb: <span class="hljs-type">F</span>[<span class="hljs-type">B</span>])(
+  f: <span class="hljs-type">C</span> =&gt; <span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]
+): <span class="hljs-type">F</span>[<span class="hljs-type">C</span>] =
+  fa.orElseEither(fb).contramap(f)
+</code></pre>
+<p>The <code>eitherWith</code> operator first converts input of type <code>C</code> into <code>Either[A, B]</code> values with <code>contramap</code> and the function <code>f</code>, then runs the <code>fa</code> and <code>fb</code> values using that input and the <code>orElseEither</code> operator.</p>
+<p>For example, if our data type was a <code>Predicate</code> the <code>eitherWith</code> operator could split incoming payloads into one of two types, sending them to the appropriate predicate for evaluation and then returning the results. Of course, if we can handle a payload with two types in this way we can also handle payloads with any number of cases by repeatedly applying the <code>eitherWith</code> operator.</p>
+<p>The <code>AssociativeEither</code> functional abstraction represents the second fundamental way of combining two values of a parameterized type. Whereas <code>AssociativeBoth</code> combines the <code>A</code> and <code>B</code> values into the sum type represented by <code>(A, B)</code>, <code>AssociativeEither</code> combines them into the product type represented by <code>Either[A, B]</code>.</p>
+<p>For existing data types the <code>orElseEither</code> operator and its variants tend to already be implemented, often with more domain specific names, so there isn't necessarily an immediate benefit if you are working with existing data types from ZIO or the Scala standard library.</p>
+<p>However, if you are defining your own parameterized types it can be helpful to think about what it would mean for running a value to fail and what it would mean to run another value instead. There are also operators in ZIO Prelude that are defined on types with an <code>AssociativeEither</code> instance, so implementing an instance for your own data type can let you take advantage of that functionality and test your implementation with the laws in ZIO Prelude.</p>
+<p>Finally, the <code>AssociativeEither</code> abstraction can be quite helpful in some cases for writing generic code in terms of the abstractions in ZIO Prelude.</p>
+<p>The combination of the ability to express running the left value and then running the right value with <code>AssociativeBoth</code> and running the left value and if it fails running the right value with <code>AssociativeEither</code> can be quite powerful. For example, we can define many parsers in this way.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth"><span class="arrow-prev">← </span><span class="function-name-prevnext">AssociativeBoth</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten"><span class="function-name-prevnext">AssociativeFlatten</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

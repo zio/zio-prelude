@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>CommutativeBoth · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`CommutativeBoth[F]` describes a way of combining two values `F[A]` and `F[B]` into a value `F[(A, B)]` that is commutative."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="CommutativeBoth · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`CommutativeBoth[F]` describes a way of combining two values `F[A]` and `F[B]` into a value `F[(A, B)]` that is commutative."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">CommutativeBoth</h1></header><article><div><span><p><code>CommutativeBoth[F]</code> describes a way of combining two values <code>F[A]</code> and <code>F[B]</code> into a value <code>F[(A, B)]</code> that is commutative.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">AssociativeBoth</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">F</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">CommutativeBoth</span>[<span class="hljs-type">F</span>[_]] <span class="hljs-keyword">extends</span> <span class="hljs-title">AssociativeBoth</span>[<span class="hljs-type">F</span>]</span>
+</code></pre>
+<p>If we import <code>zio.prelude._</code> we can use the <code>zipPar</code> operator or its symbolic alias <code>&lt;&amp;&gt;</code> to combine any two values of a parameterized type for which a <code>CommutativeBoth</code> instance exists in a commutative way.</p>
+<p>The <code>both</code> operator must be commutative, so if we combine <code>fa</code> and <code>fb</code> that must be the same as combining <code>fb</code> and <code>fa</code>. After rearranging the order of tuples:</p>
+<pre><code class="hljs css language-scala">fa &lt;&amp;&gt; fb === fb &lt;&amp;&gt; fa
+</code></pre>
+<p>This is the same law as defined for the <code>Commutative</code> functional abstraction for concrete types, just lifted into the context of parameterized types.</p>
+<p>As the name of the <code>zipPar</code> operator implies, the <code>both</code> operator of the <code>CommutativeBoth</code> abstraction corresponds to running the first value and running the second value in parallel.</p>
+<p>We can see this because to produce a tuple <code>(A, B)</code> we need to run both the left value and the right value and to do it in a way that order doesn't matter we need to run the left value and the right value in parallel. This doesn't necessarily mean we are actually forking separate fibers to run the left and right values but it does mean that we run the left and right values in a way that the result does not depend on the order in which they are run.</p>
+<p>To get a better sense of what it means for a combining operation on parameterized types to be commutative, let's start with looking at why the <code>zip</code> operator on <code>ZIO</code> is not commutative.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+<span class="hljs-keyword">import</span> zio.console._
+
+<span class="hljs-keyword">import</span> java.io.<span class="hljs-type">IOException</span>
+
+<span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
+  console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@653998fd</span>
+
+<span class="hljs-keyword">val</span> zioHello: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
+  console.putStrLn(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"Hello"</span>)
+<span class="hljs-comment">// zioHello: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@3273666</span>
+</code></pre>
+<p>If the <code>zip</code> operator was commutative these two <code>ZIO</code> workflows would be the same. But they obviously are not.</p>
+<p>The first will print <code>Hello</code> to the console on one line followed by <code>ZIO</code> on the next whereas the second will print <code>ZIO</code> to the console followed by <code>Hello</code>. We can easily observe this by running the program ourselves or using a test implementation of the <code>Console</code> service like <code>TestConsole</code> from ZIO Test.</p>
+<p>We can also see this in the context of failures.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> failZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
+  <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>)) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@23578bc1</span>
+
+<span class="hljs-keyword">val</span> zioFail: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
+  console.putStrLn(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>))
+<span class="hljs-comment">// zioFail: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@724b42c3</span>
+</code></pre>
+<p>Again if the <code>zip</code> operator was commutative these two <code>ZIO</code> workflows should be the same but they are not. The first program will fail immediately and never print <code>ZIO</code> to the console, whereas the second will print <code>ZIO</code> to the console and then fail.</p>
+<p>What would a commutative version of this operator be? It would have to run both the left and right values at the same time so they both had the same opportunity to run.</p>
+<p>The <code>zipPar</code> operator on <code>ZIO</code> does just this.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> helloZIOPar: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
+  console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;&amp;&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// helloZIOPar: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$GetForkScope@5b9cc207</span>
+</code></pre>
+<p>Now <code>Hello</code> and <code>World</code> will be printed to the console at the same time. For any given execution one will appear before the other but they each have the same opportunity to appear first and both this and the version with the order reversed describe the same <code>ZIO</code> workflow.</p>
+<p>This interpretation of <code>zipPar</code> as running the left and right values on separate fibers is the most natural one but not the only one. The left and right values can be run in parallel as long as the result of running one does not depend on the result of running the other and information from both has equal opportunity to be included in the result.</p>
+<p>To see this, let's look at a slightly simplified version of the <code>Validation</code> data type from ZIO Prelude and how we can define the <code>zipPar</code> operator for it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">NonEmptyChunk</span>
+
+<span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{ self =&gt;
+  <span class="hljs-keyword">import</span> <span class="hljs-type">Validation</span>._
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">zipPar</span></span>[<span class="hljs-type">E1</span> &gt;: <span class="hljs-type">E</span>, <span class="hljs-type">B</span>](that: <span class="hljs-type">Validation</span>[<span class="hljs-type">E1</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">Validation</span>[<span class="hljs-type">E1</span>, (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
+    (self, that) <span class="hljs-keyword">match</span> {
+      <span class="hljs-keyword">case</span> (<span class="hljs-type">Success</span>(a), <span class="hljs-type">Success</span>(b))    =&gt; <span class="hljs-type">Success</span>((a, b))
+      <span class="hljs-keyword">case</span> (<span class="hljs-type">Success</span>(_), <span class="hljs-type">Failure</span>(e1s))  =&gt; <span class="hljs-type">Failure</span>(e1s)
+      <span class="hljs-keyword">case</span> (<span class="hljs-type">Failure</span>(es), <span class="hljs-type">Success</span>(_))   =&gt; <span class="hljs-type">Failure</span>(es)
+      <span class="hljs-keyword">case</span> (<span class="hljs-type">Failure</span>(es), <span class="hljs-type">Failure</span>(e1s)) =&gt; <span class="hljs-type">Failure</span>(es ++ e1s)
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Success</span>[+<span class="hljs-type">A</span>](<span class="hljs-params">value: <span class="hljs-type">A</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Validation</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>]</span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failure</span>[+<span class="hljs-type">E</span>](<span class="hljs-params">errors: <span class="hljs-type">NonEmptyChunk</span>[<span class="hljs-type">E</span>]</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">Nothing</span>]</span>
+}
+</code></pre>
+<p>We are not forking any fibers here, but notice how in our implementation of <code>zipPar</code> we are matching on the left and right sides at the same time and preserving the information from both errors in the case where both fail. As long as we implement equality in a way that does not depend on the order of errors, combining two <code>Validation</code> values with <code>zipPar</code> will always give the same result regardless of the order in which we combine them.</p>
+<p>Another interpretation of what it means to run two values in parallel comes from collections. We can combine values from two collections in parallel by zipping them together pairwise.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">ListCommutativeBoth</span>: <span class="hljs-type">CommutativeBoth</span>[<span class="hljs-type">List</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">CommutativeBoth</span>[<span class="hljs-type">List</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">A</span>], bs: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">List</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
+      as.zip(bs)
+  }
+<span class="hljs-comment">// ListCommutativeBoth: CommutativeBoth[List] = repl.MdocSession$App0$$anon$1@61b25b14</span>
+</code></pre>
+<p>Again we are not forking any fibers here but values from the left list and the right list have an equal opportunity to be included in the zipped list.</p>
+<p>We can see this if we zip together two lists of different lengths.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> left: <span class="hljs-type">List</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-type">List</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)
+<span class="hljs-comment">// left: List[Int] = List(1, 2, 3)</span>
+
+<span class="hljs-keyword">val</span> right: <span class="hljs-type">List</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-type">List</span>(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>)
+<span class="hljs-comment">// right: List[Int] = List(4, 5, 6, 7, 8)</span>
+
+<span class="hljs-keyword">val</span> leftRight: <span class="hljs-type">List</span>[(<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>)] =
+  left.zip(right)
+<span class="hljs-comment">// leftRight: List[(Int, Int)] = List((1, 4), (2, 5), (3, 6))</span>
+
+<span class="hljs-keyword">val</span> rightLeft: <span class="hljs-type">List</span>[(<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>)] =
+  right.zip(left)
+<span class="hljs-comment">// rightLeft: List[(Int, Int)] = List((4, 1), (5, 2), (6, 3))</span>
+</code></pre>
+<p>The zipped lists are identical after rearranging the order of tuples.</p>
+<p>Some instances of <code>CommutativeBoth</code> actually combine these interpretations. For example the <code>CommutativeBoth</code> instance for <code>ZStream</code> is implemented in terms of the <code>zip</code> operator on <code>ZStream</code>, which creates a new stream that pulls values from the left and the right streams pairwise, evaluating effects in the left and right streams on separate fibers.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.stream._
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">ZStream</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>], right: <span class="hljs-type">ZStream</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">ZStream</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
+  left.zip(right)
+</code></pre>
+<p>Just like the <code>AssociativeBoth</code> abstraction, <code>CommutativeBoth</code> is not limited to covariant types. For example we could send inputs to multiple sinks in parallel, having each sink run on a separate fiber.</p>
+<p>When the parameterized type is covariant the <code>zipWithPar</code> operator is also defined on it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">zipWithPar</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">CommutativeBoth</span> : <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+  fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>],
+  fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+)(f: (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>) =&gt; <span class="hljs-type">C</span>): <span class="hljs-type">F</span>[<span class="hljs-type">C</span>] =
+  fa.zipPar(fb).map(f.tupled)
+</code></pre>
+<p>This is just like the <code>zipWith</code> operator defined on data types that have an <code>AssociativeBoth</code> instance except it runs the left and right values in parallel instead of running the left value and then the right value. It is very useful when you want to do two things in parallel and then combine the results.</p>
+<p>A version of this is available for contravariant data types called <code>bothWithPar</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bothWithPar</span></span>[<span class="hljs-type">F</span>[-_]: <span class="hljs-type">CommutativeBoth</span> : <span class="hljs-type">Contravariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+  fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>],
+  fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+)(f: <span class="hljs-type">C</span> =&gt; (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)): <span class="hljs-type">F</span>[<span class="hljs-type">C</span>] =
+  fa.zipPar(fb).contramap(f)
+</code></pre>
+<p>The <code>bothWithPar</code> operator splits a data type <code>C</code> up into two parts <code>A</code> and <code>B</code>, running the left value with <code>A</code> and the right value with <code>B</code> in parallel.</p>
+<p>The <code>CommutativeBoth</code> functional abstraction, like the <code>AssociativeBoth</code> abstraction, describes a basic way of combining two data types, this time by running them in parallel instead of running the left one and then the right one. The <code>zipPar</code> operator, or more domain specific names for it for certain basic types, is also very practically useful and we saw that it corresponded to common operators on these data types that we were probably already familiar with.</p>
+<p>For this reason, however, the <code>CommutativeBoth</code> abstraction may be less useful if you are working with data types from ZIO or the Scala standard library. They generally already implement this functionality directly, for example in the <code>zipPar</code> operator on <code>ZIO</code> and the <code>zip</code> operator on <code>ZStream</code>.</p>
+<p>This abstraction is more likely to be useful when you are defining your own data type. If your data type supports a way of combining that is commutative, such as the ones we have discussed here, then defining a <code>CommutativeBoth</code> instance will let you express that and work with other operators that are defined on data types with <code>CommutativeBoth</code> instances.</p>
+<p>Finally, this abstraction is likely to be valuable for those writing generic code to describe running values in parallel. As with the <code>AssociativeBoth</code> abstraction the ability to generalize over covariant, contravariant, and invariant data types is likely to be particularly valuable here.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten"><span class="arrow-prev">← </span><span class="function-name-prevnext">AssociativeFlatten</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither"><span class="function-name-prevnext">CommutativeEither</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

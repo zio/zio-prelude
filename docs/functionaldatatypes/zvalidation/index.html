@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>ZValidation · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Like many other data types in ZIO, the `Validation` data type we learned about before is actually a type alias for a more general data type called `ZValidation`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="ZValidation · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="Like many other data types in ZIO, the `Validation` data type we learned about before is actually a type alias for a more general data type called `ZValidation`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Functional Data Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Functional Data Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/">Summary</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/equivalence">Equivalence</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/nonemptylist">NonEmptyList</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/these">These</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/validation">Validation</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zset">ZSet</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zvalidation">ZValidation</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">ZValidation</h1></header><article><div><span><p>Like many other data types in ZIO, the <code>Validation</code> data type we learned about before is actually a type alias for a more general data type called <code>ZValidation</code>.</p>
+<p>A <code>ZValidation[W, E, A]</code> is either a <code>Success</code> with a value of type <code>A</code> or a <code>Failure</code> with one or more errors of type <code>E</code>, and in either case contains a log of values of type <code>W</code>. A <code>Validation[E, A]</code> is just a type alias for <code>ZValidation[Nothing, E, A]</code> and since the log type was <code>Nothing</code> we were able to ignore it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>= <span class="hljs-type">ZValidation</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>]
+</code></pre>
+<p>This type <code>W</code> can be used for two main purposes.</p>
+<p>First, it can be used to maintain a &quot;log&quot; of the things we did in validating some data. In some cases it can be important for auditing or debugging purposes to know not just whether data is valid or why not but the steps we took in validating that data.</p>
+<p>Second, it can be used to represent a concept of &quot;warnings&quot;.</p>
+<p>By definition a <code>Validation</code> is either a success with a value or a failure with one or more errors. So if an error occurred the data is invalid and there is no value at all.</p>
+<p>However, we can imagine some cases where data might be questionable or noteworthy in some way without being invalid.</p>
+<p>For example, we might say that a valid <code>Person</code> must have an age that is not negative, so a <code>Person</code> with an age of <code>10</code> would still be valid data. But depending on the application this data might still be unusual, for example if this <code>Person</code> represents a credit card customer.</p>
+<p>In cases like this it would be useful to have some way of capturing these warnings as data and propagating them through our validation logic so that we can see all the warnings that occurred and take some further action based on them. This could include logging them, triggering a user to confirm that their input is correct, or triggering other processes based on the content of these warnings.</p>
+<p>To model this we can represent a <code>ZValidation</code> as follows:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.{<span class="hljs-type">Chunk</span>, <span class="hljs-type">NonEmptyChunk</span>}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZValidation</span>[+<span class="hljs-type">W</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>]</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">ZValidation</span> </span>{
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Success</span>[<span class="hljs-type">W</span>, <span class="hljs-type">A</span>](<span class="hljs-params">log: <span class="hljs-type">Chunk</span>[<span class="hljs-type">W</span>], value: <span class="hljs-type">A</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">ZValidation</span>[<span class="hljs-type">W</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>]</span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failure</span>[<span class="hljs-type">W</span>, <span class="hljs-type">E</span>](<span class="hljs-params">log: <span class="hljs-type">Chunk</span>[<span class="hljs-type">W</span>], errors: <span class="hljs-type">NonEmptyChunk</span>[<span class="hljs-type">E</span>]</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">ZValidation</span>[<span class="hljs-type">W</span>, <span class="hljs-type">E</span>, <span class="hljs-type">Nothing</span>]</span>
+}
+</code></pre>
+<p>Now both validation successes and failures have a log of values of type <code>W</code> so we can keep track of values in the log regardless of whether the validation is a success or a failure.</p>
+<p>Since a <code>Validation</code> is a <code>ZValidation</code> all of the operators we learned about before for <code>Validation</code> still work. So we will focus here on operators that are specific to working with the <code>W</code> type.</p>
+<h2><a class="anchor" aria-hidden="true" id="writing-values-to-the-log"></a><a href="#writing-values-to-the-log" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Writing Values To The Log</h2>
+<p>To write values to the log we can just use the <code>log</code> operator on the <code>ZValidation</code> trait.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZValidation</span>[+<span class="hljs-type">W</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">log</span></span>[<span class="hljs-type">W1</span> &gt;: <span class="hljs-type">W</span>](w: <span class="hljs-type">W1</span>): <span class="hljs-type">ZValidation</span>[<span class="hljs-type">W1</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>]
+}
+</code></pre>
+<p>This will just append the specified value to the log without changing the success or failure value of the <code>ZValidation</code>.</p>
+<p>For example, we could add a warning that the <code>Person</code> is a child like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">ZValidation</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAge</span></span>(age: <span class="hljs-type">Int</span>): <span class="hljs-type">ZValidation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">if</span> (age &lt; <span class="hljs-number">0</span>) <span class="hljs-type">ZValidation</span>.fail(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> was less than zero"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (age &lt; <span class="hljs-number">18</span>) <span class="hljs-type">ZValidation</span>.succeed(age).log(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> is less than 18"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-type">ZValidation</span>.succeed(age)
+</code></pre>
+<p>Notice that we used exactly the same constructors as when we were working with <code>Validation</code> except we now use the <code>log</code> operator to append to the log.</p>
+<h2><a class="anchor" aria-hidden="true" id="transforming-the-log"></a><a href="#transforming-the-log" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Transforming The Log</h2>
+<p>We can transform the value of the log entries with the <code>mapLog</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZValidation</span>[+<span class="hljs-type">W</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">mapLog</span></span>[<span class="hljs-type">W2</span>](f: <span class="hljs-type">W</span> =&gt; <span class="hljs-type">W2</span>): <span class="hljs-type">ZValidation</span>[<span class="hljs-type">W2</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>]
+}
+</code></pre>
+<p>This can be useful to transform the log values into some common data model, for example mapping <code>String</code> logs into some more structured data format.</p>
+<h2><a class="anchor" aria-hidden="true" id="reading-values-from-the-log"></a><a href="#reading-values-from-the-log" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reading Values From The Log</h2>
+<p>We can get values from the log by using the <code>getLog</code> operator, which just returns the current contents of the log.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZValidation</span>[+<span class="hljs-type">W</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getLog</span></span>: <span class="hljs-type">Chunk</span>[<span class="hljs-type">W</span>]
+}
+</code></pre>
+<p>Since a <code>ZValidation</code> is just a value we can use a combination of the <code>getLog</code> operator and <code>fold</code> to extract the log and the errors or success value.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionaldatatypes/zset"><span class="arrow-prev">← </span><span>ZSet</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#writing-values-to-the-log">Writing Values To The Log</a></li><li><a href="#transforming-the-log">Transforming The Log</a></li><li><a href="#reading-values-from-the-log">Reading Values From The Log</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

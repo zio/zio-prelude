@@ -1,0 +1,310 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>ZPure · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="A `ZPure[W, S1, S2, R, E, A]` is a description of a computation that requires an environment `R` and an initial state `S1` and either fails with an error of type `E` or succeeds with an updated state of type `S2` and a value of type `A`, in either case also producing a log of type `W`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="ZPure · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="A `ZPure[W, S1, S2, R, E, A]` is a description of a computation that requires an environment `R` and an initial state `S1` and either fails with an error of type `E` or succeeds with an updated state of type `S2` and a value of type `A`, in either case also producing a log of type `W`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>ZPure</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">ZPure</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/zpure/">ZPure</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">ZPure</h1></header><article><div><span><p>A <code>ZPure[W, S1, S2, R, E, A]</code> is a description of a computation that requires an environment <code>R</code> and an initial state <code>S1</code> and either fails with an error of type <code>E</code> or succeeds with an updated state of type <code>S2</code> and a value of type <code>A</code>, in either case also producing a log of type <code>W</code>.</p>
+<p>Conceptually, we can think of <code>ZPure</code> as just a function, though <code>ZPure</code> is not actually implemented this way for reasons of efficiency and stack safety.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ZPure</span>[+<span class="hljs-type">W</span>, -<span class="hljs-type">S1</span>, +<span class="hljs-type">S2</span>, -<span class="hljs-type">R</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>](<span class="hljs-params">run: (<span class="hljs-type">R</span>, <span class="hljs-type">S1</span></span>) <span class="hljs-title">=&gt;</span> (<span class="hljs-params"><span class="hljs-type">Chunk</span>[<span class="hljs-type">W</span>], <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, (<span class="hljs-type">S2</span>, <span class="hljs-type">A</span></span>)]))</span>
+</code></pre>
+<p>The <code>ZPure</code> data type models four &quot;capabilities&quot; that a computation can have in addition to just producing a value of type <code>A</code>:</p>
+<ul>
+<li><strong>Errors</strong> - A <code>ZPure</code> computation can fail with an error of type <code>E</code> similar to an <code>Either</code>.</li>
+<li><strong>Context</strong> - A <code>ZPure</code> computation can require some environment of type <code>R</code> similar to a <code>Reader</code> data type.</li>
+<li><strong>State</strong> - A <code>ZPure</code> computation can update a state <code>S1</code> to a new state <code>S2</code> similar to a <code>State</code> data type.</li>
+<li><strong>Logging</strong> - A <code>ZPure</code> computation can maintain a log of type <code>W</code> similar to a <code>Writer</code> data type.</li>
+</ul>
+<p>Previously, each of these capabilities required a separate data type, such as <code>Either</code> for modeling errors.</p>
+<p>This was fine when we just needed one of these capabilities but it broke down when we wanted to describe computations that used more than one capability. How were we supposed to describe, for example, a computation that updated state and could also fail?</p>
+<p>The answer was to use other data types called <em>monad transformers</em> which &quot;stacked&quot; these capabilities on top of existing data types. So to get state and errors we would stack an <code>EitherT</code> monad transformer on top of a <code>StateT</code> monad transformer.</p>
+<p>This approach has a number of problems.</p>
+<p>First, it has terrible performance. Each of these monad transformers is its own data type so evaluating a single step in a monad transformer stack requires digging into multiple layers of data structures just to access a single value, doing something with it, and then rebuilding all the layers of that nested data structure all over again.</p>
+<p>Second, monad transformers have very poor ergonomics. They are generally invariant so they have bad type inference and working with these nested structures creates many opportunities for errors, such as constructing the &quot;stack&quot; in the wrong order, that reduce developer productivity and make it harder to onboard new developers.</p>
+<p>Third, monad transformer stacks are actually not powerful enough to model what they are trying to describe. Each part of the &quot;stack&quot; only knows about itself and not the other parts of the stack so it is impossible to implement operators that require multiple capabilities.</p>
+<p><code>ZPure</code> addresses this problem by including all of these capabilities in one data type using the same technique of &quot;effect rotation&quot; pioneered in ZIO. This results in dramatically higher performance, improved ergonomics, and a much more powerful API.</p>
+<h2><a class="anchor" aria-hidden="true" id="basic-operations"></a><a href="#basic-operations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Basic Operations</h2>
+<p>The <code>ZPure</code> data type exposes a very similar API to the <code>ZIO</code> data type, excluding operators that deal directly with IO or concurrency. So if you know how to use <code>ZIO</code> you should be very comfortable working with <code>ZPure</code> as well.</p>
+<p>Just like <code>ZIO</code>, <code>ZPure</code> is a description of a computation so the computation will not actually be executed until we run it.</p>
+<p>If we are not embedding side effecting code in <code>ZPure</code> this laziness will not be observable in the result of a <code>ZPure</code> computation but it can be important to keep in mind for performance. For example, if we are doing some expensive but not side effecting computation in the context of <code>ZPure</code> and using the result multiple times we want to only run the <code>ZPure</code> computation once instead of multiple times.</p>
+<p>The operators that execute a <code>ZPure</code> computation are all variants of <code>run</code> to emphasize that when we call them we are actually running the computation described by the <code>ZPure</code> value.</p>
+<p>Also like <code>ZIO</code>, <code>ZPure</code> is stack safe, so we can write recursive programs in terms of <code>ZPure</code> without worrying about stack overflow errors.</p>
+<p>The main difference between <code>ZIO</code> and <code>ZPure</code> is that we do not want to embed arbitrary side effecting code in <code>ZPure</code>. <code>ZPure</code> supports a specific set of capabilities but if we have arbitrary effects we are better off using <code>ZIO</code>, which has the power to manage these effects and also more clearly signals our intent.</p>
+<p>We can create a computation that succeeds with an existing value using the <code>succeed</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.fx.<span class="hljs-type">ZPure</span>
+
+<span class="hljs-keyword">val</span> one: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZPure</span>.succeed(<span class="hljs-number">1</span>)
+<span class="hljs-comment">// one: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = Succeed(value = 1)</span>
+</code></pre>
+<p>Note that the log type <code>W</code> here is nothing, indicating that we are not logging anything right now. The <code>S1</code>and <code>S2</code> types are <code>Unit</code> because we are not using <code>State</code> in this computation.</p>
+<p>The environment type is <code>Any</code>, indicating that this computation does not require any environment to be run. And the error type is <code>Nothing</code> because this computation cannot fail.</p>
+<p>If we find ourselves using the same type parameters over and over it can be helpful to define a type alias to avoid repeating ourselves. There are also several useful type aliases for <code>ZPure</code> defined directly in ZIO Prelude.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">State</span>[<span class="hljs-type">S</span>, +<span class="hljs-type">A</span>] </span>= zio.prelude.fx.<span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">S</span>, <span class="hljs-type">S</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>]
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Reader</span>[-<span class="hljs-type">R</span>, +<span class="hljs-type">A</span>] </span>= zio.prelude.fx.<span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">R</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>]
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Writer</span>[+<span class="hljs-type">W</span>, +<span class="hljs-type">A</span>] </span>= zio.prelude.fx.<span class="hljs-type">ZPure</span>[<span class="hljs-type">W</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>]
+</code></pre>
+<p>The <code>State</code> type alias specializes the environment type to <code>Any</code> and the error and log types to <code>Nothing</code> and just has a single state type 'A'. It is analogous to a function <code>S =&gt; (S, A)</code>.</p>
+<p>The <code>Reader</code> type alias has an environment type but specializes the log and error types to <code>Nothing</code> and the state types to <code>Unit</code>. It is analogous to a function <code>R =&gt; A</code>.</p>
+<p>The <code>Writer</code> type alias has a log type but specializes the environment type to <code>Any</code>, the error type to <code>Nothing</code>, and the state types to <code>Unit</code>. It is analogous to a function <code>() =&gt; (W, A)</code>.</p>
+<p>There are also versions of each of these type aliases that support failure, <code>EState</code>, <code>EReader</code>, and <code>EWriter</code>. Using these type aliases can simplify your type signatures and lead to better type inference in some cases. So if you are really only working with one or two of the capabilities of <code>ZPure</code> it is definitely worth using these type aliases.</p>
+<p>However, for now we will continue to use the full <code>ZPure</code> type signature.</p>
+<p>We can transform the successful value of a computation using the <code>map</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> two: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
+  one.map(_ + <span class="hljs-number">1</span>)
+<span class="hljs-comment">// two: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(</span>
+<span class="hljs-comment">//   value = Succeed(value = 1),</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$14390/402748049@3894b359</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>We can combine the values of two computations with the <code>zipWith</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> three: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
+  one.zipWith(two)(_ + _)
+<span class="hljs-comment">// three: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(</span>
+<span class="hljs-comment">//   value = Succeed(value = 1),</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$14398/1613412552@474d18d3</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>We can also chain computations using the <code>flatMap</code> operator and Scala's for comprehension syntax.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> six: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">for</span> {
+    x &lt;- one
+    y &lt;- two
+    z &lt;- three
+  } <span class="hljs-keyword">yield</span> x + y + z
+<span class="hljs-comment">// six: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(</span>
+<span class="hljs-comment">//   value = Succeed(value = 1),</span>
+<span class="hljs-comment">//   continue = &lt;function1&gt;</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>The easiest way to run a computation is to use the <code>run</code> method. It requires us to have already provided any required environment and initial state and handled our errors and just produces the final value.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> value: <span class="hljs-type">Int</span> =
+  three.run
+<span class="hljs-comment">// value: Int = 3</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="working-with-errors"></a><a href="#working-with-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Working With Errors</h2>
+<p>Since <code>ZIO</code> also has an error type the operators for working with errors are quite similar to the ones on <code>ZIO</code>.</p>
+<p>We can create a computation that fails with an error using the <code>fail</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> fail: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">String</span>, <span class="hljs-type">Nothing</span>] =
+  <span class="hljs-type">ZPure</span>.fail(<span class="hljs-string">"fail"</span>)
+<span class="hljs-comment">// fail: ZPure[Nothing, Unit, Unit, Any, String, Nothing] = Fail(</span>
+<span class="hljs-comment">//   error = Single(value = "fail")</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>Notice how now the error type is <code>String</code>, indicating that this computation can fail with a <code>String</code> error. In this case the success type is <code>Nothing</code> since we actually know that this computation can never succeed.</p>
+<p>If we are working with code that can throw exceptions we can use the <code>attempt</code> operator of <code>ZPure</code> to safely import that code into our computation, catching any non-fatal exceptions and translating them into failure values.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">parseIntThrowable</span></span>(s: <span class="hljs-type">String</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Throwable</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZPure</span>.attempt(s.toInt)
+</code></pre>
+<p>We can use the <code>mapError</code> operator to transform the error type of a computation, for example to map it to a common error type we are using in other parts of our computation.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">parseInt</span></span>(s: <span class="hljs-type">String</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  parseIntThrowable(s).mapError(_.getMessage)
+</code></pre>
+<p>We can recover from errors by using the <code>catchAll</code> operator, which allows us to recover from the failure using a new computation.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">parseIntOrDefault</span></span>(s: <span class="hljs-type">String</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Int</span>] =
+  parseInt(s).catchAll(_ =&gt; <span class="hljs-type">ZPure</span>.succeed(<span class="hljs-number">0</span>))
+</code></pre>
+<p>Now the error type is <code>Nothing</code>, indicating that we have handled all our errors.</p>
+<p>There are many other error handling operators defined on <code>ZPure</code>. The <code>catchSome</code> operator allows us to only recover from certain errors.</p>
+<p>The <code>fold</code> and <code>foldM</code> operators allow us to handle both the failure and success cases at the same time. And the <code>orElse</code> operator allows us to specify a fallback computation that will be run if the original computation fails.</p>
+<p>One other concept from <code>ZIO</code> that carries over to <code>ZPure</code> is the ability to accumulate multiple errors.</p>
+<p>Normally when we use operators like <code>zip</code> or <code>flatMap</code> if an error occurs we will not go on to evaluate further parts of the computation until we get to an error handler that can potentially recover from it. This is typically what we want because if we have already failed there is no point in doing more work.</p>
+<p>However, <code>ZPure</code> also allows us to accumulate errors when we use the <code>zipWithPar</code> operator . This operator does not do actual parallelism, but is &quot;parallel&quot; in the sense that it will run both computations even if the first one fails and return any failures that occurred.</p>
+<p>You can use this to obtain behavior similar to the <code>Validation</code> data type in ZIO Prelude. All of the errors will be captured in a <code>Cause</code> data structure similar to the one from <code>ZIO</code>.</p>
+<p>For example, we could model validating some data using <code>ZPure</code> like this.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span></span>)</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateName</span></span>(name: <span class="hljs-type">String</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">String</span>, <span class="hljs-type">String</span>] =
+  <span class="hljs-keyword">if</span> (name.isEmpty) <span class="hljs-type">ZPure</span>.fail(<span class="hljs-string">"name was empty"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-type">ZPure</span>.succeed(name)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAge</span></span>(age: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">if</span> (age &lt; <span class="hljs-number">0</span>) <span class="hljs-type">ZPure</span>.fail(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> was less than zero"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-type">ZPure</span>.succeed(age)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validatePerson</span></span>(name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">String</span>, <span class="hljs-type">Person</span>] =
+  validateName(name).zipWithPar(validateAge(age))(<span class="hljs-type">Person</span>)
+</code></pre>
+<p>To expose the full cause of failure we can use the <code>sandbox</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.fx.<span class="hljs-type">Cause</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validatePersonCause</span></span>(name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Cause</span>[<span class="hljs-type">String</span>], <span class="hljs-type">Person</span>] =
+  validatePerson(name, age).sandbox
+</code></pre>
+<p>We can now see all the failures that occurred and handle them using our normal error handling operators. If we want to submerge the full cause again and just see the error type we can undo this with the <code>unsandbox</code> operator.</p>
+<p>Once again, a variety of other operators for dealing with the full cause of failure are available on <code>ZPure</code> analogous to the ones on <code>ZIO</code> but we will not cover them all here. With <code>sandbox</code> and <code>unsandbox</code> you should be able to handle any problems involving working with the full cause of failure and you can always look up more specialized operators later.</p>
+<p>Of course, if all we want to do is validate data the <code>Validation</code> type is more specialized than this and is what we should use. But it is very nice to be able to accumulate errors when you need to when we are already working in the context of a <code>ZPure</code> computation.</p>
+<h2><a class="anchor" aria-hidden="true" id="working-with-context"></a><a href="#working-with-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Working With Context</h2>
+<p>The environment type <code>R</code> is also analogous to the environment type of ZIO.</p>
+<p>The main difference is that we tend to use <code>ZPure</code> to describe a particular computation in our application rather than as the basis for our entire application architecture. As a result, services tend to be less commonly used in the environment and often the environment just consists of some data.</p>
+<p>We also do not use layers to construct the environment. Layers are inherently effectual and we do not want to perform arbitrary effects as part of a <code>ZPure</code> computation.</p>
+<p>As an example of how we might use the environment type in a <code>ZPure</code> computation, we can imagine that our computation describes some logic for working with customer accounts. To perform its logic our computation needs access to various values such as the interest rate to use.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AccountEnvironment</span>(<span class="hljs-params">interestRate: <span class="hljs-type">Double</span></span>)</span>
+</code></pre>
+<p>We can work with the environment using the same operators we use for <code>ZIO</code>, with the caveat described above that we use the more generic environment operators instead of the ones specialized for the module pattern.</p>
+<p>We access the environment using the <code>environment</code> operator, so if we wanted to access the environment we could do it like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> accountEnvironment: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">AccountEnvironment</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">AccountEnvironment</span>] =
+  <span class="hljs-type">ZPure</span>.environment
+<span class="hljs-comment">// accountEnvironment: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, AccountEnvironment] = Access(</span>
+<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$14455/704688116@6c25f514</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>This computation does not use logging or state and cannot fail, but it now depends on an <code>AccountEnvironment</code> and just returns the <code>AccountEnvironment</code>. Since this computation now succeeds with an <code>AccountEnvironment</code> we can use all of our normal operators for transforming success values like <code>map</code> and <code>flatMap</code> to work with it.</p>
+<p>If we just want to do one thing with the environment like get the interest rate we can do this slightly more concisely with the <code>access</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> interestRate: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">AccountEnvironment</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Double</span>] =
+  <span class="hljs-type">ZPure</span>.access(_.interestRate)
+<span class="hljs-comment">// interestRate: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] = Access(</span>
+<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$14455/704688116@1dca3796</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>There is also an <code>accessM</code> variant for when we want to perform another computation based on the value from the environment.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">computeSimpleInterest</span></span>(balance: <span class="hljs-type">Double</span>, days: <span class="hljs-type">Int</span>, interestRate: <span class="hljs-type">Double</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Double</span>] =
+  <span class="hljs-type">ZPure</span>.succeed(balance * days / <span class="hljs-number">365</span> * interestRate)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">accruedInterest</span></span>(balance: <span class="hljs-type">Double</span>, days: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">AccountEnvironment</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Double</span>] =
+  <span class="hljs-type">ZPure</span>.accessM(r =&gt; computeSimpleInterest(balance, days, r.interestRate))
+</code></pre>
+<p>To run a computation we need to provide it with its required environment, which we can do with the <code>provide</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> interestComputation: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Double</span>] =
+  accruedInterest(<span class="hljs-number">100000</span>, <span class="hljs-number">30</span>).provide(<span class="hljs-type">AccountEnvironment</span>(<span class="hljs-number">0.05</span>))
+<span class="hljs-comment">// interestComputation: ZPure[Nothing, Unit, Unit, Any, Nothing, Double] = Provide(</span>
+<span class="hljs-comment">//   r = AccountEnvironment(interestRate = 0.05),</span>
+<span class="hljs-comment">//   continue = Access(access = &lt;function1&gt;)</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>Once we have provided our application with our required environment we are ready ro run it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> interestDue: <span class="hljs-type">Double</span> =
+  interestComputation.run
+<span class="hljs-comment">// interestDue: Double = 410.958904109589</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="working-with-state"></a><a href="#working-with-state" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Working With State</h2>
+<p>The state type described by <code>S1</code> and <code>S2</code> is the first capability provided by <code>ZPure</code> that is not directly analogous to <code>ZIO</code>.</p>
+<p>In <code>ZIO</code> we manage state using the <code>Ref</code> and <code>FiberRef</code> data types so we do not need these additional type parameters. In contrast, in <code>ZPure</code> we want to avoid arbitrary side effects so we instead model state as a function that takes the old state and returns the new state using the <code>S1</code> and <code>S2</code> type parameters.</p>
+<p>In practice in most cases <code>S1</code> and <code>S2</code> will be the same and we will be describing a computation that takes some state and just returns an updated value of the same state type. However, in some cases it can be useful to model the initial and updated state separately, for example to describe a transition from a <code>Closed</code> to <code>Open</code> state in a type safe way.</p>
+<p>To motivate our example here let's define an <code>AccountState</code> type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AccountState</span>(<span class="hljs-params">balance: <span class="hljs-type">Int</span>, open: <span class="hljs-type">Boolean</span></span>)</span>
+</code></pre>
+<p>We will also define a domain specific error type which we will use.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">AccountError</span></span>
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">InsufficientFunds</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AccountError</span></span>
+</code></pre>
+<p>The most basic operators for working with state are <code>get</code> and <code>set</code>. The <code>get</code> operator retrieves the initial state and the <code>set</code> operator sets the updated state to the specified value.</p>
+<p>Let's use these operators to describe a computation that withdraws funds from the account.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">withdraw</span></span>(amount: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountError</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-keyword">for</span> {
+    state &lt;- <span class="hljs-type">ZPure</span>.get[<span class="hljs-type">AccountState</span>]
+    _     &lt;- <span class="hljs-keyword">if</span> (amount &gt; state.balance) <span class="hljs-type">ZPure</span>.fail(<span class="hljs-type">InsufficientFunds</span>)
+             <span class="hljs-keyword">else</span> <span class="hljs-type">ZPure</span>.set(<span class="hljs-type">AccountState</span>(state.balance - amount, state.open))
+  } <span class="hljs-keyword">yield</span> ()
+</code></pre>
+<p>This example combines a couple of the features we have talked about so far.</p>
+<p>First, we are using a for comprehension to chain together multiple computations</p>
+<p>Second, we are using both the error type and the state type here. If the customer has insufficient funds we fail immediately, otherwise we update the state.</p>
+<p>One important thing to note here is that since <code>ZPure</code> computations are never concurrent we don't need to worry about conflicting modifications to the state.</p>
+<p>For example, in the context of <code>ZIO</code> code analogous to the above would not be safe because the <code>get</code> and <code>set</code> would not be performed atomically so we would need to do the entire transaction in a single <code>modify</code> operation, returning a value indicating whether there were sufficient funds. In <code>ZPure</code> we don't have to do any of that so our code can be simpler.</p>
+<p>There are also <code>update</code> and <code>modify</code> operators on <code>ZPure</code>. So for example we could factor out the logic of updating the account balance in the <code>withdraw</code> method like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decrementBalance</span></span>(amount: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">ZPure</span>.update(state =&gt; <span class="hljs-type">AccountState</span>(state.balance - amount, state.open))
+</code></pre>
+<p>If we are working with state then to actually run our computation we need to provide it with an initial state. The easiest way to do this is with the <code>provideState</code> operator, analogous to how we provide the environment.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> withdrawalComputation: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountError</span>, <span class="hljs-type">Unit</span>] =
+  withdraw(<span class="hljs-number">10</span>).provideState(<span class="hljs-type">AccountState</span>(<span class="hljs-number">100</span>, <span class="hljs-literal">true</span>))
+<span class="hljs-comment">// withdrawalComputation: ZPure[Nothing, Any, AccountState, Any, AccountError, Unit] = FlatMap(</span>
+<span class="hljs-comment">//   value = Modify(run0 = zio.prelude.fx.ZPure$$$Lambda$14465/661862485@59410d),</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$14398/1613412552@2ffd5a55</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>We will use the <code>runEither</code> operator, which is a variant of <code>run</code> that allows the computation to fail and just converts the failure to the left side of an <code>Either</code>. The <code>run</code> and <code>runEither</code> operators just return the final value, so let's use the <code>get</code> operator to get the final state before we run our computation since we only care about the final state.</p>
+<pre><code class="hljs css language-scala moc"><span class="hljs-keyword">val</span> updatedAccountState: <span class="hljs-type">Either</span>[<span class="hljs-type">AccountError</span>, <span class="hljs-type">AccountState</span>] =
+  (withdrawalComputation *&gt; <span class="hljs-type">ZPure</span>.get).runEither
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="working-with-logging"></a><a href="#working-with-logging" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Working With Logging</h2>
+<p>The final capability provided by <code>ZPure</code> is logging.</p>
+<p>We can add to the log with the <code>log</code> operator on the <code>ZPure</code> companion object.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">withdrawLog</span></span>(amount: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">String</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountError</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">ZPure</span>.log(<span class="hljs-string">"Attempting to withdraw"</span>) *&gt; withdraw(amount) &lt;* <span class="hljs-type">ZPure</span>.log(<span class="hljs-string">s"Withdrew <span class="hljs-subst">$amount</span>"</span>)
+</code></pre>
+<p>We can also use the <code>log</code> operator on the <code>ZPure</code> trait to log something immediately after a computation has successfully completed.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">withdrawLog</span></span>(amount: <span class="hljs-type">Int</span>): <span class="hljs-type">ZPure</span>[<span class="hljs-type">String</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountError</span>, <span class="hljs-type">Unit</span>] =
+  withdraw(amount).log(<span class="hljs-string">s"Withdrew <span class="hljs-subst">$amount</span>"</span>)
+</code></pre>
+<p>The log is maintained until our computation is done.</p>
+<p>This time we will use the <code>runAll</code> operator to run our computation. <code>runAll</code> is the most general way of running a <code>ZPure</code> computation and returns the log as well as either the failure or the success.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-keyword">val</span> withdrawalComputationLog: <span class="hljs-type">ZPure</span>[<span class="hljs-type">String</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountError</span>, <span class="hljs-type">Unit</span>] =
+  withdrawLog(<span class="hljs-number">10</span>)
+<span class="hljs-comment">// withdrawalComputationLog: ZPure[String, AccountState, AccountState, Any, AccountError, Unit] = FlatMap(</span>
+<span class="hljs-comment">//   value = FlatMap(</span>
+<span class="hljs-comment">//     value = Modify(</span>
+<span class="hljs-comment">//       run0 = zio.prelude.fx.ZPure$$$Lambda$14464/259324969@6c3397eb</span>
+<span class="hljs-comment">//     ),</span>
+<span class="hljs-comment">//     continue = &lt;function1&gt;</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$14466/1736435055@20097b7c</span>
+<span class="hljs-comment">// )</span>
+
+<span class="hljs-keyword">val</span> log: <span class="hljs-type">Chunk</span>[<span class="hljs-type">String</span>] =
+  withdrawalComputationLog.runAll(<span class="hljs-type">AccountState</span>(<span class="hljs-number">100</span>, <span class="hljs-literal">true</span>))._1
+<span class="hljs-comment">// log: Chunk[String] = IndexedSeq("Withdrew 10")</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#basic-operations">Basic Operations</a></li><li><a href="#working-with-errors">Working With Errors</a></li><li><a href="#working-with-context">Working With Context</a></li><li><a href="#working-with-state">Working With State</a></li><li><a href="#working-with-logging">Working With Logging</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

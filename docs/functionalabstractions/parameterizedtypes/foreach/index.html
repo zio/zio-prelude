@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>ForEach · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`ForEach[F]` describes a parameterized type `F[A]` that contains zero or more values of type `A`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="ForEach · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`ForEach[F]` describes a parameterized type `F[A]` that contains zero or more values of type `A`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">ForEach</h1></header><article><div><span><p><code>ForEach[F]</code> describes a parameterized type <code>F[A]</code> that contains zero or more values of type <code>A</code>.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Covariant</span>[<span class="hljs-type">F</span>[+_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ForEach</span>[<span class="hljs-type">F</span>[+_]] <span class="hljs-keyword">extends</span> <span class="hljs-title">Covariant</span>[<span class="hljs-type">F</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">forEach</span></span>[<span class="hljs-type">G</span>[+_]: <span class="hljs-type">IdentityBoth</span>: <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">G</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">G</span>[<span class="hljs-type">F</span>[<span class="hljs-type">B</span>]]
+  <span class="hljs-keyword">final</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>] =
+    ???
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">IdentityBoth</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">any</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">Any</span>]
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], b: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">F</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)]
+}
+</code></pre>
+<p>The <code>ForEach</code> functional abstraction builds on the <code>Covariant</code> abstraction to describe a type that contains zero or more <code>A</code> values rather than merely potentially producing <code>A</code> values at some point in the future.</p>
+<p>For example <code>Chunk</code> has a <code>ForEach</code> instance because it contains zero or more <code>A</code> values. In contrast <code>ZIO</code> has a <code>Covariant</code> instance but not a <code>ForEach</code> instance because it is only a description of a workflow that may produce an <code>A</code> value and does not output any actual <code>A</code> value until it is run.</p>
+<p><code>ForEach</code> generalizes over collection types like <code>List</code>, <code>Map</code>, and <code>Chunk</code>. It also describes data types like <code>Option</code> and <code>Either</code> that contain zero or one value, which can be thought of as a special case of containing zero or more values.</p>
+<p>The defining operator of the <code>ForEach</code> abstraction is <code>forEach</code>. It lets us take a collection of type <code>F[A]</code> and run a function <code>A =&gt; G[B]</code> for each element in the collection, returning a new collection <code>F[B]</code> in the context of <code>G</code>.</p>
+<p>This is somewhat abstract so let's look at the <code>foreach</code> operator on <code>ZIO</code>, which is a variant of this, to get a sense of what it means.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZIO</span>[-<span class="hljs-type">R</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>]</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">ZIO</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foreach</span></span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: <span class="hljs-type">List</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]] =
+    ???
+}
+</code></pre>
+<p>Here we have specialized the collection type <code>F</code> from <code>ForEach</code> to <code>List</code> and the effect type <code>G</code> from <code>ForEach</code> to <code>ZIO</code>. The interpretation of this is now much more clear.</p>
+<p>For each element in the list we construct a new <code>ZIO[R, E, B]</code> by applying <code>f</code> to the element. Then we combine all of those <code>ZIO</code> effects into a single effect that will run each of the individual effects and collect their results in a <code>List</code>.</p>
+<p>This pattern of doing something for each element in the collection and then collecting the results back into the original collection is common to all implementations of <code>ForEach</code>. We can get a better sense for it by looking at a simple implementation of the <code>foreach</code> operator on <code>ZIO</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ZIO</span>[-<span class="hljs-type">R</span>, +<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{ self =&gt;
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">zipWith</span></span>[<span class="hljs-type">R1</span> &lt;: <span class="hljs-type">R</span>, <span class="hljs-type">E1</span> &gt;: <span class="hljs-type">E</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](that: <span class="hljs-type">ZIO</span>[<span class="hljs-type">R1</span>, <span class="hljs-type">E1</span>, <span class="hljs-type">B</span>])(f: (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>) =&gt; <span class="hljs-type">C</span>): <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">C</span>] =
+    ???
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">ZIO</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foreach</span></span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: <span class="hljs-type">List</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]] =
+    as.foldRight[<span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]]](<span class="hljs-type">ZIO</span>.succeed(<span class="hljs-type">List</span>.empty)) { (a, zio) =&gt;
+      f(a).zipWith(zio)(_ :: _)
+    }
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">succeed</span></span>[<span class="hljs-type">A</span>](a: =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">ZIO</span>[<span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>] =
+    ???
+}
+</code></pre>
+<p>In the implementation of <code>foreach</code> the <code>foldRight</code> operator on <code>List</code> tears down the original list into each of its elements, using the function <code>f</code> to produce a new <code>ZIO</code> value for each element. Then we use the <code>zipWith</code> operator on <code>ZIO</code> to combine the resulting <code>ZIO</code> values into a single <code>ZIO</code> value, putting the values back together into a <code>List</code> with the <code>::</code> constructor.</p>
+<p>The fact that the implementation of such a complex operator can be so simple should have us thinking about how we can make this work for collection types other than <code>List</code> and types other than <code>ZIO</code>. The <code>ForEach</code> functional abstraction does just that.</p>
+<p>The <code>ForEach</code> abstraction is parameterized on the collection type <code>F</code>, so in the implementation of <code>ForEach</code> for a collection we will know how to tear down that collection and build it back up. For example, in the implementation of <code>ForEach</code> for <code>List</code> we will know that we can tear down a <code>List</code> using <code>foldRight</code> and build it back up using <code>List.empty</code> and <code>::</code>.</p>
+<p>The other piece of information we need is how to put a value into the type <code>G</code>, described by the <code>succeed</code> operator, and how to combine two <code>G</code> values into a single <code>G</code> value, described by the <code>zipWith</code> operator. Fortunately, that is exactly the functionality that the combination of the <code>Covariant</code> and <code>IdentityBoth</code> abstractions provide.</p>
+<p>Recall that the <code>Covariant</code> functional abstraction defines a <code>map</code> operator that allows us to transform a <code>F[A]</code> into an <code>F[B]</code> with a function <code>A =&gt; B</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Covariant</span>[<span class="hljs-type">F</span>[+_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+}
+</code></pre>
+<p>The <code>IdentityBoth</code> abstraction defines a <code>both</code> operator that allows us to combine an <code>F[A]</code> and an <code>F[B]</code> into an <code>F[(A, B)]</code> as well as an <code>any</code> value of type <code>F[Any]</code> that is an identity element for that operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">AssociativeBoth</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], b: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">F</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">IdentityBoth</span>[<span class="hljs-type">F</span>[_]] <span class="hljs-keyword">extends</span> <span class="hljs-title">AssociativeBoth</span>[<span class="hljs-type">F</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">any</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">Any</span>]
+
+}
+</code></pre>
+<p>If instances of these two abstractions exist for a data type we can define the <code>zipWith</code> and <code>succeed</code> operators that we used in our implementation of <code>foreach</code> for <code>ZIO</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">succeed</span></span>[<span class="hljs-type">F</span>[+_], <span class="hljs-type">A</span>](a: =&gt; <span class="hljs-type">A</span>)(<span class="hljs-keyword">implicit</span> covariant: <span class="hljs-type">Covariant</span>[<span class="hljs-type">F</span>], both: <span class="hljs-type">IdentityBoth</span>[<span class="hljs-type">F</span>]): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =
+  covariant.map[<span class="hljs-type">Any</span>, <span class="hljs-type">A</span>](_ =&gt; a)(both.any)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">zipWith</span></span>[<span class="hljs-type">F</span>[+_], <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+  fa: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>],
+  fb: <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+)(f: (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>) =&gt; <span class="hljs-type">C</span>)(<span class="hljs-keyword">implicit</span> covariant: <span class="hljs-type">Covariant</span>[<span class="hljs-type">F</span>], both: <span class="hljs-type">AssociativeBoth</span>[<span class="hljs-type">F</span>]): <span class="hljs-type">F</span>[<span class="hljs-type">C</span>] =
+  covariant.map(f.tupled)(both.both(fa, fb))
+</code></pre>
+<p>We are now in a position to complete our generalization of the <code>foreach</code> operator on <code>ZIO</code>. Here is what the implementation of the <code>ForEach</code> instance for <code>List</code> would look like.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">ForEach</span>[<span class="hljs-type">F</span>[+_]]</span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">forEach</span></span>[<span class="hljs-type">G</span>[+_]: <span class="hljs-type">IdentityBoth</span>: <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">G</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">G</span>[<span class="hljs-type">F</span>[<span class="hljs-type">B</span>]]
+}
+
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">ListForEach</span>: <span class="hljs-type">ForEach</span>[<span class="hljs-type">List</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">ForEach</span>[<span class="hljs-type">List</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">forEach</span></span>[<span class="hljs-type">G</span>[+_]: <span class="hljs-type">IdentityBoth</span>: <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: <span class="hljs-type">List</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">G</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">G</span>[<span class="hljs-type">List</span>[<span class="hljs-type">B</span>]] =
+      fa.foldRight(succeed[<span class="hljs-type">G</span>, <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]](<span class="hljs-type">List</span>.empty)) { (a, gbs) =&gt;
+        zipWith(f(a), gbs)(_ :: _)
+      }
+  }
+<span class="hljs-comment">// ListForEach: ForEach[List] = repl.MdocSession$App$$anon$1@4fae682b</span>
+</code></pre>
+<p>Notice how similar our implementation of the <code>ForEach</code> abstraction looks to our initial implementation of the <code>foreach</code> operator on <code>ZIO</code>. Other than using operators defined on <code>Covariant</code> and <code>IdentityBoth</code> instead of operators on <code>ZIO</code> they are identical.</p>
+<p>We have already come a long way with our implementation of <code>ForEach</code>. We have a much better understanding now of what the <code>forEach</code> operator does and how its signature reflects the minimum possible set of constraints necessary to implement it.</p>
+<p>We can now implement instances of <code>ForEach</code> for all collection types, like <code>List</code>, <code>Chunk</code>, and <code>Map</code>, as well as types that are like collections, such as <code>Option</code> and <code>Either</code>. In each case we can perform an effect like a <code>ZIO</code> for each element in the collection, returning a new <code>ZIO</code> that collects the results back into the original collection type.</p>
+<p>This is already quite powerful, but the other aspect of the <code>ForEach</code> abstraction that is important is our ability to use other parameterized types for the <code>G</code> in the signature of <code>ForEach</code>. We have focused so far on <code>ZIO</code> because it is the prototypical functional effect and provides a very clear intuition of what it means to do something for each element of a collection, but we can use many other data types as well.</p>
+<p>For example, we can use the <code>forEach</code> operator with a function that returns a <code>Validation</code> value from ZIO Prelude.</p>
+<p><code>Validation</code> is a data type that can either succeed with a value or fail with one or more errors. Using <code>forEach</code> with <code>Validation</code> corresponds to validating all the values in a collection, returning either a new collection of fully validated data or an accumulation of all validation errors that occurred.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span></span>)</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateName</span></span>(name: <span class="hljs-type">String</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">String</span>] =
+  <span class="hljs-type">Validation</span>.fromPredicateWith(<span class="hljs-string">"Name was empty"</span>)(name)(_.nonEmpty)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAge</span></span>(age: <span class="hljs-type">Int</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">Validation</span>.fromPredicateWith(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> was less than zero"</span>)(age)(_ &gt;= <span class="hljs-number">0</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validatePerson</span></span>(name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Person</span>] =
+  <span class="hljs-type">Validation</span>.validateWith(validateName(name), validateAge(age))(<span class="hljs-type">Person</span>)
+
+<span class="hljs-keyword">val</span> validData: <span class="hljs-type">List</span>[(<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>)] =
+  <span class="hljs-type">List</span>((<span class="hljs-string">"John"</span>, <span class="hljs-number">35</span>), (<span class="hljs-string">"Jane"</span>, <span class="hljs-number">25</span>))
+<span class="hljs-comment">// validData: List[(String, Int)] = List(("John", 35), ("Jane", 25))</span>
+
+<span class="hljs-keyword">val</span> invalidData: <span class="hljs-type">List</span>[(<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>)] =
+  <span class="hljs-type">List</span>((<span class="hljs-string">""</span>, <span class="hljs-number">35</span>), (<span class="hljs-string">"John"</span>, <span class="hljs-number">-1</span>))
+<span class="hljs-comment">// invalidData: List[(String, Int)] = List(("", 35), ("John", -1))</span>
+
+<span class="hljs-keyword">val</span> success: <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">List</span>[<span class="hljs-type">Person</span>]] =
+  validData.forEach { <span class="hljs-keyword">case</span> (name, age) =&gt; validatePerson(name, age) }
+<span class="hljs-comment">// success: Validation[String, List[Person]] = Success(</span>
+<span class="hljs-comment">//   log = IndexedSeq(),</span>
+<span class="hljs-comment">//   value = List(Person(name = "John", age = 35), Person(name = "Jane", age = 25))</span>
+<span class="hljs-comment">// )</span>
+
+<span class="hljs-keyword">val</span> failure: <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">List</span>[<span class="hljs-type">Person</span>]] =
+  invalidData.forEach { <span class="hljs-keyword">case</span> (name, age) =&gt; validatePerson(name, age) }
+<span class="hljs-comment">// failure: Validation[String, List[Person]] = Failure(</span>
+<span class="hljs-comment">//   log = IndexedSeq(),</span>
+<span class="hljs-comment">//   errors = NonEmptyChunk(Name was empty, Age -1 was less than zero)</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>Using <code>forEach</code> with the valid data will return a validation success containing the fully validated list of <code>Person(&quot;John&quot;, 35)</code> and <code>Person(&quot;Jane&quot;, 25&quot;)</code>. In contrast, using <code>forEach</code> with the invalid data will return a validation failure with the failures <code>&quot;Name was empty&quot;</code> and <code>&quot;Age -1 was less than zero&quot;</code>.</p>
+<p>We can return other data types from the function we provide to <code>ForEach</code> to obtain other functionality. For example, if we use <code>Option</code> or <code>Either</code> we will get either a collection of all the successful results or the first failure to occur, rather than the accumulation of all failures as with <code>Validation</code>.</p>
+<p>There are also a couple of specialized data types we can use in the return type of <code>f</code> that turn out to be particularly important for implementing other operators.</p>
+<p>One of these you may have noticed from the very beginning of this section was the <code>Id</code> type.</p>
+<p><code>Id</code> is the parameterized type <code>F[A]</code> where <code>F</code> doesn't have any structure itself and just contains exactly one <code>A</code> value. This seems quite trivial but it is useful to adapt a function <code>A =&gt; B</code> to the type <code>A =&gt; G[B]</code> that <code>ForEach</code> is expecting.</p>
+<p>This allows us to implement the <code>map</code> operator in terms of <code>forEach</code> and proves that the <code>ForEach</code> abstraction is an extension of the <code>Covariant</code> abstraction.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">F</span>[<span class="hljs-type">B</span>] =
+  <span class="hljs-type">Id</span>.unwrap(fa.forEach(a =&gt; <span class="hljs-type">Id</span>.wrap(f(a))))
+</code></pre>
+<p>Another data type that is important for implementing other operators is <code>State</code>.</p>
+<p>The <code>State</code> data type from ZIO Prelude describes a state transition function <code>S =&gt; (A, S)</code> that takes an initial state and returns a value and an updated state. Using <code>ForEach</code> with <code>State</code> corresponds to composing all of those state transition functions into a single state transition function.</p>
+<p>ZIO Prelude provides a specialized operator for using <code>forEach</code> with <code>State</code> called <code>mapAccum</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">mapAccum</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">S</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(s: <span class="hljs-type">S</span>)(f: (<span class="hljs-type">S</span>, <span class="hljs-type">A</span>) =&gt; (<span class="hljs-type">S</span>, <span class="hljs-type">B</span>)): (<span class="hljs-type">S</span>, <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]) =
+  ???
+</code></pre>
+<p>This lets us specify an initial state <code>S</code> and then in our function <code>f</code> instead of just providing a function <code>A =&gt; B</code> like in <code>map</code> we can update the state as well. The implementation of <code>mapAccum</code> takes care of putting each of these functions in the <code>State</code> data type for us and then runs the final computation for us with the initial state to produce both the final state and the final value.</p>
+<p>This is very useful for implementing other operators because it lets us get information out of the collection type <code>S</code>, so now we can implement collection operators that don't just transform the collection but reduce it to a summary value.</p>
+<p>To see this, let's implement the <code>foldLeft</code> operator from the Scala collection library in terms of <code>mapAccum</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foldLeft</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">A</span>, <span class="hljs-type">S</span>](fa: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(s: <span class="hljs-type">S</span>)(f: (<span class="hljs-type">S</span>, <span class="hljs-type">A</span>) =&gt; <span class="hljs-type">S</span>): <span class="hljs-type">S</span> =
+  mapAccum(fa)(s)((s, a) =&gt; (f(s, a), ()))._1
+</code></pre>
+<p>The <code>foldLeft</code> operator simply accumulates the fold state and discards the collection.</p>
+<p>This is very powerful because it means that we can implement almost every collection operator in terms of <code>ForEach</code>.</p>
+<p>This includes any collection operator that reduces a collection to some other value, like <code>count</code>, <code>exists</code>, <code>find</code>, <code>foldLeft</code>, <code>foldRight</code>, <code>forall</code>, <code>groupBy</code>, <code>isEmpty</code>, <code>product</code>, <code>size</code>, <code>sum</code>, and <code>toList</code>.</p>
+<p>It also includes any operator that modifies the values of a collection while maintaining the &quot;shape&quot; of the collection such as <code>zipWithIndex</code>.</p>
+<p>The only collection operators we can't implement in terms of <code>ForEach</code> are those that change the shape of the collection like appending a new element to the collection. We don't know enough about the structure of the data type to know what that would mean or even if it would be well defined.</p>
+<p>For example, the data type might be a tree that does not have a well defined notion of adding an element without specifying where it should be added. Or it might be a data type like <code>Option</code> or <code>Either</code> that doesn't support appending at all.</p>
+<p>In addition to the standard Scala collection operators, <code>ForEach</code> allows us to define additional operators that take advantage of the functional abstractions and data structure in ZIO Prelude.</p>
+<p>One variant of <code>forEach</code> that you may be familiar with is <code>flip</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">flip</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">G</span>[+_]: <span class="hljs-type">IdentityBoth</span> : <span class="hljs-type">Covariant</span>, <span class="hljs-type">S</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fga: <span class="hljs-type">F</span>[<span class="hljs-type">G</span>[<span class="hljs-type">A</span>]]): <span class="hljs-type">G</span>[<span class="hljs-type">F</span>[<span class="hljs-type">A</span>]] =
+  fga.forEach(identity)
+</code></pre>
+<p>This is the generalized version of the <code>collectAll</code> operator on <code>ZIO</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">collectAll</span></span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>](as: <span class="hljs-type">List</span>[<span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>]]): <span class="hljs-type">ZIO</span>[<span class="hljs-type">R</span>, <span class="hljs-type">E</span>, <span class="hljs-type">List</span>[<span class="hljs-type">A</span>]] =
+  <span class="hljs-type">ZIO</span>.foreach(as)(identity)
+</code></pre>
+<p>This operator already takes a list of <code>ZIO</code> values so all it has to do is combine them into a single <code>ZIO</code> value and put the results back together into a list.</p>
+<p>Another particularly useful operator is <code>foldMap</code>, which lets us reduce a collection to a summary value by mapping each value to a value for which an <code>Identity</code> instance is defined and combining those values with the <code>combine</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foldMap</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>: <span class="hljs-type">Identity</span>](as: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">B</span> =
+  foldLeft(as)(<span class="hljs-type">Identity</span>[<span class="hljs-type">B</span>].identity)((b, a) =&gt; b &lt;&gt; f(a))
+</code></pre>
+<p>This is a very nice operator that lets us express a variety of ways of reducing a collection to a summary value in a very concise way.</p>
+<p>For example we could implement <code>sum</code> in terms of <code>foldMap</code> like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.newtypes._
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sum</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">A</span>](as: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(<span class="hljs-keyword">implicit</span> identity: <span class="hljs-type">Identity</span>[<span class="hljs-type">Sum</span>[<span class="hljs-type">A</span>]]): <span class="hljs-type">A</span> =
+  foldMap(as)(a =&gt; <span class="hljs-type">Sum</span>[<span class="hljs-type">A</span>](a))
+</code></pre>
+<p>Here is how we could implement a fold that computes the sum and product of the values of a collection in a single pass:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sumProd</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">A</span>](as: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(<span class="hljs-keyword">implicit</span> sum: <span class="hljs-type">Identity</span>[<span class="hljs-type">Sum</span>[<span class="hljs-type">A</span>]], product: <span class="hljs-type">Identity</span>[<span class="hljs-type">Prod</span>[<span class="hljs-type">A</span>]]): (<span class="hljs-type">A</span>, <span class="hljs-type">A</span>) =
+  foldMap(as)(a =&gt; (<span class="hljs-type">Sum</span>[<span class="hljs-type">A</span>](a), <span class="hljs-type">Prod</span>[<span class="hljs-type">A</span>](a)))
+</code></pre>
+<p>As you can see by using <code>foldMap</code> with the functional abstractions in ZIO Prelude for describing ways of combining concrete types we can implement folds like this in an extremely high level and compositional way.</p>
+<p>In summary, <code>ForEach</code> is one of the most useful abstractions in ZIO Prelude in terms of providing a very large number of practically useful operators for implementing a single method. So if you are implementing your own parameterized type that contains zero or more values of the type it is parameterized on then defining a <code>ForEach</code> instance is a great &quot;quick win&quot; to immediately add a lot of functionality to your data type.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant"><span class="arrow-prev">← </span><span>Covariant</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth"><span class="function-name-prevnext">IdentityBoth</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

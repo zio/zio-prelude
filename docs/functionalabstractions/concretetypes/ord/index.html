@@ -1,0 +1,212 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Ord · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`Ord[A]` describes a total ordering on values of type `A`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Ord · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`Ord[A]` describes a total ordering on values of type `A`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concrete Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Ord</h1></header><article><div><span><p><code>Ord[A]</code> describes a total ordering on values of type <code>A</code>.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Equal</span>[-<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">equal</span></span>(left: <span class="hljs-type">A</span>, right: <span class="hljs-type">A</span>): <span class="hljs-type">Boolean</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Ord</span>[-<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">compare</span></span>(left: <span class="hljs-type">A</span>, right: <span class="hljs-type">A</span>): <span class="hljs-type">Ordering</span>
+  <span class="hljs-keyword">final</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">equal</span></span>(left: <span class="hljs-type">A</span>, right: <span class="hljs-type">A</span>): <span class="hljs-type">Boolean</span> =
+    compare(left, right) == <span class="hljs-type">Ordering</span>.<span class="hljs-type">Equals</span>
+}
+
+<span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Ordering</span></span>
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Ordering</span> </span>{
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">LessThan</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Ordering</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">GreaterThan</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Ordering</span></span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Equals</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Ordering</span></span>
+}
+</code></pre>
+<p>That is, we can compare any two values of type <code>A</code> and either the <code>left</code> value is less than the <code>right</code>, the <code>left</code> value is greater than the <code>right</code>, or the two values are equal.</p>
+<p>Furthermore, the results of these comparisons must satisfy the properties that we expect of a total ordering. For example, if <code>a</code> is greater than <code>b</code> and <code>b</code> is greater than <code>c</code> then <code>a</code> must be greater than <code>c</code> and if <code>a</code> is greater than <code>b</code> then <code>b</code> must be less than <code>a</code>.</p>
+<p>The <code>Ord</code> abstraction builds on the <code>Equal</code> abstraction because being able to define a total ordering on values of a type implies being able to compare values of that type for equality, as shown by our implementation of the <code>equal</code> operator in terms of <code>compare</code> above. This means that if we define an instance of the <code>Ord</code> abstraction for a data type we automatically get an instance of the <code>Equal</code> abstraction for free and our definition of equality is guaranteed to be consistent with the ordering.</p>
+<p>The <code>Ord</code> abstraction is similar to the <code>Ordering</code> type class in the Scala standard library and in fact we can convert any <code>scala.math.Ordering</code> to an <code>Ord</code> using the <code>fromScala</code> operator and any <code>Ord</code> to a <code>scala.math.Ordering</code> using the <code>toScala</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Ord</span>
+
+<span class="hljs-keyword">val</span> toScala: scala.math.<span class="hljs-type">Ordering</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-type">Ord</span>[<span class="hljs-type">Int</span>].toScala
+<span class="hljs-comment">// toScala: Ordering[Int] = zio.prelude.Ord$$anonfun$toScala$2@67c57fdb</span>
+
+<span class="hljs-keyword">val</span> fromScala: <span class="hljs-type">Ord</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-type">Ord</span>.fromScala(scala.math.<span class="hljs-type">Ordering</span>[<span class="hljs-type">Int</span>])
+<span class="hljs-comment">// fromScala: Ord[Int] = zio.prelude.Ord$$anonfun$fromScala$2@6d3bfa58</span>
+</code></pre>
+<p>The main advantages that the <code>Ord</code> abstraction provides over the <code>Ordering</code> in the Scala standard library is improved type inference due to use of variance and integration with the other functional abstractions in ZIO Prelude.</p>
+<p>The <code>Ordering</code> type class in the Scala standard library is invariant, meaning that from the perspective of the Scala compiler an <code>Ordering[A]</code> and an <code>Ordering[B]</code> are completely unrelated, even if <code>A</code> is a subtype of <code>B</code>. If we look at the signature of the <code>compare</code> operator on <code>Ord</code> we can see that this does not reflect the natural variance of this type.</p>
+<p>An <code>Ord[A]</code> is a consumer of <code>A</code> values, it takes two <code>A</code> values and returns a result describing whether one is less than, greater than, or equal to the other. If we know how to order values of type <code>A</code> and <code>B</code> is a subtype of <code>A</code> then we also know how to order values of type <code>B</code>, because every <code>B</code> is an <code>A</code>!</p>
+<p>The version of <code>Ordering</code> in the Scala compiler &quot;forgets&quot; this information because it does not use variance, which can lead to type inference problems.</p>
+<p>To see this, consider a situation like the following. We have a domain model where customer accounts may be either business accounts or consumer accounts, each of which have a unique identifier.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">CustomerAccount</span></span>
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BusinessAccount</span>(<span class="hljs-params">id: <span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">CustomerAccount</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerAccount</span>(<span class="hljs-params">id: <span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">CustomerAccount</span></span>
+</code></pre>
+<p>We might define a total ordering for all accounts like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">CustomerAccountOrd</span>: <span class="hljs-type">Ord</span>[<span class="hljs-type">CustomerAccount</span>] =
+  <span class="hljs-type">Ord</span>.make {
+    <span class="hljs-keyword">case</span> (<span class="hljs-type">BusinessAccount</span>(id1), <span class="hljs-type">BusinessAccount</span>(id2)) =&gt; id1 =?= id2
+    <span class="hljs-keyword">case</span> (<span class="hljs-type">BusinessAccount</span>(_), <span class="hljs-type">ConsumerAccount</span>(_))     =&gt; <span class="hljs-type">Ordering</span>.<span class="hljs-type">LessThan</span>
+    <span class="hljs-keyword">case</span> (<span class="hljs-type">ConsumerAccount</span>(_), <span class="hljs-type">BusinessAccount</span>(_))     =&gt; <span class="hljs-type">Ordering</span>.<span class="hljs-type">GreaterThan</span>
+    <span class="hljs-keyword">case</span> (<span class="hljs-type">ConsumerAccount</span>(id1), <span class="hljs-type">ConsumerAccount</span>(id2)) =&gt; id1 =?= id2
+  }
+<span class="hljs-comment">// CustomerAccountOrd: Ord[CustomerAccount] = zio.prelude.Ord$$anon$7@18f81361</span>
+</code></pre>
+<p>Basically this says that we are ordering all business accounts before all consumer accounts and then within each account type we are ordering by the identifier. Note that we are using the <code>=?=</code> operator which is available on any type for which an <code>Ord</code> is defined to return the result of comparing two values of that type.</p>
+<p>We can use this ordering to compare two customer accounts</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> customerAccount1: <span class="hljs-type">CustomerAccount</span> = <span class="hljs-type">BusinessAccount</span>(<span class="hljs-string">"abc"</span>)
+<span class="hljs-comment">// customerAccount1: CustomerAccount = BusinessAccount(id = "abc")</span>
+<span class="hljs-keyword">val</span> customerAccount2: <span class="hljs-type">CustomerAccount</span> = <span class="hljs-type">ConsumerAccount</span>(<span class="hljs-string">"def"</span>)
+<span class="hljs-comment">// customerAccount2: CustomerAccount = ConsumerAccount(id = "def")</span>
+
+<span class="hljs-keyword">val</span> compareCustomerAccounts: <span class="hljs-type">Boolean</span> =
+  customerAccount1 &lt; customerAccount2
+<span class="hljs-comment">// compareCustomerAccounts: Boolean = true</span>
+</code></pre>
+<p>We can also use it to compare two business accounts or two consumer accounts.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> consumerAccount1: <span class="hljs-type">ConsumerAccount</span> = <span class="hljs-type">ConsumerAccount</span>(<span class="hljs-string">"abc"</span>)
+<span class="hljs-comment">// consumerAccount1: ConsumerAccount = ConsumerAccount(id = "abc")</span>
+<span class="hljs-keyword">val</span> consumerAccount2: <span class="hljs-type">ConsumerAccount</span> = <span class="hljs-type">ConsumerAccount</span>(<span class="hljs-string">"def"</span>)
+<span class="hljs-comment">// consumerAccount2: ConsumerAccount = ConsumerAccount(id = "def")</span>
+
+<span class="hljs-keyword">val</span> compareConsumerAccounts: <span class="hljs-type">Boolean</span> =
+  consumerAccount1 &lt; consumerAccount2
+<span class="hljs-comment">// compareConsumerAccounts: Boolean = true</span>
+</code></pre>
+<p>This just works because a consumer account is a customer account and we know how to order customer accounts.</p>
+<p>Let's see what happens when we try to do the same thing with the <code>Ordering</code> type class defined in the Scala standard library.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> scala.math.<span class="hljs-type">Ordering</span>.<span class="hljs-type">Implicits</span>._
+
+<span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">CustomerAccount</span></span>
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BusinessAccount</span>(<span class="hljs-params">id: <span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">CustomerAccount</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConsumerAccount</span>(<span class="hljs-params">id: <span class="hljs-type">String</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">CustomerAccount</span></span>
+
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">CustomerAccountScalaOrdering</span>: scala.math.<span class="hljs-type">Ordering</span>[<span class="hljs-type">CustomerAccount</span>] =
+  <span class="hljs-keyword">new</span> scala.math.<span class="hljs-type">Ordering</span>[<span class="hljs-type">CustomerAccount</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">compare</span></span>(left: <span class="hljs-type">CustomerAccount</span>, right: <span class="hljs-type">CustomerAccount</span>): <span class="hljs-type">Int</span> =
+      (left, right) <span class="hljs-keyword">match</span> {
+        <span class="hljs-keyword">case</span> (<span class="hljs-type">BusinessAccount</span>(id1), <span class="hljs-type">BusinessAccount</span>(id2)) =&gt; id1 compare id2
+        <span class="hljs-keyword">case</span> (<span class="hljs-type">BusinessAccount</span>(_), <span class="hljs-type">ConsumerAccount</span>(_))     =&gt; <span class="hljs-number">-1</span>
+        <span class="hljs-keyword">case</span> (<span class="hljs-type">ConsumerAccount</span>(_), <span class="hljs-type">BusinessAccount</span>(_))     =&gt; <span class="hljs-number">1</span>
+        <span class="hljs-keyword">case</span> (<span class="hljs-type">ConsumerAccount</span>(id1), <span class="hljs-type">ConsumerAccount</span>(id2)) =&gt; id1 compare id2
+      }
+}
+<span class="hljs-comment">// CustomerAccountScalaOrdering: Ordering[CustomerAccount] = repl.MdocSession$App2$$anon$1@420fd081</span>
+</code></pre>
+<p>Besides the lack of specific types in modeling the result of the compare operator this works fine for comparing two customer accounts.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> customerAccount1: <span class="hljs-type">CustomerAccount</span> = <span class="hljs-type">BusinessAccount</span>(<span class="hljs-string">"abc"</span>)
+<span class="hljs-comment">// customerAccount1: CustomerAccount = BusinessAccount(id = "abc")</span>
+<span class="hljs-keyword">val</span> customerAccount2: <span class="hljs-type">CustomerAccount</span> = <span class="hljs-type">ConsumerAccount</span>(<span class="hljs-string">"def"</span>)
+<span class="hljs-comment">// customerAccount2: CustomerAccount = ConsumerAccount(id = "def")</span>
+
+<span class="hljs-keyword">val</span> compareCustomerAccounts: <span class="hljs-type">Boolean</span> =
+  customerAccount1 &lt; customerAccount2
+<span class="hljs-comment">// compareCustomerAccounts: Boolean = true</span>
+</code></pre>
+<p>But look what happens when we try to compare two consumer accounts.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> consumerAccount1: <span class="hljs-type">ConsumerAccount</span> = <span class="hljs-type">ConsumerAccount</span>(<span class="hljs-string">"abc"</span>)
+<span class="hljs-keyword">val</span> consumerAccount2: <span class="hljs-type">ConsumerAccount</span> = <span class="hljs-type">ConsumerAccount</span>(<span class="hljs-string">"def"</span>)
+
+<span class="hljs-keyword">val</span> compareConsumerAccounts: <span class="hljs-type">Boolean</span> =
+  consumerAccount1 &lt; consumerAccount2
+<span class="hljs-comment">// error: value &lt; is not a member of App2.this.ConsumerAccount</span>
+<span class="hljs-comment">//   consumerAccount1 &lt; consumerAccount2</span>
+<span class="hljs-comment">//   ^^^^^^^^^^^^^^^^^^</span>
+</code></pre>
+<p>This code doesn't compile! The Scala compiler is unable to compare the consumer accounts because of the lack of variance on <code>scala.math.Ordering</code>.</p>
+<p>We could widen the type of <code>ConsumerAccount</code> to <code>CustomerAccount</code> but that is unergonomic. And it wouldn't even work if, for example, we were trying to sort the list and needed to maintain the type information that these were consumer accounts rather than just customer accounts.</p>
+<p>The <code>Ord</code> abstraction helps us avoid problems like this and integrates seamlessly with the rest of ZIO Prelude.</p>
+<h2><a class="anchor" aria-hidden="true" id="defining-ord-instances"></a><a href="#defining-ord-instances" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining Ord Instances</h2>
+<p><code>Ord</code> instances are already defined for all the types in <code>ZIO</code> and the Scala standard library that have a total ordering.</p>
+<p>ZIO Prelude is also very good at automatically deriving <code>Ord</code> instances for more complex data types like tuples. For example if we have a pair of <code>Double</code> values representing <code>x</code> and <code>y</code> coordinates an ordering is already automatically defined for it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-type">Ord</span>[(<span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>)]
+<span class="hljs-comment">// res5: Ord[(Double, Double)] = zio.prelude.Ord$$anon$8@2e71110b</span>
+</code></pre>
+<p>The default instance for tuples will order values by the first field and then if the first field is the same by the second field and so on.</p>
+<p>If we want to define an ordering for our own data type and potentially include our own ordering logic we can use the <code>make</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Point</span>(<span class="hljs-params">x: <span class="hljs-type">Double</span>, y: <span class="hljs-type">Double</span></span>)</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Point</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">PointOrd</span>: <span class="hljs-type">Ord</span>[<span class="hljs-type">Point</span>] =
+    <span class="hljs-type">Ord</span>.make { (left, right) =&gt;
+      (left.y =?= right.y) &lt;&gt; (left.x =?= right.x)
+    }
+}
+</code></pre>
+<p>The <code>&lt;&gt;</code> operator combines two <code>Ordering</code> values, using the result of the first one if it is <code>GreaterThan</code> or <code>LessThan</code> and otherwise using the result of the second one. You can think of this like sorting by last name and then first name.</p>
+<p>So now we are sorting by the <code>y</code> coordinate and then the <code>x</code> coordinate.</p>
+<p>Just like the <code>Equal</code> abstraction, the <code>Ord</code> abstraction supports a <code>contramap</code> operator, so we can define a total ordering on a data type as long as we can transform it into another data type that has a total ordering in a way that preserves information.</p>
+<p>This is particularly useful if we want to define an <code>Ord</code> instance for our case classes because we can just derive it from the instances for tuples.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Point</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">PointOrd</span>: <span class="hljs-type">Ord</span>[<span class="hljs-type">Point</span>] =
+    <span class="hljs-type">Ord</span>[(<span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>)].contramap(point =&gt; (point.y, point.x))
+}
+</code></pre>
+<p>ZIO Prelude makes it as easy as possible to use and define instances of <code>Ord</code> so we can abstract over the property of having a total ordering and integrate it with other parts of ZIO Prelude.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse"><span class="arrow-prev">← </span><span>Inverse</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/index"><span>Introduction</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-ord-instances">Defining Ord Instances</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

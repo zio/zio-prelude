@@ -1,0 +1,163 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>IdentityEither · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`IdentityEither[F]` describes an associative way to combine two values `F[A]` and `F[B]` into a value `F[Either[A, B]]` with an identity value `none` of type `F[Nothing]`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="IdentityEither · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`IdentityEither[F]` describes an associative way to combine two values `F[A]` and `F[B]` into a value `F[Either[A, B]]` with an identity value `none` of type `F[Nothing]`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">IdentityEither</h1></header><article><div><span><p><code>IdentityEither[F]</code> describes an associative way to combine two values <code>F[A]</code> and <code>F[B]</code> into a value <code>F[Either[A, B]]</code> with an identity value <code>none</code> of type <code>F[Nothing]</code>.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">AssociativeEither</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">F</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">IdentityEither</span>[<span class="hljs-type">F</span>[_]] <span class="hljs-keyword">extends</span> <span class="hljs-title">AssociativeEither</span>[<span class="hljs-type">F</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">none</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">Nothing</span>]
+}
+</code></pre>
+<p>The <code>none</code> value must be an identity element with respect to the <code>either</code> operator so that, after eliminating cases of <code>Either</code> that can never contain values, the following property holds:</p>
+<pre><code class="hljs css language-scala">fa &lt;+&gt; none === fa
+none &lt;+&gt; fa === fa
+</code></pre>
+<p>This is the same as the law for the <code>Identity</code> abstraction for concrete types but lifted into the context of parameterized types.</p>
+<p>To satisfy these properties, rhe <code>none</code> value  must must be a value that fails with no useful information.</p>
+<p>To see what this means, let's look at the <code>IdentityEither</code> instance for <code>Option</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">OptionIdentityEither</span>: <span class="hljs-type">IdentityEither</span>[<span class="hljs-type">Option</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">IdentityEither</span>[<span class="hljs-type">Option</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">Option</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">Option</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Option</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+      fa <span class="hljs-keyword">match</span> {
+        <span class="hljs-keyword">case</span> <span class="hljs-type">None</span> =&gt;
+          fb <span class="hljs-keyword">match</span> {
+            <span class="hljs-keyword">case</span> <span class="hljs-type">None</span>    =&gt; <span class="hljs-type">None</span>
+            <span class="hljs-keyword">case</span> <span class="hljs-type">Some</span>(b) =&gt; <span class="hljs-type">Some</span>(<span class="hljs-type">Right</span>(b))
+          }
+        <span class="hljs-keyword">case</span> <span class="hljs-type">Some</span>(a) =&gt; <span class="hljs-type">Some</span>(<span class="hljs-type">Left</span>(a))
+      }
+    <span class="hljs-keyword">val</span> none: <span class="hljs-type">Option</span>[<span class="hljs-type">Nothing</span>] =
+      <span class="hljs-type">None</span>
+  }
+<span class="hljs-comment">// OptionIdentityEither: IdentityEither[Option] = repl.MdocSession$App0$$anon$1@69a3144a</span>
+</code></pre>
+<p>If we think of an <code>Option[A]</code> as representing either a success with a value of type <code>A</code> or a failure with no useful information, then the implementation of <code>none</code> is <code>None</code>. Combining any <code>Option[A]</code> with <code>None</code> with <code>orElseEither</code> won't change its result.</p>
+<p>Now let's compare that to <code>Either</code> to see why we can't define a <code>IdentityEither</code> instance for <code>Either</code>.</p>
+<p>We said that the identity value must be a value that fails with no useful information but <code>Either</code> is polymorphic in its error type so we can't define what a value that contains no information would be for an arbitrary type. We don't even know how to construct an value of that type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">none</span></span>[<span class="hljs-type">E</span>]: <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, <span class="hljs-type">Nothing</span>] =
+  <span class="hljs-type">Left</span>(???)
+</code></pre>
+<p>To define an identity value we would have to have the concept of an empty error. For example, if we created a data type that could fail without any error then the empty failure would be the <code>none</code> value.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-keyword">val</span> noneOption: <span class="hljs-type">Either</span>[<span class="hljs-type">Option</span>[<span class="hljs-type">Nothing</span>], <span class="hljs-type">Nothing</span>] =
+  <span class="hljs-type">Left</span>(<span class="hljs-type">None</span>)
+<span class="hljs-comment">// noneOption: Either[Option[Nothing], Nothing] = Left(value = None)</span>
+
+<span class="hljs-keyword">val</span> noneChunk: <span class="hljs-type">Either</span>[<span class="hljs-type">Chunk</span>[<span class="hljs-type">Nothing</span>], <span class="hljs-type">Nothing</span>] =
+  <span class="hljs-type">Left</span>(<span class="hljs-type">Chunk</span>.empty)
+<span class="hljs-comment">// noneChunk: Either[Chunk[Nothing], Nothing] = Left(value = IndexedSeq())</span>
+</code></pre>
+<p>Having this <code>none</code> value can be useful in certain situations. For example, it can help us to define a <code>filter</code> operator on a data type in combination with some of the other functional abstractions in ZIO Prelude.</p>
+<p>However, supporting a <code>none</code> value requires allowing the possibility of that a value can fail without containing any errors, which is unattractive in many cases.</p>
+<p>For example, <code>ZIO</code> and most effect types such as <code>ZManaged</code> and <code>ZStream</code> do not have an <code>IdentityEither</code> instance defined for them because is they fail they always fail with a failure <code>E</code>. Otherwise when we used an error handling operator we would have to deal with the error as well as the possibility that there is a failure but no error at all.</p>
+<p>Note that in the case of <code>ZIO</code> a workflow can also die with a cause that can potentially be <code>Cause.empty</code>, but since the associative operator <code>orElseEither</code> does not recover from <code>Die</code> failures that doesn't help us with our problem here.</p>
+<p>The other data types that do tend to have <code>IdentityEither</code> instances are collection types that can be empty. For example, the <code>IdentityEither</code> instance for <code>Chunk</code> looks like this.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">ChunkIdentityEither</span>: <span class="hljs-type">IdentityEither</span>[<span class="hljs-type">Chunk</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">IdentityEither</span>[<span class="hljs-type">Chunk</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: =&gt; <span class="hljs-type">Chunk</span>[<span class="hljs-type">A</span>], bs: =&gt; <span class="hljs-type">Chunk</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Chunk</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+      as.map(<span class="hljs-type">Left</span>(_)) ++ bs.map(<span class="hljs-type">Right</span>(_))
+    <span class="hljs-keyword">val</span> none: <span class="hljs-type">Chunk</span>[<span class="hljs-type">Nothing</span>] =
+      <span class="hljs-type">Chunk</span>.empty
+  }
+<span class="hljs-comment">// ChunkIdentityEither: IdentityEither[Chunk] = repl.MdocSession$App0$$anon$2@25647b5d</span>
+</code></pre>
+<p>Here the identity element is just the empty chunk. If we think of running a collection as producing a set of values and then failing when the collection is empty, <code>none</code> is the collection that doesn't produce any values and fails immediately.</p>
+<p>Another more mathematical way to think about it is that if concatenation corresponds to addition then the empty collection corresponds to zero. or this reason, we can also see that collections that cannot be empty, such as <code>NonEmptyChunk</code> from ZIO or <code>NonEmptyList</code> from ZIO Prelude, cannot have <code>IdentityEither</code> instances defined for them.</p>
+<p>We can also define <code>none</code> values for contravariant types, though these tend to be less interesting.</p>
+<p>For contravariant types, the <code>none</code> value corresponds to a value that can never be run because it has <code>Nothing</code> as its input type and there are no values of type <code>Nothing</code>. There the existence of the <code>none</code> value and our ability to compose it with the <code>orElseEither</code> operator in implies that values can be run independently of each other.</p>
+<p>For example, let's look at the <code>IdentityEither</code> instance for <code>Predicate</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Predicate</span>[-<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">Boolean</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Predicate</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">PredicateIdentityEither</span>: <span class="hljs-type">IdentityEither</span>[<span class="hljs-type">Predicate</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">IdentityEither</span>[<span class="hljs-type">Predicate</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">Predicate</span>[<span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">Predicate</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Predicate</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
+        <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] {
+          <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(either: <span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">Boolean</span> =
+            either <span class="hljs-keyword">match</span> {
+              <span class="hljs-keyword">case</span> <span class="hljs-type">Left</span>(a) =&gt; left.run(a)
+              <span class="hljs-keyword">case</span> <span class="hljs-type">Right</span>(b) =&gt; right.run(b)
+            }
+        }
+      <span class="hljs-keyword">val</span> none: <span class="hljs-type">Predicate</span>[<span class="hljs-type">Nothing</span>] =
+        <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">Nothing</span>] {
+          <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(a: <span class="hljs-type">Nothing</span>): <span class="hljs-type">Boolean</span> =
+            a
+    }
+  }
+}
+</code></pre>
+<p>The <code>none</code> predicate can never be run, but we can still safely compose it with other predicates with the <code>either</code> operator because since there can never be a value of type <code>Nothing</code>, there can also never be a case where the <code>either</code> operator tries to run the <code>none</code> predicate.</p>
+<p>Overall the <code>IdentityEither</code> abstraction is a useful one to generalize over the concept of a value of a parameterized type that always fails with no information, complementing the concept of a value that always succeeds with no information from <code>IdentityBoth</code>.</p>
+<p>For concrete types that have such a <code>none</code> value there tend to be existing operators defined on the data type that already take advantage of this this functionality, so <code>IdentityEither</code> tends to be less helpful when working with concrete data types.</p>
+<p>For defining your own data types thinking about whether there is a <code>none</code> value can be helpful for API design. As discussed above, there is often a trade off between having an identity element, which is generally a good thing, and providing the guarantee that all failures contain some useful information.</p>
+<p>Defining an <code>IdentityEither</code> instance for your own data type will also let you work with generic code in ZIO Prelude that uses this abstraction.</p>
+<p>Finally <code>IdentityEither</code> can be useful when you are writing generic code to describe the concept that a data type must have this failure element with no information to provide a &quot;default&quot; failure value.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth"><span class="arrow-prev">← </span><span class="function-name-prevnext">IdentityBoth</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten"><span class="function-name-prevnext">IdentityFlatten</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

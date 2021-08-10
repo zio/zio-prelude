@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Introduction · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="ZIO Prelude features a next generation approach to functional abstractions. This approach is based on the following ideas:"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Introduction · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="ZIO Prelude features a next generation approach to functional abstractions. This approach is based on the following ideas:"/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Overview</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Introduction</h1></header><article><div><span><p>ZIO Prelude features a next generation approach to functional abstractions. This approach is based on the following ideas:</p>
+<ol>
+<li><strong>Algebraic</strong> - Abstractions should describe fundamental algebraic properties.</li>
+<li><strong>Compositional</strong> - These abstractions should describe properties that are orthogonal to each other, allowing definition of higher level abstractions as the composition of more basic ones.</li>
+<li><strong>Lawful</strong> - Abstractions should be defined in terms of laws.</li>
+</ol>
+<p>The functional abstractions in ZIO Prelude can be broadly divided into two categories.</p>
+<ul>
+<li><strong><a href="/zio-prelude/docs/functionalabstractions/concretetypes/">Abstractions For Concrete Types</a></strong> - These abstractions define properties of concrete types, such as <code>Int</code> and <code>String</code>, as well as ways of combining those values.</li>
+<li><strong><a href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Abstractions For Parameterized Types</a></strong> - These abstractions define properties of parameterized types such as <code>List</code> and <code>ZIO</code> and ways of combining them.</li>
+</ul>
+<p>As we will see, there is a deep symmetry between the abstractions defined on concrete and parameterized types, such as concepts of associative operations, commutative operations, and identity. This reflects the fundamental nature of these algebraic properties and their ability to unify what were previously separate concepts.</p>
+<h2><a class="anchor" aria-hidden="true" id="abstractions"></a><a href="#abstractions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Abstractions</h2>
+<p>An <em>abstraction</em> describes some common structure that different data types share. In Scala we can encode this using a trait that describes that common structure in terms of a set of operators as well as laws that those operators must follow.</p>
+<p>For example, we can think of many data types that share the structure of having an associative combining operation. Integer addition is associative, as is string concatenation and list concatenation, among others.</p>
+<p>We can describe this common structure using the <code>Associative</code> trait.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Associative</span>[<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">A</span>, right: =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">A</span>
+}
+</code></pre>
+<p>We can then define various concrete values that extend this trait to describe how different data types share this common structure.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> <span class="hljs-type">IntAssociative</span>: <span class="hljs-type">Associative</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">Associative</span>[<span class="hljs-type">Int</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">Int</span>, right: =&gt; <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span> =
+      left + right
+  }
+<span class="hljs-comment">// IntAssociative: Associative[Int] = repl.MdocSession$App$$anon$1@392ad1d</span>
+</code></pre>
+<p>Note however that the signature of the trait is not sufficient to define the abstraction.</p>
+<p>The signature merely says that we must take two <code>A</code> values and return an <code>A</code> value. It doesn't say anything about what this combining operation is supposed to do with the value.</p>
+<p>With just that signature we could do anything we want in the implementation of <code>combine</code> such as subtracting one integer from the other, which is definitely not associative.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> <span class="hljs-type">IntNotAssociative</span>: <span class="hljs-type">Associative</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">Associative</span>[<span class="hljs-type">Int</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">Int</span>, right: =&gt; <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span> =
+      left - right <span class="hljs-comment">// don't do this</span>
+  }
+<span class="hljs-comment">// IntNotAssociative: Associative[Int] = repl.MdocSession$App$$anon$2@3fba5754</span>
+</code></pre>
+<p>This shows that abstractions are not meaningful without laws. Abstractions describe some common structure that is shared between different data types but without laws we don't know what this structure is supposed to be.</p>
+<p>In this case the law is that the combining operation must be associative, which we can write in pseudocode as.</p>
+<pre><code class="hljs css language-scala">(a &lt;&gt; b) &lt;&gt; c === a &lt;&gt; (b &lt;&gt; c)
+</code></pre>
+<p>Here <code>&lt;&gt;</code> represents the combining operation and <code>a</code>, <code>b</code>, and <code>c</code> represent any possible combination of values of the given type.</p>
+<p>Every abstraction in ZIO Prelude is described by a trait like the one above and is defined in terms of a set of laws.</p>
+<p>ZIO Prelude provides instances for these abstractions for a variety of types from ZIO and the Scala standard library. ZIO Prelude also provides tools for testing that instances of an abstraction satisfy the appropriate laws.</p>
+<h2><a class="anchor" aria-hidden="true" id="using-abstractions"></a><a href="#using-abstractions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using Abstractions</h2>
+<p>There are several ways you can use the abstractions described in this library.</p>
+<p>The first and most direct, which actually does not require depending on ZIO Prelude at all, is to use these abstractions as inspiration for defining operators on your own data type.</p>
+<p>The common structure described by these abstractions exists independent of any library. You don't need ZIO Prelude to define an associative combining operation on your own data type.</p>
+<p>However, thinking about whether an associative combining operation exists for your data type, and what it would look like, can help you write better code.</p>
+<p>As a simple example, say you want to compute the average of values from some large data set and you would like to split the work up between different concurrent processes or possibly even different nodes in a distributed network.</p>
+<p>Your first stab at the accumulator for the running average might look like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RunningAverage</span>(<span class="hljs-params">value: <span class="hljs-type">Double</span></span>)</span>
+</code></pre>
+<p>However, if you think about it for a minute you will realize that this data type does not support an associative combining operation for combining two averages. This is going to be a serious problem because it means the result is not going to be well defined if you combine averages from different processes or nodes.</p>
+<p>Thinking about the abstractions in ZIO Prelude you might come up with a representation like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RunningAverage</span>(<span class="hljs-params">sum: <span class="hljs-type">Double</span>, count: <span class="hljs-type">Int</span></span>) </span>{ self =&gt;
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">average</span></span>: <span class="hljs-type">Double</span> =
+    sum / count
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(that: <span class="hljs-type">RunningAverage</span>): <span class="hljs-type">RunningAverage</span> =
+    <span class="hljs-type">RunningAverage</span>(self.sum + that.sum, self.count + that.count)
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">RunningAverage</span> </span>{
+  <span class="hljs-keyword">val</span> empty: <span class="hljs-type">RunningAverage</span> =
+    <span class="hljs-type">RunningAverage</span>(<span class="hljs-number">0.0</span>, <span class="hljs-number">0</span>)
+}
+</code></pre>
+<p>Now this data type does have an associative combining operation. In fact the combining operation is both associative and commutative and has an identity element.</p>
+<p>This will make it much easier for you to solve your problem because now the different processes or nodes can compute the averages for their partitions independently and you can combine them in any order.</p>
+<p>And you didn't need to use any code from ZIO Prelude to do this. ZIO Prelude was hopefully just a good source of ideas of different algebraic properties that can exist and how they can be important.</p>
+<p>This is a great way to get started with functional abstractions. Your colleagues don't have to learn anything new, you just get to write better code because you are taking advantage of these algebraic properties.</p>
+<p>This is also the approach taken by ZIO ecosystem libraries.</p>
+<p>ZIO ecosystem libraries generally do not directly expose any functional abstractions but still expose a highly compositional interface because their design is based on algebraic properties like this. Users don't have to learn about these abstractions unless they want to, they just get to benefit from better library design.</p>
+<h2><a class="anchor" aria-hidden="true" id="using-type-classes"></a><a href="#using-type-classes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using Type Classes</h2>
+<p>The second way you can use the abstractions in ZIO Prelude is by leveraging the <em>type classes</em> defined in the library to take the boilerplate out of your own code.</p>
+<p>Type classes are a way of encoding functional abstractions in Scala and other programming languages. In the type class pattern, we take the same code as above but define the instances of the type class as <code>implicit</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Associative</span>[<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">A</span>, right: =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">A</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Associative</span> </span>{
+
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">IntAssociative</span>: <span class="hljs-type">Associative</span>[<span class="hljs-type">Int</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Associative</span>[<span class="hljs-type">Int</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">Int</span>, right: =&gt; <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span> =
+        left + right
+    }
+
+  <span class="hljs-keyword">implicit</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">ListAssociative</span></span>[<span class="hljs-type">A</span>]: <span class="hljs-type">Associative</span>[<span class="hljs-type">List</span>[<span class="hljs-type">A</span>]] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Associative</span>[<span class="hljs-type">List</span>[<span class="hljs-type">A</span>]] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">A</span>]): <span class="hljs-type">List</span>[<span class="hljs-type">A</span>] =
+        left ::: right
+    }
+}
+</code></pre>
+<p>If the instance of the type class depends on other parameters, like the <code>A</code> in <code>ListAssociative</code> we define it as an <code>implicit def</code>. Otherwise, we define it as an <code>implicit val</code>.</p>
+<p>We can think of the <code>implicit</code> keyword as associating the type <code>Int</code> with the value <code>IntAssociative</code>. So now if we ask the Scala compiler for the <code>Associative</code> instance for <code>Int</code> it will be able to find it.</p>
+<p>In the type class pattern we also typically define extension methods that will be available on any data type for which an instance of the type class is defined.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">implicit</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AssociativeSyntax</span>[<span class="hljs-type">A</span>](<span class="hljs-params">private val self: <span class="hljs-type">A</span></span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">&lt;&gt;</span></span>(that: =&gt; <span class="hljs-type">A</span>)(<span class="hljs-keyword">implicit</span> associative: <span class="hljs-type">Associative</span>[<span class="hljs-type">A</span>]): <span class="hljs-type">A</span> =
+    associative.combine(self, that)
+}
+</code></pre>
+<p>This machinery allows us to use the <code>&lt;&gt;</code> operator to combine values of any type as long as an <code>Associative</code> instance is defined for it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> int: <span class="hljs-type">Int</span> =
+  <span class="hljs-number">1</span> &lt;&gt; <span class="hljs-number">2</span>
+<span class="hljs-comment">// int: Int = 3</span>
+
+<span class="hljs-keyword">val</span> list: <span class="hljs-type">List</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-type">List</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>) &lt;&gt; <span class="hljs-type">List</span>(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>)
+<span class="hljs-comment">// list: List[Int] = List(1, 2, 3, 4, 5, 6)</span>
+</code></pre>
+<p>Of course we didn't really need all of this machinery to add two numbers or concatenate two lists, but where this pattern gets powerful is when we can use it to combine more complex data types in a principled way.</p>
+<p>For example, say we have an application where users can vote on content they are interested in learning more about. We might have a data structure to keep track of the number of votes for different topics like this.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Topic</span>(<span class="hljs-params">value: <span class="hljs-type">String</span></span>)</span>
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Votes</span>(<span class="hljs-params">value: <span class="hljs-type">Int</span></span>)</span>
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VoteMap</span>(<span class="hljs-params">map: <span class="hljs-type">Map</span>[<span class="hljs-type">Topic</span>, <span class="hljs-type">Votes</span>]</span>)</span>
+</code></pre>
+<p>A common thing we might want to do is combine two <code>VoteMap</code> values, for example if the user has a local copy of the <code>VoteMap</code> and we want to update it with a new batch of votes from the server.</p>
+<p>We could do that manually like this.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Topic</span>(<span class="hljs-params">value: <span class="hljs-type">String</span></span>)</span>
+
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Votes</span>(<span class="hljs-params">value: <span class="hljs-type">Int</span></span>) </span>{ self =&gt;
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(that: <span class="hljs-type">Votes</span>): <span class="hljs-type">Votes</span> =
+    <span class="hljs-type">Votes</span>(self.value + that.value)
+}
+
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VoteMap</span>(<span class="hljs-params">map: <span class="hljs-type">Map</span>[<span class="hljs-type">Topic</span>, <span class="hljs-type">Votes</span>]</span>) </span>{ self =&gt;
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(that: <span class="hljs-type">VoteMap</span>): <span class="hljs-type">VoteMap</span> =
+    <span class="hljs-type">VoteMap</span>(that.map.foldLeft(self.map) { <span class="hljs-keyword">case</span> (map, (topic, votes)) =&gt;
+      map + (topic -&gt; map.getOrElse(topic, <span class="hljs-type">Votes</span>(<span class="hljs-number">0</span>)).combine(votes))
+    })
+}
+</code></pre>
+<p>This isn't the worst but it isn't really the kind of code we want to be writing. We want to be thinking about the logic of our application rather than how to combine maps.</p>
+<p>This is where ZIO Prelude can help.</p>
+<p>The way we're combining these maps actually follows a pattern. If a key is in a single map we include it in the combined map with its associated key and if a key is in both maps we include it in the combined map with the result of combining the values associated with that key.</p>
+<p>We might see that ourselves but it would be hard to generalize that logic in a way that is worth factoring out. How often are we going to combine maps like this and what exactly does it mean to combine the keys?</p>
+<p>Let's look at how ZIO Prelude can help us clean this up.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Topic</span>(<span class="hljs-params">value: <span class="hljs-type">String</span></span>)</span>
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Votes</span>(<span class="hljs-params">value: <span class="hljs-type">Int</span></span>)</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Votes</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">VotesAssociative</span>: <span class="hljs-type">Associative</span>[<span class="hljs-type">Votes</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Associative</span>[<span class="hljs-type">Votes</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">Votes</span>, right: =&gt; <span class="hljs-type">Votes</span>): <span class="hljs-type">Votes</span> =
+        <span class="hljs-type">Votes</span>(left.value + right.value)
+    }
+}
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VoteMap</span>(<span class="hljs-params">map: <span class="hljs-type">Map</span>[<span class="hljs-type">Topic</span>, <span class="hljs-type">Votes</span>]</span>)</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">VoteMap</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">VoteMapAssociative</span>: <span class="hljs-type">Associative</span>[<span class="hljs-type">VoteMap</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Associative</span>[<span class="hljs-type">VoteMap</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">VoteMap</span>, right: =&gt; <span class="hljs-type">VoteMap</span>): <span class="hljs-type">VoteMap</span> =
+        <span class="hljs-type">VoteMap</span>(left.map &lt;&gt; right.map)
+    }
+}
+</code></pre>
+<p>All of that logic of combining the two maps just goes away!</p>
+<p>ZIO Prelude knows that we can define an associative combining operation for any two values of type <code>Map[A, B]</code> as long as there is an associative combining operation for the <code>B</code> values. All we have to do is tell ZIO Prelude how to combine the <code>B</code> values, which in this case is quite simple, and it can do the rest.</p>
+<p>This is a great example of the practical value that ZIO Prelude can bring. It took this low level logic of how to combine these two maps and just handled it for us.</p>
+<h2><a class="anchor" aria-hidden="true" id="using-generic-programming"></a><a href="#using-generic-programming" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using Generic Programming</h2>
+<p>The third way you can use the abstractions in ZIO Prelude is by leveraging type classes to do generic programming at the level of these abstractions.</p>
+<p>For example, you might find yourself doing a lot of &quot;map reduce&quot; type operations on collections like this.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">wordCount</span></span>(lines: <span class="hljs-type">List</span>[<span class="hljs-type">String</span>]): <span class="hljs-type">Int</span> =
+  lines.map(_.split(<span class="hljs-string">" "</span>).length).sum
+</code></pre>
+<p>You might like this way of working with collections and wonder how you can generalize it.</p>
+<p>A first step could be to recognize that <code>sum</code> is just a particular combining operation that has an identity element. You could then use the <code>Identity</code> abstraction in ZIO Prelude to generalize over data types that support this kind of combining operation with an identity element.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">mapReduce</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: <span class="hljs-type">List</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>)(<span class="hljs-keyword">implicit</span> identity: <span class="hljs-type">Identity</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">B</span> =
+  ???
+</code></pre>
+<p>You might want to go even further though and generalize over the collection type. You can clearly implement a similar operator for a <code>Vector</code> or another collection type so how do you generalize over that?</p>
+<p>You could do that with ZIO Prelude's <code>ForEach</code> abstraction, which describes parameterized data types with some structure where the elements in the structure can be replaced while preserving the structure itself.</p>
+<p>Using this, you could rewrite your operator like so.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">mapReduce</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>: <span class="hljs-type">Identity</span>](as: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">B</span> =
+  ???
+</code></pre>
+<p>This example illustrates some of the benefits as well as the pitfalls of generic programming using type classes.</p>
+<p>If you want to do generic programming in terms of type classes, ZIO Prelude can go as far as you want to go.</p>
+<p>However, there is a definite trade off in these three snippets.</p>
+<p>The first one is overly specific but is understandable to any Scala programmer. The last one is beautiful and elegant if you understand the necessary concepts but incomprehensible otherwise.</p>
+<p>In addition, there is a danger in using type classes to do generic programming that we reinvent the wheel. The generalized &quot;map reduce&quot; operator we developed is just the existing <code>foldMap</code> operator from ZIO Prelude!</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">mapReduce</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">ForEach</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>: <span class="hljs-type">Identity</span>](as: <span class="hljs-type">F</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">B</span> =
+  as.foldMap(f)
+</code></pre>
+<p>This illustrates the risk that sufficiently general abstractions or operators are likely to already be defined by a functional programming library.</p>
+<p>None of this is meant to argue against this style of generic programming but merely to point out that it is one of several ways to use these functional abstractions and none of them are necessarily &quot;better&quot; than others. The right approach to using these abstractions is the one that works for you and your team.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/concretetypes/index"><span>Introduction</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#abstractions">Abstractions</a></li><li><a href="#using-abstractions">Using Abstractions</a></li><li><a href="#using-type-classes">Using Type Classes</a></li><li><a href="#using-generic-programming">Using Generic Programming</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

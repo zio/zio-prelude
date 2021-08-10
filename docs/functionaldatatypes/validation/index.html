@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Validation · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="A `Validation[E, A]` is a data type that is either a `Success` with a value of type `A` or a `Failure` with one or more errors of type `E`."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Validation · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="A `Validation[E, A]` is a data type that is either a `Success` with a value of type `A` or a `Failure` with one or more errors of type `E`."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Functional Data Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Functional Data Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/">Summary</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/equivalence">Equivalence</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/nonemptylist">NonEmptyList</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/these">These</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/validation">Validation</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zset">ZSet</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zvalidation">ZValidation</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Validation</h1></header><article><div><span><p>A <code>Validation[E, A]</code> is a data type that is either a <code>Success</code> with a value of type <code>A</code> or a <code>Failure</code> with one or more errors of type <code>E</code>.</p>
+<p>You can think of a <code>Validation</code> as looking something like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">NonEmptyChunk</span>
+
+<span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>]</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Success</span>[+<span class="hljs-type">A</span>](<span class="hljs-params">value: <span class="hljs-type">A</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Validation</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>]</span>
+  <span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failure</span>[+<span class="hljs-type">E</span>](<span class="hljs-params">errors: <span class="hljs-type">NonEmptyChunk</span>[<span class="hljs-type">E</span>]</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">Nothing</span>]</span>
+}
+</code></pre>
+<p>Thus, a <code>Validation</code> looks very much like an <code>Either</code> except that it can contain multiple errors instead of just one.</p>
+<p>The distinguishing feature of <code>Validation</code> is that it can accumulate multiple errors. This makes it extremely convenient for problems like data validation where we want to accumulate all validation errors and report them back instead of failing immediately on the first validation error.</p>
+<p>To see this, let's consider a simple example of validating a <code>Person</code> data type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span></span>)</span>
+</code></pre>
+<p>The business requirements are that a valid person must have a name that is not empty and an age that is greater than zero.</p>
+<p>We could try to model validating a <code>Person</code> using <code>Either</code> like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateName</span></span>(name: <span class="hljs-type">String</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">String</span>] =
+  <span class="hljs-keyword">if</span> (name.isEmpty) <span class="hljs-type">Left</span>(<span class="hljs-string">"Name was empty"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-type">Right</span>(name)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAge</span></span>(age: <span class="hljs-type">Int</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">if</span> (age &lt;= <span class="hljs-number">0</span>) <span class="hljs-type">Left</span>(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> was less than zero"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-type">Right</span>(age)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validatePerson</span></span>(name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Person</span>] =
+  <span class="hljs-keyword">for</span> {
+    name &lt;- validateName(name)
+    age  &lt;- validateAge(age)
+  } <span class="hljs-keyword">yield</span> <span class="hljs-type">Person</span>(name, age)
+</code></pre>
+<p>However, there is a problem with this. If we try to validate a <code>Person</code> with both an invalid <code>name</code> and an invalid <code>age</code> we will just get a single failure indicating that the name was empty.</p>
+<p>This is because <code>Either</code> embodies &quot;fail fast&quot; semantics where if one part of a computation fails the subsequent parts of the computation will never be performed.</p>
+<p>Normally this is what we want because there is no point in doing further work if a computation has already failed. This is similar to how in traditional imperative programs if an exception is thrown on one line then further lines will not be executed.</p>
+<p>However, it is not what we want here.</p>
+<p>We could imagine that the <code>name</code> and <code>age</code> were transmitted by a customer. They would probably not be happy if we told them the name was invalid, they corrected that and sent it again, and then we failed again because the age was invalid.</p>
+<p>&quot;Why didn't you tell me about all the problems up front?&quot; we can see them saying. <code>Validation</code> does just that.</p>
+<p>We can fix this example using <code>Validation</code> like so:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Validation</span>
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span></span>)</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateName</span></span>(name: <span class="hljs-type">String</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">String</span>] =
+  <span class="hljs-keyword">if</span> (name.isEmpty) <span class="hljs-type">Validation</span>.fail(<span class="hljs-string">"Name was empty"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-type">Validation</span>.succeed(name)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAge</span></span>(age: <span class="hljs-type">Int</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">if</span> (age &lt;= <span class="hljs-number">0</span>) <span class="hljs-type">Validation</span>.fail(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> was less than zero"</span>)
+  <span class="hljs-keyword">else</span> <span class="hljs-type">Validation</span>.succeed(age)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validatePerson</span></span>(name: <span class="hljs-type">String</span>, age: <span class="hljs-type">Int</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Person</span>] =
+  <span class="hljs-type">Validation</span>.validateWith(validateName(name), validateAge(age))(<span class="hljs-type">Person</span>)
+</code></pre>
+<p>Here we are just using the basic operators on <code>Validation</code> of <code>succeed</code> and <code>fail</code> which construct a <code>Validation</code> that succeeds or fails with the specified value. We are then using the <code>validateWith</code> operator, which combines the results of multiple <code>Validation</code> values, accumulating all errors that occur.</p>
+<p>Note that we are using the <code>apply</code> method of <code>Person</code> to combine the validated name and age into a <code>Person</code>. This is often a convenient pattern when we are modeling our data using case classes.</p>
+<p>Now if we validate a person where both the <code>name</code> and the <code>age</code> are invalid we will get a failure containing both errors, giving us exactly what we need for our internal customer so they can efficiently correct the problem and send us valid data.</p>
+<h2><a class="anchor" aria-hidden="true" id="constructing-validation-values"></a><a href="#constructing-validation-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constructing Validation Values</h2>
+<p>Now that we understand what <code>Validation</code> is, let's look at how to construct <code>Validation</code> values.</p>
+<h3><a class="anchor" aria-hidden="true" id="from-existing-values"></a><a href="#from-existing-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From Existing Values</h3>
+<p>The simplest ways to construct <code>Validation</code> values are the <code>succeed</code> and <code>fail</code> operators we saw above.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fail</span></span>[<span class="hljs-type">E</span>](error: <span class="hljs-type">E</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">Nothing</span>] =
+    ???
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">succeed</span></span>[<span class="hljs-type">A</span>](value: <span class="hljs-type">A</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">A</span>] =
+    ???
+}
+</code></pre>
+<p>These just construct validation successes or failures with the specified value. We can use these as the building blocks for creating more complex validation logic as we saw above.</p>
+<h3><a class="anchor" aria-hidden="true" id="from-code-that-may-throw-exceptions"></a><a href="#from-code-that-may-throw-exceptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From Code That May Throw Exceptions</h3>
+<p>Another useful constructor of <code>Validation</code> values is the <code>apply</code> method on <code>Validation</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">apply</span></span>[<span class="hljs-type">A</span>](a: =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">Throwable</span>, <span class="hljs-type">A</span>] =
+    ???
+}
+</code></pre>
+<p>The <code>apply</code> operator takes a by name argument and evaluates that argument, converting any non-fatal thrown exceptions into <code>Validation</code> failures. This is useful when working with code that might throw exceptions to safely import that code into a <code>Validation</code> value.</p>
+<h3><a class="anchor" aria-hidden="true" id="from-predicates"></a><a href="#from-predicates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From Predicates</h3>
+<p>The <code>fromPredicateWith</code> constructor is useful for constructing <code>Validation</code> values from predicates. This is nice for cleaning up code that constructs a validation failure or success based on some condition like the example we wrote above.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fromPredicateWith</span></span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>](error: =&gt; <span class="hljs-type">E</span>)(value: <span class="hljs-type">A</span>)(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">Boolean</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>] =
+    ???
+}
+</code></pre>
+<p>The <code>fromPredicateWith</code> constructor constructs a <code>Validation</code> from a value, a predicate about that value, and an error to provide if the predicate is false.</p>
+<p>For example, here is how we could simplify the example we wrote above using the <code>fromPredicateWith</code> operator:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateName</span></span>(name: <span class="hljs-type">String</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">String</span>] =
+  <span class="hljs-type">Validation</span>.fromPredicateWith(<span class="hljs-string">"Name was empty"</span>)(name)(_.nonEmpty)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAge</span></span>(age: <span class="hljs-type">Int</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">Validation</span>.fromPredicateWith(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> was less than zero"</span>)(age)(_ &gt;= <span class="hljs-number">0</span>)
+</code></pre>
+<p>This is the same as the original example but lets us express our logic at a slightly higher level.</p>
+<h3><a class="anchor" aria-hidden="true" id="from-other-data-types"></a><a href="#from-other-data-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From Other Data Types</h3>
+<p>There are also operators for constructing <code>Validation</code> values from a variety of other data types in the Scala standard library such as <code>Either</code>, <code>Option</code>, and <code>Try</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> scala.util.<span class="hljs-type">Try</span>
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fromEither</span></span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>](value: <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>]): <span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>] =
+    ???
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fromOption</span></span>[<span class="hljs-type">A</span>](value: <span class="hljs-type">Option</span>[<span class="hljs-type">A</span>]): <span class="hljs-type">Validation</span>[<span class="hljs-type">Unit</span>, <span class="hljs-type">A</span>] =
+    ???
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fromTry</span></span>[<span class="hljs-type">A</span>](value: =&gt; <span class="hljs-type">Try</span>[<span class="hljs-type">A</span>]): <span class="hljs-type">Validation</span>[<span class="hljs-type">Throwable</span>, <span class="hljs-type">A</span>] =
+    ???
+}
+</code></pre>
+<p>Each of these operators just converts another data type that models potential failures into a <code>Validation</code>.</p>
+<p>In the case of <code>fromEither</code> the <code>Validation</code> will fail with the same error type as the <code>Either</code>.</p>
+<p>In the case of <code>fromTry</code> the error type is always <code>Throwable</code>, since a <code>Try</code> can fail with any <code>Throwable</code>. The <code>fromTry</code> operator will also catch any exception thrown in the construction of the <code>Try</code> value and convert it to a <code>Validation</code> failure.</p>
+<p>A <code>Validation</code> constructed using <code>fromOption</code> has <code>Unit</code> for the error type since an <code>Option</code> contains no useful information about why a failure has occurred. We will see shortly when we learn about transforming <code>Validation</code> values how we can add additional information here about why a validation failure occurred.</p>
+<h2><a class="anchor" aria-hidden="true" id="transforming-validation-values"></a><a href="#transforming-validation-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Transforming Validation Values</h2>
+<p>Now that we know about creating <code>Validation</code> values, the next thing we need to know is how to transform them.</p>
+<p>We can transform the value type of the <code>Validation</code> using the <code>map</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">map</span></span>[<span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">B</span>]
+}
+</code></pre>
+<p>We can transform the error type of the <code>Validation</code> using the <code>mapError</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">mapError</span></span>[<span class="hljs-type">E2</span>](f: <span class="hljs-type">E</span> =&gt; <span class="hljs-type">E2</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">E2</span>, <span class="hljs-type">A</span>]
+}
+</code></pre>
+<p>This can be useful to transform the error type to our own internal data model. It can also be useful to add additional information about why a validation failure occurred, for example adding a descriptive error message if an optional value did not exist.</p>
+<h2><a class="anchor" aria-hidden="true" id="combining-validation-values"></a><a href="#combining-validation-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Combining Validation Values</h2>
+<p>We can also combine <code>Validation</code> values.</p>
+<h3><a class="anchor" aria-hidden="true" id="accumulating-errors"></a><a href="#accumulating-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Accumulating Errors</h3>
+<p>The most common way to do this is with the <code>validateWith</code> operator we saw above.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Validation</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateWith</span></span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+    left: <span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>],
+    right: <span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">B</span>]
+  )(f: (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>) =&gt; <span class="hljs-type">C</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">E</span>, <span class="hljs-type">C</span>] =
+    ???
+}
+</code></pre>
+<p>This will check each of the original <code>Validation</code> values and if they are both successes combine their values with the function <code>f</code> to produce a new successful <code>Validation</code> value. If one or more of the original <code>Validation</code> values are failures then the result will be a failure with all of the failures of both original <code>Validation</code> values.</p>
+<p>There are variants of <code>validateWith</code> for combining up to twenty two different <code>Validation</code> values so even if you are working with large cases classes with many fields you can still use <code>validateWith</code> to combine them.</p>
+<p>There is also a <code>validate</code> variant that combines multiple <code>Validation</code> values but does not take a combining function. In this case the returned <code>Validation</code> just contains a tuple with all the original values and you can combine them yourself later using <code>map</code>.</p>
+<p>If you have a whole collection of values you want to validate you can use the <code>collectAllPar</code> operator to validate them all at the same time.</p>
+<h3><a class="anchor" aria-hidden="true" id="chaining-validations"></a><a href="#chaining-validations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Chaining Validations</h3>
+<p>The second way we might want to combine <code>Validation</code> values is by returning another <code>Validation</code> value based on the result of the first validation value. For example, we might first try to parse a string into an integer and then validate that the integer is within a reasonable range.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Validation</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateInt</span></span>(s: <span class="hljs-type">String</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">Validation</span>(s.toInt).mapError(_.getMessage)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAge</span></span>(age: <span class="hljs-type">Int</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">Validation</span>.fromPredicateWith(<span class="hljs-string">s"Age <span class="hljs-subst">$age</span> was less than zero"</span>)(age)(_ &gt;= <span class="hljs-number">0</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validateAgeString</span></span>(s: <span class="hljs-type">String</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-keyword">for</span> {
+    n &lt;- validateInt(s)
+    _ &lt;- validateAge(n)
+  } <span class="hljs-keyword">yield</span> n
+</code></pre>
+<p>Here the second validation depended on the first one because if we could not parse the string into an integer then we would not even have an integer to validate. Just like with other data types we can express this with the <code>flatMap</code> operator and use a for comprehension to chain multiple validations together.</p>
+<p>Note that when we chain validations like this we only do the second validation if the first one is successful so we will never see both errors here. If all we are doing is chaining then we don't actually need <code>Validation</code> and could just use <code>Either</code>.</p>
+<p>However, frequently we want to do some validations with error accumulating semantics and chain others. Having <code>flatMap</code> on <code>Validation</code> makes it very easy for us to do this.</p>
+<p>To see this, let's expand on our example of validating a <code>Person</code> data type from above. Now we will validate the person based on two <code>String</code> inputs using the logic we implemented above.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validatePerson</span></span>(name: <span class="hljs-type">String</span>, age: <span class="hljs-type">String</span>): <span class="hljs-type">Validation</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Person</span>] =
+  <span class="hljs-type">Validation</span>.validateWith(validateName(name), validateAgeString(age))(<span class="hljs-type">Person</span>)
+</code></pre>
+<p>Now we are combining accumulating errors and chaining validations.</p>
+<p>Validating the age will proceed by validating that the age can be parsed into an <code>Int</code> and then that the age is not negative. This will return either a validated age or a validation error if either of these steps failed.</p>
+<p>We are also validating that the name is not empty. The final result will be either a validated person or a validation error containing both any errors that occurred in validating the name and age.</p>
+<p>By combining operators like <code>validateWith</code> and <code>flatMap</code> you can build complex validation logic that handles any of your problems in this or related domains.</p>
+<h2><a class="anchor" aria-hidden="true" id="extracting-validation-values"></a><a href="#extracting-validation-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Extracting Validation Values</h2>
+<p>The final thing we want to be able to do with <code>Validation</code> values is extract them to access the success value or errors and do something with them. This also includes transforming <code>Validation</code> values into other data types that we may be interested in.</p>
+<p>The most basic way to do this is with the <code>fold</code> operator, which lets us provide functions specifying what we want to do with the success or failure.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fold</span></span>[<span class="hljs-type">B</span>](failure: <span class="hljs-type">E</span> =&gt; <span class="hljs-type">B</span>, success: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>): <span class="hljs-type">B</span>
+}
+</code></pre>
+<p>Using <code>fold</code>, we can get out the success value of the <code>Validation</code> by providing a function that says what we want to do if the <code>Validation</code> is a failure. For example, we might provide a default value or refail in the context of some other data type that can model failure such as <code>ZIO</code>.</p>
+<p>There are a variety of helpful operators implemented in terms of <code>fold</code> for transforming <code>Validation</code> values into other data types we might be interested in. The most common of these are:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.{<span class="hljs-type">IO</span>, <span class="hljs-type">NonEmptyChunk</span>}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Validation</span>[+<span class="hljs-type">E</span>, +<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">toEither</span></span>: <span class="hljs-type">Either</span>[<span class="hljs-type">NonEmptyChunk</span>[<span class="hljs-type">E</span>], <span class="hljs-type">A</span>]
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">toEitherWith</span></span>[<span class="hljs-type">E2</span>](f: <span class="hljs-type">NonEmptyChunk</span>[<span class="hljs-type">E</span>] =&gt; <span class="hljs-type">E2</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">E2</span>, <span class="hljs-type">A</span>]
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">toZIO</span></span>: <span class="hljs-type">IO</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>]
+}
+</code></pre>
+<p>The <code>toEither</code> operator converts the <code>Validation</code> into an <code>Either</code> where the <code>Left</code> side of the other contains a <code>NonEmptyChunk</code> of all the errors that occurred if the <code>Validation</code> was a failure. The <code>toEitherWith</code> operator is similar to this but lets us provide our own function for converting the collection of errors that occurred into our own error type.</p>
+<p>The <code>toZIO</code> operator is particularly useful because frequently we will do some data validation which we will model with <code>Validation</code> but then want to do some further work with the result that needs a <code>ZIO</code> effect such as writing it to a file or sending it over the wire.</p>
+<p>With <code>toZIO</code> we can easily do our validation in the context of <code>Validation</code> and then &quot;lift&quot; it into the context of <code>ZIO</code> to compose with our other <code>ZIO</code> effects. One nice feature of this operator is that it will automatically preserve all validation errors that occurred in ZIO's <code>Cause</code> data type.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionaldatatypes/these"><span class="arrow-prev">← </span><span>These</span></a><a class="docs-next button" href="/zio-prelude/docs/functionaldatatypes/zset"><span>ZSet</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#constructing-validation-values">Constructing Validation Values</a><ul class="toc-headings"><li><a href="#from-existing-values">From Existing Values</a></li><li><a href="#from-code-that-may-throw-exceptions">From Code That May Throw Exceptions</a></li><li><a href="#from-predicates">From Predicates</a></li><li><a href="#from-other-data-types">From Other Data Types</a></li></ul></li><li><a href="#transforming-validation-values">Transforming Validation Values</a></li><li><a href="#combining-validation-values">Combining Validation Values</a><ul class="toc-headings"><li><a href="#accumulating-errors">Accumulating Errors</a></li><li><a href="#chaining-validations">Chaining Validations</a></li></ul></li><li><a href="#extracting-validation-values">Extracting Validation Values</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Invariant · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`Invariant[F]` describes a parameterized type `F[A]` that potentially both consumes and produces `A` values."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Invariant · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`Invariant[F]` describes a parameterized type `F[A]` that potentially both consumes and produces `A` values."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Invariant</h1></header><article><div><span><p><code>Invariant[F]</code> describes a parameterized type <code>F[A]</code> that potentially both consumes and produces <code>A</code> values.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Invariant</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">invmap</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> &lt;=&gt; <span class="hljs-type">B</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] &lt;=&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">&lt;=&gt;</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>] </span>= <span class="hljs-type">Equivalence</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Equivalence</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](<span class="hljs-params">to: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>, from: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span></span>)</span>
+</code></pre>
+<p>The <code>invmap</code> operator says we can &quot;lift&quot; an equivalence relationship between <code>A</code> and <code>B</code> into an equivalence relationship between <code>F[A]</code> and <code>F[B]</code>. An equivalence relationship says we can transform back and forth between <code>A</code> and <code>B</code> values without losing any information and is described by the <code>Equivalence</code> data type in ZIO Prelude.</p>
+<p>If we import <code>zio.prelude._</code> we can use the <code>invmap</code> operator in infix form to transform an <code>F[A]</code> into an <code>F[B]</code> with an equivalence relationship <code>A &lt;=&gt; B</code>.</p>
+<p>The law is that the lifting of this equivalence relationship can transform <code>A</code> and <code>B</code> values but cannot otherwise change the structure of <code>F</code>, so using <code>invmap</code> with the identity equivalence relationship is an identity and separately using <code>invmap</code> with two equivalence relationships is the same as doing it with the composition of those equivalence relationships.</p>
+<pre><code class="hljs css language-scala">fa.invmap(<span class="hljs-type">Equivalence</span>.identity) === fa
+fa.invmap(f).invmap(g) === fa.invmap(f.andThen(g))
+</code></pre>
+<p>An example of a data type that is invariant is a JSON codec.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">JsonCodec</span>[<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decode</span></span>(json: <span class="hljs-type">String</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">A</span>]
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">String</span>
+}
+</code></pre>
+<p>Notice that <code>A</code> appears in both the output type of the <code>decode</code> operator and the input type of the <code>encode</code> operator. This makes <code>JsonCodec</code> naturally invariant with respect to the <code>A</code> type parameter.</p>
+<p>Let's try implementing an <code>invmap</code> operator for our <code>JsonCodec</code> type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">JsonCodec</span>[<span class="hljs-type">A</span>] </span>{ self =&gt;
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decode</span></span>(json: <span class="hljs-type">String</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">A</span>]
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">String</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">invmap</span></span>[<span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> &lt;=&gt; <span class="hljs-type">B</span>): <span class="hljs-type">JsonCodec</span>[<span class="hljs-type">B</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">JsonCodec</span>[<span class="hljs-type">B</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decode</span></span>(json: <span class="hljs-type">String</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">B</span>] =
+        self.decode(json).map(f.to)
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode</span></span>(b: <span class="hljs-type">B</span>): <span class="hljs-type">String</span> =
+        self.encode(f.from(b))
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">JsonCode</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">JsonCodecInvariant</span>: <span class="hljs-type">Invariant</span>[<span class="hljs-type">JsonCodec</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Invariant</span>[<span class="hljs-type">JsonCodec</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">invmap</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> &lt;=&gt; <span class="hljs-type">B</span>): <span class="hljs-type">JsonCodec</span>[<span class="hljs-type">A</span>] &lt;=&gt; <span class="hljs-type">JsonCodec</span>[<span class="hljs-type">B</span>] =
+        <span class="hljs-type">Equivalence</span>(_.invmap(f), _.invmap(f.flip))
+    }
+}
+</code></pre>
+<p>The implementation of <code>invmap</code> was quite simple and follows a pattern we can always use when implementing <code>invmap</code> for our own data types.</p>
+<p>For every operator that outputs <code>A</code> values, we can output <code>B</code> values instead by taking the <code>A</code> values and transforming them to <code>B</code> values with the equivalence relationship. For example, in our implementation of <code>decode</code> we decode a string to produce an <code>Either[String, A]</code> with the original codec and then map over the <code>Either[String, A]</code> with the equivalence relationship to produce an <code>Either[String, B]</code>.</p>
+<p>Similarly, for every operator that accepts <code>A</code> values as an input, we can accept <code>B</code> values instead and then simply transform them into <code>A</code> values with the equivalence relationship. So in our implementation of <code>encode</code> we accept <code>B</code> values to be encoded, transform them into <code>A</code> values with the equivalence relationship, and then feed them to the <code>encode</code> operator of the original codec to get a JSON string.</p>
+<p>The operators may vary and we may need to do slightly different things to transform the inputs or outputs like mapping over the <code>Either</code> in the <code>JsonCodec</code> example, but this basic pattern applies to implementing the <code>invmap</code> operator for all invariant types.</p>
+<p>Other data types that are invariant are the <code>Set</code> data type in the Scala standard library and the <code>Ref</code>, <code>Queue</code>, and <code>Hub</code> data types in <code>ZIO</code>.</p>
+<p>The <code>Invariant</code> data type itself describes very limited structure. It just says that this parameterized type potentially consumes and produces <code>A</code> values, which are conceptually the only things it could do with <code>A</code> values.</p>
+<p>As a result, the <code>invmap</code> operator itself is not very powerful. It only lets us go back and forth between <code>F[A]</code> and <code>F[B]</code> values when there is an equivalence relationship between <code>A</code> and <code>B</code>, which basically means that <code>A</code> and <code>B</code> contain the same information.</p>
+<p>However, <code>Invariant</code> can be useful when we do have an equivalence relationship between two data types to &quot;lift&quot; that equivalence relationship to the level of the parameterized type.</p>
+<p>For example, if we have two different versions of our data model it could be generally useful to define an <code>Equivalence</code> between those different versions of our data model so we could translate back and forth between different versions of the data model. With that, we could also use <code>Invariant</code> to generate a <code>JsonCodec</code> for the new data model given a <code>JsonCodec</code> for the old data model, or vice versa.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten"><span class="arrow-prev">← </span><span class="function-name-prevnext">IdentityFlatten</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach"><span class="function-name-prevnext">NonEmptyForEach</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

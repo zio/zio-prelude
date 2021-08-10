@@ -1,0 +1,229 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>AssociativeBoth · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`AssociativeBoth[F]` describes a way of combining two values `F[A]` and `F[B]` into a value `F[(A, B)]` that is associative."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="AssociativeBoth · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`AssociativeBoth[F]` describes a way of combining two values `F[A]` and `F[B]` into a value `F[(A, B)]` that is associative."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">AssociativeBoth</h1></header><article><div><span><p><code>AssociativeBoth[F]</code> describes a way of combining two values <code>F[A]</code> and <code>F[B]</code> into a value <code>F[(A, B)]</code> that is associative.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">AssociativeBoth</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">F</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)]
+}
+</code></pre>
+<p>If we import <code>zio.prelude._</code> we can use the <code>zip</code> operator or its symbolic alias <code>&lt;*&gt;</code> to combine any two values of a parameterized type <code>F</code> that have an <code>AssociativeBoth</code> instance defined for them.</p>
+<p>The <code>both</code> operator must be associative, so if we combine <code>fa</code> and <code>fb</code> with <code>both</code> and then combine the result with <code>fc</code> we must get the same value as if we combine <code>fb</code> and <code>fc</code> and then combine <code>fa</code> with the result. That is, after reassociating nested tuples:</p>
+<pre><code class="hljs css language-scala">(fa &lt;*&gt; fb) &lt;*&gt; fc === fa &lt;*&gt; (fb &lt;*&gt; fc)
+</code></pre>
+<p>Notice that this is the same as the associative law for concrete types described by the <code>Associative</code> abstraction, just lifted into the context of parameterized types.</p>
+<p>The <code>both</code> operator corresponds to running the left value and then running the right value.</p>
+<p>We can see this because to produce a tuple <code>(A, B)</code> we need to run both the left value and the right value and to do it in a way that is associative we need to do it in a consistent order. Technically running the right value and then running the left value would also be associative but since we can always flip the order of the arguments it is helpful to adopt the convention that the first value goes on the left and the second value goes on the right.</p>
+<p>For example, in the context of <code>ZIO</code> the <code>zip</code> operator returns a new <code>ZIO</code> workflow that describes running the workflow on the left, then running the workflow on the right, and then returning a tuple of their results.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+<span class="hljs-keyword">import</span> zio.console._
+
+<span class="hljs-keyword">import</span> java.io.<span class="hljs-type">IOException</span>
+
+<span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
+  console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@412d45f7</span>
+</code></pre>
+<p>This will print <code>Hello</code> to the console on the first line and then <code>ZIO</code> on the second line.</p>
+<p>If the first workflow fails then the second workflow will never be run.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> failZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
+  <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>)) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@7678d360</span>
+</code></pre>
+<p>Now <code>ZIO</code> will never be printed to the console.</p>
+<p>What it means to run the left value and run the right value will vary between data types.</p>
+<p>For example, for <code>Either</code> and <code>Option</code> it corresponds to running the left value and then running the right value if the left value is a success.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, <span class="hljs-type">B</span>]): <span class="hljs-type">Either</span>[<span class="hljs-type">E</span>, (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
+  fa <span class="hljs-keyword">match</span> {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Left</span>(e)  =&gt; <span class="hljs-type">Left</span>(e)
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Right</span>(a) =&gt; fb <span class="hljs-keyword">match</span> {
+      <span class="hljs-keyword">case</span> <span class="hljs-type">Left</span>(e)  =&gt; <span class="hljs-type">Left</span>(e)
+      <span class="hljs-keyword">case</span> <span class="hljs-type">Right</span>(b) =&gt; <span class="hljs-type">Right</span>((a, b))
+    }
+  }
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">E</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">Option</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">Option</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Option</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
+  fa <span class="hljs-keyword">match</span> {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">None</span>    =&gt; <span class="hljs-type">None</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Some</span>(a) =&gt;
+      fb <span class="hljs-keyword">match</span> {
+        <span class="hljs-keyword">case</span> <span class="hljs-type">None</span>    =&gt; <span class="hljs-type">None</span>
+        <span class="hljs-keyword">case</span> <span class="hljs-type">Some</span>(b) =&gt; <span class="hljs-type">Some</span>((a, b))
+      }
+  }
+</code></pre>
+<p>For collection types it corresponds to the Cartesian product of the left and right values.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">A</span>], fb: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">List</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
+  <span class="hljs-keyword">for</span> {
+    a &lt;- fa
+    b &lt;- fb
+  } <span class="hljs-keyword">yield</span> (a, b)
+</code></pre>
+<p>If we think of a collection as representing a set of possible states then we can see this as the set of all possible states from taking each element in the left collection and then combining it with each element in the right collection.</p>
+<p>For a parser it corresponds to running the left parser and then running the right parser with the updated state if the first parser succeeds.</p>
+<p>So far we have been using covariant types that produced values in our example, but there is no reason we have to limit ourselves to that. The <code>AssociativeBoth</code> functional abstraction can describe associative ways of combining contravariant and invariant parameterized types as well.</p>
+<p>This is a significant advantage over other functional programming libraries, which conflate abstractions for describing ways of combining paramaterized types with abstractions for describing the variance of parameterized types. This requires defining many additional interfaces to try to accomplish the same thing and obscures the fundamental symmetry of the underlying structure here.</p>
+<p>To see this, let's start with a <code>Predicate</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Predicate</span>[-<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">Boolean</span>
+}
+</code></pre>
+<p>A <code>Predicate</code> is naturally contravariant in the <code>A</code> type parameter because <code>A</code> appears as an input to <code>run</code> but never as an output. We can prove that to ourselves by implementing a <code>contramap</code> operator for <code>Predicate</code> like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Predicate</span>[-<span class="hljs-type">A</span>] </span>{ self =&gt;
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">Boolean</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">contramap</span></span>[<span class="hljs-type">B</span>](f: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">Predicate</span>[<span class="hljs-type">B</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">B</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(b: <span class="hljs-type">B</span>): <span class="hljs-type">Boolean</span> =
+        self.run(f(b))
+    }
+}
+</code></pre>
+<p>We would like to be able to combine predicates so that if we have predicates about types <code>A</code> and <code>B</code> we can combine them into a predicate about the tuple <code>(A, B)</code>. Especially in combination with the <code>contramap</code> operator, which we could use to transform a predicate about a tuple to a predicate about a class class, we could then define predicates about user defined data types in terms of predicates about primitive types.</p>
+<p>We can do that with <code>AssociativeBoth</code> like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Predicate</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">PredicateAssociativeBoth</span>: <span class="hljs-type">AssociativeBoth</span>[<span class="hljs-type">Predicate</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">AssociativeBoth</span>[<span class="hljs-type">Predicate</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">Predicate</span>[<span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">Predicate</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Predicate</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
+        <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] {
+          <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(tuple: (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)): <span class="hljs-type">Boolean</span> =
+            left.run(tuple._1) &amp;&amp; right.run(tuple._2)
+        }
+    }
+
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">PredicateContravariant</span>: <span class="hljs-type">Contravariant</span>[<span class="hljs-type">Predicate</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Contravariant</span>[<span class="hljs-type">Predicate</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">contramap</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">Predicate</span>[<span class="hljs-type">A</span>] =&gt; <span class="hljs-type">Predicate</span>[<span class="hljs-type">B</span>] =
+        _.contramap(f)
+    }
+}
+</code></pre>
+<p>Here what the <code>both</code> operator means is to run the left predicate and then if it passes to run the right predicate.</p>
+<p>When the parameterized type is covariant there are some additional useful operators we can define for it.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">zipWith</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">AssociativeBoth</span> : <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+  fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>],
+  fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+)(f: (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>) =&gt; <span class="hljs-type">C</span>): <span class="hljs-type">F</span>[<span class="hljs-type">C</span>] =
+  fa.zip(fb).map(f.tupled)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">zipLeft</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">AssociativeBoth</span> : <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+  fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>],
+  fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =
+  zipWith(fa, fb)((a, _) =&gt; a)
+  
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">zipRight</span></span>[<span class="hljs-type">F</span>[+_]: <span class="hljs-type">AssociativeBoth</span> : <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+  fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>],
+  fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+): <span class="hljs-type">F</span>[<span class="hljs-type">B</span>] =
+  zipWith(fa, fb)((_, b) =&gt; b)
+</code></pre>
+<p>The <code>zipWith</code> operator uses <code>zip</code> to combine two parameterized types and then <code>map</code> to combine the outputs with a function. For example, we can generate two random numbers with <code>ZIO</code> and then combine their results by adding them.</p>
+<p>The <code>zipLeft</code> and <code>zipRight</code> operators and their symbolic aliases <code>&lt;*</code> and <code>*&gt;</code> are specialized variants of this that throw away the left or right results. These are useful when we want to include a value of a parameterized type in the larger data type we are building but don't care about its result.</p>
+<p>For example, we could avoid creating unnecessary nested tuples when we combine <code>ZIO</code> workflows like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> helloFromAssociativeBoth: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
+  console.putStrLn(<span class="hljs-string">"Hello"</span>) *&gt;
+    console.putStrLn(<span class="hljs-string">"From"</span>) *&gt;
+    console.putStrLn(<span class="hljs-string">"AssociativeBoth"</span>)
+<span class="hljs-comment">// helloFromAssociativeBoth: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@25b7e3f7</span>
+</code></pre>
+<p>There is also a variant of <code>zipWith</code> for contravariant types called <code>bothWith</code> that combines <code>zip</code> and <code>contramap</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bothWith</span></span>[<span class="hljs-type">F</span>[-_]: <span class="hljs-type">AssociativeBoth</span> : <span class="hljs-type">Contravariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
+  fa: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">A</span>],
+  fb: =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+)(f: <span class="hljs-type">C</span> =&gt; (<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)): <span class="hljs-type">F</span>[<span class="hljs-type">C</span>] =
+  fa.zip(fb).contramap(f)
+</code></pre>
+<p>Notice again the symmetry here between the <code>zipWith</code> and <code>bothWith</code> operators.</p>
+<p>With this we can combine contravariant data types such as <code>Predicate</code> the same way we can with covariant data types.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Email</span>(<span class="hljs-params">lines: <span class="hljs-type">List</span>[<span class="hljs-type">String</span>], sender: <span class="hljs-type">String</span></span>)</span>
+
+<span class="hljs-keyword">val</span> noSuspiciousWords: <span class="hljs-type">Predicate</span>[<span class="hljs-type">List</span>[<span class="hljs-type">String</span>]] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">List</span>[<span class="hljs-type">String</span>]] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(words: <span class="hljs-type">List</span>[<span class="hljs-type">String</span>]): <span class="hljs-type">Boolean</span> =
+      !words.exists(_.contains(<span class="hljs-string">"get rich"</span>))
+  }
+<span class="hljs-comment">// noSuspiciousWords: Predicate[List[String]] = repl.MdocSession$App0$$anon$5@4a07b7f6</span>
+
+<span class="hljs-keyword">val</span> noSuspiciousSender: <span class="hljs-type">Predicate</span>[<span class="hljs-type">String</span>] =
+  <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">String</span>] {
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(sender: <span class="hljs-type">String</span>): <span class="hljs-type">Boolean</span> =
+      !sender.contains(<span class="hljs-string">"unclaimedfunds"</span>)
+  }
+<span class="hljs-comment">// noSuspiciousSender: Predicate[String] = repl.MdocSession$App0$$anon$6@612e51bc</span>
+
+<span class="hljs-keyword">val</span> spamFilter: <span class="hljs-type">Predicate</span>[<span class="hljs-type">Email</span>] =
+  noSuspiciousWords.bothWith(noSuspiciousSender) { 
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Email</span>(lines, sender) =&gt; (lines, sender)
+  }
+<span class="hljs-comment">// spamFilter: Predicate[Email] = repl.MdocSession$App0$Predicate$1$$anon$1@517d7d2a</span>
+</code></pre>
+<p>The composed predicate will extract the lines and the sender, sending the lines to the <code>nonSuspiciousWords</code> predicate and then if it passes sending the sender to the <code>nonSuspiciousSender</code> predicate.</p>
+<p>We can use the <code>bothWith</code> operator with other contravariant types as well. For example, we could combine two sinks to produce a new sink that sends all inputs first to one sink and then to the other.</p>
+<p>The <code>AssociativeBoth</code> functional abstraction describes a very basic pattern of running one value and then running another value. In addition, the operators that can be defined in terms of it such as <code>zip</code> and <code>zipWith</code> are very common and practically useful.</p>
+<p>If you are working with data types from ZIO or the Scala standard library the value you get from the <code>AssociativeBoth</code> abstraction itself may be limited because most of these data types already define these operators directly since they are so useful.</p>
+<p>However, there are some cases where these operators are missing such as the <code>zip</code> operator on <code>Either</code>. In these cases if you bring in ZIO Prelude you will get these missing operators automatically, which can help clean up your code.</p>
+<p>If you are defining your own parameterized data type then asking if you can define an <code>AssociativeBoth</code> instance for it can be a very helpful exercise.</p>
+<p>Associative ways of combining are fundamental to building up more complex structures from simpler ones, so if your data type does not support an associative combining operation it can be worth asking why that is and if there is a way it could be refactored to support such an operation. If it does, defining an <code>AssociativeBoth</code> instance will get you a lot of useful operators, especially in combination with the <code>Covariant</code> or <code>Contravariant</code> and <code>ForEach</code> abstractions from ZIO Prelude.</p>
+<p>Finally, if you are doing generic programming with the abstractions in ZIO Prelude then <code>AssociativeBoth</code> will again be an important operator to describe running one value and then another in a generic way. The orthagonal way that abstractions are described in ZIO Prelude can be particularly valuable here to help you avoid confusing unrelated concepts and describe your shared structure in as general a way as possbile.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/index"><span class="arrow-prev">← </span><span>Introduction</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither"><span class="function-name-prevnext">AssociativeEither</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

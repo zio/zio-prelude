@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Contravariant · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`Contravariant` describes a parameterized type `F[A]` that potentially consumes but never produces `A` values."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Contravariant · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`Contravariant` describes a parameterized type `F[A]` that potentially consumes but never produces `A` values."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class=""><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Parameterized Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Overview</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Concrete Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/associative">Associative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/commutative">Commutative</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/debug">Debug</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/equal">Equal</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/hash">Hash</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/identity">Identity</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/inverse">Inverse</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/concretetypes/ord">Ord</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Parameterized Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/">Introduction</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeboth">AssociativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither">AssociativeEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeflatten">AssociativeFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth">CommutativeBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither">CommutativeEither</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/contravariant">Contravariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant">Covariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/foreach">ForEach</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityboth">IdentityBoth</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityeither">IdentityEither</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/identityflatten">IdentityFlatten</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/invariant">Invariant</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/nonemptyforeach">NonEmptyForEach</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Contravariant</h1></header><article><div><span><p><code>Contravariant</code> describes a parameterized type <code>F[A]</code> that potentially consumes but never produces <code>A</code> values.</p>
+<p>Its signature is:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Invariant</span>[<span class="hljs-type">F</span>[_]] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">invmap</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> &lt;=&gt; <span class="hljs-type">B</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] &lt;=&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Contravariant</span>[<span class="hljs-type">F</span>[-_]] <span class="hljs-keyword">extends</span> <span class="hljs-title">Invariant</span>[<span class="hljs-type">F</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">contramap</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] =&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>]
+  <span class="hljs-keyword">final</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">invmap</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">A</span> &lt;=&gt; <span class="hljs-type">B</span>): <span class="hljs-type">F</span>[<span class="hljs-type">A</span>] &lt;=&gt; <span class="hljs-type">F</span>[<span class="hljs-type">B</span>] =
+    <span class="hljs-type">Equivalence</span>(contramap(f.from), contramap(f.to))
+}
+
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">&lt;=&gt;</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>] </span>= <span class="hljs-type">Equivalence</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Equivalence</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](<span class="hljs-params">to: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">B</span>, from: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span></span>)</span>
+</code></pre>
+<p>The <code>contramap</code> operator says we can lift a function <code>B =&gt; A</code> to a function <code>F[A]</code> to <code>F[B]</code>. If we import <code>zio.prelude._</code> we can use <code>contramap</code> to transform a <code>F[A]</code> to a <code>F[B]</code> with a function <code>B =&gt; A</code>.</p>
+<p>Notice that the arrows go in the opposite direction here. To transform a <code>F[A]</code> into a <code>F[B]</code> with the <code>contramap</code> operator we provide a function <code>B =&gt; A</code> rather than a function <code>A =&gt; B</code> like with the <code>map</code> operator.</p>
+<p>This can be a little counterintuitive because we are used to primarily working with data types that produce values and transforming their outputs. We will build a better sense for the <code>contramap</code> operator later in this section.</p>
+<p>The other thing to notice here is the <code>-</code> that appears in brackets in the definition of <code>Contravariant</code>. This tells the Scala compiler that <code>F</code> is contravariant with respect to the <code>A</code> type parameter.</p>
+<p>Doing this improves type inference because the Scala compiler knows that if <code>A</code> is a subtype of <code>B</code> then an <code>F[B]</code> is a subtype of an <code>F[A]</code>, since an <code>F[B]</code> can accept <code>B</code> inputs and every <code>A</code> is a <code>B</code>. It also allows the compiler to check that <code>A</code> really does only appear as an input to <code>F</code>.</p>
+<p>Other functional programming libraries don't take advantage of contravariance here and so have to define a <code>narrow</code> operator, which essentially forces users to do this type casting manually.</p>
+<p>The law is that the lifting of the function <code>f</code> in <code>contramap</code> can transform <code>B</code> values into <code>A</code> values but cannot otherwise change the structure of <code>F</code>, so using <code>contramap</code> with the identity function is an identity and separately using <code>contrmap</code> with two functions is the same as doing it with the composition of those functions.</p>
+<pre><code class="hljs css language-scala">fa.contramap(identity) === fa
+fa.contramap(f).contramap(g) === fa.contramap(f.compose(g)))
+</code></pre>
+<p>Examples of data types that are contravariant include functions with respect to their inputs, <code>ZIO</code> with respect to its environment type, and <code>ZSink</code> with respect to its input type.</p>
+<p>To get a better sense of what it means for a data type to be contravariant let's look at a <code>JSONCodec</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">JsonCodec</span>[<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decode</span></span>(json: <span class="hljs-type">String</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">A</span>]
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">String</span>
+}
+</code></pre>
+<p>This data type doesn't have either a <code>+</code> or a <code>-</code> before the <code>A</code> type parameter, indicating that it is invariant with respect to the <code>A</code> type parameter. If we try to make <code>JsonCodec</code> contravariant by adding a <code>-</code> before the <code>A</code> type parameter we get a compilation error telling us that <code>A</code> appears in covariant position in the <code>decode</code> operator.</p>
+<p>This is accurate because <code>A</code> does indeed appear as an output of the <code>decode</code> operator whereas it is only supposed to appear as an input to a contravariant type. To fix this we need to break the <code>JsonCodec</code> up into separate <code>JsonDecoder</code> and <code>JsonEncoder</code> types that are covariant and contravariant respectively.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">JsonDecoder</span>[+<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decode</span></span>(json: <span class="hljs-type">String</span>): <span class="hljs-type">Either</span>[<span class="hljs-type">String</span>, <span class="hljs-type">A</span>]
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">JsonEncoder</span>[-<span class="hljs-type">A</span>] </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">String</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">JsonCodec</span>[<span class="hljs-type">A</span>] <span class="hljs-keyword">extends</span> <span class="hljs-title">JsonDecoder</span>[<span class="hljs-type">A</span>] <span class="hljs-keyword">with</span> <span class="hljs-title">JsonEncoder</span>[<span class="hljs-type">A</span>]</span>
+</code></pre>
+<p>Now we can define a <code>Contravariant</code> instance for the <code>JsonEncoder</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">JsonEncoder</span>[-<span class="hljs-type">A</span>] </span>{ self =&gt;
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode</span></span>(a: <span class="hljs-type">A</span>): <span class="hljs-type">String</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">contramap</span></span>[<span class="hljs-type">B</span>](f: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">JsonEncoder</span>[<span class="hljs-type">B</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">JsonEncoder</span>[<span class="hljs-type">B</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode</span></span>(b: <span class="hljs-type">B</span>): <span class="hljs-type">String</span> =
+        self.encode(f(b))
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">JsonEncoder</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">JsonEncoderContravariant</span>: <span class="hljs-type">Contravariant</span>[<span class="hljs-type">JsonEncoder</span>] =
+    <span class="hljs-keyword">new</span> <span class="hljs-type">Contravariant</span>[<span class="hljs-type">JsonEncoder</span>] {
+      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">contramap</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](f: <span class="hljs-type">B</span> =&gt; <span class="hljs-type">A</span>): <span class="hljs-type">JsonEncoder</span>[<span class="hljs-type">A</span>] =&gt; <span class="hljs-type">JsonEncoder</span>[<span class="hljs-type">B</span>] =
+        jsonEncoder =&gt; jsonEncoder.contramap(f)
+    }
+}
+</code></pre>
+<p>Let's think about what this means.</p>
+<p>A <code>JsonEncoder</code> is something that knows how to encode values of type <code>A</code>. It says we can give it any value of type <code>A</code> and it will encode it.</p>
+<p>The <code>contramap</code> operator says if we have a function <code>B =&gt; A</code> we can transform a <code>JsonEncode[A]</code> into a <code>JsonEncoder[B]</code>. We can do that by taking any <code>B</code> values and transforming them into <code>A</code> values with the function <code>f</code> before sending them to the original encoder.</p>
+<p>The pattern works the same way for any contravariant type. The <code>contramap</code> operator lets us adapt the inputs to the data type with a function, for example transforming a sink that writes bytes to a file to a sink that writes strings to a file by providing a function to transform strings to bytes.</p>
+<p>While we may be less familiar with it, the <code>contramap</code> operator is quite useful for working with contravariant types and lets us &quot;work backwards&quot; from the input type we need to the input type we have. So it can be useful to implement a <code>Contravariant</code> instance for our own data types just for that.</p>
+<p>In addition, some operators in ZIO Prelude are only defined on data types that have a <code>Contravariant</code> instance along with instances of one or more other functional abstractions. So it is useful to define instances of all functional abstractions that are applicable for your own data types so that you can use these operators when you need them.</p>
+<p>Finally, if you are writing your own generic code in terms of the abstractions in ZIO Prelude a <code>Contravariant</code> instance can be important to define certain classes of operators.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeeither"><span class="arrow-prev">← </span><span class="function-name-prevnext">CommutativeEither</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/covariant"><span>Covariant</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

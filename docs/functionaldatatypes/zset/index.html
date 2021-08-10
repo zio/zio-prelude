@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>ZSet · ZIO Prelude</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`ZSet` is a version of a set that generalizes the measure of &quot;how many times&quot; each element appears in the set."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="ZSet · ZIO Prelude"/><meta property="og:type" content="website"/><meta property="og:url" content="https://zio.github.io/zio-prelude/"/><meta property="og:description" content="`ZSet` is a version of a set that generalizes the measure of &quot;how many times&quot; each element appears in the set."/><meta property="og:image" content="https://zio.github.io/zio-prelude/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://zio.github.io/zio-prelude/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/zio-prelude/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100,"cornerOffset":100}
+          )
+        });
+        </script><script src="/zio-prelude/js/scrollSpy.js"></script><link rel="stylesheet" href="/zio-prelude/css/main.css"/><script src="/zio-prelude/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/zio-prelude/"><img class="logo" src="/zio-prelude/img/navbar_brand2x.png" alt="ZIO Prelude"/><h2 class="headerTitleWithLogo">ZIO Prelude</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/zio-prelude/docs/overview/overview_index" target="_self">Overview</a></li><li class=""><a href="/zio-prelude/docs/functionalabstractions/" target="_self">Functional Abstractions</a></li><li class="siteNavGroupActive"><a href="/zio-prelude/docs/functionaldatatypes/" target="_self">Functional Data Types</a></li><li class=""><a href="/zio-prelude/docs/newtypes/" target="_self">New Types</a></li><li class=""><a href="/zio-prelude/docs/zpure/" target="_self">ZPure</a></li><li class=""><a href="/zio-prelude/docs/usecases/usecases_index" target="_self">Use Cases</a></li><li class=""><a href="/zio-prelude/docs/about/about_index" target="_self">About</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Functional Data Types</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Functional Data Types</h3><ul class=""><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/">Summary</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/equivalence">Equivalence</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/nonemptylist">NonEmptyList</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/these">These</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/validation">Validation</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zset">ZSet</a></li><li class="navListItem"><a class="navItem" href="/zio-prelude/docs/functionaldatatypes/zvalidation">ZValidation</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">ZSet</h1></header><article><div><span><p><code>ZSet</code> is a version of a set that generalizes the measure of &quot;how many times&quot; each element appears in the set.</p>
+<p>Conceptually, we can think of a <code>ZSet[A, B]</code> as a <code>Map[A, B]</code>, where <code>A</code> represents the elements of the set and <code>B</code> represents some notion of how many times each element appears.</p>
+<p>We can then define a <code>Set</code> as a <code>ZSet</code> where the measure of how many times each element appears is a <code>Boolean</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">ZSet</span>
+
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Set</span>[+<span class="hljs-type">A</span>] </span>= <span class="hljs-type">ZSet</span>[<span class="hljs-type">A</span>, <span class="hljs-type">Boolean</span>]
+</code></pre>
+<p>That is, in a <code>Set</code> the measure of how many times an element appears is just yes or no. Either the element is in the set or it is not.</p>
+<p>However, we can also define many other variants of sets by choosing different types to measure how many times an element appears.</p>
+<p>For example, by using the <code>Natural</code> new type from ZIO Prelude, which describes integers greater than or equal to zero, we can define the type of a <code>MultiSet</code> or &quot;bag&quot; in some programming languages.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">ZSet</span>
+<span class="hljs-keyword">import</span> zio.prelude.newtypes.<span class="hljs-type">Natural</span>
+
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MultiSet</span>[+<span class="hljs-type">A</span>] </span>= <span class="hljs-type">ZSet</span>[<span class="hljs-type">A</span>, <span class="hljs-type">Natural</span>]
+</code></pre>
+<p>This ends up being a quite useful data type and can represent anything where the number of times an element appears matters but the order doesn't matter, such as a shopping cart.</p>
+<p>By using other measures of how many times an item appears we can describe other variants of sets such as <code>Int</code> for sets where items can appear a negative number of times or <code>Double</code> for sets where the number of times an item appears can be fractional.</p>
+<p><code>ZSet</code> is focused on using the functional abstractions and new types in ZIO Prelude to describe operators on these generalizations of sets in as practical a way as possible.</p>
+<h2><a class="anchor" aria-hidden="true" id="constructing-zsets"></a><a href="#constructing-zsets" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constructing ZSets</h2>
+<p>The most basic way to construct a <code>ZSet</code> is from a <code>Map</code> where the keys in the map represent the elements in the <code>ZSet</code> and the values in the map represent the number of times each element appears.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> shoppingList: <span class="hljs-type">ZSet</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-string">"apples"</span> -&gt; <span class="hljs-number">2</span>, <span class="hljs-string">"oranges"</span> -&gt; <span class="hljs-number">3</span>, <span class="hljs-string">"bananas"</span> -&gt; <span class="hljs-number">5</span>))
+<span class="hljs-comment">// shoppingList: ZSet[String, Int] = ZSet(apples -&gt; 2, bananas -&gt; 5, oranges -&gt; 3)</span>
+</code></pre>
+<p>We can also construct a <code>ZSet</code> from existing collection types.</p>
+<p>If we have a normal <code>Set</code> from the Scala standard library, we can convert it to a <code>ZSet</code> using the <code>fromSet</code> operator.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> set: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Boolean</span>] =
+  <span class="hljs-type">ZSet</span>.fromSet(<span class="hljs-type">Set</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>))
+<span class="hljs-comment">// set: ZSet[Int, Boolean] = ZSet(1 -&gt; true, 2 -&gt; true, 3 -&gt; true)</span>
+</code></pre>
+<p>If we have an <code>Iterable</code> we can convert it into a <code>ZSet</code> using the <code>fromIterable</code> constructor. The measure of how many times each item appears will just be how many times it appears in the <code>Iterable</code>.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> multiSet: <span class="hljs-type">MultiSet</span>[<span class="hljs-type">Int</span>] =
+ <span class="hljs-type">ZSet</span>.fromIterable(<span class="hljs-type">List</span>(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>))
+<span class="hljs-comment">// multiSet: MultiSet[Int] = ZSet(1 -&gt; 2, 2 -&gt; 1)</span>
+</code></pre>
+<p>Finally, we can just construct an empty <code>ZSet</code> using the <code>empty</code> operator and combine <code>ZSet</code> with other <code>ZSet</code> values later.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> empty: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Nothing</span>] =
+  <span class="hljs-type">ZSet</span>.empty
+<span class="hljs-comment">// empty: ZSet[Nothing, Nothing] = ZSet()</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="operators-on-zsets"></a><a href="#operators-on-zsets" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Operators on ZSets</h2>
+<p>As a generalization of sets, <code>ZSet</code> supports many of the same operators that exist on sets.</p>
+<h3><a class="anchor" aria-hidden="true" id="set-membership"></a><a href="#set-membership" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Set Membership</h3>
+<p>We can determine how many times an element appears in the set using the <code>apply</code> operator. This requires that the measure type has an <code>Identity</code> defined for it.</p>
+<p>If the element exists in the set the measure of how many times it appears will be returned. Otherwise the identity element will be returned.</p>
+<p>Thus, <code>shoppingList(&quot;apples&quot;)</code> will return <code>2</code> and <code>shoppingList(&quot;eggs&quot;)</code> will return <code>0</code> while <code>set(1)</code> will return <code>true</code> and <code>set(4)</code> will return <code>false</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="set-union"></a><a href="#set-union" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Set Union</h3>
+<p>One simple way of combining sets is the union of two sets.</p>
+<p>The union of two sets contains all elements that appear in either set. If an element appears in both sets the measure of how many times it appears in the union will be the maximum of the two measures, as determined by an <code>Ord</code> defined on the measure type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> left: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-number">1</span> -&gt; <span class="hljs-number">2</span>, <span class="hljs-number">2</span> -&gt; <span class="hljs-number">3</span>, <span class="hljs-number">3</span> -&gt; <span class="hljs-number">4</span>))
+<span class="hljs-comment">// left: ZSet[Int, Int] = ZSet(1 -&gt; 2, 2 -&gt; 3, 3 -&gt; 4)</span>
+
+<span class="hljs-keyword">val</span> right: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-number">2</span> -&gt; <span class="hljs-number">2</span>, <span class="hljs-number">3</span> -&gt; <span class="hljs-number">3</span>, <span class="hljs-number">4</span> -&gt; <span class="hljs-number">4</span>))
+<span class="hljs-comment">// right: ZSet[Int, Int] = ZSet(2 -&gt; 2, 3 -&gt; 3, 4 -&gt; 4)</span>
+
+<span class="hljs-keyword">val</span> union: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  left.union(right)
+<span class="hljs-comment">// union: ZSet[Int, Int] = ZSet(1 -&gt; 2, 2 -&gt; 3, 3 -&gt; 4, 4 -&gt; 4)</span>
+</code></pre>
+<p>Here the result will be <code>ZSet(1 -&gt; 2, 2 -&gt; 3, 3 -&gt; 4, 4 -&gt; 4)</code> because all elements in both sets will be included in the union of the two sets.</p>
+<h2><a class="anchor" aria-hidden="true" id="set-intersection"></a><a href="#set-intersection" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Set Intersection</h2>
+<p>Set intersection is another basic way of combining sets.</p>
+<p>The intersection of two sets only contains the elements that appear in both sets. If an element appears in both sets the measure of how many times it appears in the intersection will be the minimum of the two measures, as determined by an <code>Ord</code> defined on the measure type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> left: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-number">1</span> -&gt; <span class="hljs-number">2</span>, <span class="hljs-number">2</span> -&gt; <span class="hljs-number">3</span>, <span class="hljs-number">3</span> -&gt; <span class="hljs-number">4</span>))
+<span class="hljs-comment">// left: ZSet[Int, Int] = ZSet(1 -&gt; 2, 2 -&gt; 3, 3 -&gt; 4)</span>
+
+<span class="hljs-keyword">val</span> right: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-number">2</span> -&gt; <span class="hljs-number">2</span>, <span class="hljs-number">3</span> -&gt; <span class="hljs-number">3</span>, <span class="hljs-number">4</span> -&gt; <span class="hljs-number">4</span>))
+<span class="hljs-comment">// right: ZSet[Int, Int] = ZSet(2 -&gt; 2, 3 -&gt; 3, 4 -&gt; 4)</span>
+
+<span class="hljs-keyword">val</span> intersection: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  left.intersect(right)
+<span class="hljs-comment">// intersection: ZSet[Int, Int] = ZSet(2 -&gt; 2, 3 -&gt; 3)</span>
+</code></pre>
+<p>The result will be <code>ZSet(2 -&gt; 2, 3 -&gt; 3)</code> because the only commonality of the two sets is that they contain these elements.</p>
+<h2><a class="anchor" aria-hidden="true" id="set-difference"></a><a href="#set-difference" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Set Difference</h2>
+<p>We can also compute the difference of two sets.</p>
+<p>The difference of two sets is obtained by subtracting the measure of how many times each element appears in the second set from how many times it appears in the first set. This requires an <code>Inverse</code> defined on the <code>Sum</code> of the measure type to tell us what it means to &quot;subtract&quot; for this type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> left: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-number">1</span> -&gt; <span class="hljs-number">2</span>, <span class="hljs-number">2</span> -&gt; <span class="hljs-number">3</span>, <span class="hljs-number">3</span> -&gt; <span class="hljs-number">4</span>))
+<span class="hljs-comment">// left: ZSet[Int, Int] = ZSet(1 -&gt; 2, 2 -&gt; 3, 3 -&gt; 4)</span>
+
+<span class="hljs-keyword">val</span> right: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-number">2</span> -&gt; <span class="hljs-number">2</span>, <span class="hljs-number">3</span> -&gt; <span class="hljs-number">3</span>, <span class="hljs-number">4</span> -&gt; <span class="hljs-number">4</span>))
+<span class="hljs-comment">// right: ZSet[Int, Int] = ZSet(2 -&gt; 2, 3 -&gt; 3, 4 -&gt; 4)</span>
+
+<span class="hljs-keyword">val</span> diff: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>] =
+  left.diff(right)
+<span class="hljs-comment">// diff: ZSet[Int, Int] = ZSet(1 -&gt; 2, 2 -&gt; 1, 3 -&gt; 1, 4 -&gt; -4)</span>
+</code></pre>
+<p>The result will be <code>ZSet(1 -&gt; 2, 2 -&gt; 1, 3 -&gt; 1, 4 -&gt; -4)</code>.</p>
+<p>Note that the measure of how many times <code>4</code> appears in the resulting set is negative. This is permissible because <code>Int</code> allows negative numbers.</p>
+<p>If we didn't want this we could define the measure type to be a type like <code>Natural</code> that did not permit negative numbers.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> left: <span class="hljs-type">MultiSet</span>[<span class="hljs-type">String</span>] =
+  <span class="hljs-type">ZSet</span>.fromIterable(<span class="hljs-type">List</span>(<span class="hljs-string">"apple"</span>, <span class="hljs-string">"banana"</span>))
+<span class="hljs-comment">// left: MultiSet[String] = ZSet(banana -&gt; 1, apple -&gt; 1)</span>
+
+<span class="hljs-keyword">val</span> right: <span class="hljs-type">MultiSet</span>[<span class="hljs-type">String</span>] =
+  <span class="hljs-type">ZSet</span>.fromIterable(<span class="hljs-type">List</span>(<span class="hljs-string">"banana"</span>, <span class="hljs-string">"banana"</span>, <span class="hljs-string">"banana"</span>))
+<span class="hljs-comment">// right: MultiSet[String] = ZSet(banana -&gt; 3)</span>
+
+<span class="hljs-keyword">val</span> diff: <span class="hljs-type">MultiSet</span>[<span class="hljs-type">String</span>] =
+  left.diff(right)
+<span class="hljs-comment">// diff: MultiSet[String] = ZSet(banana -&gt; 0, apple -&gt; 1)</span>
+</code></pre>
+<p>Now the measure of how many times each item appears is a natural number so &quot;banana&quot; cannot appear a negative number of times.</p>
+<h2><a class="anchor" aria-hidden="true" id="set-combination"></a><a href="#set-combination" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Set Combination</h2>
+<p>Another helpful way of combining sets that makes more sense for generalized sets is the notion of &quot;adding&quot; two sets. This is less relevant for traditional sets because an element can never appear more than once in a traditional set, so &quot;adding&quot; reduces to set union.</p>
+<p>However, for generalized sets this way of combining can be quite intuitive. For example if we think of a multiset as John's shopping list and another multiset as Jane's shopping list, the combination of the two includes everything on both shopping lists, with overlapping items appearing the total number of times they appear on both lists.</p>
+<p>This requires a <code>Commutative</code> defined on the <code>Sum</code> of the measure type to tell us how to do this addition.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> janeShoppingList: <span class="hljs-type">ZSet</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-string">"apples"</span> -&gt; <span class="hljs-number">4</span>, <span class="hljs-string">"bananas"</span> -&gt; <span class="hljs-number">5</span>))
+<span class="hljs-comment">// janeShoppingList: ZSet[String, Int] = ZSet(apples -&gt; 4, bananas -&gt; 5)</span>
+
+<span class="hljs-keyword">val</span> johnShoppingList: <span class="hljs-type">ZSet</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(<span class="hljs-type">Map</span>(<span class="hljs-string">"eggs"</span> -&gt; <span class="hljs-number">12</span>, <span class="hljs-string">"bananas"</span> -&gt; <span class="hljs-number">1</span>))
+<span class="hljs-comment">// johnShoppingList: ZSet[String, Int] = ZSet(eggs -&gt; 12, bananas -&gt; 1)</span>
+
+<span class="hljs-keyword">val</span> combinedList: <span class="hljs-type">ZSet</span>[<span class="hljs-type">String</span>, <span class="hljs-type">Int</span>] =
+  janeShoppingList.combine(johnShoppingList)
+<span class="hljs-comment">// combinedList: ZSet[String, Int] = ZSet(eggs -&gt; 12, apples -&gt; 4, bananas -&gt; 6)</span>
+</code></pre>
+<p>The result is <code>ZSet(&quot;apples&quot; -&gt; 4, &quot;bananas&quot; -&gt; 6, &quot;eggs&quot; -&gt; 12)</code>, the combination of what each of them wants to buy.</p>
+<h2><a class="anchor" aria-hidden="true" id="set-product"></a><a href="#set-product" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Set Product</h2>
+<p>We can also define the product of two sets.</p>
+<p>This is the Cartesian product of the two sets, with each combination of elements from the two sets appearing in the product set and the measure of how many times an element appears being the product of the two measures. This requires a <code>Commutative</code> defined on the <code>Prod</code> of the measure type to tell us how to do this multiplication.</p>
+<p>A nice example of this is modeling discrete probabilities. We can define the set of all possible outcomes of a dice roll along with their associated probabilities like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> die: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Double</span>] =
+  <span class="hljs-type">ZSet</span>.fromMap(
+    <span class="hljs-type">Map</span>(
+      <span class="hljs-number">1</span> -&gt; <span class="hljs-number">1.0</span> / <span class="hljs-number">6.0</span>,
+      <span class="hljs-number">2</span> -&gt; <span class="hljs-number">1.0</span> / <span class="hljs-number">6.0</span>,
+      <span class="hljs-number">3</span> -&gt; <span class="hljs-number">1.0</span> / <span class="hljs-number">6.0</span>,
+      <span class="hljs-number">4</span> -&gt; <span class="hljs-number">1.0</span> / <span class="hljs-number">6.0</span>,
+      <span class="hljs-number">5</span> -&gt; <span class="hljs-number">1.0</span> / <span class="hljs-number">6.0</span>,
+      <span class="hljs-number">6</span> -&gt; <span class="hljs-number">1.0</span> / <span class="hljs-number">6.0</span>
+    )
+  )
+<span class="hljs-comment">// die: ZSet[Int, Double] = ZSet(5 -&gt; 0.16666666666666666, 1 -&gt; 0.16666666666666666, 6 -&gt; 0.16666666666666666, 2 -&gt; 0.16666666666666666, 3 -&gt; 0.16666666666666666, 4 -&gt; 0.16666666666666666)</span>
+</code></pre>
+<p>The product of this set with itself represents the set of all possible outcomes of rolling two dice.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> pair: <span class="hljs-type">ZSet</span>[(<span class="hljs-type">Int</span>, <span class="hljs-type">Int</span>), <span class="hljs-type">Double</span>] =
+  die.zip(die)
+<span class="hljs-comment">// pair: ZSet[(Int, Int), Double] = ZSet((5,4) -&gt; 0.027777777777777776, (2,6) -&gt; 0.027777777777777776, (4,1) -&gt; 0.027777777777777776, (5,2) -&gt; 0.027777777777777776, (1,1) -&gt; 0.027777777777777776, (1,6) -&gt; 0.027777777777777776, (6,4) -&gt; 0.027777777777777776, (3,2) -&gt; 0.027777777777777776, (3,3) -&gt; 0.027777777777777776, (4,3) -&gt; 0.027777777777777776, (5,6) -&gt; 0.027777777777777776, (2,2) -&gt; 0.027777777777777776, (3,4) -&gt; 0.027777777777777776, (2,1) -&gt; 0.027777777777777776, (6,1) -&gt; 0.027777777777777776, (2,5) -&gt; 0.027777777777777776, (4,2) -&gt; 0.027777777777777776, (4,4) -&gt; 0.027777777777777776, (1,2) -&gt; 0.027777777777777776, (6,5) -&gt; 0.027777777777777776, (6,2) -&gt; 0.027777777777777776, (1,4) -&gt; 0.027777777777777776, (4,5) -&gt; 0.027777777777777776, (4,6) -&gt; 0.027777777777777776, (2,4) -&gt; 0.027777777777777776, (6,3) -&gt; 0.027777777777777776, (1,5) -&gt; 0.027777777777777776, (3,1) -&gt; 0.027777777777777776, (5,1) -&gt; 0.027777777777777776, (3,6) -&gt; 0.027777777777777776, (2,3) -&gt; 0.027777777777777776, (3,5) -&gt; 0.027777777777777776, (1,3) -&gt; 0.027777777777777776, (5,5) -&gt; 0.027777777777777776, (5,3) -&gt; 0.027777777777777776, (6,6) -&gt; 0.027777777777777776)</span>
+</code></pre>
+<p>This set has thirty six elements, corresponding to each possible combination of outcomes from the two dice rolls, each with a probability of one in thirty six.</p>
+<p>This gets more interesting if we say that matters is not the individual dice rolls but their sum.</p>
+<p>We can express this in code with the <code>zipWith</code> operator, which allows us to combine the elements from the product of the two sets with a function. If multiple elements from the product are mapped to the same value the measures of how many times each value appears will be added, using a <code>Commutative</code> instance defined on the <code>Sum</code> of the measure type.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> sum: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Double</span>] =
+  die.zipWith(die)(_ + _)
+<span class="hljs-comment">// sum: ZSet[Int, Double] = ZSet(5 -&gt; 0.1111111111111111, 10 -&gt; 0.08333333333333333, 6 -&gt; 0.1388888888888889, 9 -&gt; 0.1111111111111111, 2 -&gt; 0.027777777777777776, 12 -&gt; 0.027777777777777776, 7 -&gt; 0.16666666666666669, 3 -&gt; 0.05555555555555555, 11 -&gt; 0.05555555555555555, 8 -&gt; 0.1388888888888889, 4 -&gt; 0.08333333333333333)</span>
+</code></pre>
+<p>The resulting set has eleven elements, corresponding to the possible sums from two dice rolls of two to twelve. The measure for each value corresponds to the probability of that sum being rolled.</p>
+<p>So for example the probability of seven is about 16.7% whereas the probability of rolling two or twelve is only about 2.8%.</p>
+<p>We can take this even further using the <code>flatMap</code> operator.</p>
+<p>The <code>zipWith</code> operator lets us combine two sets when the sets are independent of each other. With the <code>flatMap</code> operator we can create a new set based on each element of the first set and then &quot;flatten&quot; the resulting set down.</p>
+<p>We could rewrite the example above using <code>flatMap</code> and a for comprehension like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> sum: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Double</span>] =
+  <span class="hljs-keyword">for</span> {
+    a &lt;- die
+    b &lt;- die
+  } <span class="hljs-keyword">yield</span> a + b
+<span class="hljs-comment">// sum: ZSet[Int, Double] = ZSet(5 -&gt; 0.1111111111111111, 10 -&gt; 0.08333333333333333, 6 -&gt; 0.1388888888888889, 9 -&gt; 0.1111111111111111, 2 -&gt; 0.027777777777777776, 12 -&gt; 0.027777777777777776, 7 -&gt; 0.16666666666666669, 3 -&gt; 0.05555555555555555, 11 -&gt; 0.05555555555555555, 8 -&gt; 0.1388888888888889, 4 -&gt; 0.08333333333333333)</span>
+</code></pre>
+<p>This allows us to express conditional logic, such as the probability distribution of outcomes for a subsequent event depending on the outcome of a previous event.</p>
+<h2><a class="anchor" aria-hidden="true" id="transforming-elements"></a><a href="#transforming-elements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Transforming Elements</h2>
+<p>We can transform set elements using the <code>map</code> operator.</p>
+<p>For example, we could add one to each value in a set like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> setPlusOne: <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Boolean</span>] =
+  set.map(_ + <span class="hljs-number">1</span>)
+<span class="hljs-comment">// setPlusOne: ZSet[Int, Boolean] = ZSet(2 -&gt; true, 3 -&gt; true, 4 -&gt; true)</span>
+</code></pre>
+<p>This requires a <code>Commutative</code> instance defined for the <code>Sum</code> of the measure type so that we can combine the measures if we map two elements to the same value.</p>
+<h2><a class="anchor" aria-hidden="true" id="transforming-measures"></a><a href="#transforming-measures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Transforming Measures</h2>
+<p>We can also transform the measure we use to represent how many times an item appears using the <code>transform</code> operator. For example, perhaps we have constructed a set where the measure is an <code>Int</code> but we would like to transform it to a <code>Double</code> so we can compose it with other <code>ZSet</code> values with <code>Double</code> as the measure type.</p>
+<p>We can do that with <code>transform</code> like this:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">constant</span></span>(n: <span class="hljs-type">Int</span>): <span class="hljs-type">ZSet</span>[<span class="hljs-type">Int</span>, <span class="hljs-type">Double</span>] =
+  <span class="hljs-type">ZSet</span>(n).transform(_.toDouble)
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="extracting-zset-values"></a><a href="#extracting-zset-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Extracting ZSet Values</h2>
+<p>If the number of times a value appears in the set is a natural number then we can use normal collection operators to fold over its values, treating it much like a normal set</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> fruits: <span class="hljs-type">MultiSet</span>[<span class="hljs-type">String</span>] =
+  <span class="hljs-type">ZSet</span>.fromIterable(<span class="hljs-type">List</span>(<span class="hljs-string">"apple"</span>, <span class="hljs-string">"banana"</span>, <span class="hljs-string">"orange"</span>, <span class="hljs-string">"apple"</span>, <span class="hljs-string">"orange"</span>))
+<span class="hljs-comment">// fruits: MultiSet[String] = ZSet(banana -&gt; 1, orange -&gt; 2, apple -&gt; 2)</span>
+
+<span class="hljs-keyword">val</span> fruitCount: <span class="hljs-type">Int</span> =
+  fruits.foldLeft(<span class="hljs-number">0</span>)((n, _) =&gt; n + <span class="hljs-number">1</span>)
+<span class="hljs-comment">// fruitCount: Int = 5</span>
+</code></pre>
+<p>This will return <code>5</code> because there are five elements in the set we are folding over.</p>
+<p>We can convert a <code>ZSet</code> back to a <code>Map</code> from elements to a measure of how many times they appear using the <code>toMap</code> operator.</p>
+<p>We can also always convert a <code>ZSet</code> back to a <code>Set</code> using the <code>toSet</code> operator. Any elements in the <code>ZSet</code> with a measure equal to zero based on an <code>Identity</code> defined on the <code>Sum</code> of the measure type will be discarded from the resulting set.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionaldatatypes/validation"><span class="arrow-prev">← </span><span>Validation</span></a><a class="docs-next button" href="/zio-prelude/docs/functionaldatatypes/zvalidation"><span>ZValidation</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#constructing-zsets">Constructing ZSets</a></li><li><a href="#operators-on-zsets">Operators on ZSets</a><ul class="toc-headings"><li><a href="#set-membership">Set Membership</a></li><li><a href="#set-union">Set Union</a></li></ul></li><li><a href="#set-intersection">Set Intersection</a></li><li><a href="#set-difference">Set Difference</a></li><li><a href="#set-combination">Set Combination</a></li><li><a href="#set-product">Set Product</a></li><li><a href="#transforming-elements">Transforming Elements</a></li><li><a href="#transforming-measures">Transforming Measures</a></li><li><a href="#extracting-zset-values">Extracting ZSet Values</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
