@@ -109,6 +109,18 @@ trait Ord[-A] extends PartialOrd[A] { self =>
     Ord.make((l, r) => f(compare(l, r)))
 
   /**
+   * Returns the maximum of the left value and the right value.
+   */
+  final def max[A1 <: A](l: A1, r: A1): A1 =
+    if (greaterOrEqual(l, r)) l else r
+
+  /**
+   * Returns the minimum of the left value and the right value.
+   */
+  final def min[A1 <: A](l: A1, r: A1): A1 =
+    if (lessOrEqual(l, r)) l else r
+
+  /**
    * Returns a new ordering that is the reverse of this one.
    */
   final def reverse: Ord[A] =
@@ -866,13 +878,13 @@ trait OrdSyntax {
      * Returns the maximum of this value and the specified value.
      */
     def max[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
-      if (l >= r) l else r
+      ord.max(l, r)
 
     /**
      * Returns the minimum of this value and the specified value.
      */
     def min[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
-      if (l <= r) l else r
+      ord.min(l, r)
   }
 }
 
