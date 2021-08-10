@@ -97,11 +97,11 @@ class Index extends React.Component {
                 style={{textAlign: 'center'}}>
                 <h2>Welcome to ZIO Prelude</h2>
                 <MarkdownBlock>
-                    TODO: Tagline
+                    ZIO Prelude provides functional abstractions and data types to solve common problems in application development.
                 </MarkdownBlock>
 
                 <MarkdownBlock>
-                    TODO: Long description (paragraph)
+                    ZIO Prelude includes zero overhead new types to increase type safety of your domain models and an alternative to monad transformers with dramatically better performance and ergonomics.
                 </MarkdownBlock>
             </div>
         );
@@ -110,16 +110,16 @@ class Index extends React.Component {
             <Block layout="fourColumn">
                 {[
                     {
-                        content: 'TODO: Content 1',
+                        content: 'Practical tools to solve common problems with no unecessary ceremony or obsfucation',
                         image: `${baseUrl}img/undraw_tweetstorm.svg`,
                         imageAlign: 'top',
-                        title: 'TODO: Title 1',
+                        title: 'Practical',
                     },
                     {
-                        content: 'TODO: Content 2',
+                        content: 'Highly principled abstractions reflecting deep understanding of problem domain',
                         image: `${baseUrl}img/undraw_operating_system.svg`,
                         imageAlign: 'top',
-                        title: 'TODO: Title 2',
+                        title: 'Principled',
                     },
                 ]}
             </Block>

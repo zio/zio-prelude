@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.Common.anyFiniteDurationScala
 import zio.test._
 import zio.test.laws._
 import zio.{Has, ZIO}
@@ -46,6 +47,8 @@ object OrdSpec extends DefaultRunnableSpec {
         test("char")(checkAllLaws(Ord)(Gen.anyChar)),
         test("chunk")(checkAllLaws(Ord)(Gen.chunkOf(Gen.anyInt))),
         test("double")(checkAllLaws(Ord)(Gen.anyDouble)),
+        test("duration Scala")(checkAllLaws(Ord)(anyFiniteDurationScala)),
+        test("duration ZIO")(checkAllLaws(Ord)(Gen.anyFiniteDuration)),
         test("either")(checkAllLaws(Ord)(Gen.either(Gen.anyInt, Gen.anyInt))),
         test("float")(checkAllLaws(Ord)(Gen.anyFloat)),
         test("int")(checkAllLaws(Ord)(Gen.anyInt)),
@@ -63,6 +66,8 @@ object OrdSpec extends DefaultRunnableSpec {
         test("boolean")(scalaOrderingConsistency(Gen.boolean)),
         test("byte")(scalaOrderingConsistency(Gen.anyByte)),
         test("char")(scalaOrderingConsistency(Gen.anyChar)),
+        test("duration Scala")(scalaOrderingConsistency(anyFiniteDurationScala)),
+        test("duration ZIO")(scalaOrderingConsistency(Gen.anyFiniteDuration)),
         test("string")(scalaOrderingConsistency(Gen.anyString)),
         test("int")(scalaOrderingConsistency(Gen.anyInt)),
         test("long")(scalaOrderingConsistency(Gen.anyLong)),

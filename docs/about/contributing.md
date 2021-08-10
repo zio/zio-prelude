@@ -72,14 +72,15 @@ project coreJVM
 ```
 
 ### Building the documentation
-If you'd like to contribute some documentation (please please do!), you can build the documentation with SBT using
+If you'd like to contribute some documentation, you can build the documentation with SBT using:
+
 ```bash
 docusaurusCreateSite
 ```
 
 This requires `yarn` to be installed on your machine. Please refer to the [Yarn Installation Page](https://yarnpkg.com/getting-started/install) for instructions on how to install `yarn` on your machine.
 
-After `docusaurusCreateSite` successfully finished, open a new terminal in the `website` folder and enter
+After `docusaurusCreateSite` successfully finished, open a new terminal in the `website` folder and enter:
 
 ```bash
 yarn start

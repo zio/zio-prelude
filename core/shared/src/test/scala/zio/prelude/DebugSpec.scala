@@ -202,6 +202,18 @@ object DebugSpec extends DefaultRunnableSpec {
           val sum = 1 + 1
           assert(d"1 + 1 is $sum.")(equalTo("1 + 1 is 2."))
         }
+      ),
+      suite("Duration")(
+        test("ZIO") {
+          import zio.duration._
+          val duration = 3.millis
+          assert(duration.debug.render)(equalTo("Duration(amount = 3L, unit = MILLISECONDS)"))
+        },
+        test("Scala") {
+          import scala.concurrent.duration._
+          val duration = 42.days
+          assert(duration.debug.render)(equalTo("Duration(length = 42L, unit = DAYS)"))
+        }
       )
     )
 }

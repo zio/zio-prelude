@@ -100,6 +100,45 @@ trait PartialOrd[-A] extends Equal[A] { self =>
     }
 
   /**
+   * Returns whether the left value is greater than the right value.
+   */
+  def greater(l: A, r: A): Boolean =
+    compare(l, r) match {
+      case Ordering.GreaterThan => true
+      case _                    => false
+    }
+
+  /**
+   * Returns whether the left value is greater than or equal to the right
+   * value.
+   */
+  def greaterOrEqual(l: A, r: A): Boolean =
+    compare(l, r) match {
+      case Ordering.GreaterThan => true
+      case Ordering.Equals      => true
+      case _                    => false
+    }
+
+  /**
+   * Returns whether the left value is less than the right value.
+   */
+  def less(l: A, r: A): Boolean =
+    compare(l, r) match {
+      case Ordering.LessThan => true
+      case _                 => false
+    }
+
+  /**
+   * Returns whether the left value is less than or equal to the right value.
+   */
+  def lessOrEqual(l: A, r: A): Boolean =
+    compare(l, r) match {
+      case Ordering.LessThan => true
+      case Ordering.Equals   => true
+      case _                 => false
+    }
+
+  /**
    * Constructs a new `PartialOrd[A]` by mapping the result of this ordering using the
    * specified function.
    */
@@ -895,41 +934,27 @@ trait PartialOrdSyntax {
      * Returns whether this value is greater than the specified value.
      */
     def >[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      ord.compare(l, r) match {
-        case Ordering.GreaterThan => true
-        case _                    => false
-      }
+      ord.greater(l, r)
 
     /**
      * Returns whether this value is greater than or equal to the specified
      * value.
      */
     def >=[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      ord.compare(l, r) match {
-        case Ordering.GreaterThan => true
-        case Ordering.Equals      => true
-        case _                    => false
-      }
+      ord.greaterOrEqual(l, r)
 
     /**
      * Returns whether this value is less than the specified value.
      */
     def <[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      ord.compare(l, r) match {
-        case Ordering.LessThan => true
-        case _                 => false
-      }
+      ord.less(l, r)
 
     /**
      * Returns whether this value is less than or equal to the specified
      * value.
      */
     def <=[A1 >: A](r: A1)(implicit ord: PartialOrd[A1]): Boolean =
-      ord.compare(l, r) match {
-        case Ordering.LessThan => true
-        case Ordering.Equals   => true
-        case _                 => false
-      }
+      ord.lessOrEqual(l, r)
 
     /**
      * Returns the result of comparing this value with the specified value.

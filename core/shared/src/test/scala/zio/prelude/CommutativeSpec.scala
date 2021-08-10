@@ -25,6 +25,7 @@ object CommutativeSpec extends DefaultRunnableSpec {
         test("double max")(checkAllLaws(Commutative)(Gen.anyDouble.map(Max(_)))),
         test("double min")(checkAllLaws(Commutative)(Gen.anyDouble.map(Min(_)))),
         test("double multiplication")(checkAllLaws(Commutative)(Gen.anyDouble.map(Prod(_)))),
+        test("duration ZIO")(checkAllLaws(Commutative)(Gen.anyFiniteDuration)),
         test("either")(checkAllLaws(Commutative)(Gen.either(anySumInt, anySumInt))),
         test("float addition")(checkAllLaws(Commutative)(Gen.anyFloat.map(Sum(_)))),
         test("float max")(checkAllLaws(Commutative)(Gen.anyFloat.map(Max(_)))),
