@@ -16,12 +16,11 @@
 
 package zio.prelude
 
-import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{And, First, Last, Max, Min, Natural, Or, Prod, Sum}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
-import zio.{Chunk, NonEmptyChunk}
+import zio.{Chunk, Duration => ZIODuration, NonEmptyChunk}
 
 import scala.annotation.tailrec
 
@@ -363,7 +362,7 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
    */
   implicit val DurationZIOCommutativeIdentity: Commutative[ZIODuration] with Identity[ZIODuration] =
     new Commutative[ZIODuration] with Identity[ZIODuration] {
-      import zio.duration._
+      import zio._
       def combine(l: => ZIODuration, r: => ZIODuration): ZIODuration = l + r
       val identity: ZIODuration                                      = ZIODuration.Zero
     }

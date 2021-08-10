@@ -16,8 +16,7 @@
 
 package zio.prelude
 
-import zio.duration.{Duration => ZIODuration}
-import zio.{Chunk, NonEmptyChunk}
+import zio.{Chunk, Duration => ZIODuration, NonEmptyChunk}
 
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap

@@ -205,7 +205,7 @@ object DebugSpec extends DefaultRunnableSpec {
       ),
       suite("Duration")(
         test("ZIO") {
-          import zio.duration._
+          import zio._
           val duration = 3.millis
           assert(duration.debug.render)(equalTo("Duration(amount = 3L, unit = MILLISECONDS)"))
         },

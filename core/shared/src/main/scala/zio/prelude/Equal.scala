@@ -17,11 +17,10 @@
 package zio.prelude
 
 import zio.Exit.{Failure, Success}
-import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
-import zio.{Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace}
+import zio.{Cause, Chunk, Duration => ZIODuration, Exit, Fiber, NonEmptyChunk, ZTrace}
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.duration.{Duration => ScalaDuration}

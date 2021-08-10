@@ -39,14 +39,12 @@ A common mistake we might make when getting started with `ZIO` is accidentally c
 
 ```scala mdoc
 import zio._
-import zio.console._
-import zio.random._
 
 import java.io.IOException
 
-val greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] =
+val greet: ZIO[Has[Random], Nothing, ZIO[Has[Console], IOException, Unit]] =
   random.nextIntBounded(100).map { n =>
-    console.putStrLn(s"The number is $n")
+    Console.printLine(s"The number is $n")
   }
 ```
 
