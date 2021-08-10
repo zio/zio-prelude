@@ -27,9 +27,7 @@ expressive effect types like ZIO and `ZPure`.
 
 # Documentation
 
-The ZIO Prelude Microsite is currently under development.
-
-[ZIO Prelude Microsite](https://zio.github.io/zio-prelude/) (not available yet, in the meantime you can check [those slides](https://www.slideshare.net/jdegoes/refactoring-functional-type-classes))
+Learn more on the [ZIO Prelude Microsite](https://zio.github.io/zio-prelude/)!
 
 # Contributing
 
