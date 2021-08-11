@@ -67,12 +67,6 @@ object BuildHelper {
 
   val dottySettings = Seq(
     crossScalaVersions += ScalaDotty,
-    scalacOptions ++= {
-      if (scalaVersion.value == ScalaDotty)
-        Seq("-noindent")
-      else
-        Seq()
-    },
     scalacOptions --= {
       if (scalaVersion.value == ScalaDotty)
         Seq("-Xfatal-warnings")
@@ -105,7 +99,7 @@ object BuildHelper {
   val replSettings = makeReplSettings {
     """|import zio._
        |import zio.console._
-       |import zio.duration._
+       |import zio._
        |import zio.Runtime.default._
        |implicit class RunSyntax[A](io: ZIO[ZEnv, Any, A]){ def unsafeRun: A = Runtime.default.unsafeRun(io.provideLayer(ZEnv.live)) }
     """.stripMargin
@@ -115,7 +109,7 @@ object BuildHelper {
   val streamReplSettings = makeReplSettings {
     """|import zio._
        |import zio.console._
-       |import zio.duration._
+       |import zio._
        |import zio.stream._
        |import zio.Runtime.default._
        |implicit class RunSyntax[A](io: ZIO[ZEnv, Any, A]){ def unsafeRun: A = Runtime.default.unsafeRun(io.provideLayer(ZEnv.live)) }
