@@ -31,12 +31,11 @@ For example, in the context of `ZIO` the `zip` operator returns a new `ZIO` work
 
 ```scala mdoc:reset
 import zio._
-import zio.console._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Console, IOException, (Unit, Unit)] =
-  console.putStrLn("Hello") <*> console.putStrLn("ZIO")
+val helloZIO: ZIO[Has[Console], IOException, Unit] =
+  Console.printLine("Hello") <*> Console.printLine("ZIO")
 ```
 
 This will print `Hello` to the console on the first line and then `ZIO` on the second line.
@@ -44,8 +43,8 @@ This will print `Hello` to the console on the first line and then `ZIO` on the s
 If the first workflow fails then the second workflow will never be run.
 
 ```scala mdoc
-val failZIO: ZIO[Console, IOException, (Unit, Unit)] =
-  ZIO.fail(new IOException("Fail")) <*> console.putStrLn("ZIO")
+val failZIO: ZIO[Has[Console], IOException, Unit] =
+  ZIO.fail(new IOException("Fail")) <*> Console.printLine("ZIO")
 ```
 
 Now `ZIO` will never be printed to the console.
@@ -170,10 +169,10 @@ The `zipLeft` and `zipRight` operators and their symbolic aliases `<*` and `*>` 
 For example, we could avoid creating unnecessary nested tuples when we combine `ZIO` workflows like this:
 
 ```scala mdoc
-val helloFromAssociativeBoth: ZIO[Console, IOException, Unit] =
-  console.putStrLn("Hello") *>
-    console.putStrLn("From") *>
-    console.putStrLn("AssociativeBoth")
+val helloFromAssociativeBoth: ZIO[Has[Console], IOException, Unit] =
+  Console.printLine("Hello") *>
+    Console.printLine("From") *>
+    Console.printLine("AssociativeBoth")
 ```
 
 There is also a variant of `zipWith` for contravariant types called `bothWith` that combines `zip` and `contramap`.

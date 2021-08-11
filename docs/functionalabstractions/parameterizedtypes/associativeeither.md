@@ -37,7 +37,7 @@ For `ZIO` the meaning is quite straightforward. The `orElseEither` operator runs
 import zio._
 
 def orElseEither[R, E, A, B](left: => ZIO[R, E, A], right: => ZIO[R, E, B]): ZIO[R, E, Either[A, B]] =
-  left.foldM(_ => right.map(b => Right(b)), a => ZIO.succeed(Left(a)))
+  left.foldZIO(_ => right.map(b => Right(b)), a => ZIO.succeed(Left(a)))
 ```
 
 Here we run the `left` workflow and if it is successful we just wrap it up in a `Left`. If the `left` workflow fails we recover from its failure and run the `Right` effect, packaging its result up in a `Right`.
