@@ -65,7 +65,7 @@ import zio.test.laws._
 object EquivalenceSpec extends DefaultRunnableSpec {
 
   def spec = suite("EquivalenceSpec") {
-    testM("chunkListEquivalence") {
+    test("chunkListEquivalence") {
       implicit val equivalence = listChunkEquivalence[Int]
       val listGen = Gen.listOf(Gen.anyInt)
       val chunkGen = Gen.chunkOf(Gen.anyInt)
