@@ -35,13 +35,12 @@ So we can always `flatten` a `ZIO` workflow constructed by mapping over the `uni
 
 ```scala mdoc:reset
 import zio._
-import zio.console._
 
 import java.io.IOException
 
-val helloIdentity: ZIO[Console, IOException, Unit] =
+val helloIdentity: ZIO[Has[Console], IOException, Unit] =
   ZIO.unit.map { _ =>
-    console.putStrLn("Hello from an identity!")
+    Console.printLine("Hello from an identity!")
   }.flatten
 ```
 

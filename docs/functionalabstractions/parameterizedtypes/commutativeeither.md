@@ -33,15 +33,14 @@ We can see this by noting that the requirement that the `either` operator is com
 
 ```scala mdoc
 import zio._
-import zio.console._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] =
-  console.putStrLn("Hello").orElseEither(console.putStrLn("ZIO"))
+val helloZIO: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+  Console.printLine("Hello").orElseEither(Console.printLine("ZIO"))
 
-val zioHello: ZIO[Console, IOException, Either[Unit, Unit]] =
-  console.putStrLn("ZIO").orElseEither(console.putStrLn("Hello"))
+val zioHello: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+  Console.printLine("ZIO").orElseEither(Console.printLine("Hello"))
 ```
 
 If the `orElseEither` operator was commutative then these two programs should be the same. But they obviously are not.
@@ -56,15 +55,14 @@ It runs both effects concurrently, returning the first one to complete successfu
 
 ```scala mdoc:nest
 import zio._
-import zio.console._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] =
-  console.putStrLn("Hello").raceEither(console.putStrLn("ZIO"))
+val helloZIO: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+  Console.printLine("Hello").raceEither(Console.printLine("ZIO"))
 
-val zioHello: ZIO[Console, IOException, Either[Unit, Unit]] =
-  console.putStrLn("ZIO").raceEither(console.putStrLn("Hello"))
+val zioHello: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+  Console.printLine("ZIO").raceEither(Console.printLine("Hello"))
 ```
 
 Now both `ZIO` workflows will begin execution at the same time.

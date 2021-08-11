@@ -33,15 +33,14 @@ To get a better sense of what it means for a combining operation on parameterize
 
 ```scala mdoc:reset
 import zio._
-import zio.console._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Console, IOException, (Unit, Unit)] =
-  console.putStrLn("Hello") <*> console.putStrLn("ZIO")
+val helloZIO: ZIO[Has[Console], IOException, Unit] =
+  Console.printLine("Hello") <*> Console.printLine("ZIO")
 
-val zioHello: ZIO[Console, IOException, (Unit, Unit)] =
-  console.putStrLn("ZIO") <*> console.putStrLn("Hello")
+val zioHello: ZIO[Has[Console], IOException, Unit] =
+  Console.printLine("ZIO") <*> Console.printLine("Hello")
 ```
 
 If the `zip` operator was commutative these two `ZIO` workflows would be the same. But they obviously are not.
@@ -51,11 +50,11 @@ The first will print `Hello` to the console on one line followed by `ZIO` on the
 We can also see this in the context of failures.
 
 ```scala mdoc
-val failZIO: ZIO[Console, IOException, (Unit, Unit)] =
-  ZIO.fail(new IOException("Fail")) <*> console.putStrLn("ZIO")
+val failZIO: ZIO[Has[Console], IOException, Unit] =
+  ZIO.fail(new IOException("Fail")) <*> Console.printLine("ZIO")
 
-val zioFail: ZIO[Console, IOException, (Unit, Unit)] =
-  console.putStrLn("ZIO") <*> ZIO.fail(new IOException("Fail"))
+val zioFail: ZIO[Has[Console], IOException, Unit] =
+  Console.printLine("ZIO") <*> ZIO.fail(new IOException("Fail"))
 ```
 
 Again if the `zip` operator was commutative these two `ZIO` workflows should be the same but they are not. The first program will fail immediately and never print `ZIO` to the console, whereas the second will print `ZIO` to the console and then fail.
@@ -65,8 +64,8 @@ What would a commutative version of this operator be? It would have to run both 
 The `zipPar` operator on `ZIO` does just this.
 
 ```scala mdoc
-val helloZIOPar: ZIO[Console, IOException, (Unit, Unit)] =
-  console.putStrLn("Hello") <&> console.putStrLn("ZIO")
+val helloZIOPar: ZIO[Has[Console], IOException, Unit] =
+  Console.printLine("Hello") <&> Console.printLine("ZIO")
 ```
 
 Now `Hello` and `World` will be printed to the console at the same time. For any given execution one will appear before the other but they each have the same opportunity to appear first and both this and the version with the order reversed describe the same `ZIO` workflow.

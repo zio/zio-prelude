@@ -34,15 +34,14 @@ The `any` value for `ZIO` is `unit`, the workflow that does not do anything, alw
 
 ```scala mdoc:reset
 import zio._
-import zio.console._
 
 import java.io.IOException
 
-val helloUnit: ZIO[Console, IOException, (Unit, Unit)] =
-  console.putStrLn("Hello") <*> ZIO.unit
+val helloUnit: ZIO[Has[Console], IOException, Unit] =
+  Console.printLine("Hello") <*> ZIO.unit
 
-val unitHello: ZIO[Console, IOException, (Unit, Unit)] =
-  ZIO.unit <*> console.putStrLn("Hello")
+val unitHello: ZIO[Has[Console], IOException, Unit] =
+  ZIO.unit <*> Console.printLine("Hello")
 ```
 
 These programs are identical because `ZIO.unit` does not do anything at all and always succeeds.

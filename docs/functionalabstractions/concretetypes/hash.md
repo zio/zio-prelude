@@ -50,7 +50,7 @@ import zio.test.laws._
 object HashSpec extends DefaultRunnableSpec {
 
   def spec = suite("HashSpec") {
-    testM("StringHash") {
+    test("StringHash") {
       val stringGen = Gen.anyString
       checkAllLaws(Hash)(stringGen)
     }
