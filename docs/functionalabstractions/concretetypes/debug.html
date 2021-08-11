@@ -77,7 +77,7 @@
 }
 </code></pre>
 <p><code>Repr</code> here is a data structure that captures the information needed to render a data type in a structured format so that it can be displayed in different ways. A <code>Renderer</code> is a data type that knows how to render a <code>Repr</code> to a particular string representation, for example using short names for readability or fully qualified names for using the rendered output as valid code.</p>
-<p>If we import <code>zio.prelude._</code> then we can use the <code>debug</code> operator on any date type with a <code>Debug</code> instance defined for it.</p>
+<p>If we import <code>zio.prelude._</code> then we can use the <code>debug</code> operator on any data type with a <code>Debug</code> instance defined for it.</p>
 <p>The <code>Debug</code> abstraction is the functional equivalent of the <code>toString</code> operator but it has several advantages over just using <code>toString</code>.</p>
 <p>First, as with other functional abstractions we can define when it makes sense to render a data type at all.</p>
 <p>We can call <code>toString</code> on anything including classes whose string representation only points to their memory address. Fortunately this is more often the cause of annoyance than real bugs but it is certainly nice to know when there isn't much point in trying to render something.</p>
