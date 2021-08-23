@@ -28,7 +28,7 @@ jobs:
       - name: Lint code
         run: sbt check
 
-  mdoc:
+  doc:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
@@ -39,7 +39,7 @@ jobs:
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Check Document Generation
-        run: sbt +mdoc docs/docusaurusCreateSite
+        run: sbt +doc docs/docusaurusCreateSite
 
   test:
     runs-on: ubuntu-20.04
@@ -70,7 +70,7 @@ jobs:
 
   ci:
     runs-on: ubuntu-20.04
-    needs: [lint, mdoc, test]
+    needs: [lint, doc, test]
     steps:
       - name: Aggregate of lint, and all tests
         run: echo "ci passed"
