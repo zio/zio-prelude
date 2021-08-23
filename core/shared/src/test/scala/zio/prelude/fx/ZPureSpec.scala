@@ -3,7 +3,7 @@ package zio.prelude.fx
 import zio.prelude._
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
-import zio.{CanFail, Chunk, Has, Random}
+import zio.{CanFail, Chunk, Has, NonEmptyChunk, Random}
 
 import java.util.NoSuchElementException
 import scala.util.Try
@@ -67,6 +67,13 @@ object ZPureSpec extends DefaultRunnableSpec {
               end <- ZPure.environment[Any, Int]
             } yield end
             assert(zPure.provide(0).run)(equalTo(0))
+          },
+          test("providing environment should preserve errors") {
+            val zPure: ZPure[Nothing, Unit, Unit, (Int, Int), Int, Int] =
+              ZPure.tupledPar(ZPure.fail(1), ZPure.fail(2)).as(0)
+            val actual                                                  = zPure.provide((1, 2)).runValidation
+            val expected                                                = Validation.Failure(Chunk.empty, NonEmptyChunk(1, 2))
+            assert(actual)(equalTo(expected))
           },
           test("provideSome") {
             val zPure = ZPure.environment[Any, Int].provideSome[String](_.split(" ").length)
