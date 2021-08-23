@@ -399,6 +399,12 @@ object ZValidation extends LowPriorityValidationImplicits {
     Failure(Chunk.empty, NonEmptyChunk(error))
 
   /**
+   * Constructs a `ZValidation` that fails with the specified chunk of errors.
+   */
+  def failChunk[E](errors: NonEmptyChunk[E]): Validation[E, Nothing] =
+    Failure(Chunk.empty, errors)
+
+  /**
    * Constructs a `ZValidation` from a value and an assertion about that value.
    * The resulting `ZValidation` will be a success if the value satisfies the
    * assertion or else will contain a string rendering describing how the
@@ -413,6 +419,12 @@ object ZValidation extends LowPriorityValidationImplicits {
    */
   def fromEither[E, A](value: Either[E, A]): Validation[E, A] =
     value.fold(fail, succeed)
+
+  /**
+   * Constructs a `ZValidation` from an `Either` with `Left` of `NonEmptyChunk`.
+   */
+  def fromEitherChunk[E, A](value: Either[NonEmptyChunk[E], A]): Validation[E, A] =
+    value.fold(failChunk, succeed)
 
   /**
    * Constructs a `ZValidation` from an `Option`.

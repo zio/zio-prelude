@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio.Exit.{Failure, Success}
+import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}

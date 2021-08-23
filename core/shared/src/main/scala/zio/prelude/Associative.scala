@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{And, First, Last, Max, Min, Natural, Or, Prod, Sum}
 import zio.test.TestResult
