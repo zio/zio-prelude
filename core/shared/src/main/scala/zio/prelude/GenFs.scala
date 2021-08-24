@@ -127,7 +127,7 @@ object GenFs {
   ): GenF[R, ({ type lambda[+c] = (A, B, c) })#lambda] =
     new GenF[R, ({ type lambda[+c] = (A, B, c) })#lambda] {
       def apply[R1 <: R, C](c: Gen[R1, C]): Gen[R1, (A, B, C)] =
-        Gen.crossN(a, b, c)((a, b, c) => (a, b, c))
+        a.cross(b).cross(c)
     }
 
   def validation[R <: Has[Random] with Has[Sized], W, E](

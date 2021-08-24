@@ -71,8 +71,10 @@ object EitherCompose {
 
     def toRight[B]: URIO[B, Either[Nothing, B]] = URIO.access(Right(_))
 
-    def fromEither[A, B, C](a2c: => URIO[A, C])(b2c: => URIO[B, C]): URIO[Either[A, B], C] =
-      a2c ||| b2c
+    def fromEither[A, B, C](a2c: => URIO[A, C])(b2c: => URIO[B, C]): URIO[Either[A, B], C] = for {
+      either <- ZIO.environment[Either[A, B]]
+      a1     <- either.fold(a2c.provide, b2c.provide)
+    } yield a1
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
       AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
@@ -112,8 +114,10 @@ object EitherCompose {
 
     def toRight[B]: URManaged[B, Either[Nothing, B]] = ZManaged.access(Right(_))
 
-    def fromEither[A, B, C](a2c: => URManaged[A, C])(b2c: => URManaged[B, C]): URManaged[Either[A, B], C] =
-      a2c ||| b2c
+    def fromEither[A, B, C](a2c: => URManaged[A, C])(b2c: => URManaged[B, C]): URManaged[Either[A, B], C] = for {
+      either <- ZManaged.environment[Either[A, B]]
+      a1     <- either.fold(a2c.provide, b2c.provide)
+    } yield a1
 
     def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] =
       AssociativeCompose.URManagedIdentityCompose.compose(bc, ab)

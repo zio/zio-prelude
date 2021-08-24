@@ -721,8 +721,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
         case Tags.Provide =>
           val zPure = curZPure.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
           environments.push(zPure.r.asInstanceOf[AnyRef])
-          curZPure = zPure.continue.foldM(
-            e => ZPure.succeed(environments.pop()) *> ZPure.fail(e),
+          curZPure = zPure.continue.foldCauseM(
+            e => ZPure.succeed(environments.pop()) *> ZPure.failCause(e),
             a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
           )
         case Tags.Modify  =>

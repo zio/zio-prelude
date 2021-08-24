@@ -85,7 +85,7 @@ object BothCompose {
     def fromSecond[B]: URIO[(Any, B), B] = URIO.access[(Any, B)](_._2)
 
     def toBoth[A, B, C](a2b: URIO[A, B])(a2c: URIO[A, C]): URIO[A, (B, C)] =
-      a2b &&& a2c
+      a2b.zip(a2c)
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
       AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
@@ -110,12 +110,12 @@ object BothCompose {
 
     type :*:[+f, +s] = Tuple2[f, s]
 
-    def fromFirst[A]: URManaged[(A, Any), A] = ZManaged.first
+    def fromFirst[A]: URManaged[(A, Any), A] = ZManaged.access(_._1)
 
-    def fromSecond[B]: URManaged[(Any, B), B] = ZManaged.second
+    def fromSecond[B]: URManaged[(Any, B), B] = ZManaged.access(_._2)
 
     def toBoth[A, B, C](a2b: URManaged[A, B])(a2c: URManaged[A, C]): URManaged[A, (B, C)] =
-      a2b &&& a2c
+      a2b.zip(a2c)
 
     def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] =
       AssociativeCompose.URManagedIdentityCompose.compose(bc, ab)
