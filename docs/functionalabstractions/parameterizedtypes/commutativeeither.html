@@ -127,7 +127,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">Set</span>[<span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">Set</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Set</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
       left.map(<span class="hljs-type">Left</span>(_)) ++ right.map(<span class="hljs-type">Right</span>(_))
   }
-<span class="hljs-comment">// SetCommutativeEither: CommutativeEither[Set] = repl.MdocSession$App$$anon$1@3b1b6a2c</span>
+<span class="hljs-comment">// SetCommutativeEither: CommutativeEither[Set] = repl.MdocSession$App$$anon$1@44415e01</span>
 </code></pre>
 <p>In this case there is no actual concurrency going on but we are combining the left <code>Set</code> and right <code>Set</code>, wrapping their values in <code>Left</code> and <code>Right</code> respectively.</p>
 <p>This is like the interpretation of <code>orElseEither</code> as concatenating two collections except normally concatenation would not be commutative since order matters. In the case of a <code>Set</code> the order of elements doesn't matter.</p>
