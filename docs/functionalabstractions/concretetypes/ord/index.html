@@ -87,11 +87,11 @@
 
 <span class="hljs-keyword">val</span> toScala: scala.math.<span class="hljs-type">Ordering</span>[<span class="hljs-type">Int</span>] =
   <span class="hljs-type">Ord</span>[<span class="hljs-type">Int</span>].toScala
-<span class="hljs-comment">// toScala: Ordering[Int] = zio.prelude.Ord$$anonfun$toScala$2@65cacae</span>
+<span class="hljs-comment">// toScala: Ordering[Int] = zio.prelude.Ord$$anonfun$toScala$2@1e647762</span>
 
 <span class="hljs-keyword">val</span> fromScala: <span class="hljs-type">Ord</span>[<span class="hljs-type">Int</span>] =
   <span class="hljs-type">Ord</span>.fromScala(scala.math.<span class="hljs-type">Ordering</span>[<span class="hljs-type">Int</span>])
-<span class="hljs-comment">// fromScala: Ord[Int] = zio.prelude.Ord$$anonfun$fromScala$2@46dbd89d</span>
+<span class="hljs-comment">// fromScala: Ord[Int] = zio.prelude.Ord$$anonfun$fromScala$2@3a3b39ed</span>
 </code></pre>
 <p>The main advantages that the <code>Ord</code> abstraction provides over the <code>Ordering</code> in the Scala standard library is improved type inference due to use of variance and integration with the other functional abstractions in ZIO Prelude.</p>
 <p>The <code>Ordering</code> type class in the Scala standard library is invariant, meaning that from the perspective of the Scala compiler an <code>Ordering[A]</code> and an <code>Ordering[B]</code> are completely unrelated, even if <code>A</code> is a subtype of <code>B</code>. If we look at the signature of the <code>compare</code> operator on <code>Ord</code> we can see that this does not reflect the natural variance of this type.</p>
@@ -113,7 +113,7 @@
     <span class="hljs-keyword">case</span> (<span class="hljs-type">ConsumerAccount</span>(_), <span class="hljs-type">BusinessAccount</span>(_))     =&gt; <span class="hljs-type">Ordering</span>.<span class="hljs-type">GreaterThan</span>
     <span class="hljs-keyword">case</span> (<span class="hljs-type">ConsumerAccount</span>(id1), <span class="hljs-type">ConsumerAccount</span>(id2)) =&gt; id1 =?= id2
   }
-<span class="hljs-comment">// CustomerAccountOrd: Ord[CustomerAccount] = zio.prelude.Ord$$anon$7@5372e1fe</span>
+<span class="hljs-comment">// CustomerAccountOrd: Ord[CustomerAccount] = zio.prelude.Ord$$anon$7@8f52e01</span>
 </code></pre>
 <p>Basically this says that we are ordering all business accounts before all consumer accounts and then within each account type we are ordering by the identifier. Note that we are using the <code>=?=</code> operator which is available on any type for which an <code>Ord</code> is defined to return the result of comparing two values of that type.</p>
 <p>We can use this ordering to compare two customer accounts</p>
@@ -155,7 +155,7 @@
         <span class="hljs-keyword">case</span> (<span class="hljs-type">ConsumerAccount</span>(id1), <span class="hljs-type">ConsumerAccount</span>(id2)) =&gt; id1 compare id2
       }
 }
-<span class="hljs-comment">// CustomerAccountScalaOrdering: Ordering[CustomerAccount] = repl.MdocSession$App2$$anon$1@10b66c58</span>
+<span class="hljs-comment">// CustomerAccountScalaOrdering: Ordering[CustomerAccount] = repl.MdocSession$App2$$anon$1@5a459229</span>
 </code></pre>
 <p>Besides the lack of specific types in modeling the result of the compare operator this works fine for comparing two customer accounts.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> customerAccount1: <span class="hljs-type">CustomerAccount</span> = <span class="hljs-type">BusinessAccount</span>(<span class="hljs-string">"abc"</span>)
@@ -186,7 +186,7 @@
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
 
 <span class="hljs-type">Ord</span>[(<span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>)]
-<span class="hljs-comment">// res5: Ord[(Double, Double)] = zio.prelude.Ord$$anon$8@3f1a30ef</span>
+<span class="hljs-comment">// res5: Ord[(Double, Double)] = zio.prelude.Ord$$anon$8@21b5480c</span>
 </code></pre>
 <p>The default instance for tuples will order values by the first field and then if the first field is the same by the second field and so on.</p>
 <p>If we want to define an ordering for our own data type and potentially include our own ordering logic we can use the <code>make</code> operator.</p>
