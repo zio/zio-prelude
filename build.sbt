@@ -177,6 +177,7 @@ lazy val examples =
     .settings(stdSettings("zio-prelude-examples"))
     .settings(crossProjectSettings)
     .settings(macroExpansionSettings)
+    .settings(publish / skip := true)
 
 lazy val examplesJVM = examples.jvm
   .settings(dottySettings)
