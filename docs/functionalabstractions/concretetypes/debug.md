@@ -10,6 +10,7 @@ Its signature is:
 ```scala mdoc
 trait Debug[-A] {
   def debug(a: A): Debug.Repr
+  final def render(a: A): String = debug(a).render
 }
 
 object Debug {
@@ -19,6 +20,7 @@ object Debug {
   sealed trait Repr {
     def render: String
     def render(renderer: Renderer): String
+    override def toString: String = render // to show a nice view in IDEs, REPL, etc
   }
 }
 ```

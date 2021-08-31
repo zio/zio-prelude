@@ -26,6 +26,7 @@ import scala.language.implicitConversions
 
 trait Debug[-A] {
   def debug(a: A): Debug.Repr
+  final def render(a: A): String = debug(a).render
 }
 
 object Debug extends DebugVersionSpecific {
@@ -909,6 +910,7 @@ object Debug extends DebugVersionSpecific {
 trait DebugSyntax {
   implicit class DebugOps[A](self: A) {
     def debug(implicit debug: Debug[A]): Debug.Repr = debug.debug(self)
+    def render(implicit debug: Debug[A]): String    = debug.render(self)
   }
 
   implicit final class DebugInterpolator(_sc: StringContext) {
