@@ -10,7 +10,6 @@ Its signature is:
 ```scala mdoc
 trait Debug[-A] {
   def debug(a: A): Debug.Repr
-  final def render(a: A): String = debug(a).render
 }
 
 object Debug {
@@ -20,14 +19,13 @@ object Debug {
   sealed trait Repr {
     def render: String
     def render(renderer: Renderer): String
-    override def toString: String = render // to show a nice view in IDEs, REPL, etc
   }
 }
 ```
 
 `Repr` here is a data structure that captures the information needed to render a data type in a structured format so that it can be displayed in different ways. A `Renderer` is a data type that knows how to render a `Repr` to a particular string representation, for example using short names for readability or fully qualified names for using the rendered output as valid code.
 
-If we import `zio.prelude._` then we can use the `debug` operator on any data type with a `Debug` instance defined for it.
+If we import `zio.prelude._` then we can use the `debug` operator on any data type with a `Debug` instance defined for it. We can also just use the `render` operator on any data type with a `Debug` instance defined for it to render it to a simple string representation.
 
 The `Debug` abstraction is the functional equivalent of the `toString` operator but it has several advantages over just using `toString`.
 
