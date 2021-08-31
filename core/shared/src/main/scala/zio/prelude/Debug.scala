@@ -1223,6 +1223,6 @@ trait DebugSyntax {
   }
 
   implicit final class DebugInterpolator(_sc: StringContext) {
-    def d(args: Debug.Repr*): String = _sc.s(args.map(_.toString): _*)
+    def d(args: Debug.Repr*): String = _sc.s(args.map(_.render): _*)
   }
 }
