@@ -909,6 +909,7 @@ object Debug extends DebugVersionSpecific {
 trait DebugSyntax {
   implicit class DebugOps[A](self: A) {
     def debug(implicit debug: Debug[A]): Debug.Repr = debug.debug(self)
+    def show(implicit debug: Debug[A]): String      = debug.debug(self).render
   }
 
   implicit final class DebugInterpolator(_sc: StringContext) {

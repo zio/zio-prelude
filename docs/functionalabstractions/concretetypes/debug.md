@@ -19,6 +19,7 @@ object Debug {
   sealed trait Repr {
     def render: String
     def render(renderer: Renderer): String
+    override def toString: String = render // to show a nice view in IDEs, REPL, etc
   }
 }
 ```
