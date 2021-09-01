@@ -1,19 +1,24 @@
 package zio.prelude
 
-import zio.NonEmptyChunk
+import zio.{NonEmptyChunk, prelude}
 import zio.prelude.newtypes._
+import zio.prelude.refined.Refinement
+import zio.prelude.refined.Refinement.{And => _, Or => _, _}
 import zio.test.Assertion._
 import zio.test._
 
 object NewtypeSpec extends DefaultRunnableSpec {
   trait Dummy[A]
 
+  type Age = Age.Type
   object Age extends Newtype[Int] {
-    // type Instances
+    def refinement =
+      refine(greaterThan(10) && Refinement.lessThan(20))
+
     implicit val dummyType: Dummy[Age] = new Dummy[Age] {}
   }
-  // Age.newtype.Type with Age.Instances
-  type Age = Age.Type
+
+  val cool: List[Age] = Age.wrapAll(12, 19, 15)
 
   val dummy = implicitly[Dummy[Age]]
 

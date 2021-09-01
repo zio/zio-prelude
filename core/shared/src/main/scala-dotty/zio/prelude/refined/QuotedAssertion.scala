@@ -1,6 +1,6 @@
 package zio.prelude.refined
 
-final case class QuotedAssertion[A, T](assertion: Assertion[A]) { self =>
+final case class QuotedAssertion[A, T](assertion: Refinement[A]) { self =>
   def unsafeApply(a: A): T = a.asInstanceOf[T]
 
   def unwrap(t: T): A = t.asInstanceOf[A]

@@ -2,41 +2,41 @@ package zio.prelude.refined
 
 import scala.language.implicitConversions
 
-sealed trait Assertion[-A] { self =>
-  import Assertion._
+sealed trait Refinement[-A] { self =>
+  import Refinement._
 
-  def &&[A1 <: A](that: Assertion[A1]): Assertion[A1] = And(self, that)
+  def &&[A1 <: A](that: Refinement[A1]): Refinement[A1] = And(self, that)
 
-  def ||[A1 <: A](that: Assertion[A1]): Assertion[A1] = Or(self, that)
+  def ||[A1 <: A](that: Refinement[A1]): Refinement[A1] = Or(self, that)
 
-  def unary_! : Assertion[A] = Not(self)
+  def unary_! : Refinement[A] = Not(self)
 
-  def apply(a: A): Either[AssertionError, Unit] = self.apply(a, negated = false)
+  def apply(a: A): Either[RefinementError, Unit] = self.apply(a, negated = false)
 
-  protected def apply(a: A, negated: Boolean): Either[AssertionError, Unit]
+  protected def apply(a: A, negated: Boolean): Either[RefinementError, Unit]
 }
 
-object Assertion {
-  lazy val always: Assertion[Any] = Assertion.Always
+object Refinement {
+  lazy val always: Refinement[Any] = Refinement.Always
 
-  def equalTo[A](value: A): Assertion[A] = EqualTo(value)
+  def equalTo[A](value: A): Refinement[A] = EqualTo(value)
 
-  def greaterThan[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = GreaterThan(value)
+  def greaterThan[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = GreaterThan(value)
 
-  def greaterThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = !lessThan(value)
+  def greaterThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = !lessThan(value)
 
-  def lessThan[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = LessThan(value)
+  def lessThan[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = LessThan(value)
 
-  def lessThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = !greaterThan(value)
+  def lessThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = !greaterThan(value)
 
-  def matches(regex: Regex): Assertion[String] = Matches(regex)
+  def matches(regex: Regex): Refinement[String] = Matches(regex)
 
-  lazy val never: Assertion[Any] = !always
+  lazy val never: Refinement[Any] = !always
 
-  def notEqualTo[A](value: A): Assertion[A] = !equalTo(value)
+  def notEqualTo[A](value: A): Refinement[A] = !equalTo(value)
 
-  final case class And[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
-    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+  private[refined] case class And[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
           case (Right(_), Right(_)) => Right(())
@@ -47,8 +47,8 @@ object Assertion {
       } else (!left || !right).apply(a, negated = false)
   }
 
-  final case class Or[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
-    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+  private[refined] case class Or[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
           case (Left(e1), Left(e2)) => Left(e1 ++ e2)
@@ -57,60 +57,60 @@ object Assertion {
       } else (!left && !right).apply(a, negated = false)
   }
 
-  final case class Not[A](assertion: Assertion[A]) extends Assertion[A] {
-    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+  private[refined] case class Not[A](assertion: Refinement[A]) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       assertion.apply(a, !negated)
   }
 
-  final case class EqualTo[A](value: A) extends Assertion[A] {
-    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+  private[refined] case class EqualTo[A](value: A) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (a == value) Right(())
-        else Left(AssertionError.failure(s"equalTo($value)"))
+        else Left(RefinementError.failure(s"equalTo($value)"))
       } else {
         if (a != value) Right(())
-        else Left(AssertionError.failure(s"notEqualTo($value)"))
+        else Left(RefinementError.failure(s"notEqualTo($value)"))
       }
   }
 
-  final case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
-    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+  private[refined] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (ordering.gt(a, value)) Right(())
-        else Left(AssertionError.failure(s"greaterThan($value)"))
+        else Left(RefinementError.failure(s"greaterThan($value)"))
       } else {
         if (ordering.lteq(a, value)) Right(())
-        else Left(AssertionError.failure(s"lessThanOrEqualTo($value)"))
+        else Left(RefinementError.failure(s"lessThanOrEqualTo($value)"))
       }
   }
 
-  final case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
-    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+  private[refined] case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (ordering.lt(a, value)) Right(())
-        else Left(AssertionError.failure(s"lessThan($value)"))
+        else Left(RefinementError.failure(s"lessThan($value)"))
       } else {
         if (ordering.gteq(a, value)) Right(())
-        else Left(AssertionError.failure(s"greaterThanOrEqualTo($value)"))
+        else Left(RefinementError.failure(s"greaterThanOrEqualTo($value)"))
       }
   }
 
-  final case class Matches(regex: Regex) extends Assertion[String] {
-    def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
+  private[refined] case class Matches(regex: Regex) extends Refinement[String] {
+    def apply(a: String, negated: Boolean): Either[RefinementError, Unit] = {
       val compiled = regex.compile
       if (!negated) {
         if (compiled.r.findAllMatchIn(a).nonEmpty) Right(())
-        else Left(AssertionError.Failure(s"matches($compiled)"))
+        else Left(RefinementError.Failure(s"matches($compiled)"))
       } else {
-        if (compiled.r.findAllMatchIn(a).nonEmpty) Left(AssertionError.Failure(s"doesNotMatch($compiled)"))
+        if (compiled.r.findAllMatchIn(a).nonEmpty) Left(RefinementError.Failure(s"doesNotMatch($compiled)"))
         else Right(())
       }
     }
   }
 
-  case object Always extends Assertion[Any] {
-    def apply(a: Any, negated: Boolean): Either[AssertionError, Unit] =
-      if (!negated) Right(()) else Left(AssertionError.failure("never"))
+  private[refined] object Always extends Refinement[Any] {
+    def apply(a: Any, negated: Boolean): Either[RefinementError, Unit] =
+      if (!negated) Right(()) else Left(RefinementError.failure("never"))
   }
 
   sealed trait Regex { self =>

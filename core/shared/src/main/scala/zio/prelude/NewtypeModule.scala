@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.prelude.refined.{QuotedRefinement, Refinement}
 import zio.test.Assertion
 
 /**
@@ -149,7 +150,9 @@ private[prelude] sealed trait NewtypeModule {
      * Converts an instance of the underlying type to an instance of the
      * newtype.
      */
-    def apply(value: A): Type = wrap(value)
+    def apply(value: A): Type = macro zio.prelude.refined.Macros.wrap_impl[A, Type]
+
+    def refine(refinement: Refinement[A]): QuotedRefinement[A] = macro zio.prelude.refined.Macros.refine_impl[A]
 
     /**
      * Allows pattern matching on newtype instances to convert them back to
@@ -159,9 +162,15 @@ private[prelude] sealed trait NewtypeModule {
 
     /**
      * Converts an instance of the underlying type to an instance of the
+     * newtype. Ignores the refinement.
+     */
+    def unsafeWrap(value: A): Type = value.asInstanceOf[Type]
+
+    /**
+     * Converts an instance of the underlying type to an instance of the
      * newtype.
      */
-    def wrap(value: A): Type = wrapAll[Id](value)
+    def wrap(value: A): Type = macro zio.prelude.refined.Macros.wrap_impl[A, Type]
 
     /**
      * Converts an instance of the newtype back to an instance of the
@@ -175,7 +184,11 @@ private[prelude] sealed trait NewtypeModule {
      * this could be used to convert a list of instances of the underlying
      * type to a list of instances of the newtype.
      */
-    def wrapAll[F[_]](value: F[A]): F[Type]
+    def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.refined.Macros.wrapAll_impl[F, A, Type]
+
+    def wrapAll[F[_]](values: A*): List[Type] = macro zio.prelude.refined.Macros.wrapAllVarargs_impl[A, Type]
+
+    def unsafeWrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
 
     /**
      * Converts an instance of a type parameterized on the newtype back to an
@@ -264,8 +277,6 @@ private[prelude] object NewtypeModule {
         new Newtype[A] {
           type Type = A
 
-          def wrapAll[F[_]](value: F[A]): F[Type] = value
-
           def unwrapAll[F[_]](value: F[Type]): F[A] = value
         }
 
@@ -289,9 +300,7 @@ private[prelude] object NewtypeModule {
         new Subtype[A] {
           type Type = A
 
-          def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
-
-          def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
+          def unwrapAll[F[_]](value: F[Type]): F[A] = value
         }
 
       def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A] =
@@ -331,9 +340,7 @@ trait NewtypeExports {
     trait Tag extends Any
     type Type = newtype.Type with Tag
 
-    def wrapAll[F[_]](value: F[A]): F[Type] = newtype.wrapAll(value).asInstanceOf[F[Type]]
-
-    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value.asInstanceOf[F[newtype.Type]])
+    def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
   }
 
   /**
@@ -380,8 +387,6 @@ trait NewtypeExports {
 
     trait Tag extends Any
     type Type = subtype.Type with Tag
-
-    def wrapAll[F[_]](value: F[A]): F[Type] = subtype.wrapAll(value).asInstanceOf[F[Type]]
 
     def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
   }

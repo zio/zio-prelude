@@ -1,54 +1,134 @@
 package zio.prelude.refined
 
+import scala.annotation.StaticAnnotation
 import scala.reflect.macros.whitebox
+
+final case class refinementQuote[A](refinement: Refinement[A]) extends StaticAnnotation
+
+trait QuotedRefinement[A]
 
 class Macros(val c: whitebox.Context) extends Liftables {
   import c.universe._
 
-  def makeRefined[A: c.WeakTypeTag, T: c.WeakTypeTag](assertion: c.Tree): c.Tree =
-    assertion match {
-      case q"${assertion: Assertion[A]}" =>
-        val anonTrait = TypeName(c.freshName("anonTrait"))
-        q"""
-          trait $anonTrait {
-            @${c.weakTypeOf[QuotedAssertion]}($assertion)
-            def fun: Int = ???
-          }
-          
-          new _root_.zio.prelude.refined.Refined[$anonTrait, ${c.weakTypeOf[A]}, ${c.weakTypeOf[T]}] {
-            @${c.weakTypeOf[QuotedAssertion]}($assertion)
-            def assertion = $assertion
-          }
-        """
+  def wrapAll_impl[F[_], A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[F[A]]): c.Expr[F[T]] = {
+    val expr = value
 
-      case _ =>
-        c.abort(c.enclosingPosition, s"FAILED TO UNLIFT ASSERTION: $assertion")
+    val quotedRefinement = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+
+    quotedRefinement match {
+      case Some(value) =>
+        val message =
+          s"""
+             |$refinementErrorHeader
+             |You cannot use `wrapAll` if you have a refinement:
+             |${show(quotedRefinement)}
+             |""".stripMargin
+        c.abort(c.enclosingPosition, message)
+      case None        =>
+        c.Expr[F[T]](q"${c.prefix}.unsafeWrapAll($expr)")
     }
+  }
 
-  def smartApply[Meta: WeakTypeTag, A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Tree): c.Tree = {
-    val assertion = c.weakTypeOf[Meta].decls.flatMap(_.annotations).headOption.flatMap(_.tree.children.lastOption)
+  def wrapAllVarargs_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](values: c.Expr[A]*): c.Expr[List[T]] = {
+    val quotedRefinement = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
 
-    assertion match {
-      case Some(q"${assertion: Assertion[A]}") =>
-        LiteralUnlift.unapply(value) match {
-          case Some(value) =>
-            assertion(value.asInstanceOf[A]) match {
-              case Left(error) => c.abort(c.enclosingPosition, error.render(value.toString))
-              case Right(_)    => q"${c.prefix}.unsafeApply(${LiteralLift.unapply(value).get})"
+    quotedRefinement match {
+      case Some(quotedRefinement) =>
+        val refinement = getRefinement[T, A](quotedRefinement)
+
+        val (errors, _) = values.partitionMap { value =>
+          value.tree match {
+            case Literal(Constant(value)) =>
+              refinement(value.asInstanceOf[A]) match {
+                case Left(error) => Left(error.render(value.toString))
+                case Right(_)    => Right(())
+              }
+          }
+        }
+
+        if (errors.nonEmpty) {
+          val message = s"""
+                           |$refinementErrorHeader
+                           |${errors.mkString("\n")}
+                           |""".stripMargin
+
+          c.abort(c.enclosingPosition, message)
+        } else {
+          c.Expr[List[T]](q"${c.prefix}.unsafeWrapAll(List(..$values))")
+        }
+
+      case None =>
+        c.Expr[List[T]](q"${c.prefix}.unsafeWrapAll(List(..$values))")
+    }
+  }
+
+  def wrap_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[A]): c.Expr[T] = {
+    val expr = value
+
+    val quotedRefinement = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+
+    quotedRefinement match {
+      case Some(quotedRefinement) =>
+        expr.tree match {
+          case Literal(Constant(value)) =>
+            val refinement = getRefinement[T, A](quotedRefinement)
+
+            refinement.apply(value.asInstanceOf[A]) match {
+              case Left(error) =>
+                val message =
+                  s"""
+                     |$refinementErrorHeader
+                     |${error.render(value.toString)}
+                     |""".stripMargin
+
+                c.abort(c.enclosingPosition, message)
+
+              case Right(_) =>
+                c.Expr[T](q"${c.prefix}.unsafeWrap($expr)")
             }
-          case _           =>
+
+          case _ =>
             val message =
               s"""
-                 |${Console.BOLD + Console.RED + Console.REVERSED}Assertion Failed${Console.RESET}
-                 |Could not validate Smart Assertion at compile-time.
-                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.make($value)"${Console.RESET}
+                 |$refinementErrorHeader
+                 |Could not validate Smart Refinement at compile-time.
+                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.make($expr)"${Console.RESET}
                  |""".stripMargin
 
             c.abort(c.enclosingPosition, message)
+
         }
 
-      case _ =>
-        c.abort(c.enclosingPosition, s"FAILED TO UNLIFT ASSERTION: $assertion")
+      case None =>
+        c.Expr[T](q"${c.prefix}.unsafeWrap($expr)")
+    }
+
+  }
+
+  def refine_impl[A: c.WeakTypeTag](refinement: c.Tree): c.Tree =
+    q"""
+new _root_.zio.prelude.refined.QuotedRefinement[${c.weakTypeOf[A]}] {
+  @_root_.zio.prelude.refined.refinementQuote($refinement)
+  def refinement = $refinement
+}
+       """
+
+  private def getRefinement[T: c.WeakTypeTag, A: c.WeakTypeTag](quotedRefinement: c.universe.Symbol): Refinement[A] = {
+    val maybeRefinement = quotedRefinement.typeSignature.resultType.decls
+      .flatMap(_.annotations)
+      .flatMap(_.tree.children.lastOption)
+      .headOption
+    maybeRefinement match {
+      case Some(q"${refinement: Refinement[A]}") =>
+        refinement
+      case _                                     =>
+        c.abort(c.enclosingPosition, s"FAILED TO UNLIFT REFINEMENT: $quotedRefinement")
     }
   }
+
+  private val refinementErrorHeader =
+    s"${Console.BOLD + Console.RED + Console.REVERSED} Refinement Failed ${Console.RESET}"
 }

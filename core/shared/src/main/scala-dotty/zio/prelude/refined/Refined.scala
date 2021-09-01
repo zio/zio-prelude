@@ -5,23 +5,23 @@ import scala.quoted.*
 infix type Refined[A, B] = QuotedAssertion[A, B]
 
 object Refined extends Liftables {
-  inline def apply[A, T](inline assertion: Assertion[A]): QuotedAssertion[A, T] = ${ applyImpl[A, T]('assertion) }
+  inline def apply[A, T](inline assertion: Refinement[A]): QuotedAssertion[A, T] = ${ applyImpl[A, T]('assertion) }
 
-  private def applyImpl[A: Type, T: Type](assertionRaw: Expr[Assertion[A]])(using Quotes): Expr[QuotedAssertion[A, T]] = {
+  private def applyImpl[A: Type, T: Type](assertionRaw: Expr[Refinement[A]])(using Quotes): Expr[QuotedRefinement[A, T]] = {
     import quotes.reflect.*
-    val assertion = assertionRaw.asTerm.underlyingArgument.asExprOf[Assertion[A]]
+    val assertion = assertionRaw.asTerm.underlyingArgument.asExprOf[Refinement[A]]
     '{ QuotedAssertion($assertion) }
   }
 
-  transparent inline def make[A, T](inline quotedAssertion: QuotedAssertion[A, T], inline a: A): Any = ${
+  transparent inline def make[A, T](inline quotedAssertion: QuotedRefinement[A, T], inline a: A): Any = ${
     makeImpl('quotedAssertion, 'a)
   }
 
-  private def makeImpl[A: Type, T: Type](quotedAssertionRaw: Expr[QuotedAssertion[A, T]], a: Expr[A])(
+  private def makeImpl[A: Type, T: Type](quotedAssertionRaw: Expr[QuotedRefinement[A, T]], a: Expr[A])(
     using Quotes
   ): Expr[Any] = {
     import quotes.reflect.*
-    val quotedAssertion = quotedAssertionRaw.asTerm.underlyingArgument.asExprOf[QuotedAssertion[A, T]]
+    val quotedAssertion = quotedAssertionRaw.asTerm.underlyingArgument.asExprOf[QuotedRefinement[A, T]]
     val assertion    = quotedAssertion.valueOrError.assertion
     a match {
       case LiteralUnlift(x) =>

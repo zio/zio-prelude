@@ -3,27 +3,27 @@ package zio.prelude.refined
 import scala.quoted.*
 
 trait Liftables {
-  given ToExpr[Assertion.Regex] with {
-    def apply(regex: Assertion.Regex)(using Quotes): Expr[Assertion.Regex] =
+  given ToExpr[Refinement.Regex] with {
+    def apply(regex: Refinement.Regex)(using Quotes): Expr[Refinement.Regex] =
       regex match {
-        case Assertion.Regex.AnyChar                     => '{ Assertion.Regex.AnyChar }
-        case Assertion.Regex.Anything                    => '{ Assertion.Regex.Anything }
-        case Assertion.Regex.End                         => '{ Assertion.Regex.End }
-        case Assertion.Regex.Alphanumeric(reversed)      => '{ Assertion.Regex.Alphanumeric(${Expr(reversed)}) }
-        case Assertion.Regex.Whitespace(reversed)        => '{ Assertion.Regex.Whitespace(${Expr(reversed)}) }
-        case Assertion.Regex.Digit(reversed)             => '{ Assertion.Regex.Digit(${Expr(reversed)}) }
-        case Assertion.Regex.Literal(char)               => '{ Assertion.Regex.Literal(${Expr(char)}) }
-        case Assertion.Regex.CharacterSet(set, reversed) => '{ Assertion.Regex.CharacterSet(${Expr(set)}, ${Expr(reversed)}) }
-        case Assertion.Regex.Range(start, end, reversed) => '{ Assertion.Regex.Range(${Expr(start)}, ${Expr(end)}, ${Expr(reversed)}) }
-        case Assertion.Regex.Start                       => '{ Assertion.Regex.Start }
-        case Assertion.Regex.Repeat(regex, min, max)     => '{ Assertion.Regex.Repeat(${Expr(regex)}, ${Expr(min)}, ${Expr(max)}) }
-        case Assertion.Regex.AndThen(first, second)      => '{ Assertion.Regex.AndThen(${Expr(first)}, ${Expr(second)}) }
-        case Assertion.Regex.OrElse(first, second)       => '{ Assertion.Regex.OrElse(${Expr(first)}, ${Expr(second)}) }
+        case Refinement.Regex.AnyChar                     => '{ Refinement.Regex.AnyChar }
+        case Refinement.Regex.Anything                    => '{ Refinement.Regex.Anything }
+        case Refinement.Regex.End                         => '{ Refinement.Regex.End }
+        case Refinement.Regex.Alphanumeric(reversed)      => '{ Refinement.Regex.Alphanumeric(${Expr(reversed)}) }
+        case Refinement.Regex.Whitespace(reversed)        => '{ Refinement.Regex.Whitespace(${Expr(reversed)}) }
+        case Refinement.Regex.Digit(reversed)             => '{ Refinement.Regex.Digit(${Expr(reversed)}) }
+        case Refinement.Regex.Literal(char)               => '{ Refinement.Regex.Literal(${Expr(char)}) }
+        case Refinement.Regex.CharacterSet(set, reversed) => '{ Refinement.Regex.CharacterSet(${Expr(set)}, ${Expr(reversed)}) }
+        case Refinement.Regex.Range(start, end, reversed) => '{ Refinement.Regex.Range(${Expr(start)}, ${Expr(end)}, ${Expr(reversed)}) }
+        case Refinement.Regex.Start                       => '{ Refinement.Regex.Start }
+        case Refinement.Regex.Repeat(regex, min, max)     => '{ Refinement.Regex.Repeat(${Expr(regex)}, ${Expr(min)}, ${Expr(max)}) }
+        case Refinement.Regex.AndThen(first, second)      => '{ Refinement.Regex.AndThen(${Expr(first)}, ${Expr(second)}) }
+        case Refinement.Regex.OrElse(first, second)       => '{ Refinement.Regex.OrElse(${Expr(first)}, ${Expr(second)}) }
       }
   }
 
-  given FromExpr[Assertion.Regex] with {
-    def unapply(assertion: Expr[Assertion.Regex])(using Quotes): Option[Assertion.Regex] = {
+  given FromExpr[Refinement.Regex] with {
+    def unapply(assertion: Expr[Refinement.Regex])(using Quotes): Option[Refinement.Regex] = {
       import quotes.reflect.*
 
       assertion match {
@@ -64,26 +64,26 @@ trait Liftables {
     }
   }
 
-  given [A](using Type[A]): ToExpr[Assertion[A]] with {
-    def apply(assertion: Assertion[A])(using Quotes): Expr[Assertion[A]] = {
+  given [A](using Type[A]): ToExpr[Refinement[A]] with {
+    def apply(assertion: Refinement[A])(using Quotes): Expr[Refinement[A]] = {
       import quotes.reflect.*
 
       assertion match {
-        case Assertion.Always                            => '{ Assertion.Always }
-        case Assertion.And(left, right)                  => '{ Assertion.And(${Expr(left.asInstanceOf[Assertion[A]])}, ${Expr(right.asInstanceOf[Assertion[A]])}) }
-        case Assertion.EqualTo(LiteralLift(value))       => '{ Assertion.EqualTo($value) }
-        case Assertion.GreaterThan(v@LiteralLift(value)) => '{ Assertion.GreaterThan($value)(${orderingForValueExpr(v)}) }
-        case Assertion.LessThan(v@LiteralLift(value))    => '{ Assertion.LessThan($value)(${orderingForValueExpr(v)}) }
-        case Assertion.Matches(regex)                    => '{ Assertion.Matches(${Expr(regex)}) }
-        case Assertion.Not(assertion)                    => '{ Assertion.Not(${Expr(assertion.asInstanceOf[Assertion[A]])}) }
-        case Assertion.Or(left, right)                   => '{ Assertion.Or(${Expr(left.asInstanceOf[Assertion[A]])}, ${Expr(right.asInstanceOf[Assertion[A]])}) }
+        case Refinement.Always                            => '{ Refinement.Always }
+        case Refinement.And(left, right)                  => '{ Refinement.And(${Expr(left.asInstanceOf[Refinement[A]])}, ${Expr(right.asInstanceOf[Refinement[A]])}) }
+        case Refinement.EqualTo(LiteralLift(value))       => '{ Refinement.EqualTo($value) }
+        case Refinement.GreaterThan(v@LiteralLift(value)) => '{ Refinement.GreaterThan($value)(${orderingForValueExpr(v)}) }
+        case Refinement.LessThan(v@LiteralLift(value))    => '{ Refinement.LessThan($value)(${orderingForValueExpr(v)}) }
+        case Refinement.Matches(regex)                    => '{ Refinement.Matches(${Expr(regex)}) }
+        case Refinement.Not(assertion)                    => '{ Refinement.Not(${Expr(assertion.asInstanceOf[Refinement[A]])}) }
+        case Refinement.Or(left, right)                   => '{ Refinement.Or(${Expr(left.asInstanceOf[Refinement[A]])}, ${Expr(right.asInstanceOf[Refinement[A]])}) }
         case _                                           => report.throwError(s"COULD NOT MATCH ASSERTION: $assertion")
       }
     }
   }
   
-  given [A](using Type[A]): FromExpr[Assertion[A]] with {
-    def unapply(assertion: Expr[Assertion[A]])(using Quotes): Option[Assertion[A]] = {
+  given [A](using Type[A]): FromExpr[Refinement[A]] with {
+    def unapply(assertion: Expr[Refinement[A]])(using Quotes): Option[Refinement[A]] = {
       import quotes.reflect.*
 
       assertion match {
@@ -112,8 +112,8 @@ trait Liftables {
     }
   }
 
-  given [A, T](using Type[A], Type[T]): FromExpr[QuotedAssertion[A, T]] with {
-    def unapply(quotedAssertion: Expr[QuotedAssertion[A, T]])(using Quotes): Option[QuotedAssertion[A, T]] =
+  given [A, T](using Type[A], Type[T]): FromExpr[QuotedRefinement[A, T]] with {
+    def unapply(quotedAssertion: Expr[QuotedRefinement[A, T]])(using Quotes): Option[QuotedRefinement[A, T]] =
       quotedAssertion match {
         case '{ QuotedAssertion[A, T](${Expr(assertion)}) } => Some(QuotedAssertion(assertion))
         case '{ Refined[A, T](${Expr(assertion)}) }         => Some(QuotedAssertion(assertion))

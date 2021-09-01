@@ -1,9 +1,9 @@
 package zio.prelude.refined
 
-sealed trait AssertionError { self =>
-  import AssertionError._
+sealed trait RefinementError { self =>
+  import RefinementError._
 
-  def ++(that: AssertionError): AssertionError =
+  def ++(that: RefinementError): RefinementError =
     (self, that) match {
       case (Many(es1), Many(es2)) => Many(es1 ++ es2)
       case (Many(es1), f)         => Many(es1 :+ f)
@@ -20,9 +20,9 @@ sealed trait AssertionError { self =>
   }
 }
 
-object AssertionError {
-  def failure(condition: String): AssertionError = Failure(condition)
+object RefinementError {
+  def failure(condition: String): RefinementError = Failure(condition)
 
-  final case class Failure(condition: String)           extends AssertionError
-  final case class Many(vector: Vector[AssertionError]) extends AssertionError
+  final case class Failure(condition: String)            extends RefinementError
+  final case class Many(vector: Vector[RefinementError]) extends RefinementError
 }
