@@ -200,8 +200,16 @@ object ForEachSpec extends DefaultRunnableSpec {
         },
         testM("partitionMap") {
           check(genList, genEitherIntIntFunction) { (as, f) =>
-            val actual = ForEach[List].partitionMap(as)(f)
-            val expected = as.partitionMap(f)
+            def partitionMap[A, B, C](as: List[A])(f: A => Either[B, C]): (List[B], List[C]) =
+              as.foldRight((List.empty[B], List.empty[C])) { case (a, (bs, cs)) =>
+                f(a).fold(
+                  b => (b :: bs, cs),
+                  c => (bs, c :: cs)
+                )
+              }
+
+            val actual   = ForEach[List].partitionMap(as)(f)
+            val expected = partitionMap(as)(f)
             assert(actual)(equalTo(expected))
           }
         },
