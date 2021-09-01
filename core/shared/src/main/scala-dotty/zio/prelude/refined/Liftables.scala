@@ -24,41 +24,41 @@ trait Liftables {
 
   given FromExpr[Refinement.Regex] with {
     def unapply(assertion: Expr[Refinement.Regex])(using Quotes): Option[Refinement.Regex] = {
-      import quotes.reflect.*
+      import quotes.reflect.{Refinement => _, *}
 
       assertion match {
-        case '{ Assertion.Regex.AnyChar }                                                  => Some(Assertion.Regex.AnyChar)
-        case '{ Assertion.Regex.anyChar }                                                  => Some(Assertion.Regex.anyChar)
-        case '{ Assertion.Regex.Anything }                                                 => Some(Assertion.Regex.Anything)
-        case '{ Assertion.Regex.anything }                                                 => Some(Assertion.Regex.anything)
-        case '{ Assertion.Regex.End }                                                      => Some(Assertion.Regex.End)
-        case '{ Assertion.Regex.end }                                                      => Some(Assertion.Regex.end)
-        case '{ Assertion.Regex.Alphanumeric(${Expr(reversed)}) }                          => Some(Assertion.Regex.Alphanumeric(reversed))
-        case '{ Assertion.Regex.alphanumeric }                                             => Some(Assertion.Regex.alphanumeric)
-        case '{ Assertion.Regex.nonAlphanumeric }                                          => Some(Assertion.Regex.nonAlphanumeric)
-        case '{ Assertion.Regex.Whitespace(${Expr(reversed)}) }                            => Some(Assertion.Regex.Whitespace(reversed))
-        case '{ Assertion.Regex.whitespace }                                               => Some(Assertion.Regex.whitespace)
-        case '{ Assertion.Regex.nonWhitespace }                                            => Some(Assertion.Regex.nonWhitespace)
-        case '{ Assertion.Regex.Digit(${Expr(reversed)}) }                                 => Some(Assertion.Regex.Digit(reversed))
-        case '{ Assertion.Regex.digit }                                                    => Some(Assertion.Regex.digit)
-        case '{ Assertion.Regex.nonDigit }                                                 => Some(Assertion.Regex.nonDigit)
-        case '{ Assertion.Regex.Literal(${Expr(char)}) }                                   => Some(Assertion.Regex.Literal(char))
-        case '{ Assertion.Regex.literal(${Expr(str)}) }                                    => Some(Assertion.Regex.literal(str))
-        case '{ Assertion.Regex.CharacterSet(${Expr(set)}, ${Expr(reversed)}) }            => Some(Assertion.Regex.CharacterSet(set, reversed))
-        case '{ Assertion.Regex.anyOf(${Expr(first)}, ${Expr(second)}, ${Expr(rest)}) }    => Some(Assertion.Regex.anyOf(first, second, rest))
-        case '{ Assertion.Regex.notAnyOf(${Expr(first)}, ${Expr(second)}, ${Expr(rest)}) } => Some(Assertion.Regex.notAnyOf(first, second, rest))
-        case '{ Assertion.Regex.Range(${Expr(start)}, ${Expr(end)}, ${Expr(reversed)}) }   => Some(Assertion.Regex.Range(start, end, reversed))
-        case '{ Assertion.Regex.inRange(${Expr(start)}, ${Expr(end)}) }                    => Some(Assertion.Regex.inRange(start, end))
-        case '{ Assertion.Regex.notInRange(${Expr(start)}, ${Expr(end)}) }                 => Some(Assertion.Regex.notInRange(start, end))
-        case '{ Assertion.Regex.Start }                                                    => Some(Assertion.Regex.Start)
-        case '{ Assertion.Regex.start }                                                    => Some(Assertion.Regex.start)
-        case '{ Assertion.Regex.Repeat(${Expr(regex)}, ${Expr(min)}, ${Expr(max)}) }       => Some(Assertion.Regex.Repeat(regex, min, max))
-        case '{ (${Expr(regex)}: Assertion.Regex).min(${Expr(n)}) }                        => Some(regex.min(n))
-        case '{ (${Expr(regex)}: Assertion.Regex).max(${Expr(n)}) }                        => Some(regex.max(n))
-        case '{ Assertion.Regex.AndThen(${Expr(first)}, ${Expr(second)}) }                 => Some(Assertion.Regex.AndThen(first, second))
-        case '{ (${Expr(left)}: Assertion.Regex).~(${Expr(right)}: Assertion.Regex) }      => Some(left ~ right)
-        case '{ Assertion.Regex.OrElse(${Expr(first)}, ${Expr(second)}) }                  => Some(Assertion.Regex.OrElse(first, second))
-        case '{ (${Expr(left)}: Assertion.Regex).|(${Expr(right)}: Assertion.Regex) }      => Some(left | right)
+        case '{ Refinement.Regex.AnyChar }                                                  => Some(Refinement.Regex.AnyChar)
+        case '{ Refinement.Regex.anyChar }                                                  => Some(Refinement.Regex.anyChar)
+        case '{ Refinement.Regex.Anything }                                                 => Some(Refinement.Regex.Anything)
+        case '{ Refinement.Regex.anything }                                                 => Some(Refinement.Regex.anything)
+        case '{ Refinement.Regex.End }                                                      => Some(Refinement.Regex.End)
+        case '{ Refinement.Regex.end }                                                      => Some(Refinement.Regex.end)
+        case '{ Refinement.Regex.Alphanumeric(${Expr(reversed)}) }                          => Some(Refinement.Regex.Alphanumeric(reversed))
+        case '{ Refinement.Regex.alphanumeric }                                             => Some(Refinement.Regex.alphanumeric)
+        case '{ Refinement.Regex.nonAlphanumeric }                                          => Some(Refinement.Regex.nonAlphanumeric)
+        case '{ Refinement.Regex.Whitespace(${Expr(reversed)}) }                            => Some(Refinement.Regex.Whitespace(reversed))
+        case '{ Refinement.Regex.whitespace }                                               => Some(Refinement.Regex.whitespace)
+        case '{ Refinement.Regex.nonWhitespace }                                            => Some(Refinement.Regex.nonWhitespace)
+        case '{ Refinement.Regex.Digit(${Expr(reversed)}) }                                 => Some(Refinement.Regex.Digit(reversed))
+        case '{ Refinement.Regex.digit }                                                    => Some(Refinement.Regex.digit)
+        case '{ Refinement.Regex.nonDigit }                                                 => Some(Refinement.Regex.nonDigit)
+        case '{ Refinement.Regex.Literal(${Expr(char)}) }                                   => Some(Refinement.Regex.Literal(char))
+        case '{ Refinement.Regex.literal(${Expr(str)}) }                                    => Some(Refinement.Regex.literal(str))
+        case '{ Refinement.Regex.CharacterSet(${Expr(set)}, ${Expr(reversed)}) }            => Some(Refinement.Regex.CharacterSet(set, reversed))
+        case '{ Refinement.Regex.anyOf(${Expr(first)}, ${Expr(second)}, ${Expr(rest)}) }    => Some(Refinement.Regex.anyOf(first, second, rest))
+        case '{ Refinement.Regex.notAnyOf(${Expr(first)}, ${Expr(second)}, ${Expr(rest)}) } => Some(Refinement.Regex.notAnyOf(first, second, rest))
+        case '{ Refinement.Regex.Range(${Expr(start)}, ${Expr(end)}, ${Expr(reversed)}) }   => Some(Refinement.Regex.Range(start, end, reversed))
+        case '{ Refinement.Regex.inRange(${Expr(start)}, ${Expr(end)}) }                    => Some(Refinement.Regex.inRange(start, end))
+        case '{ Refinement.Regex.notInRange(${Expr(start)}, ${Expr(end)}) }                 => Some(Refinement.Regex.notInRange(start, end))
+        case '{ Refinement.Regex.Start }                                                    => Some(Refinement.Regex.Start)
+        case '{ Refinement.Regex.start }                                                    => Some(Refinement.Regex.start)
+        case '{ Refinement.Regex.Repeat(${Expr(regex)}, ${Expr(min)}, ${Expr(max)}) }       => Some(Refinement.Regex.Repeat(regex, min, max))
+        case '{ (${Expr(regex)}: Refinement.Regex).min(${Expr(n)}) }                        => Some(regex.min(n))
+        case '{ (${Expr(regex)}: Refinement.Regex).max(${Expr(n)}) }                        => Some(regex.max(n))
+        case '{ Refinement.Regex.AndThen(${Expr(first)}, ${Expr(second)}) }                 => Some(Refinement.Regex.AndThen(first, second))
+        case '{ (${Expr(left)}: Refinement.Regex).~(${Expr(right)}: Refinement.Regex) }      => Some(left ~ right)
+        case '{ Refinement.Regex.OrElse(${Expr(first)}, ${Expr(second)}) }                  => Some(Refinement.Regex.OrElse(first, second))
+        case '{ (${Expr(left)}: Refinement.Regex).|(${Expr(right)}: Refinement.Regex) }      => Some(left | right)
         case _                                                                             => None
       }
     }
@@ -66,7 +66,7 @@ trait Liftables {
 
   given [A](using Type[A]): ToExpr[Refinement[A]] with {
     def apply(assertion: Refinement[A])(using Quotes): Expr[Refinement[A]] = {
-      import quotes.reflect.*
+      import quotes.reflect.{Refinement => _, *}
 
       assertion match {
         case Refinement.Always                            => '{ Refinement.Always }
@@ -84,42 +84,42 @@ trait Liftables {
   
   given [A](using Type[A]): FromExpr[Refinement[A]] with {
     def unapply(assertion: Expr[Refinement[A]])(using Quotes): Option[Refinement[A]] = {
-      import quotes.reflect.*
+      import quotes.reflect.{Refinement => _, *}
 
       assertion match {
-        case '{ Assertion.Always }                                                 => Some(Assertion.Always)
-        case '{ Assertion.always }                                                 => Some(Assertion.always)
-        case '{ Assertion.never }                                                  => Some(Assertion.never)
-        case '{ Assertion.And[A](${Expr(left)}, ${Expr(right)}) }                  => Some(Assertion.And(left, right))
-        case '{ (${Expr(left)}: Assertion[A]).&&(${Expr(right)}) }                 => Some(Assertion.And(left, right))
-        case '{ Assertion.EqualTo[A](${LiteralUnlift(value)}) }                    => Some(Assertion.EqualTo(value))
-        case '{ Assertion.equalTo[A](${LiteralUnlift(value)}) }                    => Some(Assertion.equalTo(value))
-        case '{ Assertion.notEqualTo[A](${LiteralUnlift(value)}) }                 => Some(Assertion.notEqualTo(value))
-        case '{ Assertion.GreaterThan[A](${LiteralUnlift(value)})($_) }            => Some(Assertion.GreaterThan(value)(orderingForValue(value)))
-        case '{ Assertion.greaterThan[A](${LiteralUnlift(value)})($_) }            => Some(Assertion.greaterThan(value)(orderingForValue(value)))
-        case '{ Assertion.greaterThanOrEqualTo[A](${LiteralUnlift(value)})($_) }   => Some(Assertion.greaterThanOrEqualTo(value)(orderingForValue(value)))
-        case '{ Assertion.LessThan[A](${LiteralUnlift(value)})($_) }               => Some(Assertion.LessThan(value)(orderingForValue(value)))
-        case '{ Assertion.lessThan[A](${LiteralUnlift(value)})($_) }               => Some(Assertion.lessThan(value)(orderingForValue(value)))
-        case '{ Assertion.lessThanOrEqualTo[A](${LiteralUnlift(value)})($_) }      => Some(Assertion.lessThanOrEqualTo(value)(orderingForValue(value)))
-        case '{ Assertion.Matches(${Expr(regex)}) }                                => Some(Assertion.Matches(regex).asInstanceOf[Assertion[A]])
-        case '{ Assertion.matches(${Expr(regex)}) }                                => Some(Assertion.matches(regex).asInstanceOf[Assertion[A]])
-        case '{ Assertion.Not[A](${Expr(assertion)}) }                             => Some(Assertion.Not(assertion))
-        case '{ !(${Expr(assertion)}: Assertion[A]) }                              => Some(Assertion.Not(assertion))
-        case '{ Assertion.Or[A](${Expr(left)}, ${Expr(right)}) }                   => Some(Assertion.Or(left, right))
-        case '{ (${Expr(left)}: Assertion[A]).||(${Expr(right)}) }                 => Some(Assertion.Or(left, right))
+        case '{ Refinement.Always }                                                 => Some(Refinement.Always)
+        case '{ Refinement.always }                                                 => Some(Refinement.always)
+        case '{ Refinement.never }                                                  => Some(Refinement.never)
+        case '{ Refinement.And[A](${Expr(left)}, ${Expr(right)}) }                  => Some(Refinement.And(left, right))
+        case '{ (${Expr(left)}: Refinement[A]).&&(${Expr(right)}) }                 => Some(Refinement.And(left, right))
+        case '{ Refinement.EqualTo[A](${LiteralUnlift(value)}) }                    => Some(Refinement.EqualTo(value))
+        case '{ Refinement.equalTo[A](${LiteralUnlift(value)}) }                    => Some(Refinement.equalTo(value))
+        case '{ Refinement.notEqualTo[A](${LiteralUnlift(value)}) }                 => Some(Refinement.notEqualTo(value))
+        case '{ Refinement.GreaterThan[A](${LiteralUnlift(value)})($_) }            => Some(Refinement.GreaterThan(value)(orderingForValue(value)))
+        case '{ Refinement.greaterThan[A](${LiteralUnlift(value)})($_) }            => Some(Refinement.greaterThan(value)(orderingForValue(value)))
+        case '{ Refinement.greaterThanOrEqualTo[A](${LiteralUnlift(value)})($_) }   => Some(Refinement.greaterThanOrEqualTo(value)(orderingForValue(value)))
+        case '{ Refinement.LessThan[A](${LiteralUnlift(value)})($_) }               => Some(Refinement.LessThan(value)(orderingForValue(value)))
+        case '{ Refinement.lessThan[A](${LiteralUnlift(value)})($_) }               => Some(Refinement.lessThan(value)(orderingForValue(value)))
+        case '{ Refinement.lessThanOrEqualTo[A](${LiteralUnlift(value)})($_) }      => Some(Refinement.lessThanOrEqualTo(value)(orderingForValue(value)))
+        case '{ Refinement.Matches(${Expr(regex)}) }                                => Some(Refinement.Matches(regex).asInstanceOf[Refinement[A]])
+        case '{ Refinement.matches(${Expr(regex)}) }                                => Some(Refinement.matches(regex).asInstanceOf[Refinement[A]])
+        case '{ Refinement.Not[A](${Expr(assertion)}) }                             => Some(Refinement.Not(assertion))
+        case '{ !(${Expr(assertion)}: Refinement[A]) }                              => Some(Refinement.Not(assertion))
+        case '{ Refinement.Or[A](${Expr(left)}, ${Expr(right)}) }                   => Some(Refinement.Or(left, right))
+        case '{ (${Expr(left)}: Refinement[A]).||(${Expr(right)}) }                 => Some(Refinement.Or(left, right))
         case _ => None
       }
     }
   }
 
-  given [A, T](using Type[A], Type[T]): FromExpr[QuotedRefinement[A, T]] with {
-    def unapply(quotedAssertion: Expr[QuotedRefinement[A, T]])(using Quotes): Option[QuotedRefinement[A, T]] =
-      quotedAssertion match {
-        case '{ QuotedAssertion[A, T](${Expr(assertion)}) } => Some(QuotedAssertion(assertion))
-        case '{ Refined[A, T](${Expr(assertion)}) }         => Some(QuotedAssertion(assertion))
-        case _                                              => None
-      }
-  }
+  // given [A, T](using Type[A], Type[T]): FromExpr[QuotedRefinement[A, T]] with {
+  //   def unapply(quotedRefinement: Expr[QuotedRefinement[A, T]])(using Quotes): Option[QuotedRefinement[A, T]] =
+  //     quotedRefinement match {
+  //       case '{ QuotedRefinement[A, T](${Expr(assertion)}) } => Some(QuotedRefinement(assertion))
+  //       case '{ Refined[A, T](${Expr(assertion)}) }         => Some(QuotedRefinement(assertion))
+  //       case _                                              => None
+  //     }
+  // }
 
   object LiteralLift {
     def unapply(any: Any)(using Quotes): Option[Expr[Any]] = any match {

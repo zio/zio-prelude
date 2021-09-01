@@ -190,6 +190,9 @@ trait Liftables {
       case q"${short: Short}"   => Some(short)
       case q"${byte: Byte}"     => Some(byte)
       case q"${byte: Byte}"     => Some(byte)
+      case q"List(..$values)"   =>
+        val results = values.flatMap(unapply(_))
+        Some(results.toList)
       case _                    => None
     }
   }

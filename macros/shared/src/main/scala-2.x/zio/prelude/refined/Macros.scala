@@ -45,6 +45,14 @@ class Macros(val c: whitebox.Context) extends Liftables {
                 case Left(error) => Left(error.render(value.toString))
                 case Right(_)    => Right(())
               }
+            case _                        =>
+              val message = s"""
+                               |$refinementErrorHeader
+                               |Could not validate Smart Refinement at compile-time.
+                               |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrapAll($values)"${Console.RESET}
+                               |""".stripMargin
+
+              c.abort(c.enclosingPosition, message)
           }
         }
 
@@ -95,7 +103,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
               s"""
                  |$refinementErrorHeader
                  |Could not validate Smart Refinement at compile-time.
-                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.make($expr)"${Console.RESET}
+                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrap($expr)"${Console.RESET}
                  |""".stripMargin
 
             c.abort(c.enclosingPosition, message)

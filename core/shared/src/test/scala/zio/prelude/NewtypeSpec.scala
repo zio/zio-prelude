@@ -5,6 +5,7 @@ import zio.prelude.newtypes._
 import zio.prelude.refined.Refinement
 import zio.prelude.refined.Refinement.{And => _, Or => _, _}
 import zio.test.Assertion._
+import zio.test.AssertionM.Render.param
 import zio.test._
 
 object NewtypeSpec extends DefaultRunnableSpec {
@@ -26,11 +27,11 @@ object NewtypeSpec extends DefaultRunnableSpec {
     suite("NewtypeSpec")(
       suite("NewtypeSmart")(
         test("valid values") {
-          assert(Natural.make(0))(isSuccessV(anything))
+          assert(Natural(0))(equalTo(Natural.unsafeWrap(0)))
         },
-        test("invalid values") {
-          val expected = "-1 did not satisfy isGreaterThanEqualTo(0)"
-          assert(Natural.make(-1))(isFailureV(equalTo(NonEmptyChunk(expected))))
+        testM("invalid values") {
+          val expected = "-1 did not satisfy greaterThanOrEqualTo(0)"
+          assertM(typeCheck("Natural(-1)"))(isLeft(containsStringWithoutAnsi(expected)))
         }
       ),
       suite("SubtypeSmart")(
@@ -82,7 +83,8 @@ object NewtypeSpec extends DefaultRunnableSpec {
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
     And.unwrap(foldMap(as)(a => And(f(a))))
 
-  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+  object Natural extends Subtype[Int] {
+    val refinement   = refine(Refinement.greaterThanOrEqualTo(0))
     val two: Natural = Natural(2)
   }
   type Natural = Natural.Type
@@ -95,4 +97,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
 
   def sum[A](as: List[A])(implicit A: Identity[Sum[A]]): A =
     Sum.unwrap(Sum.wrapAll(as).foldLeft(A.identity)((b, a) => A.combine(b, a)))
+
+  implicit class StringOps(private val self: String) extends AnyVal {
+    def removingAnsiCodes: String =
+      self.replaceAll("\u001B\\[[;\\d]*m", "")
+  }
+
+  def containsStringWithoutAnsi(element: String): Assertion[String] =
+    Assertion.assertion("containsStringWithoutAnsi")(param(element))(_.removingAnsiCodes.contains(element))
 }
