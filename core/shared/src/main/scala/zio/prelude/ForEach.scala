@@ -225,6 +225,40 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     !isEmpty(fa)
 
   /**
+   * Partitions the collection based on the specified function.
+   */
+  def partitionMap[A, B, C](
+    fa: F[A]
+  )(f: A => Either[B, C])(implicit both: IdentityBoth[F], either: IdentityEither[F]): (F[B], F[C]) = {
+    implicit val covariant: Covariant[F]       = self
+    implicit val leftIdentity: Identity[F[B]]  = Identity.fromIdentityEitherCovariant
+    implicit val rightIdentity: Identity[F[C]] = Identity.fromIdentityEitherCovariant
+    foldMap(fa) { a =>
+      f(a) match {
+        case Left(b)  => (b.succeed, either.none)
+        case Right(c) => (either.none, c.succeed)
+      }
+    }
+  }
+
+  /**
+   * Partitions the collection based on the specified effectual function.
+   */
+  def partitionMapM[G[+_]: IdentityFlatten: Covariant, A, B, C](
+    fa: F[A]
+  )(f: A => G[Either[B, C]])(implicit both: IdentityBoth[F], either: IdentityEither[F]): G[(F[B], F[C])] = {
+    implicit val covariant: Covariant[F]       = self
+    implicit val leftIdentity: Identity[F[B]]  = Identity.fromIdentityEitherCovariant
+    implicit val rightIdentity: Identity[F[C]] = Identity.fromIdentityEitherCovariant
+    foldMapM(fa) { a =>
+      f(a).map {
+        case Left(b)  => (b.succeed, either.none)
+        case Right(c) => (either.none, c.succeed)
+      }
+    }
+  }
+
+  /**
    * Returns the product of all elements in the collection.
    */
   def product[A](fa: F[A])(implicit ev: Identity[Prod[A]]): A =

@@ -33,6 +33,9 @@ object ForEachSpec extends DefaultRunnableSpec {
   val genIntIntFunction2: Gen[Random, (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
+  val genEitherIntIntFunction: Gen[Random, Int => Either[Int, Int]] =
+    Gen.function(Gen.either(genInt, genInt))
+
   implicit val chunkOptionForEach: ForEach[ChunkOption] =
     ForEach[Chunk].compose[Option]
 
@@ -192,6 +195,13 @@ object ForEachSpec extends DefaultRunnableSpec {
           check(genList) { (as) =>
             val actual   = ForEach[List].nonEmpty(as)
             val expected = as.nonEmpty
+            assert(actual)(equalTo(expected))
+          }
+        },
+        testM("partitionMap") {
+          check(genList, genEitherIntIntFunction) { (as, f) =>
+            val actual = ForEach[List].partitionMap(as)(f)
+            val expected = as.partitionMap(f)
             assert(actual)(equalTo(expected))
           }
         },
