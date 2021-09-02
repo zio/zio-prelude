@@ -108,7 +108,9 @@ package object newtypes {
 
   type FailureOut[+A] = FailureOut.Type[A]
 
-  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+  object Natural extends Subtype[Int]() {
+
+    val refinement = refine(Refinement.greaterThanOrEqualTo(0))
 
     val one: Natural =
       Natural(1)
@@ -117,25 +119,25 @@ package object newtypes {
       Natural(0)
 
     def successor(n: Natural): Natural =
-      Natural(n + 1)
+      wrap(n + 1)
 
     def times(x: Natural, y: Natural): Natural = {
       val product = x * y
-      if (x == 0 || product / x != y) Natural(Int.MaxValue) else Natural(product)
+      if (x == 0 || product / x != y) Natural(Int.MaxValue) else wrap(product)
     }
 
     def plus(x: Natural, y: Natural): Natural = {
       val sum = x + y
-      if (sum < 0) Natural(Int.MaxValue) else Natural(sum)
+      if (sum < 0) Natural(Int.MaxValue) else wrap(sum)
     }
 
     def minus(x: Natural, y: Natural): Natural = {
       val difference = x - y
-      if (difference < 0) zero else Natural(difference)
+      if (difference < 0) zero else wrap(difference)
     }
 
     private[prelude] def unsafeMake(n: Int): Natural =
-      Natural(n)
+      wrap(n)
   }
 
   type Natural = Natural.Type
