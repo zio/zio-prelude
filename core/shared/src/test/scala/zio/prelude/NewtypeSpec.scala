@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.prelude
+import zio.NonEmptyChunk
+import zio.prelude.Refinement.{And => _, Or => _}
 import zio.prelude.newtypes._
-import zio.prelude.Refinement.{And => _, Or => _, _}
 import zio.test.Assertion._
 import zio.test.AssertionM.Render.param
 import zio.test._
@@ -12,32 +12,49 @@ object NewtypeSpec extends DefaultRunnableSpec {
 
   type Age = Age.Type
   object Age extends Newtype[Int] {
-    def refinement =
-      refine(greaterThan(9) && lessThan(20))
-
     implicit val dummyType: Dummy[Age] = new Dummy[Age] {}
   }
-
-  val cool = Age(12)
-//  val cool: List[Age] = Age.wrapAll(12, 19, 15)
 
   val dummy = implicitly[Dummy[Age]]
 
   def spec =
     suite("NewtypeSpec")(
       suite("NewtypeSmart")(
-        test("valid values") {
-          assert(Natural(0))(equalTo(Natural.unsafeWrap(0)))
+        test("valid values at compile-time") {
+          assertTrue(Natural(0) == Natural.unsafeWrap(0))
         },
-        testM("invalid values") {
-          val expected = "-1 did not satisfy greaterThanOrEqualTo(0)"
-          assertM(typeCheck("Natural(-1)"))(isLeft(containsStringWithoutAnsi(expected)))
+        test("multiple valid values at compile-time") {
+          assertTrue(
+            Natural(0, 1, 900) == NonEmptyChunk(Natural.unsafeWrap(0), Natural.unsafeWrap(1), Natural.unsafeWrap(900))
+          )
+        },
+        test("valid values at run-time") {
+          assert(Natural.make(0))(isSuccessV(equalTo(Natural.unsafeWrap(0))))
+        },
+        testM("invalid values at compile-time") {
+          assertM(typeCheck("Natural(-1, -8, 4, -3)"))(
+            isLeft(
+              containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)") &&
+                containsStringWithoutAnsi("-8 did not satisfy greaterThanOrEqualTo(0)") &&
+                containsStringWithoutAnsi("-3 did not satisfy greaterThanOrEqualTo(0)")
+            )
+          )
+        },
+        testM("invalid value at run-time") {
+          assertM(typeCheck("Natural(-1)"))(
+            isLeft(containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)"))
+          )
+        },
+        test("invalid values at run-time") {
+          assert(Natural.make(-1))(
+            isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))
+          )
         }
       ),
       suite("SubtypeSmart")(
         test("subtypes values") {
           val two = 2
-          assert(two + Natural.two)(equalTo(2 + 2))
+          assertTrue(two + Natural.two == 2 + 2)
         }
       ),
       suite("examples from documentation")(
@@ -45,7 +62,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
           val x = Meter(3.4)
           val y = Meter(4.3)
           val z = x add y
-          assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
+          assertTrue(Meter.unwrap(z) == 3.4 + 4.3)
         },
         test("exists") {
           assert(exists(List(true, false))(identity))(isTrue)
@@ -56,12 +73,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
         test("sumInt") {
           val actual   = sum(List(1, 2, 3))
           val expected = 6
-          assert(actual)(equalTo(expected))
+          assertTrue(actual == expected)
         },
         test("sumLong") {
           val actual   = sum(List(1L, 2L, 3L))
           val expected = 6L
-          assert(actual)(equalTo(expected))
+          assertTrue(actual == expected)
         }
       )
     )
@@ -83,13 +100,15 @@ object NewtypeSpec extends DefaultRunnableSpec {
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
     And.unwrap(foldMap(as)(a => And(f(a))))
 
+  type Natural = Natural.Type
   object Natural extends Subtype[Int] {
-    val refinement   = refine(prelude.Refinement.greaterThanOrEqualTo(0))
+    def refinement =
+      refine(Refinement.greaterThanOrEqualTo(0))
+
     val two: Natural = Natural(2)
 
     def unsafeWrap(int: Int): Natural = wrap(int)
   }
-  type Natural = Natural.Type
 
   object IntSum extends Newtype[Int]
   type IntSum = IntSum.Type
