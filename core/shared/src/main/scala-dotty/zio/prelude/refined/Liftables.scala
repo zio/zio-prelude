@@ -1,6 +1,7 @@
-package zio.prelude.refined
+package zio.prelude
 
 import scala.quoted.*
+import scala.math.{Ordering => SOrdering}
 
 trait Liftables {
   given ToExpr[Refinement.Regex] with {
@@ -147,32 +148,32 @@ trait Liftables {
     }
   }
 
-  private def orderingForValue(any: Any)(using Quotes): Ordering[Any] = {
+  private def orderingForValue(any: Any)(using Quotes): SOrdering[Any] = {
     import quotes.reflect.*
 
     any match {
-      case _: Int    => Ordering.Int.asInstanceOf[Ordering[Any]]
-      case _: String => Ordering.String.asInstanceOf[Ordering[Any]]
-      case _: Double => Ordering.Double.TotalOrdering.asInstanceOf[Ordering[Any]]
-      case _: Float  => Ordering.Float.TotalOrdering.asInstanceOf[Ordering[Any]]
-      case _: Long   => Ordering.Long.asInstanceOf[Ordering[Any]]
-      case _: Short  => Ordering.Short.asInstanceOf[Ordering[Any]]
-      case _: Byte   => Ordering.Byte.asInstanceOf[Ordering[Any]]
+      case _: Int    => SOrdering.Int.asInstanceOf[SOrdering[Any]]
+      case _: String => SOrdering.String.asInstanceOf[SOrdering[Any]]
+      case _: Double => SOrdering.Double.TotalOrdering.asInstanceOf[SOrdering[Any]]
+      case _: Float  => SOrdering.Float.TotalOrdering.asInstanceOf[SOrdering[Any]]
+      case _: Long   => SOrdering.Long.asInstanceOf[SOrdering[Any]]
+      case _: Short  => SOrdering.Short.asInstanceOf[SOrdering[Any]]
+      case _: Byte   => SOrdering.Byte.asInstanceOf[SOrdering[Any]]
       case other     => report.throwError(s"NO ORDERING FOR $other")
     }
   }
 
-  private def orderingForValueExpr(any: Any)(using Quotes): Expr[Ordering[Any]] = {
+  private def orderingForValueExpr(any: Any)(using Quotes): Expr[SOrdering[Any]] = {
     import quotes.reflect.*
 
     any match {
-      case _: Int    => '{ Ordering.Int.asInstanceOf[Ordering[Any]] }
-      case _: String => '{ Ordering.String.asInstanceOf[Ordering[Any]] }
-      case _: Double => '{ Ordering.Double.TotalOrdering.asInstanceOf[Ordering[Any]] }
-      case _: Float  => '{ Ordering.Float.TotalOrdering.asInstanceOf[Ordering[Any]] }
-      case _: Long   => '{ Ordering.Long.asInstanceOf[Ordering[Any]] }
-      case _: Short  => '{ Ordering.Short.asInstanceOf[Ordering[Any]] }
-      case _: Byte   => '{ Ordering.Byte.asInstanceOf[Ordering[Any]] }
+      case _: Int    => '{ SOrdering.Int.asInstanceOf[SOrdering[Any]] }
+      case _: String => '{ SOrdering.String.asInstanceOf[SOrdering[Any]] }
+      case _: Double => '{ SOrdering.Double.TotalOrdering.asInstanceOf[SOrdering[Any]] }
+      case _: Float  => '{ SOrdering.Float.TotalOrdering.asInstanceOf[SOrdering[Any]] }
+      case _: Long   => '{ SOrdering.Long.asInstanceOf[SOrdering[Any]] }
+      case _: Short  => '{ SOrdering.Short.asInstanceOf[SOrdering[Any]] }
+      case _: Byte   => '{ SOrdering.Byte.asInstanceOf[SOrdering[Any]] }
       case other     => report.throwError(s"NO ORDERING FOR $other")
     }
   }

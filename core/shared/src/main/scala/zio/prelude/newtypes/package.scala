@@ -16,8 +16,6 @@
 
 package zio.prelude
 
-import zio.prelude.Refinement.greaterThanOrEqualTo
-
 package object newtypes {
   object Sum extends SubtypeF
 
@@ -33,14 +31,18 @@ package object newtypes {
    */
   type Prod[A] = Prod.Type[A]
 
-  object Or extends Subtype[Boolean]
+  object Or extends Subtype[Boolean] {
+    private[prelude] def create(value: Boolean): Or = wrap(value)
+  }
 
   /**
    * A newtype representing logical disjunction.
    */
   type Or = Or.Type
 
-  object And extends Subtype[Boolean]
+  object And extends Subtype[Boolean] {
+    private[prelude] def create(value: Boolean): And = wrap(value)
+  }
 
   /**
    * A newtype representing logical conjunction.
@@ -111,9 +113,6 @@ package object newtypes {
   type FailureOut[+A] = FailureOut.Type[A]
 
   object Natural extends Subtype[Int]() {
-
-    def refinement =
-      refine(greaterThanOrEqualTo(0))
 
     val one: Natural =
       Natural(1)

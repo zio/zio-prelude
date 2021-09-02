@@ -2,8 +2,6 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 
-import scala.+:
-
 sealed trait RefinementError { self =>
   import RefinementError._
 

@@ -95,10 +95,10 @@ object NewtypeSpec extends DefaultRunnableSpec {
     as.foldLeft(B.identity)((b, a) => B.combine(b, f(a)))
 
   def exists[A](as: List[A])(f: A => Boolean): Boolean =
-    Or.unwrap(foldMap(as)(a => Or(f(a))))
+    Or.unwrap(foldMap(as)(a => Or.create(f(a))))
 
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
-    And.unwrap(foldMap(as)(a => And(f(a))))
+    And.unwrap(foldMap(as)(a => And.create(f(a))))
 
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {

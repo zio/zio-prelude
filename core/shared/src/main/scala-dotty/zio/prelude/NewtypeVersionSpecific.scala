@@ -1,6 +1,11 @@
 package zio.prelude
 
-import zio.prelude.refined.Refinement
+import zio.NonEmptyChunk
+
+import scala.quoted.*
+
+trait NewtypeCompanionVersionSpecific
+
 
 trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
 
@@ -9,42 +14,23 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
    * newtype.
    */
   inline def apply(inline value: A): Type =  
-    ${Macros.makeImpl[A, Type]('{refinement}, 'value)}
+    ${Macros.make_Impl[A, Type]('{refinement}, 'value)}
+
+  inline def apply(inline value: A, inline values: A*): NonEmptyChunk[Type] = 
+    ${Macros.makeMany_Impl[A, Type]('{refinement}, 'value, 'values)}
   
   def refinement: Refinement[A] = Refinement.always
 
-  /**
-   * Converts an instance of the underlying type to an instance of the
-   * newtype.
-   */
-  inline def wrap(inline value: A): Type = 
-    ${Macros.makeImpl[A, Type]('refinement, 'value)}
-
-  /**
-   * Converts an instance of a type parameterized on the underlying type
-   * to an instance of a type parameterized on the newtype. For example,
-   * this could be used to convert a list of instances of the underlying
-   * type to a list of instances of the newtype.
-   */
-  // def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.refined.Macros.wrapAll_impl[F, A, Type]
-
-  // def wrapAll[F[_]](values: A*): List[Type] = macro zio.prelude.refined.Macros.wrapAllVarargs_impl[A, Type]
+  def make(value: A): Validation[String, Type] = 
+    Validation.fromEitherNonEmptyChunk(
+      refinement.apply(value).left.map(_.toNonEmptyChunk(value.toString))
+    ).as(value.asInstanceOf[Type])
 
 }
 
-import scala.quoted.*
+object Macros extends Liftables {
 
-object Macros extends refined.Liftables {
-  def box(proxy: Expr[Any])(using Quotes) = {
-    import quotes.reflect._
-
-    println(proxy.asTerm)
-
-    throw new Error("OH")
-  }
-
-  def makeImpl[A: Type, T: Type](refinementExpr: Expr[Refinement[A]], a: Expr[A])(using Quotes
-  ): Expr[T] = {
+  def make_Impl[A: Type, T: Type](refinementExpr: Expr[Refinement[A]], a: Expr[A])(using Quotes): Expr[T] = {
     import quotes.reflect.*
 
     refinementExpr.value match {
@@ -62,10 +48,37 @@ object Macros extends refined.Liftables {
       case None =>
         '{ $a.asInstanceOf[T] }
     }
-
-
   }
 
-    private val refinementErrorHeader =
+  def makeMany_Impl[A: Type, T: Type](refinementExpr: Expr[Refinement[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
+  ): Expr[NonEmptyChunk[T]] = {
+    import quotes.reflect.*
+
+    refinementExpr.value match {
+      case Some(refinement) =>
+        as match {
+          case Varargs(exprs) =>
+            val validated = exprs.map {
+              case LiteralUnlift(x) => refinement(x.asInstanceOf[A])
+              case _ => report.throwError(s"$refinementErrorHeader\nMust use literal value for macro.")
+            }
+
+            val (errors, _) = validated.partitionMap(identity)
+
+            if (errors.nonEmpty)
+               report.throwError(s"YOU FAILED ${errors}")
+
+            '{ NonEmptyChunk($a, $as*).asInstanceOf[NonEmptyChunk[T]] }
+
+          case _ =>
+              report.throwError(s"NO VARARGS!?")
+        }
+      
+      case None =>
+        report.throwError(s"NO REFINEMENT!?")
+    }
+  }
+
+  private val refinementErrorHeader =
     s"${Console.BOLD + Console.RED + Console.REVERSED} Refinement Failed ${Console.RESET}"
 }

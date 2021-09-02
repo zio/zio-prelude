@@ -316,28 +316,7 @@ trait NewtypeExports {
     def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
   }
 
-  object Newtype extends NewtypeCompanionVersionSpecific {
-
-    /**
-     * Converts an instance of the underlying type to an instance of the
-     * newtype, ignoring any [[Refinement]].
-     */
-    def unsafeWrap[A, T <: NewtypeModule#Newtype[A]](newtype: T, value: A): T#Type = {
-      val _ = newtype
-      value.asInstanceOf[T#Type]
-    }
-
-    /**
-     * Converts an instance of a type parameterized on the underlying type
-     * to an instance of a type parameterized on the newtype, ignoring any
-     * [[Refinement]]. For example, this could be used to convert a list of
-     * instances of the underlying type to a list of instances of the newtype.
-     */
-    def unsafeWrapAll[F[_], A, T <: NewtypeModule#Newtype[A]](newtype: T, value: F[A]): F[T#Type] = {
-      val _ = newtype
-      value.asInstanceOf[F[T#Type]]
-    }
-  }
+  object Newtype extends NewtypeCompanionVersionSpecific {}
 
   /**
    * The class of objects corresponding to newtypes with smart constructors
