@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.refined.Refinement
+import zio.prelude.Refinement.greaterThanOrEqualTo
 
 package object newtypes {
   object Sum extends SubtypeF
@@ -112,7 +112,8 @@ package object newtypes {
 
   object Natural extends Subtype[Int]() {
 
-    val refinement = refine(Refinement.greaterThanOrEqualTo(0))
+    def refinement =
+      refine(greaterThanOrEqualTo(0))
 
     val one: Natural =
       Natural(1)

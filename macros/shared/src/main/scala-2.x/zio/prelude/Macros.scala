@@ -1,4 +1,4 @@
-package zio.prelude.refined
+package zio.prelude
 
 import scala.annotation.StaticAnnotation
 import scala.reflect.macros.whitebox
@@ -17,7 +17,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
       .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
 
     quotedRefinement match {
-      case Some(value) =>
+      case Some(_) =>
         val message =
           s"""
              |$refinementErrorHeader
@@ -25,7 +25,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
              |${show(quotedRefinement)}
              |""".stripMargin
         c.abort(c.enclosingPosition, message)
-      case None        =>
+      case None    =>
         c.Expr[F[T]](q"_root.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, $expr)")
     }
   }
@@ -118,8 +118,8 @@ class Macros(val c: whitebox.Context) extends Liftables {
 
   def refine_impl[A: c.WeakTypeTag](refinement: c.Tree): c.Tree =
     q"""
-new _root_.zio.prelude.refined.QuotedRefinement[${c.weakTypeOf[A]}] {
-  @_root_.zio.prelude.refined.refinementQuote($refinement)
+new _root_.zio.prelude.QuotedRefinement[${c.weakTypeOf[A]}] {
+  @_root_.zio.prelude.refinementQuote($refinement)
   def refinement = $refinement
 }
        """

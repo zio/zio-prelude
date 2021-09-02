@@ -1,8 +1,8 @@
 package zio.prelude
 
+import zio.prelude
 import zio.prelude.newtypes._
-import zio.prelude.refined.Refinement
-import zio.prelude.refined.Refinement.{And => _, Or => _, _}
+import zio.prelude.Refinement.{And => _, Or => _, _}
 import zio.test.Assertion._
 import zio.test.AssertionM.Render.param
 import zio.test._
@@ -13,12 +13,13 @@ object NewtypeSpec extends DefaultRunnableSpec {
   type Age = Age.Type
   object Age extends Newtype[Int] {
     def refinement =
-      refine(greaterThan(10) && Refinement.lessThan(20))
+      refine(greaterThan(9) && lessThan(20))
 
     implicit val dummyType: Dummy[Age] = new Dummy[Age] {}
   }
 
-  val cool: List[Age] = Age.wrapAll(12, 19, 15)
+  val cool = Age(12)
+//  val cool: List[Age] = Age.wrapAll(12, 19, 15)
 
   val dummy = implicitly[Dummy[Age]]
 
@@ -83,7 +84,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
     And.unwrap(foldMap(as)(a => And(f(a))))
 
   object Natural extends Subtype[Int] {
-    val refinement   = refine(Refinement.greaterThanOrEqualTo(0))
+    val refinement   = refine(prelude.Refinement.greaterThanOrEqualTo(0))
     val two: Natural = Natural(2)
 
     def unsafeWrap(int: Int): Natural = wrap(int)

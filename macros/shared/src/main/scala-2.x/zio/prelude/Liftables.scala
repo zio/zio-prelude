@@ -1,4 +1,4 @@
-package zio.prelude.refined
+package zio.prelude
 
 import com.github.ghik.silencer.silent
 
@@ -9,7 +9,7 @@ trait Liftables {
 
   import c.universe._
 
-  final val RefinementPrefix: Select = q"_root_.zio.prelude.refined.Refinement"
+  final val RefinementPrefix: Select = q"_root_.zio.prelude.Refinement"
 
   implicit def optionUnliftable[T](implicit u: Unliftable[T]): Unliftable[Option[T]] = Unliftable[Option[T]] {
     case q"scala.None"               => None
@@ -36,69 +36,69 @@ trait Liftables {
 
   implicit lazy val regexUnliftable: Unliftable[Refinement.Regex] =
     Unliftable[Refinement.Regex] {
-      case q"zio.prelude.refined.Refinement.Regex.AnyChar"                                                                            =>
+      case q"${R(_)}.Regex.AnyChar"                                                                            =>
         Refinement.Regex.AnyChar
-      case q"zio.prelude.refined.Refinement.Regex.anyChar"                                                                            =>
+      case q"${R(_)}.Regex.anyChar"                                                                            =>
         Refinement.Regex.anyChar
-      case q"zio.prelude.refined.Refinement.Regex.Anything"                                                                           =>
+      case q"${R(_)}.Regex.Anything"                                                                           =>
         Refinement.Regex.Anything
-      case q"zio.prelude.refined.Refinement.Regex.anything"                                                                           =>
+      case q"${R(_)}.Regex.anything"                                                                           =>
         Refinement.Regex.anything
-      case q"zio.prelude.refined.Refinement.Regex.End"                                                                                =>
+      case q"${R(_)}.Regex.End"                                                                                =>
         Refinement.Regex.End
-      case q"zio.prelude.refined.Refinement.Regex.end"                                                                                =>
+      case q"${R(_)}.Regex.end"                                                                                =>
         Refinement.Regex.end
-      case q"zio.prelude.refined.Refinement.Regex.Alphanumeric.apply(${reversed: Boolean})"                                           =>
+      case q"${R(_)}.Regex.Alphanumeric.apply(${reversed: Boolean})"                                           =>
         Refinement.Regex.Alphanumeric(reversed)
-      case q"zio.prelude.refined.Refinement.Regex.alphanumeric"                                                                       =>
+      case q"${R(_)}.Regex.alphanumeric"                                                                       =>
         Refinement.Regex.alphanumeric
-      case q"zio.prelude.refined.Refinement.Regex.nonAlphanumeric"                                                                    =>
+      case q"${R(_)}.Regex.nonAlphanumeric"                                                                    =>
         Refinement.Regex.nonAlphanumeric
-      case q"zio.prelude.refined.Refinement.Regex.Whitespace.apply(${reversed: Boolean})"                                             =>
+      case q"${R(_)}.Regex.Whitespace.apply(${reversed: Boolean})"                                             =>
         Refinement.Regex.Whitespace(reversed)
-      case q"zio.prelude.refined.Refinement.Regex.whitespace"                                                                         =>
+      case q"${R(_)}.Regex.whitespace"                                                                         =>
         Refinement.Regex.whitespace
-      case q"zio.prelude.refined.Refinement.Regex.nonWhitespace"                                                                      =>
+      case q"${R(_)}.Regex.nonWhitespace"                                                                      =>
         Refinement.Regex.nonWhitespace
-      case q"zio.prelude.refined.Refinement.Regex.Digit.apply(${reversed: Boolean})"                                                  =>
+      case q"${R(_)}.Regex.Digit.apply(${reversed: Boolean})"                                                  =>
         Refinement.Regex.Digit(reversed)
-      case q"zio.prelude.refined.Refinement.Regex.digit"                                                                              =>
+      case q"${R(_)}.Regex.digit"                                                                              =>
         Refinement.Regex.digit
-      case q"zio.prelude.refined.Refinement.Regex.nonDigit"                                                                           =>
+      case q"${R(_)}.Regex.nonDigit"                                                                           =>
         Refinement.Regex.nonDigit
-      case q"zio.prelude.refined.Refinement.Regex.Literal.apply(${char: Char})"                                                       =>
+      case q"${R(_)}.Regex.Literal.apply(${char: Char})"                                                       =>
         Refinement.Regex.Literal(char)
-      case q"zio.prelude.refined.Refinement.Regex.literal(${str: String})"                                                            =>
+      case q"${R(_)}.Regex.literal(${str: String})"                                                            =>
         Refinement.Regex.literal(str)
-      case q"zio.prelude.refined.Refinement.Regex.CharacterSet.apply(scala.Predef.Set.apply[$_](..$set), ${reversed: Boolean})"       =>
+      case q"${R(_)}.Regex.CharacterSet.apply(scala.Predef.Set.apply[$_](..$set), ${reversed: Boolean})"       =>
         Refinement.Regex.CharacterSet(set.map(t => c.eval[Char](c.Expr[Char](t))).toSet, reversed)
-      case q"zio.prelude.refined.Refinement.Regex.anyOf(${first: Char}, ${second: Char}, ..$rest)"                                    =>
+      case q"${R(_)}.Regex.anyOf(${first: Char}, ${second: Char}, ..$rest)"                                    =>
         Refinement.Regex.anyOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
-      case q"zio.prelude.refined.Refinement.Regex.notAnyOf(${first: Char}, ${second: Char}, ..$rest)"                                 =>
+      case q"${R(_)}.Regex.notAnyOf(${first: Char}, ${second: Char}, ..$rest)"                                 =>
         Refinement.Regex.notAnyOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
-      case q"zio.prelude.refined.Refinement.Regex.Range.apply(${start: Char}, ${end: Char}, ${reversed: Boolean})"                    =>
+      case q"${R(_)}.Regex.Range.apply(${start: Char}, ${end: Char}, ${reversed: Boolean})"                    =>
         Refinement.Regex.Range(start, end, reversed)
-      case q"zio.prelude.refined.Refinement.Regex.inRange(${start: Char}, ${end: Char})"                                              =>
+      case q"${R(_)}.Regex.inRange(${start: Char}, ${end: Char})"                                              =>
         Refinement.Regex.inRange(start, end)
-      case q"zio.prelude.refined.Refinement.Regex.notInRange(${start: Char}, ${end: Char})"                                           =>
+      case q"${R(_)}.Regex.notInRange(${start: Char}, ${end: Char})"                                           =>
         Refinement.Regex.notInRange(start, end)
-      case q"zio.prelude.refined.Refinement.Regex.Start"                                                                              =>
+      case q"${R(_)}.Regex.Start"                                                                              =>
         Refinement.Regex.Start
-      case q"zio.prelude.refined.Refinement.Regex.start"                                                                              =>
+      case q"${R(_)}.Regex.start"                                                                              =>
         Refinement.Regex.start
-      case q"zio.prelude.refined.Refinement.Regex.Repeat.apply(${regex: Refinement.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
+      case q"${R(_)}.Regex.Repeat.apply(${regex: Refinement.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
         Refinement.Regex.Repeat(regex, min, max)
-      case q"${regex: Refinement.Regex}.min(${n: Int})"                                                                               =>
+      case q"${regex: Refinement.Regex}.min(${n: Int})"                                                        =>
         regex.min(n)
-      case q"${regex: Refinement.Regex}.max(${n: Int})"                                                                               =>
+      case q"${regex: Refinement.Regex}.max(${n: Int})"                                                        =>
         regex.max(n)
-      case q"zio.prelude.refined.Refinement.Regex.AndThen.apply(${first: Refinement.Regex}, ${second: Refinement.Regex})"             =>
+      case q"${R(_)}.Regex.AndThen.apply(${first: Refinement.Regex}, ${second: Refinement.Regex})"             =>
         Refinement.Regex.AndThen(first, second)
-      case q"${left: Refinement.Regex}.~(${right: Refinement.Regex})"                                                                 =>
+      case q"${left: Refinement.Regex}.~(${right: Refinement.Regex})"                                          =>
         left ~ right
-      case q"zio.prelude.refined.Refinement.Regex.OrElse.apply(${first: Refinement.Regex}, ${second: Refinement.Regex})"              =>
+      case q"${R(_)}.Regex.OrElse.apply(${first: Refinement.Regex}, ${second: Refinement.Regex})"              =>
         Refinement.Regex.OrElse(first, second)
-      case q"${left: Refinement.Regex}.|(${right: Refinement.Regex})"                                                                 =>
+      case q"${left: Refinement.Regex}.|(${right: Refinement.Regex})"                                          =>
         left | right
     }
 
@@ -116,64 +116,73 @@ trait Liftables {
       case other                                      => c.abort(c.enclosingPosition, s"COULD NOT MATCH ASSERTION: $other")
     }
 
+  object R {
+    def unapply(tree: c.Tree): Option[Refinement.type] =
+      tree match {
+        case q"zio.prelude.Refinement" => Some(Refinement)
+        case q"Refinement"             => Some(Refinement)
+        case _                         => None
+      }
+  }
+
   @silent("Implicit resolves to enclosing method")
   implicit def refinementUnliftable[A: c.WeakTypeTag]: Unliftable[Refinement[A]] =
     Unliftable[Refinement[A]] {
-      case q"zio.prelude.refined.Refinement.Always" =>
+      case q"${R(_)}.Always" =>
         Refinement.Always
 
-      case q"zio.prelude.refined.Refinement.always" =>
+      case q"${R(_)}.always" =>
         Refinement.always
 
-      case q"zio.prelude.refined.Refinement.never" =>
+      case q"${R(_)}.never" =>
         Refinement.never
 
-      case q"zio.prelude.refined.Refinement.And.apply[$_](${left: Refinement[A]}, ${right: Refinement[A]})" =>
+      case q"${R(_)}.And.apply[$_](${left: Refinement[A]}, ${right: Refinement[A]})" =>
         Refinement.And(left, right)
 
       case q"${left: Refinement[A]}.&&[$_](${right: Refinement[A]})" =>
         Refinement.And(left, right)
 
-      case q"zio.prelude.refined.Refinement.EqualTo.apply[$_](${LiteralUnlift(value)})" =>
+      case q"${R(_)}.EqualTo.apply[$_](${LiteralUnlift(value)})" =>
         Refinement.EqualTo(value.asInstanceOf[A])
 
-      case q"zio.prelude.refined.Refinement.equalTo[$_](${LiteralUnlift(value)})" =>
+      case q"${R(_)}.equalTo[$_](${LiteralUnlift(value)})" =>
         Refinement.equalTo(value.asInstanceOf[A])
 
-      case q"zio.prelude.refined.Refinement.notEqualTo[$_](${LiteralUnlift(value)})" =>
+      case q"${R(_)}.notEqualTo[$_](${LiteralUnlift(value)})" =>
         Refinement.notEqualTo(value.asInstanceOf[A])
 
-      case q"zio.prelude.refined.Refinement.GreaterThan.apply[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${R(_)}.GreaterThan.apply[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.GreaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"zio.prelude.refined.Refinement.greaterThan[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${R(_)}.greaterThan[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.greaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"zio.prelude.refined.Refinement.greaterThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${R(_)}.greaterThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.greaterThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"zio.prelude.refined.Refinement.LessThan.apply[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${R(_)}.LessThan.apply[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.LessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"zio.prelude.refined.Refinement.lessThan[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${R(_)}.lessThan[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.lessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"zio.prelude.refined.Refinement.lessThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${R(_)}.lessThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.lessThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"zio.prelude.refined.Refinement.Matches.apply(${regex: Refinement.Regex})" =>
+      case q"${R(_)}.Matches.apply(${regex: Refinement.Regex})" =>
         Refinement.Matches(regex).asInstanceOf[Refinement[A]]
 
-      case q"zio.prelude.refined.Refinement.matches(${regex: Refinement.Regex})" =>
+      case q"${R(_)}.matches(${regex: Refinement.Regex})" =>
         Refinement.Matches(regex).asInstanceOf[Refinement[A]]
 
-      case q"zio.prelude.refined.Refinement.Not.apply[$_](${refinement: Refinement[A]})" =>
+      case q"${R(_)}.Not.apply[$_](${refinement: Refinement[A]})" =>
         Refinement.Not(refinement)
 
       case q"!${refinement: Refinement[A]}" =>
         Refinement.Not(refinement)
 
-      case q"zio.prelude.refined.Refinement.Or.apply[$_](${left: Refinement[A]}, ${right: Refinement[A]})" =>
+      case q"${R(_)}.Or.apply[$_](${left: Refinement[A]}, ${right: Refinement[A]})" =>
         Refinement.Or(left, right)
 
       case q"${left: Refinement[A]}.||[$_](${right: Refinement[A]})" =>

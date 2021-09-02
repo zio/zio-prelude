@@ -1,4 +1,4 @@
-package zio.prelude.refined
+package zio.prelude
 
 sealed trait RefinementError { self =>
   import RefinementError._

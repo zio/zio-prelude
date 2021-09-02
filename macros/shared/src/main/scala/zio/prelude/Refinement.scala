@@ -1,4 +1,4 @@
-package zio.prelude.refined
+package zio.prelude
 
 import scala.language.implicitConversions
 
@@ -35,7 +35,7 @@ object Refinement {
 
   def notEqualTo[A](value: A): Refinement[A] = !equalTo(value)
 
-  private[refined] case class And[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
+  case class And[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -47,7 +47,7 @@ object Refinement {
       } else (!left || !right).apply(a, negated = false)
   }
 
-  private[refined] case class Or[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
+  case class Or[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -57,12 +57,12 @@ object Refinement {
       } else (!left && !right).apply(a, negated = false)
   }
 
-  private[refined] case class Not[A](assertion: Refinement[A]) extends Refinement[A] {
+  case class Not[A](assertion: Refinement[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       assertion.apply(a, !negated)
   }
 
-  private[refined] case class EqualTo[A](value: A) extends Refinement[A] {
+  case class EqualTo[A](value: A) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (a == value) Right(())
@@ -73,7 +73,7 @@ object Refinement {
       }
   }
 
-  private[refined] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
+  case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (ordering.gt(a, value)) Right(())
@@ -84,7 +84,7 @@ object Refinement {
       }
   }
 
-  private[refined] case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
+  case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (ordering.lt(a, value)) Right(())
@@ -95,7 +95,7 @@ object Refinement {
       }
   }
 
-  private[refined] case class Matches(regex: Regex) extends Refinement[String] {
+  case class Matches(regex: Regex) extends Refinement[String] {
     def apply(a: String, negated: Boolean): Either[RefinementError, Unit] = {
       val compiled = regex.compile
       if (!negated) {
@@ -108,7 +108,7 @@ object Refinement {
     }
   }
 
-  private[refined] object Always extends Refinement[Any] {
+  object Always extends Refinement[Any] {
     def apply(a: Any, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) Right(()) else Left(RefinementError.failure("never"))
   }
