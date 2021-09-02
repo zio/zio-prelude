@@ -18,7 +18,7 @@ trait SPCDerive {
    * The `DeriveEqual` instance for `ParSeq`.
    */
   // to avoid conflict with `zio.prelude.ParSeq`
-  implicit lazy val parParSeqDeriveEqual: Derive[par.ParSeq, Equal] =
+  implicit val parParSeqDeriveEqual: Derive[par.ParSeq, Equal] =
     new Derive[par.ParSeq, Equal] {
       def derive[A: Equal]: Equal[par.ParSeq[A]] =
         ParSeqEqual

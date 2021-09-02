@@ -17,7 +17,7 @@ trait AssociativeFlattenInstances {
   /**
    * The `IdentityFlatten` (and thus `AssociativeFlatten`) instance for `ParSeq`.
    */
-  implicit lazy val ParSeqIdentityFlatten: IdentityFlatten[par.ParSeq] =
+  implicit val ParSeqIdentityFlatten: IdentityFlatten[par.ParSeq] =
     new IdentityFlatten[par.ParSeq] {
       def any: par.ParSeq[Any] = par.ParSeq(())
 

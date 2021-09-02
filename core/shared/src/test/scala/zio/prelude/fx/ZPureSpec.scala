@@ -11,28 +11,28 @@ import scala.util.Try
 
 object ZPureSpec extends DefaultRunnableSpec {
 
-  lazy val genInt: Gen[Random, Int] =
+  val genInt: Gen[Random, Int] =
     Gen.anyInt
 
-  lazy val genString: Gen[Random with Sized, String] =
+  val genString: Gen[Random with Sized, String] =
     Gen.anyString
 
-  lazy val genIntIntToInt: Gen[Random, (Int, Int) => Int] =
+  val genIntIntToInt: Gen[Random, (Int, Int) => Int] =
     Gen.function2(genInt)
 
-  lazy val genIntToInt: Gen[Random, Int => Int] =
+  val genIntToInt: Gen[Random, Int => Int] =
     Gen.function(genInt)
 
-  lazy val genIntToIntInt: Gen[Random, Int => (Int, Int)] =
+  val genIntToIntInt: Gen[Random, Int => (Int, Int)] =
     Gen.function(genInt <*> genInt)
 
-  lazy val genIntToState: Gen[Random, Int => State[Int, Int]] =
+  val genIntToState: Gen[Random, Int => State[Int, Int]] =
     Gen.function(genState)
 
-  lazy val genState: Gen[Random, State[Int, Int]] =
+  val genState: Gen[Random, State[Int, Int]] =
     Gens.state(genInt, genInt)
 
-  lazy val genStateState: Gen[Random, State[Int, State[Int, Int]]] =
+  val genStateState: Gen[Random, State[Int, State[Int, Int]]] =
     Gens.state(genInt, genState)
 
   def spec: ZSpec[Environment, Failure] =

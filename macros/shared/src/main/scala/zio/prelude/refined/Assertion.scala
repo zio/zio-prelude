@@ -17,7 +17,7 @@ sealed trait Assertion[-A] { self =>
 }
 
 object Assertion {
-  lazy val always: Assertion[Any] = Assertion.Always
+  val always: Assertion[Any] = Assertion.Always
 
   def equalTo[A](value: A): Assertion[A] = EqualTo(value)
 
@@ -31,7 +31,7 @@ object Assertion {
 
   def matches(regex: Regex): Assertion[String] = Matches(regex)
 
-  lazy val never: Assertion[Any] = !always
+  val never: Assertion[Any] = !always
 
   def notEqualTo[A](value: A): Assertion[A] = !equalTo(value)
 

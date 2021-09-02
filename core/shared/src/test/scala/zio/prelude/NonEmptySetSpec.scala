@@ -6,16 +6,16 @@ import zio.test.laws._
 
 object NonEmptySetSpec extends DefaultRunnableSpec {
 
-  private lazy val genSet: Gen[Random with Sized, Set[Int]] =
+  private val genSet: Gen[Random with Sized, Set[Int]] =
     Gen.setOf1(genInt)
 
-  private lazy val genSetFunction: Gen[Random with Sized, Int => Set[Int]] =
+  private val genSetFunction: Gen[Random with Sized, Int => Set[Int]] =
     Gen.function(genSet)
 
-  private lazy val genInt: Gen[Random, Int] =
+  private val genInt: Gen[Random, Int] =
     Gen.int(-10, 10)
 
-  private lazy val genNonEmptySet: Gen[Random with Sized, NonEmptySet[Int]] =
+  private val genNonEmptySet: Gen[Random with Sized, NonEmptySet[Int]] =
     genSet.map(NonEmptySet.fromSetOption(_).get)
 
   def spec: ZSpec[Environment, Failure] =

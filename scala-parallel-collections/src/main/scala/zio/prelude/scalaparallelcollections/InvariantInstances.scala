@@ -20,7 +20,7 @@ trait InvariantInstances {
   /**
    * The `ForEach` (and thus `Covariant` and `Invariant`) instance for `ParSeq`.
    */
-  implicit lazy val ParSeqForEach: ForEach[par.ParSeq] = new ForEach[par.ParSeq] {
+  implicit val ParSeqForEach: ForEach[par.ParSeq] = new ForEach[par.ParSeq] {
     def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: par.ParSeq[A])(f: A => G[B]): G[par.ParSeq[B]] =
       fa.aggregate[G[par.ParSeq[B]]](par.ParSeq.empty.succeed)(
         (bs, a) => bs.zipWith(f(a))(_ :+ _),
@@ -29,7 +29,7 @@ trait InvariantInstances {
   }
 
   /** The `Invariant` instance for `ParSet` */
-  implicit lazy val ParSetInvariant: Invariant[par.ParSet] = new Invariant[par.ParSet] {
+  implicit val ParSetInvariant: Invariant[par.ParSet] = new Invariant[par.ParSet] {
     def invmap[A, B](f: A <=> B): par.ParSet[A] <=> par.ParSet[B] =
       Equivalence(setA => setA.map(f.to), setB => setB.map(f.from))
   }
