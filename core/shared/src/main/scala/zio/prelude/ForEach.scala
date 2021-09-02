@@ -302,6 +302,32 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     foldLeft(fa)(List.empty[A])((as, a) => a :: as).reverse
 
   /**
+   * Zips the left collection and right collection together, using `None` to
+   * handle the case where one collection is larger than the other.
+   */
+  def zipAll[A, B, C](fa: F[A], fb: F[B])(implicit both: IdentityBoth[F], either: IdentityEither[F]): F[(Option[A], Option[B])] =
+    zipAllWith(fa, fb) {
+      case These.Both(a, b) => ((Some(a), Some(b)))
+      case These.Left(a)    => ((Some(a), None))
+      case These.Right(b)   => ((None, Some(b)))
+    }
+
+  /**
+   * Zips the left collection and right collection together, using the
+   * specified function to handle the cases where one collection is larger than
+   * the other.
+   */
+  def zipAllWith[A, B, C](fa: F[A], fb: F[B])(
+    f: These[A, B] => C
+  )(implicit both: IdentityBoth[F], either: IdentityEither[F]): F[C] = {
+    implicit val covariant: Covariant[F] = self
+    val as                               = toChunk(fa)
+    val bs                               = toChunk(fb)
+    val cs                               = as.zipAllWith(bs)(a => f(These.Left(a)), b => f(These.Right(b)))((a, b) => f(These.Both(a, b)))
+    cs.foldLeft[F[C]](either.none)((cs, c) => cs orElse c.succeed)
+  }
+
+  /**
    * Zips each element of the collection with its index.
    */
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
