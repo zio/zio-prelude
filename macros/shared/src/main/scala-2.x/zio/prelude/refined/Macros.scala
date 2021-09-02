@@ -26,7 +26,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
              |""".stripMargin
         c.abort(c.enclosingPosition, message)
       case None        =>
-        c.Expr[F[T]](q"${c.prefix}.unsafeWrapAll($expr)")
+        c.Expr[F[T]](q"_root.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, $expr)")
     }
   }
 
@@ -64,11 +64,11 @@ class Macros(val c: whitebox.Context) extends Liftables {
 
           c.abort(c.enclosingPosition, message)
         } else {
-          c.Expr[List[T]](q"${c.prefix}.unsafeWrapAll(List(..$values))")
+          c.Expr[List[T]](q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, List(..$values))")
         }
 
       case None =>
-        c.Expr[List[T]](q"${c.prefix}.unsafeWrapAll(List(..$values))")
+        c.Expr[List[T]](q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, List(..$values))")
     }
   }
 
@@ -95,7 +95,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
                 c.abort(c.enclosingPosition, message)
 
               case Right(_) =>
-                c.Expr[T](q"${c.prefix}.unsafeWrap($expr)")
+                c.Expr[T](q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)")
             }
 
           case _ =>
@@ -111,7 +111,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
         }
 
       case None =>
-        c.Expr[T](q"${c.prefix}.unsafeWrap($expr)")
+        c.Expr[T](q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)")
     }
 
   }

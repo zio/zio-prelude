@@ -1,19 +1,20 @@
-//// scalafix:off
-//package examples
-//
-//import zio.prelude.refined._
-//
-//object RefinedTypes extends App {
-//  import Assertion._
-//
-//  type Natural <: Int
-//  val Natural = Refined[Int, Natural] {
-//    greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
-//  }
-//  implicit class NaturalOps(private val self: Natural) extends AnyVal {
-//    def add(that: Natural): Natural = Natural.unsafeApply(Natural.unwrap(self) + Natural.unwrap(that))
-//  }
-//
+// scalafix:off
+package examples
+
+import zio.prelude._
+
+object RefinedTypes extends App {
+  import Refinement._
+
+  type Natural <: Int
+  object Natural extends Subtype[Int] {
+    val refinement = refine(greaterThanOrEqualTo(0) && lessThanOrEqualTo(100))
+
+    implicit class NaturalOps(private val self: Natural) extends AnyVal {
+      def add(that: Natural): Natural = Natural.wrap(Natural.unwrap(self) + Natural.unwrap(that))
+    }
+  }
+
 //  type Age <: Int
 //  val Age = Refined[Int, Age] {
 //    greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
@@ -42,5 +43,5 @@
 //  }
 //
 //  val myRegex: MyRegex = MyRegex("ab#l*helloccayj678")
-//}
-//// scalafix:on
+}
+// scalafix:on

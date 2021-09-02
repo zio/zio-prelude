@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.{NonEmptyChunk, prelude}
 import zio.prelude.newtypes._
 import zio.prelude.refined.Refinement
 import zio.prelude.refined.Refinement.{And => _, Or => _, _}
@@ -44,7 +43,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
         test("meter") {
           val x = Meter(3.4)
           val y = Meter(4.3)
-          val z = x + y
+          val z = x add y
           assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
         },
         test("exists") {
@@ -66,12 +65,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
       )
     )
 
-  object Meter extends Newtype[Double]
   type Meter = Meter.Type
-
-  implicit class MeterSyntax(private val self: Meter) extends AnyVal {
-    def +(that: Meter): Meter =
-      Meter.wrap(Meter.unwrap(self) + Meter.unwrap(that))
+  object Meter extends Newtype[Double] {
+    implicit final class MeterOps(private val self: Meter) extends AnyVal {
+      def add(that: Meter): Meter =
+        Meter.wrap(Meter.unwrap(self) + Meter.unwrap(that))
+    }
   }
 
   def foldMap[A, B](as: List[A])(f: A => B)(implicit B: Identity[B]) =
@@ -86,6 +85,8 @@ object NewtypeSpec extends DefaultRunnableSpec {
   object Natural extends Subtype[Int] {
     val refinement   = refine(Refinement.greaterThanOrEqualTo(0))
     val two: Natural = Natural(2)
+
+    def unsafeWrap(int: Int): Natural = wrap(int)
   }
   type Natural = Natural.Type
 

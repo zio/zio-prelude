@@ -16,6 +16,8 @@
 
 package zio.prelude
 
+import zio.prelude.refined.Refinement
+
 package object newtypes {
   object Sum extends SubtypeF
 
