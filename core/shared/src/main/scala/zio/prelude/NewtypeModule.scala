@@ -155,15 +155,13 @@ private[prelude] sealed trait NewtypeModule {
      * Converts an instance of the underlying type to an instance of the
      * newtype. Ignores the refinement.
      */
-    def unsafeWrap(value: A): Type = value.asInstanceOf[Type]
+    protected def wrap(value: A): Type = value.asInstanceOf[Type]
 
     /**
      * Converts an instance of the newtype back to an instance of the
      * underlying type.
      */
     def unwrap(value: Type): A = unwrapAll[Id](value)
-
-    def unsafeWrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
 
     /**
      * Converts an instance of a type parameterized on the newtype back to an
@@ -316,6 +314,29 @@ trait NewtypeExports {
     type Type = newtype.Type with Tag
 
     def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
+  }
+
+  object Newtype {
+
+    /**
+     * Converts an instance of the underlying type to an instance of the
+     * newtype, ignoring the [[Refinement]].
+     */
+    def unsafeWrap[A, T <: NewtypeModule#Newtype[A]](newtype: T, value: A): T#Type = {
+      val _ = newtype
+      value.asInstanceOf[T#Type]
+    }
+
+    /**
+     * Converts an instance of a type parameterized on the underlying type
+     * to an instance of a type parameterized on the newtype, ignoring the
+     * [[Refinement]]. For example, this could be used to convert a list of
+     * instances of the underlying type to a list of instances of the newtype.
+     */
+    def unsafeWrapAll[F[_], A, T <: NewtypeModule#Newtype[A]](newtype: T, value: F[A]): F[T#Type] = {
+      val _ = newtype
+      value.asInstanceOf[F[T#Type]]
+    }
   }
 
   /**
