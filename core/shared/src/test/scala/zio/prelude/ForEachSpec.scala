@@ -33,6 +33,9 @@ object ForEachSpec extends DefaultRunnableSpec {
   val genIntIntFunction2: Gen[Random, (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
+  val genTheseFunction: Gen[Random, These[Int, Int] => Int] =
+    Gen.function(genInt)
+
   implicit val chunkOptionForEach: ForEach[ChunkOption] =
     ForEach[Chunk].compose[Option]
 
@@ -227,6 +230,21 @@ object ForEachSpec extends DefaultRunnableSpec {
           check(genList) { (as) =>
             val actual   = ForEach[List].sum(as)
             val expected = as.sum
+            assert(actual)(equalTo(expected))
+          }
+        },
+        testM("zipAll") {
+          check(genChunk, genChunk) { (as, bs) =>
+            val actual   = ForEach[Chunk].zipAll(as, bs)
+            val expected = as.zipAll(bs)
+            assert(actual)(equalTo(expected))
+          }
+        },
+        testM("zipAllWith") {
+          check(genChunk, genChunk, genTheseFunction) { (as, bs, f) =>
+            val actual   = ForEach[Chunk].zipAllWith(as, bs)(f)
+            val expected =
+              as.zipAllWith(bs)(a => f(These.Left(a)), b => f(These.Right(b)))((a, b) => f(These.Both(a, b)))
             assert(actual)(equalTo(expected))
           }
         },

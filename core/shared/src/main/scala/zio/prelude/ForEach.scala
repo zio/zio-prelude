@@ -305,7 +305,10 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Zips the left collection and right collection together, using `None` to
    * handle the case where one collection is larger than the other.
    */
-  def zipAll[A, B, C](fa: F[A], fb: F[B])(implicit both: IdentityBoth[F], either: IdentityEither[F]): F[(Option[A], Option[B])] =
+  def zipAll[A, B, C](fa: F[A], fb: F[B])(implicit
+    both: IdentityBoth[F],
+    either: IdentityEither[F]
+  ): F[(Option[A], Option[B])] =
     zipAllWith(fa, fb) {
       case These.Both(a, b) => ((Some(a), Some(b)))
       case These.Left(a)    => ((Some(a), None))
@@ -423,9 +426,13 @@ trait ForEachSyntax {
       F.sum(self)
     def toChunk(implicit F: ForEach[F]): Chunk[A]                                                               =
       F.toChunk(self)
-    def zipAll[B](that: F[B])(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[(Option[A], Option[B])] =
+    def zipAll[B](
+      that: F[B]
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[(Option[A], Option[B])]      =
       F.zipAll(self, that)
-    def zipAllWith[B, C](that: F[B])(f: These[A, B] => C)(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C] =
+    def zipAllWith[B, C](that: F[B])(
+      f: These[A, B] => C
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C]                           =
       F.zipAllWith(self, that)(f)
     def zipWithIndex(implicit F: ForEach[F]): F[(A, Int)]                                                       =
       F.zipWithIndex(self)
