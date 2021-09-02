@@ -44,7 +44,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   /**
    * For all `fa`, `both(identity, fa)` is equivalent to `fa`.
    */
-  lazy val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+  val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
     new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("leftIdentityLaw") {
       def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityBoth[F].both(IdentityBoth[F].any, fa)
@@ -57,7 +57,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   /**
    * For all `fa`, `both(fa, identity)` is equivalent to `fa`.
    */
-  lazy val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+  val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
     new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("rightIdentityLaw") {
       def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
         val left  = IdentityBoth[F].both(fa, IdentityBoth[F].any)
@@ -70,7 +70,7 @@ object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, 
   /**
    * The set of law laws that instances of `IdentityBoth` must satisfy.
    */
-  lazy val laws: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
+  val laws: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
     leftIdentityLaw + rightIdentityLaw + AssociativeBoth.laws
 
   /**

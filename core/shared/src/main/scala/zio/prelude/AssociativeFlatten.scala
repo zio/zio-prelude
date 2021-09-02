@@ -49,7 +49,7 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
    * For all `fffa`, `flatten(flatten(fffa))` is equivalent to
    * `flatten(fffa.map(flatten))`.
    */
-  lazy val associativityLaw: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
+  val associativityLaw: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
     new LawsF.Covariant.FlattenLaw[AssociativeFlattenCovariantDeriveEqual, Equal]("associativityLaw") {
       def apply[F[+_]: AssociativeFlattenCovariantDeriveEqual, A: Equal](fffa: F[F[F[A]]]): TestResult =
         fffa.flatten.flatten <-> fffa.map(_.flatten).flatten
@@ -58,7 +58,7 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
   /**
    * The set of all laws that instances of `AssociativeFlatten` must satisfy.
    */
-  lazy val laws: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
+  val laws: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
     associativityLaw
 
   /**

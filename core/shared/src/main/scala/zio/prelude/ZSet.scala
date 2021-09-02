@@ -284,7 +284,7 @@ object ZSet extends LowPriorityZSetImplicits {
   /**
    * The `ForEach` instance for `MultiSet`.
    */
-  implicit lazy val MultiSetForEach: ForEach[MultiSet] =
+  implicit val MultiSetForEach: ForEach[MultiSet] =
     new ForEach[MultiSet] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: MultiSet[A])(f: A => G[B]): G[MultiSet[B]] =
         fa.forEach(f)

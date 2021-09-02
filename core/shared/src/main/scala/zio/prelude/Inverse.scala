@@ -64,7 +64,7 @@ object Inverse extends Lawful[EqualInverse] {
    * a * a === identity
    * }}}
    */
-  lazy val inverseLaw: Laws[EqualInverse] =
+  val inverseLaw: Laws[EqualInverse] =
     new Laws.Law1[EqualInverse]("rightInverseLaw") {
       def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
         I.inverse(a, a) <-> I.identity
@@ -73,7 +73,7 @@ object Inverse extends Lawful[EqualInverse] {
   /**
    * The set of all laws that instances of `Inverse` must satisfy.
    */
-  lazy val laws: Laws[EqualInverse] =
+  val laws: Laws[EqualInverse] =
     inverseLaw + Identity.laws
 
   /**

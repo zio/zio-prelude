@@ -53,7 +53,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
    * For all `fa`, `fb`, and `fc`, `both(fa, both(fb, fc))` is equivalent
    * to `both(both(fa, fb), fc)`.
    */
-  lazy val associativityLaw: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
+  val associativityLaw: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
     new LawsF.Invariant.Law3[AssociativeBothDeriveEqualInvariant, Equal]("associativityLaw") {
       def apply[F[_]: AssociativeBothDeriveEqualInvariant, A: Equal, B: Equal, C: Equal](
         fa: F[A],
@@ -70,7 +70,7 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
   /**
    * The set of law laws that instances of `AssociativeBoth` must satisfy.
    */
-  lazy val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
+  val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
     associativityLaw
 
   def fromCovariantAssociativeFlatten[F[+_]](implicit

@@ -55,7 +55,7 @@ object Identity extends Lawful[EqualIdentity] {
    * identity * a === a
    * }}}
    */
-  lazy val leftIdentityLaw: Laws[EqualIdentity] =
+  val leftIdentityLaw: Laws[EqualIdentity] =
     new Laws.Law1[EqualIdentity]("leftIdentityLaw") {
       def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
         (I.identity <> a) <-> a
@@ -69,7 +69,7 @@ object Identity extends Lawful[EqualIdentity] {
    * a * identity === a
    * }}}
    */
-  lazy val rightIdentityLaw: Laws[EqualIdentity] =
+  val rightIdentityLaw: Laws[EqualIdentity] =
     new Laws.Law1[EqualIdentity]("rightIdentityLaw") {
       def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
         (a <> I.identity) <-> a
@@ -78,7 +78,7 @@ object Identity extends Lawful[EqualIdentity] {
   /**
    * The set of all laws that instances of `Identity` must satisfy.
    */
-  lazy val laws: Laws[EqualIdentity] =
+  val laws: Laws[EqualIdentity] =
     leftIdentityLaw + rightIdentityLaw + Associative.laws
 
   /**

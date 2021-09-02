@@ -162,7 +162,7 @@ object NonEmptyForEach extends LawfulF.Covariant[DeriveEqualNonEmptyForEach, Equ
   /**
    * The set of all laws that instances of `NonEmptyForEach` must satisfy.
    */
-  lazy val laws: LawsF.Covariant[DeriveEqualNonEmptyForEach, Equal] =
+  val laws: LawsF.Covariant[DeriveEqualNonEmptyForEach, Equal] =
     ForEach.laws
 
   /**

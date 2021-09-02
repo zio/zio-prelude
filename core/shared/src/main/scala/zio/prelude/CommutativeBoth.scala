@@ -37,7 +37,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * For all `fa` and `fb`, `both(fa, fb)` is equivalent to `both(fb, fa)`.
    */
-  lazy val commutativeLaw: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
+  val commutativeLaw: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
     new LawsF.Invariant.Law2[CommutativeBothDeriveEqualInvariant, Equal]("commutativeLaw") {
       def apply[F[_]: CommutativeBothDeriveEqualInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
         val left  = fa.zipPar(fb)
@@ -50,7 +50,7 @@ object CommutativeBoth extends LawfulF.Invariant[CommutativeBothDeriveEqualInvar
   /**
    * The set of law laws that instances of `CommutativeBoth` must satisfy.
    */
-  lazy val laws: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
+  val laws: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
     commutativeLaw + AssociativeBoth.laws
 
   /**

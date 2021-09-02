@@ -321,7 +321,7 @@ object ForEach extends LawfulF.Covariant[DeriveEqualForEach, Equal] {
   /**
    * The set of all laws that instances of `ForEach` must satisfy.
    */
-  lazy val laws: LawsF.Covariant[DeriveEqualForEach, Equal] =
+  val laws: LawsF.Covariant[DeriveEqualForEach, Equal] =
     Covariant.laws
 
   /**
