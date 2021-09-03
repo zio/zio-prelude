@@ -1,11 +1,12 @@
 package zio.prelude
 
 import zio.NonEmptyChunk
-import zio.prelude.Refinement.{And => _, Or => _}
-import zio.prelude.newtypes._
-import zio.test.Assertion._
+import zio.prelude.newtypes.{And, Or, Sum}
+import zio.test.Assertion.{isFalse, isLeft, isTrue}
 import zio.test.AssertionM.Render.param
 import zio.test._
+
+import zio.prelude.NewtypeSpecTypes._
 
 object NewtypeSpec extends DefaultRunnableSpec {
   trait Dummy[A]
@@ -39,12 +40,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
                 containsStringWithoutAnsi("-3 did not satisfy greaterThanOrEqualTo(0)")
             )
           )
-        },
+        } @@ TestAspect.exceptDotty,
         testM("invalid value at run-time") {
           assertM(typeCheck("Natural(-1)"))(
             isLeft(containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)"))
           )
-        },
+        } @@ TestAspect.exceptDotty,
         test("invalid values at run-time") {
           assert(Natural.make(-1))(
             isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))
@@ -99,16 +100,6 @@ object NewtypeSpec extends DefaultRunnableSpec {
 
   def forall[A](as: List[A])(f: A => Boolean): Boolean =
     And.unwrap(foldMap(as)(a => And.create(f(a))))
-
-  type Natural = Natural.Type
-  object Natural extends Subtype[Int] {
-    def refinement =
-      refine(Refinement.greaterThanOrEqualTo(0))
-
-    val two: Natural = Natural(2)
-
-    def unsafeWrap(int: Int): Natural = wrap(int)
-  }
 
   object IntSum extends Newtype[Int]
   type IntSum = IntSum.Type
