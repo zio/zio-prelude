@@ -6,14 +6,14 @@ import zio.test.laws._
 
 object NonEmptySetSpec extends DefaultRunnableSpec {
 
+  private val genInt: Gen[Random, Int] =
+    Gen.int(-10, 10)
+
   private val genSet: Gen[Random with Sized, Set[Int]] =
     Gen.setOf1(genInt)
 
   private val genSetFunction: Gen[Random with Sized, Int => Set[Int]] =
     Gen.function(genSet)
-
-  private val genInt: Gen[Random, Int] =
-    Gen.int(-10, 10)
 
   private val genNonEmptySet: Gen[Random with Sized, NonEmptySet[Int]] =
     genSet.map(NonEmptySet.fromSetOption(_).get)

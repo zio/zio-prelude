@@ -6,6 +6,9 @@ import zio.test.laws._
 
 object NonEmptyListSpec extends DefaultRunnableSpec {
 
+  val genInt: Gen[Random, Int] =
+    Gen.int(-10, 10)
+
   val genBooleanFunction: Gen[Random, Int => Boolean] =
     Gen.function(Gen.boolean)
 
@@ -23,9 +26,6 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
 
   val genFunction2: Gen[Random with Sized, (Int, Int) => Int] =
     Gen.function2(genInt)
-
-  val genInt: Gen[Random, Int] =
-    Gen.int(-10, 10)
 
   val genNonEmptyList: Gen[Random with Sized, NonEmptyList[Int]] =
     genCons.map(NonEmptyList.fromCons)

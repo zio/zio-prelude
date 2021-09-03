@@ -26,11 +26,11 @@ object ZPureSpec extends DefaultRunnableSpec {
   val genIntToIntInt: Gen[Random, Int => (Int, Int)] =
     Gen.function(genInt <*> genInt)
 
-  val genIntToState: Gen[Random, Int => State[Int, Int]] =
-    Gen.function(genState)
-
   val genState: Gen[Random, State[Int, Int]] =
     Gens.state(genInt, genInt)
+
+  val genIntToState: Gen[Random, Int => State[Int, Int]] =
+    Gen.function(genState)
 
   val genStateState: Gen[Random, State[Int, State[Int, Int]]] =
     Gens.state(genInt, genState)
