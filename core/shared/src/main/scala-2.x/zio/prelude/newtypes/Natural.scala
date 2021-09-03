@@ -4,7 +4,9 @@ import zio.prelude._
 
 object Natural extends Subtype[Int] {
 
+  // scalafix:off
   def refinement = refine(Refinement.greaterThanOrEqualTo(0))
+  // scalafix:on
 
   val one: Natural =
     Natural(1)

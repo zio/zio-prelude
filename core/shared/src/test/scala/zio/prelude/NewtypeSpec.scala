@@ -9,18 +9,10 @@ import zio.test._
 import zio.prelude.NewtypeSpecTypes._
 
 object NewtypeSpec extends DefaultRunnableSpec {
-  trait Dummy[A]
-
-  type Age = Age.Type
-  object Age extends Newtype[Int] {
-    implicit val dummyType: Dummy[Age] = new Dummy[Age] {}
-  }
-
-  val dummy = implicitly[Dummy[Age]]
 
   def spec =
     suite("NewtypeSpec")(
-      suite("NewtypeSmart")(
+      suite("with refinement")(
         test("valid values at compile-time") {
           assertTrue(Natural(0) == Natural.unsafeWrap(0))
         },
@@ -52,7 +44,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
           )
         }
       ),
-      suite("SubtypeSmart")(
+      suite("Subtype")(
         test("subtypes values") {
           val two = 2
           assertTrue(two + Natural.two == 2 + 2)
@@ -110,11 +102,20 @@ object NewtypeSpec extends DefaultRunnableSpec {
   def sum[A](as: List[A])(implicit A: Identity[Sum[A]]): A =
     Sum.unwrap(Sum.wrapAll(as).foldLeft(A.identity)((b, a) => A.combine(b, a)))
 
+  trait Dummy[A]
+
+  type Age = Age.Type
+  object Age extends Newtype[Int] {
+    implicit val dummyType: Dummy[Age] = new Dummy[Age] {}
+  }
+
+  val dummy = implicitly[Dummy[Age]]
+
   implicit class StringOps(private val self: String) extends AnyVal {
     def removingAnsiCodes: String =
       self.replaceAll("\u001B\\[[;\\d]*m", "")
   }
 
-  def containsStringWithoutAnsi(element: String): Assertion[String] =
+  private def containsStringWithoutAnsi(element: String): Assertion[String] =
     Assertion.assertion("containsStringWithoutAnsi")(param(element))(_.removingAnsiCodes.contains(element))
 }
