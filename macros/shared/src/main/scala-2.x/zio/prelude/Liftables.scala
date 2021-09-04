@@ -124,8 +124,9 @@ trait Liftables {
   }
 
   implicit def scalaRegexUnliftable[A: c.WeakTypeTag]: Unliftable[scala.util.matching.Regex] =
-    Unliftable[scala.util.matching.Regex] { case q"scala.Predef.augmentString(${string: String}).r" =>
-      string.r
+    Unliftable[scala.util.matching.Regex] {
+      case q"scala.Predef.augmentString(${string: String}).r"      => string.r
+      case q"scala.this.Predef.augmentString(${string: String}).r" => string.r
     }
 
   @silent("Implicit resolves to enclosing method")
@@ -184,6 +185,8 @@ trait Liftables {
   object LiteralUnlift {
     def unapply(expr: Tree): Option[Any] = expr match {
       case q"${int: Int}"       => Some(int)
+      case q"Int.MaxValue"      => Some(Int.MaxValue)
+      case q"Int.MinValue"      => Some(Int.MinValue)
       case q"${string: String}" => Some(string)
       case q"${double: Double}" => Some(double)
       case q"${float: Float}"   => Some(float)

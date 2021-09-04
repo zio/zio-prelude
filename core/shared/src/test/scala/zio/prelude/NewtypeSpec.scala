@@ -21,13 +21,16 @@ object NewtypeSpec extends DefaultRunnableSpec {
           )
         },
         test("valid values at run-time") {
-          assert(Natural.make(0))(isSuccessV(equalTo(Natural.unsafeWrap(0))))
+          assert(Natural.make(0))(isSuccessV(equalTo(Natural(0))))
         },
         test("multiple valid values at run-time") {
-          assert(Pin.makeAll(List(1234, 5823)))(isSuccessV(equalTo(List(Pin(1234), Pin(5823)))))
+          val result   = Pin.makeAll(NonEmptyChunk(1234, 5823))
+          val expected = NonEmptyChunk(Pin(1234), Pin(5823))
+          assert(result)(isSuccessV(equalTo(expected)))
         },
         test("multiple invalid values at run-time") {
-          assert(Pin.makeAll(List(1234, 44, 5823, 81234)))(
+          val result = Pin.makeAll(NonEmptyChunk(1234, 44, 5823, 81234))
+          assert(result)(
             isFailureV(
               equalTo(
                 NonEmptyChunk(
@@ -69,7 +72,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
           val x = Meter(3.4)
           val y = Meter(4.3)
           val z = x add y
-          assertTrue(Meter.unwrap(z) == 3.4 + 4.3)
+          assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
         },
         test("exists") {
           assert(exists(List(true, false))(identity))(isTrue)

@@ -268,6 +268,7 @@ private[prelude] sealed trait NewtypeModule {
 
   sealed trait Subtype[A] extends Newtype[A] {
     type Type <: A
+
   }
 
   @deprecated("use Subtype with a refinement", "1.0.0-RC8")
@@ -399,7 +400,9 @@ trait NewtypeExports {
     trait Tag extends Any
     type Type = subtype.Type with Tag
 
-    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
+    override def unwrap(value: Type): A       = value
+    def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
+
   }
 
   /**

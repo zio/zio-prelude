@@ -19,12 +19,12 @@ object Natural extends Subtype[Int] {
 
   def times(x: Natural, y: Natural): Natural = {
     val product = x * y
-    if (x == 0 || product / x != y) Natural(Int.MaxValue) else wrap(product)
+    if (x == 0 || product / x != y) wrap(Int.MaxValue) else wrap(product)
   }
 
   def plus(x: Natural, y: Natural): Natural = {
     val sum = x + y
-    if (sum < 0) Natural(Int.MaxValue) else wrap(sum)
+    if (sum < 0) wrap(Int.MaxValue) else wrap(sum)
   }
 
   def minus(x: Natural, y: Natural): Natural = {

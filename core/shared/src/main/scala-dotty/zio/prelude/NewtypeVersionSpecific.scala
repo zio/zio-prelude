@@ -3,6 +3,7 @@ package zio.prelude
 import zio.NonEmptyChunk
 
 import scala.quoted.*
+import zio.prelude.ConsoleUtils.*
 
 trait NewtypeCompanionVersionSpecific
 
@@ -26,6 +27,13 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
       refinement.apply(value).left.map(_.toNonEmptyChunk(value.toString))
     ).as(value.asInstanceOf[Type])
 
+
+  def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
+    ForEach[F].forEach(value) { value =>
+      Validation.fromEitherNonEmptyChunk(
+        refinement.apply(value).left.map(_.toNonEmptyChunk(value.toString))
+      )
+    }.as(value.asInstanceOf[F[Type]])
 }
 
 object Macros extends Liftables {
@@ -59,14 +67,18 @@ object Macros extends Liftables {
         as match {
           case Varargs(exprs) =>
             val validated = exprs.map {
-              case LiteralUnlift(x) => refinement(x.asInstanceOf[A])
+              case LiteralUnlift(x) => refinement(x.asInstanceOf[A]).left.map(_.render(x.toString))
               case _ => report.throwError(s"$refinementErrorHeader\nMust use literal value for macro.")
             }
 
             val (errors, _) = validated.partitionMap(identity)
 
+            // val rendered = ${dim("refinement =")} ${refinement}
+
             if (errors.nonEmpty)
-               report.throwError(s"YOU FAILED ${errors}")
+               report.throwError(s"""$refinementErrorHeader
+${errors.mkString("\n")}
+""")
 
             '{ NonEmptyChunk($a, $as*).asInstanceOf[NonEmptyChunk[T]] }
 

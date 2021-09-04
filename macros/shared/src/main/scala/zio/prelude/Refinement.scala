@@ -174,13 +174,13 @@ object Refinement {
 
   private[prelude] case class Matches(regexString: String) extends Refinement[String] {
     def apply(a: String, negated: Boolean): Either[RefinementError, Unit] = {
-      val compiled = regexString.r
-      val result   = compiled.matches(a)
+      val compiled = s"^$regexString$$".r
+      val result   = compiled.findFirstIn(a).isDefined
       if (!negated) {
         if (result) Right(())
-        else Left(RefinementError.Failure(s"matches($compiled)"))
+        else Left(RefinementError.Failure(s"matches(${regexString.r})"))
       } else {
-        if (result) Left(RefinementError.Failure(s"doesNotMatch($compiled)"))
+        if (result) Left(RefinementError.Failure(s"doesNotMatch(${regexString.r})"))
         else Right(())
       }
     }
@@ -191,7 +191,7 @@ object Refinement {
       val result = isPower(numeric.toDouble(base), numeric.toDouble(a))
       if (!negated) {
         if (result) Right(())
-        else Left(RefinementError.Failure(s"matches($base)"))
+        else Left(RefinementError.Failure(s"powerOf($base)"))
       } else {
         if (!result) Left(RefinementError.Failure(s"notPowerOf($base)"))
         else Right(())
