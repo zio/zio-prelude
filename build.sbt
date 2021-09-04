@@ -95,7 +95,8 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings(
     libraryDependencies ++= Seq(
-      "dev.zio" %%% "zio" % zioVersion
+      "dev.zio" %%% "zio"      % zioVersion,
+      "dev.zio" %%% "zio-test" % zioVersion
     )
   )
   .enablePlugins(BuildInfoPlugin)

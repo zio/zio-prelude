@@ -1,6 +1,5 @@
 package zio.prelude
 
-import scala.language.implicitConversions
 import scala.util.matching
 
 sealed trait Refinement[-A] { self =>
@@ -250,7 +249,7 @@ object Refinement {
     val digit: Regex           = Digit(reversed = false)
     val nonDigit: Regex        = Digit(reversed = true)
 
-    implicit def literal(str: String): Regex =
+    def literal(str: String): Regex =
       str.toList.foldLeft(anything)((acc, char) => acc ~ Literal(char))
 
     def anyOf(first: Char, second: Char, rest: Char*): Regex =

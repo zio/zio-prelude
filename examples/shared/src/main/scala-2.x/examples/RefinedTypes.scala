@@ -15,33 +15,37 @@ object RefinedTypes extends App {
     }
   }
 
-//  type Age <: Int
-//  val Age = Refined[Int, Age] {
-//    greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
-//  }
-//
-//  val natural: Natural = Natural(5) add Natural(6)
-//
-//  val age: Age = Age(60)
-//
-//  def sum(a: Int, b: Int): Int = a + b
-//
-//  println(sum(natural, age))
-//
-//  val x: Natural                 = Natural(0)
-//  val y: Either[String, Natural] = Natural.make(scala.util.Random.nextInt)
-//
-//  import Regex._
-//
-//  type MyRegex <: String
-//  val MyRegex = Refined[String, MyRegex] {
-//    matches {
-//      start ~ anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
-//        "hello" ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
-//        inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3) ~ end
-//    }
-//  }
-//
-//  val myRegex: MyRegex = MyRegex("ab#l*helloccayj678")
+  type Age = Age.Type
+  object Age extends Subtype[Int] {
+    def refinement = refine {
+      greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
+    }
+  }
+
+  val natural: Natural = Natural(5) add Natural(6)
+
+  val age: Age = Age(60)
+
+  def sum(a: Int, b: Int): Int = a + b
+
+  println(sum(natural, age))
+
+  val x: Natural                     = Natural(0)
+  val y: Validation[String, Natural] = Natural.make(scala.util.Random.nextInt)
+
+  import Regex._
+
+  type MyRegex = MyRegex.Type
+  object MyRegex extends Newtype[String] {
+    def refinement = refine {
+      Refinement.matches {
+        anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace.* ~ digit.min(0) ~ nonDigit.min(1) ~
+          literal("hello").+ ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
+          inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3)
+      }
+    }
+  }
+
+  val myRegex: MyRegex = MyRegex("ab#l*helloccayj678")
 }
 // scalafix:on

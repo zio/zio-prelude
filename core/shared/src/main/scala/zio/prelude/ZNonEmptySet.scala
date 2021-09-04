@@ -16,8 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.Natural.Natural
-import zio.prelude.newtypes.{Max, Prod, Sum}
+import zio.prelude.newtypes._
 
 import scala.language.implicitConversions
 

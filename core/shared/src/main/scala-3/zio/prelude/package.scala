@@ -1,19 +1,3 @@
-/*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package zio.prelude
 
 package object newtypes {
@@ -113,4 +97,38 @@ package object newtypes {
 
   type FailureOut[+A] = FailureOut.Type[A]
 
+  object Natural extends Subtype[Int] {
+
+    override inline def refinement: Refinement[Int] =
+      Refinement.greaterThanOrEqualTo(0)
+
+    val one: Natural =
+      Natural(1)
+
+    val zero: Natural =
+      Natural(0)
+
+    def successor(n: Natural): Natural =
+      wrap(n + 1)
+
+    def times(x: Natural, y: Natural): Natural = {
+      val product = x * y
+      if (x == 0 || product / x != y) Natural(Int.MaxValue) else wrap(product)
+    }
+
+    def plus(x: Natural, y: Natural): Natural = {
+      val sum = x + y
+      if (sum < 0) Natural(Int.MaxValue) else wrap(sum)
+    }
+
+    def minus(x: Natural, y: Natural): Natural = {
+      val difference = x - y
+      if (difference < 0) zero else wrap(difference)
+    }
+
+    private[prelude] def unsafeMake(n: Int): Natural =
+      wrap(n)
+  }
+
+  type Natural = Natural.Type
 }
