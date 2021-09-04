@@ -18,6 +18,7 @@ package zio.prelude
 
 import zio.prelude.fx.Cause
 import zio.prelude.newtypes.Natural
+import zio.prelude.newtypes.Natural.Natural
 import zio.random.Random
 import zio.test._
 

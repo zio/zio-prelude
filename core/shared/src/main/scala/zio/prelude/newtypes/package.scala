@@ -17,7 +17,6 @@
 package zio.prelude
 
 package object newtypes {
-  type Natural = Natural.Type
 
   object Sum extends SubtypeF
 

@@ -5,6 +5,7 @@ import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZSet._
 import zio.prelude.coherent.{CovariantDeriveEqual, DeriveEqualForEach}
+import zio.prelude.newtypes.Natural.Natural
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test.Assertion._

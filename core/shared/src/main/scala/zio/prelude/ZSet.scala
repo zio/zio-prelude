@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.prelude.newtypes.Natural.Natural
 import zio.prelude.newtypes.{Max, Min, Natural, Prod, Sum}
 
 import scala.annotation.tailrec

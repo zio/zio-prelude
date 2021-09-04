@@ -3,6 +3,7 @@ package zio.prelude.newtypes
 import zio.prelude._
 
 object Natural extends Subtype[Int] {
+  type Natural = Type
 
   // scalafix:off
   def refinement = refine(Refinement.greaterThanOrEqualTo(0))

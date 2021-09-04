@@ -3,6 +3,7 @@ import zio.prelude.newtypes.Natural
 import zio.prelude.*
 
 object Natural extends Subtype[Int] {
+  type Natural = Type
 
   override inline def refinement = 
     Refinement.greaterThanOrEqualTo(0)

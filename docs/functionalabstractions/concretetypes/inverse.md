@@ -44,6 +44,7 @@ We can then define an `Inverse` instance for `Natural` like this:
 ```scala mdoc:reset
 import zio.prelude._
 import zio.prelude.newtypes._
+import zio.prelude.newtypes.Natural.Natural
 
 implicit val NaturalInverse: Inverse[Natural] =
   new Inverse[Natural] {
