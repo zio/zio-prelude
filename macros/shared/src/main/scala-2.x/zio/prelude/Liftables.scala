@@ -44,10 +44,6 @@ trait Liftables {
         Refinement.Regex.Anything
       case q"${R(_)}.Regex.anything"                                                                           =>
         Refinement.Regex.anything
-      case q"${R(_)}.Regex.End"                                                                                =>
-        Refinement.Regex.End
-      case q"${R(_)}.Regex.end"                                                                                =>
-        Refinement.Regex.end
       case q"${R(_)}.Regex.Alphanumeric.apply(${reversed: Boolean})"                                           =>
         Refinement.Regex.Alphanumeric(reversed)
       case q"${R(_)}.Regex.alphanumeric"                                                                       =>
@@ -82,10 +78,6 @@ trait Liftables {
         Refinement.Regex.inRange(start, end)
       case q"${R(_)}.Regex.notInRange(${start: Char}, ${end: Char})"                                           =>
         Refinement.Regex.notInRange(start, end)
-      case q"${R(_)}.Regex.Start"                                                                              =>
-        Refinement.Regex.Start
-      case q"${R(_)}.Regex.start"                                                                              =>
-        Refinement.Regex.start
       case q"${R(_)}.Regex.Repeat.apply(${regex: Refinement.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
         Refinement.Regex.Repeat(regex, min, max)
       case q"${regex: Refinement.Regex}.min(${n: Int})"                                                        =>
@@ -111,7 +103,7 @@ trait Liftables {
   @silent("Implicit resolves to enclosing method")
   implicit def refinementLiftable[A: c.WeakTypeTag]: Liftable[Refinement[A]] =
     Liftable[Refinement[A]] {
-      case Refinement.Always                          => q"$RefinementPrefix.Always"
+      case Refinement.Anything                        => q"$RefinementPrefix.Always"
       case Refinement.And(left, right)                => q"$RefinementPrefix.And($left, $right)"
       case Refinement.EqualTo(LiteralLift(value))     => q"$RefinementPrefix.EqualTo($value)"
       case Refinement.GreaterThan(LiteralLift(value)) => q"$RefinementPrefix.GreaterThan($value)"
@@ -139,23 +131,15 @@ trait Liftables {
   @silent("Implicit resolves to enclosing method")
   implicit def refinementUnliftable[A: c.WeakTypeTag]: Unliftable[Refinement[A]] =
     Unliftable[Refinement[A]] {
-      case q"${R(_)}.Always" =>
-        Refinement.Always
 
-      case q"${R(_)}.always" =>
-        Refinement.always
+      case q"${R(_)}.anything" =>
+        Refinement.anything
 
       case q"${R(_)}.never" =>
         Refinement.never
 
-      case q"${R(_)}.And.apply[$_](${left: Refinement[A]}, ${right: Refinement[A]})" =>
-        Refinement.And(left, right)
-
       case q"${left: Refinement[A]}.&&[$_](${right: Refinement[A]})" =>
         Refinement.And(left, right)
-
-      case q"${R(_)}.EqualTo.apply[$_](${LiteralUnlift(value)})" =>
-        Refinement.EqualTo(value.asInstanceOf[A])
 
       case q"${R(_)}.equalTo[$_](${LiteralUnlift(value)})" =>
         Refinement.equalTo(value.asInstanceOf[A])
@@ -163,8 +147,8 @@ trait Liftables {
       case q"${R(_)}.notEqualTo[$_](${LiteralUnlift(value)})" =>
         Refinement.notEqualTo(value.asInstanceOf[A])
 
-      case q"${R(_)}.GreaterThan.apply[$_](${LiteralUnlift(value)})($_)" =>
-        Refinement.GreaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
+      case q"${R(_)}.between[$_](${LiteralUnlift(min)}, ${LiteralUnlift(max)})($_)" =>
+        Refinement.between(min.asInstanceOf[A], max.asInstanceOf[A])(orderingForValue(min).asInstanceOf[Ordering[A]])
 
       case q"${R(_)}.greaterThan[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.greaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
@@ -172,17 +156,11 @@ trait Liftables {
       case q"${R(_)}.greaterThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.greaterThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"${R(_)}.LessThan.apply[$_](${LiteralUnlift(value)})($_)" =>
-        Refinement.LessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
-
       case q"${R(_)}.lessThan[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.lessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
       case q"${R(_)}.lessThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.lessThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
-
-      case q"${R(_)}.Matches.apply(${string: String})" =>
-        Refinement.Matches(string).asInstanceOf[Refinement[A]]
 
       case q"${R(_)}.matches(${regex: Refinement.Regex})" =>
         Refinement.Matches(regex.compile).asInstanceOf[Refinement[A]]
@@ -193,14 +171,11 @@ trait Liftables {
       case q"${R(_)}.matches(${regex: scala.util.matching.Regex})" =>
         Refinement.Matches(regex.regex).asInstanceOf[Refinement[A]]
 
-      case q"${R(_)}.Not.apply[$_](${refinement: Refinement[A]})" =>
-        Refinement.Not(refinement)
+      case q"${R(_)}.powerOf[$_](${LiteralUnlift(base)})($_)" =>
+        Refinement.powerOf(base)(numericForValue(base)).asInstanceOf[Refinement[A]]
 
       case q"!${refinement: Refinement[A]}" =>
         Refinement.Not(refinement)
-
-      case q"${R(_)}.Or.apply[$_](${left: Refinement[A]}, ${right: Refinement[A]})" =>
-        Refinement.Or(left, right)
 
       case q"${left: Refinement[A]}.||[$_](${right: Refinement[A]})" =>
         Refinement.Or(left, right)
@@ -244,6 +219,18 @@ trait Liftables {
     case _: Long   => scala.Ordering.Long.asInstanceOf[Ordering[Any]]
     case _: Short  => scala.Ordering.Short.asInstanceOf[Ordering[Any]]
     case _: Byte   => scala.Ordering.Byte.asInstanceOf[Ordering[Any]]
+    case _: Char   => scala.Ordering.Char.asInstanceOf[Ordering[Any]]
+    case other     => c.abort(c.enclosingPosition, s"NO ORDERING FOR $other")
+  }
+
+  private def numericForValue(any: Any): Numeric[Any] = any match {
+    case _: Int    => scala.Numeric.IntIsIntegral.asInstanceOf[Numeric[Any]]
+    case _: Double => scala.Numeric.DoubleIsFractional.asInstanceOf[Numeric[Any]]
+    case _: Float  => scala.Numeric.FloatIsFractional.asInstanceOf[Numeric[Any]]
+    case _: Long   => scala.Numeric.LongIsIntegral.asInstanceOf[Numeric[Any]]
+    case _: Short  => scala.Numeric.ShortIsIntegral.asInstanceOf[Numeric[Any]]
+    case _: Byte   => scala.Numeric.ByteIsIntegral.asInstanceOf[Numeric[Any]]
+    case _: Char   => scala.Numeric.CharIsIntegral.asInstanceOf[Numeric[Any]]
     case other     => c.abort(c.enclosingPosition, s"NO ORDERING FOR $other")
   }
 

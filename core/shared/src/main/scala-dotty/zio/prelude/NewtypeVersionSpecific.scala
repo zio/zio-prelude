@@ -19,7 +19,7 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
   inline def apply(inline value: A, inline values: A*): NonEmptyChunk[Type] = 
     ${Macros.makeMany_Impl[A, Type]('{refinement}, 'value, 'values)}
   
-  def refinement: Refinement[A] = Refinement.always
+  def refinement: Refinement[A] = Refinement.anything
 
   def make(value: A): Validation[String, Type] = 
     Validation.fromEitherNonEmptyChunk(

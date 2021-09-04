@@ -18,7 +18,12 @@ sealed trait Refinement[-A] { self =>
 }
 
 object Refinement {
-  val always: Refinement[Any] = Refinement.Always
+  val anything: Refinement[Any] = Refinement.Anything
+
+  /**
+   * Ensures the value falls between a given min and max (inclusive).
+   */
+  def between[A](min: A, max: A)(implicit ordering: Ordering[A]): Refinement[A] = Between(min, max)
 
   def equalTo[A](value: A): Refinement[A] = EqualTo(value)
 
@@ -46,9 +51,25 @@ object Refinement {
    */
   def matches(regex: matching.Regex): Refinement[String] = Matches(regex.regex)
 
-  lazy val never: Refinement[Any] = !always
+  val never: Refinement[Any] = !anything
 
   def notEqualTo[A](value: A): Refinement[A] = !equalTo(value)
+
+  /**
+   * Ensures that the value is a power of the given base.
+   *
+   * {{{
+   *  type PowerOfTwo = PowerOfTwo.Type
+   *  object PowerOfTwo extends Newtype[Int] {
+   *    def refinement =
+   *      refine(Refinement.powerOf(2))
+   *  }
+   *
+   *  // PowerOfTwo(1024) compiles
+   *  // PowerOfTwo(1025) fails
+   * }}}
+   */
+  def powerOf[A](base: A)(implicit numeric: Numeric[A]): Refinement[A] = PowerOf(base)
 
   private[prelude] case class And[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
@@ -88,6 +109,19 @@ object Refinement {
       }
   }
 
+  private[prelude] case class Between[A](min: A, max: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] = {
+      val result = ordering.gteq(a, min) && ordering.lteq(a, max)
+      if (!negated) {
+        if (result) Right(())
+        else Left(RefinementError.failure(s"between($min, $max)"))
+      } else {
+        if (!result) Right(())
+        else Left(RefinementError.failure(s"notBetween($min, $max)"))
+      }
+    }
+  }
+
   private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
@@ -123,7 +157,27 @@ object Refinement {
     }
   }
 
-  private[prelude] object Always extends Refinement[Any] {
+  private[prelude] case class PowerOf[A](base: A)(implicit numeric: Numeric[A]) extends Refinement[A] {
+    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] = {
+      val result = isPower(numeric.toDouble(base), numeric.toDouble(a))
+      if (!negated) {
+        if (result) Right(())
+        else Left(RefinementError.Failure(s"matches($base)"))
+      } else {
+        if (!result) Left(RefinementError.Failure(s"notPowerOf($base)"))
+        else Right(())
+      }
+    }
+
+    private def isPower(base: Double, number: Double): Boolean = {
+      if (base == 1) return number == 1
+      var pow = 1.0
+      while (pow < number) pow = pow * base
+      pow == number
+    }
+  }
+
+  private[prelude] object Anything extends Refinement[Any] {
     def apply(a: Any, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) Right(()) else Left(RefinementError.failure("never"))
   }
@@ -161,13 +215,11 @@ object Refinement {
     val anyChar: Regex         = AnyChar
     val alphanumeric: Regex    = Alphanumeric(reversed = false)
     val anything: Regex        = Anything
-    val end: Regex             = End
     val nonAlphanumeric: Regex = Alphanumeric(reversed = true)
     val whitespace: Regex      = Whitespace(reversed = false)
     val nonWhitespace: Regex   = Whitespace(reversed = true)
     val digit: Regex           = Digit(reversed = false)
     val nonDigit: Regex        = Digit(reversed = true)
-    val start: Regex           = Start
 
     implicit def literal(str: String): Regex =
       str.toList.foldLeft(anything)((acc, char) => acc ~ Literal(char))

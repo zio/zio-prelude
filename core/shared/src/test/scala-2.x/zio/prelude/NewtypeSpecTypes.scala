@@ -15,6 +15,14 @@ object NewtypeSpecTypes {
     def unsafeWrap(int: Int): Natural = wrap(int)
   }
 
+  type LuckyNumber = LuckyNumber.Type
+  object LuckyNumber extends Newtype[Double] {
+    def refinement =
+      refine(Refinement.between(10.0, 20.0))
+  }
+
+  LuckyNumber(19.0)
+
   // A scala.util.matching.Regex Validated Email
   type Email = Email.Type
   object Email extends Newtype[String] {
@@ -56,6 +64,14 @@ object NewtypeSpecTypes {
   Password("aaaaaaaaa134ohohoh")
   Password("ahoe")
   Password("a1oh")
+
+  type PowerOfTwo = PowerOfTwo.Type
+  object PowerOfTwo extends Newtype[Int] {
+    def refinement =
+      refine(Refinement.powerOf(2))
+  }
+
+  PowerOfTwo(1024)
 
 }
 // scalafix:on
