@@ -23,6 +23,21 @@ object NewtypeSpec extends DefaultRunnableSpec {
         test("valid values at run-time") {
           assert(Natural.make(0))(isSuccessV(equalTo(Natural.unsafeWrap(0))))
         },
+        test("multiple valid values at run-time") {
+          assert(Pin.makeAll(List(1234, 5823)))(isSuccessV(equalTo(List(Pin(1234), Pin(5823)))))
+        },
+        test("multiple invalid values at run-time") {
+          assert(Pin.makeAll(List(1234, 44, 5823, 81234)))(
+            isFailureV(
+              equalTo(
+                NonEmptyChunk(
+                  "44 did not satisfy between(1000, 9999)",
+                  "81234 did not satisfy between(1000, 9999)"
+                )
+              )
+            )
+          )
+        },
         testM("invalid values at compile-time") {
           assertM(typeCheck("Natural(-1, -8, 4, -3)"))(
             isLeft(

@@ -80,13 +80,6 @@ val accountNumber: AccountNumber =
 
 You can think of the new type object as being the "companion object" of the new type and it comes included with an `apply` method to make it easy for us to construct instances of the new type.
 
-If we want to be more explicit we can also always use the `wrap` operator on the new type object to "wrap" a value of the underlying type in the new type. For example:
-
-```scala mdoc
-val sequenceNumber: SequenceNumber =
-  SequenceNumber.wrap(2)
-```
-
 If you want to construct a collection of values of the new type from values of the underlying type you can use the `wrapAll` operator.
 
 ```scala mdoc
@@ -266,7 +259,7 @@ However, in other cases we may want to restrict the values that the underlying t
 We can model this in ZIO Prelude by extending `Newtype` and `Subtype`, just as before, and then defining an additional `def refinement` method that describes the constraints on the underlying value. (The syntax differs slightly between Scala 2 and 3 due to changes in the macro API).
 
 ```scala mdoc:reset-object
-import zio.prelude.Subtype
+import zio.prelude.{Subtype, Validation}
 import zio.prelude.Refinement._
 
 object SequenceNumber extends Subtype[Int] {

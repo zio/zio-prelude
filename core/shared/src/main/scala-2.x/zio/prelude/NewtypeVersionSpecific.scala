@@ -47,6 +47,9 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
 
   def make(value: A): Validation[String, Type] = macro zio.prelude.Macros.make_impl[A, Type]
 
+  def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
+    macro zio.prelude.Macros.makeAll_impl[F, A, Type]
+
   /**
    * This method is used to generate Newtype that can be validated at
    * compile-time. This must wrap a [[Refinement]] and be assigned to

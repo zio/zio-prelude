@@ -74,7 +74,7 @@ object NewtypeSpecTypes {
   PowerOfTwo(1024)
 
   type Pin = Pin.Type
-  object Pin extends Newtype[Int] {
+  object Pin extends Subtype[Int] {
     def refinement =
       refine(Refinement.between(1000, 9999))
   }

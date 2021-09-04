@@ -32,7 +32,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
              |""".stripMargin
         c.abort(c.enclosingPosition, message)
       case None    =>
-        c.Expr[F[T]](q"_root.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, $expr)")
+        c.Expr[F[T]](q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, $expr)")
     }
   }
 
@@ -59,7 +59,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
             case _                        =>
               val message = s"""
                                |$refinementErrorHeader
-                               |Could not validate Smart Refinement at compile-time.
+                               |Could not validate Refinement at compile-time.
                                |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrapAll(List($value, ..$values))"${Console.RESET}
                                |""".stripMargin
 
@@ -121,7 +121,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
             val message =
               s"""
                  |$refinementErrorHeader
-                 |Could not validate Smart Refinement at compile-time.
+                 |Could not validate Refinement at compile-time.
                  |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrap($expr)"${Console.RESET}
                  |""".stripMargin
 
@@ -153,6 +153,35 @@ _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
 
       case None =>
         val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)"
+        q"_root_.zio.prelude.Validation.succeed($result)"
+    }
+
+  }
+
+  def makeAll_impl[F[+_], A: c.WeakTypeTag, T: c.WeakTypeTag](
+    value: c.Expr[F[A]]
+  )(forall: c.Tree): c.Tree = {
+    val expr = value
+    val _    = forall
+
+    val quotedRefinement = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+
+    quotedRefinement match {
+      case Some(quotedRefinement) =>
+        val result = q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, $expr)"
+        q"""
+$forall.forEach($value) { value =>
+  _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
+    $quotedRefinement.refinement.apply(value)
+      .left.map(_.toNonEmptyChunk(value.toString))
+  }
+}.as($result)
+
+"""
+
+      case None =>
+        val result = q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, $expr)"
         q"_root_.zio.prelude.Validation.succeed($result)"
     }
 
