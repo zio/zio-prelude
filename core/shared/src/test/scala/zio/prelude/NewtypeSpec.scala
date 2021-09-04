@@ -1,12 +1,11 @@
 package zio.prelude
 
 import zio.NonEmptyChunk
+import zio.prelude.NewtypeSpecTypes._
 import zio.prelude.newtypes.{And, Or, Sum}
 import zio.test.Assertion.{isFalse, isLeft, isTrue}
 import zio.test.AssertionM.Render.param
 import zio.test._
-
-import zio.prelude.NewtypeSpecTypes._
 
 object NewtypeSpec extends DefaultRunnableSpec {
 

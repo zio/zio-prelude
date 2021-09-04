@@ -172,6 +172,7 @@ private[prelude] sealed trait NewtypeModule {
     def unwrapAll[F[_]](value: F[Type]): F[A]
   }
 
+  @deprecated("use Newtype with a refinement", "1.0.0-RC8")
   sealed trait NewtypeSmart[A] {
     type Type
 
@@ -238,6 +239,7 @@ private[prelude] sealed trait NewtypeModule {
     type Type <: A
   }
 
+  @deprecated("use Subtype with a refinement", "1.0.0-RC8")
   sealed trait SubtypeSmart[A] extends NewtypeSmart[A] {
     type Type <: A
   }
@@ -331,6 +333,7 @@ trait NewtypeExports {
    * type Natural = Natural.Type
    * }}}
    */
+  @deprecated("use Newtype with a refinement", "1.0.0-RC8")
   abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
     val newtype: instance.NewtypeSmart[A] = instance.newtypeSmart[A](assertion)
 
@@ -379,6 +382,7 @@ trait NewtypeExports {
    * type Natural = Natural.Type
    * }}}
    */
+  @deprecated("use Subtype with a refinement", "1.0.0-RC8")
   abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {
     val subtype: instance.SubtypeSmart[A] = instance.subtypeSmart[A](assertion)
 
