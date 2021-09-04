@@ -1,6 +1,7 @@
 package zio.prelude
 
 import scala.language.implicitConversions
+import scala.util.matching
 
 sealed trait Refinement[-A] { self =>
   import Refinement._
@@ -17,7 +18,7 @@ sealed trait Refinement[-A] { self =>
 }
 
 object Refinement {
-  lazy val always: Refinement[Any] = Refinement.Always
+  val always: Refinement[Any] = Refinement.Always
 
   def equalTo[A](value: A): Refinement[A] = EqualTo(value)
 
@@ -29,13 +30,27 @@ object Refinement {
 
   def lessThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = !greaterThan(value)
 
-  def matches(regex: Regex): Refinement[String] = Matches(regex)
+  def matches(regex: Regex): Refinement[String] = Matches(regex.compile)
+
+  def matches(regexString: String): Refinement[String] = Matches(regexString)
+
+  /**
+   * Matches a [[scala.util.matching.Regex]].
+   *
+   * In order to use this for compile-time Refinements, make sure to use the
+   * string literal extension method, e.g.:
+   *
+   * {{{
+   *   Refinement.matches("\\w+@\\d{3,5}".r)
+   * }}}
+   */
+  def matches(regex: matching.Regex): Refinement[String] = Matches(regex.regex)
 
   lazy val never: Refinement[Any] = !always
 
   def notEqualTo[A](value: A): Refinement[A] = !equalTo(value)
 
-  case class And[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
+  private[prelude] case class And[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -47,7 +62,7 @@ object Refinement {
       } else (!left || !right).apply(a, negated = false)
   }
 
-  case class Or[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
+  private[prelude] case class Or[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -57,12 +72,12 @@ object Refinement {
       } else (!left && !right).apply(a, negated = false)
   }
 
-  case class Not[A](assertion: Refinement[A]) extends Refinement[A] {
+  private[prelude] case class Not[A](assertion: Refinement[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       assertion.apply(a, !negated)
   }
 
-  case class EqualTo[A](value: A) extends Refinement[A] {
+  private[prelude] case class EqualTo[A](value: A) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (a == value) Right(())
@@ -73,7 +88,7 @@ object Refinement {
       }
   }
 
-  case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
+  private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (ordering.gt(a, value)) Right(())
@@ -84,7 +99,7 @@ object Refinement {
       }
   }
 
-  case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
+  private[prelude] case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
     def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) {
         if (ordering.lt(a, value)) Right(())
@@ -95,20 +110,20 @@ object Refinement {
       }
   }
 
-  case class Matches(regex: Regex) extends Refinement[String] {
+  private[prelude] case class Matches(regexString: String) extends Refinement[String] {
     def apply(a: String, negated: Boolean): Either[RefinementError, Unit] = {
-      val compiled = regex.compile
+      val compiled = regexString.r
       if (!negated) {
-        if (compiled.r.findAllMatchIn(a).nonEmpty) Right(())
+        if (compiled.matches(a)) Right(())
         else Left(RefinementError.Failure(s"matches($compiled)"))
       } else {
-        if (compiled.r.findAllMatchIn(a).nonEmpty) Left(RefinementError.Failure(s"doesNotMatch($compiled)"))
+        if (compiled.matches(a)) Left(RefinementError.Failure(s"doesNotMatch($compiled)"))
         else Right(())
       }
     }
   }
 
-  object Always extends Refinement[Any] {
+  private[prelude] object Always extends Refinement[Any] {
     def apply(a: Any, negated: Boolean): Either[RefinementError, Unit] =
       if (!negated) Right(()) else Left(RefinementError.failure("never"))
   }
@@ -119,6 +134,13 @@ object Refinement {
     def ~(that: Regex): Regex = AndThen(self, that)
 
     def |(that: Regex): Regex = OrElse(self, that)
+
+    def * : Regex = min(0)
+
+    def + : Regex = min(1)
+
+    def between(min: Int, max: Int): Regex =
+      Repeat(self, Some(min), Some(max))
 
     def min(n: Int): Regex =
       self match {
@@ -204,12 +226,12 @@ object Refinement {
       def compile: String =
         (regex, min, max) match {
           case (Anything, _, _)          => anything.compile
-          case (_, Some(0), Some(1))     => raw"${regex.compile}?"
-          case (_, Some(min), Some(max)) => raw"${regex.compile}{$min,$max}"
-          case (_, Some(0), None)        => raw"${regex.compile}*"
-          case (_, Some(1), None)        => raw"${regex.compile}+"
-          case (_, Some(min), None)      => raw"${regex.compile}{$min,}"
-          case (_, None, Some(max))      => raw"${regex.compile}{0,$max}"
+          case (_, Some(0), Some(1))     => raw"(${regex.compile})?"
+          case (_, Some(min), Some(max)) => raw"(${regex.compile}){$min,$max}"
+          case (_, Some(0), None)        => raw"(${regex.compile})*"
+          case (_, Some(1), None)        => raw"(${regex.compile})+"
+          case (_, Some(min), None)      => raw"(${regex.compile}){$min,}"
+          case (_, None, Some(max))      => raw"(${regex.compile}){0,$max}"
           case (_, None, None)           => regex.compile
         }
     }

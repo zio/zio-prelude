@@ -92,6 +92,12 @@ trait Liftables {
         regex.min(n)
       case q"${regex: Refinement.Regex}.max(${n: Int})"                                                        =>
         regex.max(n)
+      case q"${regex: Refinement.Regex}.between(${min: Int}, ${max: Int})"                                     =>
+        regex.between(min, max)
+      case q"${regex: Refinement.Regex}.*"                                                                     =>
+        regex.*
+      case q"${regex: Refinement.Regex}.+"                                                                     =>
+        regex.*
       case q"${R(_)}.Regex.AndThen.apply(${first: Refinement.Regex}, ${second: Refinement.Regex})"             =>
         Refinement.Regex.AndThen(first, second)
       case q"${left: Refinement.Regex}.~(${right: Refinement.Regex})"                                          =>
@@ -124,6 +130,11 @@ trait Liftables {
         case _                         => None
       }
   }
+
+  implicit def scalaRegexUnliftable[A: c.WeakTypeTag]: Unliftable[scala.util.matching.Regex] =
+    Unliftable[scala.util.matching.Regex] { case q"scala.Predef.augmentString(${string: String}).r" =>
+      string.r
+    }
 
   @silent("Implicit resolves to enclosing method")
   implicit def refinementUnliftable[A: c.WeakTypeTag]: Unliftable[Refinement[A]] =
@@ -170,11 +181,17 @@ trait Liftables {
       case q"${R(_)}.lessThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
         Refinement.lessThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"${R(_)}.Matches.apply(${regex: Refinement.Regex})" =>
-        Refinement.Matches(regex).asInstanceOf[Refinement[A]]
+      case q"${R(_)}.Matches.apply(${string: String})" =>
+        Refinement.Matches(string).asInstanceOf[Refinement[A]]
 
       case q"${R(_)}.matches(${regex: Refinement.Regex})" =>
-        Refinement.Matches(regex).asInstanceOf[Refinement[A]]
+        Refinement.Matches(regex.compile).asInstanceOf[Refinement[A]]
+
+      case q"${R(_)}.matches(${string: String})" =>
+        Refinement.Matches(string).asInstanceOf[Refinement[A]]
+
+      case q"${R(_)}.matches(${regex: scala.util.matching.Regex})" =>
+        Refinement.Matches(regex.regex).asInstanceOf[Refinement[A]]
 
       case q"${R(_)}.Not.apply[$_](${refinement: Refinement[A]})" =>
         Refinement.Not(refinement)

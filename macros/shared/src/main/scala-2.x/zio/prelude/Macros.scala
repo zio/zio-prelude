@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.NonEmptyChunk
+import zio.prelude.ConsoleUtils._
 
 import scala.annotation.StaticAnnotation
 import scala.reflect.macros.whitebox
@@ -189,7 +190,29 @@ new _root_.zio.prelude.QuotedRefinement[${c.weakTypeOf[A]}] {
       case (Some(refinement), Some(code)) =>
         (refinement, code)
       case _                              =>
-        c.abort(c.enclosingPosition, s"FAILED TO UNLIFT REFINEMENT: $quotedRefinement")
+        val signatureExample =
+          yellow("def refinement: ") + underlined(yellow(s"QuotedAssertion[${weakTypeOf[A]}]")) +
+            yellow(" = refine(...)")
+        val message          =
+          s"""
+             |$refinementErrorHeader
+             |We were unable to read your refinement at compile-time.
+             |This could be for one of two reasons:
+             |
+             | ${red("1.")} You have annotated `def refinement` with its type signature.
+             |      $signatureExample
+             |    
+             |    Due to the macro machinery powering this feature, you ${red("MUST NOT ANNOTATE")} this method. 
+             |    ${underlined("Try deleting the type annotation and recompiling.")}
+             |    
+             | ${red("2.")} You have defined your Refinement in a way that cannot be read at compile-time.
+             |    Due to the limitations of macros, refinements cannot be abstracted into other definitions.
+             |    Make certain your definition looks something like this:
+             |      ${yellow("import zio.prelude.Refinement._")}
+             |      ${yellow("def refinement = refine(greaterThan(40) && lessThan(80))")}
+             |      
+             |""".stripMargin
+        c.abort(c.enclosingPosition, message)
     }
   }
 
@@ -219,5 +242,35 @@ new _root_.zio.prelude.QuotedRefinement[${c.weakTypeOf[A]}] {
     val end    = parser.in.lastOffset
     (initialStart - start, start, fileContent.slice(start, start + end))
   }
+
+}
+
+private[prelude] object ConsoleUtils {
+  def underlined(s: String): String =
+    Console.UNDERLINED + s + Console.RESET
+
+  def green(s: String): String =
+    Console.GREEN + s + Console.RESET
+
+  def yellow(s: String): String =
+    Console.YELLOW + s + Console.RESET
+
+  def red(s: String): String =
+    Console.RED + s + Console.RESET
+
+  def blue(s: String): String =
+    Console.BLUE + s + Console.RESET
+
+  def magenta(s: String): String =
+    Console.MAGENTA + s + Console.RESET
+
+  def cyan(s: String): String =
+    Console.CYAN + s + Console.RESET
+
+  def dim(s: String): String =
+    "\u001b[2m" + s + Console.RESET
+
+  def bold(s: String): String =
+    Console.BOLD + s + Console.RESET
 
 }
