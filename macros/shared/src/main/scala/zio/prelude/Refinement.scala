@@ -175,11 +175,15 @@ object Refinement {
   private[prelude] case class Matches(regexString: String) extends Refinement[String] {
     def apply(a: String, negated: Boolean): Either[RefinementError, Unit] = {
       val compiled = regexString.r
+      val result   = a match {
+        case compiled(_) => true
+        case _           => false
+      }
       if (!negated) {
-        if (compiled.matches(a)) Right(())
+        if (result) Right(())
         else Left(RefinementError.Failure(s"matches($compiled)"))
       } else {
-        if (compiled.matches(a)) Left(RefinementError.Failure(s"doesNotMatch($compiled)"))
+        if (result) Left(RefinementError.Failure(s"doesNotMatch($compiled)"))
         else Right(())
       }
     }

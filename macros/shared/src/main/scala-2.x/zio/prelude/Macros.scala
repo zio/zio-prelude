@@ -49,12 +49,12 @@ class Macros(val c: whitebox.Context) extends Liftables {
       case Some(quotedRefinement) =>
         val (refinement, code) = getRefinement[T, A](quotedRefinement)
 
-        val (errors, _) = allValues.partitionMap { value =>
+        val errors = allValues.flatMap { value =>
           value.tree match {
             case Literal(Constant(value)) =>
               refinement(value.asInstanceOf[A]) match {
-                case Left(error) => Left(error.render(value.toString))
-                case Right(_)    => Right(())
+                case Left(error) => Some(error.render(value.toString))
+                case Right(_)    => None
               }
             case _                        =>
               val message = s"""

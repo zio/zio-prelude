@@ -157,10 +157,12 @@ private[prelude] sealed trait NewtypeModule {
 
   def newtype[A]: Newtype[A]
 
+  @deprecated("deprecated", "1.0.0-RC8")
   def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A]
 
   def subtype[A]: Subtype[A]
 
+  @deprecated("deprecated", "1.0.0-RC8")
   def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A]
 
   private[this] type Id[+A] = A
@@ -284,6 +286,7 @@ private[prelude] object NewtypeModule {
           def unwrapAll[F[_]](value: F[Type]): F[A] = value
         }
 
+      @deprecated("deprecated", "1.0.0-RC8")
       def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A] =
         new NewtypeSmart[A] {
           type Type = A
@@ -307,6 +310,7 @@ private[prelude] object NewtypeModule {
           def unwrapAll[F[_]](value: F[Type]): F[A] = value
         }
 
+      @deprecated("deprecated", "1.0.0-RC8")
       def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A] =
         new SubtypeSmart[A] {
           type Type = A

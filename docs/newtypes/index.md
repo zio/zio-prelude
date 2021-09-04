@@ -255,7 +255,7 @@ Now `SequenceNumber` is a type that is different from `Int` but is still a subty
 
 This means that we can use a `SequenceNumber` any time we need an `Int` and can use operators defined on `Int` on `SequenceNumber`. However, we still get the type safety of not being able to use an `Int` or `AccountNumber` when a `SequenceNumber` is expected.
 
-## Smart Types
+## Refined Newtypes
 
 So far, all the new types we have created have been distinct from the underlying types but have not imposed any additional constraints on the values that the underlying type can take. For example, the `SequenceNumber` above could in principle be any `Int` value, whether that is `42` or `-1`.
 
@@ -263,70 +263,100 @@ In many cases that makes sense. We often want to use a new type to denote that t
 
 However, in other cases we may want to restrict the values that the underlying type can take. For instance, perhaps a `SequenceNumber` should never be negative.
 
-We can model this in ZIO Prelude by extending `NewtypeSmart` and `SubtypeSmart` when creating our new type and providing an `Assertion` that describes the constraints on the underlying value. We call these types smart types because they build in the logic for their own validation.
+We can model this in ZIO Prelude by extending `Newtype` and `Subtype`, just as before, and then defining an additional `def refinement` method that describes the constraints on the underlying value. (The syntax differs slightly between Scala 2 and 3 due to changes in the macro API).
 
 ```scala mdoc:reset-object
-import zio.prelude.SubtypeSmart
-import zio.test.Assertion._
+import zio.prelude.Subtype
+import zio.prelude.Refinement._
 
-object SequenceNumber extends SubtypeSmart[Int](isGreaterThanEqualTo(0))
-type SequenceNumber = SequenceNumber.Type
-```
+object SequenceNumber extends Subtype[Int] {
 
-Here we created a simple assertion that requires the value be equal to or greater than zero but we can use much more complex assertions. For example, we could valid an `Email` with the `matchesRegex` assertion.
-
-When we create a smart type the `apply`, `wrap`, and `wrapAll` operators will be `protected` and will only be accessible within the scope of the smart type object unless we choose to expose them.
-
-```scala mdoc:reset-object
-import zio.prelude.{SubtypeSmart, Validation}
-import zio.test.Assertion._
-
-object SequenceNumber extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
-  val initial: SequenceNumber =
-    SequenceNumber(0)
+  // Scala 2
+  def refinement = refine { 
+    greaterThanOrEqualTo(0)
+  }
+  
+  // Scala 3
+  // override inline def refinement = 
+  //  greaterThanOrEqualTo(0)
 }
 type SequenceNumber = SequenceNumber.Type
 ```
 
-This prevents the users of our smart type from creating invalid instances of the smart type.
+Here we created a simple refinement that requires the value be equal to or greater than zero, but we can use much more complex refinements. For example, we could valid an `Email` with the `matches` refinement, which accept a `Regex`.
 
-```scala mdoc:fail
-val invalid: SequenceNumber =
-  SequenceNumber(-1)
+Now, when we construct new values using `apply`, they will be validated *at compile time*.
+
+```scala
+val valid1: SequenceNumber = SequenceNumber(0)
+val valid2: SequenceNumber = SequenceNumber(42)
+
+val oops = SequenceNumber(-10)
+// Newtype Refinement Failed 
+// • -10 did not satisfy greaterThanOrEqualTo(0)
 ```
 
-Instead, the `make` or `makeAll` operators can be used to construct instances of the smart type with validation.
+Refined newtypes can only be validated at compile-time when called with literals, such as `9000` or `"Fancy Pants"`. When wrapping variables or run-time values, you can use the `make` or `makeAll`.
 
 ```scala mdoc
 import zio.Chunk
 
+val a = 10
+val b = 11
+val c = 12
+
 val validatedSequenceNumber: Validation[String, SequenceNumber] =
-  SequenceNumber.make(1)
+  SequenceNumber.make(a)
 
 val validateSequenceNumbers: Validation[String, Chunk[SequenceNumber]] =
-  SequenceNumber.makeAll(Chunk(1, 2, 3))
+  SequenceNumber.makeAll(Chunk(a, b, c))
 ```
 
-We can see that `make` and `makeAll` return a `Validation` that will either be a success with a valid instance of the smart type or a failure with a helpful error message indicating why a valid instance of the smart type could not be constructed.
+We can see that `make` and `makeAll` return a `Validation` that will either be a success with a valid instance of the newtype or a failure with a helpful error message indicating why a valid instance of the newtype could not be constructed.
 
-Because we have access to the `apply`, `wrap`, and `wrapAll` constructors within the smart type object we can implement operators that allow us to create instances of the smart type internally with zero overhead when we know that the underlying data is valid.
+Note that the `wrap` operator, which bypasses the compile-time check, is `protected` and will only be accessible within the scope of the newtype object unless we choose to expose them. This allows us to skip the compile-time check when we need to, such as in implementing a `.next` method, which we know will be safe, even if the compiler does not.
 
-For example, we might want to expose an `unsafeMake` operator for our users to allow them to construct instances of the smart type directly without going through `Validation`. As its name implies this places responsibility on the user to ensure that the underlying data is valid but could be necessary for performance or ergonomics in some situations.
+```scala mdoc:reset-object
+import zio.prelude.{Subtype, Validation}
+import zio.prelude.Refinement._
+
+object SequenceNumber extends Subtype[Int] {
+  def refinement = refine { 
+    greaterThanOrEqualTo(0)
+  }
+  
+  val initial: SequenceNumber =
+    SequenceNumber(0)
+    
+  implicit final class SequenceNumberOps(val self: SequenceNumber) extends AnyVal {
+    def next: SequenceNumber = 
+      wrap(self + 1)
+  }
+}
+type SequenceNumber = SequenceNumber.Type
+```
+
+As another example, we might want to expose an `unsafeMake` operator for our users to allow them to construct instances of the newtype directly without going through `Validation`. As its name implies this places responsibility on the user to ensure that the underlying data is valid but could be necessary for performance or ergonomics in some situations.
 
 We can do that quite easily like this:.
 
 ```scala mdoc:reset-object
-import zio.prelude.{SubtypeSmart, Validation}
-import zio.test.Assertion._
+import zio.prelude.{Subtype, Validation}
+import zio.prelude.Refinement._
 
-object SequenceNumber extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+object SequenceNumber extends Subtype[Int] {
+  def refinement = refine { 
+    greaterThanOrEqualTo(0)
+  }
+
   def unsafeMake(n: Int): SequenceNumber =
-    SequenceNumber(n)
+    SequenceNumber.wrap(n)
 }
 type SequenceNumber = SequenceNumber.Type
 
+val aTrustedInt = 1
 val sequenceNumber: SequenceNumber =
-  SequenceNumber.unsafeMake(1)
+  SequenceNumber.unsafeMake(aTrustedInt)
 ```
 
-Thus, smart types give us full ability to implement our own operators and to expose whatever interface we want for our type, from requiring all construction to go through `Validation` to allowing users to create instances of the smart type directly.
+Thus, refined newtypes give us full ability to implement our own operators and to expose whatever interface we want for our type, from validating input at compile-time, to using `Validation` at run-time, to allowing users to create instances of the refined newtype directly.
