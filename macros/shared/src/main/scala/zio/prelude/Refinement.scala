@@ -17,6 +17,34 @@ sealed trait Refinement[-A] { self =>
   protected def apply(a: A, negated: Boolean): Either[RefinementError, Unit]
 }
 
+/**
+ * An `Refinement[A]` is essentially a composable predicate from `A => Boolean`.
+ * They can be composed with standard Boolean operators of `&&`, `||` and `!`.
+ * This is primarily intended to be used with `Newtype` and `Subtype`,
+ * enhancing them with compile-time time validation.
+ *
+ * For example, if you'd like to validate that a particular Int is precisely
+ * 4 digits long, you can create the following refined Newtype. (Note that the
+ * syntax is slightly difference between Scala 2 and Scala 3).
+ *
+ * {{{
+ *  type Pin = Pin.Type
+ *  object Pin extends Newtype[Int] {
+ *    // Scala 2 Syntax
+ *    def refinement =
+ *      refine(Refinement.between(1000, 9999))
+ *
+ *    // Scala 3 Syntax
+ *    override inline def refinement =
+ *      Refinement.between(1000, 9999)
+ *  }
+ *
+ *  // PowerOfTwo(1000) compiles
+ *  // PowerOfTwo(5412) compiles
+ *  // PowerOfTwo(34567) fails with "34567 did not satisfy between(1000, 9999)"
+ *  // PowerOfTwo(234) fails with "123 did not satisfy between(1000, 9999)"
+ * }}}
+ */
 object Refinement {
   val anything: Refinement[Any] = Refinement.Anything
 
