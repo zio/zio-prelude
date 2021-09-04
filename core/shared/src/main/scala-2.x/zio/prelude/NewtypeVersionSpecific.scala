@@ -84,6 +84,9 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
    * to an instance of a type parameterized on the newtype. For example,
    * this could be used to convert a list of instances of the underlying
    * type to a list of instances of the newtype.
+   *
+   * Due to macro limitations, this method cannot with refined newtype and
+   * will thus issue a compiler error if you attempt to do so.
    */
   def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.Macros.wrapAll_impl[F, A, Type]
 
