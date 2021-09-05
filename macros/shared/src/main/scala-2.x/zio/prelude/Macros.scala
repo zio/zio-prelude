@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.NonEmptyChunk
 import zio.prelude.ConsoleUtils._
 
 import scala.annotation.StaticAnnotation
@@ -39,7 +38,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
   def applyMany_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](
     value: c.Expr[A],
     values: c.Expr[A]*
-  ): c.Expr[NonEmptyChunk[T]] = {
+  ): c.Tree = {
     val quotedRefinement = c.prefix.actualType.decls
       .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
 
@@ -77,15 +76,12 @@ class Macros(val c: whitebox.Context) extends Liftables {
 
           c.abort(c.enclosingPosition, message)
         } else {
-          c.Expr[NonEmptyChunk[T]](
-            q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, _root_.zio.NonEmptyChunk($value, ..$values))"
-          )
+
+          q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, _root_.zio.NonEmptyChunk($value, ..$values))"
         }
 
       case None =>
-        c.Expr[NonEmptyChunk[T]](
-          q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, _root_.zio.NonEmptyChunk($value, ..$values))"
-        )
+        q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, _root_.zio.NonEmptyChunk($value, ..$values))"
     }
   }
 
@@ -147,7 +143,7 @@ class Macros(val c: whitebox.Context) extends Liftables {
         q"""
 _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
   $quotedRefinement.refinement.apply($value)
-    .left.map(_.toNonEmptyChunk($value.toString))
+    .left.map(e => _root_.zio.NonEmptyChunk.fromCons(e.toNel($value.toString)))
 }.as($result)
 """
 
@@ -174,7 +170,7 @@ _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
 $forall.forEach($value) { value =>
   _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
     $quotedRefinement.refinement.apply(value)
-      .left.map(_.toNonEmptyChunk(value.toString))
+      .left.map(e => _root_.zio.NonEmptyChunk.fromCons(e.toNel(value.toString)))
   }
 }.as($result)
 

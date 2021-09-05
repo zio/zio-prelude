@@ -93,12 +93,6 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(macroDefinitionSettings)
   .settings(buildInfoSettings("zio.prelude.macros"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
-  .settings(
-    libraryDependencies ++= Seq(
-      "dev.zio" %%% "zio"      % zioVersion,
-      "dev.zio" %%% "zio-test" % zioVersion
-    )
-  )
   .enablePlugins(BuildInfoPlugin)
 
 lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)

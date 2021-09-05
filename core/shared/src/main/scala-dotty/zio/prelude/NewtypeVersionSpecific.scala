@@ -24,14 +24,14 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
 
   def make(value: A): Validation[String, Type] = 
     Validation.fromEitherNonEmptyChunk(
-      refinement.apply(value).left.map(_.toNonEmptyChunk(value.toString))
+      refinement.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
     ).as(value.asInstanceOf[Type])
 
 
   def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
     ForEach[F].forEach(value) { value =>
       Validation.fromEitherNonEmptyChunk(
-        refinement.apply(value).left.map(_.toNonEmptyChunk(value.toString))
+        refinement.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
       )
     }.as(value.asInstanceOf[F[Type]])
 }
