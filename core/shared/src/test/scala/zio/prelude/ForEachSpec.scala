@@ -233,13 +233,6 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("zipAll") {
-          check(genChunk, genChunk) { (as, bs) =>
-            val actual   = ForEach[Chunk].zipAll(as, bs)
-            val expected = as.zipAll(bs)
-            assert(actual)(equalTo(expected))
-          }
-        },
         testM("zipAllWith") {
           check(genChunk, genChunk, genTheseFunction) { (as, bs, f) =>
             val actual   = ForEach[Chunk].zipAllWith(as, bs)(f)

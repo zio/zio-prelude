@@ -308,12 +308,8 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   def zipAll[A, B, C](fa: F[A], fb: F[B])(implicit
     both: IdentityBoth[F],
     either: IdentityEither[F]
-  ): F[(Option[A], Option[B])] =
-    zipAllWith(fa, fb) {
-      case These.Both(a, b) => ((Some(a), Some(b)))
-      case These.Left(a)    => ((Some(a), None))
-      case These.Right(b)   => ((None, Some(b)))
-    }
+  ): F[These[A, B]] =
+    zipAllWith(fa, fb)(identity)
 
   /**
    * Zips the left collection and right collection together, using the
@@ -428,7 +424,7 @@ trait ForEachSyntax {
       F.toChunk(self)
     def zipAll[B](
       that: F[B]
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[(Option[A], Option[B])]      =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]]      =
       F.zipAll(self, that)
     def zipAllWith[B, C](that: F[B])(
       f: These[A, B] => C
