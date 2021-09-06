@@ -458,7 +458,7 @@ trait ForEachSyntax {
       F.toChunk(self)
     def zipAll[B](
       that: F[B]
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]]      =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]]                 =
       F.zipAll(self, that)
     def zipAllWith[B, C](that: F[B])(
       f: These[A, B] => C
