@@ -64,7 +64,7 @@ If we didn't have ZIO Prelude we would have to implement the operator to combine
 ```scala mdoc
 def combine(left: VoteMap, right: VoteMap): VoteMap =
   VoteMap(right.map.foldLeft(left.map) { case (map, (k, v)) =>
-    map + (k -> right.map.get(k).fold(v)(v1 => Votes(v.value + v1.value)))
+    map + (k -> map.get(k).fold(v)(v1 => Votes(v.value + v1.value)))
   })
 ```
 
