@@ -87,6 +87,18 @@ object Identity extends Lawful[EqualIdentity] {
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 
   /**
+   * Constructs an `Identity` instance from an `IdentityEither` instance and a
+   * `Covariant` instance.
+   */
+  def fromIdentityEitherCovariant[F[+_]: IdentityEither: Covariant, A]: Identity[F[A]] =
+    new Identity[F[A]] {
+      def identity: F[A]                        =
+        IdentityEither[F].none
+      def combine(l: => F[A], r: => F[A]): F[A] =
+        l orElse r
+    }
+
+  /**
    * Constructs an `Identity` instance from an associative binary operator and
    * an identity element.
    */
