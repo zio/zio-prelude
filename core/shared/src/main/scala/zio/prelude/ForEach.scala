@@ -58,7 +58,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * predicate.
    */
   def exists[A](fa: F[A])(f: A => Boolean): Boolean =
-    foldMap(fa)(a => Or(f(a)))
+    foldMap(fa)(a => Or.create(f(a)))
 
   /**
    * Returns the first element in the collection satisfying the specified
@@ -134,7 +134,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * predicate.
    */
   def forall[A](fa: F[A])(f: A => Boolean): Boolean =
-    foldMap(fa)(a => And(f(a)))
+    foldMap(fa)(a => And.create(f(a)))
 
   /**
    * Traverses each element in the collection with the specified effectual
@@ -167,7 +167,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Returns whether the collection is empty.
    */
   def isEmpty[A](fa: F[A]): Boolean =
-    foldMap(fa)(_ => And(false))
+    foldMap(fa)(_ => And.create(false))
 
   /**
    * Lifts a function operating on values to a function that operates on each
