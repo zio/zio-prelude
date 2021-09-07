@@ -106,7 +106,7 @@
 <p>If we didn't have ZIO Prelude we would have to implement the operator to combine two <code>VoteMap</code> values ourselves. This would require some relatively low level logic that would look like this.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: <span class="hljs-type">VoteMap</span>, right: <span class="hljs-type">VoteMap</span>): <span class="hljs-type">VoteMap</span> =
   <span class="hljs-type">VoteMap</span>(right.map.foldLeft(left.map) { <span class="hljs-keyword">case</span> (map, (k, v)) =&gt;
-    map + (k -&gt; right.map.get(k).fold(v)(v1 =&gt; <span class="hljs-type">Votes</span>(v.value + v1.value)))
+    map + (k -&gt; map.get(k).fold(v)(v1 =&gt; <span class="hljs-type">Votes</span>(v.value + v1.value)))
   })
 </code></pre>
 <p>This code isn't the worst. It uses operators like <code>foldLeft</code> to do this combining of the two maps in a relatively high level way.</p>
