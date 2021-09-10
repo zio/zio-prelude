@@ -107,9 +107,9 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
    */
   implicit val BooleanConjunctionIdempotentInverse: Commutative[And] with Idempotent[And] with Inverse[And] =
     new Commutative[And] with Idempotent[And] with Inverse[And] {
-      def combine(l: => And, r: => And): And = And(l && r)
-      val identity: And                      = And(true)
-      def inverse(l: => And, r: => And): And = And(l || !r)
+      def combine(l: => And, r: => And): And = And.create(l && r)
+      val identity: And                      = And.create(true)
+      def inverse(l: => And, r: => And): And = And.create(l || !r)
     }
 
   /**
@@ -118,9 +118,9 @@ object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] 
    */
   implicit val BooleanDisjunctionIdempotentInverse: Commutative[Or] with Idempotent[Or] with Inverse[Or] =
     new Commutative[Or] with Idempotent[Or] with Inverse[Or] {
-      def combine(l: => Or, r: => Or): Or = Or(l || r)
-      val identity: Or                    = Or(false)
-      def inverse(l: => Or, r: => Or): Or = Or(l && !r)
+      def combine(l: => Or, r: => Or): Or = Or.create(l || r)
+      val identity: Or                    = Or.create(false)
+      def inverse(l: => Or, r: => Or): Or = Or.create(l && !r)
     }
 
   /**

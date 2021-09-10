@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Max, Min, Natural, Prod, Sum}
+import zio.prelude.newtypes._
 
 import scala.annotation.tailrec
 import scala.annotation.unchecked.uncheckedVariance

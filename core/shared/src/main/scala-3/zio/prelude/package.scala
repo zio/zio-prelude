@@ -1,22 +1,7 @@
-/*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package zio.prelude
 
 package object newtypes {
+
   object Sum extends SubtypeF
 
   /**
@@ -31,14 +16,18 @@ package object newtypes {
    */
   type Prod[A] = Prod.Type[A]
 
-  object Or extends Subtype[Boolean]
+  object Or extends Subtype[Boolean] {
+    private[prelude] def create(value: Boolean): Or = wrap(value)
+  }
 
   /**
    * A newtype representing logical disjunction.
    */
   type Or = Or.Type
 
-  object And extends Subtype[Boolean]
+  object And extends Subtype[Boolean] {
+    private[prelude] def create(value: Boolean): And = wrap(value)
+  }
 
   /**
    * A newtype representing logical conjunction.
@@ -108,7 +97,10 @@ package object newtypes {
 
   type FailureOut[+A] = FailureOut.Type[A]
 
-  object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0)) {
+  object Natural extends Subtype[Int] {
+
+    override inline def refinement: Refinement[Int] =
+      Refinement.greaterThanOrEqualTo(0)
 
     val one: Natural =
       Natural(1)
@@ -117,25 +109,25 @@ package object newtypes {
       Natural(0)
 
     def successor(n: Natural): Natural =
-      Natural(n + 1)
+      wrap(n + 1)
 
     def times(x: Natural, y: Natural): Natural = {
       val product = x * y
-      if (x == 0 || product / x != y) Natural(Int.MaxValue) else Natural(product)
+      if (x == 0 || product / x != y) Natural(Int.MaxValue) else wrap(product)
     }
 
     def plus(x: Natural, y: Natural): Natural = {
       val sum = x + y
-      if (sum < 0) Natural(Int.MaxValue) else Natural(sum)
+      if (sum < 0) Natural(Int.MaxValue) else wrap(sum)
     }
 
     def minus(x: Natural, y: Natural): Natural = {
       val difference = x - y
-      if (difference < 0) zero else Natural(difference)
+      if (difference < 0) zero else wrap(difference)
     }
 
     private[prelude] def unsafeMake(n: Int): Natural =
-      Natural(n)
+      wrap(n)
   }
 
   type Natural = Natural.Type

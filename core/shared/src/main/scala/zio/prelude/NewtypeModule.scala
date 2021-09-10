@@ -23,10 +23,14 @@ import zio.test.Assertion
  * newtypes. Newtypes wrap an existing type and have the same representation as
  * the underlying type at runtime but are treated as distinct types by the
  * Scala compiler. Newtypes can be used to increase type safety in modeling a
- * domain, for example by creating separate types for `Meter` and `Foot`. They
- * can also be used to provide coherent instances for types that can support
- * more than one version of a typeclass. For example, the `And` and `Or`
- * types can be used to distinguish boolean conjunction and disjunction.
+ * domain, for example by creating separate types for `Meter` and `Foot`.
+ * Additionally, Refined Newtypes allow for compile-time validation of values,
+ * e.g., ensuring an Int is 4 digits long (a PIN) or that a String matches a
+ * particular Regex (an Email).
+ *
+ * Newtypes can also be used to provide coherent instances for types that can
+ * support more than one version of a typeclass. For example, the `And` and
+ * `Or` types can be used to distinguish boolean conjunction and disjunction.
  *
  * To create a newtype, simply implement an object which extends `Newtype[A]`,
  * where `A` is the underlying type you are wrapping. Then implement a type
@@ -108,30 +112,57 @@ import zio.test.Assertion
  * underlying type, so this technique is most useful for creating coherent
  * typeclasses instances rather than type safe domain specific languages.
  *
- * Finally, it is possible to create newtypes that require smart constructors
- * by extending `NewTypeSmart` or `SubtypeSmart`. In this case we must provide
- * an additional argument to the class we are extending indicating how to
- * validate an instance of the underlying type. For example, let's create a
- * newtype for natural numbers, which must be equal to or greater than zero.
+ * Finally, it is possible to create refined newtypes that can be are at
+ * compile-time when constructed with a literal value, or at run-time with a
+ * dynamic value, returning a [[Validation]]. In this case we must define an
+ * additional `def refinement` method on the Object, indicating how to validate
+ * an instance of the underlying type. For example, let's create a newtype for
+ * natural numbers, which must be equal to or greater than zero. (Note that the
+ * syntax differs between Scala 2 and 3 due to changes in the macro API).
  *
  * {{{
- * object Natural extends NewtypeSmart[Int](isGreaterThanEqualTo(0))
+ * import zio.prelude.Refinement.greaterThanOrEqualTo
+ *
  * type Natural = Natural.Type
+ * object Natural extends Newtype[Int] {
+ *   // Scala 2 — be sure you DO NOT give a type annotation to `refinement`
+ *   def refinement = refine {
+ *     greaterThanOrEqualTo(0)
+ *   }
+ *
+ *   // Scala 3
+ *   override inline def refinement: Refinement[Int] =
+ *     greaterThanOrEqualTo(0)
+ * }
  * }}}
  *
  * In this case, attempting to convert an integer to a natural number will
- * return a `Validation[String, Natural]` that will either contain a`Natural`
- * if the integer was equal to or greater than zero or a string with a
- * descriptive error message if the condition was not satisfied.
+ * return a `Natural` that will either return a`Natural` if the integer was
+ * equal to or greater than zero or a fail to compile with a descriptive error
+ * message if the condition was not satisfied.
+ *
+ * {{{
+ *   val compiles = Natural(10)
+ *   val fails    = Natural(-99) // -99 does not satisfy greaterThanOrEqualTo(0)
+ * }}}
+ *
+ * If you need to supply a variable or other run-time validation to a refined
+ * newtype, use the `make` method instead, which will return a [[Validation]].
+ *
+ * {{{
+ *   val result: Validation[String, Natural] = Natural.make(10)
+ * }}}
  */
 private[prelude] sealed trait NewtypeModule {
 
   def newtype[A]: Newtype[A]
 
+  @deprecated("deprecated", "1.0.0-RC8")
   def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A]
 
   def subtype[A]: Subtype[A]
 
+  @deprecated("deprecated", "1.0.0-RC8")
   def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A]
 
   private[this] type Id[+A] = A
@@ -142,14 +173,8 @@ private[prelude] sealed trait NewtypeModule {
         f(fa)
     }
 
-  sealed trait Newtype[A] {
+  sealed trait Newtype[A] extends NewtypeVersionSpecific[A] {
     type Type
-
-    /**
-     * Converts an instance of the underlying type to an instance of the
-     * newtype.
-     */
-    def apply(value: A): Type = wrap(value)
 
     /**
      * Allows pattern matching on newtype instances to convert them back to
@@ -159,23 +184,15 @@ private[prelude] sealed trait NewtypeModule {
 
     /**
      * Converts an instance of the underlying type to an instance of the
-     * newtype.
+     * newtype. Ignores the refinement.
      */
-    def wrap(value: A): Type = wrapAll[Id](value)
+    protected def wrap(value: A): Type = value.asInstanceOf[Type]
 
     /**
      * Converts an instance of the newtype back to an instance of the
      * underlying type.
      */
     def unwrap(value: Type): A = unwrapAll[Id](value)
-
-    /**
-     * Converts an instance of a type parameterized on the underlying type
-     * to an instance of a type parameterized on the newtype. For example,
-     * this could be used to convert a list of instances of the underlying
-     * type to a list of instances of the newtype.
-     */
-    def wrapAll[F[_]](value: F[A]): F[Type]
 
     /**
      * Converts an instance of a type parameterized on the newtype back to an
@@ -186,6 +203,7 @@ private[prelude] sealed trait NewtypeModule {
     def unwrapAll[F[_]](value: F[Type]): F[A]
   }
 
+  @deprecated("use Newtype with a refinement", "1.0.0-RC8")
   sealed trait NewtypeSmart[A] {
     type Type
 
@@ -250,8 +268,10 @@ private[prelude] sealed trait NewtypeModule {
 
   sealed trait Subtype[A] extends Newtype[A] {
     type Type <: A
+
   }
 
+  @deprecated("use Subtype with a refinement", "1.0.0-RC8")
   sealed trait SubtypeSmart[A] extends NewtypeSmart[A] {
     type Type <: A
   }
@@ -264,11 +284,10 @@ private[prelude] object NewtypeModule {
         new Newtype[A] {
           type Type = A
 
-          def wrapAll[F[_]](value: F[A]): F[Type] = value
-
           def unwrapAll[F[_]](value: F[Type]): F[A] = value
         }
 
+      @deprecated("deprecated", "1.0.0-RC8")
       def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A] =
         new NewtypeSmart[A] {
           type Type = A
@@ -289,11 +308,10 @@ private[prelude] object NewtypeModule {
         new Subtype[A] {
           type Type = A
 
-          def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
-
-          def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
+          def unwrapAll[F[_]](value: F[Type]): F[A] = value
         }
 
+      @deprecated("deprecated", "1.0.0-RC8")
       def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A] =
         new SubtypeSmart[A] {
           type Type = A
@@ -331,10 +349,10 @@ trait NewtypeExports {
     trait Tag extends Any
     type Type = newtype.Type with Tag
 
-    def wrapAll[F[_]](value: F[A]): F[Type] = newtype.wrapAll(value).asInstanceOf[F[Type]]
-
-    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value.asInstanceOf[F[newtype.Type]])
+    def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
   }
+
+  object Newtype extends NewtypeCompanionVersionSpecific {}
 
   /**
    * The class of objects corresponding to newtypes with smart constructors
@@ -349,6 +367,7 @@ trait NewtypeExports {
    * type Natural = Natural.Type
    * }}}
    */
+  @deprecated("use Newtype with a refinement", "1.0.0-RC8")
   abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
     val newtype: instance.NewtypeSmart[A] = instance.newtypeSmart[A](assertion)
 
@@ -381,9 +400,9 @@ trait NewtypeExports {
     trait Tag extends Any
     type Type = subtype.Type with Tag
 
-    def wrapAll[F[_]](value: F[A]): F[Type] = subtype.wrapAll(value).asInstanceOf[F[Type]]
+    override def unwrap(value: Type): A       = value
+    def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
 
-    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
   }
 
   /**
@@ -399,6 +418,7 @@ trait NewtypeExports {
    * type Natural = Natural.Type
    * }}}
    */
+  @deprecated("use Subtype with a refinement", "1.0.0-RC8")
   abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {
     val subtype: instance.SubtypeSmart[A] = instance.subtypeSmart[A](assertion)
 
