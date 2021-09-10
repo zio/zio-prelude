@@ -96,7 +96,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">inverse</span></span>(left: =&gt; <span class="hljs-type">Natural</span>, right: =&gt; <span class="hljs-type">Natural</span>): <span class="hljs-type">Natural</span> =
       <span class="hljs-type">Natural</span>.minus(left, right)
   }
-<span class="hljs-comment">// NaturalInverse: Inverse[Natural] = repl.MdocSession$App0$$anon$1@2c36e91d</span>
+<span class="hljs-comment">// NaturalInverse: Inverse[Natural] = repl.MdocSession$App0$$anon$1@5f92a639</span>
 </code></pre>
 <p>This also lets us define <code>Inverse</code> instances for other data types that we would not otherwise be able to. For example, what is the inverse of <code>Set(1, 2, 3)</code>?</p>
 <p>Logically it is the set of all integers other than <code>1</code>, <code>2</code>, and <code>3</code> but we have no way of efficiently representing that because a <code>Set</code> is a collection of concrete values. So we would not be able to define an <code>Inverse</code> instance for <code>Set</code> this way.</p>
