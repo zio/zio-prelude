@@ -79,10 +79,12 @@ private[prelude] sealed trait NewtypeModuleF {
 
   def newtypeF: NewtypeF
 
+  @deprecated("deprecated", "1.0.0-RC8")
   def newtypeSmartF[A[_]](assertion: AssertionF[A]): NewtypeSmartF[A]
 
   def subtypeF: SubtypeF
 
+  @deprecated("deprecated", "1.0.0-RC8")
   def subtypeSmartF[A[_]](assertion: AssertionF[A]): SubtypeSmartF[A]
 
   private[this] type Id[+A] = A
@@ -137,6 +139,7 @@ private[prelude] sealed trait NewtypeModuleF {
     def unwrapAll[F[_], A](value: F[Type[A]]): F[A]
   }
 
+  @deprecated("deprecated", "1.0.0-RC8")
   sealed trait NewtypeSmartF[A[_]] {
     type Type[x]
 
@@ -203,6 +206,7 @@ private[prelude] sealed trait NewtypeModuleF {
     type Type[+A] <: A
   }
 
+  @deprecated("deprecated", "1.0.0-RC8")
   sealed trait SubtypeSmartF[A[_]] extends NewtypeSmartF[A] {
     type Type[x] <: A[x]
   }
@@ -220,6 +224,7 @@ private[prelude] object NewtypeModuleF {
           def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
 
+      @deprecated("deprecated", "1.0.0-RC8")
       override def newtypeSmartF[A[_]](assertion: AssertionF[A]): NewtypeSmartF[A] =
         new NewtypeSmartF[A] {
           type Type[x] = A[x]
@@ -245,6 +250,7 @@ private[prelude] object NewtypeModuleF {
           def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
 
+      @deprecated("deprecated", "1.0.0-RC8")
       override def subtypeSmartF[A[_]](assertion: AssertionF[A]): SubtypeSmartF[A] =
         new SubtypeSmartF[A] {
           type Type[x] = A[x]
@@ -304,6 +310,7 @@ trait NewtypeFExports {
    * type ShortList = ShortList.Type
    * }}}
    */
+  @deprecated("deprecated", "1.0.0-RC8")
   abstract class NewtypeSmartF[A[_]](assertion: AssertionF[A]) extends instance.NewtypeSmartF[A] {
     val newtypeF: instance.NewtypeSmartF[A] = instance.newtypeSmartF(assertion)
 
@@ -356,6 +363,7 @@ trait NewtypeFExports {
    * type ShortList = ShortList.Type
    * }}}
    */
+  @deprecated("deprecated", "1.0.0-RC8")
   abstract class SubtypeSmartF[A[_]](assertion: AssertionF[A]) extends instance.SubtypeSmartF[A] {
     val subtypeF: instance.SubtypeSmartF[A] = instance.subtypeSmartF(assertion)
 

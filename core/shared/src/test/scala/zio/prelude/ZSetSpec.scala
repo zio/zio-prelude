@@ -4,7 +4,7 @@ import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZSet._
 import zio.prelude.coherent.{CovariantDeriveEqual, DeriveEqualForEach}
-import zio.prelude.newtypes._
+import zio.prelude.newtypes.{Natural, _}
 import zio.test.Assertion._
 import zio.test._
 import zio.test.laws._
@@ -24,8 +24,11 @@ object ZSetSpec extends DefaultRunnableSpec {
   lazy val smallInts: Gen[Has[Random] with Has[Sized], Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  lazy val naturals: Gen[Has[Random] with Has[Sized], Natural] =
-    Gen.small(n => Gens.natural(Natural.zero, Natural.unsafeMake(n)))
+  def natural(min: Natural, max: Natural): Gen[Random, Natural] =
+    Gen.int(min, max).map(_.asInstanceOf[Natural])
+
+  def naturals: Gen[Has[Random] with Has[Sized], Natural] =
+    Gen.small(n => natural(0.asInstanceOf[Natural], n.asInstanceOf[Natural]))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
     Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
