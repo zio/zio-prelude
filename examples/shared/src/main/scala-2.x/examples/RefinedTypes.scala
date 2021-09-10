@@ -31,7 +31,7 @@ object RefinedTypes extends App {
   println(sum(natural, age))
 
   val x: Natural                     = Natural(0)
-  val y: Validation[String, Natural] = Natural.make(scala.util.Random.nextInt)
+  val y: Validation[String, Natural] = Natural.make(scala.util.Random.nextInt())
 
   import Regex._
 
