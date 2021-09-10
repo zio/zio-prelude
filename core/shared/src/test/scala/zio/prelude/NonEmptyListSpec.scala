@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.test._
 import zio.test.laws._
-import zio.{Has, Random}
+import zio.{Has, NonEmptyChunk, Random}
 
 object NonEmptyListSpec extends DefaultRunnableSpec {
 
@@ -26,6 +26,9 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
 
   lazy val genInt: Gen[Has[Random], Int] =
     Gen.int(-10, 10)
+
+  lazy val genNonEmptyChunk: Gen[Has[Random] with Has[Sized], NonEmptyChunk[Int]] =
+    Gen.chunkOf1(genInt)
 
   lazy val genNonEmptyList: Gen[Has[Random] with Has[Sized], NonEmptyList[Int]] =
     genCons.map(NonEmptyList.fromCons)
@@ -254,6 +257,13 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
             val nonEmptyList = NonEmptyList.fromCons(as)
             val cons         = nonEmptyList.toCons
             assert(cons)(equalTo(as))
+          }
+        },
+        test("fromNonEmptyChunk") {
+          check(genNonEmptyChunk) { as =>
+            val nonEmptyList  = NonEmptyList.fromNonEmptyChunk(as)
+            val nonEmptyChunk = nonEmptyList.toNonEmptyChunk
+            assert(nonEmptyChunk)(equalTo(as))
           }
         }
       )

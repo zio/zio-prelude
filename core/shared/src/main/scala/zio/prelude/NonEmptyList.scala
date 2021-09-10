@@ -578,6 +578,12 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     fromCons(::(head, tail.toList))
 
   /**
+   * Constructs a `NonEmptyList` from a `NonEmptyChunk`.
+   */
+  def fromNonEmptyChunk[A](nonEmptyChunk: NonEmptyChunk[A]): NonEmptyList[A] =
+    nonEmptyChunk.reduceMapRight(single)(cons)
+
+  /**
    * Constructs a `NonEmptyList` from an initial state `start` by repeatedly
    * applying `iterate` as long as it returns `Some`.
    */
