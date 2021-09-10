@@ -27,18 +27,22 @@ object BuildHelper {
 
   val SilencerVersion = "1.7.5"
 
-  private val stdOptions = Seq(
-    "-deprecation",
-    "-encoding",
-    "UTF-8",
-    "-feature",
-    "-unchecked"
-  ) ++ {
-    if (sys.env.contains("CI")) {
-      Seq("-Xfatal-warnings")
-    } else {
-      Nil // to enable Scalafix locally
+  private val stdOptions = {
+    val tmp = Seq(
+      "-deprecation",
+      "-encoding",
+      "UTF-8",
+      "-feature",
+      "-unchecked"
+    ) ++ {
+      if (sys.env.contains("CI")) {
+        Seq("-Xfatal-warnings")
+      } else {
+        Nil // to enable Scalafix locally
+      }
     }
+    println(s"stdOptions: $tmp")
+    tmp
   }
 
   private val std2xOptions = Seq(
