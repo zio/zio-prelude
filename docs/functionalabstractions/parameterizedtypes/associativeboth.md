@@ -34,7 +34,7 @@ import zio._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Has[Console], IOException, Unit] =
+val helloZIO: ZIO[Has[Console], IOException, (Unit, Unit)] =
   Console.printLine("Hello") <*> Console.printLine("ZIO")
 ```
 
@@ -43,7 +43,7 @@ This will print `Hello` to the console on the first line and then `ZIO` on the s
 If the first workflow fails then the second workflow will never be run.
 
 ```scala mdoc
-val failZIO: ZIO[Has[Console], IOException, Unit] =
+val failZIO: ZIO[Has[Console], IOException, (Unit, Unit)] =
   ZIO.fail(new IOException("Fail")) <*> Console.printLine("ZIO")
 ```
 

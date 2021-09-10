@@ -99,6 +99,7 @@ object BuildHelper {
   val replSettings = makeReplSettings {
     """|import zio._
        |import zio.Console._
+       |import zio.Duration._
        |import zio.Runtime.default._
        |implicit class RunSyntax[A](io: ZIO[ZEnv, Any, A]){ def unsafeRun: A = Runtime.default.unsafeRun(io.provideLayer(ZEnv.live)) }
     """.stripMargin
@@ -109,6 +110,7 @@ object BuildHelper {
     """|import zio._
        |import zio.stream._
        |import zio.Console._
+       |import zio.Duration._
        |import zio.Runtime.default._
        |implicit class RunSyntax[A](io: ZIO[ZEnv, Any, A]){ def unsafeRun: A = Runtime.default.unsafeRun(io.provideLayer(ZEnv.live)) }
     """.stripMargin
