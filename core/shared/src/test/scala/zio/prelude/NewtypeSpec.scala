@@ -41,7 +41,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
             )
           )
         },
-        testM("invalid values at compile-time") {
+        test("invalid values at compile-time") {
           assertM(typeCheck("Natural(-1, -8, 4, -3)"))(
             isLeft(
               containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)") &&
@@ -50,7 +50,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
             )
           )
         } @@ TestAspect.exceptDotty,
-        testM("invalid value at run-time") {
+        test("invalid value at run-time") {
           assertM(typeCheck("Natural(-1)"))(
             isLeft(containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)"))
           )

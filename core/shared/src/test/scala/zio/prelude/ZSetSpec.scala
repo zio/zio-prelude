@@ -24,7 +24,7 @@ object ZSetSpec extends DefaultRunnableSpec {
   lazy val smallInts: Gen[Has[Random] with Has[Sized], Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  def natural(min: Natural, max: Natural): Gen[Random, Natural] =
+  def natural(min: Natural, max: Natural): Gen[Has[Random], Natural] =
     Gen.int(min, max).map(_.asInstanceOf[Natural])
 
   def naturals: Gen[Has[Random] with Has[Sized], Natural] =
