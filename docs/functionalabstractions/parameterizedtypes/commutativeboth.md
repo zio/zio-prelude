@@ -53,7 +53,7 @@ We can also see this in the context of failures.
 val failZIO: ZIO[Has[Console], IOException, Unit] =
   ZIO.fail(new IOException("Fail")) <*> Console.printLine("ZIO")
 
-val zioFail: ZIO[Has[Console], IOException, Unit] =
+val zioFail: ZIO[Has[Console], IOException, (Unit, Unit)] =
   Console.printLine("ZIO") <*> ZIO.fail(new IOException("Fail"))
 ```
 
