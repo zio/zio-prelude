@@ -37,10 +37,10 @@ import zio._
 
 import java.io.IOException
 
-val helloUnit: ZIO[Has[Console], IOException, (Unit, Unit)] =
+val helloUnit: ZIO[Has[Console], IOException, Unit] =
   Console.printLine("Hello") <*> ZIO.unit
 
-val unitHello: ZIO[Has[Console], IOException, (Unit, Unit)] =
+val unitHello: ZIO[Has[Console], IOException, Unit] =
   ZIO.unit <*> Console.printLine("Hello")
 ```
 
