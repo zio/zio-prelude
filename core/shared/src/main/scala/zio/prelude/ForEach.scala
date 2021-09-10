@@ -336,6 +336,31 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     foldLeft(fa)(List.empty[A])((as, a) => a :: as).reverse
 
   /**
+   * Zips the left collection and right collection together, using `None` to
+   * handle the case where one collection is larger than the other.
+   */
+  def zipAll[A, B, C](fa: F[A], fb: F[B])(implicit
+    both: IdentityBoth[F],
+    either: IdentityEither[F]
+  ): F[These[A, B]] =
+    zipAllWith(fa, fb)(identity)
+
+  /**
+   * Zips the left collection and right collection together, using the
+   * specified function to handle the cases where one collection is larger than
+   * the other.
+   */
+  def zipAllWith[A, B, C](fa: F[A], fb: F[B])(
+    f: These[A, B] => C
+  )(implicit both: IdentityBoth[F], either: IdentityEither[F]): F[C] = {
+    implicit val covariant: Covariant[F] = self
+    val as                               = toChunk(fa)
+    val bs                               = toChunk(fb)
+    val cs                               = as.zipAllWith(bs)(a => f(These.Left(a)), b => f(These.Right(b)))((a, b) => f(These.Both(a, b)))
+    cs.foldLeft[F[C]](either.none)((cs, c) => cs orElse c.succeed)
+  }
+
+  /**
    * Zips each element of the collection with its index.
    */
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
@@ -431,6 +456,14 @@ trait ForEachSyntax {
       F.sum(self)
     def toChunk(implicit F: ForEach[F]): Chunk[A]                                                               =
       F.toChunk(self)
+    def zipAll[B](
+      that: F[B]
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]]                 =
+      F.zipAll(self, that)
+    def zipAllWith[B, C](that: F[B])(
+      f: These[A, B] => C
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C]                           =
+      F.zipAllWith(self, that)(f)
     def zipWithIndex(implicit F: ForEach[F]): F[(A, Int)]                                                       =
       F.zipWithIndex(self)
   }
