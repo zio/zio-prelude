@@ -17,7 +17,10 @@ inThisBuild(
 )
 
 addCommandAlias("fix", "; all compile:scalafix test:scalafix; all scalafmtSbt scalafmtAll")
-addCommandAlias("check", "; Test/compile; scalafmtSbtCheck; scalafmtCheckAll; compile:scalafix --check; test:scalafix --check")
+addCommandAlias(
+  "check",
+  "; scalafmtSbtCheck; scalafmtCheckAll; Test/compile; compile:scalafix --check; test:scalafix --check"
+)
 
 addCommandAlias(
   "testJVM",
