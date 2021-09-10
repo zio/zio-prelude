@@ -1078,10 +1078,11 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     )
 
   /**
-   * The `AssociativeBoth` instance for `Chunk`.
+   * The `IdentityBoth` instance for `Chunk`.
    */
-  implicit val ChunkAssociativeBoth: AssociativeBoth[Chunk] =
-    new AssociativeBoth[Chunk] {
+  implicit val ChunkIdentityeBoth: IdentityBoth[Chunk] =
+    new IdentityBoth[Chunk] {
+      def any: Chunk[Any]                                             = Chunk.unit
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 

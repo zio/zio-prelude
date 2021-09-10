@@ -32,6 +32,9 @@ object ForEachSpec extends DefaultRunnableSpec {
   val genIntIntFunction2: Gen[Has[Random], (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
+  val genTheseFunction: Gen[Has[Random], These[Int, Int] => Int] =
+    Gen.function(genInt)
+
   val genEitherIntIntFunction: Gen[Has[Random], Int => Either[Int, Int]] =
     Gen.function(Gen.either(genInt, genInt))
 
@@ -244,6 +247,14 @@ object ForEachSpec extends DefaultRunnableSpec {
           check(genList) { (as) =>
             val actual   = ForEach[List].sum(as)
             val expected = as.sum
+            assert(actual)(equalTo(expected))
+          }
+        },
+        testM("zipAllWith") {
+          check(genChunk, genChunk, genTheseFunction) { (as, bs, f) =>
+            val actual   = ForEach[Chunk].zipAllWith(as, bs)(f)
+            val expected =
+              as.zipAllWith(bs)(a => f(These.Left(a)), b => f(These.Right(b)))((a, b) => f(These.Both(a, b)))
             assert(actual)(equalTo(expected))
           }
         },
