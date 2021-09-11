@@ -7,19 +7,18 @@ object RefinedTypes extends App {
 
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {
-    override inline def refinement = 
-      greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
+    override inline def refinement = greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
 
     extension (self: Natural) {
-      infix def add(that: Natural): Natural = 
-        Natural.unsafeWrap(Natural.unwrap(self) + Natural.unwrap(that))
+      infix def add(that: Natural): Natural = wrap(unwrap(self) + unwrap(that))
     }
   }
 
-
   type Age = Age.Type
   object Age extends Subtype[Int] {
-    override inline def refinement = greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
+    override inline def refinement = {
+      greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
+    }
   }
 
   val natural: Natural = Natural(5) add Natural(8)
@@ -37,10 +36,12 @@ object RefinedTypes extends App {
 
   type MyRegex = MyRegex.Type
   object MyRegex extends Newtype[String] {
-    override inline def refinement = matches {
-      start ~ anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
-        "hello" ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
-        inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3) ~ end
+    override inline def refinement = {
+      matches {
+        anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
+          literal("hello") ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
+          inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3)
+      }
     }
   }
 
