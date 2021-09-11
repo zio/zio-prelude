@@ -24,7 +24,7 @@ addCommandAlias(
 
 addCommandAlias(
   "testJVM",
-  ";Test/doc;coreJVM/test;experimentalJVM/test;scalaParallelCollections/test"
+  ";coreJVM/test;experimentalJVM/test;scalaParallelCollections/test"
 )
 addCommandAlias(
   "testJS",
