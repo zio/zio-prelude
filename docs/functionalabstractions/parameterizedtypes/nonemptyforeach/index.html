@@ -111,14 +111,14 @@
         zipWith(f(a), gbs)(_ :: _)
       }
   }
-<span class="hljs-comment">// ListForEach: ForEach[List] = repl.MdocSession$App$$anon$1@5132fa35</span>
+<span class="hljs-comment">// ListForEach: ForEach[List] = repl.MdocSession$App$$anon$1@7c6221d7</span>
 
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> <span class="hljs-type">NonEmptyListNonEmptyForEach</span>: <span class="hljs-type">ForEach</span>[<span class="hljs-type">NonEmptyList</span>] =
   <span class="hljs-keyword">new</span> <span class="hljs-type">NonEmptyForEach</span>[<span class="hljs-type">NonEmptyList</span>] {
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">forEach1</span></span>[<span class="hljs-type">G</span>[+_]: <span class="hljs-type">AssociativeBoth</span>: <span class="hljs-type">Covariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>](fa: <span class="hljs-type">NonEmptyList</span>[<span class="hljs-type">A</span>])(f: <span class="hljs-type">A</span> =&gt; <span class="hljs-type">G</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">G</span>[<span class="hljs-type">NonEmptyList</span>[<span class="hljs-type">B</span>]] =
       fa.reduceMapRight(a =&gt; map(f(a))(<span class="hljs-type">NonEmptyList</span>.single))((a, gbs) =&gt; zipWith(f(a), gbs)(<span class="hljs-type">NonEmptyList</span>.cons))
   }
-<span class="hljs-comment">// NonEmptyListNonEmptyForEach: ForEach[NonEmptyList] = repl.MdocSession$App$$anon$2@2c917224</span>
+<span class="hljs-comment">// NonEmptyListNonEmptyForEach: ForEach[NonEmptyList] = repl.MdocSession$App$$anon$2@224d1317</span>
 </code></pre>
 <p>In our implementation of <code>ForEach</code> for <code>List</code> we needed to use the <code>succeed</code> operator to handle the case where the collection was empty, because in that case we had to be able to lift an empty collection into the context of <code>G</code>. The <code>succeed</code> operator requires an <code>IdentityBoth</code> instance because we have to be able to construct a neutral value of type <code>G</code> that we can then fill with the value we are lifting using the <code>map</code> operator.</p>
 <p>In contrast, in our implementation of <code>NonEmptyForEach</code> we never need to call <code>succeed</code> because there is always at least one one element in the collection. So we can just apply the function <code>f</code> to each element in the collection and then use the <code>zipWith</code> operator to combine the results.</p>
