@@ -1,7 +1,6 @@
 package examples
 
 import zio.prelude.*
-import zio.prelude.refined.*
 
 object RefinedTypes extends App {
   import Refinement.*
