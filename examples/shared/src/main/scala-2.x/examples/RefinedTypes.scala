@@ -31,14 +31,14 @@ object RefinedTypes extends App {
   println(sum(natural, age))
 
   val x: Natural                     = Natural(0)
-  val y: Validation[String, Natural] = Natural.make(scala.util.Random.nextInt)
+  val y: Validation[String, Natural] = Natural.make(scala.util.Random.nextInt())
 
   import Regex._
 
   type MyRegex = MyRegex.Type
   object MyRegex extends Newtype[String] {
     def refinement = refine {
-      Refinement.matches {
+      matches {
         anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace.* ~ digit.min(0) ~ nonDigit.min(1) ~
           literal("hello").+ ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
           inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3)
