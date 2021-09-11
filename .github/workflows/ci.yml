@@ -104,7 +104,7 @@ jobs:
       - name: Test on different Scala target platforms
         run: ./sbt test${{ matrix.platform }}
 
-  docScalaVersions:
+  publishLocal:
     runs-on: ubuntu-20.04
     timeout-minutes: 30
     steps:
@@ -114,12 +114,12 @@ jobs:
         uses: olafurpg/setup-scala@v13
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Check Document Generation
-        run: ./sbt +Test/doc
+      - name: Check that building packages works
+        run: ./sbt +Test/doc +publishLocal
 
   ci:
     runs-on: ubuntu-20.04
-    needs: [lint, doc, test, testJvms, testPlatforms, docScalaVersions]
+    needs: [lint, doc, test, testJvms, testPlatforms, publishLocal]
     steps:
       - name: Aggregate of lint, and all tests
         run: echo "ci passed"
