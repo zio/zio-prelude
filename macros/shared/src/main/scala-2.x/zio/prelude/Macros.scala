@@ -1,5 +1,6 @@
 package zio.prelude
 
+import com.github.ghik.silencer.silent
 import zio.prelude.ConsoleUtils._
 
 import scala.annotation.StaticAnnotation
@@ -12,6 +13,8 @@ trait QuotedRefinement[A] {
   def refinement: Refinement[A]
 }
 
+// Wrongly emits warnings on Scala 2.12.x https://github.com/scala/bug/issues/11918
+@silent("pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
 class Macros(val c: whitebox.Context) extends Liftables {
   import c.universe._
 

@@ -4,6 +4,8 @@ import com.github.ghik.silencer.silent
 
 import scala.reflect.macros.whitebox
 
+// Wrongly emits warnings on Scala 2.12.x https://github.com/scala/bug/issues/11918
+@silent("pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
 trait Liftables {
   val c: whitebox.Context
 
