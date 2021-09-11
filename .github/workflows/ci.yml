@@ -28,7 +28,7 @@ jobs:
       - name: Lint code
         run: ./sbt check
 
-  doc:
+  website:
     runs-on: ubuntu-20.04
     timeout-minutes: 30
     steps:
@@ -38,7 +38,7 @@ jobs:
         uses: olafurpg/setup-scala@v13
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Check Document Generation
+      - name: Check Website Generation
         run: ./sbt docs/docusaurusCreateSite
 
   test:
@@ -119,7 +119,7 @@ jobs:
 
   ci:
     runs-on: ubuntu-20.04
-    needs: [lint, doc, test, testJvms, testPlatforms, publishLocal]
+    needs: [lint, website, test, testJvms, testPlatforms, publishLocal]
     steps:
       - name: Aggregate of lint, and all tests
         run: echo "ci passed"
