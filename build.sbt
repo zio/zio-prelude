@@ -156,6 +156,7 @@ lazy val benchmarks = project
   .in(file("benchmarks"))
   .settings(stdSettings("zio-prelude-benchmarks"))
   .settings(
+    crossScalaVersions --= List(BuildHelper.Scala211),
     publish / skip := true,
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
