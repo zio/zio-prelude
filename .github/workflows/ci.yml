@@ -38,7 +38,33 @@ jobs:
         uses: olafurpg/setup-scala@v13
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Check Document Generation
+      - name: Check generation of ScalaDoc
+        run: ./sbt +Test/doc
+
+  publishLocal:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2.3.4
+      - name: Setup Scala and Java
+        uses: olafurpg/setup-scala@v13
+      - name: Cache scala dependencies
+        uses: coursier/cache-action@v6
+      - name: Check that building packages works
+        run: ./sbt +publishLocal
+
+  website:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2.3.4
+      - name: Setup Scala and Java
+        uses: olafurpg/setup-scala@v13
+      - name: Cache scala dependencies
+        uses: coursier/cache-action@v6
+      - name: Check Website Generation
         run: ./sbt docs/docusaurusCreateSite
 
   test:
@@ -104,22 +130,9 @@ jobs:
       - name: Test on different Scala target platforms
         run: ./sbt test${{ matrix.platform }}
 
-  docScalaVersions:
-    runs-on: ubuntu-20.04
-    timeout-minutes: 30
-    steps:
-      - name: Checkout current branch
-        uses: actions/checkout@v2.3.4
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
-      - name: Cache scala dependencies
-        uses: coursier/cache-action@v6
-      - name: Check Document Generation
-        run: ./sbt +Test/doc
-
   ci:
     runs-on: ubuntu-20.04
-    needs: [lint, doc, test, testJvms, testPlatforms, docScalaVersions]
+    needs: [lint, doc, publishLocal, website, test, testJvms, testPlatforms]
     steps:
       - name: Aggregate of lint, and all tests
         run: echo "ci passed"
