@@ -81,13 +81,13 @@
 
 <span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@734f4d7d</span>
+<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@1029834a</span>
 </code></pre>
 <p>This will print <code>Hello</code> to the console on the first line and then <code>ZIO</code> on the second line.</p>
 <p>If the first workflow fails then the second workflow will never be run.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> failZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>)) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@7db5628f</span>
+<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@7f6e8161</span>
 </code></pre>
 <p>Now <code>ZIO</code> will never be printed to the console.</p>
 <p>What it means to run the left value and run the right value will vary between data types.</p>
@@ -185,7 +185,7 @@
   console.putStrLn(<span class="hljs-string">"Hello"</span>) *&gt;
     console.putStrLn(<span class="hljs-string">"From"</span>) *&gt;
     console.putStrLn(<span class="hljs-string">"AssociativeBoth"</span>)
-<span class="hljs-comment">// helloFromAssociativeBoth: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@4ad0ef40</span>
+<span class="hljs-comment">// helloFromAssociativeBoth: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@9a28f3</span>
 </code></pre>
 <p>There is also a variant of <code>zipWith</code> for contravariant types called <code>bothWith</code> that combines <code>zip</code> and <code>contramap</code>.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bothWith</span></span>[<span class="hljs-type">F</span>[-_]: <span class="hljs-type">AssociativeBoth</span> : <span class="hljs-type">Contravariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
@@ -203,20 +203,20 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(words: <span class="hljs-type">List</span>[<span class="hljs-type">String</span>]): <span class="hljs-type">Boolean</span> =
       !words.exists(_.contains(<span class="hljs-string">"get rich"</span>))
   }
-<span class="hljs-comment">// noSuspiciousWords: Predicate[List[String]] = repl.MdocSession$App0$$anon$5@3c152c55</span>
+<span class="hljs-comment">// noSuspiciousWords: Predicate[List[String]] = repl.MdocSession$App0$$anon$5@7d77635</span>
 
 <span class="hljs-keyword">val</span> noSuspiciousSender: <span class="hljs-type">Predicate</span>[<span class="hljs-type">String</span>] =
   <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">String</span>] {
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(sender: <span class="hljs-type">String</span>): <span class="hljs-type">Boolean</span> =
       !sender.contains(<span class="hljs-string">"unclaimedfunds"</span>)
   }
-<span class="hljs-comment">// noSuspiciousSender: Predicate[String] = repl.MdocSession$App0$$anon$6@3538ba0f</span>
+<span class="hljs-comment">// noSuspiciousSender: Predicate[String] = repl.MdocSession$App0$$anon$6@5bb89656</span>
 
 <span class="hljs-keyword">val</span> spamFilter: <span class="hljs-type">Predicate</span>[<span class="hljs-type">Email</span>] =
   noSuspiciousWords.bothWith(noSuspiciousSender) { 
     <span class="hljs-keyword">case</span> <span class="hljs-type">Email</span>(lines, sender) =&gt; (lines, sender)
   }
-<span class="hljs-comment">// spamFilter: Predicate[Email] = repl.MdocSession$App0$Predicate$1$$anon$1@63cf173d</span>
+<span class="hljs-comment">// spamFilter: Predicate[Email] = repl.MdocSession$App0$Predicate$1$$anon$1@505671c9</span>
 </code></pre>
 <p>The composed predicate will extract the lines and the sender, sending the lines to the <code>nonSuspiciousWords</code> predicate and then if it passes sending the sender to the <code>nonSuspiciousSender</code> predicate.</p>
 <p>We can use the <code>bothWith</code> operator with other contravariant types as well. For example, we could combine two sinks to produce a new sink that sends all inputs first to one sink and then to the other.</p>
@@ -226,4 +226,4 @@
 <p>If you are defining your own parameterized data type then asking if you can define an <code>AssociativeBoth</code> instance for it can be a very helpful exercise.</p>
 <p>Associative ways of combining are fundamental to building up more complex structures from simpler ones, so if your data type does not support an associative combining operation it can be worth asking why that is and if there is a way it could be refactored to support such an operation. If it does, defining an <code>AssociativeBoth</code> instance will get you a lot of useful operators, especially in combination with the <code>Covariant</code> or <code>Contravariant</code> and <code>ForEach</code> abstractions from ZIO Prelude.</p>
 <p>Finally, if you are doing generic programming with the abstractions in ZIO Prelude then <code>AssociativeBoth</code> will again be an important operator to describe running one value and then another in a generic way. The orthagonal way that abstractions are described in ZIO Prelude can be particularly valuable here to help you avoid confusing unrelated concepts and describe your shared structure in as general a way as possbile.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/index"><span class="arrow-prev">← </span><span>Introduction</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither"><span class="function-name-prevnext">AssociativeEither</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/index"><span class="arrow-prev">← </span><span>Introduction</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither"><span class="function-name-prevnext">AssociativeEither</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/zio/prelude/">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>

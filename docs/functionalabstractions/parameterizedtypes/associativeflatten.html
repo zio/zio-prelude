@@ -88,7 +88,7 @@
   random.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
     console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }
-<span class="hljs-comment">// greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] = zio.ZIO$FlatMap@6010675e</span>
+<span class="hljs-comment">// greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] = zio.ZIO$FlatMap@695c7596</span>
 </code></pre>
 <p>This is very understandable.</p>
 <p>We want to perform a second <code>ZIO</code> workflow, in this case printing to the console, based on the result of the first workflow. So we use the <code>map</code> operator, which is described by the <code>Covariant</code> abstraction, to get the success value of the first workflow and transform it with a function.</p>
@@ -103,7 +103,7 @@
   random.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
     console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }.flatten
-<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@66462685</span>
+<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@32af317c</span>
 </code></pre>
 <p>Now we have eliminated the nested workflows. This workflow will do exactly what we want, first generating a random number and then printing it to the console.</p>
 <p>Of course if we are working with <code>ZIO</code> we quickly learn to use the <code>flatMap</code> operator, which just combines <code>map</code> and <code>flatten</code>.</p>
@@ -111,7 +111,7 @@
   random.nextIntBounded(<span class="hljs-number">100</span>).flatMap { n =&gt;
     console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }
-<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@7e2c5690</span>
+<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@50672982</span>
 </code></pre>
 <p>The <code>flatMap</code> operator is extremely convenient, especially in combination with Scala's syntax for for comprehensions. However, we are now in a position to see that there isn't really anything special about the <code>flatMap</code> operator itself.</p>
 <p>The <code>flatMap</code> operator is just a combination of <code>map</code> and <code>flatten</code> and <code>map</code> is a very basic operator defined on all covariant data types. The real work here is in the <code>flatten</code> operator.</p>
@@ -172,4 +172,4 @@
 <p>There are some operators defined on the <code>ForEach</code> and <code>NonEmptyForEach</code> abstractions that work with data types that have instances of <code>AssociativeFlatten</code> or <code>IdentityFlatten</code>. These can be helpful to do things like fold over a collection with the possibility of failure.</p>
 <p>When defining your own parameterized data types the <code>flatMap</code> operator is so useful that you should be thinking about what an implementation of this abstraction would look like for your own data type. Or you may intentionally not want to expose it to allow for more static analysis, but that is definitely something worth thinking about.</p>
 <p>For all the reasons discussed above the <code>AssociativeFlatten</code> and <code>IdentityFlatten</code> abstractions are also very important in writing generic code to express values that depend on other values in a parameterized context.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither"><span class="arrow-prev">← </span><span class="function-name-prevnext">AssociativeEither</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth"><span class="function-name-prevnext">CommutativeBoth</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/index.html">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/associativeeither"><span class="arrow-prev">← </span><span class="function-name-prevnext">AssociativeEither</span></a><a class="docs-next button" href="/zio-prelude/docs/functionalabstractions/parameterizedtypes/commutativeboth"><span class="function-name-prevnext">CommutativeBoth</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/zio-prelude/" class="nav-home"><img src="/zio-prelude/img/sidebar_brand2x.png" alt="ZIO Prelude"/></a><div><h5>GitHub</h5><a class="github-button" href="https://github.com/zio/zio-prelude" data-icon="octicon-star" data-count-href="/zio/zio-prelude/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div><div><h5>Chat with us on Discord</h5><a href="https://discord.gg/2ccFBr4"><img src="/zio-prelude//img/discord.png" width="120" alt="discord"/></a></div><div><h5>Additional resources</h5><a href="/zio-prelude/api/zio/prelude/">Scaladoc of zio-prelude</a></div></section><section class="copyright">Copyright © 2021 ZIO Maintainers</section></footer></div></body></html>
