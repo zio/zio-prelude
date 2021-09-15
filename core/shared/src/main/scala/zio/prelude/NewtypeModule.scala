@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.test.Assertion
+import zio.test.{Assertion => TestAssertion}
 
 /**
  * The `Newtype` module provides functionality for creating zero overhead
@@ -158,12 +158,12 @@ private[prelude] sealed trait NewtypeModule {
   def newtype[A]: Newtype[A]
 
   @deprecated("deprecated", "1.0.0-RC8")
-  def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A]
+  def newtypeSmart[A](assertion: TestAssertion[A]): NewtypeSmart[A]
 
   def subtype[A]: Subtype[A]
 
   @deprecated("deprecated", "1.0.0-RC8")
-  def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A]
+  def subtypeSmart[A](assertion: TestAssertion[A]): SubtypeSmart[A]
 
   private[this] type Id[+A] = A
 
@@ -288,7 +288,7 @@ private[prelude] object NewtypeModule {
         }
 
       @deprecated("deprecated", "1.0.0-RC8")
-      def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A] =
+      def newtypeSmart[A](assertion: TestAssertion[A]): NewtypeSmart[A] =
         new NewtypeSmart[A] {
           type Type = A
 
@@ -312,7 +312,7 @@ private[prelude] object NewtypeModule {
         }
 
       @deprecated("deprecated", "1.0.0-RC8")
-      def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A] =
+      def subtypeSmart[A](assertion: TestAssertion[A]): SubtypeSmart[A] =
         new SubtypeSmart[A] {
           type Type = A
 
@@ -368,7 +368,7 @@ trait NewtypeExports {
    * }}}
    */
   @deprecated("use Newtype with an assertion", "1.0.0-RC8")
-  abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
+  abstract class NewtypeSmart[A](assertion: TestAssertion[A]) extends instance.NewtypeSmart[A] {
     val newtype: instance.NewtypeSmart[A] = instance.newtypeSmart[A](assertion)
 
     trait Tag extends Any
@@ -419,7 +419,7 @@ trait NewtypeExports {
    * }}}
    */
   @deprecated("use Subtype with an assertion", "1.0.0-RC8")
-  abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {
+  abstract class SubtypeSmart[A](assertion: TestAssertion[A]) extends instance.SubtypeSmart[A] {
     val subtype: instance.SubtypeSmart[A] = instance.subtypeSmart[A](assertion)
 
     trait Tag extends Any

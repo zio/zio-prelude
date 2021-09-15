@@ -38,49 +38,49 @@ trait Liftables {
 
   implicit lazy val regexUnliftable: Unliftable[Assertion.Regex] =
     Unliftable[Assertion.Regex] {
-      case q"${R(_)}.Regex.AnyChar"                                                                           =>
+      case q"${A(_)}.Regex.AnyChar"                                                                           =>
         Assertion.Regex.AnyChar
-      case q"${R(_)}.Regex.anyChar"                                                                           =>
+      case q"${A(_)}.Regex.anyChar"                                                                           =>
         Assertion.Regex.anyChar
-      case q"${R(_)}.Regex.Anything"                                                                          =>
+      case q"${A(_)}.Regex.Anything"                                                                          =>
         Assertion.Regex.Anything
-      case q"${R(_)}.Regex.anything"                                                                          =>
+      case q"${A(_)}.Regex.anything"                                                                          =>
         Assertion.Regex.anything
-      case q"${R(_)}.Regex.Alphanumeric.apply(${reversed: Boolean})"                                          =>
+      case q"${A(_)}.Regex.Alphanumeric.apply(${reversed: Boolean})"                                          =>
         Assertion.Regex.Alphanumeric(reversed)
-      case q"${R(_)}.Regex.alphanumeric"                                                                      =>
+      case q"${A(_)}.Regex.alphanumeric"                                                                      =>
         Assertion.Regex.alphanumeric
-      case q"${R(_)}.Regex.nonAlphanumeric"                                                                   =>
+      case q"${A(_)}.Regex.nonAlphanumeric"                                                                   =>
         Assertion.Regex.nonAlphanumeric
-      case q"${R(_)}.Regex.Whitespace.apply(${reversed: Boolean})"                                            =>
+      case q"${A(_)}.Regex.Whitespace.apply(${reversed: Boolean})"                                            =>
         Assertion.Regex.Whitespace(reversed)
-      case q"${R(_)}.Regex.whitespace"                                                                        =>
+      case q"${A(_)}.Regex.whitespace"                                                                        =>
         Assertion.Regex.whitespace
-      case q"${R(_)}.Regex.nonWhitespace"                                                                     =>
+      case q"${A(_)}.Regex.nonWhitespace"                                                                     =>
         Assertion.Regex.nonWhitespace
-      case q"${R(_)}.Regex.Digit.apply(${reversed: Boolean})"                                                 =>
+      case q"${A(_)}.Regex.Digit.apply(${reversed: Boolean})"                                                 =>
         Assertion.Regex.Digit(reversed)
-      case q"${R(_)}.Regex.digit"                                                                             =>
+      case q"${A(_)}.Regex.digit"                                                                             =>
         Assertion.Regex.digit
-      case q"${R(_)}.Regex.nonDigit"                                                                          =>
+      case q"${A(_)}.Regex.nonDigit"                                                                          =>
         Assertion.Regex.nonDigit
-      case q"${R(_)}.Regex.Literal.apply(${char: Char})"                                                      =>
+      case q"${A(_)}.Regex.Literal.apply(${char: Char})"                                                      =>
         Assertion.Regex.Literal(char)
-      case q"${R(_)}.Regex.literal(${str: String})"                                                           =>
+      case q"${A(_)}.Regex.literal(${str: String})"                                                           =>
         Assertion.Regex.literal(str)
-      case q"${R(_)}.Regex.CharacterSet.apply(scala.Predef.Set.apply[$_](..$set), ${reversed: Boolean})"      =>
+      case q"${A(_)}.Regex.CharacterSet.apply(scala.Predef.Set.apply[$_](..$set), ${reversed: Boolean})"      =>
         Assertion.Regex.CharacterSet(set.map(t => c.eval[Char](c.Expr[Char](t))).toSet, reversed)
-      case q"${R(_)}.Regex.anyOf(${first: Char}, ${second: Char}, ..$rest)"                                   =>
+      case q"${A(_)}.Regex.anyOf(${first: Char}, ${second: Char}, ..$rest)"                                   =>
         Assertion.Regex.anyOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
-      case q"${R(_)}.Regex.notAnyOf(${first: Char}, ${second: Char}, ..$rest)"                                =>
+      case q"${A(_)}.Regex.notAnyOf(${first: Char}, ${second: Char}, ..$rest)"                                =>
         Assertion.Regex.notAnyOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
-      case q"${R(_)}.Regex.Range.apply(${start: Char}, ${end: Char}, ${reversed: Boolean})"                   =>
+      case q"${A(_)}.Regex.Range.apply(${start: Char}, ${end: Char}, ${reversed: Boolean})"                   =>
         Assertion.Regex.Range(start, end, reversed)
-      case q"${R(_)}.Regex.inRange(${start: Char}, ${end: Char})"                                             =>
+      case q"${A(_)}.Regex.inRange(${start: Char}, ${end: Char})"                                             =>
         Assertion.Regex.inRange(start, end)
-      case q"${R(_)}.Regex.notInRange(${start: Char}, ${end: Char})"                                          =>
+      case q"${A(_)}.Regex.notInRange(${start: Char}, ${end: Char})"                                          =>
         Assertion.Regex.notInRange(start, end)
-      case q"${R(_)}.Regex.Repeat.apply(${regex: Assertion.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
+      case q"${A(_)}.Regex.Repeat.apply(${regex: Assertion.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
         Assertion.Regex.Repeat(regex, min, max)
       case q"${regex: Assertion.Regex}.min(${n: Int})"                                                        =>
         regex.min(n)
@@ -92,31 +92,18 @@ trait Liftables {
         regex.*
       case q"${regex: Assertion.Regex}.+"                                                                     =>
         regex.*
-      case q"${R(_)}.Regex.AndThen.apply(${first: Assertion.Regex}, ${second: Assertion.Regex})"              =>
+      case q"${A(_)}.Regex.AndThen.apply(${first: Assertion.Regex}, ${second: Assertion.Regex})"              =>
         Assertion.Regex.AndThen(first, second)
       case q"${left: Assertion.Regex}.~(${right: Assertion.Regex})"                                           =>
         left ~ right
-      case q"${R(_)}.Regex.OrElse.apply(${first: Assertion.Regex}, ${second: Assertion.Regex})"               =>
+      case q"${A(_)}.Regex.OrElse.apply(${first: Assertion.Regex}, ${second: Assertion.Regex})"               =>
         Assertion.Regex.OrElse(first, second)
       case q"${left: Assertion.Regex}.|(${right: Assertion.Regex})"                                           =>
         left | right
     }
 
-  @silent("Implicit resolves to enclosing method")
-  implicit def assertionLiftable[A: c.WeakTypeTag]: Liftable[Assertion[A]] =
-    Liftable[Assertion[A]] {
-      case Assertion.Anything                        => q"$AssertionPrefix.Always"
-      case Assertion.And(left, right)                => q"$AssertionPrefix.And($left, $right)"
-      case Assertion.EqualTo(LiteralLift(value))     => q"$AssertionPrefix.EqualTo($value)"
-      case Assertion.GreaterThan(LiteralLift(value)) => q"$AssertionPrefix.GreaterThan($value)"
-      case Assertion.LessThan(LiteralLift(value))    => q"$AssertionPrefix.LessThan($value)"
-      case Assertion.Matches(regex)                  => q"$AssertionPrefix.Matches($regex)"
-      case Assertion.Not(assertion)                  => q"$AssertionPrefix.Not($assertion)"
-      case Assertion.Or(left, right)                 => q"$AssertionPrefix.Or($left, $right)"
-      case other                                     => c.abort(c.enclosingPosition, s"COULD NOT MATCH ASSERTION: $other")
-    }
-
-  object R {
+  // Match on zio.prelude.Assertion path prefix
+  object A {
     def unapply(tree: c.Tree): Option[Assertion.type] =
       tree match {
         case q"zio.prelude.Assertion" => Some(Assertion)
@@ -135,47 +122,62 @@ trait Liftables {
   implicit def assertionUnliftable[A: c.WeakTypeTag]: Unliftable[Assertion[A]] =
     Unliftable[Assertion[A]] {
 
-      case q"${R(_)}.anything" =>
+      case q"${A(_)}.anything" =>
         Assertion.anything
 
-      case q"${R(_)}.never" =>
+      case q"${A(_)}.never" =>
         Assertion.never
 
       case q"${left: Assertion[A]}.&&[$_](${right: Assertion[A]})" =>
         Assertion.And(left, right)
 
-      case q"${R(_)}.equalTo[$_](${LiteralUnlift(value)})" =>
+      case q"${A(_)}.divisibleBy[$_](${LiteralUnlift(value)})($_)" =>
+        Assertion.divisibleBy(value)(numericForValue(value))
+
+      case q"${A(_)}.contains(${value: String})" =>
+        Assertion.contains(value).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.endsWith(${value: String})" =>
+        Assertion.endsWith(value).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.equalTo[$_](${LiteralUnlift(value)})" =>
         Assertion.equalTo(value.asInstanceOf[A])
 
-      case q"${R(_)}.notEqualTo[$_](${LiteralUnlift(value)})" =>
+      case q"${A(_)}.notEqualTo[$_](${LiteralUnlift(value)})" =>
         Assertion.notEqualTo(value.asInstanceOf[A])
 
-      case q"${R(_)}.between[$_](${LiteralUnlift(min)}, ${LiteralUnlift(max)})($_)" =>
+      case q"${A(_)}.between[$_](${LiteralUnlift(min)}, ${LiteralUnlift(max)})($_)" =>
         Assertion.between(min.asInstanceOf[A], max.asInstanceOf[A])(orderingForValue(min).asInstanceOf[Ordering[A]])
 
-      case q"${R(_)}.greaterThan[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${A(_)}.greaterThan[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.greaterThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"${R(_)}.greaterThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${A(_)}.greaterThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.greaterThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"${R(_)}.lessThan[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${A(_)}.hasLength(${assertion: Assertion[Int]})" =>
+        Assertion.hasLength(assertion).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.lessThan[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.lessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"${R(_)}.lessThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
+      case q"${A(_)}.lessThanOrEqualTo[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.lessThanOrEqualTo(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
 
-      case q"${R(_)}.matches(${regex: Assertion.Regex})" =>
+      case q"${A(_)}.matches(${regex: Assertion.Regex})" =>
         Assertion.Matches(regex.compile).asInstanceOf[Assertion[A]]
 
-      case q"${R(_)}.matches(${string: String})" =>
+      case q"${A(_)}.matches(${string: String})" =>
         Assertion.Matches(string).asInstanceOf[Assertion[A]]
 
-      case q"${R(_)}.matches(${regex: scala.util.matching.Regex})" =>
+      case q"${A(_)}.matches(${regex: scala.util.matching.Regex})" =>
         Assertion.Matches(regex.regex).asInstanceOf[Assertion[A]]
 
-      case q"${R(_)}.powerOf[$_](${LiteralUnlift(base)})($_)" =>
+      case q"${A(_)}.powerOf[$_](${LiteralUnlift(base)})($_)" =>
         Assertion.powerOf(base)(numericForValue(base)).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.startsWith(${value: String})" =>
+        Assertion.startsWith(value).asInstanceOf[Assertion[A]]
 
       case q"!${assertion: Assertion[A]}" =>
         Assertion.Not(assertion)

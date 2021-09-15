@@ -25,7 +25,7 @@ trait Liftables {
 
   given FromExpr[Assertion.Regex] with {
     def unapply(assertion: Expr[Assertion.Regex])(using Quotes): Option[Assertion.Regex] = {
-      import quotes.reflect.{Assertion => _, *}
+      import quotes.reflect.*
 
       assertion match {
         case '{ Assertion.Regex.anyChar }                                                  => Some(Assertion.Regex.anyChar)
@@ -55,38 +55,34 @@ trait Liftables {
   
   given [A](using Type[A]): FromExpr[Assertion[A]] with {
     def unapply(assertion: Expr[Assertion[A]])(using Quotes): Option[Assertion[A]] = {
-      import quotes.reflect.{Assertion => _, *}
+      import quotes.reflect.*
 
       assertion match {
         case '{ Assertion.anything }                                                     => Some(Assertion.anything)
         case '{ Assertion.between[A](${LiteralUnlift(min)}, ${LiteralUnlift(max)})($_) } => Some(Assertion.between(min, max)(orderingForValue(min)))
+        case '{ Assertion.contains(${Expr(value)}) }                                     => Some(Assertion.contains(value).asInstanceOf[Assertion[A]])
+        case '{ Assertion.divisibleBy[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.divisibleBy(value)(numericForValue(value)))
         case '{ Assertion.never }                                                        => Some(Assertion.never)
+        case '{ Assertion.endsWith(${Expr(value)}) }                                     => Some(Assertion.endsWith(value).asInstanceOf[Assertion[A]])
         case '{ (${Expr(left)}: Assertion[A]).&&(${Expr(right)}) }                       => Some(Assertion.And(left, right))
         case '{ Assertion.equalTo[A](${LiteralUnlift(value)}) }                          => Some(Assertion.equalTo(value))
         case '{ Assertion.notEqualTo[A](${LiteralUnlift(value)}) }                       => Some(Assertion.notEqualTo(value))
         case '{ Assertion.greaterThan[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.greaterThan(value)(orderingForValue(value)))
         case '{ Assertion.greaterThanOrEqualTo[A](${LiteralUnlift(value)})($_) }         => Some(Assertion.greaterThanOrEqualTo(value)(orderingForValue(value)))
+        case '{ Assertion.hasLength(${Expr(assertion)}) }                                => Some(Assertion.hasLength(assertion).asInstanceOf[Assertion[A]])
         case '{ Assertion.lessThan[A](${LiteralUnlift(value)})($_) }                     => Some(Assertion.lessThan(value)(orderingForValue(value)))
         case '{ Assertion.lessThanOrEqualTo[A](${LiteralUnlift(value)})($_) }            => Some(Assertion.lessThanOrEqualTo(value)(orderingForValue(value)))
-        case '{ Assertion.matches(${Expr(regex)}: Assertion.Regex) }                    => Some(Assertion.matches(regex).asInstanceOf[Assertion[A]])
+        case '{ Assertion.matches(${Expr(regex)}: Assertion.Regex) }                     => Some(Assertion.matches(regex).asInstanceOf[Assertion[A]])
         case '{ Assertion.matches((${Expr(regex)}: String).r) }                          => Some(Assertion.matches(regex.r).asInstanceOf[Assertion[A]])
         case '{ Assertion.matches(${Expr(regex)}: String) }                              => Some(Assertion.matches(regex).asInstanceOf[Assertion[A]])
         case '{ !(${Expr(assertion)}: Assertion[A]) }                                    => Some(Assertion.Not(assertion))
         case '{ (${Expr(left)}: Assertion[A]).||(${Expr(right)}) }                       => Some(Assertion.Or(left, right))
         case '{ Assertion.powerOf[A](${LiteralUnlift(value)})($_) }                      => Some(Assertion.powerOf(value)(numericForValue(value)))
+        case '{ Assertion.startsWith(${Expr(value)}) }                                   => Some(Assertion.startsWith(value).asInstanceOf[Assertion[A]])
         case _ => None
       }
     }
   }
-
-  // given [A, T](using Type[A], Type[T]): FromExpr[QuotedAssertion[A, T]] with {
-  //   def unapply(quotedAssertion: Expr[QuotedAssertion[A, T]])(using Quotes): Option[QuotedAssertion[A, T]] =
-  //     quotedAssertion match {
-  //       case '{ QuotedAssertion[A, T](${Expr(assertion)}) } => Some(QuotedAssertion(assertion))
-  //       case '{ Refined[A, T](${Expr(assertion)}) }         => Some(QuotedAssertion(assertion))
-  //       case _                                              => None
-  //     }
-  // }
 
   object LiteralLift {
     def unapply(any: Any)(using Quotes): Option[Expr[Any]] = any match {

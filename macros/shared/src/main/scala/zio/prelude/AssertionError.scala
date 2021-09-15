@@ -32,6 +32,6 @@ sealed trait AssertionError { self =>
 object AssertionError {
   def failure(condition: String): AssertionError = Failure(condition)
 
-  final case class Failure(condition: String)        extends AssertionError
+  final case class Failure(condition: String)       extends AssertionError
   final case class Many(vector: ::[AssertionError]) extends AssertionError
 }

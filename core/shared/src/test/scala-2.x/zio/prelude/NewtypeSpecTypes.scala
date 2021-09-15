@@ -5,6 +5,35 @@ import zio.prelude.Assertion.Regex._
 
 object NewtypeSpecTypes {
 
+  // A type that uses EVERY SINGLE string assertion
+  type MegaString = MegaString.Type
+  object MegaString extends Newtype[String] {
+    import Assertion._
+    def assertion =
+      assert(startsWith("START-") && endsWith("-END") && hasLength(greaterThan(5)) && contains("love"))
+  }
+
+  val megaString = MegaString("START-lovely-END")
+
+  // A type that uses EVERY SINGLE numeric assertion
+  type MegaInt = MegaInt.Type
+  object MegaInt extends Newtype[Int] {
+    def assertion =
+      assert(
+        Assertion.between(0, 100) &&
+          Assertion.divisibleBy(9) &&
+          Assertion.equalTo(81) &&
+          Assertion.greaterThanOrEqualTo(0) &&
+          Assertion.greaterThan(0) &&
+          Assertion.lessThanOrEqualTo(100) &&
+          Assertion.lessThan(100) &&
+          Assertion.powerOf(3) &&
+          Assertion.notEqualTo(1234)
+      )
+  }
+
+  val megaInt = MegaInt(81)
+
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {
     def assertion =
