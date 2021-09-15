@@ -2,12 +2,12 @@ package examples
 
 import zio.prelude.*
 
-object RefinedTypes extends App {
-  import Refinement.*
+object SmartTypes extends App {
+  import Assertion.*
 
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {
-    override inline def refinement = greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
+    override inline def assertion = greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
 
     extension (self: Natural) {
       infix def add(that: Natural): Natural = wrap(unwrap(self) + unwrap(that))
@@ -16,7 +16,7 @@ object RefinedTypes extends App {
 
   type Age = Age.Type
   object Age extends Subtype[Int] {
-    override inline def refinement = {
+    override inline def assertion = {
       greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
     }
   }
@@ -36,7 +36,7 @@ object RefinedTypes extends App {
 
   type MyRegex = MyRegex.Type
   object MyRegex extends Newtype[String] {
-    override inline def refinement = {
+    override inline def assertion = {
       matches {
         anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
           literal("hello") ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~

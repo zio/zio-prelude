@@ -1,12 +1,12 @@
 package zio.prelude
 
-sealed trait RefinementError { self =>
-  import RefinementError._
+sealed trait AssertionError { self =>
+  import AssertionError._
 
-  def ++(that: RefinementError): RefinementError =
+  def ++(that: AssertionError): AssertionError =
     (self, that) match {
-      case (Many(es1), Many(es2)) => Many((es1 ++ es2).asInstanceOf[::[RefinementError]])
-      case (Many(es1), f)         => Many((es1 :+ f).asInstanceOf[::[RefinementError]])
+      case (Many(es1), Many(es2)) => Many((es1 ++ es2).asInstanceOf[::[AssertionError]])
+      case (Many(es1), f)         => Many((es1 :+ f).asInstanceOf[::[AssertionError]])
       case (f, Many(es2))         => Many(::(f, es2))
       case (f1, f2)               => Many(::(f1, ::(f2, Nil)))
     }
@@ -29,9 +29,9 @@ sealed trait RefinementError { self =>
   }
 }
 
-object RefinementError {
-  def failure(condition: String): RefinementError = Failure(condition)
+object AssertionError {
+  def failure(condition: String): AssertionError = Failure(condition)
 
-  final case class Failure(condition: String)        extends RefinementError
-  final case class Many(vector: ::[RefinementError]) extends RefinementError
+  final case class Failure(condition: String)        extends AssertionError
+  final case class Many(vector: ::[AssertionError]) extends AssertionError
 }

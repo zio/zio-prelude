@@ -115,23 +115,23 @@ import zio.test.Assertion
  * Finally, it is possible to create refined newtypes that can be are at
  * compile-time when constructed with a literal value, or at run-time with a
  * dynamic value, returning a [[Validation]]. In this case we must define an
- * additional `def refinement` method on the Object, indicating how to validate
+ * additional `def assertion` method on the Object, indicating how to validate
  * an instance of the underlying type. For example, let's create a newtype for
  * natural numbers, which must be equal to or greater than zero. (Note that the
  * syntax differs between Scala 2 and 3 due to changes in the macro API).
  *
  * {{{
- * import zio.prelude.Refinement.greaterThanOrEqualTo
+ * import zio.prelude.Assertion.greaterThanOrEqualTo
  *
  * type Natural = Natural.Type
  * object Natural extends Newtype[Int] {
- *   // Scala 2 — be sure you DO NOT give a type annotation to `refinement`
- *   def refinement = refine {
+ *   // Scala 2 — be sure you DO NOT give a type annotation to `assertion`
+ *   def assertion = assert {
  *     greaterThanOrEqualTo(0)
  *   }
  *
  *   // Scala 3
- *   override inline def refinement: Refinement[Int] =
+ *   override inline def assertion: Assertion[Int] =
  *     greaterThanOrEqualTo(0)
  * }
  * }}}
@@ -184,7 +184,7 @@ private[prelude] sealed trait NewtypeModule {
 
     /**
      * Converts an instance of the underlying type to an instance of the
-     * newtype. Ignores the refinement.
+     * newtype. Ignores the assertion.
      */
     protected def wrap(value: A): Type = value.asInstanceOf[Type]
 
@@ -203,7 +203,7 @@ private[prelude] sealed trait NewtypeModule {
     def unwrapAll[F[_]](value: F[Type]): F[A]
   }
 
-  @deprecated("use Newtype with a refinement", "1.0.0-RC8")
+  @deprecated("use Newtype with an assertion", "1.0.0-RC8")
   sealed trait NewtypeSmart[A] {
     type Type
 
@@ -271,7 +271,7 @@ private[prelude] sealed trait NewtypeModule {
 
   }
 
-  @deprecated("use Subtype with a refinement", "1.0.0-RC8")
+  @deprecated("use Subtype with an assertion", "1.0.0-RC8")
   sealed trait SubtypeSmart[A] extends NewtypeSmart[A] {
     type Type <: A
   }
@@ -367,7 +367,7 @@ trait NewtypeExports {
    * type Natural = Natural.Type
    * }}}
    */
-  @deprecated("use Newtype with a refinement", "1.0.0-RC8")
+  @deprecated("use Newtype with an assertion", "1.0.0-RC8")
   abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
     val newtype: instance.NewtypeSmart[A] = instance.newtypeSmart[A](assertion)
 
@@ -418,7 +418,7 @@ trait NewtypeExports {
    * type Natural = Natural.Type
    * }}}
    */
-  @deprecated("use Subtype with a refinement", "1.0.0-RC8")
+  @deprecated("use Subtype with an assertion", "1.0.0-RC8")
   abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {
     val subtype: instance.SubtypeSmart[A] = instance.subtypeSmart[A](assertion)
 

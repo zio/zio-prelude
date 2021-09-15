@@ -24,7 +24,7 @@ import zio.test.Assertion.Render._
  * Provides versions of assertions from _ZIO Test_ that use `Equal`, `Ord`, and
  * `Validation`.
  */
-trait Assertions {
+trait TestAssertions {
 
   /**
    * Makes a new assertion that requires a value equal the specified value.

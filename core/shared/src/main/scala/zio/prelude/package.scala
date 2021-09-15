@@ -21,8 +21,7 @@ import zio.prelude.newtypes.Natural
 import zio.test.{TestResult, assert}
 
 package object prelude
-    extends Assertions
-    with AssociativeSyntax
+    extends AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
@@ -31,26 +30,27 @@ package object prelude
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with ConstExports
-    with CovariantSyntax
     with ContravariantSyntax
+    with CovariantSyntax
     with DebugSyntax
     with DivariantSyntax
     with EqualSyntax
+    with ForEachSyntax
     with HashSyntax
     with IdExports
-    with IdentitySyntax
     with IdentityBothSyntax
     with IdentityEitherSyntax
+    with IdentitySyntax
     with InvariantSyntax
     with InverseSyntax
     with NewtypeExports
     with NewtypeFExports
+    with NonEmptyForEachSyntax
     with NonEmptyListSyntax
     with NonEmptySetSyntax
-    with NonEmptyForEachSyntax
     with OrdSyntax
     with PartialOrdSyntax
-    with ForEachSyntax
+    with TestAssertions
     with ZNonEmptySetSyntax
     with ZSetSyntax
     with ZivariantSyntax {

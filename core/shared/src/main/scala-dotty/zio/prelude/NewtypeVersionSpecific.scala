@@ -15,37 +15,37 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
    * newtype.
    */
   inline def apply(inline value: A): Type =  
-    ${Macros.make_Impl[A, Type]('{refinement}, 'value)}
+    ${Macros.make_Impl[A, Type]('{assertion}, 'value)}
 
   inline def apply(inline value: A, inline values: A*): NonEmptyChunk[Type] = 
-    ${Macros.makeMany_Impl[A, Type]('{refinement}, 'value, 'values)}
+    ${Macros.makeMany_Impl[A, Type]('{assertion}, 'value, 'values)}
   
-  def refinement: Refinement[A] = Refinement.anything
+  def assertion: Assertion[A] = Assertion.anything
 
   def make(value: A): Validation[String, Type] = 
     Validation.fromEitherNonEmptyChunk(
-      refinement.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
+      assertion.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
     ).as(value.asInstanceOf[Type])
 
 
   def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
     ForEach[F].forEach(value) { value =>
       Validation.fromEitherNonEmptyChunk(
-        refinement.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
+        assertion.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
       )
     }.as(value.asInstanceOf[F[Type]])
 }
 
 object Macros extends Liftables {
 
-  def make_Impl[A: Type, T: Type](refinementExpr: Expr[Refinement[A]], a: Expr[A])(using Quotes): Expr[T] = {
+  def make_Impl[A: Type, T: Type](refinementExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[T] = {
     import quotes.reflect.*
 
     refinementExpr.value match {
-      case Some(refinement) =>
+      case Some(assertion) =>
         a match {
           case LiteralUnlift(x) =>
-            refinement(x.asInstanceOf[A]) match {
+            assertion(x.asInstanceOf[A]) match {
               case Right(_)    => '{ $a.asInstanceOf[T] }
               case Left(error) => report.throwError(s"$refinementErrorHeader\n" + error.render(x.toString))
             }
@@ -58,22 +58,22 @@ object Macros extends Liftables {
     }
   }
 
-  def makeMany_Impl[A: Type, T: Type](refinementExpr: Expr[Refinement[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
+  def makeMany_Impl[A: Type, T: Type](refinementExpr: Expr[Assertion[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
   ): Expr[NonEmptyChunk[T]] = {
     import quotes.reflect.*
 
     refinementExpr.value match {
-      case Some(refinement) =>
+      case Some(assertion) =>
         as match {
           case Varargs(exprs) =>
             val validated = exprs.map {
-              case LiteralUnlift(x) => refinement(x.asInstanceOf[A]).left.map(_.render(x.toString))
+              case LiteralUnlift(x) => assertion(x.asInstanceOf[A]).left.map(_.render(x.toString))
               case _ => report.throwError(s"$refinementErrorHeader\nMust use literal value for macro.")
             }
 
             val (errors, _) = validated.partitionMap(identity)
 
-            // val rendered = ${dim("refinement =")} ${refinement}
+            // val rendered = ${dim("assertion =")} ${assertion}
 
             if (errors.nonEmpty)
                report.throwError(s"""$refinementErrorHeader
@@ -92,5 +92,5 @@ ${errors.mkString("\n")}
   }
 
   private val refinementErrorHeader =
-    s"${Console.BOLD + Console.RED + Console.REVERSED} Refinement Failed ${Console.RESET}"
+    s"${Console.BOLD + Console.RED + Console.REVERSED} Assertion Failed ${Console.RESET}"
 }

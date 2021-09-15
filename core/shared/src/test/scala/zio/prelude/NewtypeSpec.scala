@@ -11,7 +11,7 @@ object NewtypeSpec extends DefaultRunnableSpec {
 
   def spec =
     suite("NewtypeSpec")(
-      suite("with refinement")(
+      suite("with assertion")(
         test("valid values at compile-time") {
           assertTrue(Natural(0) == Natural.unsafeWrap(0))
         },
