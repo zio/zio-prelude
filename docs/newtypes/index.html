@@ -259,30 +259,30 @@
 <p>So far, all the new types we have created have been distinct from the underlying types but have not imposed any additional constraints on the values that the underlying type can take. For example, the <code>SequenceNumber</code> above could in principle be any <code>Int</code> value, whether that is <code>42</code> or <code>-1</code>.</p>
 <p>In many cases that makes sense. We often want to use a new type to denote that this particular <code>Int</code> value represents a sequence number and shouldn't be confused with another <code>Int</code> value that represents an account number without imposing other constraints.</p>
 <p>However, in other cases we may want to restrict the values that the underlying type can take. For instance, perhaps a <code>SequenceNumber</code> should never be negative.</p>
-<p>We can model this in ZIO Prelude by extending <code>Newtype</code> and <code>Subtype</code>, just as before, and then defining an additional <code>def refinement</code> method that describes the constraints on the underlying value. (The syntax differs slightly between Scala 2 and 3 due to changes in the macro API).</p>
+<p>We can model this in ZIO Prelude by extending <code>Newtype</code> and <code>Subtype</code>, just as before, and then defining an additional <code>def assertion</code> method that describes the constraints on the underlying value. (The syntax differs slightly between Scala 2 and 3 due to changes in the macro API).</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.{<span class="hljs-type">Subtype</span>, <span class="hljs-type">Validation</span>}
-<span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Refinement</span>._
+<span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Assertion</span>._
 
 <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Subtype</span>[<span class="hljs-type">Int</span>] </span>{
 
   <span class="hljs-comment">// Scala 2</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">refinement</span> </span>= refine { 
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">assertion</span> </span>= assert { 
     greaterThanOrEqualTo(<span class="hljs-number">0</span>)
   }
   
   <span class="hljs-comment">// Scala 3</span>
-  <span class="hljs-comment">// override inline def refinement = </span>
+  <span class="hljs-comment">// override inline def assertion = </span>
   <span class="hljs-comment">//  greaterThanOrEqualTo(0)</span>
 }
 <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">SequenceNumber</span> </span>= <span class="hljs-type">SequenceNumber</span>.<span class="hljs-type">Type</span>
 </code></pre>
-<p>Here we created a simple refinement that requires the value be equal to or greater than zero, but we can use much more complex refinements. For example, we could valid an <code>Email</code> with the <code>matches</code> refinement, which accept a <code>Regex</code>.</p>
+<p>Here we created a simple assertion that requires the value be equal to or greater than zero, but we can use much more complex refinements. For example, we could valid an <code>Email</code> with the <code>matches</code> assertion, which accept a <code>Regex</code>.</p>
 <p>Now, when we construct new values using <code>apply</code>, they will be validated <em>at compile time</em>.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> valid1: <span class="hljs-type">SequenceNumber</span> = <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">0</span>)
 <span class="hljs-keyword">val</span> valid2: <span class="hljs-type">SequenceNumber</span> = <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">42</span>)
 
 <span class="hljs-keyword">val</span> oops = <span class="hljs-type">SequenceNumber</span>(<span class="hljs-number">-10</span>)
-<span class="hljs-comment">// Newtype Refinement Failed </span>
+<span class="hljs-comment">// Newtype Assertion Failed </span>
 <span class="hljs-comment">// • -10 did not satisfy greaterThanOrEqualTo(0)</span>
 </code></pre>
 <p>Refined newtypes can only be validated at compile-time when called with literals, such as <code>9000</code> or <code>&quot;Fancy Pants&quot;</code>. When wrapping variables or run-time values, you can use the <code>make</code> or <code>makeAll</code>.</p>
@@ -312,10 +312,10 @@
 <p>We can see that <code>make</code> and <code>makeAll</code> return a <code>Validation</code> that will either be a success with a valid instance of the newtype or a failure with a helpful error message indicating why a valid instance of the newtype could not be constructed.</p>
 <p>Note that the <code>wrap</code> operator, which bypasses the compile-time check, is <code>protected</code> and will only be accessible within the scope of the newtype object unless we choose to expose them. This allows us to skip the compile-time check when we need to, such as in implementing a <code>.next</code> method, which we know will be safe, even if the compiler does not.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.{<span class="hljs-type">Subtype</span>, <span class="hljs-type">Validation</span>}
-<span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Refinement</span>._
+<span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Assertion</span>._
 
 <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Subtype</span>[<span class="hljs-type">Int</span>] </span>{
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">refinement</span> </span>= refine { 
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">assertion</span> </span>= assert { 
     greaterThanOrEqualTo(<span class="hljs-number">0</span>)
   }
   
@@ -332,10 +332,10 @@
 <p>As another example, we might want to expose an <code>unsafeMake</code> operator for our users to allow them to construct instances of the newtype directly without going through <code>Validation</code>. As its name implies this places responsibility on the user to ensure that the underlying data is valid but could be necessary for performance or ergonomics in some situations.</p>
 <p>We can do that quite easily like this:.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.{<span class="hljs-type">Subtype</span>, <span class="hljs-type">Validation</span>}
-<span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Refinement</span>._
+<span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Assertion</span>._
 
 <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">SequenceNumber</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Subtype</span>[<span class="hljs-type">Int</span>] </span>{
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">refinement</span> </span>= refine { 
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">assertion</span> </span>= assert { 
     greaterThanOrEqualTo(<span class="hljs-number">0</span>)
   }
 
