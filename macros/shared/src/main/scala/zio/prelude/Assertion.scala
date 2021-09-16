@@ -2,22 +2,22 @@ package zio.prelude
 
 import scala.util.matching
 
-sealed trait Refinement[-A] { self =>
-  import Refinement._
+sealed trait Assertion[-A] { self =>
+  import Assertion._
 
-  def &&[A1 <: A](that: Refinement[A1]): Refinement[A1] = And(self, that)
+  def &&[A1 <: A](that: Assertion[A1]): Assertion[A1] = And(self, that)
 
-  def ||[A1 <: A](that: Refinement[A1]): Refinement[A1] = Or(self, that)
+  def ||[A1 <: A](that: Assertion[A1]): Assertion[A1] = Or(self, that)
 
-  def unary_! : Refinement[A] = Not(self)
+  def unary_! : Assertion[A] = Not(self)
 
-  def apply(a: A): Either[RefinementError, Unit] = self.apply(a, negated = false)
+  def apply(a: A): Either[AssertionError, Unit] = self.apply(a, negated = false)
 
-  protected def apply(a: A, negated: Boolean): Either[RefinementError, Unit]
+  protected def apply(a: A, negated: Boolean): Either[AssertionError, Unit]
 }
 
 /**
- * An `Refinement[A]` is essentially a composable predicate from `A => Boolean`.
+ * An `Assertion[A]` is essentially a composable predicate from `A => Boolean`.
  * They can be composed with standard Boolean operators of `&&`, `||` and `!`.
  * This is primarily intended to be used with `Newtype` and `Subtype`,
  * enhancing them with compile-time time validation.
@@ -30,12 +30,12 @@ sealed trait Refinement[-A] { self =>
  *  type Pin = Pin.Type
  *  object Pin extends Newtype[Int] {
  *    // Scala 2 Syntax
- *    def refinement =
- *      refine(Refinement.between(1000, 9999))
+ *    def assertion =
+ *      assert(Assertion.between(1000, 9999))
  *
  *    // Scala 3 Syntax
- *    override inline def refinement =
- *      Refinement.between(1000, 9999)
+ *    override inline def assertion =
+ *      Assertion.between(1000, 9999)
  *  }
  *
  *  // PowerOfTwo(1000) compiles
@@ -44,43 +44,51 @@ sealed trait Refinement[-A] { self =>
  *  // PowerOfTwo(234) fails with "123 did not satisfy between(1000, 9999)"
  * }}}
  */
-object Refinement {
-  val anything: Refinement[Any] = Refinement.Anything
+object Assertion {
+  val anything: Assertion[Any] = Assertion.Anything
 
   /**
    * Ensures the value falls between a given min and max (inclusive).
    */
-  def between[A](min: A, max: A)(implicit ordering: Ordering[A]): Refinement[A] = Between(min, max)
+  def between[A](min: A, max: A)(implicit ordering: Ordering[A]): Assertion[A] = Between(min, max)
 
-  def equalTo[A](value: A): Refinement[A] = EqualTo(value)
+  def divisibleBy[A](n: A)(implicit numeric: Numeric[A]): Assertion[A] = DivisibleBy(n)
 
-  def greaterThan[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = GreaterThan(value)
+  def contains(string: String): Assertion[String] = Contains(string)
 
-  def greaterThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = !lessThan(value)
+  def equalTo[A](value: A): Assertion[A] = EqualTo(value)
 
-  def lessThan[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = LessThan(value)
+  def endsWith(suffix: String): Assertion[String] = EndsWith(suffix)
 
-  def lessThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Refinement[A] = !greaterThan(value)
+  def greaterThan[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = GreaterThan(value)
 
-  def matches(regex: Regex): Refinement[String] = Matches(regex.compile)
+  def greaterThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = !lessThan(value)
 
-  def matches(regexString: String): Refinement[String] = Matches(regexString)
+  def hasLength(lengthAssertion: Assertion[Int]): Assertion[String] = HasLength(lengthAssertion)
+
+  def lessThan[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = LessThan(value)
+
+  def lessThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = !greaterThan(value)
+
+  def matches(regex: Regex): Assertion[String] = Matches(regex.compile)
+
+  def matches(regexString: String): Assertion[String] = Matches(regexString)
 
   /**
    * Matches a [[scala.util.matching.Regex]].
    *
-   * In order to use this for compile-time Refinements, make sure to use the
+   * In order to use this for compile-time Assertions, make sure to use the
    * string literal extension method, e.g.:
    *
    * {{{
-   *   Refinement.matches("\\w+@\\d{3,5}".r)
+   *   Assertion.matches("\\w+@\\d{3,5}".r)
    * }}}
    */
-  def matches(regex: matching.Regex): Refinement[String] = Matches(regex.regex)
+  def matches(regex: matching.Regex): Assertion[String] = Matches(regex.regex)
 
-  val never: Refinement[Any] = !anything
+  val never: Assertion[Any] = !anything
 
-  def notEqualTo[A](value: A): Refinement[A] = !equalTo(value)
+  def notEqualTo[A](value: A): Assertion[A] = !equalTo(value)
 
   /**
    * Ensures that the value is a power of the given base.
@@ -88,18 +96,20 @@ object Refinement {
    * {{{
    *  type PowerOfTwo = PowerOfTwo.Type
    *  object PowerOfTwo extends Newtype[Int] {
-   *    def refinement =
-   *      refine(Refinement.powerOf(2))
+   *    def assertion =
+   *      assert(Assertion.powerOf(2))
    *  }
    *
    *  // PowerOfTwo(1024) compiles
    *  // PowerOfTwo(1025) fails
    * }}}
    */
-  def powerOf[A](base: A)(implicit numeric: Numeric[A]): Refinement[A] = PowerOf(base)
+  def powerOf[A](base: A)(implicit numeric: Numeric[A]): Assertion[A] = PowerOf(base)
 
-  private[prelude] case class And[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
+  def startsWith(prefix: String): Assertion[String] = StartsWith(prefix)
+
+  private[prelude] case class And[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
           case (Right(_), Right(_)) => Right(())
@@ -110,8 +120,8 @@ object Refinement {
       } else (!left || !right).apply(a, negated = false)
   }
 
-  private[prelude] case class Or[A](left: Refinement[A], right: Refinement[A]) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
+  private[prelude] case class Or[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
           case (Left(e1), Left(e2)) => Left(e1 ++ e2)
@@ -120,79 +130,126 @@ object Refinement {
       } else (!left && !right).apply(a, negated = false)
   }
 
-  private[prelude] case class Not[A](assertion: Refinement[A]) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
+  private[prelude] case class Not[A](assertion: Assertion[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       assertion.apply(a, !negated)
   }
 
-  private[prelude] case class EqualTo[A](value: A) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
-      if (!negated) {
-        if (a == value) Right(())
-        else Left(RefinementError.failure(s"equalTo($value)"))
-      } else {
-        if (a != value) Right(())
-        else Left(RefinementError.failure(s"notEqualTo($value)"))
-      }
-  }
-
-  private[prelude] case class Between[A](min: A, max: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] = {
-      val result = ordering.gteq(a, min) && ordering.lteq(a, max)
+  private[prelude] case class DivisibleBy[A](n: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = numeric.toDouble(a) % numeric.toDouble(n) == 0
       if (!negated) {
         if (result) Right(())
-        else Left(RefinementError.failure(s"between($min, $max)"))
+        else Left(AssertionError.Failure(s"divisibleBy($n)"))
       } else {
-        if (!result) Right(())
-        else Left(RefinementError.failure(s"notBetween($min, $max)"))
-      }
-    }
-  }
-
-  private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
-      if (!negated) {
-        if (ordering.gt(a, value)) Right(())
-        else Left(RefinementError.failure(s"greaterThan($value)"))
-      } else {
-        if (ordering.lteq(a, value)) Right(())
-        else Left(RefinementError.failure(s"lessThanOrEqualTo($value)"))
-      }
-  }
-
-  private[prelude] case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] =
-      if (!negated) {
-        if (ordering.lt(a, value)) Right(())
-        else Left(RefinementError.failure(s"lessThan($value)"))
-      } else {
-        if (ordering.gteq(a, value)) Right(())
-        else Left(RefinementError.failure(s"greaterThanOrEqualTo($value)"))
-      }
-  }
-
-  private[prelude] case class Matches(regexString: String) extends Refinement[String] {
-    def apply(a: String, negated: Boolean): Either[RefinementError, Unit] = {
-      val compiled = s"^$regexString$$".r
-      val result   = compiled.findFirstIn(a).isDefined
-      if (!negated) {
-        if (result) Right(())
-        else Left(RefinementError.Failure(s"matches(${regexString.r})"))
-      } else {
-        if (result) Left(RefinementError.Failure(s"doesNotMatch(${regexString.r})"))
+        if (!result) Left(AssertionError.Failure(s"notDivisibleBy($n)"))
         else Right(())
       }
     }
   }
 
-  private[prelude] case class PowerOf[A](base: A)(implicit numeric: Numeric[A]) extends Refinement[A] {
-    def apply(a: A, negated: Boolean): Either[RefinementError, Unit] = {
+  private[prelude] case class Contains(string: String) extends Assertion[String] {
+    def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = a.contains(string)
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.Failure(s"contains($string)"))
+      } else {
+        if (result) Left(AssertionError.Failure(s"doesNotContain($string)"))
+        else Right(())
+      }
+    }
+  }
+
+  private[prelude] case class EndsWith(suffix: String) extends Assertion[String] {
+    def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = a.endsWith(suffix)
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.Failure(s"startsWith($suffix)"))
+      } else {
+        if (result) Left(AssertionError.Failure(s"doesNotStartWith($suffix)"))
+        else Right(())
+      }
+    }
+  }
+
+  private[prelude] case class EqualTo[A](value: A) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+      if (!negated) {
+        if (a == value) Right(())
+        else Left(AssertionError.failure(s"equalTo($value)"))
+      } else {
+        if (a != value) Right(())
+        else Left(AssertionError.failure(s"notEqualTo($value)"))
+      }
+  }
+
+  private[prelude] case class Between[A](min: A, max: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = ordering.gteq(a, min) && ordering.lteq(a, max)
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.failure(s"between($min, $max)"))
+      } else {
+        if (!result) Right(())
+        else Left(AssertionError.failure(s"notBetween($min, $max)"))
+      }
+    }
+  }
+
+  private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+      if (!negated) {
+        if (ordering.gt(a, value)) Right(())
+        else Left(AssertionError.failure(s"greaterThan($value)"))
+      } else {
+        if (ordering.lteq(a, value)) Right(())
+        else Left(AssertionError.failure(s"lessThanOrEqualTo($value)"))
+      }
+  }
+
+  private[prelude] case class HasLength[A](lengthAssertion: Assertion[Int]) extends Assertion[String] {
+    def apply(string: String, negated: Boolean): Either[AssertionError, Unit] =
+      lengthAssertion(string.length, negated) match {
+        case Left(AssertionError.Failure(condition)) => Left(AssertionError.failure(s"hasLength($condition)"))
+        case other                                   => other
+      }
+  }
+
+  private[prelude] case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+      if (!negated) {
+        if (ordering.lt(a, value)) Right(())
+        else Left(AssertionError.failure(s"lessThan($value)"))
+      } else {
+        if (ordering.gteq(a, value)) Right(())
+        else Left(AssertionError.failure(s"greaterThanOrEqualTo($value)"))
+      }
+  }
+
+  private[prelude] case class Matches(regexString: String) extends Assertion[String] {
+    def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
+      val compiled = s"^$regexString$$".r
+      val result   = compiled.findFirstIn(a).isDefined
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.Failure(s"matches(${regexString.r})"))
+      } else {
+        if (result) Left(AssertionError.Failure(s"doesNotMatch(${regexString.r})"))
+        else Right(())
+      }
+    }
+  }
+
+  private[prelude] case class PowerOf[A](base: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
       val result = isPower(numeric.toDouble(base), numeric.toDouble(a))
       if (!negated) {
         if (result) Right(())
-        else Left(RefinementError.Failure(s"powerOf($base)"))
+        else Left(AssertionError.Failure(s"powerOf($base)"))
       } else {
-        if (!result) Left(RefinementError.Failure(s"notPowerOf($base)"))
+        if (!result) Left(AssertionError.Failure(s"notPowerOf($base)"))
         else Right(())
       }
     }
@@ -205,9 +262,22 @@ object Refinement {
     }
   }
 
-  private[prelude] object Anything extends Refinement[Any] {
-    def apply(a: Any, negated: Boolean): Either[RefinementError, Unit] =
-      if (!negated) Right(()) else Left(RefinementError.failure("never"))
+  private[prelude] case class StartsWith(prefix: String) extends Assertion[String] {
+    def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = a.startsWith(prefix)
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.Failure(s"startsWith($prefix)"))
+      } else {
+        if (result) Left(AssertionError.Failure(s"doesNotStartWith($prefix)"))
+        else Right(())
+      }
+    }
+  }
+
+  private[prelude] object Anything extends Assertion[Any] {
+    def apply(a: Any, negated: Boolean): Either[AssertionError, Unit] =
+      if (!negated) Right(()) else Left(AssertionError.failure("never"))
   }
 
   sealed trait Regex { self =>

@@ -256,27 +256,27 @@ In many cases that makes sense. We often want to use a new type to denote that t
 
 However, in other cases we may want to restrict the values that the underlying type can take. For instance, perhaps a `SequenceNumber` should never be negative.
 
-We can model this in ZIO Prelude by extending `Newtype` and `Subtype`, just as before, and then defining an additional `def refinement` method that describes the constraints on the underlying value. (The syntax differs slightly between Scala 2 and 3 due to changes in the macro API).
+We can model this in ZIO Prelude by extending `Newtype` and `Subtype`, just as before, and then defining an additional `def assertion` method that describes the constraints on the underlying value. (The syntax differs slightly between Scala 2 and 3 due to changes in the macro API).
 
 ```scala mdoc:reset-object
 import zio.prelude.{Subtype, Validation}
-import zio.prelude.Refinement._
+import zio.prelude.Assertion._
 
 object SequenceNumber extends Subtype[Int] {
 
   // Scala 2
-  def refinement = refine { 
+  def assertion = assert { 
     greaterThanOrEqualTo(0)
   }
   
   // Scala 3
-  // override inline def refinement = 
+  // override inline def assertion = 
   //  greaterThanOrEqualTo(0)
 }
 type SequenceNumber = SequenceNumber.Type
 ```
 
-Here we created a simple refinement that requires the value be equal to or greater than zero, but we can use much more complex refinements. For example, we could valid an `Email` with the `matches` refinement, which accept a `Regex`.
+Here we created a simple assertion that requires the value be equal to or greater than zero, but we can use much more complex refinements. For example, we could valid an `Email` with the `matches` assertion, which accept a `Regex`.
 
 Now, when we construct new values using `apply`, they will be validated *at compile time*.
 
@@ -285,7 +285,7 @@ val valid1: SequenceNumber = SequenceNumber(0)
 val valid2: SequenceNumber = SequenceNumber(42)
 
 val oops = SequenceNumber(-10)
-// Newtype Refinement Failed 
+// Newtype Assertion Failed 
 // • -10 did not satisfy greaterThanOrEqualTo(0)
 ```
 
@@ -311,10 +311,10 @@ Note that the `wrap` operator, which bypasses the compile-time check, is `protec
 
 ```scala mdoc:reset-object
 import zio.prelude.{Subtype, Validation}
-import zio.prelude.Refinement._
+import zio.prelude.Assertion._
 
 object SequenceNumber extends Subtype[Int] {
-  def refinement = refine { 
+  def assertion = assert { 
     greaterThanOrEqualTo(0)
   }
   
@@ -335,10 +335,10 @@ We can do that quite easily like this:.
 
 ```scala mdoc:reset-object
 import zio.prelude.{Subtype, Validation}
-import zio.prelude.Refinement._
+import zio.prelude.Assertion._
 
 object SequenceNumber extends Subtype[Int] {
-  def refinement = refine { 
+  def assertion = assert { 
     greaterThanOrEqualTo(0)
   }
 

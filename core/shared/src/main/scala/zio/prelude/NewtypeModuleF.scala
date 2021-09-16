@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.test.Assertion
+import zio.test.{Assertion => TestAssertion}
 
 /**
  * The `NewtypeF` module provides functionality for creating newtypes that are
@@ -269,7 +269,7 @@ private[prelude] object NewtypeModuleF {
     }
 }
 
-trait AssertionF[-A[_]] { def apply[x]: Assertion[A[x]] }
+trait AssertionF[-A[_]] { def apply[x]: TestAssertion[A[x]] }
 
 trait NewtypeFExports {
   import NewtypeModuleF._

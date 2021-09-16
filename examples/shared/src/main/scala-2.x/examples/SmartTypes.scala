@@ -3,12 +3,12 @@ package examples
 
 import zio.prelude._
 
-object RefinedTypes extends App {
-  import Refinement._
+object SmartTypes extends App {
+  import Assertion._
 
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {
-    val refinement = refine(greaterThanOrEqualTo(0) && lessThanOrEqualTo(100))
+    val assertion = assert(greaterThanOrEqualTo(0) && lessThanOrEqualTo(100))
 
     implicit class NaturalOps(private val self: Natural) extends AnyVal {
       def add(that: Natural): Natural = wrap(unwrap(self) + unwrap(that))
@@ -17,7 +17,7 @@ object RefinedTypes extends App {
 
   type Age = Age.Type
   object Age extends Subtype[Int] {
-    def refinement = refine {
+    def assertion = assert {
       greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
     }
   }
@@ -37,7 +37,7 @@ object RefinedTypes extends App {
 
   type MyRegex = MyRegex.Type
   object MyRegex extends Newtype[String] {
-    def refinement = refine {
+    def assertion = assert {
       matches {
         anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace.* ~ digit.min(0) ~ nonDigit.min(1) ~
           literal("hello").+ ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~

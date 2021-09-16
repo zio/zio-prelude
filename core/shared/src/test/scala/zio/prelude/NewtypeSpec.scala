@@ -3,15 +3,15 @@ package zio.prelude
 import zio.NonEmptyChunk
 import zio.prelude.NewtypeSpecTypes._
 import zio.prelude.newtypes.{And, Or, Sum}
-import zio.test.Assertion.{isFalse, isLeft, isTrue}
+import zio.test.Assertion._
 import zio.test.AssertionM.Render.param
-import zio.test._
+import zio.test.{Assertion => TestAssertion, _}
 
 object NewtypeSpec extends DefaultRunnableSpec {
 
   def spec =
     suite("NewtypeSpec")(
-      suite("with refinement")(
+      suite("with assertion")(
         test("valid values at compile-time") {
           assertTrue(Natural(0) == Natural.unsafeWrap(0))
         },
@@ -133,6 +133,6 @@ object NewtypeSpec extends DefaultRunnableSpec {
       self.replaceAll("\u001B\\[[;\\d]*m", "")
   }
 
-  private def containsStringWithoutAnsi(element: String): Assertion[String] =
-    Assertion.assertion("containsStringWithoutAnsi")(param(element))(_.removingAnsiCodes.contains(element))
+  private def containsStringWithoutAnsi(element: String): TestAssertion[String] =
+    TestAssertion.assertion("containsStringWithoutAnsi")(param(element))(_.removingAnsiCodes.contains(element))
 }
