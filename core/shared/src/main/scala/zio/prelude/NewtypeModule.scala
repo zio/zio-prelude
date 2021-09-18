@@ -177,6 +177,14 @@ private[prelude] sealed trait NewtypeModule {
     type Type
 
     /**
+     * Derives an instance of a type class for the new type given an instance
+     * of the type class for the underlying type. The caller is responsible for
+     * the type class being a valid instance for the new type.
+     */
+    protected def derive[TypeClass[_]](ev: TypeClass[A]): TypeClass[Type] =
+      ev.asInstanceOf[TypeClass[Type]]
+
+    /**
      * Allows pattern matching on newtype instances to convert them back to
      * instances of the underlying type.
      */
