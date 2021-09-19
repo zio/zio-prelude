@@ -230,7 +230,7 @@ lazy val docs = project
     docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
   .settings(macroDefinitionSettings)
-  .dependsOn(coreJVM, experimentalJVM)
+  .dependsOn(coreJVM, experimentalJVM, lawsJVM)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val examples    =
