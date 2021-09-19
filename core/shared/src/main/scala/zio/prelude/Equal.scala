@@ -19,8 +19,6 @@ package zio.prelude
 import zio.Exit.{Failure, Success}
 import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
 import zio.{Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace}
 
 import scala.annotation.implicitNotFound
@@ -107,42 +105,7 @@ trait Equal[-A] { self =>
   def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
-object Equal extends Lawful[Equal] {
-
-  /**
-   * For all values `a1`, `a1` is equal to `a1`.
-   */
-  lazy val reflexiveLaw: Laws.Law1[Equal] =
-    new Laws.Law1[Equal]("reflexiveLaw") {
-      def apply[A: Equal](a1: A): TestResult =
-        a1 <-> a1
-    }
-
-  /**
-   * For all values `a1` and `a2`, if `a1` is equal to `a2` then `a2` is equal
-   * to `a1`.
-   */
-  lazy val symmetryLaw: Laws.Law2[Equal] =
-    new Laws.Law2[Equal]("symmetryLaw") {
-      def apply[A: Equal](a1: A, a2: A): TestResult =
-        (a1 <-> a2) ==> (a2 <-> a1)
-    }
-
-  /**
-   * For all values `a1`, `a2`, and `a3`, if `a1` is equal to `a2` and `a2` is
-   * equal `a3`, then `a1` is equal to `a3`.
-   */
-  lazy val transitivityLaw: Laws.Law3[Equal] =
-    new Laws.Law3[Equal]("transitivityLaw") {
-      def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
-        ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
-    }
-
-  /**
-   * The set of all laws that instances of `Equal` must satisfy.
-   */
-  lazy val laws: Laws[Equal] =
-    reflexiveLaw + symmetryLaw + transitivityLaw
+object Equal {
 
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 

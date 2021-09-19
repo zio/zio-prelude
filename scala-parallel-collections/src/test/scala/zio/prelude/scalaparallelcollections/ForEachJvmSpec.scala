@@ -2,6 +2,7 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
+import zio.prelude.laws._
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -37,8 +38,8 @@ object ForEachJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("ForEachJvmSpec")(
       suite("laws")(
-        testM("parMap")(checkAllLaws(ForEach)(genParMap(Gen.anyInt), Gen.anyInt)),
-        testM("parSeq")(checkAllLaws(ForEach)(genParSeq, Gen.anyInt))
+        testM("parMap")(checkAllLaws(ForEachLaws)(genParMap(Gen.anyInt), Gen.anyInt)),
+        testM("parSeq")(checkAllLaws(ForEachLaws)(genParSeq, Gen.anyInt))
       )
     )
 }

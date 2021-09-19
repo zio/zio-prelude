@@ -17,12 +17,9 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
 import zio.prelude.newtypes.{AndF, Failure, OrF}
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
-import zio.test.TestResult
-import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
@@ -41,37 +38,13 @@ trait AssociativeBoth[F[_]] {
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
-object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] {
+object AssociativeBoth {
 
   /**
    * Summons an implicit `AssociativeBoth[F]`.
    */
   def apply[F[_]](implicit associativeBoth: AssociativeBoth[F]): AssociativeBoth[F] =
     associativeBoth
-
-  /**
-   * For all `fa`, `fb`, and `fc`, `both(fa, both(fb, fc))` is equivalent
-   * to `both(both(fa, fb), fc)`.
-   */
-  lazy val associativityLaw: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
-    new LawsF.Invariant.Law3[AssociativeBothDeriveEqualInvariant, Equal]("associativityLaw") {
-      def apply[F[_]: AssociativeBothDeriveEqualInvariant, A: Equal, B: Equal, C: Equal](
-        fa: F[A],
-        fb: F[B],
-        fc: F[C]
-      ): TestResult = {
-        val left  = fa.zip(fb.zip(fc))
-        val right = (fa.zip(fb)).zip(fc)
-        val left2 = Invariant[F].invmap(Equivalence.tuple[A, B, C]).to(left)
-        left2 <-> right
-      }
-    }
-
-  /**
-   * The set of law laws that instances of `AssociativeBoth` must satisfy.
-   */
-  lazy val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
-    associativityLaw
 
   def fromCovariantAssociativeFlatten[F[+_]](implicit
     covariant: Covariant[F],

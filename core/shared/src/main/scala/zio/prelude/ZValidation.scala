@@ -1,7 +1,6 @@
 package zio.prelude
 
 import zio.prelude.ZValidation._
-import zio.test.{Assertion => TestAssertion}
 import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
@@ -404,16 +403,6 @@ object ZValidation extends LowPriorityValidationImplicits {
    */
   def failNonEmptyChunk[E](errors: NonEmptyChunk[E]): Validation[E, Nothing] =
     Failure(Chunk.empty, errors)
-
-  /**
-   * Constructs a `ZValidation` from a value and an assertion about that value.
-   * The resulting `ZValidation` will be a success if the value satisfies the
-   * assertion or else will contain a string rendering describing how the
-   * value did not satisfy the assertion.
-   */
-  def fromAssert[A](value: A)(assertion: TestAssertion[A]): Validation[String, A] =
-    if (assertion.test(value)) succeed(value)
-    else fail(s"$value did not satisfy ${assertion.render}")
 
   /**
    * Constructs a `ZValidation` from an `Either`.

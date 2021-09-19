@@ -19,7 +19,6 @@ package zio.prelude.fx
 import com.github.ghik.silencer.silent
 import zio.internal.{Stack, StackBool}
 import zio.prelude._
-import zio.test.Assertion
 import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, switch}
@@ -1031,16 +1030,6 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    */
   def first[S, A]: ZPure[Nothing, S, S, (A, Any), Nothing, A] =
     fromFunction(_._1)
-
-  /**
-   * Constructs a computation from a value and an assertion about that value.
-   * The resulting computation will be a success if the value satisfies the
-   * assertion or else will contain a string rendering describing how the
-   * value did not satisfy the assertion.
-   */
-  def fromAssert[S, A](value: A)(assertion: Assertion[A]): ZPure[Nothing, S, S, Any, String, A] =
-    if (assertion.test(value)) succeed(value)
-    else fail(s"$value did not satisfy ${assertion.render}")
 
   /**
    * Constructs a computation from an `Either`.
