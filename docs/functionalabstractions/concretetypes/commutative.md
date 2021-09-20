@@ -35,6 +35,7 @@ For example, here is how we could define and test a `Commutative` instance for a
 
 ```scala mdoc:reset
 import zio.prelude._
+import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
@@ -55,7 +56,7 @@ object RunningAverageSpec extends DefaultRunnableSpec {
   def spec = suite("RunningAverageSpec") {
     testM("commutative") {
       val runningAverageGen = Gen.anyLong.zipWith(Gen.anyInt)(RunningAverage(_, _))
-      checkAllLaws(Commutative)(runningAverageGen)
+      checkAllLaws(CommutativeLaws)(runningAverageGen)
     }
   }
 }

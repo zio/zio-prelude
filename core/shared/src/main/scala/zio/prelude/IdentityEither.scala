@@ -16,10 +16,6 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.DeriveEqualIdentityEitherInvariant
-import zio.test.TestResult
-import zio.test.laws._
-
 import scala.annotation.implicitNotFound
 
 /**
@@ -36,39 +32,7 @@ trait IdentityEither[F[_]] extends AssociativeEither[F] {
   def none: F[Nothing]
 }
 
-object IdentityEither extends LawfulF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] {
-
-  /**
-   * For all `fa`, `either(identity, fa)` is equivalent to `fa`.
-   */
-  val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
-    new LawsF.Invariant.Law1[DeriveEqualIdentityEitherInvariant, Equal]("leftIdentityLaw") {
-      def apply[F[_]: DeriveEqualIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
-        val left  = IdentityEither[F].either[Nothing, A](IdentityEither[F].none, fa)
-        val right = fa
-        val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A] compose Equivalence.eitherFlip).to(left)
-        left2 <-> right
-      }
-    }
-
-  /**
-   * For all `fa`, `either(fa, identity)` is equivalent to `fa`.
-   */
-  val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
-    new LawsF.Invariant.Law1[DeriveEqualIdentityEitherInvariant, Equal]("rightIdentityLaw") {
-      def apply[F[_]: DeriveEqualIdentityEitherInvariant, A: Equal](fa: F[A]): TestResult = {
-        val left  = IdentityEither[F].either[A, Nothing](fa, IdentityEither[F].none)
-        val right = fa
-        val left2 = Invariant[F].invmap(Equivalence.eitherNothing[A]).to(left)
-        left2 <-> right
-      }
-    }
-
-  /**
-   * The set of law laws that instances of `IdentityEither` must satisfy.
-   */
-  val laws: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
-    leftIdentityLaw + rightIdentityLaw + AssociativeEither.laws
+object IdentityEither {
 
   /**
    * Summons an implicit `IdentityEither[F]`.

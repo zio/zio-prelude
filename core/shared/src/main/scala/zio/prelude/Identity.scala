@@ -16,10 +16,6 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.EqualIdentity
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
-
 /**
  * The `Identity` type class describes an associative binary operator for a
  * type `A` that also has an identity element. Combining any value with the
@@ -45,41 +41,7 @@ trait Identity[A] extends Associative[A] {
     else super.multiplyOption(n)(a)
 }
 
-object Identity extends Lawful[EqualIdentity] {
-
-  /**
-   * The left identity law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
-   *
-   * {{{
-   * identity * a === a
-   * }}}
-   */
-  lazy val leftIdentityLaw: Laws[EqualIdentity] =
-    new Laws.Law1[EqualIdentity]("leftIdentityLaw") {
-      def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
-        (I.identity <> a) <-> a
-    }
-
-  /**
-   * The left identity law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
-   *
-   * {{{
-   * a * identity === a
-   * }}}
-   */
-  lazy val rightIdentityLaw: Laws[EqualIdentity] =
-    new Laws.Law1[EqualIdentity]("rightIdentityLaw") {
-      def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
-        (a <> I.identity) <-> a
-    }
-
-  /**
-   * The set of all laws that instances of `Identity` must satisfy.
-   */
-  lazy val laws: Laws[EqualIdentity] =
-    leftIdentityLaw + rightIdentityLaw + Associative.laws
+object Identity {
 
   /**
    * Summons an implicit `Identity[A]`.

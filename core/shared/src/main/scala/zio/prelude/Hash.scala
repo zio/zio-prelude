@@ -16,8 +16,6 @@
 
 package zio.prelude
 
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
 
 import scala.annotation.implicitNotFound
@@ -47,23 +45,7 @@ trait Hash[-A] extends Equal[A] { self =>
     )
 }
 
-object Hash extends Lawful[Hash] {
-
-  /**
-   * For all values `a1` and `a2`, if `a1` is equal to `a2` then the hash of
-   * `a1` is equal to the hash of `a2`.
-   */
-  lazy val consistencyLaw: Laws[Hash] =
-    new Laws.Law2[Hash]("consistencyLaw") {
-      def apply[A](a1: A, a2: A)(implicit caps: Hash[A]): TestResult =
-        (a1 <-> a2) ==> (Hash[A].hash(a1) <-> Hash[A].hash(a2))
-    }
-
-  /**
-   * The set of all laws that instances of `Hash` must satisfy.
-   */
-  lazy val laws: Laws[Hash] =
-    consistencyLaw + Equal.laws
+object Hash {
 
   /**
    * The contravariant instance for `Hash`.
