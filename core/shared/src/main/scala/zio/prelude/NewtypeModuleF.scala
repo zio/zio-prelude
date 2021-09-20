@@ -16,8 +16,6 @@
 
 package zio.prelude
 
-import zio.test.{Assertion => TestAssertion}
-
 /**
  * The `NewtypeF` module provides functionality for creating newtypes that are
  * parameterized on some type `A`. See the documentation on `Newtype` for a
@@ -79,13 +77,7 @@ private[prelude] sealed trait NewtypeModuleF {
 
   def newtypeF: NewtypeF
 
-  @deprecated("deprecated", "1.0.0-RC8")
-  def newtypeSmartF[A[_]](assertion: AssertionF[A]): NewtypeSmartF[A]
-
   def subtypeF: SubtypeF
-
-  @deprecated("deprecated", "1.0.0-RC8")
-  def subtypeSmartF[A[_]](assertion: AssertionF[A]): SubtypeSmartF[A]
 
   private[this] type Id[+A] = A
 
@@ -224,23 +216,6 @@ private[prelude] object NewtypeModuleF {
           def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
 
-      @deprecated("deprecated", "1.0.0-RC8")
-      override def newtypeSmartF[A[_]](assertion: AssertionF[A]): NewtypeSmartF[A] =
-        new NewtypeSmartF[A] {
-          type Type[x] = A[x]
-
-          override def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[A[x]]] =
-            ForEach[F].forEach[({ type lambda[+a] = Validation[String, a] })#lambda, A[x], A[x]](value)(
-              Validation.fromAssert(_)(assertion.apply)
-            )
-
-          override protected def wrapAll[F[_], x](value: F[A[x]]): F[A[x]] = value
-
-          override def unwrapAll[F[_], x](value: F[A[x]]): F[A[x]] = value
-
-          override private[prelude] def unsafeWrapAll[F[_], x](value: F[A[x]]): F[A[x]] = value
-        }
-
       def subtypeF: SubtypeF =
         new SubtypeF {
           type Type[+A] = A
@@ -249,27 +224,8 @@ private[prelude] object NewtypeModuleF {
 
           def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
-
-      @deprecated("deprecated", "1.0.0-RC8")
-      override def subtypeSmartF[A[_]](assertion: AssertionF[A]): SubtypeSmartF[A] =
-        new SubtypeSmartF[A] {
-          type Type[x] = A[x]
-
-          override def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[A[x]]] =
-            ForEach[F].forEach[({ type lambda[+a] = Validation[String, a] })#lambda, A[x], A[x]](value)(
-              Validation.fromAssert(_)(assertion.apply)
-            )
-
-          override protected def wrapAll[F[_], x](value: F[A[x]]): F[A[x]] = value
-
-          override def unwrapAll[F[_], x](value: F[A[x]]): F[A[x]] = value
-
-          override private[prelude] def unsafeWrapAll[F[_], x](value: F[A[x]]): F[A[x]] = value
-        }
     }
 }
-
-trait AssertionF[-A[_]] { def apply[x]: TestAssertion[A[x]] }
 
 trait NewtypeFExports {
   import NewtypeModuleF._
@@ -298,36 +254,6 @@ trait NewtypeFExports {
   }
 
   /**
-   * The class of objects corresponding to newtypes with smart constructors
-   * where not all instances of the underlying type are valid instances of the
-   * newtype. Users should implement an object that extends this class to
-   * create their own newtypes, specifying `A` as the underlying type to wrap
-   * and an assertion that valid instances of the underlying type should
-   * satisfy.
-   *
-   * {{{
-   * object ShortList extends NewtypeSmart[List](isShorterThan(5))
-   * type ShortList = ShortList.Type
-   * }}}
-   */
-  @deprecated("deprecated", "1.0.0-RC8")
-  abstract class NewtypeSmartF[A[_]](assertion: AssertionF[A]) extends instance.NewtypeSmartF[A] {
-    val newtypeF: instance.NewtypeSmartF[A] = instance.newtypeSmartF(assertion)
-
-    type Type[x] = newtypeF.Type[x]
-
-    def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[Type[x]]] =
-      newtypeF.makeAll(value)
-
-    protected def wrapAll[F[_], x](value: F[A[x]]): F[Type[x]] = unsafeWrapAll(value)
-
-    def unwrapAll[F[_], x](value: F[Type[x]]): F[A[x]] = newtypeF.unwrapAll(value)
-
-    private[prelude] def unsafeWrapAll[F[_], x](value: F[A[x]]): F[Type[x]] =
-      newtypeF.unsafeWrapAll(value)
-  }
-
-  /**
    * The class of objects corresponding to parameterized subtypes. Users should
    * implement an object that extends this class to create their own
    * parameterized subtypes
@@ -348,35 +274,5 @@ trait NewtypeFExports {
 
     def unwrapAll[F[_], A](value: F[Type[A]]): F[A] =
       subtypeF.unwrapAll(value)
-  }
-
-  /**
-   * The class of objects corresponding to subtypes with smart constructors
-   * where not all instances of the underlying type are valid instances of the
-   * subtype. Users should implement an object that extends this class to
-   * create their own subtypes, specifying `A` as the underlying type to wrap
-   * and an assertion that valid instances of the underlying type should
-   * satisfy.
-   *
-   * {{{
-   * object ShortList extends SubtypeSmartF[List](isShorterThan(5))
-   * type ShortList = ShortList.Type
-   * }}}
-   */
-  @deprecated("deprecated", "1.0.0-RC8")
-  abstract class SubtypeSmartF[A[_]](assertion: AssertionF[A]) extends instance.SubtypeSmartF[A] {
-    val subtypeF: instance.SubtypeSmartF[A] = instance.subtypeSmartF(assertion)
-
-    type Type[x] = subtypeF.Type[x]
-
-    def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[Type[x]]] =
-      subtypeF.makeAll(value)
-
-    protected def wrapAll[F[_], x](value: F[A[x]]): F[Type[x]] = unsafeWrapAll(value)
-
-    def unwrapAll[F[_], x](value: F[Type[x]]): F[A[x]] = subtypeF.unwrapAll(value)
-
-    private[prelude] def unsafeWrapAll[F[_], x](value: F[A[x]]): F[Type[x]] =
-      subtypeF.unsafeWrapAll(value)
   }
 }

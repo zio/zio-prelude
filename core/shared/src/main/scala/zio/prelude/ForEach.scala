@@ -16,9 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.DeriveEqualForEach
 import zio.prelude.newtypes.{And, First, Max, Min, Or, Prod, Sum}
-import zio.test.laws._
 import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
 
 /**
@@ -375,13 +373,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     }
 }
 
-object ForEach extends LawfulF.Covariant[DeriveEqualForEach, Equal] {
-
-  /**
-   * The set of all laws that instances of `ForEach` must satisfy.
-   */
-  lazy val laws: LawsF.Covariant[DeriveEqualForEach, Equal] =
-    Covariant.laws
+object ForEach {
 
   /**
    * Summons an implicit `ForEach`.
