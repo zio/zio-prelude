@@ -18,18 +18,32 @@ object ComposeState extends ComposeStateImplicits {
       right
   }
 
-  final case class RightIdentity[S1, S2]() extends ComposeState[S1, S2, Unit, Unit] {
+  final case class RightIdentity[S1, S2, S3]() extends ComposeState[S1, S2, Unit, Unit] {
     type In  = S1
     type Out = S2
     def compose(left: S1 => S2, right: Unit => Unit): In => Out =
       left
   }
 
-  final case class Compose[S1, S2, S3]() extends ComposeState[S1, S2, S2, S3] {
+  final case class Compose[S1, S2 <: S3, S3, S4]() extends ComposeState[S1, S2, S3, S4] {
     type In  = S1
-    type Out = S3
-    def compose(left: S1 => S2, right: S2 => S3): In => Out =
+    type Out = S4
+    def compose(left: S1 => S2, right: S3 => S4): In => Out =
       right compose left
+  }
+
+  final case class RightConst[S1, S2, S3 >: Unit, S4]() extends ComposeState[S1, S2, S3, S4] {
+    type In  = S1
+    type Out = S4
+    def compose(left: S1 => S2, right: S3 => S4): In => Out =
+      _ => right(())
+  }
+
+  final case class LeftConst[S1 >: Unit, S2, S3, S4]() extends ComposeState[S1, S2, S3, S4] {
+    type In  = S3
+    type Out = S4
+    def compose(left: S1 => S2, right: S3 => S4): In => Out =
+      right
   }
 
   implicit def leftIdentity[S1, S2]: Aux[Unit, Unit, S1, S2, S1, S2] =
@@ -41,27 +55,15 @@ trait ComposeStateImplicits extends ComposeStateLowPriorityImplicits {
     ComposeState.RightIdentity()
 }
 
-trait ComposeStateLowPriorityImplicits {
-  implicit def compose[S1, S2, S3]: ComposeState.Aux[S1, S2, S2, S3, S1, S3] =
+trait ComposeStateLowPriorityImplicits extends ComposeStateLowPriorityImplicits2 {
+  implicit def compose[S1, S2 <: S3, S3, S4]: ComposeState.Aux[S1, S2, S3, S4, S1, S4] =
     ComposeState.Compose()
 }
 
-object Example {
+trait ComposeStateLowPriorityImplicits2 {
+  implicit def rightConst[S1, S2, S3 >: Unit, S4]: ComposeState.Aux[S1, S2, S3, S4, S1, S4] =
+    ComposeState.RightConst()
 
-  def compose[S1, S2, S3, S4, In, Out](left: S1 => S2, right: S3 => S4)(implicit
-    ev: ComposeState.Aux[S1, S2, S3, S4, In, Out]
-  ): In => Out =
-    ev.compose(left, right)
-
-  lazy val unitUnitState: Unit => Unit   = ???
-  lazy val stringIntState: String => Int = ???
-  lazy val intDoubleState: Int => Double = ???
-
-  val x = compose(unitUnitState, stringIntState)
-  val y = compose(intDoubleState, unitUnitState)
-  val z = compose(stringIntState, intDoubleState)
-
-  val test1: String => Int    = x
-  val test2: Int => Double    = y
-  val test3: String => Double = z
+  // implicit def leftConst[S1 >: Unit, S2, S3, S4]: ComposeState.Aux[S1, S2, S3, S4, S3, S4] =
+  //   ComposeState.LeftConst()
 }

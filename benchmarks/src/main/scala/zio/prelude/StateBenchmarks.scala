@@ -107,8 +107,8 @@ class StateBenchmarks {
   @Benchmark
   def zioGetSet(): Int = {
     def loop(i: Int, acc: State[Int, Int]): State[Int, Int] =
-      if (i > size) acc.flatMap(_ => State.set(i)).flatMap(_ => State.get)
-      else loop(i + 1, acc.flatMap(_ => State.set(i)).flatMap(_ => State.get))
+      if (i > size) acc.flatMap(_ => State.set(i)).flatMap(_ => State.get[Int])
+      else loop(i + 1, acc.flatMap(_ => State.set(i)).flatMap(_ => State.get[Int]))
 
     loop(0, State.const.as(0)).runState(0)
   }

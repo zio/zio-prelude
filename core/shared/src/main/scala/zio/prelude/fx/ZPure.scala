@@ -1,9 +1,9 @@
 package zio.prelude.fx
 
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 import zio.internal.Stack
 import zio.prelude.{CommutativeBoth, Covariant, ForEach, IdentityBoth, IdentityFlatten, Validation, ZValidation}
 import zio.test.Assertion
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.util.Try
@@ -119,13 +119,16 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def either[S3 >: S2 <: S1](implicit ev: CanFail[E]): ZPure[W, S3, S3, R, Nothing, Either[E, A]] =
     fold(Left(_), Right(_))
 
-      /**
+  /**
    * Applies the specified function if the predicate fails.
    */
   final def filterOrElse[W1 >: W, S3 >: S2, R1 <: R, E1 >: E, A1 >: A](
     p: A => Boolean
   )(f: A => ZPure[W1, S2, S3, R1, E1, A1]): ZPure[W1, S1, S3, R1, E1, A1] =
-    ???
+    self.flatMap {
+      case v if !p(v) => f(v)
+      case v          => ZPure.get[S3] *> ZPure.succeed(v)
+    }
 
   /**
    * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
@@ -140,7 +143,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Fails with the specified error if the predicate fails.
    */
   final def filterOrFail[E1 >: E](p: A => Boolean)(e: => E1): ZPure[W, S1, S2, R, E1, A] =
-    ???
+    filterOrElse_[W, S2, R, E1, A](p)(ZPure.get[S2] *> ZPure.fail(e))
 
   /**
    * Swaps the error and success types of this computation.
@@ -157,7 +160,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Exposes the output state into the value channel.
    */
   final def getState: ZPure[W, S1, S2, R, E, (S2, A)] =
-    ???
+    self.flatMap(a => ZPure.get[S2].map(s => (s, a)))
 
   /**
    * Returns a successful computation with the head of the list if the list is
@@ -307,10 +310,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Executes this computation and returns its value, if it succeeds, but
    * otherwise succeeds with the specified value.
    */
-  final def orElseSucceed[A1 >: A](a1: => A1)(implicit ev: CanFail[E]): ZPure[W, S1, Any, R, Nothing, A1] = {
-    val _ = a1
-    self.orElse(???)
-  }
+  final def orElseSucceed[A1 >: A](a1: => A1)(implicit ev: CanFail[E]): ZPure[W, S1, Any, R, Nothing, A1] =
+    orElse(ZPure.get[S1] *> ZPure.succeed(a1))
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
@@ -318,10 +319,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3)(implicit
     ev: CanFail[E]
-  ): ZPure[W, S1, S3, R, Nothing, A1] = {
-    val _ = (a1, s3)
-    self.orElse(???)
-  }
+  ): ZPure[W, S1, S3, R, Nothing, A1] =
+    orElse(ZPure.get[S1] *> ZPure.succeed(a1).mapState(_ => s3))
 
   /**
    * Provides this computation with its required environment.
@@ -354,14 +353,14 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * passing the updated state to each successive repetition.
    */
   final def repeatN(n: Int)(implicit ev: S2 <:< S1): ZPure[W, S1, S2, R, E, A] =
-    ???
+    self.flatMap(a => if (n <= 0) ZPure.get[S2] *> ZPure.succeed(a) else repeatN(n - 1).contramapState(ev))
 
   /**
    * Repeats this computation until its value satisfies the specified predicate
    * (or until the first failure) passing the updated state to each successive repetition.
    */
   final def repeatUntil(f: A => Boolean)(implicit ev: S2 <:< S1): ZPure[W, S1, S2, R, E, A] =
-    ???
+    self.flatMap(a => if (f(a)) ZPure.get[S2] *> ZPure.succeed(a) else repeatUntil(f).contramapState(ev))
 
   /**
    * Repeats this computation until its value is equal to the specified value
@@ -375,7 +374,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * (or until the first failure) passing the updated state to each successive repetition.
    */
   final def repeatUntilState(f: S2 => Boolean)(implicit ev: S2 <:< S1): ZPure[W, S1, S2, R, E, A] =
-    ???
+    self.zip(ZPure.get[S2]).flatMap { case (a, s) =>
+      if (f(s)) ZPure.get[S2] *> ZPure.succeed(a)
+      else repeatUntilState(f).contramapState(ev)
+    }
 
   /**
    * Repeats this computation until the updated state is equal to the specified value
@@ -636,7 +638,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def someOrElseM[W1 >: W, S3 >: S2, R1 <: R, E1 >: E, B](
     that: ZPure[W1, S2, S3, R1, E1, B]
   )(implicit ev: A <:< Option[B]): ZPure[W1, S1, S3, R1, E1, B] =
-    self.flatMap(ev(_).fold(that)(???))
+    self.flatMap(ev(_).fold(that)(a => ZPure.get[S3] *> ZPure.succeed(a)))
 
   /**
    * Extracts the optional value or fails with the given error 'e'.
@@ -884,7 +886,10 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation that may fail from the specified modify function.
    */
   def modifyEither[S1, S2, E, A](f: S1 => Either[E, (S2, A)]): ZPure[Nothing, S1, S2, Any, E, A] =
-    ???
+    get.map(f).flatMap {
+      case Left(e)        => ZPure.fail(e).asInstanceOf[ZPure[Nothing, Any, Nothing, Any, E, A]]
+      case Right((s2, a)) => ZPure.succeed(a).asState(s2)
+    }
 
   /**
    * Constructs a computation that extracts the second element of a tuple.
@@ -1113,7 +1118,13 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     final def rejectM[W1 >: W, S0 <: S1, S3 >: S2, R1 <: R, E1 >: E](
       pf: PartialFunction[A, ZPure[W1, S2, S3, R1, E1, E1]]
     ): ZPure[W1, S0, S3, R1, E1, A] =
-      ???
+      self.flatMap { v =>
+        if (pf.isDefinedAt(v)) {
+          pf(v).flatMap(ZPure.fail)
+        } else {
+          ZPure.get[S2] *> ZPure.succeed(v)
+        }
+      }
 
     /**
      * Combines this computation with the specified computation, passing the

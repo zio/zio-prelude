@@ -1312,12 +1312,14 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 }
 
+import zio.prelude.fx.NotZPure
+
 trait AssociativeBothSyntax {
 
   /**
    * Provides infix syntax for associative operations for invariant types.
    */
-  implicit class AssociativeBothOps[F[_], A](fa: => F[A]) {
+  implicit class AssociativeBothOps[F[_], A](fa: => F[A])(implicit ev: NotZPure[F[A]]) {
 
     /**
      * A symbolic alias for `zip`.
@@ -1336,7 +1338,7 @@ trait AssociativeBothSyntax {
   /**
    * Provides infix syntax for associative operations for covariant types.
    */
-  implicit class AssociativeBothCovariantOps[F[+_], A](fa: => F[A]) {
+  implicit class AssociativeBothCovariantOps[F[+_], A](fa: => F[A])(implicit ev: NotZPure[F[A]]) {
 
     /**
      * A symbolic alias for `zipLeft`.

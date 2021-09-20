@@ -115,10 +115,12 @@ object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
 
 trait CovariantSyntax {
 
+  import zio.prelude.fx.NotZPure
+
   /**
    * Provides infix syntax for mapping over covariant values.
    */
-  implicit class CovariantOps[F[+_], A](private val self: F[A]) {
+  implicit class CovariantOps[F[+_], A](private val self: F[A])(implicit ev: NotZPure[F[A]]) {
     def as[B](b: => B)(implicit F: Covariant[F]): F[B] = map(_ => b)
 
     def map[B](f: A => B)(implicit F: Covariant[F]): F[B] =
