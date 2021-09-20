@@ -84,6 +84,7 @@
 <p>This is another common source of errors whenever we implement our own definition of <code>equals</code> and <code>hashCode</code> and ZIO Prelude can prevent it by automatically checking that all instances of <code>Hash</code> define a consistent notion of equality and hashing.</p>
 <p>For example, here is how we could test that ZIO Prelude's notions of hashing and equality for strings are consistent.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.<span class="hljs-type">Hash</span>
+<span class="hljs-keyword">import</span> zio.prelude.laws.<span class="hljs-type">HashLaws</span>
 <span class="hljs-keyword">import</span> zio.test._
 <span class="hljs-keyword">import</span> zio.test.laws._
 
@@ -92,7 +93,7 @@
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">spec</span> </span>= suite(<span class="hljs-string">"HashSpec"</span>) {
     testM(<span class="hljs-string">"StringHash"</span>) {
       <span class="hljs-keyword">val</span> stringGen = <span class="hljs-type">Gen</span>.anyString
-      checkAllLaws(<span class="hljs-type">Hash</span>)(stringGen)
+      checkAllLaws(<span class="hljs-type">HashLaws</span>)(stringGen)
     }
   }
 }

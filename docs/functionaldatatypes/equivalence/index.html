@@ -91,7 +91,8 @@
 <p>This is not a particularly interesting example because we could have easily converted directly from <code>Vector</code> to <code>Chunk</code> in a more performant way without going through <code>List</code>. But we can imagine that if <code>A</code>, <code>B</code>, and <code>C</code> were equivalent but different representations of some more complex data type, being able to build up these conversions incrementally could be quite useful.</p>
 <p>Beyond this there are not a lot of operators on the <code>Equivalence</code> data type itself. The main power of this data type is the ability to express the fact that two types are equivalent and capture this as a data type that we can test and reuse.</p>
 <p>In particular, if we have what we believe to be an equivalence relationship between two types <code>A</code> and <code>B</code> ZIO Prelude makes it easy for us to test this.</p>
-<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.test._
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude.laws._
+<span class="hljs-keyword">import</span> zio.test._
 <span class="hljs-keyword">import</span> zio.test.laws._
 
 <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">EquivalenceSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DefaultRunnableSpec</span> </span>{
@@ -101,7 +102,7 @@
       <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> equivalence = listChunkEquivalence[<span class="hljs-type">Int</span>]
       <span class="hljs-keyword">val</span> listGen = <span class="hljs-type">Gen</span>.listOf(<span class="hljs-type">Gen</span>.anyInt)
       <span class="hljs-keyword">val</span> chunkGen = <span class="hljs-type">Gen</span>.chunkOf(<span class="hljs-type">Gen</span>.anyInt)
-      checkAllLaws(<span class="hljs-type">Equivalence</span>)(listGen, chunkGen)
+      checkAllLaws(<span class="hljs-type">EquivalenceLaws</span>)(listGen, chunkGen)
     }
   }
 }

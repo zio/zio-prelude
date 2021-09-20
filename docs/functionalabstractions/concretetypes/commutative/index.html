@@ -78,6 +78,7 @@
 <p>We can use the <code>Commutative</code> abstraction to specify at the type level whether one of our data types can be combined in a way that is associative and commutative or only associative. We can also test for it using the laws testing functionality provided by ZIO Prelude.</p>
 <p>For example, here is how we could define and test a <code>Commutative</code> instance for a version of the <code>RunningAverage</code> data type that we discussed in the introduction to functional abstractions.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.prelude._
+<span class="hljs-keyword">import</span> zio.prelude.laws._
 <span class="hljs-keyword">import</span> zio.test._
 <span class="hljs-keyword">import</span> zio.test.laws._
 
@@ -98,7 +99,7 @@
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">spec</span> </span>= suite(<span class="hljs-string">"RunningAverageSpec"</span>) {
     testM(<span class="hljs-string">"commutative"</span>) {
       <span class="hljs-keyword">val</span> runningAverageGen = <span class="hljs-type">Gen</span>.anyLong.zipWith(<span class="hljs-type">Gen</span>.anyInt)(<span class="hljs-type">RunningAverage</span>(_, _))
-      checkAllLaws(<span class="hljs-type">Commutative</span>)(runningAverageGen)
+      checkAllLaws(<span class="hljs-type">CommutativeLaws</span>)(runningAverageGen)
     }
   }
 }
