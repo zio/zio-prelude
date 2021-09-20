@@ -30,17 +30,29 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
    * Returns an element of this `NonEmptySet` and the remainder, which is a (possibly empty) `Set`.
    */
   @inline
-  def destruct: (A, Set[A]) = (set.head, set.tail)
+  def peel: (A, Set[A]) = (set.head, set.tail)
+
+  /**
+   * Returns an element of this `NonEmptySet`
+   * and the remainder or `None`, if the remainder is empty.
+   */
+  def peelNonEmpty: (A, Option[NonEmptySet[A]]) = {
+    val (head, tail) = peel
+    if (tail.isEmpty)
+      (head, None)
+    else
+      (head, Some(new NonEmptySet(tail)))
+  }
 
   /**
    * Converts this `NonEmptySet` to a `NonEmptyChunk`.
    */
-  def toNonEmptyChunk: NonEmptyChunk[A] = destruct match { case (head, tail) => NonEmptyChunk.fromIterable(head, tail) }
+  def toNonEmptyChunk: NonEmptyChunk[A] = peel match { case (head, tail) => NonEmptyChunk.fromIterable(head, tail) }
 
   /**
    * Converts this `NonEmptySet` to a `NonEmptyList`.
    */
-  def toNonEmptyList: NonEmptyList[A] = destruct match { case (head, tail) => NonEmptyList.fromIterable(head, tail) }
+  def toNonEmptyList: NonEmptyList[A] = peel match { case (head, tail) => NonEmptyList.fromIterable(head, tail) }
 
   /**
    * Creates a new `NonEmptySet` with an additional element, unless the element is
@@ -84,11 +96,18 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   def remove(elem: A): Set[A] = set - elem
 
   /**
+   * Returns the tail of this `NonEmptySet` if it exists or `None` otherwise.
+   */
+  def tailNonEmpty: Option[NonEmptySet[A]] = peelNonEmpty._2
+
+  /**
    * Flattens a `NonEmptySet` of `NonEmptySet` values into a single
    * `NonEmptySet`.
    */
   def flatten[B](implicit ev: A <:< NonEmptySet[B]): NonEmptySet[B] =
     new NonEmptySet[B](set.foldLeft[Set[B]](Set.empty)((b, a) => b union ev(a)))
+
+  def map[B](f: A => B): NonEmptySet[B] = new NonEmptySet(set.map(f))
 
   override def hashCode: Int = set.hashCode ^ NonEmptySet.NonEmptySetSeed
 
@@ -114,7 +133,7 @@ object NonEmptySet {
    */
   def apply[A](elem: A, others: A*): NonEmptySet[A] = apply(elem, others.toSet)
 
-  def unapply[A](arg: NonEmptySet[A]): Some[(A, Set[A])] = Some(arg.destruct)
+  def unapply[A](arg: NonEmptySet[A]): Some[(A, Set[A])] = Some(arg.peel)
 
   /**
    * Constructs a `NonEmptyChunk` from a `NonEmptyList`.
@@ -156,13 +175,22 @@ object NonEmptySet {
 
   /** Creates a `NonEmptySet` containing elements from `l` and `r` */
   def union[A](l: NonEmptySet[A], r: Set[A]): NonEmptySet[A] = {
-    val (head, tail) = l.destruct
+    val (head, tail) = l.peel
     NonEmptySet.fromSet(head, tail.union(r))
   }
 
   /** Creates a `NonEmptySet` containing elements from `l` and `r` */
   def union[A](l: Set[A], r: NonEmptySet[A]): NonEmptySet[A] =
     union(r, l)
+
+  /**
+   * The `CommutativeEither` instance for `NonEmptySet`.
+   */
+  implicit val NonEmptySetCommutativeEither: CommutativeEither[NonEmptySet] =
+    new CommutativeEither[NonEmptySet] {
+      def either[A, B](fa: => NonEmptySet[A], fb: => NonEmptySet[B]): NonEmptySet[Either[A, B]] =
+        fa.map[Either[A, B]](Left(_)).union(fb.map[Either[A, B]](Right(_)))
+    }
 
   /**
    * The `Commutative` and `Idempotent` (and thus `Associative`) instance for `NonEmptySet`.
@@ -179,10 +207,28 @@ object NonEmptySet {
     chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptySet", chunk.toNonEmptyList.map(_.debug).toCons)
 
   /**
+   * The `DeriveEqual` instance for `NonEmptySet`.
+   */
+  implicit val NonEmptySetDeriveEqual: DeriveEqual[NonEmptySet] =
+    new DeriveEqual[NonEmptySet] {
+      def derive[A: Equal]: Equal[NonEmptySet[A]] =
+        NonEmptySetHashPartialOrd
+    }
+
+  /**
    * Derives a `Hash[NonEmptySet[A]]` and `PartialOrd[NonEmptySet[A]]` (and thus `Equal[NonEmptyList[A]]`) instance.
    */
   implicit def NonEmptySetHashPartialOrd[A]: Hash[NonEmptySet[A]] with PartialOrd[NonEmptySet[A]] =
     HashPartialOrd.derive[Set[A]].contramap(_.toSet)
+
+  /**
+   * The `Invariant` instance for `NonEmptySet`.
+   */
+  implicit val NonEmptySetInvariant: Invariant[NonEmptySet] =
+    new Invariant[NonEmptySet] {
+      def invmap[A, B](f: A <=> B): NonEmptySet[A] <=> NonEmptySet[B] =
+        Equivalence[NonEmptySet[A], NonEmptySet[B]](a => a.map(f.to), b => b.map(f.from))
+    }
 
   /**
    * Provides an implicit conversion from `NonEmptySet` to the `Set`
@@ -195,11 +241,18 @@ object NonEmptySet {
 }
 
 trait NonEmptySetSyntax {
-  implicit class IterableOps[A](private val iterable: Iterable[A]) {
+  implicit final class NonEmptySetIterableOps[A](private val iterable: Iterable[A]) {
 
     /**
      * Constructs a `NonEmptySet` from an `Iterable` or `None` otherwise.
      */
     def toNonEmptySet: Option[NonEmptySet[A]] = NonEmptySet.fromIterableOption(iterable)
+  }
+  implicit final class NonEmptySetSetOps[A](self: Set[A]) {
+
+    /**
+     * Constructs a `NonEmptySet` from a `Set` or `None` otherwise.
+     */
+    def toNonEmptySet: Option[NonEmptySet[A]] = NonEmptySet.fromSetOption(self)
   }
 }

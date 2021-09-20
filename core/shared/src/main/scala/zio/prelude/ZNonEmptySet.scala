@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Max, Prod, Sum}
+import zio.prelude.newtypes._
 
 import scala.language.implicitConversions
 
@@ -241,13 +241,15 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
    * Derives an `Equal[ZNonEmptySet[A, B]]` given an `Equal[B]`. Due to the
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZNonEmptySetEqual[A, B: Equal]: Equal[ZNonEmptySet[A, B]] =
+  implicit def ZNonEmptySetEqual[A, B: Equal](implicit ev: Identity[Sum[B]]): Equal[ZNonEmptySet[A, B]] =
     Equal[ZSet[A, B]].contramap(_.toZSet)
 
   /**
    * The `EqualF` instance for `ZNonEmptySet`.
    */
-  implicit def ZNonEmptySetDeriveEqual[B: Equal]: DeriveEqual[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
+  implicit def ZNonEmptySetDeriveEqual[B: Equal](implicit
+    ev: Identity[Sum[B]]
+  ): DeriveEqual[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new DeriveEqual[({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
       def derive[A: Equal]: Equal[ZNonEmptySet[A, B]] =
         ZNonEmptySetEqual
@@ -289,7 +291,7 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
    * Derives a `Hash[ZNonEmptySet[A, B]]` given a `Hash[B]`. Due to the
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZNonEmptySetHash[A, B: Hash]: Hash[ZNonEmptySet[A, B]] =
+  implicit def ZNonEmptySetHash[A, B: Hash](implicit ev: Identity[Sum[B]]): Hash[ZNonEmptySet[A, B]] =
     Hash[ZSet[A, B]].contramap(_.zset)
 
   /**
@@ -306,7 +308,48 @@ trait LowPriorityZNonEmptySetImplicits {
    * Derives a `PartialOrd[ZNonEmptySet[A, B]]` given a `PartialOrd[B]`.
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def ZNonEmptySetPartialOrd[A, B: PartialOrd]: PartialOrd[ZNonEmptySet[A, B]] =
+  implicit def ZNonEmptySetPartialOrd[A, B: PartialOrd](implicit ev: Identity[Sum[B]]): PartialOrd[ZNonEmptySet[A, B]] =
     PartialOrd[ZSet[A, B]].contramap(_.toZSet)
 
+}
+
+trait ZNonEmptySetSyntax {
+  implicit final class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
+
+    /** Returns a `NonEmptyMultiSet` or `None` if the original Multiset is empty */
+    def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
+  }
+
+  implicit final class ZNonEmptySetNonEmptyMultiSetOps[+A](self: NonEmptyMultiSet[A]) {
+
+    /** Returns an element */
+    def head: A = peel._1
+
+    /**
+     * Returns an element of this `NonEmptyMultiSet` and the remainder, which is a (possibly empty) `MultiSet`.
+     */
+    def peel: (A, MultiSet[A]) =
+      self.toZSet.peel.get
+
+    /**
+     * Returns an element of this `NonEmptyMultiSet`
+     * and the remainder or `None`, if the remainder is empty.
+     */
+    def peelNonEmpty: (A, Option[NonEmptyMultiSet[A]]) = {
+      val (head, tail) = peel
+      (head, tail.toNonEmptyZSet)
+    }
+
+    /**
+     * Returns the tail of this `NonEmptyMultiSet` as a (possibly empty) `MultiSet`.
+     */
+    def tail: MultiSet[A] =
+      peel._2
+
+    /**
+     * Returns the tail of this `NonEmptyMultiSet` if it exists or `None` otherwise.
+     */
+    def tailNonEmpty: Option[NonEmptyMultiSet[A]] =
+      peelNonEmpty._2
+  }
 }

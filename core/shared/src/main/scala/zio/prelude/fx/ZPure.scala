@@ -1,11 +1,13 @@
 package zio.prelude.fx
 
-import zio.internal.Stack
+import com.github.ghik.silencer.silent
+import zio.internal.{Stack, StackBool}
 import zio.prelude.{CommutativeBoth, Covariant, ForEach, IdentityBoth, IdentityFlatten, Validation, ZValidation}
 import zio.test.Assertion
 import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, switch}
+import scala.reflect.ClassTag
 import scala.util.Try
 
 /**
@@ -97,6 +99,13 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self.foldM(e => ZPure.fail(f(e)), a => ZPure.succeed(g(a)))
 
   /**
+   * Modifies the behavior of the inner computation regarding logs, so that
+   * logs written in a failed computation will be cleared.
+   */
+  final def clearLogOnError: ZPure[W, S1, S2, R, E, A] =
+    ZPure.Flag(ZPure.FlagType.ClearLogOnError, value = true, self)
+
+  /**
    * Transforms the result of this computation with the specified partial
    * function, failing with the `e` value if the partial function is not
    * defined for the given input.
@@ -185,6 +194,13 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     that: ZPure[W1, S0, S3, R1, E1, A1]
   ): ZPure[W1, S0, S3, Either[R, R1], E1, A1] =
     ZPure.accessM(_.fold(self.provide, that.provide))
+
+  /**
+   * Modifies the behavior of the inner computation regarding logs, so that
+   * logs written in a failed computation will be kept (this is the default behavior).
+   */
+  final def keepLogOnError: ZPure[W, S1, S2, R, E, A] =
+    ZPure.Flag(ZPure.FlagType.ClearLogOnError, value = false, self)
 
   /**
    * Returns a successful computation if the value is `Left`, or fails with error `None`.
@@ -342,6 +358,23 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZPure.set(s) *> self
 
   /**
+   * Keeps some of the errors, and `throw` the rest
+   */
+  final def refineOrDie[E1](
+    pf: PartialFunction[E, E1]
+  )(implicit ev1: E <:< Throwable, ev2: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
+    refineOrDieWith(pf)(ev1)
+
+  /**
+   * Keeps some of the errors, and `throw` the rest, using
+   * the specified function to convert the `E` into a `Throwable`.
+   */
+  final def refineOrDieWith[E1](pf: PartialFunction[E, E1])(f: E => Throwable)(implicit
+    ev: CanFail[E]
+  ): ZPure[W, S1, S2, R, E1, A] =
+    self catchAll (err => (pf lift err).fold(throw f(err))(e => ZPure.fail(e)))
+
+  /**
    * Fail with the returned value if the `PartialFunction` matches, otherwise
    * continue with our held value.
    */
@@ -468,9 +501,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     val _                                                        = ev
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
     val environments: Stack[AnyRef]                              = Stack()
+    val logs: Stack[ChunkBuilder[Any]]                           = Stack(ChunkBuilder.make())
+    val clearLogOnError: StackBool                               = StackBool()
     var s0: Any                                                  = s
     var a: Any                                                   = null
-    val builder: ChunkBuilder[Any]                               = ChunkBuilder.make()
     var failed                                                   = false
     var curZPure: ZPure[Any, Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
 
@@ -536,11 +570,21 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           val fold  =
             ZPure.Fold(
               zPure.value,
-              (cause: Cause[Any]) => ZPure.set(state) *> zPure.failure(cause),
-              zPure.success,
+              (cause: Cause[Any]) =>
+                ZPure.suspend(ZPure.Succeed({
+                  val clear   = clearLogOnError.peekOrElse(false)
+                  val builder = logs.pop()
+                  if (!clear) logs.peek() ++= builder.result()
+                })) *> ZPure.set(state) *> zPure.failure(cause),
+              (a: Any) =>
+                ZPure.suspend(ZPure.Succeed({
+                  val builder = logs.pop()
+                  logs.peek() ++= builder.result()
+                })) *> zPure.success(a),
               zPure.fold
             )
           stack.push(fold)
+          logs.push(ChunkBuilder.make())
           curZPure = zPure.value
         case ZPure.Tags.Access  =>
           val zPure = curZPure.asInstanceOf[ZPure.Access[Any, Any, Any, Any, Any, Any]]
@@ -548,8 +592,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
         case ZPure.Tags.Provide =>
           val zPure = curZPure.asInstanceOf[ZPure.Provide[Any, Any, Any, Any, Any, Any]]
           environments.push(zPure.r.asInstanceOf[AnyRef])
-          curZPure = zPure.continue.foldM(
-            e => ZPure.succeed(environments.pop()) *> ZPure.fail(e),
+          curZPure = zPure.continue.foldCauseM(
+            e => ZPure.succeed(environments.pop()) *> ZPure.halt(e),
             a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
           )
         case ZPure.Tags.Modify  =>
@@ -561,13 +605,27 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
         case ZPure.Tags.Log     =>
           val zPure     = curZPure.asInstanceOf[ZPure.Log[Any, Any]]
-          builder += zPure.log
+          logs.peek() += zPure.log
           val nextInstr = stack.pop()
           a = ()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+        case ZPure.Tags.Flag    =>
+          val zPure = curZPure.asInstanceOf[ZPure.Flag[Any, Any, Any, Any, Any, Any]]
+          zPure.flag match {
+            case ZPure.FlagType.ClearLogOnError =>
+              clearLogOnError.push(zPure.value)
+              curZPure = zPure.continue.bimap(
+                e => {
+                  if (zPure.value) logs.peek().clear()
+                  clearLogOnError.popOrElse(false)
+                  e
+                },
+                a => { clearLogOnError.popOrElse(false); a }
+              )
+          }
       }
     }
-    val log = builder.result().asInstanceOf[Chunk[W]]
+    val log = logs.peek().result().asInstanceOf[Chunk[W]]
     if (failed) (log, Left(a.asInstanceOf[Cause[E]]))
     else (log, Right((s0.asInstanceOf[S2], a.asInstanceOf[A])))
   }
@@ -661,7 +719,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       case None        => ZPure.fail(ev2(new NoSuchElementException("None.get")))
     })
 
-  def tag: Int
+  protected def tag: Int
 
   /**
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
@@ -732,6 +790,18 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     new AccessMPartiallyApplied
 
   /**
+   * Constructs a computation, catching any `Throwable` that is thrown.
+   */
+  def attempt[A](a: => A): ZPure[Nothing, Unit, Unit, Any, Throwable, A] =
+    suspend {
+      try ZPure.succeed(a)
+      catch {
+        case e: VirtualMachineError => throw e
+        case e: Throwable           => ZPure.fail(e)
+      }
+    }
+
+  /**
    * Combines a collection of computations into a single computation that
    * passes the updated state from each computation to the next and collects
    * the results.
@@ -782,18 +852,6 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     else fail(s"$value did not satisfy ${assertion.render}")
 
   /**
-   * Constructs a computation from an effect that may throw.
-   */
-  def fromEffect[A](effect: => A): ZPure[Nothing, Unit, Unit, Any, Throwable, A] =
-    ZPure.suspend {
-      try ZPure.succeed(effect)
-      catch {
-        case t: VirtualMachineError => throw t
-        case t: Throwable           => ZPure.fail(t)
-      }
-    }
-
-  /**
    * Constructs a computation from an `Either`.
    */
   def fromEither[L, R](either: Either[L, R]): ZPure[Nothing, Unit, Unit, Any, L, R] =
@@ -831,7 +889,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation from a `scala.util.Try`.
    */
   def fromTry[A](t: Try[A]): ZPure[Nothing, Unit, Unit, Any, Throwable, A] =
-    fromEffect(t).flatMap {
+    attempt(t).flatMap {
       case scala.util.Success(v) => ZPure.succeed(v)
       case scala.util.Failure(t) => ZPure.fail(t)
     }
@@ -1223,6 +1281,15 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
         ffa.flatMap(identity)
     }
 
+  implicit final class ZPureRefineToOrDieOps[W, S1, S2, R, E <: Throwable, A](self: ZPure[W, S1, S2, R, E, A]) {
+
+    /**
+     * Keeps some of the errors, and `throw` the rest.
+     */
+    def refineToOrDie[E1 <: E: ClassTag](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
+      self.refineOrDie { case e: E1 => e }
+  }
+
   implicit final class ZPureWithFilterOps[W, S1, S2, R, E, A](private val self: ZPure[W, S1, S2, R, E, A])
       extends AnyVal {
 
@@ -1242,7 +1309,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       }
   }
 
-  object Tags {
+  @silent("never used")
+  private object Tags {
     final val FlatMap = 0
     final val Succeed = 1
     final val Fail    = 2
@@ -1251,6 +1319,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     final val Provide = 5
     final val Modify  = 6
     final val Log     = 7
+    final val Flag    = 8
   }
 
   private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Unit, Unit, Any, Nothing, A]   {
@@ -1290,6 +1359,18 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   }
   private final case class Log[S, +W](log: W) extends ZPure[W, S, S, Any, Nothing, Unit] {
     override def tag: Int = Tags.Log
+  }
+  private final case class Flag[W, S1, S2, R, E, A](
+    flag: FlagType,
+    value: Boolean,
+    continue: ZPure[W, S1, S2, R, E, A]
+  ) extends ZPure[W, S1, S2, R, E, A] {
+    override def tag: Int = Tags.Flag
+  }
+
+  sealed trait FlagType
+  object FlagType {
+    case object ClearLogOnError extends FlagType
   }
 }
 

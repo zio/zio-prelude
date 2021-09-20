@@ -17,11 +17,11 @@
 package zio
 
 import com.github.ghik.silencer.silent
+import zio.prelude.newtypes.Natural
 import zio.test.{TestResult, assert}
 
 package object prelude
-    extends Assertions
-    with AssociativeSyntax
+    extends AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
@@ -30,24 +30,29 @@ package object prelude
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with ConstExports
-    with CovariantSyntax
     with ContravariantSyntax
+    with CovariantSyntax
     with DebugSyntax
     with DivariantSyntax
     with EqualSyntax
+    with ForEachSyntax
     with HashSyntax
     with IdExports
-    with IdentitySyntax
     with IdentityBothSyntax
     with IdentityEitherSyntax
+    with IdentitySyntax
+    with InvariantSyntax
     with InverseSyntax
     with NewtypeExports
     with NewtypeFExports
-    with NonEmptySetSyntax
     with NonEmptyForEachSyntax
+    with NonEmptyListSyntax
+    with NonEmptySetSyntax
     with OrdSyntax
     with PartialOrdSyntax
-    with ForEachSyntax
+    with TestAssertions
+    with ZNonEmptySetSyntax
+    with ZSetSyntax
     with ZivariantSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
@@ -75,9 +80,9 @@ package object prelude
   type Validation[+E, +A] = ZValidation[Nothing, E, A]
   val Validation: ZValidation.type = ZValidation
 
-  type MultiSet[+A] = ZSet[A, Int]
+  type MultiSet[+A] = ZSet[A, Natural]
   val MultiSet: ZSet.type = ZSet
-  type NonEmptyMultiSet[+A] = ZNonEmptySet[A, Int]
+  type NonEmptyMultiSet[+A] = ZNonEmptySet[A, Natural]
   val NonEmptyMultiSet: ZNonEmptySet.type = ZNonEmptySet
 
   type DeriveAssociative[F[_]] = Derive[F, Associative]

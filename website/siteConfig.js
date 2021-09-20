@@ -22,7 +22,7 @@ const users = [
 
 const siteConfig = {
   title: 'ZIO Prelude',
-  tagline: 'TODO: Tagline',
+  tagline: 'Next Generation Functional Abstractions For Scala',
   url: 'https://zio.github.io',
   baseUrl: '/zio-prelude/',
 
@@ -31,10 +31,13 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: 'overview/overview_index', label: 'Overview'},
-    {doc: 'usecases/usecases_index', label: 'Use Cases'},
-    {href: 'api/index.html', label: 'API'},
-    {doc: 'about/about_index', label: 'About'}
+    { doc: 'overview/overview_index', label: 'Overview' },
+    { doc: 'functionalabstractions/index', label: 'Functional Abstractions' },
+    { doc: 'functionaldatatypes/index', label: 'Functional Data Types' },
+    { doc: 'newtypes/index', label: 'New Types' },
+    { doc: 'zpure/index', label: 'ZPure' },
+    { doc: 'usecases/usecases_index', label: 'Use Cases' },
+    { doc: 'about/about_index', label: 'About' }
   ],
 
   // by default Docusaurus combines CSS files in a way that doesn't play nicely with Scaladoc

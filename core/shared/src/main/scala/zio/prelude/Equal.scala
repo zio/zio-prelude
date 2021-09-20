@@ -17,12 +17,14 @@
 package zio.prelude
 
 import zio.Exit.{Failure, Success}
+import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 import zio.{Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace}
 
 import scala.annotation.implicitNotFound
+import scala.concurrent.duration.{Duration => ScalaDuration}
 import scala.util.Try
 import scala.{math => sm}
 
@@ -110,7 +112,7 @@ object Equal extends Lawful[Equal] {
   /**
    * For all values `a1`, `a1` is equal to `a1`.
    */
-  val reflexiveLaw: Laws.Law1[Equal] =
+  lazy val reflexiveLaw: Laws.Law1[Equal] =
     new Laws.Law1[Equal]("reflexiveLaw") {
       def apply[A: Equal](a1: A): TestResult =
         a1 <-> a1
@@ -120,7 +122,7 @@ object Equal extends Lawful[Equal] {
    * For all values `a1` and `a2`, if `a1` is equal to `a2` then `a2` is equal
    * to `a1`.
    */
-  val symmetryLaw: Laws.Law2[Equal] =
+  lazy val symmetryLaw: Laws.Law2[Equal] =
     new Laws.Law2[Equal]("symmetryLaw") {
       def apply[A: Equal](a1: A, a2: A): TestResult =
         (a1 <-> a2) ==> (a2 <-> a1)
@@ -130,7 +132,7 @@ object Equal extends Lawful[Equal] {
    * For all values `a1`, `a2`, and `a3`, if `a1` is equal to `a2` and `a2` is
    * equal `a3`, then `a1` is equal to `a3`.
    */
-  val transitivityLaw: Laws.Law3[Equal] =
+  lazy val transitivityLaw: Laws.Law3[Equal] =
     new Laws.Law3[Equal]("transitivityLaw") {
       def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
         ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
@@ -139,7 +141,7 @@ object Equal extends Lawful[Equal] {
   /**
    * The set of all laws that instances of `Equal` must satisfy.
    */
-  val laws: Laws[Equal] =
+  lazy val laws: Laws[Equal] =
     reflexiveLaw + symmetryLaw + transitivityLaw
 
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
@@ -221,6 +223,18 @@ object Equal extends Lawful[Equal] {
     DefaultEqual
 
   /**
+   * The `Hash` and `Ord` instance for `BigDecimal`.
+   */
+  implicit val BigDecimalHashOrd: Hash[BigDecimal] with Ord[BigDecimal] =
+    HashOrd.default
+
+  /**
+   * The `Hash` and `Ord` instance for `BigInt`.
+   */
+  implicit val BigIntHashOrd: Hash[BigInt] with Ord[BigInt] =
+    HashOrd.default
+
+  /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
    */
   implicit val BooleanHashOrd: Hash[Boolean] with Ord[Boolean] =
@@ -283,6 +297,18 @@ object Equal extends Lawful[Equal] {
    */
   implicit val DoubleHashOrd: Hash[Double] with Ord[Double] =
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
+
+  /**
+   * `Hash` and `Ord` (and thus also `Equal`) instance for Scala `Duration` values.
+   */
+  implicit val DurationScalaHashOrd: Hash[ScalaDuration] with Ord[ScalaDuration] =
+    HashOrd.default
+
+  /**
+   * `Hash` and `Ord` (and thus also `Equal`) instance for ZIO `Duration` values.
+   */
+  implicit val DurationZIOHashOrd: Hash[ZIODuration] with Ord[ZIODuration] =
+    HashOrd.default
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.

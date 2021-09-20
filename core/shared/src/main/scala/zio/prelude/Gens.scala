@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio.prelude.fx.Cause
+import zio.prelude.newtypes.Natural
 import zio.random.Random
 import zio.test._
 
@@ -24,6 +25,19 @@ import zio.test._
  * Provides generators for data types from _ZIO Prelude_.
  */
 object Gens {
+
+  /**
+   * A generator of natural numbers. Shrinks toward '0'.
+   */
+  val anyNatural: Gen[Random, Natural] =
+    natural(Natural.zero, Natural.unsafeMake(Int.MaxValue))
+
+  /**
+   * A generator of natural numbers inside the specified range: [start, end].
+   * The shrinker will shrink toward the lower end of the range ("smallest").
+   */
+  def natural(min: Natural, max: Natural): Gen[Random, Natural] =
+    Gen.int(min, max).map(Natural.unsafeMake)
 
   def parSeq[R <: Random with Sized, Z <: Unit, A](z: Gen[R, Z], a: Gen[R, A]): Gen[R, ParSeq[Z, A]] = {
     val failure = a.map(Cause.single)
@@ -63,7 +77,13 @@ object Gens {
    * A generator of `NonEmptyMultiSet` values.
    */
   def nonEmptyMultiSetOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptyMultiSet[A]] =
-    Gen.mapOf1(a, Gen.size).map(NonEmptyMultiSet.fromMapOption(_).get)
+    Gen.mapOf1(a, Gen.size.map(Natural.unsafeMake)).map(NonEmptyMultiSet.fromMapOption(_).get)
+
+  /**
+   * A generator of `NonEmptySet` values.
+   */
+  def nonEmptySetOf[R <: Random with Sized, A](a: Gen[R, A]): Gen[R, NonEmptySet[A]] =
+    Gen.setOf1(a).map(NonEmptySet.fromSetOption(_).get)
 
   /**
    * A generator of state transition functions.

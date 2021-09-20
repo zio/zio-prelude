@@ -4,7 +4,7 @@ import zio.prelude._
 import zio.random.Random
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
-import zio.{CanFail, Chunk}
+import zio.{CanFail, Chunk, NonEmptyChunk}
 
 import java.util.NoSuchElementException
 import scala.util.Try
@@ -68,6 +68,13 @@ object ZPureSpec extends DefaultRunnableSpec {
               end <- ZPure.environment[Int]
             } yield end
             assert(zPure.provide(0).run)(equalTo(0))
+          },
+          test("providing environment should preserve errors") {
+            val zPure: ZPure[Nothing, Unit, Unit, (Int, Int), Int, Int] =
+              ZPure.tupledPar(ZPure.fail(1), ZPure.fail(2)).as(0)
+            val actual                                                  = zPure.provide((1, 2)).runValidation
+            val expected                                                = Validation.Failure(Chunk.empty, NonEmptyChunk(1, 2))
+            assert(actual)(equalTo(expected))
           },
           test("provideSome") {
             val zPure = ZPure.environment[Int].provideSome[String](_.split(" ").length)
@@ -529,6 +536,22 @@ object ZPureSpec extends DefaultRunnableSpec {
               }
             )
           ),
+          suite("refineToOrDie")(
+            testM("success case") {
+              check(genInt) { a =>
+                assert(ZPure.attempt(a.toString.toInt).refineToOrDie[NumberFormatException].runEither)(
+                  isRight(equalTo(a))
+                )
+              }
+            },
+            test("failure case") {
+              implicit val throwableHash = Equal.ThrowableHash
+              val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
+              assert(ZPure.attempt("a".toInt).refineToOrDie[NumberFormatException].runEither)(
+                isLeft(equalTo(exception))
+              )
+            }
+          ),
           suite("right methods")(
             suite("right")(
               test("failure") {
@@ -810,13 +833,13 @@ object ZPureSpec extends DefaultRunnableSpec {
           },
           testM("fromEffect (Success case)") {
             check(genInt) { a =>
-              assert(ZPure.fromEffect(a).runEither)(isRight(equalTo(a)))
+              assert(ZPure.attempt(a).runEither)(isRight(equalTo(a)))
             }
           },
           test("fromEffect (Failure case)") {
             implicit val throwableHash = Equal.ThrowableHash
             val exception: Throwable   = new NumberFormatException("""For input string: "a"""")
-            assert(ZPure.fromEffect("a".toInt).runEither)(isLeft(equalTo(exception)))
+            assert(ZPure.attempt("a".toInt).runEither)(isLeft(equalTo(exception)))
           },
           suite("modifyEither")(
             test("success") {
@@ -876,6 +899,64 @@ object ZPureSpec extends DefaultRunnableSpec {
             _ <- ZPure.log("times")
           } yield b
           assert(computation.runLog)(equalTo((Chunk("plus", "times"), 6)))
+        },
+        test("log is not cleared after failure") {
+          def log(i: Int) = ZPure.log(i)
+          val zPure       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either
+              _ <- (log(4) *> (if (false) ZPure.fail("baz") else ZPure.unit)).either
+            } yield ()
+          assert(zPure.keepLogOnError.runLog)(equalTo((Chunk(1, 2, 3, 4), ())))
+        },
+        test("log is not cleared after failure with keepLogOnError") {
+          def log(i: Int) = ZPure.log(i)
+          val zPure       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either
+              _ <- (log(4) *> (if (false) ZPure.fail("baz") else ZPure.unit)).either
+            } yield ()
+          assert(zPure.keepLogOnError.runLog)(equalTo((Chunk(1, 2, 3, 4), ())))
+        },
+        test("log is cleared after failure with clearLogOnError") {
+          def log(i: Int) = ZPure.log(i)
+          val zPure       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either
+              _ <- (log(4) *> (if (false) ZPure.fail("baz") else ZPure.unit)).either
+            } yield ()
+          assert(zPure.clearLogOnError.runLog)(equalTo((Chunk(2, 4), ())))
+        },
+        test("combine clearLogOnError and keepLogOnError") {
+          def log(i: Int) = ZPure.log(i)
+          val zPure       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).either.keepLogOnError
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).either.clearLogOnError
+            } yield ()
+          assert(zPure.runLog)(equalTo((Chunk(1, 2), ())))
+        },
+        test("log is not cleared after failure with keepLogOnError when the whole computation fails") {
+          def log(i: Int) = ZPure.log(i)
+          val zPure       = log(1) *> ZPure.fail("baz")
+          assert(zPure.keepLogOnError.runAll(())._1)(equalTo(Chunk(1)))
+        },
+        test("log is cleared after failure with clearLogOnError when the whole computation fails") {
+          def log(i: Int) = ZPure.log(i)
+          val zPure       = log(1) *> ZPure.fail("baz")
+          assert(zPure.clearLogOnError.runAll(())._1)(equalTo(Chunk()))
+        },
+        test("clearLogOnError should not affect the overall result") {
+          def log(i: Int) = ZPure.log(i)
+          val zPure       = log(1) *> ZPure.fail("baz")
+          assert(zPure.clearLogOnError.runAll(())._2)(isLeft(anything))
         }
       )
     )

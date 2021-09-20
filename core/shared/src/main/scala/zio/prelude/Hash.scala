@@ -36,30 +36,6 @@ trait Hash[-A] extends Equal[A] { self =>
   override protected def checkEqual(l: A, r: A): Boolean
 
   /**
-   * Constructs a `Hash[(A, B)]` given a `Hash[A]` and `Hash[B]` by hashing the
-   * `A` and `B` values together.
-   */
-  def both[B](that: Hash[B]): Hash[(A, B)] =
-    bothWith(that)(identity)
-
-  /**
-   * Constructs a `Hash[C]` given a `Hash[A]`, a `Hash[B]` and a function `f`
-   * to transform a `C` value into an `(A, B)`. The instance will convert each
-   * `C` value into an `(A, B)`, and hash the `A` and `B` values together.
-   */
-  def bothWith[B, C](that: Hash[B])(f: C => (A, B)): Hash[C] =
-    Hash.make(
-      c =>
-        f(c) match {
-          case (a, b) => (self.hash(a), that.hash(b)).hashCode
-        },
-      (c1, c2) =>
-        (f(c1), f(c2)) match {
-          case ((a1, b1), (a2, b2)) => self.equal(a1, a2) && that.equal(b1, b2)
-        }
-    )
-
-  /**
    * Constructs a `Hash[B]` given a `Hash[A]` and a function `f` to transform a
    * `B` value into an `A` value. The instance will convert each `B` value into
    * an `A` and hash the `A` values.
@@ -69,34 +45,6 @@ trait Hash[-A] extends Equal[A] { self =>
       b => hash(f(b)),
       (b1, b2) => equal(f(b1), f(b2))
     )
-
-  /**
-   * Constructs a `Hash[Either[A, B]]` given a `Hash[A]` and a `Hash[B]`. The
-   * instance will hash either the `A` or `B` values.
-   */
-  def either[B](that: Hash[B]): Hash[Either[A, B]] =
-    eitherWith(that)(identity)
-
-  /**
-   * Constructs a `Hash[C]` given a `Hash[A]`, a `Hash[B]`, and a function `f`
-   * to transform a `C` value into an `Either[A, B]`. The instance will convert
-   * each `C` value into an `Either[A, B]` and then hash either the `A` or `B`
-   * values.
-   */
-  def eitherWith[B, C](that: Hash[B])(f: C => Either[A, B]): Hash[C] =
-    Hash.make(
-      c =>
-        f(c) match {
-          case Left(a)  => Left(self.hash(a)).hashCode
-          case Right(b) => Right(that.hash(b)).hashCode
-        },
-      (c1, c2) =>
-        (f(c1), f(c2)) match {
-          case (Left(a1), Left(a2))   => self.equal(a1, a2)
-          case (Right(b1), Right(b2)) => that.equal(b1, b2)
-          case _                      => false
-        }
-    )
 }
 
 object Hash extends Lawful[Hash] {
@@ -105,7 +53,7 @@ object Hash extends Lawful[Hash] {
    * For all values `a1` and `a2`, if `a1` is equal to `a2` then the hash of
    * `a1` is equal to the hash of `a2`.
    */
-  val consistencyLaw: Laws[Hash] =
+  lazy val consistencyLaw: Laws[Hash] =
     new Laws.Law2[Hash]("consistencyLaw") {
       def apply[A](a1: A, a2: A)(implicit caps: Hash[A]): TestResult =
         (a1 <-> a2) ==> (Hash[A].hash(a1) <-> Hash[A].hash(a2))
@@ -114,7 +62,7 @@ object Hash extends Lawful[Hash] {
   /**
    * The set of all laws that instances of `Hash` must satisfy.
    */
-  val laws: Laws[Hash] =
+  lazy val laws: Laws[Hash] =
     consistencyLaw + Equal.laws
 
   /**
@@ -124,30 +72,6 @@ object Hash extends Lawful[Hash] {
     new Contravariant[Hash] {
       def contramap[A, B](f: B => A): Hash[A] => Hash[B] =
         _.contramap(f)
-    }
-
-  /**
-   * The `IdentityBoth` (and thus `AssociativeBoth`) instance for `Hash`.
-   */
-  implicit val HashIdentityBoth: IdentityBoth[Hash] =
-    new IdentityBoth[Hash] {
-      val any: Hash[Any] =
-        Equal.AnyHashOrd
-
-      def both[A, B](fa: => Hash[A], fb: => Hash[B]): Hash[(A, B)] =
-        fa.both(fb)
-    }
-
-  /**
-   * The `IdentityEither` (and thus `AssociativeEither`) instance for `Hash`.
-   */
-  implicit val HashIdentityEither: IdentityEither[Hash] =
-    new IdentityEither[Hash] {
-      def either[A, B](fa: => Hash[A], fb: => Hash[B]): Hash[Either[A, B]] =
-        fa.either(fb)
-
-      val none: Hash[Nothing] =
-        Equal.NothingHashOrd
     }
 
   /**

@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.ZValidation._
-import zio.test.Assertion
+import zio.test.{Assertion => TestAssertion}
 import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
@@ -42,15 +42,31 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     log(w1)
 
   /**
+   * Maps the successful value of this `ZValidation` to the specified constant
+   * value.
+   */
+  final def as[B](b: B): ZValidation[W, E, B] =
+    map(_ => b)
+
+  /**
+   * Maps the error value of this `ZValidation` to the specified constant
+   * value.
+   */
+  final def asError[E2](e: E2): ZValidation[W, E2, A] =
+    mapError(_ => e)
+
+  /**
    * Returns whether this `ZValidation` and the specified `ZValidation` are
    * equal to each other.
    */
   override final def equals(that: Any): Boolean =
-    (self, that) match {
-      case (Failure(_, e), Failure(_, e1)) => e == e1
-      case (Success(_, a), Success(_, a1)) => a == a1
-      case _                               => false
+    that match {
+      case that: AnyRef if self.eq(that) => true
+      case that: ZValidation[_, _, _]    => self.toEitherMultiSet == that.toEitherMultiSet
+      case _                             => false
     }
+
+  override final def hashCode(): Int = toEitherMultiSet.hashCode()
 
   /**
    * Transforms the value of this `ZValidation` with the specified validation
@@ -65,6 +81,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
           case Success(w1, b) => Success(w ++ w1, b)
         }
     }
+
+  /**
+   * Returns a ZValidation that is this ZValidation if failing or the inner ZValidation if the outer one succeeds.
+   * In particular, the sequential aspect of this combinator precludes combining error values of outer and inner ZValidations.
+   * This method can be used to "flatten" nested ZValidation.
+   */
+  final def flatten[W1 >: W, E1 >: E, B](implicit ev1: A <:< ZValidation[W1, E1, B]): ZValidation[W1, E1, B] =
+    self.flatMap(a => ev1(a))
 
   /**
    * Transforms the value of this `ZValidation` with the specified effectual
@@ -164,11 +188,34 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case Success(w, a) => (w, Right(a))
     }
 
+  final def orElse[W1 >: W, E1, A1 >: A](that: ZValidation[W1, E1, A1]): ZValidation[W1, E1, A1] =
+    self match {
+      case Failure(log, _)     => that.mapLogAll(log ++ _)
+      case Success(log, value) => Success(log, value)
+    }
+
+  final def orElseLog[W1 >: W, E1, A1 >: A](
+    that: ZValidation[W1, E1, A1]
+  )(implicit ev: E <:< W1): ZValidation[W1, E1, A1] =
+    self match {
+      case Failure(log, errors) => that.mapLogAll(log ++ errors.map(ev) ++ _)
+      case Success(log, value)  => Success(log, value)
+    }
+
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+  final def toEither: Either[NonEmptyChunk[E], A] =
     fold(Left(_), Right(_))
+
+  /**
+   * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
+   */
+  final def toEitherMultiSet: Either[NonEmptyMultiSet[E], A] =
+    self match {
+      case failure @ Failure(_, _) => Left(failure.errorsUnordered)
+      case Success(_, value)       => Right(value)
+    }
 
   /**
    * Transforms this `ZValidation` to an `Either`, transforming the accumulated errors and discarding the log.
@@ -240,7 +287,9 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 
 object ZValidation extends LowPriorityValidationImplicits {
 
-  final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing]
+  final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
+    lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
+  }
   final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
 
   /**
@@ -265,11 +314,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Derives an `Equal[ZValidation[W, E, A]]` given an `Equal[A]`.
    */
   implicit def ZValidationEqual[W, E, A: Equal]: Equal[ZValidation[W, E, A]] =
-    Equal.make {
-      case (Failure(_, e), Failure(_, e1)) => MultiSet.fromIterable(e) == MultiSet.fromIterable(e1)
-      case (Success(_, a), Success(_, a1)) => a === a1
-      case _                               => false
-    }
+    Equal[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 
   /**
    * The `DeriveEqual` instance for `ZValidation`.
@@ -326,7 +371,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
    */
   implicit def ZValidationPartialOrd[W, E: PartialOrd, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
-    PartialOrd[MultiSet[E]].eitherWith(PartialOrd[A])(_.fold(e => Left(MultiSet.fromIterable(e)), a => Right(a)))
+    PartialOrd[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 
   /**
    * Attempts to evaluate the specified value, catching any error that occurs
@@ -341,11 +386,11 @@ object ZValidation extends LowPriorityValidationImplicits {
 
   /**
    * Combine a collection of `ZValidation` values into a single `ZValidation`
-   * that either returns the values of all of them, if their all succeed, or
+   * that either returns the values of all of them, if they all succeed, or
    * else fails with all of their errors.
    */
-  def collectAllPar[W, E, A](validations: Iterable[ZValidation[W, E, A]]): ZValidation[W, E, List[A]] =
-    validations.foldRight[ZValidation[W, E, List[A]]](succeed(List.empty))(_.zipWithPar(_)(_ :: _))
+  def validateAll[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
+    validations.flip
 
   /**
    * Constructs a `ZValidation` that fails with the specified error.
@@ -354,12 +399,19 @@ object ZValidation extends LowPriorityValidationImplicits {
     Failure(Chunk.empty, NonEmptyChunk(error))
 
   /**
+   * Constructs a `ZValidation` that fails with the specified `NonEmptyChunk`
+   * of errors.
+   */
+  def failNonEmptyChunk[E](errors: NonEmptyChunk[E]): Validation[E, Nothing] =
+    Failure(Chunk.empty, errors)
+
+  /**
    * Constructs a `ZValidation` from a value and an assertion about that value.
    * The resulting `ZValidation` will be a success if the value satisfies the
    * assertion or else will contain a string rendering describing how the
    * value did not satisfy the assertion.
    */
-  def fromAssert[A](value: A)(assertion: Assertion[A]): Validation[String, A] =
+  def fromAssert[A](value: A)(assertion: TestAssertion[A]): Validation[String, A] =
     if (assertion.test(value)) succeed(value)
     else fail(s"$value did not satisfy ${assertion.render}")
 
@@ -370,10 +422,24 @@ object ZValidation extends LowPriorityValidationImplicits {
     value.fold(fail, succeed)
 
   /**
+   * Constructs a `ZValidation` from an `Either` that fails with a
+   * `NonEmptyChunk` of errors.
+   */
+  def fromEitherNonEmptyChunk[E, A](value: Either[NonEmptyChunk[E], A]): Validation[E, A] =
+    value.fold(failNonEmptyChunk, succeed)
+
+  /**
    * Constructs a `ZValidation` from an `Option`.
    */
   def fromOption[A](value: Option[A]): Validation[Unit, A] =
     value.fold[Validation[Unit, A]](fail(()))(succeed)
+
+  /**
+   * Construts a `Validation` from an `Option`, failing with the error
+   * provided.
+   */
+  def fromOptionWith[E, A](error: => E)(value: Option[A]): Validation[E, A] =
+    value.fold[Validation[E, A]](fail(error))(succeed)
 
   /**
    * Constructs a `Validation` from a predicate, failing with None.
@@ -405,10 +471,488 @@ object ZValidation extends LowPriorityValidationImplicits {
     Success(Chunk(w), ())
 
   /**
+   * Constructs a `Validation` that succeeds with the specified value.
+   */
+  def succeed[A](value: A): Validation[Nothing, A] =
+    Success(Chunk.empty, value)
+
+  /**
+   * The `Validation` that succeeds with the `Unit` value.
+   */
+  val unit: Validation[Nothing, Unit] =
+    succeed(())
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1](a0: ZValidation[W, E, A0], a1: ZValidation[W, E, A1]): ZValidation[W, E, (A0, A1)] =
+    a0 <&> a1
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2]
+  ): ZValidation[W, E, (A0, A1, A2)] =
+    validateWith(a0, a1, a2)((_, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3]
+  ): ZValidation[W, E, (A0, A1, A2, A3)] =
+    validateWith(a0, a1, a2, a3)((_, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4)] =
+    validateWith(a0, a1, a2, a3, a4)((_, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5)] =
+    validateWith(a0, a1, a2, a3, a4, a5)((_, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6)((_, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7)((_, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8)((_, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)((_, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)((_, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)((_, _, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)((_, _, _, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)((_, _, _, _, _, _, _, _, _, _, _, _, _, _))
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14],
+    a15: ZValidation[W, E, A15]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14],
+    a15: ZValidation[W, E, A15],
+    a16: ZValidation[W, E, A16]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14],
+    a15: ZValidation[W, E, A15],
+    a16: ZValidation[W, E, A16],
+    a17: ZValidation[W, E, A17]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14],
+    a15: ZValidation[W, E, A15],
+    a16: ZValidation[W, E, A16],
+    a17: ZValidation[W, E, A17],
+    a18: ZValidation[W, E, A18]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14],
+    a15: ZValidation[W, E, A15],
+    a16: ZValidation[W, E, A16],
+    a17: ZValidation[W, E, A17],
+    a18: ZValidation[W, E, A18],
+    a19: ZValidation[W, E, A19]
+  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19)] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14],
+    a15: ZValidation[W, E, A15],
+    a16: ZValidation[W, E, A16],
+    a17: ZValidation[W, E, A17],
+    a18: ZValidation[W, E, A18],
+    a19: ZValidation[W, E, A19],
+    a20: ZValidation[W, E, A20]
+  ): ZValidation[
+    W,
+    E,
+    (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20)
+  ] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
+   * Combines the results of the specified `Validation` values into a tuple,
+   * failing with the accumulation of all errors if any fail.
+   */
+  def validate[
+    W,
+    E,
+    A0,
+    A1,
+    A2,
+    A3,
+    A4,
+    A5,
+    A6,
+    A7,
+    A8,
+    A9,
+    A10,
+    A11,
+    A12,
+    A13,
+    A14,
+    A15,
+    A16,
+    A17,
+    A18,
+    A19,
+    A20,
+    A21
+  ](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2],
+    a3: ZValidation[W, E, A3],
+    a4: ZValidation[W, E, A4],
+    a5: ZValidation[W, E, A5],
+    a6: ZValidation[W, E, A6],
+    a7: ZValidation[W, E, A7],
+    a8: ZValidation[W, E, A8],
+    a9: ZValidation[W, E, A9],
+    a10: ZValidation[W, E, A10],
+    a11: ZValidation[W, E, A11],
+    a12: ZValidation[W, E, A12],
+    a13: ZValidation[W, E, A13],
+    a14: ZValidation[W, E, A14],
+    a15: ZValidation[W, E, A15],
+    a16: ZValidation[W, E, A16],
+    a17: ZValidation[W, E, A17],
+    a18: ZValidation[W, E, A18],
+    a19: ZValidation[W, E, A19],
+    a20: ZValidation[W, E, A20],
+    a21: ZValidation[W, E, A21]
+  ): ZValidation[
+    W,
+    E,
+    (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21)
+  ] =
+    validateWith(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21)(
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
+    )
+
+  /**
    * Combines the results of the specified `ZValidation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, B](a0: ZValidation[W, E, A0], a1: ZValidation[W, E, A1])(
+  def validateWith[W, E, A0, A1, B](a0: ZValidation[W, E, A0], a1: ZValidation[W, E, A1])(
     f: (A0, A1) => B
   ): ZValidation[W, E, B] =
     a0.zipWithPar(a1)(f)
@@ -417,7 +961,11 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, B](a0: ZValidation[W, E, A0], a1: ZValidation[W, E, A1], a2: ZValidation[W, E, A2])(
+  def validateWith[W, E, A0, A1, A2, B](
+    a0: ZValidation[W, E, A0],
+    a1: ZValidation[W, E, A1],
+    a2: ZValidation[W, E, A2]
+  )(
     f: (A0, A1, A2) => B
   ): ZValidation[W, E, B] =
     (a0 <&> a1 <&> a2).map { case ((a0, a1), a2) => f(a0, a1, a2) }
@@ -426,7 +974,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, B](
+  def validateWith[W, E, A0, A1, A2, A3, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -440,7 +988,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -455,7 +1003,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -471,7 +1019,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -490,7 +1038,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -510,7 +1058,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -531,7 +1079,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -553,7 +1101,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -577,7 +1125,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -602,7 +1150,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -628,7 +1176,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -655,7 +1203,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -683,7 +1231,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -712,7 +1260,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -742,7 +1290,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -776,7 +1324,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -814,7 +1362,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, B](
+  def validateWith[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, B](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -859,7 +1407,32 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, B](
+  def validateWith[
+    W,
+    E,
+    A0,
+    A1,
+    A2,
+    A3,
+    A4,
+    A5,
+    A6,
+    A7,
+    A8,
+    A9,
+    A10,
+    A11,
+    A12,
+    A13,
+    A14,
+    A15,
+    A16,
+    A17,
+    A18,
+    A19,
+    A20,
+    B
+  ](
     a0: ZValidation[W, E, A0],
     a1: ZValidation[W, E, A1],
     a2: ZValidation[W, E, A2],
@@ -908,7 +1481,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combines the results of the specified `Validation` values using the
    * function `f`, failing with the accumulation of all errors if any fail.
    */
-  def mapParN[
+  def validateWith[
     W,
     E,
     A0,
@@ -985,484 +1558,6 @@ object ZValidation extends LowPriorityValidationImplicits {
           ) =>
         f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21)
     }
-
-  /**
-   * Constructs a `Validation` that succeeds with the specified value.
-   */
-  def succeed[A](value: A): Validation[Nothing, A] =
-    Success(Chunk.empty, value)
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1](a0: ZValidation[W, E, A0], a1: ZValidation[W, E, A1]): ZValidation[W, E, (A0, A1)] =
-    a0 <&> a1
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2]
-  ): ZValidation[W, E, (A0, A1, A2)] =
-    mapParN(a0, a1, a2)((_, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3]
-  ): ZValidation[W, E, (A0, A1, A2, A3)] =
-    mapParN(a0, a1, a2, a3)((_, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4)] =
-    mapParN(a0, a1, a2, a3, a4)((_, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5)] =
-    mapParN(a0, a1, a2, a3, a4, a5)((_, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6)((_, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7)((_, _, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8)((_, _, _, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)((_, _, _, _, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)((_, _, _, _, _, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)((_, _, _, _, _, _, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)((_, _, _, _, _, _, _, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)((_, _, _, _, _, _, _, _, _, _, _, _, _, _))
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14],
-    a15: ZValidation[W, E, A15]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14],
-    a15: ZValidation[W, E, A15],
-    a16: ZValidation[W, E, A16]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14],
-    a15: ZValidation[W, E, A15],
-    a16: ZValidation[W, E, A16],
-    a17: ZValidation[W, E, A17]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14],
-    a15: ZValidation[W, E, A15],
-    a16: ZValidation[W, E, A16],
-    a17: ZValidation[W, E, A17],
-    a18: ZValidation[W, E, A18]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14],
-    a15: ZValidation[W, E, A15],
-    a16: ZValidation[W, E, A16],
-    a17: ZValidation[W, E, A17],
-    a18: ZValidation[W, E, A18],
-    a19: ZValidation[W, E, A19]
-  ): ZValidation[W, E, (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19)] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, E, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14],
-    a15: ZValidation[W, E, A15],
-    a16: ZValidation[W, E, A16],
-    a17: ZValidation[W, E, A17],
-    a18: ZValidation[W, E, A18],
-    a19: ZValidation[W, E, A19],
-    a20: ZValidation[W, E, A20]
-  ): ZValidation[
-    W,
-    E,
-    (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20)
-  ] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * Combines the results of the specified `Validation` values into a tuple,
-   * failing with the accumulation of all errors if any fail.
-   */
-  def tupledPar[
-    W,
-    E,
-    A0,
-    A1,
-    A2,
-    A3,
-    A4,
-    A5,
-    A6,
-    A7,
-    A8,
-    A9,
-    A10,
-    A11,
-    A12,
-    A13,
-    A14,
-    A15,
-    A16,
-    A17,
-    A18,
-    A19,
-    A20,
-    A21
-  ](
-    a0: ZValidation[W, E, A0],
-    a1: ZValidation[W, E, A1],
-    a2: ZValidation[W, E, A2],
-    a3: ZValidation[W, E, A3],
-    a4: ZValidation[W, E, A4],
-    a5: ZValidation[W, E, A5],
-    a6: ZValidation[W, E, A6],
-    a7: ZValidation[W, E, A7],
-    a8: ZValidation[W, E, A8],
-    a9: ZValidation[W, E, A9],
-    a10: ZValidation[W, E, A10],
-    a11: ZValidation[W, E, A11],
-    a12: ZValidation[W, E, A12],
-    a13: ZValidation[W, E, A13],
-    a14: ZValidation[W, E, A14],
-    a15: ZValidation[W, E, A15],
-    a16: ZValidation[W, E, A16],
-    a17: ZValidation[W, E, A17],
-    a18: ZValidation[W, E, A18],
-    a19: ZValidation[W, E, A19],
-    a20: ZValidation[W, E, A20],
-    a21: ZValidation[W, E, A21]
-  ): ZValidation[
-    W,
-    E,
-    (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21)
-  ] =
-    mapParN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21)(
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)
-    )
-
-  /**
-   * The `Validation` that succeeds with the `Unit` value.
-   */
-  val unit: Validation[Nothing, Unit] =
-    succeed(())
 }
 
 trait LowPriorityValidationImplicits {
@@ -1479,6 +1574,6 @@ trait LowPriorityValidationImplicits {
   /**
    * Derives a `Hash[ZValidation[W, E, A]]` given a `Hash[A]`.
    */
-  implicit def ValidationHash[W, E, A: Hash]: Hash[ZValidation[W, E, A]] =
-    Hash[MultiSet[E]].eitherWith(Hash[A])(_.fold(e => Left(MultiSet.fromIterable(e)), a => Right(a)))
+  implicit def ZValidationHash[W, E, A: Hash]: Hash[ZValidation[W, E, A]] =
+    Hash[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 }

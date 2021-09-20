@@ -109,6 +109,18 @@ trait Ord[-A] extends PartialOrd[A] { self =>
     Ord.make((l, r) => f(compare(l, r)))
 
   /**
+   * Returns the maximum of the left value and the right value.
+   */
+  final def max[A1 <: A](l: A1, r: A1): A1 =
+    if (greaterOrEqual(l, r)) l else r
+
+  /**
+   * Returns the minimum of the left value and the right value.
+   */
+  final def min[A1 <: A](l: A1, r: A1): A1 =
+    if (lessOrEqual(l, r)) l else r
+
+  /**
    * Returns a new ordering that is the reverse of this one.
    */
   final def reverse: Ord[A] =
@@ -128,7 +140,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, `a1` is less than or equal to `a2` or `a2`
    * is less than or equal to `a1`.
    */
-  val connexityLaw1: Laws[Ord] =
+  lazy val connexityLaw1: Laws[Ord] =
     new Laws.Law2[Ord]("connexityLaw1") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         (a1 lessOrEqual a2) || (a2 lessOrEqual a1)
@@ -138,7 +150,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, `a1` is greater than or equal to `a2` or
    * `a2` is greater than or equal to `a1`.
    */
-  val connexityLaw2: Laws[Ord] =
+  lazy val connexityLaw2: Laws[Ord] =
     new Laws.Law2[Ord]("connexityLaw2") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         (a1 greaterOrEqual a2) || (a2 greaterOrEqual a1)
@@ -148,7 +160,7 @@ object Ord extends Lawful[Ord] {
    * For all values `a1` and `a2`, `a1` is less than or equal to `a2` if and
    * only if `a2` is greater than or equal to `a1`.
    */
-  val complementLaw: Laws[Ord] =
+  lazy val complementLaw: Laws[Ord] =
     new Laws.Law2[Ord]("complementLaw") {
       def apply[A: Ord](a1: A, a2: A): TestResult =
         (a1 lessOrEqual a2) <==> (a2 greaterOrEqual a1)
@@ -157,7 +169,7 @@ object Ord extends Lawful[Ord] {
   /**
    * The set of all laws that instances of `Ord` must satisfy.
    */
-  val laws: Laws[Ord] =
+  lazy val laws: Laws[Ord] =
     connexityLaw1 +
       connexityLaw2 +
       complementLaw +
@@ -861,6 +873,18 @@ trait OrdSyntax {
      * Returns the result of comparing this value with the specified value.
      */
     def =?=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Ordering = ord.compare(l, r)
+
+    /**
+     * Returns the maximum of this value and the specified value.
+     */
+    def max[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
+      ord.max(l, r)
+
+    /**
+     * Returns the minimum of this value and the specified value.
+     */
+    def min[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
+      ord.min(l, r)
   }
 }
 

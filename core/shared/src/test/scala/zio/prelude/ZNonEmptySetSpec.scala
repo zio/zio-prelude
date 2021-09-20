@@ -26,6 +26,9 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
   val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
+  implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
+    Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
+
   def spec: ZSpec[Environment, Failure] =
     suite("ZNonEmptySetSpec")(
       suite("laws")(
@@ -44,24 +47,33 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda](
               ZNonEmptySetCovariant(IntSumCommutativeInverse),
-              ZNonEmptySetDeriveEqual(IntHashOrd)
+              ZNonEmptySetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
             IntHashOrd
           )
         ),
-        testM("hash")(checkAllLaws(Hash)(genZNonEmptySet(Gen.anyInt, Gen.anyInt))),
-        testM("intersect commutative")(
-          checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Min(_))))
-        ),
-        testM("union commutative")(
-          checkAllLaws(Commutative)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Max(_))))
-        )
+        testM("hash")(checkAllLaws(Hash)(genZNonEmptySet(Gen.anyInt, Gen.anyInt)))
       ),
       suite("methods")(
         test("zipWith") {
           val die  = ZNonEmptySet(1, 2, 3, 4, 5, 6)
           val pair = die.zipWith(die)(_ + _)
           assert(pair(7))(equalTo(6))
+        },
+        test("peelNonEmpty none") {
+          val znes     = ZNonEmptySet("a")
+          val destruct = znes.peelNonEmpty
+          assert(destruct)(equalTo(("a", None)))
+        },
+        test("peelNonEmpty some 1") {
+          val znes     = ZNonEmptySet("a", "b")
+          val destruct = znes.peelNonEmpty
+          assert(destruct)(equalTo(("a", Some(ZNonEmptySet("b")))))
+        },
+        test("peelNonEmpty some 2") {
+          val znes     = ZNonEmptySet("a", "a")
+          val destruct = znes.peelNonEmpty
+          assert(destruct)(equalTo(("a", Some(ZNonEmptySet("a")))))
         }
       ),
       suite("set")(

@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.NonEmptyChunk
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -27,6 +28,9 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
   lazy val genInt: Gen[Random, Int] =
     Gen.int(-10, 10)
 
+  lazy val genNonEmptyChunk: Gen[Random with Sized, NonEmptyChunk[Int]] =
+    Gen.chunkOf1(genInt)
+
   lazy val genNonEmptyList: Gen[Random with Sized, NonEmptyList[Int]] =
     genCons.map(NonEmptyList.fromCons)
 
@@ -43,6 +47,7 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
     suite("NonEmptyListSpec")(
       suite("laws")(
         testM("associative")(checkAllLaws(Associative)(genNonEmptyList)),
+        testM("associativeEither")(checkAllLaws(AssociativeEither)(GenFs.nonEmptyList, Gen.anyInt)),
         testM("commutativeBoth")(checkAllLaws(CommutativeBoth)(GenFs.nonEmptyList, Gen.anyInt)),
         testM("hash")(checkAllLaws(Hash)(genNonEmptyList)),
         testM("identityBoth")(checkAllLaws(IdentityBoth)(GenFs.nonEmptyList, Gen.anyInt)),
@@ -253,6 +258,13 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
             val nonEmptyList = NonEmptyList.fromCons(as)
             val cons         = nonEmptyList.toCons
             assert(cons)(equalTo(as))
+          }
+        },
+        testM("fromNonEmptyChunk") {
+          check(genNonEmptyChunk) { as =>
+            val nonEmptyList  = NonEmptyList.fromNonEmptyChunk(as)
+            val nonEmptyChunk = nonEmptyList.toNonEmptyChunk
+            assert(nonEmptyChunk)(equalTo(as))
           }
         }
       )

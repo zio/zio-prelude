@@ -1,8 +1,8 @@
 # ZIO Prelude
 
-| CI | Release | Snapshot | Discord |
-| --- | --- | --- | --- |
-| ![CI][Badge-CI] | [![Release Artifacts][Badge-SonatypeReleases]][Link-SonatypeReleases] | [![Snapshot Artifacts][Badge-SonatypeSnapshots]][Link-SonatypeSnapshots] | [![Badge-Discord]][Link-Discord] |
+| Project Stage | CI | Release | Snapshot | Discord |
+| --- | --- | --- | --- | --- |
+| [![Project stage][Stage]][Stage-Page] | ![CI][Badge-CI] | [![Release Artifacts][Badge-SonatypeReleases]][Link-SonatypeReleases] | [![Snapshot Artifacts][Badge-SonatypeSnapshots]][Link-SonatypeSnapshots] | [![Badge-Discord]][Link-Discord] |
 
 # Summary
 
@@ -27,9 +27,7 @@ expressive effect types like ZIO and `ZPure`.
 
 # Documentation
 
-The ZIO Prelude Microsite is currently under development.
-
-[ZIO Prelude Microsite](https://zio.github.io/zio-prelude/) (not available yet, in the meantime you can check [those slides](https://www.slideshare.net/jdegoes/refactoring-functional-type-classes))
+Learn more on the [ZIO Prelude Microsite](https://zio.github.io/zio-prelude/)!
 
 # Contributing
 
@@ -54,4 +52,5 @@ Come chat with us on [![Badge-Discord]][Link-Discord].
 [Link-SonatypeReleases]: https://oss.sonatype.org/content/repositories/releases/dev/zio/zio-prelude_2.12/ "Sonatype Releases"
 [Link-SonatypeSnapshots]: https://oss.sonatype.org/content/repositories/snapshots/dev/zio/zio-prelude_2.12/ "Sonatype Snapshots"
 [Link-Discord]: https://discord.gg/2ccFBr4 "Discord"
-
+[Stage]: https://img.shields.io/badge/Project%20Stage-Production%20Ready-brightgreen.svg
+[Stage-Page]: https://github.com/zio/zio/wiki/Project-Stages

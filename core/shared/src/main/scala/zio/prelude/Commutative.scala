@@ -54,7 +54,7 @@ object Commutative extends Lawful[CommutativeEqual] {
    * a1 * a2 === a2 * a1
    * }}}
    */
-  val commutativeLaw: Laws[CommutativeEqual] =
+  lazy val commutativeLaw: Laws[CommutativeEqual] =
     new Laws.Law2[CommutativeEqual]("commutativeLaw") {
       def apply[A: CommutativeEqual](a1: A, a2: A): TestResult =
         (a1 <> a2) <-> (a2 <> a1)
@@ -63,7 +63,7 @@ object Commutative extends Lawful[CommutativeEqual] {
   /**
    * The set of all laws that instances of `Commutative` must satisfy.
    */
-  val laws: Laws[CommutativeEqual] =
+  lazy val laws: Laws[CommutativeEqual] =
     commutativeLaw + Associative.laws
 
   /**

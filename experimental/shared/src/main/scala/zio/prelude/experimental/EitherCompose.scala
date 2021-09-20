@@ -17,7 +17,7 @@
 package zio.prelude
 package experimental
 
-import zio.URIO
+import zio._
 
 trait EitherCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
 
@@ -76,6 +76,47 @@ object EitherCompose {
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
       AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
+  }
+
+  implicit val URLayerEitherCompose: EitherCompose[URLayer] = new EitherCompose[URLayer] {
+
+    type :+:[+l, +r] = Either[l, r]
+
+    def toLeft[A]: URLayer[A, Either[A, Nothing]] = ZLayer.identity[A].map(Left(_))
+
+    def toRight[B]: URLayer[B, Either[Nothing, B]] = ZLayer.identity[B].map(Right(_))
+
+    def fromEither[A, B, C](a2c: => URLayer[A, C])(b2c: => URLayer[B, C]): URLayer[Either[A, B], C] = {
+      val right: ZLayer[Either[A, B], A, B]                   =
+        ZLayer.fromFunctionManyM[Either[A, B], A, B] {
+          case Left(a)  => ZIO.fail(a)
+          case Right(b) => ZIO.succeed(b)
+        }
+      val unright: URLayer[(Either[A, B], Cause[A]), A]       =
+        ZLayer.fromFunctionManyM[(Either[A, B], Cause[A]), Nothing, A] { case (_, cause) =>
+          cause.failureOrCause.fold(ZIO.succeed(_), ZIO.halt(_))
+        }
+      val handleFailure: URLayer[(Either[A, B], Cause[A]), C] = unright >>> a2c
+      right.fold(handleFailure, b2c)
+    }
+
+    def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] =
+      AssociativeCompose.URLayerIdentityCompose.compose(bc, ab)
+  }
+
+  implicit val URManagedEitherCompose: EitherCompose[URManaged] = new EitherCompose[URManaged] {
+
+    type :+:[+l, +r] = Either[l, r]
+
+    def toLeft[A]: URManaged[A, Either[A, Nothing]] = ZManaged.access(Left(_))
+
+    def toRight[B]: URManaged[B, Either[Nothing, B]] = ZManaged.access(Right(_))
+
+    def fromEither[A, B, C](a2c: => URManaged[A, C])(b2c: => URManaged[B, C]): URManaged[Either[A, B], C] =
+      a2c ||| b2c
+
+    def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] =
+      AssociativeCompose.URManagedIdentityCompose.compose(bc, ab)
   }
 }
 
