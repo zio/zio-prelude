@@ -59,6 +59,7 @@ Beyond this there are not a lot of operators on the `Equivalence` data type itse
 In particular, if we have what we believe to be an equivalence relationship between two types `A` and `B` ZIO Prelude makes it easy for us to test this.
 
 ```scala mdoc
+import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
@@ -69,7 +70,7 @@ object EquivalenceSpec extends DefaultRunnableSpec {
       implicit val equivalence = listChunkEquivalence[Int]
       val listGen = Gen.listOf(Gen.anyInt)
       val chunkGen = Gen.chunkOf(Gen.anyInt)
-      checkAllLaws(Equivalence)(listGen, chunkGen)
+      checkAllLaws(EquivalenceLaws)(listGen, chunkGen)
     }
   }
 }

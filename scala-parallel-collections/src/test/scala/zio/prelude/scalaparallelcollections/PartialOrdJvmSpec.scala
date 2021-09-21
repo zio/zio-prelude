@@ -2,6 +2,7 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
+import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
@@ -22,8 +23,8 @@ object PartialOrdJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("EqualJvmSpec")(
       suite("laws")(
-        test("parMap")(checkAllLaws(PartialOrd)(Gen.mapOf(Gen.anyInt, Gen.anyInt).map(_.par))),
-        test("parSet")(checkAllLaws(PartialOrd)(Gen.setOf(Gen.anyInt).map(_.par)))
+        test("parMap")(checkAllLaws(PartialOrdLaws)(Gen.mapOf(Gen.anyInt, Gen.anyInt).map(_.par))),
+        test("parSet")(checkAllLaws(PartialOrdLaws)(Gen.setOf(Gen.anyInt).map(_.par)))
       )
     )
 }

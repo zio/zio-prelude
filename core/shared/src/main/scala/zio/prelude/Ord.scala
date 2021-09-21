@@ -18,8 +18,6 @@ package zio.prelude
 
 import zio.prelude.Equal._
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, tailrec}
@@ -134,46 +132,7 @@ trait Ord[-A] extends PartialOrd[A] { self =>
     }
 }
 
-object Ord extends Lawful[Ord] {
-
-  /**
-   * For all values `a1` and `a2`, `a1` is less than or equal to `a2` or `a2`
-   * is less than or equal to `a1`.
-   */
-  lazy val connexityLaw1: Laws[Ord] =
-    new Laws.Law2[Ord]("connexityLaw1") {
-      def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 lessOrEqual a2) || (a2 lessOrEqual a1)
-    }
-
-  /**
-   * For all values `a1` and `a2`, `a1` is greater than or equal to `a2` or
-   * `a2` is greater than or equal to `a1`.
-   */
-  lazy val connexityLaw2: Laws[Ord] =
-    new Laws.Law2[Ord]("connexityLaw2") {
-      def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 greaterOrEqual a2) || (a2 greaterOrEqual a1)
-    }
-
-  /**
-   * For all values `a1` and `a2`, `a1` is less than or equal to `a2` if and
-   * only if `a2` is greater than or equal to `a1`.
-   */
-  lazy val complementLaw: Laws[Ord] =
-    new Laws.Law2[Ord]("complementLaw") {
-      def apply[A: Ord](a1: A, a2: A): TestResult =
-        (a1 lessOrEqual a2) <==> (a2 greaterOrEqual a1)
-    }
-
-  /**
-   * The set of all laws that instances of `Ord` must satisfy.
-   */
-  lazy val laws: Laws[Ord] =
-    connexityLaw1 +
-      connexityLaw2 +
-      complementLaw +
-      PartialOrd.laws
+object Ord {
 
   def fromScala[A](implicit ordering: sm.Ordering[A]): Ord[A] =
     (l: A, r: A) => Ordering.fromCompare(ordering.compare(l, r))

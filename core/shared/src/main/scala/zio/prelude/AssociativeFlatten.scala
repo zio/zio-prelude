@@ -17,10 +17,7 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.AssociativeFlattenCovariantDeriveEqual
 import zio.stream.ZStream
-import zio.test.TestResult
-import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
@@ -43,23 +40,7 @@ trait AssociativeFlatten[F[+_]] {
   def flatten[A](ffa: F[F[A]]): F[A]
 }
 
-object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] {
-
-  /**
-   * For all `fffa`, `flatten(flatten(fffa))` is equivalent to
-   * `flatten(fffa.map(flatten))`.
-   */
-  lazy val associativityLaw: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
-    new LawsF.Covariant.FlattenLaw[AssociativeFlattenCovariantDeriveEqual, Equal]("associativityLaw") {
-      def apply[F[+_]: AssociativeFlattenCovariantDeriveEqual, A: Equal](fffa: F[F[F[A]]]): TestResult =
-        fffa.flatten.flatten <-> fffa.map(_.flatten).flatten
-    }
-
-  /**
-   * The set of all laws that instances of `AssociativeFlatten` must satisfy.
-   */
-  lazy val laws: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
-    associativityLaw
+object AssociativeFlatten {
 
   /**
    * Summons an implicit `AssociativeFlatten[F]`.

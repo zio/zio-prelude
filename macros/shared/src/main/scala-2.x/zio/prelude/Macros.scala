@@ -6,31 +6,31 @@ import zio.prelude.ConsoleUtils._
 import scala.annotation.StaticAnnotation
 import scala.reflect.macros.whitebox
 
-final case class refinementQuote[A](refinement: Refinement[A]) extends StaticAnnotation
-final case class refinementString(string: String)              extends StaticAnnotation
+final case class assertionQuote[A](assertion: Assertion[A]) extends StaticAnnotation
+final case class assertionString(string: String)            extends StaticAnnotation
 
-trait QuotedRefinement[A] {
-  def refinement: Refinement[A]
+trait QuotedAssertion[A] {
+  def assertion: Assertion[A]
 }
 
 // Wrongly emits warnings on Scala 2.12.x https://github.com/scala/bug/issues/11918
 @silent("pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
-class Macros(val c: whitebox.Context) extends Liftables {
+private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
   import c.universe._
 
   def wrapAll_impl[F[_], A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[F[A]]): c.Expr[F[T]] = {
     val expr = value
 
-    val quotedRefinement = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+    val quotedAssertion = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
 
-    quotedRefinement match {
+    quotedAssertion match {
       case Some(_) =>
         val message =
           s"""
-             |$refinementErrorHeader
-             |You cannot use `wrapAll` if you have a refinement:
-             |${show(quotedRefinement)}
+             |$assertionErrorHeader
+             |You cannot use `wrapAll` if you have a assertion:
+             |${show(quotedAssertion)}
              |""".stripMargin
         c.abort(c.enclosingPosition, message)
       case None    =>
@@ -42,26 +42,26 @@ class Macros(val c: whitebox.Context) extends Liftables {
     value: c.Expr[A],
     values: c.Expr[A]*
   ): c.Tree = {
-    val quotedRefinement = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+    val quotedAssertion = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
 
     val allValues = value +: values
 
-    quotedRefinement match {
-      case Some(quotedRefinement) =>
-        val (refinement, code) = getRefinement[T, A](quotedRefinement)
+    quotedAssertion match {
+      case Some(quotedAssertion) =>
+        val (assertion, code) = getAssertion[T, A](quotedAssertion)
 
         val errors = allValues.flatMap { value =>
           value.tree match {
             case Literal(Constant(value)) =>
-              refinement(value.asInstanceOf[A]) match {
+              assertion(value.asInstanceOf[A]) match {
                 case Left(error) => Some(error.render(value.toString))
                 case Right(_)    => None
               }
             case _                        =>
               val message = s"""
-                               |$refinementErrorHeader
-                               |Could not validate Refinement at compile-time.
+                               |$assertionErrorHeader
+                               |Could not validate Assertion at compile-time.
                                |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrapAll(List($value, ..$values))"${Console.RESET}
                                |""".stripMargin
 
@@ -71,8 +71,8 @@ class Macros(val c: whitebox.Context) extends Liftables {
 
         if (errors.nonEmpty) {
           val message = s"""
-                           |$refinementErrorHeader
-                           |${"\u001b[2m"}refinement = ${Console.RESET + Console.YELLOW}$code${Console.RESET}
+                           |$assertionErrorHeader
+                           |${"\u001b[2m"}assertion = ${Console.RESET + Console.YELLOW}$code${Console.RESET}
                            |
                            |${errors.mkString("\n")}
                            |""".stripMargin
@@ -91,21 +91,21 @@ class Macros(val c: whitebox.Context) extends Liftables {
   def wrap_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[A]): c.Expr[T] = {
     val expr = value
 
-    val quotedRefinement = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+    val quotedAssertion = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
 
-    quotedRefinement match {
-      case Some(quotedRefinement) =>
+    quotedAssertion match {
+      case Some(quotedAssertion) =>
         expr.tree match {
           case Literal(Constant(value)) =>
-            val (refinement, code) = getRefinement[T, A](quotedRefinement)
+            val (assertion, code) = getAssertion[T, A](quotedAssertion)
 
-            refinement.apply(value.asInstanceOf[A]) match {
+            assertion.apply(value.asInstanceOf[A]) match {
               case Left(error) =>
                 val message =
                   s"""
-                     |$refinementErrorHeader
-                     |${"\u001b[2m"}refinement = ${Console.RESET + Console.YELLOW}$code${Console.RESET}
+                     |$assertionErrorHeader
+                     |${"\u001b[2m"}assertion = ${Console.RESET + Console.YELLOW}$code${Console.RESET}
                      |
                      |${error.render(value.toString)}
                      |""".stripMargin
@@ -119,8 +119,8 @@ class Macros(val c: whitebox.Context) extends Liftables {
           case _ =>
             val message =
               s"""
-                 |$refinementErrorHeader
-                 |Could not validate Refinement at compile-time.
+                 |$assertionErrorHeader
+                 |Could not validate Assertion at compile-time.
                  |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrap($expr)"${Console.RESET}
                  |""".stripMargin
 
@@ -137,15 +137,15 @@ class Macros(val c: whitebox.Context) extends Liftables {
   def make_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[A]): c.Tree = {
     val expr = value
 
-    val quotedRefinement = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+    val quotedAssertion = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
 
-    quotedRefinement match {
-      case Some(quotedRefinement) =>
+    quotedAssertion match {
+      case Some(quotedAssertion) =>
         val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)"
         q"""
 _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
-  $quotedRefinement.refinement.apply($value)
+  $quotedAssertion.assertion.apply($value)
     .left.map(e => _root_.zio.NonEmptyChunk.fromCons(e.toNel($value.toString)))
 }.as($result)
 """
@@ -163,16 +163,16 @@ _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
     val expr = value
     val _    = forall
 
-    val quotedRefinement = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedRefinement[_]])
+    val quotedAssertion = c.prefix.actualType.decls
+      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
 
-    quotedRefinement match {
-      case Some(quotedRefinement) =>
+    quotedAssertion match {
+      case Some(quotedAssertion) =>
         val result = q"_root_.zio.prelude.Newtype.unsafeWrapAll(${c.prefix}, $expr)"
         q"""
 $forall.forEach($value) { value =>
   _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
-    $quotedRefinement.refinement.apply(value)
+    $quotedAssertion.assertion.apply(value)
       .left.map(e => _root_.zio.NonEmptyChunk.fromCons(e.toNel(value.toString)))
   }
 }.as($result)
@@ -186,66 +186,66 @@ $forall.forEach($value) { value =>
 
   }
 
-  def refine_impl[A: c.WeakTypeTag](refinement: c.Tree): c.Tree = {
-    val (_, _, codeString) = text(refinement)
+  def refine_impl[A: c.WeakTypeTag](assertion: c.Tree): c.Tree = {
+    val (_, _, codeString) = text(assertion)
     q"""
-new _root_.zio.prelude.QuotedRefinement[${c.weakTypeOf[A]}] {
-  @_root_.zio.prelude.refinementQuote($refinement)
-  @_root_.zio.prelude.refinementString($codeString)
+new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
+  @_root_.zio.prelude.assertionQuote($assertion)
+  @_root_.zio.prelude.assertionString($codeString)
   def magic = 42
   
-  def refinement = $refinement
+  def assertion = $assertion
 }
        """
   }
 
-  private def getRefinement[T: c.WeakTypeTag, A: c.WeakTypeTag](
-    quotedRefinement: c.universe.Symbol
-  ): (Refinement[A], String) = {
-    val trees = quotedRefinement.typeSignature.resultType.decls
+  private def getAssertion[T: c.WeakTypeTag, A: c.WeakTypeTag](
+    quotedAssertion: c.universe.Symbol
+  ): (Assertion[A], String) = {
+    val trees = quotedAssertion.typeSignature.resultType.decls
       .flatMap(_.annotations)
       .flatMap(_.tree.children.lastOption)
 
-    val maybeRefinement: Option[Refinement[A]] = trees.collectFirst { case q"${refinement: Refinement[A]}" =>
-      refinement
+    val maybeAssertion: Option[Assertion[A]] = trees.collectFirst { case q"${assertion: Assertion[A]}" =>
+      assertion
     }
 
     val maybeCodeString: Option[String] = trees.collectFirst { case q"${string: String}" =>
       string
     }
 
-    (maybeRefinement, maybeCodeString) match {
-      case (Some(refinement), Some(code)) =>
-        (refinement, code)
-      case _                              =>
+    (maybeAssertion, maybeCodeString) match {
+      case (Some(assertion), Some(code)) =>
+        (assertion, code)
+      case _                             =>
         val signatureExample =
-          yellow("def refinement: ") + underlined(yellow(s"QuotedAssertion[${weakTypeOf[A]}]")) +
-            yellow(" = refine(...)")
+          yellow("def assertion: ") + underlined(yellow(s"QuotedAssertion[${weakTypeOf[A]}]")) +
+            yellow(" = assert(...)")
         val message          =
           s"""
-             |$refinementErrorHeader
-             |We were unable to read your refinement at compile-time.
+             |$assertionErrorHeader
+             |We were unable to read your assertion at compile-time.
              |This could be for one of two reasons:
              |
-             | ${red("1.")} You have annotated `def refinement` with its type signature.
+             | ${red("1.")} You have annotated `def assertion` with its type signature.
              |      $signatureExample
-             |    
+             |   
              |    Due to the macro machinery powering this feature, you ${red("MUST NOT ANNOTATE")} this method. 
              |    ${underlined("Try deleting the type annotation and recompiling.")}
              |    
-             | ${red("2.")} You have defined your Refinement in a way that cannot be read at compile-time.
-             |    Due to the limitations of macros, refinements cannot be abstracted into other definitions.
+             | ${red("2.")} You have defined your Assertion in a way that cannot be read at compile-time.
+             |    Due to the limitations of macros, assertions cannot be abstracted into other definitions.
              |    Make certain your definition looks something like this:
-             |      ${yellow("import zio.prelude.Refinement._")}
-             |      ${yellow("def refinement = refine(greaterThan(40) && lessThan(80))")}
+             |      ${yellow("import zio.prelude.Assertion._")}
+             |      ${yellow("def assertion = assert(greaterThan(40) && lessThan(80))")}
              |      
              |""".stripMargin
         c.abort(c.enclosingPosition, message)
     }
   }
 
-  private val refinementErrorHeader =
-    s"${Console.BOLD + Console.RED + Console.REVERSED} Newtype Refinement Failed ${Console.RESET}"
+  private val assertionErrorHeader =
+    s"${Console.BOLD + Console.RED + Console.REVERSED} Newtype Assertion Failed ${Console.RESET}"
 
   // Pilfered (with immense gratitude & minor modifications)
   // from https://github.com/com-lihaoyi/sourcecode
