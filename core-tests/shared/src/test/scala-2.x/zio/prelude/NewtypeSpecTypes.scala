@@ -86,7 +86,7 @@ object NewtypeSpecTypes {
   object Password extends Newtype[String] {
 
     def assertion =
-      assert(Assertion.matches(literal("a").+ ~ char.between(1, 3) ~ literal("oh").*))
+      assert(Assertion.matches(literal("a").+ ~ anyChar.between(1, 3) ~ literal("oh").*))
   }
 
   // These should compile
