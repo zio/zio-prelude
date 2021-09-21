@@ -1187,25 +1187,27 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     ): ZPure[W1, compose.In, compose.Out, R1, E1, B] =
       self.flatMap(ev(_).fold(that)(a => ZPure.get[S4] *> ZPure.succeed(a)))
 
-  /**
-   * Applies the specified function if the predicate fails.
-   */
-  final def filterOrElse[W1 >: W, S3, S4 >: S3, R1 <: R, E1 >: E, A1 >: A](
-    p: A => Boolean
-  )(f: A => ZPure[W1, S3, S4, R1, E1, A1])(implicit compose: ComposeState[S1, S2, S3, S4]): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
-    self.flatMap {
-      case v if !p(v) => f(v)
-      case v          => ZPure.get[S4] *> ZPure.succeed(v)
-    }
+    /**
+     * Applies the specified function if the predicate fails.
+     */
+    final def filterOrElse[W1 >: W, S3, S4 >: S3, R1 <: R, E1 >: E, A1 >: A](
+      p: A => Boolean
+    )(
+      f: A => ZPure[W1, S3, S4, R1, E1, A1]
+    )(implicit compose: ComposeState[S1, S2, S3, S4]): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
+      self.flatMap {
+        case v if !p(v) => f(v)
+        case v          => ZPure.get[S4] *> ZPure.succeed(v)
+      }
 
-  /**
-   * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
-   * to apply if the predicate fails.
-   */
-  final def filterOrElse_[W1 >: W, S3, S4 >: S3, R1 <: R, E1 >: E, A1 >: A](p: A => Boolean)(
-    zPure: => ZPure[W1, S3, S4, R1, E1, A1]
-  )(implicit compose: ComposeState[S1, S2, S3, S4]): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
-    filterOrElse[W1, S3, S4, R1, E1, A1](p)(_ => zPure)
+    /**
+     * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
+     * to apply if the predicate fails.
+     */
+    final def filterOrElse_[W1 >: W, S3, S4 >: S3, R1 <: R, E1 >: E, A1 >: A](p: A => Boolean)(
+      zPure: => ZPure[W1, S3, S4, R1, E1, A1]
+    )(implicit compose: ComposeState[S1, S2, S3, S4]): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
+      filterOrElse[W1, S3, S4, R1, E1, A1](p)(_ => zPure)
 
     /**
      * Combines this computation with the specified computation, passing the
