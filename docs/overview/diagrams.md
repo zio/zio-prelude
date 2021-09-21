@@ -354,7 +354,7 @@ classDiagram
     Double
     Either[A: Hash, B: Hash]
     F[A: Hash]: Derive[_, Hash]
-    Fiber.Id
+    FiberId
     Float
     Int
     List[A: Hash]
@@ -426,7 +426,7 @@ classDiagram
     Double
     Either[A: Ord, B: Ord]
     F[A: Ord]: Derive[_, Ord]
-    Fiber.Id
+    FiberId
     Float
     Int
     List[A: Ord]

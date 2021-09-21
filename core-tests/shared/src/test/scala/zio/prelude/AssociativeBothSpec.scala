@@ -14,7 +14,7 @@ object AssociativeBothSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("AssociativeBothSpec")(
       suite("laws")(
-        test("chunk . option")(checkAllLaws(AssociativeBothLaws)(chunkOptionGenF, Gen.anyInt))
+        test("chunk . option")(checkAllLaws(AssociativeBothLaws)(chunkOptionGenF, Gen.int))
       )
     )
 }

@@ -24,14 +24,14 @@ object HashJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("HashJvmSpec")(
       suite("laws")(
-        test("parMap")(checkAllLaws(HashLaws)(Gen.mapOf(Gen.anyInt, Gen.anyInt).map(_.par))),
-        test("parSeq")(checkAllLaws(HashLaws)(Gen.listOf(Gen.anyInt).map(_.par))),
-        test("parSet")(checkAllLaws(HashLaws)(Gen.setOf(Gen.anyInt).map(_.par)))
+        test("parMap")(checkAllLaws(HashLaws)(Gen.mapOf(Gen.int, Gen.int).map(_.par))),
+        test("parSeq")(checkAllLaws(HashLaws)(Gen.listOf(Gen.int).map(_.par))),
+        test("parSet")(checkAllLaws(HashLaws)(Gen.setOf(Gen.int).map(_.par)))
       ),
       suite("ScalaHashCode consistency")(
-        test("parMap")(scalaHashCodeConsistency(Gen.mapOf(Gen.anyInt, Gen.anyInt).map(_.par))),
-        test("parSeq")(scalaHashCodeConsistency(Gen.listOf(Gen.anyInt).map(_.par))),
-        test("parSet")(scalaHashCodeConsistency(Gen.setOf(Gen.anyInt).map(_.par)))
+        test("parMap")(scalaHashCodeConsistency(Gen.mapOf(Gen.int, Gen.int).map(_.par))),
+        test("parSeq")(scalaHashCodeConsistency(Gen.listOf(Gen.int).map(_.par))),
+        test("parSet")(scalaHashCodeConsistency(Gen.setOf(Gen.int).map(_.par)))
       )
     )
 }

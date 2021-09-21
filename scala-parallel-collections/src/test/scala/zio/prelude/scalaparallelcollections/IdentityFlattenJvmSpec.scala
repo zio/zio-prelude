@@ -32,7 +32,7 @@ object IdentityFlattenJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("IdentityFlattenJvmSpec")(
       suite("laws")(
-        test("parSeq")(checkAllLaws(IdentityFlattenLaws)(genParSeq, Gen.anyInt))
+        test("parSeq")(checkAllLaws(IdentityFlattenLaws)(genParSeq, Gen.int))
       )
     )
 }

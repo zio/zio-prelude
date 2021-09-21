@@ -40,8 +40,8 @@ object ForEachJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("ForEachJvmSpec")(
       suite("laws")(
-        test("parMap")(checkAllLaws(ForEachLaws)(genParMap(Gen.anyInt), Gen.anyInt)),
-        test("parSeq")(checkAllLaws(ForEachLaws)(genParSeq, Gen.anyInt))
+        test("parMap")(checkAllLaws(ForEachLaws)(genParMap(Gen.int), Gen.int)),
+        test("parSeq")(checkAllLaws(ForEachLaws)(genParSeq, Gen.int))
       )
     )
 }

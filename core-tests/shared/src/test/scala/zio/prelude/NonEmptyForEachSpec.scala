@@ -8,7 +8,7 @@ import zio.{Has, Random}
 object NonEmptyForEachSpec extends DefaultRunnableSpec {
 
   val genInt: Gen[Has[Random], Int] =
-    Gen.anyInt
+    Gen.int
 
   val genNonEmptyList: Gen[Has[Random] with Has[Sized], NonEmptyList[Int]] =
     Gens.nonEmptyListOf(genInt)
@@ -22,7 +22,7 @@ object NonEmptyForEachSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("NonEmptyForEachSpec")(
       suite("laws")(
-        test("nonEmptyChunk")(checkAllLaws(NonEmptyForEachLaws)(GenFs.nonEmptyChunk, Gen.anyInt))
+        test("nonEmptyChunk")(checkAllLaws(NonEmptyForEachLaws)(GenFs.nonEmptyChunk, Gen.int))
       ),
       suite("combinators")(
         test("max") {

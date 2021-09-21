@@ -10,9 +10,9 @@ import scala.math.abs
 
 object IdempotentSpec extends DefaultRunnableSpec {
 
-  val anyMaxInt: Gen[Has[Random], Max[Int]] = Gen.anyInt.map(Max(_))
+  val anyMaxInt: Gen[Has[Random], Max[Int]] = Gen.int.map(Max(_))
 
-  val anyOrdering: Gen[Has[Random], Ordering] = Gen.anyInt.map { n =>
+  val anyOrdering: Gen[Has[Random], Ordering] = Gen.int.map { n =>
     abs(n) % 3 match {
       case 0 => Ordering.LessThan
       case 1 => Ordering.Equals
@@ -20,7 +20,7 @@ object IdempotentSpec extends DefaultRunnableSpec {
     }
   }
 
-  val anyPartialOrdering: Gen[Has[Random], PartialOrdering] = Gen.anyInt.map { n =>
+  val anyPartialOrdering: Gen[Has[Random], PartialOrdering] = Gen.int.map { n =>
     abs(n) % 4 match {
       case 0 => Ordering.LessThan
       case 1 => Ordering.Equals
@@ -37,15 +37,15 @@ object IdempotentSpec extends DefaultRunnableSpec {
       suite("laws")(
         test("boolean conjuction")(checkAllLaws(IdempotentLaws)(Gen.boolean.map(And(_)))),
         test("boolean disjunction")(checkAllLaws(IdempotentLaws)(Gen.boolean.map(Or(_)))),
-        test("double max")(checkAllLaws(IdempotentLaws)(Gen.anyDouble.map(Max(_)))),
-        test("double min")(checkAllLaws(IdempotentLaws)(Gen.anyDouble.map(Min(_)))),
-        test("float max")(checkAllLaws(IdempotentLaws)(Gen.anyFloat.map(Max(_)))),
-        test("float min")(checkAllLaws(IdempotentLaws)(Gen.anyFloat.map(Min(_)))),
+        test("double max")(checkAllLaws(IdempotentLaws)(Gen.double.map(Max(_)))),
+        test("double min")(checkAllLaws(IdempotentLaws)(Gen.double.map(Min(_)))),
+        test("float max")(checkAllLaws(IdempotentLaws)(Gen.float.map(Max(_)))),
+        test("float min")(checkAllLaws(IdempotentLaws)(Gen.float.map(Min(_)))),
         test("map")(checkAllLaws(IdempotentLaws)(Gen.mapOf(anyMaxInt, anyMaxInt))),
         test("option")(checkAllLaws(IdempotentLaws)(Gen.option(anyMaxInt))),
         test("ordering")(checkAllLaws(IdempotentLaws)(anyOrdering)),
         test("partial ordering")(checkAllLaws(IdempotentLaws)(anyPartialOrdering)),
-        test("set")(checkAllLaws(IdempotentLaws)(Gen.setOf(Gen.anyInt))),
+        test("set")(checkAllLaws(IdempotentLaws)(Gen.setOf(Gen.int))),
         test("tuple2")(checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt))),
         test("tuple3")(
           checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt))

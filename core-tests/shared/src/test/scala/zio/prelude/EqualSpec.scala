@@ -16,7 +16,7 @@ object EqualSpec extends DefaultRunnableSpec {
         },
         test("try")(
           checkAllLaws(EqualLaws)(
-            oneOf(Gen.throwable.map(scala.util.Failure(_)), Gen.anyInt.map(scala.util.Success(_)))
+            oneOf(Gen.throwable.map(scala.util.Failure(_)), Gen.int.map(scala.util.Success(_)))
           )
         )
       ),

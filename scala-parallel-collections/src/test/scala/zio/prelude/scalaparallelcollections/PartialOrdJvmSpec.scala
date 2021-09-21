@@ -23,8 +23,8 @@ object PartialOrdJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("EqualJvmSpec")(
       suite("laws")(
-        test("parMap")(checkAllLaws(PartialOrdLaws)(Gen.mapOf(Gen.anyInt, Gen.anyInt).map(_.par))),
-        test("parSet")(checkAllLaws(PartialOrdLaws)(Gen.setOf(Gen.anyInt).map(_.par)))
+        test("parMap")(checkAllLaws(PartialOrdLaws)(Gen.mapOf(Gen.int, Gen.int).map(_.par))),
+        test("parSet")(checkAllLaws(PartialOrdLaws)(Gen.setOf(Gen.int).map(_.par)))
       )
     )
 }

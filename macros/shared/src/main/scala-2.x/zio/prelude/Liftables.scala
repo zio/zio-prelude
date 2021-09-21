@@ -40,8 +40,8 @@ trait Liftables {
     Unliftable[Assertion.Regex] {
       case q"${A(_)}.Regex.AnyChar"                                                                           =>
         Assertion.Regex.AnyChar
-      case q"${A(_)}.Regex.anyChar"                                                                           =>
-        Assertion.Regex.anyChar
+      case q"${A(_)}.Regex.char"                                                                              =>
+        Assertion.Regex.char
       case q"${A(_)}.Regex.Anything"                                                                          =>
         Assertion.Regex.Anything
       case q"${A(_)}.Regex.anything"                                                                          =>

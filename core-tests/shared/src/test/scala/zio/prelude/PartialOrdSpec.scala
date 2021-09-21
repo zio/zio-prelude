@@ -9,8 +9,8 @@ object PartialOrdSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("OrdSpec")(
       suite("laws")(
-        test("map")(checkAllLaws(PartialOrdLaws)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
-        test("set")(checkAllLaws(PartialOrdLaws)(Gen.setOf(Gen.anyInt)))
+        test("map")(checkAllLaws(PartialOrdLaws)(Gen.mapOf(Gen.int, Gen.int))),
+        test("set")(checkAllLaws(PartialOrdLaws)(Gen.setOf(Gen.int)))
       ),
       test("map compareSoft") {
         assert(Map.empty[Int, Int] compareSoft Map.empty[Int, Int])(equalTo(Ordering.Equals)) &&

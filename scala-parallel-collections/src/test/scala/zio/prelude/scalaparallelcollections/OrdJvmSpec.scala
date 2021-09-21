@@ -23,7 +23,7 @@ object OrdJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("OrdJvmSpec")(
       suite("laws")(
-        test("parSeq")(checkAllLaws(OrdLaws)(Gen.listOf(Gen.anyInt).map(_.par)))
+        test("parSeq")(checkAllLaws(OrdLaws)(Gen.listOf(Gen.int).map(_.par)))
       )
     )
 }

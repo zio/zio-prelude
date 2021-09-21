@@ -12,10 +12,10 @@ import scala.util.Try
 object ZPureSpec extends DefaultRunnableSpec {
 
   lazy val genInt: Gen[Has[Random], Int] =
-    Gen.anyInt
+    Gen.int
 
   lazy val genString: Gen[Has[Random] with Has[Sized], String] =
-    Gen.anyString
+    Gen.string
 
   lazy val genIntIntToInt: Gen[Has[Random], (Int, Int) => Int] =
     Gen.function2(genInt)
@@ -349,7 +349,7 @@ object ZPureSpec extends DefaultRunnableSpec {
             }
           },
           test("modify") {
-            check(Gen.anyInt, genIntToIntInt) { (s, f) =>
+            check(Gen.int, genIntToIntInt) { (s, f) =>
               assert(State.modify(f).run(s))(equalTo(f(s)))
             }
           },

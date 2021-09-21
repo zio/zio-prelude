@@ -14,7 +14,7 @@ object CommutativeEitherSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("CommutativeEitherSpec")(
       suite("laws")(
-        test("set")(checkAllLaws(CommutativeEitherLaws)(GenF.set, Gen.anyInt))
+        test("set")(checkAllLaws(CommutativeEitherLaws)(GenF.set, Gen.int))
       )
     )
 }

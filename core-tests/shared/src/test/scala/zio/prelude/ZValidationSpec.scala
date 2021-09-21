@@ -11,23 +11,23 @@ import zio.{Has, Random}
 object ZValidationSpec extends DefaultRunnableSpec {
 
   val genValidation: Gen[Has[Random] with Has[Sized], ZValidation[Int, Int, Int]] =
-    Gens.validation(Gen.anyInt, Gen.anyInt, Gen.anyInt)
+    Gens.validation(Gen.int, Gen.int, Gen.int)
 
   val genFValidation: GenF[Has[Random] with Has[Sized], ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
-    GenFs.validation(Gen.anyInt, Gen.anyInt)
+    GenFs.validation(Gen.int, Gen.int)
 
   val genFValidationFailure
     : GenF[Has[Random] with Has[Sized], ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
-    GenFs.validationFailure(Gen.anyInt, Gen.anyInt)
+    GenFs.validationFailure(Gen.int, Gen.int)
 
   def spec: ZSpec[Environment, Failure] = suite("ZValidationSpec")(
     suite("laws")(
-      test("associativeBoth")(checkAllLaws(AssociativeBothLaws)(genFValidation, Gen.anyInt)),
-      test("commutativeBoth")(checkAllLaws(CommutativeBothLaws)(genFValidation, Gen.anyInt)),
-      test("covariant")(checkAllLaws(CovariantLaws)(genFValidation, Gen.anyInt)),
+      test("associativeBoth")(checkAllLaws(AssociativeBothLaws)(genFValidation, Gen.int)),
+      test("commutativeBoth")(checkAllLaws(CommutativeBothLaws)(genFValidation, Gen.int)),
+      test("covariant")(checkAllLaws(CovariantLaws)(genFValidation, Gen.int)),
       test("equal")(checkAllLaws(EqualLaws)(genValidation)),
       test("hash")(checkAllLaws(HashLaws)(genValidation)),
-      test("identityBoth")(checkAllLaws(IdentityBothLaws)(genFValidation, Gen.anyInt)),
+      test("identityBoth")(checkAllLaws(IdentityBothLaws)(genFValidation, Gen.int)),
       test("partialOrd")(checkAllLaws(PartialOrdLaws)(genValidation))
     ),
     suite("ScalaHashCode consistency")(

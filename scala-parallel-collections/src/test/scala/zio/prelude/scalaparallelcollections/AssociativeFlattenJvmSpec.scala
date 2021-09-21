@@ -34,7 +34,7 @@ object AssociativeFlattenJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("AssociativeFlattenJvmSpec")(
       suite("laws")(
-        test("parMap")(checkAllLaws(AssociativeFlattenLaws)(genParMap(Gen.anyInt), Gen.anyInt))
+        test("parMap")(checkAllLaws(AssociativeFlattenLaws)(genParMap(Gen.int), Gen.int))
       )
     )
 }

@@ -13,7 +13,7 @@ object ForEachSpec extends DefaultRunnableSpec {
     Gen.boolean
 
   val genInt: Gen[Has[Random], Int] =
-    Gen.anyInt
+    Gen.int
 
   val genChunk: Gen[Has[Random] with Has[Sized], Chunk[Int]] =
     Gen.chunkOf(genInt)
@@ -45,13 +45,13 @@ object ForEachSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("ForEachSpec")(
       suite("laws")(
-        test("chunk")(checkAllLaws(ForEachLaws)(GenF.chunk, Gen.anyInt)),
-        test("chunk . option")(checkAllLaws(ForEachLaws)(chunkOptionGenF, Gen.anyInt)),
-        test("either")(checkAllLaws(ForEachLaws)(GenFs.either(Gen.anyInt), Gen.anyInt)),
-        test("list")(checkAllLaws(ForEachLaws)(GenF.list, Gen.anyInt)),
-        test("map")(checkAllLaws(ForEachLaws)(GenFs.map(Gen.anyInt), Gen.anyInt)),
-        test("option")(checkAllLaws(ForEachLaws)(GenF.option, Gen.anyInt)),
-        test("vector")(checkAllLaws(ForEachLaws)(GenF.vector, Gen.anyInt))
+        test("chunk")(checkAllLaws(ForEachLaws)(GenF.chunk, Gen.int)),
+        test("chunk . option")(checkAllLaws(ForEachLaws)(chunkOptionGenF, Gen.int)),
+        test("either")(checkAllLaws(ForEachLaws)(GenFs.either(Gen.int), Gen.int)),
+        test("list")(checkAllLaws(ForEachLaws)(GenF.list, Gen.int)),
+        test("map")(checkAllLaws(ForEachLaws)(GenFs.map(Gen.int), Gen.int)),
+        test("option")(checkAllLaws(ForEachLaws)(GenF.option, Gen.int)),
+        test("vector")(checkAllLaws(ForEachLaws)(GenF.vector, Gen.int))
       ),
       suite("combinators")(
         test("contains") {

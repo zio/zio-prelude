@@ -22,7 +22,7 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("NonEmptySetSpec")(
       suite("laws")(
-        test("commutativeEither")(checkAllLaws(CommutativeEitherLaws)(GenFs.nonEmptySet, Gen.anyInt)),
+        test("commutativeEither")(checkAllLaws(CommutativeEitherLaws)(GenFs.nonEmptySet, Gen.int)),
         test("commutative")(checkAllLaws(CommutativeLaws)(genNonEmptySet)),
         test("idempotent")(checkAllLaws(IdempotentLaws)(genNonEmptySet)),
         test("hash")(checkAllLaws(HashLaws)(genNonEmptySet))

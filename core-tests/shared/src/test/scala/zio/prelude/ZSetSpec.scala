@@ -38,7 +38,7 @@ object ZSetSpec extends DefaultRunnableSpec {
     suite("ZSetSpec")(
       suite("laws")(
         test("combine commutative")(
-          checkAllLaws(CommutativeLaws)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
+          checkAllLaws(CommutativeLaws)(genZSet(Gen.int, Gen.int).map(_.transform(Sum(_))))
         ),
         test("covariant")(
           checkAllLaws[
@@ -48,7 +48,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             Has[Random] with Has[Sized] with Has[TestConfig],
             ({ type lambda[+x] = ZSet[x, Int] })#lambda,
             Int
-          ](CovariantLaws)(genFZSet(Gen.anyInt), Gen.anyInt)(
+          ](CovariantLaws)(genFZSet(Gen.int), Gen.int)(
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
               ZSetCovariant(IntSumCommutativeInverse),
@@ -65,7 +65,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             Has[Random] with Has[Sized] with Has[TestConfig],
             MultiSet,
             Int
-          ](ForEachLaws)(genFZSet(naturals), Gen.anyInt)(
+          ](ForEachLaws)(genFZSet(naturals), Gen.int)(
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             DeriveEqualForEach.derive[MultiSet](
               ZSetDeriveEqual(IntHashOrd, Identity[Sum[Natural]]),
@@ -74,7 +74,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             IntHashOrd
           )
         ),
-        test("hash")(checkAllLaws(HashLaws)(genZSet(Gen.anyInt, Gen.anyInt)))
+        test("hash")(checkAllLaws(HashLaws)(genZSet(Gen.int, Gen.int)))
       ),
       suite("methods")(
         test("zipWith") {
@@ -85,28 +85,28 @@ object ZSetSpec extends DefaultRunnableSpec {
       ),
       suite("set")(
         test("diff") {
-          check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
+          check(Gen.setOf(Gen.int), Gen.setOf(Gen.int)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) &~ ZSet.fromSet(r)).toSet
             val expected = l &~ r
             assert(actual)(equalTo(expected))
           }
         },
         test("flatMap") {
-          check(Gen.setOf(Gen.anyInt), Gen.function(Gen.setOf(Gen.anyInt))) { (as, f) =>
+          check(Gen.setOf(Gen.int), Gen.function(Gen.setOf(Gen.int))) { (as, f) =>
             val actual   = ZSet.fromSet(as).flatMap(a => ZSet.fromSet(f(a))).toSet
             val expected = as.flatMap(f)
             assert(actual)(equalTo(expected))
           }
         },
         test("intersect") {
-          check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
+          check(Gen.setOf(Gen.int), Gen.setOf(Gen.int)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) & ZSet.fromSet(r)).toSet
             val expected = l & r
             assert(actual)(equalTo(expected))
           }
         },
         test("union") {
-          check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
+          check(Gen.setOf(Gen.int), Gen.setOf(Gen.int)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) | ZSet.fromSet(r)).toSet
             val expected = l | r
             assert(actual)(equalTo(expected))

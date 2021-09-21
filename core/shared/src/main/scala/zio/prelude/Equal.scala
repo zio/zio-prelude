@@ -18,7 +18,7 @@ package zio.prelude
 
 import zio.Exit.{Failure, Success}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.{Cause, Chunk, Duration => ZIODuration, Exit, Fiber, NonEmptyChunk, ZTrace}
+import zio.{Cause, Chunk, Duration => ZIODuration, Exit, FiberId, NonEmptyChunk, ZTrace}
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.duration.{Duration => ScalaDuration}
@@ -300,10 +300,10 @@ object Equal {
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
-   * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
+   * `Hash` and `Ord` and (and thus also `Equal`) instance for `FiberId` values.
    */
-  implicit lazy val FiberIdHashOrd: Hash[Fiber.Id] with Ord[Fiber.Id] =
-    HashOrd.derive[(Long, Long)].contramap[Fiber.Id](fid => (fid.startTimeMillis, fid.seqNumber))
+  implicit lazy val FiberIdHashOrd: Hash[FiberId] with Ord[FiberId] =
+    HashOrd.derive[(Long, Long)].contramap[FiberId](fid => (fid.startTimeMillis, fid.seqNumber))
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.

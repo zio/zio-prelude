@@ -47,12 +47,12 @@ object NonEmptyListSpec extends DefaultRunnableSpec {
     suite("NonEmptyListSpec")(
       suite("laws")(
         test("associative")(checkAllLaws(AssociativeLaws)(genNonEmptyList)),
-        test("associativeEither")(checkAllLaws(AssociativeEitherLaws)(GenFs.nonEmptyList, Gen.anyInt)),
-        test("commutativeBoth")(checkAllLaws(CommutativeBothLaws)(GenFs.nonEmptyList, Gen.anyInt)),
+        test("associativeEither")(checkAllLaws(AssociativeEitherLaws)(GenFs.nonEmptyList, Gen.int)),
+        test("commutativeBoth")(checkAllLaws(CommutativeBothLaws)(GenFs.nonEmptyList, Gen.int)),
         test("hash")(checkAllLaws(HashLaws)(genNonEmptyList)),
-        test("identityBoth")(checkAllLaws(IdentityBothLaws)(GenFs.nonEmptyList, Gen.anyInt)),
-        test("identityFlatten")(checkAllLaws(IdentityFlattenLaws)(GenFs.nonEmptyList, Gen.anyInt)),
-        test("nonEmptyForEach")(checkAllLaws(NonEmptyForEachLaws)(GenFs.nonEmptyList, Gen.anyInt)),
+        test("identityBoth")(checkAllLaws(IdentityBothLaws)(GenFs.nonEmptyList, Gen.int)),
+        test("identityFlatten")(checkAllLaws(IdentityFlattenLaws)(GenFs.nonEmptyList, Gen.int)),
+        test("nonEmptyForEach")(checkAllLaws(NonEmptyForEachLaws)(GenFs.nonEmptyList, Gen.int)),
         test("ord")(checkAllLaws(OrdLaws)(genNonEmptyList))
       ),
       suite("methods")(

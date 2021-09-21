@@ -55,7 +55,7 @@ object RunningAverageSpec extends DefaultRunnableSpec {
 
   def spec = suite("RunningAverageSpec") {
     test("commutative") {
-      val runningAverageGen = Gen.anyLong.zipWith(Gen.anyInt)(RunningAverage(_, _))
+      val runningAverageGen = Gen.long.zipWith(Gen.int)(RunningAverage(_, _))
       checkAllLaws(CommutativeLaws)(runningAverageGen)
     }
   }

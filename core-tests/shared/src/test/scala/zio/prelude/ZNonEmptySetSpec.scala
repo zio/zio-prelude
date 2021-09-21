@@ -33,7 +33,7 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
     suite("ZNonEmptySetSpec")(
       suite("laws")(
         test("combine commutative")(
-          checkAllLaws(CommutativeLaws)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
+          checkAllLaws(CommutativeLaws)(genZNonEmptySet(Gen.int, Gen.int).map(_.transform(Sum(_))))
         ),
         test("covariant")(
           checkAllLaws[
@@ -43,7 +43,7 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
             Has[Random] with Has[Sized] with Has[TestConfig],
             ({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda,
             Int
-          ](CovariantLaws)(genFZNonEmptySet(Gen.anyInt), Gen.anyInt)(
+          ](CovariantLaws)(genFZNonEmptySet(Gen.int), Gen.int)(
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda](
               ZNonEmptySetCovariant(IntSumCommutativeInverse),
@@ -52,7 +52,7 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
             IntHashOrd
           )
         ),
-        test("hash")(checkAllLaws(HashLaws)(genZNonEmptySet(Gen.anyInt, Gen.anyInt)))
+        test("hash")(checkAllLaws(HashLaws)(genZNonEmptySet(Gen.int, Gen.int)))
       ),
       suite("methods")(
         test("zipWith") {
@@ -78,14 +78,14 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
       ),
       suite("set")(
         test("flatMap") {
-          check(Gen.setOf1(Gen.anyInt), Gen.function(Gen.setOf1(Gen.anyInt))) { (as, f) =>
+          check(Gen.setOf1(Gen.int), Gen.function(Gen.setOf1(Gen.int))) { (as, f) =>
             val actual   = ZNonEmptySet.fromSetOption(as).get.flatMap(a => ZNonEmptySet.fromSetOption(f(a)).get).toSet
             val expected = as.flatMap(f)
             assert(actual)(equalTo(expected))
           }
         },
         test("union") {
-          check(Gen.setOf1(Gen.anyInt), Gen.setOf1(Gen.anyInt)) { (l, r) =>
+          check(Gen.setOf1(Gen.int), Gen.setOf1(Gen.int)) { (l, r) =>
             val actual   = (ZNonEmptySet.fromSetOption(l).get | ZNonEmptySet.fromSetOption(r).get).toSet
             val expected = l | r
             assert(actual)(equalTo(expected))

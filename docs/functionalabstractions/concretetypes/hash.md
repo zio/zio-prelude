@@ -52,7 +52,7 @@ object HashSpec extends DefaultRunnableSpec {
 
   def spec = suite("HashSpec") {
     test("StringHash") {
-      val stringGen = Gen.anyString
+      val stringGen = Gen.string
       checkAllLaws(HashLaws)(stringGen)
     }
   }

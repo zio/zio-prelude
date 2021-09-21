@@ -15,21 +15,21 @@ object IdentitySpec extends DefaultRunnableSpec {
       suite("laws")(
         test("boolean conjuction")(checkAllLaws(IdentityLaws)(Gen.boolean.map(And(_)))),
         test("boolean disjunction")(checkAllLaws(IdentityLaws)(Gen.boolean.map(Or(_)))),
-        test("byte multiplication")(checkAllLaws(IdentityLaws)(Gen.anyByte.map(Prod(_)))),
-        test("char multiplication")(checkAllLaws(IdentityLaws)(Gen.anyChar.map(Prod(_)))),
-        test("chunk")(checkAllLaws(IdentityLaws)(Gen.chunkOf(Gen.anyInt))),
-        test("double multiplication")(checkAllLaws(IdentityLaws)(Gen.anyDouble.map(Prod(_)))),
-        test("duration ZIO")(checkAllLaws(IdentityLaws)(Gen.anyFiniteDuration)),
-        test("either")(checkAllLaws(IdentityLaws)(Gen.either(Gen.anyInt.map(Sum(_)), Gen.anyInt.map(Sum(_))))),
-        test("float multiplication")(checkAllLaws(IdentityLaws)(Gen.anyFloat.map(Prod(_)))),
-        test("int multiplication")(checkAllLaws(IdentityLaws)(Gen.anyInt.map(Prod(_)))),
-        test("list")(checkAllLaws(IdentityLaws)(Gen.listOf(Gen.anyInt))),
-        test("long multiplication")(checkAllLaws(IdentityLaws)(Gen.anyLong.map(Prod(_)))),
-        test("map")(checkAllLaws(IdentityLaws)(Gen.mapOf(Gen.anyInt, Gen.anyInt.map(Sum(_))))),
-        test("option")(checkAllLaws(IdentityLaws)(Gen.option(Gen.anyInt.map(Sum(_))))),
-        test("short multiplication")(checkAllLaws(IdentityLaws)(Gen.anyShort.map(Prod(_)))),
-        test("string")(checkAllLaws(IdentityLaws)(Gen.anyString)),
-        test("vector")(checkAllLaws(IdentityLaws)(Gen.vectorOf(Gen.anyInt)))
+        test("byte multiplication")(checkAllLaws(IdentityLaws)(Gen.byte.map(Prod(_)))),
+        test("char multiplication")(checkAllLaws(IdentityLaws)(Gen.char.map(Prod(_)))),
+        test("chunk")(checkAllLaws(IdentityLaws)(Gen.chunkOf(Gen.int))),
+        test("double multiplication")(checkAllLaws(IdentityLaws)(Gen.double.map(Prod(_)))),
+        test("duration ZIO")(checkAllLaws(IdentityLaws)(Gen.finiteDuration)),
+        test("either")(checkAllLaws(IdentityLaws)(Gen.either(Gen.int.map(Sum(_)), Gen.int.map(Sum(_))))),
+        test("float multiplication")(checkAllLaws(IdentityLaws)(Gen.float.map(Prod(_)))),
+        test("int multiplication")(checkAllLaws(IdentityLaws)(Gen.int.map(Prod(_)))),
+        test("list")(checkAllLaws(IdentityLaws)(Gen.listOf(Gen.int))),
+        test("long multiplication")(checkAllLaws(IdentityLaws)(Gen.long.map(Prod(_)))),
+        test("map")(checkAllLaws(IdentityLaws)(Gen.mapOf(Gen.int, Gen.int.map(Sum(_))))),
+        test("option")(checkAllLaws(IdentityLaws)(Gen.option(Gen.int.map(Sum(_))))),
+        test("short multiplication")(checkAllLaws(IdentityLaws)(Gen.short.map(Prod(_)))),
+        test("string")(checkAllLaws(IdentityLaws)(Gen.string)),
+        test("vector")(checkAllLaws(IdentityLaws)(Gen.vectorOf(Gen.int)))
       )
     )
 }

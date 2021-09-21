@@ -68,8 +68,8 @@ object EquivalenceSpec extends DefaultRunnableSpec {
   def spec = suite("EquivalenceSpec") {
     test("chunkListEquivalence") {
       implicit val equivalence = listChunkEquivalence[Int]
-      val listGen = Gen.listOf(Gen.anyInt)
-      val chunkGen = Gen.chunkOf(Gen.anyInt)
+      val listGen = Gen.listOf(Gen.int)
+      val chunkGen = Gen.chunkOf(Gen.int)
       checkAllLaws(EquivalenceLaws)(listGen, chunkGen)
     }
   }

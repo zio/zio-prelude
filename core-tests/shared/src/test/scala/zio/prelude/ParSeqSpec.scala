@@ -9,7 +9,7 @@ import zio.{Has, Random}
 object ParSeqSpec extends DefaultRunnableSpec {
 
   val parSeq: Gen[Has[Random] with Has[Sized], ParSeq[Unit, Int]] =
-    Gens.parSeq(Gen.unit, Gen.anyInt)
+    Gens.parSeq(Gen.unit, Gen.int)
 
   val equalparSeqs: Gen[Has[Random] with Has[Sized], (ParSeq[Unit, Int], ParSeq[Unit, Int])] =
     (parSeq <*> parSeq <*> parSeq).flatMap { case (a, b, c) =>
@@ -31,19 +31,19 @@ object ParSeqSpec extends DefaultRunnableSpec {
     suite("parSeqSpec")(
       suite("laws")(
         test("covariant") {
-          checkAllLaws(CovariantLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+          checkAllLaws(CovariantLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         },
         test("hash") {
-          checkAllLaws(HashLaws)(Gens.parSeq(Gen.unit, Gen.anyInt))
+          checkAllLaws(HashLaws)(Gens.parSeq(Gen.unit, Gen.int))
         },
         test("identityBoth") {
-          checkAllLaws(IdentityBothLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+          checkAllLaws(IdentityBothLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         },
         test("identityFlatten") {
-          checkAllLaws(IdentityFlattenLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+          checkAllLaws(IdentityFlattenLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         },
         test("forEach") {
-          checkAllLaws(ForEachLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+          checkAllLaws(ForEachLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         }
       ),
       suite("both")(
