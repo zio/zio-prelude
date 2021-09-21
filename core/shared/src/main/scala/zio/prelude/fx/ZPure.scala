@@ -111,7 +111,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * by the specified functions, `f` and `g`.
    */
   final def bimap[E1, B](f: E => E1, g: A => B)(implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, B] =
-    self.foldM(e => ZPure.fail(f(e)), a => ZPure.succeed(g(a)))
+    self.foldM(
+      e => ZPure.fail(f(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
+      a => ZPure.succeed(g(a))
+    )
 
   /**
    * Modifies the behavior of the inner computation regarding logs, so that
@@ -144,41 +147,22 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
-   * Applies the specified function if the predicate fails.
-   */
-  final def filterOrElse[W1 >: W, S3 >: S2, R1 <: R, E1 >: E, A1 >: A](
-    p: A => Boolean
-  )(f: A => ZPure[W1, S2, S3, R1, E1, A1]): ZPure[W1, S1, S3, R1, E1, A1] =
-    self.flatMap {
-      case v if !p(v) => f(v)
-      case v          => ZPure.get[S3] *> ZPure.succeed(v)
-    }
-
-  /**
-   * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
-   * to apply if the predicate fails.
-   */
-  final def filterOrElse_[W1 >: W, S3 >: S2, R1 <: R, E1 >: E, A1 >: A](p: A => Boolean)(
-    zPure: => ZPure[W1, S2, S3, R1, E1, A1]
-  ): ZPure[W1, S1, S3, R1, E1, A1] =
-    filterOrElse[W1, S3, R1, E1, A1](p)(_ => zPure)
-
-  /**
    * Fails with the specified error if the predicate fails.
    */
   final def filterOrFail[E1 >: E](p: A => Boolean)(e: => E1): ZPure[W, S1, S2, R, E1, A] =
-    filterOrElse_[W, S2, R, E1, A](p)(ZPure.get[S2] *> ZPure.fail(e))
+    self.filterOrElse_[W, S2, S2, R, E1, A](p)(ZPure.get[S2] *> ZPure.fail(e))
 
   /**
    * Swaps the error and success types of this computation.
    */
-  final def flip: ZPure[W, S1, S2, R, A, E] =
-    self.foldM(ZPure.succeed, ZPure.fail)
+  final def flip[S3 >: S2 <: S1]: ZPure[W, S3, S3, R, A, E] =
+    (self: ZPure[W, S3, S3, R, E, A]).foldM(e => ZPure.get[S3] *> ZPure.succeed(e), ZPure.fail)
 
   final def fold[S3 >: S2 <: S1, B](failure: E => B, success: A => B)(implicit
     ev: CanFail[E]
   ): ZPure[W, S3, S3, R, Nothing, B] =
-    self.foldM(e => ZPure.succeed(failure(e)), a => ZPure.succeed(success(a)))
+    (self: ZPure[W, S3, S3, R, E, A])
+      .foldM(e => ZPure.get[S3] *> ZPure.succeed(failure(e)), a => ZPure.succeed(success(a)))
 
   /**
    * Exposes the output state into the value channel.
@@ -192,7 +176,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def head[B](implicit ev: A <:< List[B]): ZPure[W, S1, S2, R, Option[E], B] =
     self.foldM(
-      e => ZPure.fail(Some(e)),
+      e => ZPure.fail(Some(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a =>
         ev(a).headOption match {
           case Some(b) => ZPure.succeed(b)
@@ -222,7 +206,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def left[B, C](implicit ev: A <:< Either[B, C]): ZPure[W, S1, S2, R, Option[E], B] =
     self.foldM(
-      e => ZPure.fail(Some(e)),
+      e => ZPure.fail(Some(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a => ev(a).fold(ZPure.succeed, _ => ZPure.fail(None))
     )
 
@@ -252,7 +236,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ev2: E <:< E1
   ): ZPure[W, S1, S2, R, E1, B] =
     self.foldM(
-      e => ZPure.fail(ev2(e)),
+      e => ZPure.fail(ev2(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a => ev(a).fold(ZPure.succeed, _ => ZPure.fail(new NoSuchElementException("Either.left.get on Right")))
     )
 
@@ -270,7 +254,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * function.
    */
   final def mapError[E1](f: E => E1)(implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
-    self.catchAll(e => ZPure.fail(f(e)))
+    self.catchAll(e => ZPure.fail(f(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)))
 
   /**
    * Returns a computation with its full cause of failure mapped using the
@@ -278,7 +262,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * preserving the original structure of the `Cause`.
    */
   final def mapErrorCause[E2](f: Cause[E] => Cause[E2]): ZPure[W, S1, S2, R, E2, A] =
-    self.foldCauseM(cause => ZPure.halt(f(cause)), ZPure.succeed)
+    self.foldCauseM(
+      cause => ZPure.halt(f(cause)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
+      ZPure.succeed
+    )
 
   /**
    * Transforms the updated state of this computation with the specified
@@ -298,7 +285,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def none[B](implicit ev: A <:< Option[B]): ZPure[W, S1, S2, R, Option[E], Unit] =
     self.foldM(
-      e => ZPure.fail(Some(e)),
+      e => ZPure.fail(Some(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a => a.fold[ZPure[W, Unit, Unit, R, Option[E], Unit]](ZPure.succeed(()))(_ => ZPure.fail(None))
     )
 
@@ -387,7 +374,9 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def refineOrDieWith[E1](pf: PartialFunction[E, E1])(f: E => Throwable)(implicit
     ev: CanFail[E]
   ): ZPure[W, S1, S2, R, E1, A] =
-    self catchAll (err => (pf lift err).fold(throw f(err))(e => ZPure.fail(e)))
+    self catchAll (err =>
+      (pf lift err).fold(throw f(err))(e => ZPure.fail(e).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)))
+    )
 
   /**
    * Fail with the returned value if the `PartialFunction` matches, otherwise
@@ -460,7 +449,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def right[B, C](implicit ev: A <:< Either[B, C]): ZPure[W, S1, S2, R, Option[E], C] =
     self.foldM(
-      e => ZPure.fail(Some(e)),
+      e => ZPure.fail(Some(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a => ev(a).fold(_ => ZPure.fail(None), ZPure.succeed)
     )
 
@@ -490,7 +479,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ev2: E <:< E1
   ): ZPure[W, S1, S2, R, E1, C] =
     self.foldM(
-      e => ZPure.fail(ev2(e)),
+      e => ZPure.fail(ev2(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a => ev(a).fold(_ => ZPure.fail(new NoSuchElementException("Either.right.get on Left")), ZPure.succeed)
     )
 
@@ -608,9 +597,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           val zPure = curZPure.asInstanceOf[ZPure.Provide[Any, Any, Any, Any, Any, Any]]
           environments.push(zPure.r.asInstanceOf[AnyRef])
           curZPure = zPure.continue.foldCauseM(
-            e => ZPure.succeed(environments.pop()) *> ZPure.halt(e),
-            a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
-          )
+            e => (ZPure.succeed(environments.pop()) *> ZPure.halt(e)).asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]],
+            a =>
+              (ZPure.succeed(environments.pop()) *> ZPure.succeed(a)).asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
+          )(implicitly, FoldState.compose)
         case ZPure.Tags.Modify  =>
           val zPure     = curZPure.asInstanceOf[ZPure.Modify[Any, Any, Any]]
           val updated   = zPure.run0(s0)
@@ -687,14 +677,14 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Exposes the full cause of failures of this computation.
    */
   final def sandbox: ZPure[W, S1, S2, R, Cause[E], A] =
-    self.foldCauseM(ZPure.fail, ZPure.succeed)
+    self.foldCauseM(e => ZPure.fail(e).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)), ZPure.succeed)
 
   /**
    * Converts an option on values into an option on errors leaving the state unchanged.
    */
   final def some[B](implicit ev: A <:< Option[B]): ZPure[W, S1, S2, R, Option[E], B] =
     self.foldM(
-      e => ZPure.fail(Some(e)),
+      e => ZPure.fail(Some(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a => a.fold[ZPure[W, Unit, Unit, R, Option[E], B]](ZPure.fail(Option.empty))(ZPure.succeed)
     )
 
@@ -784,7 +774,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Submerges the full cause of failures of this computation.
    */
   def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
-    self.foldM(e => ZPure.halt(ev(e)), a => ZPure.succeed(a))
+    self.foldM(
+      e => ZPure.halt(ev(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
+      a => ZPure.succeed(a)
+    )
 }
 
 object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
@@ -915,8 +908,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     left.foldCauseM(
       c1 =>
         right.foldCauseM(
-          c2 => ZPure.halt(c1 && c2),
-          _ => ZPure.halt(c1)
+          c2 => ZPure.get[S] *> ZPure.halt(c1 && c2),
+          _ => ZPure.get[S] *> ZPure.halt(c1)
         ),
       a => right.map(b => f(a, b))
     )
@@ -1088,7 +1081,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       f: E => ZPure[W1, S3, S4, R1, E1, A1]
     )(implicit
       ev: CanFail[E],
-      compose: FoldState[S1, S2, Unit, Unit, S3, S4]
+      compose: FoldState[S1, S2, S3, S4, Unit, Unit]
     ): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
       self.foldM(f, succeed)
 
@@ -1099,7 +1092,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       pf: PartialFunction[E, ZPure[W1, S3, S4, R1, E1, A1]]
     )(implicit
       ev: CanFail[E],
-      compose: FoldState[S1, S2, Unit, Unit, S3, S4]
+      compose: FoldState[S1, S2, S3, S4, Unit, Unit]
     ): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
       self.catchAll(pf.applyOrElse[E, ZPure[W1, S3, S4, R1, E1, A1]](_, fail0))
 
@@ -1145,8 +1138,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       self.flatMap(ev)
 
     final def foldCauseM[W1 >: W, S3, S4, S5, S6, R1 <: R, E1, B](
-      failure: Cause[E] => ZPure[W1, S5, S6, R1, E1, B],
-      success: A => ZPure[W1, S3, S4, R1, E1, B]
+      failure: Cause[E] => ZPure[W1, S3, S4, R1, E1, B],
+      success: A => ZPure[W1, S5, S6, R1, E1, B]
     )(implicit
       ev: CanFail[E],
       compose: FoldState[S1, S2, S3, S4, S5, S6]
@@ -1158,8 +1151,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
      * of an error, and one computation to execute for the case of success.
      */
     final def foldM[W1 >: W, S3, S4, S5, S6, R1 <: R, E1, B](
-      failure: E => ZPure[W1, S5, S6, R1, E1, B],
-      success: A => ZPure[W1, S3, S4, R1, E1, B]
+      failure: E => ZPure[W1, S3, S4, R1, E1, B],
+      success: A => ZPure[W1, S5, S6, R1, E1, B]
     )(implicit
       ev: CanFail[E],
       compose: FoldState[S1, S2, S3, S4, S5, S6]
@@ -1193,6 +1186,26 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       compose: ComposeState[S1, S2, S3, S4]
     ): ZPure[W1, compose.In, compose.Out, R1, E1, B] =
       self.flatMap(ev(_).fold(that)(a => ZPure.get[S4] *> ZPure.succeed(a)))
+
+  /**
+   * Applies the specified function if the predicate fails.
+   */
+  final def filterOrElse[W1 >: W, S3, S4 >: S3, R1 <: R, E1 >: E, A1 >: A](
+    p: A => Boolean
+  )(f: A => ZPure[W1, S3, S4, R1, E1, A1])(implicit compose: ComposeState[S1, S2, S3, S4]): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
+    self.flatMap {
+      case v if !p(v) => f(v)
+      case v          => ZPure.get[S4] *> ZPure.succeed(v)
+    }
+
+  /**
+   * Similar to `filterOrElse`, but instead of a function it accepts the ZPure computation
+   * to apply if the predicate fails.
+   */
+  final def filterOrElse_[W1 >: W, S3, S4 >: S3, R1 <: R, E1 >: E, A1 >: A](p: A => Boolean)(
+    zPure: => ZPure[W1, S3, S4, R1, E1, A1]
+  )(implicit compose: ComposeState[S1, S2, S3, S4]): ZPure[W1, compose.In, compose.Out, R1, E1, A1] =
+    filterOrElse[W1, S3, S4, R1, E1, A1](p)(_ => zPure)
 
     /**
      * Combines this computation with the specified computation, passing the
@@ -1361,8 +1374,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   }
   private final case class Fold[+W, S1, S2, S3, S4, S5, S6, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
-    failure: Cause[E1] => ZPure[W, S5, S6, R, E2, B],
-    success: A => ZPure[W, S3, S4, R, E2, B],
+    failure: Cause[E1] => ZPure[W, S3, S4, R, E2, B],
+    success: A => ZPure[W, S5, S6, R, E2, B],
     fold: FoldState[S1, S2, S3, S4, S5, S6]
   )                                                                  extends ZPure[W, Any, Nothing, R, E2, B]
       with Function[A, ZPure[Any, Any, Any, Any, Any, Any]] {

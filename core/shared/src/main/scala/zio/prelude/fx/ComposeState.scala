@@ -53,11 +53,6 @@ object ComposeState extends ComposeStateImplicits {
   type Out[S1, S2, S3, S4, In0, Out0] = ComposeState[S1, S2, S3, S4] { type In = In0; type Out = Out0 }
 
   /**
-   * Summons an implicit `ComposeState` instance.
-   */
-  def apply[S1, S2, S3, S4](implicit ev: ComposeState[S1, S2, S3, S4]): Out[S1, S2, S3, S4, ev.In, ev.Out] = ev
-
-  /**
    * Composes the identity function `Unit => Unit` and a state transition
    * function `S1 => S2` into a state transition function `S1 => S2`  by simply
    * ignoring the left function and returning the right function unchanged.
