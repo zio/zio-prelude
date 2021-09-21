@@ -9,11 +9,11 @@ object IdentityEitherSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("IdentityEitherSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(IdentityEitherlaws)(GenF.chunk, Gen.anyInt)),
-        testM("list")(checkAllLaws(IdentityEitherlaws)(GenF.list, Gen.anyInt)),
-        testM("option")(checkAllLaws(IdentityEitherlaws)(GenF.option, Gen.anyInt)),
-        testM("set")(checkAllLaws(IdentityEitherlaws)(GenF.set, Gen.anyInt)),
-        testM("vector")(checkAllLaws(IdentityEitherlaws)(GenF.vector, Gen.anyInt))
+        test("chunk")(checkAllLaws(IdentityEitherlaws)(GenF.chunk, Gen.anyInt)),
+        test("list")(checkAllLaws(IdentityEitherlaws)(GenF.list, Gen.anyInt)),
+        test("option")(checkAllLaws(IdentityEitherlaws)(GenF.option, Gen.anyInt)),
+        test("set")(checkAllLaws(IdentityEitherlaws)(GenF.set, Gen.anyInt)),
+        test("vector")(checkAllLaws(IdentityEitherlaws)(GenF.vector, Gen.anyInt))
       )
     )
 }

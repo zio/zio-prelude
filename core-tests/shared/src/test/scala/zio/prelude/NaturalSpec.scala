@@ -10,10 +10,10 @@ object NaturalSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("NaturalSpec")(
       suite("laws")(
-        testM("product commutative")(checkAllLaws(CommutativeLaws)(Gens.anyNatural.map(Prod(_)))),
-        testM("product identity")(checkAllLaws(IdentityLaws)(Gens.anyNatural.map(Prod(_)))),
-        testM("sum commutative")(checkAllLaws(CommutativeLaws)(Gens.anyNatural.map(Sum(_)))),
-        testM("sum inverse")(checkAllLaws(InverseLaws)(Gens.anyNatural.map(Sum(_))))
+        test("product commutative")(checkAllLaws(CommutativeLaws)(Gens.anyNatural.map(Prod(_)))),
+        test("product identity")(checkAllLaws(IdentityLaws)(Gens.anyNatural.map(Prod(_)))),
+        test("sum commutative")(checkAllLaws(CommutativeLaws)(Gens.anyNatural.map(Sum(_)))),
+        test("sum inverse")(checkAllLaws(InverseLaws)(Gens.anyNatural.map(Sum(_))))
       )
     )
 

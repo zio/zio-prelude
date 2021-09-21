@@ -14,10 +14,10 @@ object CovariantSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("CovariantSpec")(
       suite("laws")(
-        testM("cause")(checkAllLaws(CovariantLaws)(GenFs.cause, Gen.anyInt)),
-        testM("exit")(checkAllLaws(CovariantLaws)(GenFs.exit(Gen.causes(Gen.anyInt, Gen.throwable)), Gen.anyInt)),
-        testM("tuple2")(checkAllLaws(CovariantLaws)(GenFs.tuple2(Gen.anyInt), Gen.anyInt)),
-        testM("tuple3")(checkAllLaws(CovariantLaws)(GenFs.tuple3(Gen.anyInt, Gen.anyInt), Gen.anyInt))
+        test("cause")(checkAllLaws(CovariantLaws)(GenFs.cause, Gen.anyInt)),
+        test("exit")(checkAllLaws(CovariantLaws)(GenFs.exit(Gen.causes(Gen.anyInt, Gen.throwable)), Gen.anyInt)),
+        test("tuple2")(checkAllLaws(CovariantLaws)(GenFs.tuple2(Gen.anyInt), Gen.anyInt)),
+        test("tuple3")(checkAllLaws(CovariantLaws)(GenFs.tuple3(Gen.anyInt, Gen.anyInt), Gen.anyInt))
       )
     )
 }

@@ -9,11 +9,11 @@ object IdentityFlattenSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("IdentityFlattenSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(IdentityFlattenLaws)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
-        testM("either")(checkAllLaws(IdentityFlattenLaws)(GenFs.either(Gen.anyInt), Gen.anyInt)),
-        testM("list")(checkAllLaws(IdentityFlattenLaws)(GenF.list, Gen.anyInt)),
-        testM("option")(checkAllLaws(IdentityFlattenLaws)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(IdentityFlattenLaws)(GenF.vector, Gen.anyInt))
+        test("chunk")(checkAllLaws(IdentityFlattenLaws)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
+        test("either")(checkAllLaws(IdentityFlattenLaws)(GenFs.either(Gen.anyInt), Gen.anyInt)),
+        test("list")(checkAllLaws(IdentityFlattenLaws)(GenF.list, Gen.anyInt)),
+        test("option")(checkAllLaws(IdentityFlattenLaws)(GenF.option, Gen.anyInt)),
+        test("vector")(checkAllLaws(IdentityFlattenLaws)(GenF.vector, Gen.anyInt))
       )
     )
 

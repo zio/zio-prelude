@@ -9,10 +9,10 @@ object CommutativeBothSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("CommutativeBothSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(CommutativeBothLaws)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
-        testM("list")(checkAllLaws(CommutativeBothLaws)(GenF.list, Gen.anyInt)),
-        testM("option")(checkAllLaws(CommutativeBothLaws)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(CommutativeBothLaws)(GenF.vector, Gen.vectorOf(Gen.anyInt)))
+        test("chunk")(checkAllLaws(CommutativeBothLaws)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
+        test("list")(checkAllLaws(CommutativeBothLaws)(GenF.list, Gen.anyInt)),
+        test("option")(checkAllLaws(CommutativeBothLaws)(GenF.option, Gen.anyInt)),
+        test("vector")(checkAllLaws(CommutativeBothLaws)(GenF.vector, Gen.vectorOf(Gen.anyInt)))
       )
     )
 }
