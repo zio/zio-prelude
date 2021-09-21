@@ -100,7 +100,7 @@ package object newtypes {
   object Natural extends Subtype[Int] {
 
     // scalafix:off
-    def refinement = refine(Refinement.greaterThanOrEqualTo(0))
+    def assertion = assert(Assertion.greaterThanOrEqualTo(0))
     // scalafix:on
 
     val one: Natural =

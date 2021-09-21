@@ -17,9 +17,6 @@
 package zio.prelude
 
 import com.github.ghik.silencer.silent
-import zio.prelude.coherent.DeriveEqualIdentityBothInvariant
-import zio.test.TestResult
-import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 
@@ -38,40 +35,8 @@ trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
 }
 
 @silent("Unused import")
-object IdentityBoth extends LawfulF.Invariant[DeriveEqualIdentityBothInvariant, Equal] {
+object IdentityBoth {
   import zio._ // for zio.EitherCompat
-
-  /**
-   * For all `fa`, `both(identity, fa)` is equivalent to `fa`.
-   */
-  lazy val leftIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
-    new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("leftIdentityLaw") {
-      def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
-        val left  = IdentityBoth[F].both(IdentityBoth[F].any, fa)
-        val right = fa
-        val left2 = Invariant[F].invmap(Equivalence.tupleAny[A] compose Equivalence.tupleFlip).to(left)
-        left2 <-> right
-      }
-    }
-
-  /**
-   * For all `fa`, `both(fa, identity)` is equivalent to `fa`.
-   */
-  lazy val rightIdentityLaw: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
-    new LawsF.Invariant.Law1[DeriveEqualIdentityBothInvariant, Equal]("rightIdentityLaw") {
-      def apply[F[_]: DeriveEqualIdentityBothInvariant, A: Equal](fa: F[A]): TestResult = {
-        val left  = IdentityBoth[F].both(fa, IdentityBoth[F].any)
-        val right = fa
-        val left2 = Invariant[F].invmap(Equivalence.tupleAny[A]).to(left)
-        left2 <-> right
-      }
-    }
-
-  /**
-   * The set of law laws that instances of `IdentityBoth` must satisfy.
-   */
-  lazy val laws: LawsF.Invariant[DeriveEqualIdentityBothInvariant, Equal] =
-    leftIdentityLaw + rightIdentityLaw + AssociativeBoth.laws
 
   /**
    * Summons an implicit `IdentityBoth[F]`.

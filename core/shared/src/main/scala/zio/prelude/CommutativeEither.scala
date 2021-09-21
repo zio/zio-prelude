@@ -17,10 +17,7 @@
 package zio.prelude
 
 import zio.ZIO
-import zio.prelude.coherent.CommutativeEitherDeriveEqualInvariant
 import zio.stream.{ZSink, ZStream}
-import zio.test.TestResult
-import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -32,26 +29,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 @implicitNotFound("No implicit CommutativeEither defined for ${F}.")
 trait CommutativeEither[F[_]] extends AssociativeEither[F]
 
-object CommutativeEither extends LawfulF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] {
-
-  /**
-   * For all `fa` and `fb`, `either(fa, fb)` is equivalent to `either(fb, fa)`.
-   */
-  lazy val commutativeLaw: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
-    new LawsF.Invariant.Law2[CommutativeEitherDeriveEqualInvariant, Equal]("commutativeLaw") {
-      def apply[F[_]: CommutativeEitherDeriveEqualInvariant, A: Equal, B: Equal](fa: F[A], fb: F[B]): TestResult = {
-        val left  = fa.orElseEitherPar(fb)
-        val right = fb.orElseEitherPar(fa)
-        val left2 = Invariant[F].invmap(Equivalence.eitherFlip[A, B]).to(left)
-        left2 <-> right
-      }
-    }
-
-  /**
-   * The set of law laws that instances of `CommutativeEither` must satisfy.
-   */
-  lazy val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
-    commutativeLaw + AssociativeEither.laws
+object CommutativeEither {
 
   /**
    * The `CommutativeEither` instance for `Future`.

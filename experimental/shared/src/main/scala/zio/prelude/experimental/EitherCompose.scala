@@ -73,7 +73,7 @@ object EitherCompose {
 
     def fromEither[A, B, C](a2c: => URIO[A, C])(b2c: => URIO[B, C]): URIO[Either[A, B], C] = for {
       either <- ZIO.environment[Either[A, B]]
-      a1     <- either.fold(a2c.provide, b2c.provide)
+      a1     <- either.fold(a2c.provide(_), b2c.provide(_))
     } yield a1
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
@@ -84,9 +84,9 @@ object EitherCompose {
 
     type :+:[+l, +r] = Either[l, r]
 
-    def toLeft[A]: URLayer[A, Either[A, Nothing]] = ZLayer.identity[A].map(Left(_))
+    def toLeft[A]: URLayer[A, Either[A, Nothing]] = ZLayer.environment[A].map(Left(_))
 
-    def toRight[B]: URLayer[B, Either[Nothing, B]] = ZLayer.identity[B].map(Right(_))
+    def toRight[B]: URLayer[B, Either[Nothing, B]] = ZLayer.environment[B].map(Right(_))
 
     def fromEither[A, B, C](a2c: => URLayer[A, C])(b2c: => URLayer[B, C]): URLayer[Either[A, B], C] = {
       val right: ZLayer[Either[A, B], A, B]                   =
@@ -116,7 +116,7 @@ object EitherCompose {
 
     def fromEither[A, B, C](a2c: => URManaged[A, C])(b2c: => URManaged[B, C]): URManaged[Either[A, B], C] = for {
       either <- ZManaged.environment[Either[A, B]]
-      a1     <- either.fold(a2c.provide, b2c.provide)
+      a1     <- either.fold(a2c.provide(_), b2c.provide(_))
     } yield a1
 
     def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] =

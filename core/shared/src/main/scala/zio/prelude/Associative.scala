@@ -16,10 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.AssociativeEqual
 import zio.prelude.newtypes.{And, First, Last, Max, Min, Natural, Or, Prod, Sum}
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, Duration => ZIODuration, NonEmptyChunk}
 
 import scala.annotation.tailrec
@@ -68,27 +65,7 @@ trait Associative[A] {
   }
 }
 
-object Associative extends AssociativeLowPriority with Lawful[AssociativeEqual] {
-
-  /**
-   * The associativity law states that for some binary operator `*`, for all
-   * values `a1`, `a2`, and `a3`, the following must hold:
-   *
-   * {{{
-   * (a1 * a2) * a3 === a1 * (a2 * a3)
-   * }}}
-   */
-  lazy val associativityLaw: Laws[AssociativeEqual] =
-    new Laws.Law3[AssociativeEqual]("associativityLaw") {
-      def apply[A: AssociativeEqual](a1: A, a2: A, a3: A): TestResult =
-        (a1 <> (a2 <> a3)) <-> ((a1 <> a2) <> a3)
-    }
-
-  /**
-   * The set of all laws that instances of `Associative` must satisfy.
-   */
-  lazy val laws: Laws[AssociativeEqual] =
-    associativityLaw
+object Associative extends AssociativeLowPriority {
 
   /**
    * Summons an implicit `Associative[A]`.

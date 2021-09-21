@@ -44,6 +44,7 @@ For example, here is how we could test that ZIO Prelude's notions of hashing and
 
 ```scala mdoc:reset
 import zio.prelude.Hash
+import zio.prelude.laws.HashLaws
 import zio.test._
 import zio.test.laws._
 
@@ -51,8 +52,8 @@ object HashSpec extends DefaultRunnableSpec {
 
   def spec = suite("HashSpec") {
     test("StringHash") {
-      val stringGen = Gen.anyString
-      checkAllLaws(Hash)(stringGen)
+      val stringGen = Gen.string
+      checkAllLaws(HashLaws)(stringGen)
     }
   }
 }

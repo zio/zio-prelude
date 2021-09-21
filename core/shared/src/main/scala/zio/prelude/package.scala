@@ -18,11 +18,9 @@ package zio
 
 import com.github.ghik.silencer.silent
 import zio.prelude.newtypes.Natural
-import zio.test.{TestResult, assert}
 
 package object prelude
-    extends Assertions
-    with AssociativeSyntax
+    extends AssociativeSyntax
     with AssociativeBothSyntax
     with AssociativeComposeSyntax
     with AssociativeEitherSyntax
@@ -31,26 +29,26 @@ package object prelude
     with CommutativeBothSyntax
     with CommutativeEitherSyntax
     with ConstExports
-    with CovariantSyntax
     with ContravariantSyntax
+    with CovariantSyntax
     with DebugSyntax
     with DivariantSyntax
     with EqualSyntax
+    with ForEachSyntax
     with HashSyntax
     with IdExports
-    with IdentitySyntax
     with IdentityBothSyntax
     with IdentityEitherSyntax
+    with IdentitySyntax
     with InvariantSyntax
     with InverseSyntax
     with NewtypeExports
     with NewtypeFExports
+    with NonEmptyForEachSyntax
     with NonEmptyListSyntax
     with NonEmptySetSyntax
-    with NonEmptyForEachSyntax
     with OrdSyntax
     with PartialOrdSyntax
-    with ForEachSyntax
     with ZNonEmptySetSyntax
     with ZSetSyntax
     with ZivariantSyntax {
@@ -138,25 +136,6 @@ package object prelude
     type Category[=>:[-_, +_]]   = IdentityCompose[=>:]
     type Profunctor[=>:[-_, +_]] = Divariant[=>:]
     type Bifunctor[=>:[+_, +_]]  = Bicovariant[=>:]
-  }
-
-  /**
-   * Provides implicit syntax for assertions.
-   */
-  implicit class AssertionSyntax[A](private val self: A) extends AnyVal {
-    def <->[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult       =
-      isEqualTo(that)
-    // name intentionally different from other methods (`equal`, `equalTo`, etc to avoid confusing compiler errors)
-    def isEqualTo[A1 >: A](that: A1)(implicit eq: Equal[A1]): TestResult =
-      assert(self)(equalTo(that))
-    def greater(that: A)(implicit ord: PartialOrd[A]): TestResult        =
-      assert(self)(isGreaterThan(that))
-    def greaterOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult =
-      assert(self)(isGreaterThanEqualTo(that))
-    def less(that: A)(implicit ord: PartialOrd[A]): TestResult           =
-      assert(self)(isLessThan(that))
-    def lessOrEqual(that: A)(implicit ord: PartialOrd[A]): TestResult    =
-      assert(self)(isLessThanEqualTo(that))
   }
 
   implicit class MapSyntax[K, V](private val l: Map[K, V]) extends AnyVal {

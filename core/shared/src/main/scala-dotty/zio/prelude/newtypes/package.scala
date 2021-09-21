@@ -99,8 +99,8 @@ package object newtypes {
 
   object Natural extends Subtype[Int] {
 
-    override inline def refinement: Refinement[Int] =
-      Refinement.greaterThanOrEqualTo(0)
+    override inline def assertion: Assertion[Int] =
+      Assertion.greaterThanOrEqualTo(0)
 
     val one: Natural =
       Natural(1)

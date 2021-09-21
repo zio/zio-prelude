@@ -47,11 +47,11 @@ object AssociativeCompose {
   implicit val URIOIdentityCompose: IdentityCompose[URIO] = new IdentityCompose[URIO] {
     def identity[A]: URIO[A, A] = URIO.environment
 
-    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab.flatMap(bc.provide)
+    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab.flatMap(bc.provide(_))
   }
 
   implicit val URLayerIdentityCompose: IdentityCompose[URLayer] = new IdentityCompose[URLayer] {
-    def identity[A]: URLayer[A, A] = ZLayer.identity
+    def identity[A]: URLayer[A, A] = ZLayer.environment
 
     def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] = ab >>> bc
   }
@@ -59,7 +59,7 @@ object AssociativeCompose {
   implicit val URManagedIdentityCompose: IdentityCompose[URManaged] = new IdentityCompose[URManaged] {
     def identity[A]: URManaged[A, A] = ZManaged.environment
 
-    def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] = ab.flatMap(bc.provide)
+    def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] = ab.flatMap(bc.provide(_))
   }
 }
 

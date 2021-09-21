@@ -2,6 +2,7 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
+import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 import zio.{Has, Random}
@@ -33,7 +34,7 @@ object AssociativeFlattenJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("AssociativeFlattenJvmSpec")(
       suite("laws")(
-        test("parMap")(checkAllLaws(AssociativeFlatten)(genParMap(Gen.anyInt), Gen.anyInt))
+        test("parMap")(checkAllLaws(AssociativeFlattenLaws)(genParMap(Gen.int), Gen.int))
       )
     )
 }

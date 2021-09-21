@@ -18,9 +18,7 @@ package zio.prelude
 
 import zio.Exit.{Failure, Success}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
-import zio.{Cause, Chunk, Duration => ZIODuration, Exit, Fiber, NonEmptyChunk, ZTrace}
+import zio.{Cause, Chunk, Duration => ZIODuration, Exit, FiberId, NonEmptyChunk, ZTrace}
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.duration.{Duration => ScalaDuration}
@@ -106,42 +104,7 @@ trait Equal[-A] { self =>
   def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
-object Equal extends Lawful[Equal] {
-
-  /**
-   * For all values `a1`, `a1` is equal to `a1`.
-   */
-  lazy val reflexiveLaw: Laws.Law1[Equal] =
-    new Laws.Law1[Equal]("reflexiveLaw") {
-      def apply[A: Equal](a1: A): TestResult =
-        a1 <-> a1
-    }
-
-  /**
-   * For all values `a1` and `a2`, if `a1` is equal to `a2` then `a2` is equal
-   * to `a1`.
-   */
-  lazy val symmetryLaw: Laws.Law2[Equal] =
-    new Laws.Law2[Equal]("symmetryLaw") {
-      def apply[A: Equal](a1: A, a2: A): TestResult =
-        (a1 <-> a2) ==> (a2 <-> a1)
-    }
-
-  /**
-   * For all values `a1`, `a2`, and `a3`, if `a1` is equal to `a2` and `a2` is
-   * equal `a3`, then `a1` is equal to `a3`.
-   */
-  lazy val transitivityLaw: Laws.Law3[Equal] =
-    new Laws.Law3[Equal]("transitivityLaw") {
-      def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
-        ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
-    }
-
-  /**
-   * The set of all laws that instances of `Equal` must satisfy.
-   */
-  lazy val laws: Laws[Equal] =
-    reflexiveLaw + symmetryLaw + transitivityLaw
+object Equal {
 
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
@@ -337,10 +300,10 @@ object Equal extends Lawful[Equal] {
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
-   * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
+   * `Hash` and `Ord` and (and thus also `Equal`) instance for `FiberId` values.
    */
-  implicit lazy val FiberIdHashOrd: Hash[Fiber.Id] with Ord[Fiber.Id] =
-    HashOrd.derive[(Long, Long)].contramap[Fiber.Id](fid => (fid.startTimeMillis, fid.seqNumber))
+  implicit lazy val FiberIdHashOrd: Hash[FiberId] with Ord[FiberId] =
+    HashOrd.derive[(Long, Long)].contramap[FiberId](fid => (fid.startTimeMillis, fid.seqNumber))
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
