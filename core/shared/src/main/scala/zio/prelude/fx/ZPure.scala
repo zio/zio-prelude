@@ -1,8 +1,24 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude.fx
 
 import com.github.ghik.silencer.silent
 import zio.internal.{Stack, StackBool}
-import zio.prelude.{CommutativeBoth, Covariant, ForEach, IdentityBoth, IdentityFlatten, Validation, ZValidation}
+import zio.prelude._
 import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
 
 import scala.annotation.{implicitNotFound, switch}
@@ -335,7 +351,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3)(implicit
     ev: CanFail[E]
   ): ZPure[W, S1, S3, R, Nothing, A1] =
-    orElse(ZPure.get[S1] *> ZPure.succeed(a1).mapState(_ => s3))
+    (self: ZPure[W, S1, S3, R, E, A1]).foldM(_ => ZPure.update[S1, S3](_ => s3) *> ZPure.succeed(a1), ZPure.succeed)
 
   /**
    * Provides this computation with its required environment.
@@ -689,15 +705,6 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     map(_.getOrElse(default))
 
   /**
-   * Extracts the optional value or runs the specified computation passing the
-   * updated state from this computation.
-   */
-  final def someOrElseM[W1 >: W, S3 >: S2, R1 <: R, E1 >: E, B](
-    that: ZPure[W1, S2, S3, R1, E1, B]
-  )(implicit ev: A <:< Option[B]): ZPure[W1, S1, S3, R1, E1, B] =
-    self.flatMap(ev(_).fold(that)(a => ZPure.get[S3] *> ZPure.succeed(a)))
-
-  /**
    * Extracts the optional value or fails with the given error 'e'.
    */
   final def someOrFail[B, E1 >: E](e: => E1)(implicit ev: A <:< Option[B]): ZPure[W, S1, S2, R, E1, B] =
@@ -933,10 +940,12 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation that may fail from the specified modify function.
    */
   def modifyEither[S1, S2, E, A](f: S1 => Either[E, (S2, A)]): ZPure[Nothing, S1, S2, Any, E, A] =
-    get.map(f).flatMap {
-      case Left(e)        => ZPure.fail(e).asInstanceOf[ZPure[Nothing, Any, Nothing, Any, E, A]]
-      case Right((s2, a)) => ZPure.succeed(a).asState(s2)
-    }
+    for {
+      s      <- ZPure.get[S1]
+      tuple  <- ZPure.fromEither(f(s))
+      (s2, a) = tuple
+      _      <- ZPure.set(s2)
+    } yield a
 
   /**
    * Constructs a computation that extracts the second element of a tuple.
@@ -1174,6 +1183,18 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       }
 
     /**
+     * Extracts the optional value or runs the specified computation passing the
+     * updated state from this computation.
+     */
+    final def someOrElseM[W1 >: W, S3, S4 >: S3, R1 <: R, E1 >: E, B](
+      that: ZPure[W1, S3, S4, R1, E1, B]
+    )(implicit
+      ev: A <:< Option[B],
+      compose: ComposeState[S1, S2, S3, S4]
+    ): ZPure[W1, compose.In, compose.Out, R1, E1, B] =
+      self.flatMap(ev(_).fold(that)(a => ZPure.get[S4] *> ZPure.succeed(a)))
+
+    /**
      * Combines this computation with the specified computation, passing the
      * updated state from this computation to that computation and combining the
      * results of both into a tuple.
@@ -1237,6 +1258,17 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
         def apply(t: NoSuchElementException): E = t
       }
   }
+
+  implicit def ZPureCustomCovariantSyntax[W, S1, S2, R, E, A]: CustomCovariantSyntax[ZPure[W, S1, S2, R, E, A]] =
+    new CustomCovariantSyntax[ZPure[W, S1, S2, R, E, A]] {}
+
+  implicit def ZPureCustomAssociativeFlattenSyntax[W, S1, S2, R, E, A]
+    : CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]]                                                 =
+    new CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]] {}
+
+  implicit def ZPureCustomAssociativeBothSyntax[W, S1, S2, R, E, A]
+    : CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]]                                                    =
+    new CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]] {}
 
   /**
    * The `Covariant` instance for `ZPure`.

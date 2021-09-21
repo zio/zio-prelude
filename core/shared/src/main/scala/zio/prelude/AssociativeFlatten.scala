@@ -227,12 +227,12 @@ trait AssociativeFlattenSyntax {
       flatten.flatten(ffa)
   }
 
-  import zio.prelude.fx.NotZPure
-
   /**
    * Provides infix syntax for flattening covariant types.
    */
-  implicit class AssociativeFlattenCovariantOps[F[+_], A](fa: F[A])(implicit ev: NotZPure[F[A]]) {
+  implicit class AssociativeFlattenCovariantOps[F[+_], A](fa: F[A])(implicit
+    ev: Not[CustomAssociativeFlattenSyntax[F[A]]]
+  ) {
 
     /**
      * Maps a function `A => F[B]` over an `F[A]` value and then flattens the
@@ -242,3 +242,11 @@ trait AssociativeFlattenSyntax {
       flatten.flatten(covariant.map(f)(fa))
   }
 }
+
+/**
+ * Provides implicit evidence that a data type defines its own implementation
+ * of operators defined by `AssociativeFlattenSyntax` as extension methods and
+ * that the implementations provided by `AssociativeFlattenSyntax` should not
+ * be used.
+ */
+trait CustomAssociativeFlattenSyntax[A]

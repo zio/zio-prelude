@@ -86,12 +86,10 @@ object Covariant {
 
 trait CovariantSyntax {
 
-  import zio.prelude.fx.NotZPure
-
   /**
    * Provides infix syntax for mapping over covariant values.
    */
-  implicit class CovariantOps[F[+_], A](private val self: F[A])(implicit ev: NotZPure[F[A]]) {
+  implicit class CovariantOps[F[+_], A](private val self: F[A])(implicit ev: Not[CustomCovariantSyntax[F[A]]]) {
     def as[B](b: => B)(implicit F: Covariant[F]): F[B] = map(_ => b)
 
     def map[B](f: A => B)(implicit F: Covariant[F]): F[B] =
@@ -106,3 +104,10 @@ trait CovariantSyntax {
     def unit(implicit F: Covariant[F]): F[Unit] = as(())
   }
 }
+
+/**
+ * Provides implicit evidence that a data type defines its own implementation
+ * of operators defined by `CovariantSyntax` as extension methods and that the
+ * implementations provided by `CovariantSyntax` should not be used.
+ */
+trait CustomCovariantSyntax[A]

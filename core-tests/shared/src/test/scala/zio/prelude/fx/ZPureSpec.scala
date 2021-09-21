@@ -660,14 +660,14 @@ object ZPureSpec extends DefaultRunnableSpec {
             }
           ),
           suite("someOrElseM")(
-            // testM("success (Some)") {
-            //   check(genInt, genInt, genInt) { (s1, s2, a) =>
-            //     val successSome = ZPure.modify[Int, Int, Option[Int]](_ => (s2, Some(a)))
-            //     val that        = ZPure.fail(())
-            //     val result      = successSome.someOrElseM(that)
-            //     assert(result.getState.either.runResult(s1))(isRight(equalTo((s2, a))))
-            //   }
-            // },
+            testM("success (Some)") {
+              check(genInt, genInt, genInt) { (s1, s2, a) =>
+                val successSome = ZPure.modify[Int, Int, Option[Int]](_ => (s2, Some(a)))
+                val that        = ZPure.fail(())
+                val result      = successSome.someOrElseM(that)
+                assert(result.getState.either.runResult(s1))(isRight(equalTo((s2, a))))
+              }
+            },
             testM("success (None)") {
               check(genInt, genInt, genIntToInt, genIntToInt) { (s, a, f1, f2) =>
                 val successNone =
@@ -676,14 +676,14 @@ object ZPureSpec extends DefaultRunnableSpec {
                 val result      = successNone.someOrElseM(that)
                 assert(result.run(s))(equalTo((f2(f1(s)), a)))
               }
+            },
+            testM("failure") {
+              check(genInt, genInt, genState) { (s, e, that) =>
+                val failure = ZPure.fail(e)
+                val result  = failure.someOrElseM(that)
+                assert(result.getState.either.runResult(s))(isLeft(equalTo(e)))
+              }
             }
-            // testM("failure") {
-            //   check(genInt, genInt, genState) { (s, e, that) =>
-            //     val failure = ZPure.fail(e)
-            //     val result  = failure.someOrElseM(that)
-            //     assert(result.getState.either.runResult(s))(isLeft(equalTo(e)))
-            //   }
-            // }
           ),
           suite("someOrFail")(
             testM("success (Some)") {
