@@ -121,7 +121,7 @@ object Zivariant {
             }
     }
 
-  implicit val FunctionTupleZivariant: Zivariant[({ type lambda[-R, +E, +A] = R => (E, A) })#lambda] =
+  implicit val FunctionTupleZivariant: Zivariant[({ type lambda[-R, +E, +A] = R => (E, A) })#lambda]        =
     new Zivariant[({ type lambda[-R, +E, +A] = R => (E, A) })#lambda] {
       override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): (R => (E, A)) => R1 => (E1, A1) =
         rea =>
@@ -131,12 +131,12 @@ object Zivariant {
           }
     }
 
-  implicit val ZioZivariant: Zivariant[ZIO] = new Zivariant[ZIO] {
+  implicit val ZioZivariant: Zivariant[ZIO]                                                                 = new Zivariant[ZIO] {
     override def zimap[R, E, A, R1, E1, A1](r: R1 => R, e: E => E1, a: A => A1): ZIO[R, E, A] => ZIO[R1, E1, A1] =
       rea => rea.mapBoth(e, a).provideSome(r)
   }
 
-  implicit val ZLayerZivariant: Zivariant[ZLayer] =
+  implicit val ZLayerZivariant: Zivariant[ZLayer]                                                           =
     new Zivariant[ZLayer] {
       override def zimap[E, A, R, EE, AA, RR](
         r: EE => E,
@@ -146,7 +146,7 @@ object Zivariant {
         rea => ZLayer.fromFunctionMany(r) >>> rea.map(a).mapError(e)
     }
 
-  implicit val ZManagedZivariant: Zivariant[ZManaged] =
+  implicit val ZManagedZivariant: Zivariant[ZManaged]                                                       =
     new Zivariant[ZManaged] {
       override def zimap[E, A, R, EE, AA, RR](
         r: EE => E,
@@ -156,7 +156,7 @@ object Zivariant {
         rea => rea.mapBoth(e, a).provideSome(r)
     }
 
-  implicit val ZStreamZivariant: Zivariant[ZStream] =
+  implicit val ZStreamZivariant: Zivariant[ZStream]                                                         =
     new Zivariant[ZStream] {
       override def zimap[E, A, R, EE, AA, RR](
         r: EE => E,
@@ -166,7 +166,7 @@ object Zivariant {
         rea => rea.mapBoth(e, a).provideSome(r)
     }
 
-  implicit val ZSTMZivariant: Zivariant[ZSTM] =
+  implicit val ZSTMZivariant: Zivariant[ZSTM]                                                               =
     new Zivariant[ZSTM] {
       override def zimap[E, A, R, EE, AA, RR](r: EE => E, e: A => AA, a: R => RR): ZSTM[E, A, R] => ZSTM[EE, AA, RR] =
         rea => rea.mapBoth(e, a).provideSome(r)

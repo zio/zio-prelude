@@ -37,7 +37,7 @@ addCommandAlias(
 
 val zioVersion = "1.0.12"
 
-lazy val root = project
+lazy val root                     = project
   .in(file("."))
   .settings(
     publish / skip := true,
@@ -61,7 +61,7 @@ lazy val root = project
     macrosNative
   )
 
-lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+lazy val core                     = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
   .settings(stdSettings("zio-prelude"))
   .settings(crossProjectSettings)
@@ -78,20 +78,20 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(macros)
 
-lazy val coreJS  = core.js
+lazy val coreJS                   = core.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val coreJVM = core.jvm
+lazy val coreJVM                  = core.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
   .settings(scalaReflectTestSettings)
 
-lazy val coreNative = core.native
+lazy val coreNative               = core.native
   .settings(nativeSettings)
 
-lazy val coreTests    = crossProject(JSPlatform, JVMPlatform)
+lazy val coreTests                = crossProject(JSPlatform, JVMPlatform)
   .in(file("core-tests"))
   .settings(stdSettings("zio-prelude-tests"))
   .settings(crossProjectSettings)
@@ -103,17 +103,17 @@ lazy val coreTests    = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core, laws)
   .settings(publish / skip := true)
 
-lazy val coreTestsJS  = coreTests.js
+lazy val coreTestsJS              = coreTests.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val coreTestsJVM = coreTests.jvm
+lazy val coreTestsJVM             = coreTests.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
   .settings(scalaReflectTestSettings)
 
-lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+lazy val laws                     = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("laws"))
   .settings(stdSettings("zio-laws-laws"))
   .settings(crossProjectSettings)
@@ -125,20 +125,20 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(core)
 
-lazy val lawsJS  = laws.js
+lazy val lawsJS                   = laws.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val lawsJVM = laws.jvm
+lazy val lawsJVM                  = laws.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
   .settings(scalaReflectTestSettings)
 
-lazy val lawsNative = laws.native
+lazy val lawsNative               = laws.native
   .settings(nativeSettings)
 
-lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+lazy val macros                   = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("macros"))
   .settings(stdSettings("zio-prelude-macros"))
   .settings(crossProjectSettings)
@@ -147,17 +147,17 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .enablePlugins(BuildInfoPlugin)
 
-lazy val macrosJS = macros.js
+lazy val macrosJS                 = macros.js
   .settings(jsSettings)
   .settings(dottySettings)
 
-lazy val macrosJVM = macros.jvm
+lazy val macrosJVM                = macros.jvm
   .settings(dottySettings)
 
-lazy val macrosNative = macros.native
+lazy val macrosNative             = macros.native
   .settings(nativeSettings)
 
-lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+lazy val experimental             = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental"))
   .dependsOn(core)
   .settings(stdSettings("zio-prelude-experimental"))
@@ -166,17 +166,17 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
-lazy val experimentalJS  = experimental.js
+lazy val experimentalJS           = experimental.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
 
-lazy val experimentalJVM = experimental.jvm
+lazy val experimentalJVM          = experimental.jvm
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
   .settings(scalaReflectTestSettings)
 
-lazy val experimentalNative = experimental.native
+lazy val experimentalNative       = experimental.native
   .settings(nativeSettings)
 
 lazy val scalaParallelCollections = project
@@ -201,7 +201,7 @@ lazy val scalaParallelCollections = project
   .settings(scalaReflectTestSettings)
   .enablePlugins(BuildInfoPlugin)
 
-lazy val benchmarks = project
+lazy val benchmarks               = project
   .in(file("benchmarks"))
   .settings(stdSettings("zio-prelude-benchmarks"))
   .settings(
@@ -216,7 +216,7 @@ lazy val benchmarks = project
   .dependsOn(coreJVM)
   .enablePlugins(JmhPlugin)
 
-lazy val docs = project
+lazy val docs                     = project
   .in(file("zio-prelude-docs"))
   .settings(
     publish / skip                             := true,
@@ -233,7 +233,7 @@ lazy val docs = project
   .dependsOn(coreJVM, experimentalJVM, lawsJVM)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
-lazy val examples    =
+lazy val examples                 =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .in(file("examples"))
     .dependsOn(core)
@@ -242,5 +242,5 @@ lazy val examples    =
     .settings(macroExpansionSettings)
     .settings(publish / skip := true)
 
-lazy val examplesJVM = examples.jvm
+lazy val examplesJVM              = examples.jvm
   .settings(dottySettings)

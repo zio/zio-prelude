@@ -40,7 +40,7 @@ object ForEachSpec extends DefaultRunnableSpec {
   val genEitherIntIntFunction: Gen[Random, Int => Either[Int, Int]] =
     Gen.function(Gen.either(genInt, genInt))
 
-  implicit val chunkOptionForEach: ForEach[ChunkOption] =
+  implicit val chunkOptionForEach: ForEach[ChunkOption]             =
     ForEach[Chunk].compose[Option]
 
   def spec: ZSpec[Environment, Failure] =

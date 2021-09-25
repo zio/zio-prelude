@@ -137,21 +137,21 @@ object Hash {
    * Derives a `Hash` for a product type given a `Hash` for each element of the
    * product type.
    */
-  implicit def Tuple2Hash[A: Hash, B: Hash]: Hash[(A, B)]                                     =
+  implicit def Tuple2Hash[A: Hash, B: Hash]: Hash[(A, B)] =
     makeFrom({ case (a, b) => (a.hash, b.hash).hashCode }, Equal.Tuple2Equal)
 
   /**
    * Derives an `Hash` for a product type given an `Hash` for each element of
    * the product type.
    */
-  implicit def Tuple3Hash[A: Hash, B: Hash, C: Hash]: Hash[(A, B, C)]                         =
+  implicit def Tuple3Hash[A: Hash, B: Hash, C: Hash]: Hash[(A, B, C)] =
     makeFrom({ case (a, b, c) => (a.hash, b.hash, c.hash).hashCode }, Equal.Tuple3Equal)
 
   /**
    * Derives an `Hash` for a product type given an `Hash` for each element of
    * the product type.
    */
-  implicit def Tuple4Hash[A: Hash, B: Hash, C: Hash, D: Hash]: Hash[(A, B, C, D)]             =
+  implicit def Tuple4Hash[A: Hash, B: Hash, C: Hash, D: Hash]: Hash[(A, B, C, D)] =
     makeFrom({ case (a, b, c, d) => (a.hash, b.hash, c.hash, d.hash).hashCode }, Equal.Tuple4Equal)
 
   /**

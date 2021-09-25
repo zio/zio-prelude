@@ -1193,7 +1193,7 @@ object Debug extends DebugVersionSpecific {
   /**
    * Derives a `Debug[Vector[A]]` given a `Debug[A]`.
    */
-  implicit def VectorDebug[A: Debug]: Debug[Vector[A]] =
+  implicit def VectorDebug[A: Debug]: Debug[Vector[A]]    =
     vector => Repr.VConstructor(List("scala"), "Vector", vector.map(_.debug).toList)
 
   private val nanosToPrettyUnit: Long => (Long, TimeUnit) = {
@@ -1217,7 +1217,7 @@ object Debug extends DebugVersionSpecific {
 }
 
 trait DebugSyntax {
-  implicit class DebugOps[A](self: A) {
+  implicit class DebugOps[A](self: A)                        {
     def debug(implicit debug: Debug[A]): Debug.Repr = debug.debug(self)
     def render(implicit debug: Debug[A]): String    = debug.render(self)
   }

@@ -1016,7 +1016,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def collectAll[F[+_]: ForEach, W, S, R, E, A](fa: F[ZPure[W, S, S, R, E, A]]): ZPure[W, S, S, R, E, F[A]] =
     ForEach[F].flip[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A](fa)
 
-  def environment[S, R]: ZPure[Nothing, S, S, R, Nothing, R]                                                =
+  def environment[S, R]: ZPure[Nothing, S, S, R, Nothing, R] =
     access(r => r)
 
   def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
@@ -1081,7 +1081,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    */
   def forEach[F[+_]: ForEach, W, S, R, E, A, B](fa: F[A])(
     f: A => ZPure[W, S, S, R, E, B]
-  ): ZPure[W, S, S, R, E, F[B]]                     =
+  ): ZPure[W, S, S, R, E, F[B]] =
     ForEach[F].forEach[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A, B](fa)(f)
 
   /**
@@ -1191,7 +1191,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def update[S1, S2](f: S1 => S2): ZPure[Nothing, S1, S2, Any, Nothing, Unit] =
     modify(s => (f(s), ()))
 
-  final class AccessPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+  final class AccessPartiallyApplied[R](private val dummy: Boolean = true)  extends AnyVal {
     def apply[S, A](f: R => A): ZPure[Nothing, S, S, R, Nothing, A] =
       Access(r => succeed(f(r)))
   }
@@ -1300,28 +1300,28 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   private final case class FlatMap[+W, -S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S2, S3, R, E, B]
-  )                                                                  extends ZPure[W, S1, S3, R, E, B]                     {
+  ) extends ZPure[W, S1, S3, R, E, B] {
     override def tag: Int = Tags.FlatMap
   }
   private final case class Fold[+W, -S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
     failure: Cause[E1] => ZPure[W, S1, S3, R, E2, B],
     success: A => ZPure[W, S2, S3, R, E2, B]
-  )                                                                  extends ZPure[W, S1, S3, R, E2, B]
+  ) extends ZPure[W, S1, S3, R, E2, B]
       with Function[A, ZPure[W, S2, S3, R, E2, B]] {
     override def tag: Int                                = Tags.Fold
     override def apply(a: A): ZPure[W, S2, S3, R, E2, B] =
       success(a)
   }
   private final case class Access[W, S1, S2, R, E, A](access: R => ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, R, E, A]            {
+      extends ZPure[W, S1, S2, R, E, A] {
     override def tag: Int = Tags.Access
   }
   private final case class Provide[W, S1, S2, R, E, A](r: R, continue: ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, Any, E, A]          {
+      extends ZPure[W, S1, S2, Any, E, A] {
     override def tag: Int = Tags.Provide
   }
-  private final case class Log[S, +W](log: W) extends ZPure[W, S, S, Any, Nothing, Unit] {
+  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]            {
     override def tag: Int = Tags.Log
   }
   private final case class Flag[W, S1, S2, R, E, A](

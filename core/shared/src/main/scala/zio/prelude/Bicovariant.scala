@@ -140,7 +140,7 @@ object Bicovariant {
       }
     }
 
-  implicit val ExitBicovariant: Bicovariant[Exit] =
+  implicit val ExitBicovariant: Bicovariant[Exit]     =
     new Bicovariant[Exit] {
       override def bimap[A, E, AA, EE](f: A => AA, g: E => EE): Exit[A, E] => Exit[AA, EE] =
         _.mapBoth(f, g)

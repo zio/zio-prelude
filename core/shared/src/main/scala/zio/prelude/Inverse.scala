@@ -37,7 +37,7 @@ import scala.annotation.tailrec
 trait Inverse[A] extends Identity[A] {
   def inverse(l: => A, r: => A): A
 
-  def multiply(n: Int)(a: A): A = {
+  def multiply(n: Int)(a: A): A                      = {
     @tailrec
     def multiplyHelper(res: A, n: Int): A =
       if (n == 0) res

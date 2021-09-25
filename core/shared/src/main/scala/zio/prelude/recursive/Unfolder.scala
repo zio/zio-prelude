@@ -10,7 +10,7 @@ sealed trait Unfolder[Case[+_], A] extends (A => Case[A]) { self =>
 
 object Unfolder {
 
-  def apply[Case[+_], A](f: A => Case[A]): Unfolder[Case, A] =
+  def apply[Case[+_], A](f: A => Case[A]): Unfolder[Case, A]                                                     =
     new Unfolder[Case, A] {
       def apply(a: A): Case[A] =
         f(a)

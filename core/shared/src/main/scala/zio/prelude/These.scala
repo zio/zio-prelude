@@ -77,7 +77,7 @@ object These {
       override protected def checkEqual(l: These[A, B], r: These[A, B]): Boolean =
         TheseEqual(Hash[A], Hash[B]).equal(l, r)
 
-      override def hash(a: These[A, B]): Int = a match {
+      override def hash(a: These[A, B]): Int                                     = a match {
         case Left(left)        => Left(left.hash).hashCode()
         case Right(right)      => Right(right.hash).hashCode()
         case Both(left, right) => Both(left.hash, right.hash).hashCode()

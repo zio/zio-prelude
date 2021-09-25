@@ -108,7 +108,7 @@ object Assertion {
 
   def startsWith(prefix: String): Assertion[String] = StartsWith(prefix)
 
-  private[prelude] case class And[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
+  private[prelude] case class And[A](left: Assertion[A], right: Assertion[A])            extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -120,7 +120,7 @@ object Assertion {
       } else (!left || !right).apply(a, negated = false)
   }
 
-  private[prelude] case class Or[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
+  private[prelude] case class Or[A](left: Assertion[A], right: Assertion[A])             extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -130,12 +130,12 @@ object Assertion {
       } else (!left && !right).apply(a, negated = false)
   }
 
-  private[prelude] case class Not[A](assertion: Assertion[A]) extends Assertion[A] {
+  private[prelude] case class Not[A](assertion: Assertion[A])                            extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       assertion.apply(a, !negated)
   }
 
-  private[prelude] case class DivisibleBy[A](n: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
+  private[prelude] case class DivisibleBy[A](n: A)(implicit numeric: Numeric[A])         extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
       val result = numeric.toDouble(a) % numeric.toDouble(n) == 0
       if (!negated) {
@@ -148,7 +148,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class Contains(string: String) extends Assertion[String] {
+  private[prelude] case class Contains(string: String)                                   extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val result = a.contains(string)
       if (!negated) {
@@ -161,7 +161,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class EndsWith(suffix: String) extends Assertion[String] {
+  private[prelude] case class EndsWith(suffix: String)                                   extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val result = a.endsWith(suffix)
       if (!negated) {
@@ -174,7 +174,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class EqualTo[A](value: A) extends Assertion[A] {
+  private[prelude] case class EqualTo[A](value: A)                                       extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         if (a == value) Right(())
@@ -185,7 +185,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class Between[A](min: A, max: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+  private[prelude] case class Between[A](min: A, max: A)(implicit ordering: Ordering[A]) extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
       val result = ordering.gteq(a, min) && ordering.lteq(a, max)
       if (!negated) {
@@ -198,7 +198,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+  private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A])   extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         if (ordering.gt(a, value)) Right(())
@@ -209,7 +209,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class HasLength[A](lengthAssertion: Assertion[Int]) extends Assertion[String] {
+  private[prelude] case class HasLength[A](lengthAssertion: Assertion[Int])              extends Assertion[String] {
     def apply(string: String, negated: Boolean): Either[AssertionError, Unit] =
       lengthAssertion(string.length, negated) match {
         case Left(AssertionError.Failure(condition)) => Left(AssertionError.failure(s"hasLength($condition)"))
@@ -217,7 +217,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+  private[prelude] case class LessThan[A](value: A)(implicit ordering: Ordering[A])      extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         if (ordering.lt(a, value)) Right(())
@@ -228,7 +228,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class Matches(regexString: String) extends Assertion[String] {
+  private[prelude] case class Matches(regexString: String)                               extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val compiled = s"^$regexString$$".r
       val result   = compiled.findFirstIn(a).isDefined
@@ -242,7 +242,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class PowerOf[A](base: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
+  private[prelude] case class PowerOf[A](base: A)(implicit numeric: Numeric[A])          extends Assertion[A]      {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
       val result = isPower(numeric.toDouble(base), numeric.toDouble(a))
       if (!negated) {
@@ -254,7 +254,7 @@ object Assertion {
       }
     }
 
-    private def isPower(base: Double, number: Double): Boolean = {
+    private def isPower(base: Double, number: Double): Boolean      = {
       if (base == 1) return number == 1
       var pow = 1.0
       while (pow < number) pow = pow * base
@@ -262,7 +262,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class StartsWith(prefix: String) extends Assertion[String] {
+  private[prelude] case class StartsWith(prefix: String)                                 extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val result = a.startsWith(prefix)
       if (!negated) {
@@ -275,7 +275,7 @@ object Assertion {
     }
   }
 
-  private[prelude] object Anything extends Assertion[Any] {
+  private[prelude] object Anything                                                       extends Assertion[Any]    {
     def apply(a: Any, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) Right(()) else Left(AssertionError.failure("never"))
   }
@@ -332,43 +332,43 @@ object Assertion {
 
     def notInRange(start: Char, end: Char): Regex = Range(start, end, reversed = true)
 
-    case object AnyChar extends Regex {
+    case object AnyChar                                                       extends Regex {
       def compile: String = "."
     }
 
-    case object End extends Regex {
+    case object End                                                           extends Regex {
       def compile: String = "$"
     }
 
-    case object Anything extends Regex {
+    case object Anything                                                      extends Regex {
       def compile: String = ""
     }
 
-    final case class Alphanumeric(reversed: Boolean) extends Regex {
+    final case class Alphanumeric(reversed: Boolean)                          extends Regex {
       def compile: String = if (reversed) raw"\W" else raw"\w"
     }
 
-    final case class Whitespace(reversed: Boolean) extends Regex {
+    final case class Whitespace(reversed: Boolean)                            extends Regex {
       def compile: String = if (reversed) raw"\S" else raw"\s"
     }
 
-    final case class Digit(reversed: Boolean) extends Regex {
+    final case class Digit(reversed: Boolean)                                 extends Regex {
       def compile: String = if (reversed) raw"\D" else raw"\d"
     }
 
-    final case class Literal(char: Char) extends Regex {
+    final case class Literal(char: Char)                                      extends Regex {
       def compile: String = s"$char"
     }
 
-    final case class CharacterSet(set: Set[Char], reversed: Boolean) extends Regex {
+    final case class CharacterSet(set: Set[Char], reversed: Boolean)          extends Regex {
       def compile: String = set.mkString(if (reversed) "[^" else "[", "", "]")
     }
 
-    final case class Range(start: Char, end: Char, reversed: Boolean) extends Regex {
+    final case class Range(start: Char, end: Char, reversed: Boolean)         extends Regex {
       def compile: String = s"${if (reversed) "[^" else "["}$start-$end]"
     }
 
-    case object Start extends Regex {
+    case object Start                                                         extends Regex {
       def compile: String = "^"
     }
 
@@ -386,7 +386,7 @@ object Assertion {
         }
     }
 
-    final case class AndThen(first: Regex, second: Regex) extends Regex {
+    final case class AndThen(first: Regex, second: Regex)                     extends Regex {
       def compile: String =
         (first, second) match {
           case (first, Anything)  => first.compile
@@ -395,7 +395,7 @@ object Assertion {
         }
     }
 
-    final case class OrElse(first: Regex, second: Regex) extends Regex {
+    final case class OrElse(first: Regex, second: Regex)                      extends Regex {
       def compile: String =
         (first, second) match {
           case (first, Anything)  => first.compile

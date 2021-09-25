@@ -2368,16 +2368,16 @@ trait ZPureArities {
       zPure22
     )((_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _))
 
-  private def reassociate[A, B, C, D](function: (A, B, C) => D): (((A, B), C)) => D = { case ((a, b), c) =>
+  private def reassociate[A, B, C, D](function: (A, B, C) => D): (((A, B), C)) => D                                  = { case ((a, b), c) =>
     function(a, b, c)
   }
 
-  private def reassociate[A, B, C, D, E](function: (A, B, C, D) => E): ((((A, B), C), D)) => E = {
+  private def reassociate[A, B, C, D, E](function: (A, B, C, D) => E): ((((A, B), C), D)) => E                       = {
     case (((a, b), c), d) =>
       function(a, b, c, d)
   }
 
-  private def reassociate[A, B, C, D, E, F](function: (A, B, C, D, E) => F): (((((A, B), C), D), E)) => F = {
+  private def reassociate[A, B, C, D, E, F](function: (A, B, C, D, E) => F): (((((A, B), C), D), E)) => F            = {
     case ((((a, b), c), d), e) => function(a, b, c, d, e)
   }
 

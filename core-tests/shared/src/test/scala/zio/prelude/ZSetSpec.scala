@@ -23,13 +23,13 @@ object ZSetSpec extends DefaultRunnableSpec {
   def genZSet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
     Gen.mapOf(a, b).map(ZSet.fromMap)
 
-  lazy val smallInts: Gen[Random with Sized, Chunk[Int]] =
+  lazy val smallInts: Gen[Random with Sized, Chunk[Int]]                                    =
     Gen.chunkOf(Gen.int(-10, 10))
 
   def natural(min: Natural, max: Natural): Gen[Random, Natural] =
     Gen.int(min, max).map(_.asInstanceOf[Natural])
 
-  def naturals: Gen[Random with Sized, Natural] =
+  def naturals: Gen[Random with Sized, Natural]           =
     Gen.small(n => natural(0.asInstanceOf[Natural], n.asInstanceOf[Natural]))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =

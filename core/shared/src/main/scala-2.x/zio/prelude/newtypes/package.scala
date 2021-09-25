@@ -122,7 +122,7 @@ package object newtypes {
       if (sum < 0) wrap(Int.MaxValue) else wrap(sum)
     }
 
-    def minus(x: Natural, y: Natural): Natural = {
+    def minus(x: Natural, y: Natural): Natural       = {
       val difference = x - y
       if (difference < 0) zero else wrap(difference)
     }

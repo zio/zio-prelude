@@ -29,8 +29,8 @@ object IdempotentSpec extends DefaultRunnableSpec {
     }
   }
 
-  private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
-  private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
+  private implicit val DoubleEqual: Equal[Double]      = Equal.DoubleEqualWithEpsilon()
+  private implicit val FloatEqual: Equal[Float]        = Equal.FloatEqualWithEpsilon()
 
   def spec: ZSpec[Environment, Failure] =
     suite("IdempotentSpec")(

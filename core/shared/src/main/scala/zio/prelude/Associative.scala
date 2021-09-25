@@ -397,7 +397,7 @@ object Associative extends AssociativeLowPriority {
       def inverse(l: => Sum[Float], r: => Sum[Float]): Sum[Float] = Sum(l - r)
     }
 
-  implicit def Function1Identity[A]: Identity[A => A] = new Identity[A => A] {
+  implicit def Function1Identity[A]: Identity[A => A]                                       = new Identity[A => A] {
     override def identity: A => A = scala.Predef.identity
 
     override def combine(l: => A => A, r: => A => A): A => A = l.andThen(r)

@@ -54,7 +54,7 @@ object BothCompose {
     override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
       AssociativeCompose.FunctionIdentityCompose.compose(bc, ab)
 
-    override def fromFirst[A]: Function[(A, Any), A] = _._1
+    override def fromFirst[A]: Function[(A, Any), A]              = _._1
 
     override def fromSecond[B]: Function[(Any, B), B] = _._2
 
@@ -62,15 +62,15 @@ object BothCompose {
       (a2b(a), a2c(a))
     }
 
-    override def application[A, B]: Function[(Function[A, B], A), B] = { case (a2b, a) =>
+    override def application[A, B]: Function[(Function[A, B], A), B]                            = { case (a2b, a) =>
       a2b(a)
     }
 
-    override def curry[A, B, C](f: Function[(A, B), C]): Function[A, Function[B, C]] = { a => b =>
+    override def curry[A, B, C](f: Function[(A, B), C]): Function[A, Function[B, C]]            = { a => b =>
       f((a, b))
     }
 
-    override def uncurry[A, B, C](g: Function[A, Function[B, C]]): Function[(A, B), C] = { case (a, b) =>
+    override def uncurry[A, B, C](g: Function[A, Function[B, C]]): Function[(A, B), C]          = { case (a, b) =>
       g(a)(b)
     }
 

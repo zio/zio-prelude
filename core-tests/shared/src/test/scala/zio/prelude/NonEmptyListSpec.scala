@@ -8,37 +8,37 @@ import zio.test.laws._
 
 object NonEmptyListSpec extends DefaultRunnableSpec {
 
-  lazy val genBooleanFunction: Gen[Random, Int => Boolean] =
+  lazy val genBooleanFunction: Gen[Random, Int => Boolean]              =
     Gen.function(Gen.boolean)
 
-  lazy val genBooleanFunction2: Gen[Random, (Int, Int) => Boolean] =
+  lazy val genBooleanFunction2: Gen[Random, (Int, Int) => Boolean]      =
     Gen.function2(Gen.boolean)
 
-  lazy val genCons: Gen[Random with Sized, ::[Int]] =
+  lazy val genCons: Gen[Random with Sized, ::[Int]]                     =
     Gen.listOf1(genInt)
 
-  lazy val genConsFunction: Gen[Random with Sized, Int => ::[Int]] =
+  lazy val genConsFunction: Gen[Random with Sized, Int => ::[Int]]      =
     Gen.function(genCons)
 
-  lazy val genFunction: Gen[Random, Int => Int] =
+  lazy val genFunction: Gen[Random, Int => Int]                         =
     Gen.function(genInt)
 
-  lazy val genFunction2: Gen[Random with Sized, (Int, Int) => Int] =
+  lazy val genFunction2: Gen[Random with Sized, (Int, Int) => Int]      =
     Gen.function2(genInt)
 
-  lazy val genInt: Gen[Random, Int] =
+  lazy val genInt: Gen[Random, Int]                                     =
     Gen.int(-10, 10)
 
   lazy val genNonEmptyChunk: Gen[Random with Sized, NonEmptyChunk[Int]] =
     Gen.chunkOf1(genInt)
 
-  lazy val genNonEmptyList: Gen[Random with Sized, NonEmptyList[Int]] =
+  lazy val genNonEmptyList: Gen[Random with Sized, NonEmptyList[Int]]   =
     genCons.map(NonEmptyList.fromCons)
 
-  lazy val genString: Gen[Random with Sized, String] =
+  lazy val genString: Gen[Random with Sized, String]                    =
     Gen.alphaNumericString
 
-  lazy val genConsWithIndex: Gen[Random with Sized, (::[Int], Int)] =
+  lazy val genConsWithIndex: Gen[Random with Sized, (::[Int], Int)]     =
     for {
       cons  <- genCons
       index <- Gen.int(-2, cons.length + 2)

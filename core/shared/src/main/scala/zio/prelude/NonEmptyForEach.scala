@@ -44,7 +44,7 @@ trait NonEmptyForEach[F[+_]] extends ForEach[F] {
    * Converts a collection with elements that are in the context of effects to
    * a collection of elements in the context of an effect.
    */
-  def flip1[G[+_]: AssociativeBoth: Covariant, A](fa: F[G[A]]): G[F[A]] =
+  def flip1[G[+_]: AssociativeBoth: Covariant, A](fa: F[G[A]]): G[F[A]]                       =
     forEach1(fa)(identity)
 
   override def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =

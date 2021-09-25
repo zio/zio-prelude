@@ -121,7 +121,7 @@ trait Ord[-A] extends PartialOrd[A] { self =>
   /**
    * Returns a new ordering that is the reverse of this one.
    */
-  final def reverse: Ord[A] =
+  final def reverse: Ord[A]                      =
     mapOrdering(_.opposite)
 
   override def toScala[A1 <: A]: sm.Ordering[A1] =
@@ -1027,6 +1027,6 @@ object Ordering {
         case l               => l
       }
 
-      override def identity: Ordering = Ordering.Equals
+      override def identity: Ordering                                = Ordering.Equals
     }
 }

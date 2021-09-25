@@ -1373,7 +1373,7 @@ trait AssociativeBothSyntax {
       both.both(fa, fb).contramap(f)
   }
 
-  implicit class AssociativeBothTuple2Ops[F[+_], T1, T2](tf: => (F[T1], F[T2])) {
+  implicit class AssociativeBothTuple2Ops[F[+_], T1, T2](tf: => (F[T1], F[T2]))                                  {
     def mapN[R](f: (T1, T2) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2])(f)).tupled(tf)
 
@@ -1381,7 +1381,7 @@ trait AssociativeBothSyntax {
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2])).tupled(tf)
   }
 
-  implicit class AssociativeBothTuple3Ops[F[+_], T1, T2, T3](tf: => (F[T1], F[T2], F[T3])) {
+  implicit class AssociativeBothTuple3Ops[F[+_], T1, T2, T3](tf: => (F[T1], F[T2], F[T3]))                       {
     def mapN[R](f: (T1, T2, T3) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3])(f)).tupled(tf)
 
@@ -1389,7 +1389,7 @@ trait AssociativeBothSyntax {
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3])).tupled(tf)
   }
 
-  implicit class AssociativeBothTuple4Ops[F[+_], T1, T2, T3, T4](tf: => (F[T1], F[T2], F[T3], F[T4])) {
+  implicit class AssociativeBothTuple4Ops[F[+_], T1, T2, T3, T4](tf: => (F[T1], F[T2], F[T3], F[T4]))            {
     def mapN[R](f: (T1, T2, T3, T4) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])(f)).tupled(tf)
 

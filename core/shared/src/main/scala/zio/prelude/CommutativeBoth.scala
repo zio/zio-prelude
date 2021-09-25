@@ -1234,7 +1234,7 @@ trait CommutativeBothSyntax {
     )(f: C => (A, B))(implicit both: CommutativeBoth[F], contravariant: Contravariant[F]): F[C] =
       both.both(fa, fb).contramap(f)
   }
-  implicit class CommutativeBothTuple2Ops[F[+_], T1, T2](tf: => (F[T1], F[T2])) {
+  implicit class CommutativeBothTuple2Ops[F[+_], T1, T2](tf: => (F[T1], F[T2]))                                  {
     def mapParN[R](f: (T1, T2) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2])(f)).tupled(tf)
 
@@ -1242,7 +1242,7 @@ trait CommutativeBothSyntax {
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2])).tupled(tf)
   }
 
-  implicit class CommutativeBothTuple3Ops[F[+_], T1, T2, T3](tf: => (F[T1], F[T2], F[T3])) {
+  implicit class CommutativeBothTuple3Ops[F[+_], T1, T2, T3](tf: => (F[T1], F[T2], F[T3]))                       {
     def mapParN[R](f: (T1, T2, T3) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3])(f)).tupled(tf)
 
@@ -1250,7 +1250,7 @@ trait CommutativeBothSyntax {
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3])).tupled(tf)
   }
 
-  implicit class CommutativeBothTuple4Ops[F[+_], T1, T2, T3, T4](tf: => (F[T1], F[T2], F[T3], F[T4])) {
+  implicit class CommutativeBothTuple4Ops[F[+_], T1, T2, T3, T4](tf: => (F[T1], F[T2], F[T3], F[T4]))            {
     def mapParN[R](f: (T1, T2, T3, T4) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])(f)).tupled(tf)
 

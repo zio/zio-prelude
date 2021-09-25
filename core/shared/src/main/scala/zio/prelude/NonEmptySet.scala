@@ -118,7 +118,7 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
       case _                             => false
     }
 
-  override def toString: String = s"NonEmpty$set"
+  override def toString: String           = s"NonEmpty$set"
 }
 
 object NonEmptySet {
@@ -237,7 +237,7 @@ object NonEmptySet {
   implicit def toSet[A](nonEmptySet: NonEmptySet[A]): Set[A] =
     nonEmptySet.toSet
 
-  private val NonEmptySetSeed: Int = 1247820194
+  private val NonEmptySetSeed: Int                           = 1247820194
 }
 
 trait NonEmptySetSyntax {

@@ -65,7 +65,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case _                             => false
     }
 
-  override final def hashCode(): Int = toEitherMultiSet.hashCode()
+  override final def hashCode(): Int            = toEitherMultiSet.hashCode()
 
   /**
    * Transforms the value of this `ZValidation` with the specified validation
@@ -181,7 +181,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * a success of type `A` or a `Left` with one or more errors of type `E`,
    * along with the log.
    */
-  final def runLog[B]: (Chunk[W], Either[NonEmptyChunk[E], A]) =
+  final def runLog[B]: (Chunk[W], Either[NonEmptyChunk[E], A])                                   =
     self match {
       case Failure(w, e) => (w, Left(e))
       case Success(w, a) => (w, Right(a))

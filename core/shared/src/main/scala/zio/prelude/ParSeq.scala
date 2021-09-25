@@ -136,7 +136,7 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
       _.zipWith(_)(_ && _)
     ).asInstanceOf[F[ParSeq[Z, B]]]
 
-  final def toCause: zio.Cause[A] = this match {
+  final def toCause: zio.Cause[A]                                                     = this match {
     case ParSeq.Both(left, right) => zio.Cause.Both(left.toCause, right.toCause)
     case _: ParSeq.Empty.type     => zio.Cause.empty
     case ParSeq.Single(value)     => zio.Cause.Fail(value)
@@ -236,13 +236,13 @@ object ParSeq {
       }
   }
 
-  case object Empty extends ParSeq[Unit, Nothing]
+  case object Empty                                                              extends ParSeq[Unit, Nothing]
 
-  final case class Single[+A](value: A) extends ParSeq[Nothing, A] {
+  final case class Single[+A](value: A)                                          extends ParSeq[Nothing, A] {
     override def hashCode = value.hashCode
   }
 
-  final case class Then[+Z <: Unit, +A](left: ParSeq[Z, A], right: ParSeq[Z, A]) extends ParSeq[Z, A] { self =>
+  final case class Then[+Z <: Unit, +A](left: ParSeq[Z, A], right: ParSeq[Z, A]) extends ParSeq[Z, A]       { self =>
     override def equals(that: Any): Boolean                                     = that match {
       case that: ParSeq[Unit, Any] =>
         equal(that) || symmetric(associate)(self, that) || symmetric(distribute)(self, that) || symmetric(empty)(
@@ -349,7 +349,7 @@ object ParSeq {
    * The `Hash` instance for `ParSeq`. Note that due to limitations of
    * Scala's `Set` this uses object equality and hash code on the elements.
    */
-  implicit def parSeqHash[Z <: Unit, A]: Hash[ParSeq[Z, A]] =
+  implicit def parSeqHash[Z <: Unit, A]: Hash[ParSeq[Z, A]]              =
     Hash.default
 
   private def empty(l: ParSeq[Unit, Any], r: ParSeq[Unit, Any]): Boolean = (l, r) match {

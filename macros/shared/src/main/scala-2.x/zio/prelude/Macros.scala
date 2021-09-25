@@ -244,7 +244,7 @@ new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
     }
   }
 
-  private val assertionErrorHeader =
+  private val assertionErrorHeader                             =
     s"${Console.BOLD + Console.RED + Console.REVERSED} Newtype Assertion Failed ${Console.RESET}"
 
   // Pilfered (with immense gratitude & minor modifications)

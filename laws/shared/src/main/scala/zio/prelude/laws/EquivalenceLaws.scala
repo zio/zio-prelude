@@ -22,7 +22,7 @@ import zio.test.laws._
 
 object EquivalenceLaws extends Lawful2[Equivalence, Equal, Equal] {
 
-  lazy val leftIdentity: Laws2[Equivalence, Equal, AnyF] =
+  lazy val leftIdentity: Laws2[Equivalence, Equal, AnyF]  =
     new Laws2.Law1Left[Equivalence, Equal, AnyF]("leftIdentity") {
       def apply[A: Equal, B: AnyF](a: A)(implicit equivalence: Equivalence[A, B]): TestResult =
         equivalence.from(equivalence.to(a)) <-> a
@@ -34,6 +34,6 @@ object EquivalenceLaws extends Lawful2[Equivalence, Equal, Equal] {
         equivalence.to(equivalence.from(b)) <-> b
     }
 
-  lazy val laws: Laws2[Equivalence, Equal, Equal] =
+  lazy val laws: Laws2[Equivalence, Equal, Equal]         =
     leftIdentity + rightIdentity
 }

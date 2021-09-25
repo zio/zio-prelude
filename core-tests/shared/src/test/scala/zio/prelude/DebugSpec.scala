@@ -23,7 +23,7 @@ object DebugSpec extends DefaultRunnableSpec {
     list   <- Gen.listOf(Gen.anyDouble)
   } yield TestCase(str, number, list)
 
-  implicit val DebugTestCase: Debug[TestCase] = Debug.make[TestCase](a =>
+  implicit val DebugTestCase: Debug[TestCase]       = Debug.make[TestCase](a =>
     Repr.Constructor(
       List("DebugSpec"),
       "TestCase",

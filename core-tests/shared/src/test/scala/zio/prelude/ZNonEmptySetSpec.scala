@@ -24,7 +24,7 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
   def genZNonEmptySet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZNonEmptySet[A, B]] =
     Gen.mapOf1(a, b).map(ZNonEmptySet.fromMapOption(_).get)
 
-  val smallInts: Gen[Random with Sized, Chunk[Int]] =
+  val smallInts: Gen[Random with Sized, Chunk[Int]]       =
     Gen.chunkOf(Gen.int(-10, 10))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =

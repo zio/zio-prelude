@@ -44,13 +44,13 @@ object AssociativeCompose {
 
   }
 
-  implicit val URIOIdentityCompose: IdentityCompose[URIO] = new IdentityCompose[URIO] {
+  implicit val URIOIdentityCompose: IdentityCompose[URIO]           = new IdentityCompose[URIO] {
     def identity[A]: URIO[A, A] = URIO.environment
 
     def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab >>> bc
   }
 
-  implicit val URLayerIdentityCompose: IdentityCompose[URLayer] = new IdentityCompose[URLayer] {
+  implicit val URLayerIdentityCompose: IdentityCompose[URLayer]     = new IdentityCompose[URLayer] {
     def identity[A]: URLayer[A, A] = ZLayer.identity
 
     def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] = ab >>> bc

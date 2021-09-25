@@ -333,7 +333,7 @@ object Equal {
     protected def checkCompare(l: Map[A, B], r: Map[A, B]): PartialOrdering =
       l.compareStrict(r)
 
-    override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
+    override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean  =
       l.size == r.size &&
         l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
   }

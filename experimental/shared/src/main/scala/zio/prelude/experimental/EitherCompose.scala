@@ -53,7 +53,7 @@ object EitherCompose {
     override def compose[A, B, C](bc: B => C, ab: A => B): A => C =
       AssociativeCompose.FunctionIdentityCompose.compose(bc, ab)
 
-    override def toLeft[A]: Function[A, Either[A, Nothing]] = Left(_)
+    override def toLeft[A]: Function[A, Either[A, Nothing]]       = Left(_)
 
     override def toRight[B]: Function[B, Either[Nothing, B]] = Right(_)
 

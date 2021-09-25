@@ -18,7 +18,7 @@ trait Liftables {
     case q"scala.Some.apply[$_]($v)" => Some(u.unapply(v).get)
   }
 
-  implicit lazy val regexLiftable: Liftable[Assertion.Regex] =
+  implicit lazy val regexLiftable: Liftable[Assertion.Regex]                         =
     Liftable[Assertion.Regex] {
       case Assertion.Regex.AnyChar                     => q"$AssertionPrefix.Regex.AnyChar"
       case Assertion.Regex.Anything                    => q"$AssertionPrefix.Regex.Anything"
@@ -36,7 +36,7 @@ trait Liftables {
       case Assertion.Regex.OrElse(first, second)       => q"$AssertionPrefix.Regex.OrElse($first, $second)"
     }
 
-  implicit lazy val regexUnliftable: Unliftable[Assertion.Regex] =
+  implicit lazy val regexUnliftable: Unliftable[Assertion.Regex]                     =
     Unliftable[Assertion.Regex] {
       case q"${A(_)}.Regex.AnyChar"                                                                           =>
         Assertion.Regex.AnyChar

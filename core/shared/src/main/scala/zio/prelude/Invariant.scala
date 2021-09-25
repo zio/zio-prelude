@@ -62,7 +62,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   def apply[F[_]](implicit invariant: Invariant[F]): Invariant[F] =
     invariant
 
-  implicit val AssociativeInvariant: Invariant[Associative] =
+  implicit val AssociativeInvariant: Invariant[Associative]       =
     new Invariant[Associative] {
       def invmap[A, B](f: A <=> B): Associative[A] <=> Associative[B] =
         Equivalence(
@@ -84,7 +84,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   /**
    * The `ForEach` (and thus `Covariant` and `Invariant`) for `Chunk`.
    */
-  implicit val ChunkForEach: ForEach[Chunk] =
+  implicit val ChunkForEach: ForEach[Chunk]                 =
     new ForEach[Chunk] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
         chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
@@ -123,7 +123,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
         either.fold(Left(_).succeed, f(_).map(Right(_)))
 
-      override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Either[A, B] => Either[AA, BB] = {
+      override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Either[A, B] => Either[AA, BB]               = {
         case Right(a) => Right(g(a))
         case Left(b)  => Left(f(b))
       }
@@ -629,7 +629,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       override def forEach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
         f(Id.unwrap(fa)).map(Id(_))
 
-      override def map[A, B](f: A => B): Id[A] => Id[B] = { id =>
+      override def map[A, B](f: A => B): Id[A] => Id[B]                                                 = { id =>
         Id(f(Id.unwrap(id)))
       }
     }
@@ -643,7 +643,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         )
     }
 
-  implicit val InverseInvariant: Invariant[Inverse] =
+  implicit val InverseInvariant: Invariant[Inverse]   =
     new Invariant[Inverse] {
       def invmap[A, B](f: A <=> B): Inverse[A] <=> Inverse[B] =
         Equivalence(
