@@ -310,7 +310,7 @@ object Assertion {
   }
 
   object Regex {
-    val char: Regex            = AnyChar
+    val anyChar: Regex         = AnyChar
     val alphanumeric: Regex    = Alphanumeric(reversed = false)
     val anything: Regex        = Anything
     val nonAlphanumeric: Regex = Alphanumeric(reversed = true)

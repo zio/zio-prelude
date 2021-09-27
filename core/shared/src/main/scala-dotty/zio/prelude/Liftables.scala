@@ -28,7 +28,7 @@ trait Liftables {
       import quotes.reflect.*
 
       assertion match {
-        case '{ Assertion.Regex.char }                                                  => Some(Assertion.Regex.char)
+        case '{ Assertion.Regex.anyChar }                                                  => Some(Assertion.Regex.anyChar)
         case '{ Assertion.Regex.anything }                                                 => Some(Assertion.Regex.anything)
         case '{ Assertion.Regex.alphanumeric }                                             => Some(Assertion.Regex.alphanumeric)
         case '{ Assertion.Regex.nonAlphanumeric }                                          => Some(Assertion.Regex.nonAlphanumeric)
