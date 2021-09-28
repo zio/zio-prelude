@@ -1297,7 +1297,7 @@ trait AssociativeBothSyntax {
   /**
    * Provides infix syntax for associative operations for invariant types.
    */
-  implicit class AssociativeBothOps[F[_], A](fa: => F[A]) {
+  implicit class AssociativeBothOps[F[_], A](fa: => F[A])(implicit ev: Not[CustomAssociativeBothSyntax[F[A]]]) {
 
     /**
      * A symbolic alias for `zip`.
@@ -1316,7 +1316,9 @@ trait AssociativeBothSyntax {
   /**
    * Provides infix syntax for associative operations for covariant types.
    */
-  implicit class AssociativeBothCovariantOps[F[+_], A](fa: => F[A]) {
+  implicit class AssociativeBothCovariantOps[F[+_], A](fa: => F[A])(implicit
+    ev: Not[CustomAssociativeBothSyntax[F[A]]]
+  ) {
 
     /**
      * A symbolic alias for `zipLeft`.
@@ -2443,3 +2445,11 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 }
+
+/**
+ * Provides implicit evidence that a data type defines its own implementation
+ * of operators defined by `AssociativeBothSyntax` as extension methods and
+ * that the implementations provided by `AssociativeBothSyntax` should not
+ * be used.
+ */
+trait CustomAssociativeBothSyntax[A]

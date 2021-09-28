@@ -97,20 +97,20 @@ class StateBenchmarks {
 
   @Benchmark
   def zioLeftAssociatedBind(): Int = {
-    def loop(i: Int): State[Int, Int] =
+    def loop(i: Int): State[Unit, Int] =
       if (i > size) State.succeed(i)
       else State.succeed(i + 1).flatMap(loop)
 
-    loop(0).runState(0)
+    loop(0).run
   }
 
   @Benchmark
   def zioGetSet(): Int = {
     def loop(i: Int, acc: State[Int, Int]): State[Int, Int] =
-      if (i > size) acc.flatMap(_ => State.set(i)).flatMap(_ => State.get)
-      else loop(i + 1, acc.flatMap(_ => State.set(i)).flatMap(_ => State.get))
+      if (i > size) acc.flatMap(_ => State.set(i)).flatMap(_ => State.get[Int])
+      else loop(i + 1, acc.flatMap(_ => State.set(i)).flatMap(_ => State.get[Int]))
 
-    loop(0, State.succeed(0)).runState(0)
+    loop(0, State.const.as(0)).runState(0)
   }
 
   @Benchmark
