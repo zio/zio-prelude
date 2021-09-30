@@ -23,7 +23,7 @@ import scala.util.NotGiven
  * Provides implicit evidence that an instance of `A` is not in implicit scope.
  */
 @implicitNotFound("Implicit ${A} defined.")
-trait Not[A]
+sealed trait Not[A]
 
 object Not {
 
