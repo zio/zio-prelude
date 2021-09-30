@@ -22,7 +22,7 @@ import scala.annotation.implicitAmbiguous
  * Provides implicit evidence that an instance of `A` is not in implicit scope.
  */
 @implicitAmbiguous("Implicit ${A} defined.")
-trait Not[A]
+sealed trait Not[A]
 
 object Not {
 
