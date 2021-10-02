@@ -26,7 +26,7 @@ class StateBenchmarks {
 
   type CatsStack[A] = Kleisli[CatsEitherIntState, Any, A]
   object CatsStack {
-    def get: CatsStack[Int] = {
+    def get: CatsStack[Int]                        = {
       val eitherT: CatsEitherIntState[Int] =
         EitherT.liftF[CatsIntState, Nothing, Int](CatsState.get)
       Kleisli.liftF(eitherT)
@@ -35,7 +35,7 @@ class StateBenchmarks {
       Kleisli.pure(a)
     def runState[A](fa: CatsStack[A])(s: Int): Int =
       fa.run(()).merge.runS(s).value
-    def set(n: Int): CatsStack[Unit] = {
+    def set(n: Int): CatsStack[Unit]               = {
       val eitherT: CatsEitherIntState[Unit] =
         EitherT.liftF[CatsIntState, Nothing, Unit](CatsState.set(n))
       Kleisli.liftF(eitherT)
