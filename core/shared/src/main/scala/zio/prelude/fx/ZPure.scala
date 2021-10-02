@@ -812,7 +812,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation from a state transition function that returns
    * the original state unchanged.
    */
-  def const[S]: ZPure[Nothing, S, S, Any, Nothing, Unit]                                                    =
+  def const[S]: ZPure[Nothing, S, S, Any, Nothing, Unit] =
     update(identity)
 
   def environment[R]: ZPure[Nothing, Unit, Unit, R, Nothing, R] =
@@ -837,7 +837,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    */
   def forEach[F[+_]: ForEach, W, S, R, E, A, B](fa: F[A])(
     f: A => ZPure[W, S, S, R, E, B]
-  ): ZPure[W, S, S, R, E, F[B]]                                                     =
+  ): ZPure[W, S, S, R, E, F[B]] =
     ForEach[F].forEach[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A, B](fa)(f)
 
   /**
@@ -1278,11 +1278,11 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     new CustomCovariantSyntax[ZPure[W, S1, S2, R, E, A]] {}
 
   implicit def ZPureCustomAssociativeFlattenSyntax[W, S1, S2, R, E, A]
-    : CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]]                                                 =
+    : CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]] =
     new CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]] {}
 
   implicit def ZPureCustomAssociativeBothSyntax[W, S1, S2, R, E, A]
-    : CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]]                                                    =
+    : CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]] =
     new CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]] {}
 
   /**
@@ -1371,7 +1371,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S3, S4, R, E, B],
     compose: ComposeState[S1, S2, S3, S4]
-  )                                                                  extends ZPure[W, Any, Nothing, R, E, B]               {
+  ) extends ZPure[W, Any, Nothing, R, E, B] {
     override def tag: Int = Tags.FlatMap
   }
   private final case class Fold[+W, S1, S2, S3, S4, S5, S6, -R, E1, +E2, A, +B](
@@ -1379,21 +1379,21 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     failure: Cause[E1] => ZPure[W, S3, S4, R, E2, B],
     success: A => ZPure[W, S5, S6, R, E2, B],
     fold: FoldState[S1, S2, S3, S4, S5, S6]
-  )                                                                  extends ZPure[W, Any, Nothing, R, E2, B]
+  ) extends ZPure[W, Any, Nothing, R, E2, B]
       with Function[A, ZPure[Any, Any, Any, Any, Any, Any]] {
     override def tag: Int                                         = Tags.Fold
     override def apply(a: A): ZPure[Any, Any, Any, Any, Any, Any] =
       success(a).asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
   }
   private final case class Access[W, S1, S2, R, E, A](access: R => ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, R, E, A]                     {
+      extends ZPure[W, S1, S2, R, E, A] {
     override def tag: Int = Tags.Access
   }
   private final case class Provide[W, S1, S2, R, E, A](r: R, continue: ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, Any, E, A]                   {
+      extends ZPure[W, S1, S2, Any, E, A] {
     override def tag: Int = Tags.Provide
   }
-  private final case class Log[S, +W](log: W) extends ZPure[W, S, S, Any, Nothing, Unit] {
+  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]            {
     override def tag: Int = Tags.Log
   }
   private final case class Flag[W, S1, S2, R, E, A](

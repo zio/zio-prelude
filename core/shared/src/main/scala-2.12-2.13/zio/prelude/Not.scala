@@ -30,7 +30,7 @@ object Not {
    * Derives a `Not[A]` instance when an instance of `A` is not in implciit
    * scope.
    */
-  implicit def Not[A]: Not[A]                           =
+  implicit def Not[A]: Not[A] =
     new Not[A] {}
 
   /**

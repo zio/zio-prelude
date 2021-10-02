@@ -98,7 +98,7 @@ object Divariant {
       override def leftContramap[A, B, C](c2a: C => A): (A => B) => C => B = { a2b => c =>
         c |> c2a |> a2b
       }
-      override def rightMap[A, B, C](b2c: B => C): (A => B) => A => C = { a2b => a =>
+      override def rightMap[A, B, C](b2c: B => C): (A => B) => A => C      = { a2b => a =>
         a |> a2b |> b2c
       }
     }

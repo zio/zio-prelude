@@ -83,7 +83,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Folds over the elements of this collection from left to right to produce a
    * summary value, maintaining some internal state along the way.
    */
-  def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S                                           =
+  def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S =
     forEach[({ type lambda[+A] = State[S, A] })#lambda, A, Unit](fa)(a => State.update((s: S) => f(s, a))).runState(s)
 
   /**
@@ -186,7 +186,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Returns the largest value in the collection if one exists or `None`
    * otherwise.
    */
-  def maxOption[A: Ord](fa: F[A]): Option[A]                            =
+  def maxOption[A: Ord](fa: F[A]): Option[A] =
     maxByOption(fa)(identity)
 
   /**
@@ -450,11 +450,11 @@ trait ForEachSyntax {
       F.toChunk(self)
     def zipAll[B](
       that: F[B]
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]]                 =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]] =
       F.zipAll(self, that)
     def zipAllWith[B, C](that: F[B])(
       f: These[A, B] => C
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C]                           =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C] =
       F.zipAllWith(self, that)(f)
     def zipWithIndex(implicit F: ForEach[F]): F[(A, Int)]                                                       =
       F.zipWithIndex(self)

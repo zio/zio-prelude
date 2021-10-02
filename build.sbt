@@ -78,7 +78,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(macros)
 
-lazy val coreJS  = core.js
+lazy val coreJS = core.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
@@ -91,7 +91,7 @@ lazy val coreJVM = core.jvm
 lazy val coreNative = core.native
   .settings(nativeSettings)
 
-lazy val coreTests    = crossProject(JSPlatform, JVMPlatform)
+lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .in(file("core-tests"))
   .settings(stdSettings("zio-prelude-tests"))
   .settings(crossProjectSettings)
@@ -103,7 +103,7 @@ lazy val coreTests    = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core, laws)
   .settings(publish / skip := true)
 
-lazy val coreTestsJS  = coreTests.js
+lazy val coreTestsJS = coreTests.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
@@ -125,7 +125,7 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(core)
 
-lazy val lawsJS  = laws.js
+lazy val lawsJS = laws.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
@@ -166,7 +166,7 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .enablePlugins(BuildInfoPlugin)
 
-lazy val experimentalJS  = experimental.js
+lazy val experimentalJS = experimental.js
   .settings(jsSettings)
   .settings(dottySettings)
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
@@ -233,7 +233,7 @@ lazy val docs = project
   .dependsOn(coreJVM, experimentalJVM, lawsJVM)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
-lazy val examples    =
+lazy val examples =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .in(file("examples"))
     .dependsOn(core)
