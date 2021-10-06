@@ -16,9 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.DeriveEqualForEach
 import zio.prelude.newtypes.{And, First, Max, Min, Or, Prod, Sum}
-import zio.test.laws._
 import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
 
 /**
@@ -58,7 +56,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * predicate.
    */
   def exists[A](fa: F[A])(f: A => Boolean): Boolean =
-    foldMap(fa)(a => Or(f(a)))
+    foldMap(fa)(a => Or.create(f(a)))
 
   /**
    * Returns the first element in the collection satisfying the specified
@@ -85,7 +83,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Folds over the elements of this collection from left to right to produce a
    * summary value, maintaining some internal state along the way.
    */
-  def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S                                           =
+  def foldLeft[S, A](fa: F[A])(s: S)(f: (S, A) => S): S =
     forEach[({ type lambda[+A] = State[S, A] })#lambda, A, Unit](fa)(a => State.update((s: S) => f(s, a))).runState(s)
 
   /**
@@ -134,7 +132,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * predicate.
    */
   def forall[A](fa: F[A])(f: A => Boolean): Boolean =
-    foldMap(fa)(a => And(f(a)))
+    foldMap(fa)(a => And.create(f(a)))
 
   /**
    * Traverses each element in the collection with the specified effectual
@@ -167,7 +165,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Returns whether the collection is empty.
    */
   def isEmpty[A](fa: F[A]): Boolean =
-    foldMap(fa)(_ => And(false))
+    foldMap(fa)(_ => And.create(false))
 
   /**
    * Lifts a function operating on values to a function that operates on each
@@ -188,7 +186,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Returns the largest value in the collection if one exists or `None`
    * otherwise.
    */
-  def maxOption[A: Ord](fa: F[A]): Option[A]                            =
+  def maxOption[A: Ord](fa: F[A]): Option[A] =
     maxByOption(fa)(identity)
 
   /**
@@ -223,6 +221,40 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    */
   def nonEmpty[A](fa: F[A]): Boolean =
     !isEmpty(fa)
+
+  /**
+   * Partitions the collection based on the specified function.
+   */
+  def partitionMap[A, B, C](
+    fa: F[A]
+  )(f: A => Either[B, C])(implicit both: IdentityBoth[F], either: IdentityEither[F]): (F[B], F[C]) = {
+    implicit val covariant: Covariant[F]       = self
+    implicit val leftIdentity: Identity[F[B]]  = Identity.fromIdentityEitherCovariant
+    implicit val rightIdentity: Identity[F[C]] = Identity.fromIdentityEitherCovariant
+    foldMap(fa) { a =>
+      f(a) match {
+        case Left(b)  => (b.succeed, either.none)
+        case Right(c) => (either.none, c.succeed)
+      }
+    }
+  }
+
+  /**
+   * Partitions the collection based on the specified effectual function.
+   */
+  def partitionMapM[G[+_]: IdentityFlatten: Covariant, A, B, C](
+    fa: F[A]
+  )(f: A => G[Either[B, C]])(implicit both: IdentityBoth[F], either: IdentityEither[F]): G[(F[B], F[C])] = {
+    implicit val covariant: Covariant[F]       = self
+    implicit val leftIdentity: Identity[F[B]]  = Identity.fromIdentityEitherCovariant
+    implicit val rightIdentity: Identity[F[C]] = Identity.fromIdentityEitherCovariant
+    foldMapM(fa) { a =>
+      f(a).map {
+        case Left(b)  => (b.succeed, either.none)
+        case Right(c) => (either.none, c.succeed)
+      }
+    }
+  }
 
   /**
    * Returns the product of all elements in the collection.
@@ -302,6 +334,31 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     foldLeft(fa)(List.empty[A])((as, a) => a :: as).reverse
 
   /**
+   * Zips the left collection and right collection together, using `None` to
+   * handle the case where one collection is larger than the other.
+   */
+  def zipAll[A, B, C](fa: F[A], fb: F[B])(implicit
+    both: IdentityBoth[F],
+    either: IdentityEither[F]
+  ): F[These[A, B]] =
+    zipAllWith(fa, fb)(identity)
+
+  /**
+   * Zips the left collection and right collection together, using the
+   * specified function to handle the cases where one collection is larger than
+   * the other.
+   */
+  def zipAllWith[A, B, C](fa: F[A], fb: F[B])(
+    f: These[A, B] => C
+  )(implicit both: IdentityBoth[F], either: IdentityEither[F]): F[C] = {
+    implicit val covariant: Covariant[F] = self
+    val as                               = toChunk(fa)
+    val bs                               = toChunk(fb)
+    val cs                               = as.zipAllWith(bs)(a => f(These.Left(a)), b => f(These.Right(b)))((a, b) => f(These.Both(a, b)))
+    cs.foldLeft[F[C]](either.none)((cs, c) => cs orElse c.succeed)
+  }
+
+  /**
    * Zips each element of the collection with its index.
    */
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
@@ -316,13 +373,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     }
 }
 
-object ForEach extends LawfulF.Covariant[DeriveEqualForEach, Equal] {
-
-  /**
-   * The set of all laws that instances of `ForEach` must satisfy.
-   */
-  lazy val laws: LawsF.Covariant[DeriveEqualForEach, Equal] =
-    Covariant.laws
+object ForEach {
 
   /**
    * Summons an implicit `ForEach`.
@@ -397,6 +448,14 @@ trait ForEachSyntax {
       F.sum(self)
     def toChunk(implicit F: ForEach[F]): Chunk[A]                                                               =
       F.toChunk(self)
+    def zipAll[B](
+      that: F[B]
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]] =
+      F.zipAll(self, that)
+    def zipAllWith[B, C](that: F[B])(
+      f: These[A, B] => C
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C] =
+      F.zipAllWith(self, that)(f)
     def zipWithIndex(implicit F: ForEach[F]): F[(A, Int)]                                                       =
       F.zipWithIndex(self)
   }

@@ -1,7 +1,6 @@
 package zio.prelude
 
 import zio.prelude.ZValidation._
-import zio.test.Assertion
 import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
@@ -399,14 +398,11 @@ object ZValidation extends LowPriorityValidationImplicits {
     Failure(Chunk.empty, NonEmptyChunk(error))
 
   /**
-   * Constructs a `ZValidation` from a value and an assertion about that value.
-   * The resulting `ZValidation` will be a success if the value satisfies the
-   * assertion or else will contain a string rendering describing how the
-   * value did not satisfy the assertion.
+   * Constructs a `ZValidation` that fails with the specified `NonEmptyChunk`
+   * of errors.
    */
-  def fromAssert[A](value: A)(assertion: Assertion[A]): Validation[String, A] =
-    if (assertion.test(value)) succeed(value)
-    else fail(s"$value did not satisfy ${assertion.render}")
+  def failNonEmptyChunk[E](errors: NonEmptyChunk[E]): Validation[E, Nothing] =
+    Failure(Chunk.empty, errors)
 
   /**
    * Constructs a `ZValidation` from an `Either`.
@@ -415,10 +411,24 @@ object ZValidation extends LowPriorityValidationImplicits {
     value.fold(fail, succeed)
 
   /**
+   * Constructs a `ZValidation` from an `Either` that fails with a
+   * `NonEmptyChunk` of errors.
+   */
+  def fromEitherNonEmptyChunk[E, A](value: Either[NonEmptyChunk[E], A]): Validation[E, A] =
+    value.fold(failNonEmptyChunk, succeed)
+
+  /**
    * Constructs a `ZValidation` from an `Option`.
    */
   def fromOption[A](value: Option[A]): Validation[Unit, A] =
     value.fold[Validation[Unit, A]](fail(()))(succeed)
+
+  /**
+   * Construts a `Validation` from an `Option`, failing with the error
+   * provided.
+   */
+  def fromOptionWith[E, A](error: => E)(value: Option[A]): Validation[E, A] =
+    value.fold[Validation[E, A]](fail(error))(succeed)
 
   /**
    * Constructs a `Validation` from a predicate, failing with None.

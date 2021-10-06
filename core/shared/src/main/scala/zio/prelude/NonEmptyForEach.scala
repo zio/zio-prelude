@@ -16,9 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.DeriveEqualNonEmptyForEach
 import zio.prelude.newtypes.{Max, Min}
-import zio.test.laws._
 import zio.{ChunkBuilder, NonEmptyChunk}
 
 /**
@@ -157,13 +155,7 @@ trait NonEmptyForEach[F[+_]] extends ForEach[F] {
   def toNonEmptyList[A](fa: F[A]): NonEmptyList[A] =
     reduceMapLeft(fa)(NonEmptyList.single)((as, a) => NonEmptyList.cons(a, as)).reverse
 }
-object NonEmptyForEach extends LawfulF.Covariant[DeriveEqualNonEmptyForEach, Equal] {
-
-  /**
-   * The set of all laws that instances of `NonEmptyForEach` must satisfy.
-   */
-  lazy val laws: LawsF.Covariant[DeriveEqualNonEmptyForEach, Equal] =
-    ForEach.laws
+object NonEmptyForEach {
 
   /**
    * Summons an implicit `NonEmptyForEach`.

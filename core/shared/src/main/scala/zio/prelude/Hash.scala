@@ -16,8 +16,6 @@
 
 package zio.prelude
 
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
 import zio.{Chunk, NonEmptyChunk}
 
 import scala.annotation.implicitNotFound
@@ -47,23 +45,7 @@ trait Hash[-A] extends Equal[A] { self =>
     )
 }
 
-object Hash extends Lawful[Hash] {
-
-  /**
-   * For all values `a1` and `a2`, if `a1` is equal to `a2` then the hash of
-   * `a1` is equal to the hash of `a2`.
-   */
-  lazy val consistencyLaw: Laws[Hash] =
-    new Laws.Law2[Hash]("consistencyLaw") {
-      def apply[A](a1: A, a2: A)(implicit caps: Hash[A]): TestResult =
-        (a1 <-> a2) ==> (Hash[A].hash(a1) <-> Hash[A].hash(a2))
-    }
-
-  /**
-   * The set of all laws that instances of `Hash` must satisfy.
-   */
-  lazy val laws: Laws[Hash] =
-    consistencyLaw + Equal.laws
+object Hash {
 
   /**
    * The contravariant instance for `Hash`.
@@ -155,21 +137,21 @@ object Hash extends Lawful[Hash] {
    * Derives a `Hash` for a product type given a `Hash` for each element of the
    * product type.
    */
-  implicit def Tuple2Hash[A: Hash, B: Hash]: Hash[(A, B)]                                     =
+  implicit def Tuple2Hash[A: Hash, B: Hash]: Hash[(A, B)] =
     makeFrom({ case (a, b) => (a.hash, b.hash).hashCode }, Equal.Tuple2Equal)
 
   /**
    * Derives an `Hash` for a product type given an `Hash` for each element of
    * the product type.
    */
-  implicit def Tuple3Hash[A: Hash, B: Hash, C: Hash]: Hash[(A, B, C)]                         =
+  implicit def Tuple3Hash[A: Hash, B: Hash, C: Hash]: Hash[(A, B, C)] =
     makeFrom({ case (a, b, c) => (a.hash, b.hash, c.hash).hashCode }, Equal.Tuple3Equal)
 
   /**
    * Derives an `Hash` for a product type given an `Hash` for each element of
    * the product type.
    */
-  implicit def Tuple4Hash[A: Hash, B: Hash, C: Hash, D: Hash]: Hash[(A, B, C, D)]             =
+  implicit def Tuple4Hash[A: Hash, B: Hash, C: Hash, D: Hash]: Hash[(A, B, C, D)] =
     makeFrom({ case (a, b, c, d) => (a.hash, b.hash, c.hash, d.hash).hashCode }, Equal.Tuple4Equal)
 
   /**
