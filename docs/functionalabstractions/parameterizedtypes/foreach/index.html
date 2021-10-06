@@ -147,7 +147,7 @@
         zipWith(f(a), gbs)(_ :: _)
       }
   }
-<span class="hljs-comment">// ListForEach: ForEach[List] = repl.MdocSession$App$$anon$1@39eef6a1</span>
+<span class="hljs-comment">// ListForEach: ForEach[List] = repl.MdocSession$App$$anon$1@3b1aac86</span>
 </code></pre>
 <p>Notice how similar our implementation of the <code>ForEach</code> abstraction looks to our initial implementation of the <code>foreach</code> operator on <code>ZIO</code>. Other than using operators defined on <code>Covariant</code> and <code>IdentityBoth</code> instead of operators on <code>ZIO</code> they are identical.</p>
 <p>We have already come a long way with our implementation of <code>ForEach</code>. We have a much better understanding now of what the <code>forEach</code> operator does and how its signature reflects the minimum possible set of constraints necessary to implement it.</p>
