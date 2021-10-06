@@ -49,41 +49,12 @@ object Derive {
     derive
 
   /**
-   * The `DeriveEqual` instance for `Id`.
-   */
-  implicit val IdDeriveEqual: Derive[Id, Equal] =
-    new Derive[Id, Equal] {
-      override def derive[A: Equal]: Equal[Id[A]] = Id.wrapAll(Equal[A])
-    }
-
-  /**
-   * The `DeriveEqual` instance for `Nested`.
-   */
-  implicit def NestedDeriveEqual[F[+_], G[+_]](implicit
-    F: Derive[F, Equal],
-    G: Derive[G, Equal]
-  ): Derive[({ type lambda[A] = Nested[F, G, A] })#lambda, Equal] =
-    new Derive[({ type lambda[A] = Nested[F, G, A] })#lambda, Equal] {
-      override def derive[A: Equal]: Equal[Nested[F, G, A]] =
-        Equal.NestedEqual(F.derive(G.derive[A]))
-    }
-
-  /**
    * The `DeriveEqual` instance for `Chunk`.
    */
   implicit val ChunkDeriveEqual: Derive[Chunk, Equal] =
     new Derive[Chunk, Equal] {
       def derive[A: Equal]: Equal[Chunk[A]] =
         Equal.ChunkEqual
-    }
-
-  /**
-   * The `DeriveEqual` instance for `List`.
-   */
-  implicit val ListDeriveEqual: Derive[List, Equal] =
-    new Derive[List, Equal] {
-      def derive[A: Equal]: Equal[List[A]] =
-        Equal.ListEqual
     }
 
   /**
@@ -96,12 +67,41 @@ object Derive {
     }
 
   /**
+   * The `DeriveEqual` instance for `Id`.
+   */
+  implicit val IdDeriveEqual: Derive[Id, Equal] =
+    new Derive[Id, Equal] {
+      override def derive[A: Equal]: Equal[Id[A]] = Id.wrapAll(Equal[A])
+    }
+
+  /**
+   * The `DeriveEqual` instance for `List`.
+   */
+  implicit val ListDeriveEqual: Derive[List, Equal] =
+    new Derive[List, Equal] {
+      def derive[A: Equal]: Equal[List[A]] =
+        Equal.ListEqual
+    }
+
+  /**
    * The `DeriveEqual` instance for `Map`.
    */
   implicit def MapDeriveEqual[A]: DeriveEqual[({ type lambda[+x] = Map[A, x] })#lambda] =
     new DeriveEqual[({ type lambda[+x] = Map[A, x] })#lambda] {
       def derive[B: Equal]: Equal[Map[A, B]] =
         Equal.MapPartialOrd
+    }
+
+  /**
+   * The `DeriveEqual` instance for `Nested`.
+   */
+  implicit def NestedDeriveEqual[F[+_], G[+_]](implicit
+    F: Derive[F, Equal],
+    G: Derive[G, Equal]
+  ): Derive[({ type lambda[A] = Nested[F, G, A] })#lambda, Equal] =
+    new Derive[({ type lambda[A] = Nested[F, G, A] })#lambda, Equal] {
+      override def derive[A: Equal]: Equal[Nested[F, G, A]] =
+        Equal.NestedEqual(F.derive(G.derive[A]))
     }
 
   /**

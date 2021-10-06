@@ -1159,6 +1159,17 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
     }
 
   /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `List`.
+   */
+  implicit val ListIdentityBoth: IdentityBoth[List] =
+    new IdentityBoth[List] {
+      val any: List[Any] =
+        List(())
+
+      def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
    * The `IdentityBoth` (and `AssociativeBoth`) instance for `Nested[F, G, A]`.
    */
   implicit def NestedIdentityBoth[F[+_]: IdentityBoth: Covariant, G[+_]](implicit
@@ -1171,17 +1182,6 @@ object AssociativeBoth extends LawfulF.Invariant[AssociativeBothDeriveEqualInvar
         Nested {
           Nested.unwrap[F[G[A]]](fa).zipWith(Nested.unwrap[F[G[B]]](fb))(_ zip _)
         }
-    }
-
-  /**
-   * The `IdentityBoth` (and `AssociativeBoth`) instance for `List`.
-   */
-  implicit val ListIdentityBoth: IdentityBoth[List] =
-    new IdentityBoth[List] {
-      val any: List[Any] =
-        List(())
-
-      def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 
   /**

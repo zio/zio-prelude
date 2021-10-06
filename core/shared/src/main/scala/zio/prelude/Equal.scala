@@ -221,17 +221,6 @@ object Equal extends Lawful[Equal] {
   def default[A]: Equal[A] =
     DefaultEqual
 
-  implicit def IdEqual[A: Equal]: Equal[Id[A]] = new Equal[Id[A]] {
-    override protected def checkEqual(l: Id[A], r: Id[A]): Boolean =
-      Id.unwrap[A](l) === Id.unwrap[A](r)
-  }
-
-  implicit def NestedEqual[F[+_], G[+_], A](implicit eqFGA: Equal[F[G[A]]]): Equal[Nested[F, G, A]] =
-    new Equal[Nested[F, G, A]] {
-      override protected def checkEqual(l: Nested[F, G, A], r: Nested[F, G, A]): Boolean =
-        eqFGA.checkEqual(Nested.unwrap[F[G[A]]](l), Nested.unwrap[F[G[A]]](r))
-    }
-
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
    */
@@ -329,6 +318,11 @@ object Equal extends Lawful[Equal] {
   implicit lazy val FiberIdHashOrd: Hash[Fiber.Id] with Ord[Fiber.Id] =
     HashOrd.derive[(Long, Long)].contramap[Fiber.Id](fid => (fid.startTimeMillis, fid.seqNumber))
 
+  implicit def IdEqual[A: Equal]: Equal[Id[A]] = new Equal[Id[A]] {
+    override protected def checkEqual(l: Id[A], r: Id[A]): Boolean =
+      Id.unwrap[A](l) === Id.unwrap[A](r)
+  }
+
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
    */
@@ -360,6 +354,12 @@ object Equal extends Lawful[Equal] {
       l.size == r.size &&
         l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
   }
+
+  implicit def NestedEqual[F[+_], G[+_], A](implicit eqFGA: Equal[F[G[A]]]): Equal[Nested[F, G, A]] =
+    new Equal[Nested[F, G, A]] {
+      override protected def checkEqual(l: Nested[F, G, A], r: Nested[F, G, A]): Boolean =
+        eqFGA.checkEqual(Nested.unwrap[F[G[A]]](l), Nested.unwrap[F[G[A]]](r))
+    }
 
   /**
    * Derives an `Equal[NonEmptyChunk[A]]` given an `Equal[A]`.
