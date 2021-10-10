@@ -90,7 +90,7 @@ object Gens {
    * A generator of state transition functions.
    */
   def state[R, S, A](s: Gen[R, S], a: Gen[R, A]): Gen[R, State[S, A]] =
-    Gen.function[R, S, (S, A)](s <*> a).map(State.modify)
+    Gen.function[R, S, (A, S)](a <*> s).map(State.modify)
 
   /**
    * A generator of `Validation` values.

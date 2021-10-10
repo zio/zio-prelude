@@ -543,8 +543,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
               val zPure2 = nested.asInstanceOf[ZPure.Modify[Any, Any, Any]]
 
               val updated = zPure2.run0(s0)
-              s0 = updated._1
-              a = updated._2
+              a = updated._1
+              s0 = updated._2
               curZPure = continuation(a)
 
             case _ =>
@@ -604,8 +604,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
         case ZPure.Tags.Modify  =>
           val zPure     = curZPure.asInstanceOf[ZPure.Modify[Any, Any, Any]]
           val updated   = zPure.run0(s0)
-          s0 = updated._1
-          a = updated._2
+          a = updated._1
+          s0 = updated._2
           val nextInstr = stack.pop()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
         case ZPure.Tags.Log     =>
@@ -926,17 +926,17 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   /**
    * Constructs a computation from the specified modify function.
    */
-  def modify[S1, S2, A](f: S1 => (S2, A)): ZPure[Nothing, S1, S2, Any, Nothing, A] =
+  def modify[S1, S2, A](f: S1 => (A, S2)): ZPure[Nothing, S1, S2, Any, Nothing, A] =
     new ZPure.Modify(f)
 
   /**
    * Constructs a computation that may fail from the specified modify function.
    */
-  def modifyEither[S1, S2, E, A](f: S1 => Either[E, (S2, A)]): ZPure[Nothing, S1, S2, Any, E, A] =
+  def modifyEither[S1, S2, E, A](f: S1 => Either[E, (A, S2)]): ZPure[Nothing, S1, S2, Any, E, A] =
     for {
       s      <- ZPure.get[S1]
       tuple  <- ZPure.fromEither(f(s))
-      (s2, a) = tuple
+      (a, s2) = tuple
       _      <- ZPure.set(s2)
     } yield a
 
@@ -950,7 +950,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation that sets the state to the specified value.
    */
   def set[S](s: S): ZPure[Nothing, Any, S, Any, Nothing, Unit] =
-    modify(_ => (s, ()))
+    modify(_ => ((), s))
 
   /**
    * Constructs a computation that always succeeds with the specified value,
@@ -996,7 +996,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation from the specified update function.
    */
   def update[S1, S2](f: S1 => S2): ZPure[Nothing, S1, S2, Any, Nothing, Unit] =
-    modify(s => (f(s), ()))
+    modify(s => ((), f(s)))
 
   implicit final class ZPureSyntax[+W, S1, S2, -R, +E, +A](private val self: ZPure[W, S1, S2, R, E, A]) extends AnyVal {
 
@@ -1364,7 +1364,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   private final case class Fail[+E](error: Cause[E])                 extends ZPure[Nothing, Any, Nothing, Any, E, Nothing] {
     override def tag: Int = Tags.Fail
   }
-  private final case class Modify[-S1, +S2, +A](run0: S1 => (S2, A)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]       {
+  private final case class Modify[-S1, +S2, +A](run0: S1 => (A, S2)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]       {
     override def tag: Int = Tags.Modify
   }
   private final case class FlatMap[+W, S1, S2, S3, S4, -R, +E, A, +B](
