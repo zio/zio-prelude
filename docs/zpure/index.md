@@ -280,7 +280,8 @@ def withdraw(amount: Int): ZPure[Nothing, AccountState, AccountState, Any, Accou
   for {
     state <- ZPure.get[AccountState]
     _     <- if (amount > state.balance) ZPure.fail(InsufficientFunds)
-             else ZPure.set(AccountState(state.balance - amount, state.open))
+             else ZPure.unit
+   _      <- ZPure.set(AccountState(state.balance - amount, state.open))
   } yield ()
 ```
 
