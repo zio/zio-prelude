@@ -9,13 +9,13 @@ import zio.prelude.newtypes.{Natural, _}
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
 import zio.test.laws._
-import zio.{Chunk, Has, Random}
+import zio.{Chunk, Has, Random, ZTraceElement}
 
 object ZSetSpec extends DefaultRunnableSpec {
 
   def genFZSet[R <: Has[Random] with Has[Sized], B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] {
-      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, ZSet[A, B]] =
+      def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: ZTraceElement): Gen[R1, ZSet[A, B]] =
         genZSet(a, b)
     }
 
@@ -25,7 +25,7 @@ object ZSetSpec extends DefaultRunnableSpec {
   lazy val smallInts: Gen[Has[Random] with Has[Sized], Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  def natural(min: Natural, max: Natural): Gen[Has[Random], Natural] =
+  def natural(min: Natural, max: Natural)(implicit trace: ZTraceElement): Gen[Has[Random], Natural] =
     Gen.int(min, max).map(_.asInstanceOf[Natural])
 
   def naturals: Gen[Has[Random] with Has[Sized], Natural] =
@@ -54,7 +54,8 @@ object ZSetSpec extends DefaultRunnableSpec {
               ZSetCovariant(IntSumCommutativeInverse),
               ZSetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
-            IntHashOrd
+            IntHashOrd,
+            implicitly[ZTraceElement]
           )
         ),
         test("foreach")(
@@ -71,7 +72,8 @@ object ZSetSpec extends DefaultRunnableSpec {
               ZSetDeriveEqual(IntHashOrd, Identity[Sum[Natural]]),
               MultiSetForEach
             ),
-            IntHashOrd
+            IntHashOrd,
+            implicitly[ZTraceElement]
           )
         ),
         test("hash")(checkAllLaws(HashLaws)(genZSet(Gen.int, Gen.int)))
