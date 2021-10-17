@@ -43,7 +43,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def +++[W1 >: W, S0 <: S1, S3 >: S2, R1, B, E1 >: E](
     that: ZPure[W1, S0, S3, R1, E1, B]
   ): ZPure[W1, S0, S3, Either[R, R1], E1, Either[A, B]] =
-    ZPure.accessM(_.fold(self.provide(_).map(Left(_)), that.provide(_).map(Right(_))))
+    ZPure.accessZPure(_.fold(self.provide(_).map(Left(_)), that.provide(_).map(Right(_))))
 
   /**
    * A symbolic alias for `orElseEither`.
@@ -192,7 +192,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def join[W1 >: W, S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
     that: ZPure[W1, S0, S3, R1, E1, A1]
   ): ZPure[W1, S0, S3, Either[R, R1], E1, A1] =
-    ZPure.accessM(_.fold(self.provide, that.provide))
+    ZPure.accessZPure(_.fold(self.provide, that.provide))
 
   /**
    * Modifies the behavior of the inner computation regarding logs, so that
@@ -263,7 +263,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def mapErrorCause[E2](f: Cause[E] => Cause[E2]): ZPure[W, S1, S2, R, E2, A] =
     self.foldCauseM(
-      cause => ZPure.halt(f(cause)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
+      cause => ZPure.failCause(f(cause)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       ZPure.succeed
     )
 
@@ -351,7 +351,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * the remainder.
    */
   final def provideSome[R0](f: R0 => R): ZPure[W, S1, S2, R0, E, A] =
-    ZPure.accessM(r0 => self.provide(f(r0)))
+    ZPure.accessZPure(r0 => self.provide(f(r0)))
 
   /**
    * Provides this computation with its initial state.
@@ -597,7 +597,9 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           val zPure = curZPure.asInstanceOf[ZPure.Provide[Any, Any, Any, Any, Any, Any]]
           environments.push(zPure.r.asInstanceOf[AnyRef])
           curZPure = zPure.continue.foldCauseM(
-            e => (ZPure.succeed(environments.pop()) *> ZPure.halt(e)).asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]],
+            e =>
+              (ZPure.succeed(environments.pop()) *> ZPure.failCause(e))
+                .asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]],
             a =>
               (ZPure.succeed(environments.pop()) *> ZPure.succeed(a)).asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
           )(implicitly, FoldState.compose)
@@ -721,9 +723,9 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * The original state is supposed to be `()`.
    */
-  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
+  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessZIO[R] { r =>
     self.provide(r).runAll(())._2 match {
-      case Left(cause)   => zio.ZIO.halt(cause.toCause)
+      case Left(cause)   => zio.ZIO.failCause(cause.toCause)
       case Right((_, a)) => zio.ZIO.succeedNow(a)
     }
   }
@@ -732,10 +734,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    */
   def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
-    zio.ZIO.accessM[R] { r =>
+    zio.ZIO.accessZIO[R] { r =>
       val result = provide(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Left(cause)   => zio.ZIO.failCause(cause.toCause)
         case Right((_, a)) => zio.ZIO.succeedNow(a)
       }
     }
@@ -744,10 +746,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
    */
   def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
-    zio.ZIO.accessM[R] { r =>
+    zio.ZIO.accessZIO[R] { r =>
       val result = provide(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => zio.ZIO.halt(cause.toCause)
+        case Left(cause)   => zio.ZIO.failCause(cause.toCause)
         case Right(result) => zio.ZIO.succeedNow(result)
       }
     }
@@ -756,10 +758,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
    */
   def toZIOWithAll(s1: S1): zio.ZIO[R, E, (Chunk[W], S2, A)] =
-    zio.ZIO.accessM[R] { r =>
+    zio.ZIO.accessZIO[R] { r =>
       val (log, result) = provide(r).runAll(s1)
       result match {
-        case Left(cause)    => zio.ZIO.halt(cause.toCause)
+        case Left(cause)    => zio.ZIO.failCause(cause.toCause)
         case Right((s2, a)) => zio.ZIO.succeedNow((log, s2, a))
       }
     }
@@ -775,7 +777,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
     self.foldM(
-      e => ZPure.halt(ev(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
+      e => ZPure.failCause(ev(e)).flatMap(e => ZPure.update[S1, S2](_ => e) *> ZPure.fail(e)),
       a => ZPure.succeed(a)
     )
 }
@@ -785,8 +787,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def access[R]: AccessPartiallyApplied[R] =
     new AccessPartiallyApplied
 
-  def accessM[R]: AccessMPartiallyApplied[R] =
-    new AccessMPartiallyApplied
+  def accessZPure[R]: AccessZPurePartiallyApplied[R] =
+    new AccessZPurePartiallyApplied
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
@@ -812,17 +814,17 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    * Constructs a computation from a state transition function that returns
    * the original state unchanged.
    */
-  def const[S]: ZPure[Nothing, S, S, Any, Nothing, Unit]                                                    =
+  def const[S]: ZPure[Nothing, S, S, Any, Nothing, Unit] =
     update(identity)
 
   def environment[R]: ZPure[Nothing, Unit, Unit, R, Nothing, R] =
     access(r => r)
 
   def fail[E](e: E): ZPure[Nothing, Unit, Unit, Any, E, Nothing] =
-    halt(Cause(e))
+    failCause(Cause(e))
 
   def fail0[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
-    halt0(Cause(e))
+    failCause0(Cause(e))
 
   /**
    * Constructs a computation that extracts the first element of a tuple.
@@ -837,7 +839,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
    */
   def forEach[F[+_]: ForEach, W, S, R, E, A, B](fa: F[A])(
     f: A => ZPure[W, S, S, R, E, B]
-  ): ZPure[W, S, S, R, E, F[B]]                                                     =
+  ): ZPure[W, S, S, R, E, F[B]] =
     ForEach[F].forEach[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A, B](fa)(f)
 
   /**
@@ -889,10 +891,10 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def get[S]: ZPure[Nothing, S, S, Any, Nothing, S] =
     modify(s => (s, s))
 
-  def halt[E](cause: Cause[E]): ZPure[Nothing, Unit, Unit, Any, E, Nothing] =
+  def failCause[E](cause: Cause[E]): ZPure[Nothing, Unit, Unit, Any, E, Nothing] =
     ZPure.Fail(cause)
 
-  def halt0[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
+  def failCause0[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
     ZPure.Fail(cause)
 
   def log[W](w: W): ZPure[W, Unit, Unit, Any, Nothing, Unit] =
@@ -908,8 +910,8 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     left.foldCauseM(
       c1 =>
         right.foldCauseM(
-          c2 => ZPure.get[S] *> ZPure.halt(c1 && c2),
-          _ => ZPure.get[S] *> ZPure.halt(c1)
+          c2 => ZPure.get[S] *> ZPure.failCause(c1 && c2),
+          _ => ZPure.get[S] *> ZPure.failCause(c1)
         ),
       a => right.map(b => f(a, b))
     )
@@ -1255,7 +1257,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       Access(r => succeed(f(r)))
   }
 
-  final class AccessMPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+  final class AccessZPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[W, S1, S2, E, A](f: R => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
       Access(f)
   }
@@ -1278,11 +1280,11 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     new CustomCovariantSyntax[ZPure[W, S1, S2, R, E, A]] {}
 
   implicit def ZPureCustomAssociativeFlattenSyntax[W, S1, S2, R, E, A]
-    : CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]]                                                 =
+    : CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]] =
     new CustomAssociativeFlattenSyntax[ZPure[W, S1, S2, R, E, A]] {}
 
   implicit def ZPureCustomAssociativeBothSyntax[W, S1, S2, R, E, A]
-    : CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]]                                                    =
+    : CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]] =
     new CustomAssociativeBothSyntax[ZPure[W, S1, S2, R, E, A]] {}
 
   /**
@@ -1371,7 +1373,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S3, S4, R, E, B],
     compose: ComposeState[S1, S2, S3, S4]
-  )                                                                  extends ZPure[W, Any, Nothing, R, E, B]               {
+  ) extends ZPure[W, Any, Nothing, R, E, B] {
     override def tag: Int = Tags.FlatMap
   }
   private final case class Fold[+W, S1, S2, S3, S4, S5, S6, -R, E1, +E2, A, +B](
@@ -1379,21 +1381,21 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     failure: Cause[E1] => ZPure[W, S3, S4, R, E2, B],
     success: A => ZPure[W, S5, S6, R, E2, B],
     fold: FoldState[S1, S2, S3, S4, S5, S6]
-  )                                                                  extends ZPure[W, Any, Nothing, R, E2, B]
+  ) extends ZPure[W, Any, Nothing, R, E2, B]
       with Function[A, ZPure[Any, Any, Any, Any, Any, Any]] {
     override def tag: Int                                         = Tags.Fold
     override def apply(a: A): ZPure[Any, Any, Any, Any, Any, Any] =
       success(a).asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
   }
   private final case class Access[W, S1, S2, R, E, A](access: R => ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, R, E, A]                     {
+      extends ZPure[W, S1, S2, R, E, A] {
     override def tag: Int = Tags.Access
   }
   private final case class Provide[W, S1, S2, R, E, A](r: R, continue: ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, Any, E, A]                   {
+      extends ZPure[W, S1, S2, Any, E, A] {
     override def tag: Int = Tags.Provide
   }
-  private final case class Log[S, +W](log: W) extends ZPure[W, S, S, Any, Nothing, Unit] {
+  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]            {
     override def tag: Int = Tags.Log
   }
   private final case class Flag[W, S1, S2, R, E, A](
