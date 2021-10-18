@@ -55,10 +55,13 @@ lazy val root = project
     experimentalJS,
     experimentalJVM,
     experimentalNative,
-    scalaParallelCollections,
+    lawsJS,
+    lawsJVM,
+    lawsNative,
     macrosJS,
     macrosJVM,
-    macrosNative
+    macrosNative,
+    scalaParallelCollections
   )
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)

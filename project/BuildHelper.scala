@@ -193,13 +193,13 @@ object BuildHelper {
   def crossPlatformSources(scalaVer: String, platform: String, conf: String, baseDir: File) = {
     val versions = CrossVersion.partialVersion(scalaVer) match {
       case Some((2, 11)) =>
-        List("2.11", "2.11+", "2.11-2.12", "2.x")
+        List("2.11+", "2.11-2.12")
       case Some((2, 12)) =>
-        List("2.12", "2.11+", "2.12+", "2.11-2.12", "2.12-2.13", "2.x")
+        List("2.11+", "2.12+", "2.11-2.12", "2.12-2.13")
       case Some((2, 13)) =>
-        List("2.13", "2.11+", "2.12+", "2.13+", "2.12-2.13", "2.x")
-      case Some((3, 0))  =>
-        List("dotty", "2.11+", "2.12+", "2.13+", "3.x")
+        List("2.11+", "2.12+", "2.13+", "2.12-2.13")
+      case Some((3, _))  =>
+        List("2.11+", "2.12+", "2.13+")
       case _             =>
         List()
     }
@@ -248,7 +248,7 @@ object BuildHelper {
     ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
     ThisBuild / scalafixDependencies ++= List(
       "com.github.liancheng" %% "organize-imports" % "0.5.0",
-      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.18"
+      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.20"
     ),
     Test / parallelExecution               := true,
     incOptions ~= (_.withLogRecompileOnMacro(false)),
