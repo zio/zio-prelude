@@ -179,7 +179,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * Converts this set to a `Map` from elements to how many times they appear
    * in the set.
    */
-  def toMap[A1 >: A]: Map[A1, B]          =
+  def toMap[A1 >: A]: Map[A1, B] =
     map.asInstanceOf[Map[A1, B]]
 
   /** Converts this set to a non-empty one. */

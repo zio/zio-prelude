@@ -225,14 +225,14 @@ val interestRate: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double
   ZPure.access(_.interestRate)
 ```
 
-There is also an `accessZIO` variant for when we want to perform another computation based on the value from the environment.
+There is also an `accessZPure` variant for when we want to perform another computation based on the value from the environment.
 
 ```scala mdoc:nest
 def computeSimpleInterest(balance: Double, days: Int, interestRate: Double): ZPure[Nothing, Unit, Unit, Any, Nothing, Double] =
   ZPure.succeed(balance * days / 365 * interestRate)
 
 def accruedInterest(balance: Double, days: Int): ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] =
-  ZPure.accessZIO(r => computeSimpleInterest(balance, days, r.interestRate))
+  ZPure.accessZPure(r => computeSimpleInterest(balance, days, r.interestRate))
 ```
 
 To run a computation we need to provide it with its required environment, which we can do with the `provide` operator.
@@ -280,7 +280,8 @@ def withdraw(amount: Int): ZPure[Nothing, AccountState, AccountState, Any, Accou
   for {
     state <- ZPure.get[AccountState]
     _     <- if (amount > state.balance) ZPure.fail(InsufficientFunds)
-             else ZPure.set(AccountState(state.balance - amount, state.open))
+             else ZPure.unit
+   _      <- ZPure.set(AccountState(state.balance - amount, state.open))
   } yield ()
 ```
 

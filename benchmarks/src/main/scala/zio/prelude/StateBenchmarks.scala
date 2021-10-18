@@ -26,7 +26,7 @@ class StateBenchmarks {
 
   type CatsStack[A] = Kleisli[CatsEitherIntState, Any, A]
   object CatsStack {
-    def get: CatsStack[Int] = {
+    def get: CatsStack[Int]                        = {
       val eitherT: CatsEitherIntState[Int] =
         EitherT.liftF[CatsIntState, Nothing, Int](CatsState.get)
       Kleisli.liftF(eitherT)
@@ -35,7 +35,7 @@ class StateBenchmarks {
       Kleisli.pure(a)
     def runState[A](fa: CatsStack[A])(s: Int): Int =
       fa.run(()).merge.runS(s).value
-    def set(n: Int): CatsStack[Unit] = {
+    def set(n: Int): CatsStack[Unit]               = {
       val eitherT: CatsEitherIntState[Unit] =
         EitherT.liftF[CatsIntState, Nothing, Unit](CatsState.set(n))
       Kleisli.liftF(eitherT)
@@ -97,20 +97,20 @@ class StateBenchmarks {
 
   @Benchmark
   def zioLeftAssociatedBind(): Int = {
-    def loop(i: Int): State[Int, Int] =
+    def loop(i: Int): State[Unit, Int] =
       if (i > size) State.succeed(i)
       else State.succeed(i + 1).flatMap(loop)
 
-    loop(0).runState(0)
+    loop(0).run
   }
 
   @Benchmark
   def zioGetSet(): Int = {
     def loop(i: Int, acc: State[Int, Int]): State[Int, Int] =
-      if (i > size) acc.flatMap(_ => State.set(i)).flatMap(_ => State.get)
-      else loop(i + 1, acc.flatMap(_ => State.set(i)).flatMap(_ => State.get))
+      if (i > size) acc.flatMap(_ => State.set(i)).flatMap(_ => State.get[Int])
+      else loop(i + 1, acc.flatMap(_ => State.set(i)).flatMap(_ => State.get[Int]))
 
-    loop(0, State.succeed(0)).runState(0)
+    loop(0, State.const.as(0)).runState(0)
   }
 
   @Benchmark
