@@ -460,6 +460,16 @@ object ZValidation extends LowPriorityValidationImplicits {
     Success(Chunk(w), ())
 
   /**
+   * Converts an `Option` to a `ZValidation`, treating `None` as a success with
+   * no information and `Some` as a failure with the specified error.
+   */
+  def noneOrFail[E](option: Option[E]): Validation[E, Unit] =
+    option match {
+      case None    => ZValidation.unit
+      case Some(e) => ZValidation.fail(e)
+    }
+
+  /**
    * Constructs a `Validation` that succeeds with the specified value.
    */
   def succeed[A](value: A): Validation[Nothing, A] =
