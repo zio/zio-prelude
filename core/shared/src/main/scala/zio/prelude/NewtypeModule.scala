@@ -22,7 +22,7 @@ package zio.prelude
  * the underlying type at runtime but are treated as distinct types by the
  * Scala compiler. Newtypes can be used to increase type safety in modeling a
  * domain, for example by creating separate types for `Meter` and `Foot`.
- * Additionally, Refined Newtypes allow for compile-time validation of values,
+ * Additionally, Smart Newtypes allow for compile-time validation of values,
  * e.g., ensuring an Int is 4 digits long (a PIN) or that a String matches a
  * particular Regex (an Email).
  *
@@ -110,7 +110,7 @@ package zio.prelude
  * underlying type, so this technique is most useful for creating coherent
  * typeclasses instances rather than type safe domain specific languages.
  *
- * Finally, it is possible to create refined newtypes that can be are at
+ * Finally, it is possible to create Smart Newtypes that can be validated at
  * compile-time when constructed with a literal value, or at run-time with a
  * dynamic value, returning a [[Validation]]. In this case we must define an
  * additional `def assertion` method on the Object, indicating how to validate
@@ -144,8 +144,8 @@ package zio.prelude
  *   val fails    = Natural(-99) // -99 does not satisfy greaterThanOrEqualTo(0)
  * }}}
  *
- * If you need to supply a variable or other run-time validation to a refined
- * newtype, use the `make` method instead, which will return a [[Validation]].
+ * If you need to supply a variable or other run-time validation to a Smart
+ * Newtype, use the `make` method instead, which will return a [[Validation]].
  *
  * {{{
  *   val result: Validation[String, Natural] = Natural.make(10)

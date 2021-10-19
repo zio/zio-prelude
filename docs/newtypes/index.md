@@ -248,7 +248,7 @@ Now `SequenceNumber` is a type that is different from `Int` but is still a subty
 
 This means that we can use a `SequenceNumber` any time we need an `Int` and can use operators defined on `Int` on `SequenceNumber`. However, we still get the type safety of not being able to use an `Int` or `AccountNumber` when a `SequenceNumber` is expected.
 
-## Refined Newtypes
+## Smart Newtypes
 
 So far, all the new types we have created have been distinct from the underlying types but have not imposed any additional constraints on the values that the underlying type can take. For example, the `SequenceNumber` above could in principle be any `Int` value, whether that is `42` or `-1`.
 
@@ -276,7 +276,7 @@ object SequenceNumber extends Subtype[Int] {
 type SequenceNumber = SequenceNumber.Type
 ```
 
-Here we created a simple assertion that requires the value be equal to or greater than zero, but we can use much more complex refinements. For example, we could valid an `Email` with the `matches` assertion, which accept a `Regex`.
+Here we created a simple assertion that requires the value be equal to or greater than zero, but we can use much more complex assertions. For example, we could validate an `Email` with the `matches` assertion, which accept a `Regex`.
 
 Now, when we construct new values using `apply`, they will be validated *at compile time*.
 
@@ -289,7 +289,7 @@ val oops = SequenceNumber(-10)
 // • -10 did not satisfy greaterThanOrEqualTo(0)
 ```
 
-Refined newtypes can only be validated at compile-time when called with literals, such as `9000` or `"Fancy Pants"`. When wrapping variables or run-time values, you can use the `make` or `makeAll`.
+Smart Newtypes can only be validated at compile-time when called with literals, such as `9000` or `"Fancy Pants"`. When wrapping variables or run-time values, you can use the `make` or `makeAll`.
 
 ```scala mdoc
 import zio.Chunk
@@ -352,4 +352,4 @@ val sequenceNumber: SequenceNumber =
   SequenceNumber.unsafeMake(aTrustedInt)
 ```
 
-Thus, refined newtypes give us full ability to implement our own operators and to expose whatever interface we want for our type, from validating input at compile-time, to using `Validation` at run-time, to allowing users to create instances of the refined newtype directly.
+Thus, Smart Newtypes give us full ability to implement our own operators and to expose whatever interface we want for our type, from validating input at compile-time, to using `Validation` at run-time, to allowing users to create instances of the refined newtype directly.
