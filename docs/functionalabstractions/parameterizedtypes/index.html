@@ -79,7 +79,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">Int</span>, right: =&gt; <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span> =
       left + right
   }
-<span class="hljs-comment">// IntAssociative: Associative[Int] = repl.MdocSession$App$$anon$1@40a20096</span>
+<span class="hljs-comment">// IntAssociative: Associative[Int] = repl.MdocSession$App$$anon$1@655a5b1b</span>
 </code></pre>
 <p>In contrast, the <code>AssociativeBoth</code> abstraction describes a way of associatively combining two parameterized types.</p>
 <p>The syntax here may look a little new. Instead of being parameterized on an <code>A</code>, <code>AssociativeBoth</code> is parameterized on an <code>F[_]</code>.</p>
@@ -92,7 +92,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">List</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
       left.flatMap(a =&gt; right.map(b =&gt; (a, b)))
   }
-<span class="hljs-comment">// ListAssociativeBoth: AssociativeBoth[List] = repl.MdocSession$App$$anon$2@79b04705</span>
+<span class="hljs-comment">// ListAssociativeBoth: AssociativeBoth[List] = repl.MdocSession$App$$anon$2@7564e47f</span>
 </code></pre>
 <p>Notice how the <code>AssociativeBoth</code> instance is parameterized on <code>List</code> rather than a list of any specific type. This is important because it says the <code>ListAssociativeBoth</code> instance knows how to combine any two lists in an associative way, not just two lists of some specific type.</p>
 <p>What would the implementation of such a way of combining look like? It would not be able to use any information about the <code>A</code> or <code>B</code> values, because they could be anything, so it would have to combine them in a way that worked for any <code>A</code> and <code>B</code> values.</p>
