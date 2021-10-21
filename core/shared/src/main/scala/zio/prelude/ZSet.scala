@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Max, Min, Natural, Prod, Sum}
+import zio.prelude.newtypes._
 
 import scala.annotation.tailrec
 import scala.annotation.unchecked.uncheckedVariance
@@ -34,9 +34,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   /**
    * A symbolic alias for `intersect`.
    */
-  def &[A1 >: A, B1 >: B](
-    that: ZSet[A1, B1]
-  )(implicit ev1: Commutative[Min[B1]], ev2: Identity[Sum[B1]]): ZSet[A1, B1] =
+  def &[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Commutative[Min[B1]]): ZSet[A1, B1] =
     self intersect that
 
   /**
@@ -48,9 +46,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   /**
    * A symbolic alias for `zip`.
    */
-  def <*>[B1 >: B, C](
-    that: ZSet[C, B1]
-  )(implicit ev1: Commutative[Sum[B1]], ev2: Commutative[Prod[B1]]): ZSet[(A, C), B1] =
+  def <*>[B1 >: B, C](that: ZSet[C, B1])(implicit ev: Commutative[Prod[B1]]): ZSet[(A, C), B1] =
     self zip that
 
   /**
@@ -62,9 +58,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   /**
    * A symbolic alias for `union`.
    */
-  def |[A1 >: A, B1 >: B](
-    that: ZSet[A1, B1]
-  )(implicit ev1: Commutative[Max[B1]], ev2: Identity[Sum[B1]]): ZSet[A1, B1] =
+  def |[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev1: Commutative[Max[B1]]): ZSet[A1, B1] =
     self union that
 
   /**
@@ -151,11 +145,12 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * number of times each element appears is the minimum of the number of times
    * it appears in this set and the specified set.
    */
-  def intersect[A1 >: A, B1 >: B](
-    that: ZSet[A1, B1]
-  )(implicit ev1: Commutative[Min[B1]], ev2: Identity[Sum[B1]]): ZSet[A1, B1] =
-    new ZSet((self.map.toVector ++ that.map.toVector).foldLeft(HashMap.empty[A1, B1]) { case (map, (a, b)) =>
-      map + (a -> ev1.combine(Min(map.getOrElse(a, ev2.identity)), Min(b)))
+  def intersect[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Commutative[Min[B1]]): ZSet[A1, B1] =
+    new ZSet(self.map.foldLeft[HashMap[A1, B1]](HashMap.empty) { case (map, (a, b)) =>
+      that.map.get(a) match {
+        case Some(b1) => map + (a -> ev.combine(Min(b), Min(b1)))
+        case None     => map
+      }
     })
 
   /**
@@ -184,7 +179,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    * Converts this set to a `Map` from elements to how many times they appear
    * in the set.
    */
-  def toMap[A1 >: A]: Map[A1, B]          =
+  def toMap[A1 >: A]: Map[A1, B] =
     map.asInstanceOf[Map[A1, B]]
 
   /** Converts this set to a non-empty one. */
@@ -212,9 +207,12 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    */
   def union[A1 >: A, B1 >: B](
     that: ZSet[A1, B1]
-  )(implicit ev1: Commutative[Max[B1]], ev2: Identity[Sum[B1]]): ZSet[A1, B1] =
-    new ZSet((self.map.toVector ++ that.map.toVector).foldLeft(HashMap.empty[A1, B1]) { case (map, (a, b)) =>
-      map + (a -> ev1.combine(Max(map.getOrElse(a, ev2.identity)), Max(b)))
+  )(implicit ev: Commutative[Max[B1]]): ZSet[A1, B1] =
+    new ZSet(self.map.foldLeft(that.map) { case (map, (a, b)) =>
+      map.get(a) match {
+        case Some(b1) => map + (a -> ev.combine(Max(b), Max(b1)))
+        case None     => map + (a -> b)
+      }
     })
 
   /**
@@ -223,8 +221,10 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
    */
   def zip[B1 >: B, C](
     that: ZSet[C, B1]
-  )(implicit ev1: Commutative[Sum[B1]], ev2: Commutative[Prod[B1]]): ZSet[(A, C), B1] =
-    zipWith(that)((_, _))
+  )(implicit ev: Commutative[Prod[B1]]): ZSet[(A, C), B1] =
+    new ZSet(self.map.flatMap { case (a, b) =>
+      that.map.map { case (c, b1) => ((a, c), ev.combine(Prod(b), Prod(b1))) }
+    })
 
   /**
    * Combines this set with the specified set to produce their cartesian

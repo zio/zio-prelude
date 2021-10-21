@@ -17,7 +17,7 @@ trait HashInstances {
   /**
    * Derives a `Hash[ParSeq[A]]` given a `Hash[A]`.
    */
-  implicit def ParSeqHash[A: Hash]: Hash[par.ParSeq[A]]       =
+  implicit def ParSeqHash[A: Hash]: Hash[par.ParSeq[A]] =
     makeFrom(_.map(_.hash).hashCode, ParSeqEqual)
 
 }

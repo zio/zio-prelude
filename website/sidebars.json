@@ -5,6 +5,59 @@
       "overview/overview_diagrams"
     ]
   },
+  "functionalabstractions-sidebar": {
+    "Overview": [
+      "functionalabstractions/index"
+    ],
+    "Concrete Types": [
+      "functionalabstractions/concretetypes/index",
+      "functionalabstractions/concretetypes/associative",
+      "functionalabstractions/concretetypes/commutative",
+      "functionalabstractions/concretetypes/debug",
+      "functionalabstractions/concretetypes/equal",
+      "functionalabstractions/concretetypes/hash",
+      "functionalabstractions/concretetypes/identity",
+      "functionalabstractions/concretetypes/inverse",
+      "functionalabstractions/concretetypes/ord"
+    ],
+    "Parameterized Types": [
+      "functionalabstractions/parameterizedtypes/index",
+      "functionalabstractions/parameterizedtypes/associativeboth",
+      "functionalabstractions/parameterizedtypes/associativeeither",
+      "functionalabstractions/parameterizedtypes/associativeflatten",
+      "functionalabstractions/parameterizedtypes/commutativeboth",
+      "functionalabstractions/parameterizedtypes/commutativeeither",
+      "functionalabstractions/parameterizedtypes/contravariant",
+      "functionalabstractions/parameterizedtypes/covariant",
+      "functionalabstractions/parameterizedtypes/foreach",
+      "functionalabstractions/parameterizedtypes/identityboth",
+      "functionalabstractions/parameterizedtypes/identityeither",
+      "functionalabstractions/parameterizedtypes/identityflatten",
+      "functionalabstractions/parameterizedtypes/invariant",
+      "functionalabstractions/parameterizedtypes/nonemptyforeach"
+    ]
+  },
+  "functionaldatatypes-sidebar": {
+    "Functional Data Types": [
+      "functionaldatatypes/index",
+      "functionaldatatypes/equivalence",
+      "functionaldatatypes/nonemptylist",
+      "functionaldatatypes/these",
+      "functionaldatatypes/validation",
+      "functionaldatatypes/zset",
+      "functionaldatatypes/zvalidation"
+    ]
+  },
+  "newtypes-sidebar": {
+    "New types": [
+      "newtypes/index"
+    ]
+  },
+  "zpure-sidebar": {
+    "ZPure": [
+      "zpure/index"
+    ]
+  },
   "usecases-sidebar": {
     "Use Cases": [
       "usecases/usecases_index"

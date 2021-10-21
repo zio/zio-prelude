@@ -53,7 +53,7 @@ class Footer extends React.Component {
                     <div>
                         <h5>Additional resources</h5>
                         <a
-                            href="/zio-prelude/api/index.html">
+                            href="/zio-prelude/api/zio/prelude/">
                             Scaladoc of zio-prelude
                         </a>
                     </div>

@@ -16,10 +16,6 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.CovariantDeriveEqual
-import zio.test.TestResult
-import zio.test.laws._
-
 trait CovariantSubset[F[+_], Subset[_]] {
   def mapSubset[A, B: Subset](f: A => B): F[A] => F[B]
 }
@@ -78,32 +74,7 @@ trait Covariant[F[+_]] extends CovariantSubset[F, AnyType] with Invariant[F] { s
     }
 }
 
-object Covariant extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
-
-  /**
-   * Mapping with the identity function must be an identity function.
-   */
-  lazy val identityLaw: LawsF.Covariant[CovariantDeriveEqual, Equal] =
-    new LawsF.Covariant.Law1[CovariantDeriveEqual, Equal]("identityLaw") {
-      def apply[F[+_]: CovariantDeriveEqual, A: Equal](fa: F[A]): TestResult =
-        fa.map(identity) <-> fa
-    }
-
-  /**
-   * Mapping by `f` followed by `g` must be the same as mapping with the
-   * composition of `f` and `g`.
-   */
-  lazy val compositionLaw: LawsF.Covariant[CovariantDeriveEqual, Equal] =
-    new LawsF.Covariant.ComposeLaw[CovariantDeriveEqual, Equal]("compositionLaw") {
-      def apply[F[+_]: CovariantDeriveEqual, A: Equal, B: Equal, C: Equal](fa: F[A], f: A => B, g: B => C): TestResult =
-        fa.map(f).map(g) <-> fa.map(f andThen g)
-    }
-
-  /**
-   * The set of all laws that instances of `Covariant` must satisfy.
-   */
-  lazy val laws: LawsF.Covariant[CovariantDeriveEqual, Equal] =
-    identityLaw + compositionLaw
+object Covariant {
 
   /**
    * Summons an implicit `Covariant[F]`.
@@ -118,7 +89,7 @@ trait CovariantSyntax {
   /**
    * Provides infix syntax for mapping over covariant values.
    */
-  implicit class CovariantOps[F[+_], A](private val self: F[A]) {
+  implicit class CovariantOps[F[+_], A](private val self: F[A])(implicit ev: Not[CustomCovariantSyntax[F[A]]]) {
     def as[B](b: => B)(implicit F: Covariant[F]): F[B] = map(_ => b)
 
     def map[B](f: A => B)(implicit F: Covariant[F]): F[B] =
@@ -133,3 +104,10 @@ trait CovariantSyntax {
     def unit(implicit F: Covariant[F]): F[Unit] = as(())
   }
 }
+
+/**
+ * Provides implicit evidence that a data type defines its own implementation
+ * of operators defined by `CovariantSyntax` as extension methods and that the
+ * implementations provided by `CovariantSyntax` should not be used.
+ */
+trait CustomCovariantSyntax[A]

@@ -3,19 +3,21 @@ id: overview_index
 title: "Summary"
 ---
 
-ZIO Prelude is an alternative approach to functional abstractions in Scala, which throws out the classic functor hierarchy in favor of a modular algebraic approach that is smaller, easier to understand and teach, and more expressive.
+ZIO Prelude is a library focused on providing a core set of functional data types and abstractions that can help you solve a variety of day to day problems. The tools provided by ZIO Prelude fall into the following main categories:
 
-The ZIO Prelude Microsite is currently under development. In the meantime you can check tthe following resources:
-
-- [Scaladoc of zio-prelude](https://zio.github.io/zio-prelude/api/index.html)
-- [Github README.md](https://github.com/zio/zio-prelude)
-- [Type Class diagrams](https://zio.github.io/zio-prelude/docs/overview/overview_diagrams)
-- [Refactoring Functional Type Classes](https://www.slideshare.net/jdegoes/refactoring-functional-type-classes) - slides by John De Goes and Adam Fraser,
-- [SF Scala: Reimagining Functional Type Classes](https://youtu.be/OwmHgL9F_9Q) - a talk by John A. De Goes and Adam Fraser
-- [The Terror-Free Guide to Introducing Functional Scala at Work](https://www.slideshare.net/jv2301/the-terrorfree-guide-to-introducing-functional-scala-at-work) - slides by Jorge Vásquez,
-- [Exploring ZIO Prelude The game-changer for type classes in Scala](https://youtu.be/OzoMofqsPg8) - talk by Jorge Vásquez
-- [What's Ap with zio-prelude?](https://justinhj.github.io/2020/08/02/whats-ap-with-zio-prelude.html) - an article by justinhj
+- **[Functional Abstractions](functionalabstractions/index.md)** - Functional abstractions to describe different ways of combining data, making it easy for you to combine complex data types in a principled way.
+- **[Functional Data Types](functionaldatatypes/index.md)** - Additional data types to supplement the ones in the Scala standard library such as `Validation` and `NonEmptyList` to enable more accurate domain modeling and handle common problems like data validation.
+- **[New Types](newtypes/index.md)** - Zero overhead newtypes and refined newtypes to allow you to increase the type safety of your code base with zero overhead and minimal boilerplate.
+- **[ZPure](zpure/index.md)** - A description of a computation that supports logging, context, state, and errors, providing all the functionality traditionally offered by monad transformers with dramatically better performance and ergonomics.
 
 ## Installation
 
-TODO: Installation details
+Include ZIO Prelude in your project by adding the following to your build.sbt file:
+
+```scala mdoc:passthrough
+println(s"""```""")
+if (zio.prelude.BuildInfo.isSnapshot)
+  println(s"""resolvers += Resolver.sonatypeRepo("snapshots")""")
+println(s"""libraryDependencies += "dev.zio" %% "zio-prelude" % "${zio.prelude.BuildInfo.version}"""")
+println(s"""```""")
+```
