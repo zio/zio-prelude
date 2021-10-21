@@ -88,7 +88,7 @@ any.map(_ =&gt; fa).flatten === fa
   <span class="hljs-type">ZIO</span>.unit.map { _ =&gt;
     console.putStrLn(<span class="hljs-string">"Hello from an identity!"</span>)
   }.flatten
-<span class="hljs-comment">// helloIdentity: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@741faa70</span>
+<span class="hljs-comment">// helloIdentity: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@1a84f4b2</span>
 </code></pre>
 <p>Recall from our discussion of <code>AssociativeFlatten</code> that the <code>flatten</code> operator corresponds to running a workflow, which returns a new workflow, and then running the workflow. Here the <code>unit</code> workflow doesn't do anything and always succeeds so we can simply eliminate it.</p>
 <p>Just like the <code>any</code> value that is an identity with respect to the <code>both</code> operator of a <code>IdentityBoth</code>, the <code>any</code> value represents a successful value that contains no information. So other examples of the <code>any</code> value would include:</p>
