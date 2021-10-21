@@ -83,29 +83,29 @@
 
 <span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@6405e9e0</span>
+<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@5381630</span>
 
 <span class="hljs-keyword">val</span> zioHello: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   console.putStrLn(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"Hello"</span>)
-<span class="hljs-comment">// zioHello: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@1deec813</span>
+<span class="hljs-comment">// zioHello: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@1559930d</span>
 </code></pre>
 <p>If the <code>zip</code> operator was commutative these two <code>ZIO</code> workflows would be the same. But they obviously are not.</p>
 <p>The first will print <code>Hello</code> to the console on one line followed by <code>ZIO</code> on the next whereas the second will print <code>ZIO</code> to the console followed by <code>Hello</code>. We can easily observe this by running the program ourselves or using a test implementation of the <code>Console</code> service like <code>TestConsole</code> from ZIO Test.</p>
 <p>We can also see this in the context of failures.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> failZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>)) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@7d12a0cb</span>
+<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@79dbbb7d</span>
 
 <span class="hljs-keyword">val</span> zioFail: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   console.putStrLn(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>))
-<span class="hljs-comment">// zioFail: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@24d4780d</span>
+<span class="hljs-comment">// zioFail: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@fbec498</span>
 </code></pre>
 <p>Again if the <code>zip</code> operator was commutative these two <code>ZIO</code> workflows should be the same but they are not. The first program will fail immediately and never print <code>ZIO</code> to the console, whereas the second will print <code>ZIO</code> to the console and then fail.</p>
 <p>What would a commutative version of this operator be? It would have to run both the left and right values at the same time so they both had the same opportunity to run.</p>
 <p>The <code>zipPar</code> operator on <code>ZIO</code> does just this.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> helloZIOPar: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;&amp;&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// helloZIOPar: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$GetForkScope@6fd5cf9e</span>
+<span class="hljs-comment">// helloZIOPar: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$GetForkScope@4a72cac9</span>
 </code></pre>
 <p>Now <code>Hello</code> and <code>World</code> will be printed to the console at the same time. For any given execution one will appear before the other but they each have the same opportunity to appear first and both this and the version with the order reversed describe the same <code>ZIO</code> workflow.</p>
 <p>This interpretation of <code>zipPar</code> as running the left and right values on separate fibers is the most natural one but not the only one. The left and right values can be run in parallel as long as the result of running one does not depend on the result of running the other and information from both has equal opportunity to be included in the result.</p>
@@ -138,7 +138,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">A</span>], bs: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">List</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
       as.zip(bs)
   }
-<span class="hljs-comment">// ListCommutativeBoth: CommutativeBoth[List] = repl.MdocSession$App0$$anon$1@4902c27</span>
+<span class="hljs-comment">// ListCommutativeBoth: CommutativeBoth[List] = repl.MdocSession$App0$$anon$1@136ae971</span>
 </code></pre>
 <p>Again we are not forking any fibers here but values from the left list and the right list have an equal opportunity to be included in the zipped list.</p>
 <p>We can see this if we zip together two lists of different lengths.</p>
