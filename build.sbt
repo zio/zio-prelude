@@ -48,8 +48,6 @@ lazy val root = project
     coreJS,
     coreJVM,
     coreNative,
-    coreTestsJS,
-    coreTestsJVM,
     docs,
     examplesJVM,
     experimentalJS,
@@ -93,28 +91,6 @@ lazy val coreJVM = core.jvm
 
 lazy val coreNative = core.native
   .settings(nativeSettings)
-
-lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
-  .in(file("core-tests"))
-  .settings(stdSettings("zio-prelude-tests"))
-  .settings(crossProjectSettings)
-  .settings(macroDefinitionSettings)
-  .settings(buildInfoSettings("zio.prelude.tests"))
-  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
-  .enablePlugins(BuildInfoPlugin)
-  .dependsOn(core, laws)
-  .settings(publish / skip := true)
-
-lazy val coreTestsJS = coreTests.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val coreTestsJVM = coreTests.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
 
 lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("laws"))
@@ -184,7 +160,7 @@ lazy val experimentalNative = experimental.native
 
 lazy val scalaParallelCollections = project
   .in(file("scala-parallel-collections"))
-  .dependsOn(coreJVM % "compile->compile;test->test", coreTestsJVM % "test->test")
+  .dependsOn(coreJVM % "compile->compile;test->test", lawsJVM % "test->test")
   .settings(stdSettings("zio-prelude-scala-parallel-collections"))
   .settings(buildInfoSettings("zio.prelude.scalaparallelcollections"))
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
