@@ -1,8 +1,7 @@
 package zio.prelude.laws
 
-import zio.prelude._
 import zio.NonEmptyChunk
-import zio.prelude.laws._
+import zio.prelude._
 import zio.random.Random
 import zio.test._
 import zio.test.laws._

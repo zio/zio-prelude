@@ -1,10 +1,9 @@
 package zio.prelude.laws
 
-import zio.prelude._
 import zio.prelude.Equal._
-import zio.prelude.laws.HashSpec.scalaHashCodeConsistency
 import zio.prelude.ZValidation._
-import zio.prelude.laws._
+import zio.prelude._
+import zio.prelude.laws.HashSpec.scalaHashCodeConsistency
 import zio.random.Random
 import zio.test._
 import zio.test.laws._

@@ -1,7 +1,6 @@
 package zio.prelude.laws
 
 import zio.prelude._
-import zio.prelude.laws._
 import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._

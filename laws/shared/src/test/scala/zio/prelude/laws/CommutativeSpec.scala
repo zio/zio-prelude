@@ -1,8 +1,7 @@
 package zio.prelude.laws
 
 import zio.prelude._
-import zio.prelude.laws.CommutativeLaws
-import zio.prelude.newtypes.{And, Max, Min, Or, Prod, Sum}
+import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test._
 import zio.test.laws._

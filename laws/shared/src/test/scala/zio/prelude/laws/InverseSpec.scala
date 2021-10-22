@@ -1,10 +1,9 @@
 package zio.prelude.laws
 
 import zio.prelude._
-import zio.prelude.laws.InverseLaws
 import zio.prelude.newtypes.Sum
 import zio.test.laws._
-import zio.test.{DefaultRunnableSpec, _}
+import zio.test._
 
 object InverseSpec extends DefaultRunnableSpec {
 

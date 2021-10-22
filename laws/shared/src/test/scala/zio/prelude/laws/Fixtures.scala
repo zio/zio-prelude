@@ -1,7 +1,7 @@
 package zio.prelude.laws
 
-import zio.prelude._
 import zio.Chunk
+import zio.prelude._
 import zio.random.Random
 import zio.test.laws.GenF
 import zio.test.{Gen, Sized}

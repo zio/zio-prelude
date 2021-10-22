@@ -1,13 +1,12 @@
 package zio.prelude.laws
 
-import zio.prelude._
 import zio.Chunk
 import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZSet._
+import zio.prelude._
 import zio.prelude.coherent.{CovariantDeriveEqual, DeriveEqualForEach}
-import zio.prelude.laws._
-import zio.prelude.newtypes.{Natural, _}
+import zio.prelude.newtypes._
 import zio.random.Random
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._

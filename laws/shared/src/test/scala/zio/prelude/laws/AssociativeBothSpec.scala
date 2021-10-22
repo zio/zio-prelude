@@ -1,8 +1,7 @@
 package zio.prelude.laws
 
-import zio.prelude._
 import zio.Chunk
-import zio.prelude.laws.AssociativeBothLaws
+import zio.prelude._
 import zio.test._
 import zio.test.laws._
 
