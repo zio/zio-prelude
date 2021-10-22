@@ -32,7 +32,7 @@ addCommandAlias(
 )
 addCommandAlias(
   "testNative",
-  ";coreLawsNative/test;experimentalLawsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
+  ";lawsNative/test;experimentalLawsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
 val zioVersion = "1.0.12"
