@@ -24,15 +24,15 @@ addCommandAlias(
 
 addCommandAlias(
   "testJVM",
-  ";coreTestsJVM/test;experimentalJVM/test;scalaParallelCollections/test"
+  ";lawsJVM/test;experimentalJVM/test;scalaParallelCollections/test"
 )
 addCommandAlias(
   "testJS",
-  ";coreTestsJS/test;experimentalJS/test"
+  ";lawsJS/test;experimentalJS/test"
 )
 addCommandAlias(
   "testNative",
-  ";coreNative/test;experimentalNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
+  ";lawsNative/test;experimentalNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
 val zioVersion = "1.0.12"
