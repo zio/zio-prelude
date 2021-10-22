@@ -2,8 +2,8 @@ package zio.prelude.laws
 
 import zio.prelude._
 import zio.prelude.newtypes._
-import zio.test.laws._
 import zio.test._
+import zio.test.laws._
 
 object IdentitySpec extends DefaultRunnableSpec {
 
