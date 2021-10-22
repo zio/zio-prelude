@@ -1,18 +1,12 @@
-package zio.prelude
-package experimental
+package zio.prelude.experimental.laws
 
-import zio.prelude.experimental.coherent.DistributiveJoinMeetEqual
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
+import zio.prelude.experimental._
+import zio.prelude.experimental.coherent._
+import zio.prelude.laws._
+import zio.test._
+import zio.test.laws._
 
-trait DistributiveJoinMeet[A] extends JoinMeetShape[A]
-
-object DistributiveJoinMeet extends Lawful[DistributiveJoinMeetEqual] {
-
-  type Aux[A, +join[x] <: Associative[x], +meet[x] <: Associative[x]] = DistributiveJoinMeet[A] {
-    type Join[x] <: join[x]
-    type Meet[x] <: meet[x]
-  }
+object DistributiveJoinMeetLaws extends Lawful[DistributiveJoinMeetEqual] {
 
   /**
    * The join distributiveJoinMeet law states that for the join operator `vvv`, the meet operator `^^^`,
@@ -48,11 +42,4 @@ object DistributiveJoinMeet extends Lawful[DistributiveJoinMeetEqual] {
   lazy val laws: Laws[DistributiveJoinMeetEqual] =
     joinDistributiveJoinMeetLaw + meetDistributiveJoinMeetLaw
 
-  /**
-   * Summons an implicit `DistributiveJoinMeet[A]`.
-   */
-  def apply[A, Join[x] <: Associative[x], Meet[x] <: Associative[x]](implicit
-    distributiveJoinMeet: DistributiveJoinMeet.Aux[A, Join, Meet]
-  ): DistributiveJoinMeet.Aux[A, Join, Meet] =
-    distributiveJoinMeet
 }
