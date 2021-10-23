@@ -27,7 +27,7 @@ object JoinMeetShape {
     type Meet[x] <: meet[x]
   }
 
-  implicit def BoolJoinMeet: Absorption[Boolean] with DistributiveJoinMeet[Boolean] with ExcludedMiddle[
+  implicit lazy val BoolJoinMeet: Absorption[Boolean] with DistributiveJoinMeet[Boolean] with ExcludedMiddle[
     Boolean
   ] with Involution[Boolean] with Noncontradiction[Boolean] {
     type Join[x] = Commutative[x] with Idempotent[x] with Inverse[x]
@@ -87,7 +87,7 @@ object JoinMeetShape {
     }
 }
 
-trait JoinMeetSyntax {
+trait JoinMeetShapeSyntax {
 
   /**
    * Provides infix syntax for adding or multiplying two values.

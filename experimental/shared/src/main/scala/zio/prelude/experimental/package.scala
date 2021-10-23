@@ -21,7 +21,7 @@ package object experimental
     with BothComposeSyntax
     with ComplementShapeSyntax
     with EitherComposeSyntax
-    with JoinMeetSyntax {
+    with JoinMeetShapeSyntax {
 
   object classic {
 

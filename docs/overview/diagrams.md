@@ -461,73 +461,64 @@ classDiagram
 
 # JoinMeet
 
-[![JoinMeet hierarchy](https://user-images.githubusercontent.com/9019485/104251711-9e124580-5470-11eb-9e20-dac1c4359270.png)][JoinMeet-link]
+[![JoinMeet hierarchy](https://user-images.githubusercontent.com/9019485/138556416-825e5d95-6e16-410c-8379-0e00025fbd6e.png)][JoinMeet-link]
 
 <details><summary>Mermaid</summary>
 
 ```mermaid
 classDiagram
-  class Absorption~A~{
-    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
-    Set[A] [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent ]
-
+  JoinMeetShape~A~ <|.. Absorption~A~
+  <<shape>> JoinMeetShape
+  JoinMeetShape~A~ <|.. DistributiveJoinMeet~A~
+  JoinMeetShape~A~ <|-- ComplementShape~A~
+  <<shape>> ComplementShape
+  JoinMeetShape~A~ <|-- TopShape~A~
+  <<shape>> TopShape
+  JoinMeetShape~A~ <|-- BottomShape~A~
+  <<shape>> BottomShape
+  ComplementShape~A~ <|.. Involution~A~
+  ComplementShape~A~ <|.. Noncontradiction~A~
+  BottomShape~A~ <|.. Noncontradiction~A~
+  ComplementShape~A~ <|.. ExcludedMiddle~A~
+  TopShape~A~ <|.. ExcludedMiddle~A~
+  class JoinMeetShape~A~{
     (type) Join <: Associative
     (type) Meet <: Associative
     () Join: Join[OrF[A]]
     () Meet: Meet[AndF[A]]
     () join(=> A, => A): A
     () meet(=> A, => A): A
+  }
+  class ComplementShape~A~{
+    () complement(=> A): A
+  }
+  class TopShape~A~{
+    (type) Meet <: Identity
+    () top: A
+  }
+  class BottomShape~A~{
+    (type) Join <: Identity
+    () bottom: A
+  }
+  class Absorption~A~{
+    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
+    Set[A] [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent ]
   }
   class DistributiveJoinMeet~A~{
     Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
     Set[A] [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent ]
-
-    (type) Join <: Associative
-    (type) Meet <: Associative
-    () Join: Join[OrF[A]]
-    () Meet: Meet[AndF[A]]
-    () join(=> A, => A): A
-    () meet(=> A, => A): A
-  }
-  class ExcludedMiddle~A~{
-    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
-
-    (type) Join <: Associative
-    (type) Meet <: Identity
-    () Join: Join[OrF[A]]
-    () Meet: Meet[AndF[A]]
-    () bottom: A
-    () complement(A): A
-    () join(=> A, => A): A
-    () meet(=> A, => A): A
-    () top: A
   }
   class Involution~A~{
     Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
-
-    (type) Join <: Associative
-    (type) Meet <: Associative
-    () Join: Join[OrF[A]]
-    () Meet: Meet[AndF[A]]
-    () complement(A): A
-    () join(=> A, => A): A
-    () meet(=> A, => A): A
   }
   class Noncontradiction~A~{
     Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
-
-    (type) Join <: Identity
-    (type) Meet <: Associative
-    () Join: Join[OrF[A]]
-    () Meet: Meet[AndF[A]]
-    () bottom: A
-    () complement(A): A
-    () join(=> A, => A): A
-    () meet(=> A, => A): A
-    () top: A
+  }
+  class ExcludedMiddle~A~{
+    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
   }
 ```
 
 </details>
 
-[JoinMeet-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIGNsYXNzIEFic29ycHRpb25-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuICAgIFNldFtBXSBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltPckZbQV1dXG4gICAgKCkgTWVldDogTWVldFtBbmRGW0FdXVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgRGlzdHJpYnV0aXZlSm9pbk1lZXR-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuICAgIFNldFtBXSBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltPckZbQV1dXG4gICAgKCkgTWVldDogTWVldFtBbmRGW0FdXVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgRXhjbHVkZWRNaWRkbGV-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuXG4gICAgKHR5cGUpIEpvaW4gPDogQXNzb2NpYXRpdmVcbiAgICAodHlwZSkgTWVldCA8OiBJZGVudGl0eVxuICAgICgpIEpvaW46IEpvaW5bT3JGW0FdXVxuICAgICgpIE1lZXQ6IE1lZXRbQW5kRltBXV1cbiAgICAoKSBib3R0b206IEFcbiAgICAoKSBjb21wbGVtZW50KEEpOiBBXG4gICAgKCkgam9pbig9PiBBLCA9PiBBKTogQVxuICAgICgpIG1lZXQoPT4gQSwgPT4gQSk6IEFcbiAgICAoKSB0b3A6IEFcbiAgfVxuICBjbGFzcyBJbnZvbHV0aW9ufkF-e1xuICAgIEJvb2xlYW4gWyBKb2luID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSA7IE1lZXQgPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIF1cblxuICAgICh0eXBlKSBKb2luIDw6IEFzc29jaWF0aXZlXG4gICAgKHR5cGUpIE1lZXQgPDogQXNzb2NpYXRpdmVcbiAgICAoKSBKb2luOiBKb2luW09yRltBXV1cbiAgICAoKSBNZWV0OiBNZWV0W0FuZEZbQV1dXG4gICAgKCkgY29tcGxlbWVudChBKTogQVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgTm9uY29udHJhZGljdGlvbn5BfntcbiAgICBCb29sZWFuIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSBdXG5cbiAgICAodHlwZSkgSm9pbiA8OiBJZGVudGl0eVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltPckZbQV1dXG4gICAgKCkgTWVldDogTWVldFtBbmRGW0FdXVxuICAgICgpIGJvdHRvbTogQVxuICAgICgpIGNvbXBsZW1lbnQoQSk6IEFcbiAgICAoKSBqb2luKD0-IEEsID0-IEEpOiBBXG4gICAgKCkgbWVldCg9PiBBLCA9PiBBKTogQVxuICAgICgpIHRvcDogQVxuICB9XG4iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ
+[JoinMeet-link]: https://mermaid-js.github.io/mermaid-live-editor/edit#eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEpvaW5NZWV0fkF-IDx8LS0gQWJzb3JwdGlvbn5BflxuICBKb2luTWVldH5BfiA8fC0tIERpc3RyaWJ1dGl2ZUpvaW5NZWV0fkF-XG4gIEpvaW5NZWV0fkF-IDx8LS0gQ29tcGxlbWVudH5BflxuICBKb2luTWVldH5BfiA8fC0tIFRvcH5BflxuICBKb2luTWVldH5BfiA8fC0tIEJvdHRvbX5BflxuICBDb21wbGVtZW50fkF-IDx8LS0gSW52b2x1dGlvbn5BflxuICBDb21wbGVtZW50fkF-IDx8LS0gTm9uY29udHJhZGljdGlvbn5BflxuICBCb3R0b21-QX4gPHwtLSBOb25jb250cmFkaWN0aW9ufkF-XG4gIENvbXBsZW1lbnR-QX4gPHwtLSBFeGNsdWRlZE1pZGRsZX5BflxuICBUb3B-QX4gPHwtLSBFeGNsdWRlZE1pZGRsZX5BflxuICBjbGFzcyBKb2luTWVldH5BfntcbiAgICAodHlwZSkgSm9pbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNZWV0IDw6IEFzc29jaWF0aXZlXG4gICAgKCkgSm9pbjogSm9pbltPckZbQV1dXG4gICAgKCkgTWVldDogTWVldFtBbmRGW0FdXVxuICAgICgpIGpvaW4oPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtZWV0KD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgQ29tcGxlbWVudH5BfntcbiAgICAoKSBjb21wbGVtZW50KD0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgVG9wfkF-e1xuICAgICh0eXBlKSBNZWV0IDw6IElkZW50aXR5XG4gICAgKCkgdG9wOiBBXG4gIH1cbiAgY2xhc3MgQm90dG9tfkF-e1xuICAgICh0eXBlKSBKb2luIDw6IElkZW50aXR5XG4gICAgKCkgYm90dG9tOiBBXG4gIH1cbiAgY2xhc3MgQWJzb3JwdGlvbn5BfntcbiAgICBCb29sZWFuIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSBdXG4gICAgU2V0W0FdIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50IF1cbiAgfVxuICBjbGFzcyBEaXN0cmlidXRpdmVKb2luTWVldH5BfntcbiAgICBCb29sZWFuIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSBdXG4gICAgU2V0W0FdIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50IF1cbiAgfVxuICBjbGFzcyBJbnZvbHV0aW9ufkF-e1xuICAgIEJvb2xlYW4gWyBKb2luID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSA7IE1lZXQgPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIF1cbiAgfVxuICBjbGFzcyBOb25jb250cmFkaWN0aW9ufkF-e1xuICAgIEJvb2xlYW4gWyBKb2luID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSA7IE1lZXQgPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIF1cbiAgfVxuICBjbGFzcyBFeGNsdWRlZE1pZGRsZX5BfntcbiAgICBCb29sZWFuIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSBdXG4gIH0iLCJtZXJtYWlkIjoie1xuICBcInRoZW1lXCI6IFwiZGVmYXVsdFwiXG59IiwidXBkYXRlRWRpdG9yIjpmYWxzZSwiYXV0b1N5bmMiOnRydWUsInVwZGF0ZURpYWdyYW0iOmZhbHNlfQ
