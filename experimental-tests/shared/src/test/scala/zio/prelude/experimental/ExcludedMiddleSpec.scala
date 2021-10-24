@@ -10,7 +10,7 @@ object ExcludedMiddleSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("ExcludedMiddleSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(ExcludedMiddleLaws)(Gen.anyInt.map(_ % 2 == 0)))
+        testM("boolean")(checkAllLaws(ExcludedMiddleLaws)(Gen.boolean))
       )
     )
 }

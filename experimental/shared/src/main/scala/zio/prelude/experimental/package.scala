@@ -17,11 +17,11 @@
 package zio.prelude
 
 package object experimental
-    extends ApplicationComposeSyntax
+    extends AbsorptionSyntax
+    with ApplicationComposeSyntax
     with BothComposeSyntax
-    with ComplementShapeSyntax
     with EitherComposeSyntax
-    with JoinMeetShapeSyntax {
+    with NoncontradictionSyntax {
 
   object classic {
 
@@ -32,15 +32,15 @@ package object experimental
       with ApplicationCompose.Aux[=>:, :*:, -->:]
     type CoCartesianCategory[=>:[-_, +_], :+:[+_, +_]]                   = Category[=>:] with EitherCompose.Aux[=>:, :+:]
 
-    type Lattice[A]                  = JoinMeetShape.Aux[A, Semilattice, Semilattice]
-    type BoundedLattice[A]           = JoinMeetShape.Aux[A, BoundedSemilattice, BoundedSemilattice]
+    type Lattice[A]                  = Absorption.Aux[A, Semilattice, Semilattice]
+    type BoundedLattice[A]           = Absorption.Aux[A, BoundedSemilattice, BoundedSemilattice]
     type OrthoComplementedLattice[A] = ExcludedMiddle[A] with Involution[A] with Noncontradiction[A] {
       type Join[x] = BoundedSemilattice[x]
       type Meet[x] = BoundedSemilattice[x]
     }
-    type DistributiveLattice[A]      = DistributiveJoinMeet.Aux[A, Semilattice, Semilattice]
+    type DistributiveLattice[A]      = DistributiveAbsorption.Aux[A, Semilattice, Semilattice]
     type BooleanAlgebra[A]           =
-      Absorption[A] with DistributiveJoinMeet[A] with ExcludedMiddle[A] with Noncontradiction[A] {
+      DistributiveAbsorption[A] with ExcludedMiddle[A] with Involution[A] with Noncontradiction[A] {
         type Join[x] = BoundedSemilattice[x]
         type Meet[x] = BoundedSemilattice[x]
       }

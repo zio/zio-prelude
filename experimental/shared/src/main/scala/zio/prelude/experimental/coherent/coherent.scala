@@ -24,17 +24,17 @@ object AbsorptionEqual {
     }
 }
 
-trait DistributiveJoinMeetEqual[A] extends DistributiveJoinMeet[A] with Equal[A] {
+trait DistributiveAbsorptionEqual[A] extends DistributiveAbsorption[A] with Equal[A] {
   override type Join[x] = Associative[x]
   override type Meet[x] = Associative[x]
 }
 
-object DistributiveJoinMeetEqual {
+object DistributiveAbsorptionEqual {
   implicit def derive[A](implicit
-    distributiveJoinMeet0: DistributiveJoinMeet.Aux[A, Associative, Associative],
+    distributiveJoinMeet0: DistributiveAbsorption.Aux[A, Associative, Associative],
     equal0: Equal[A]
-  ): DistributiveJoinMeetEqual[A] =
-    new DistributiveJoinMeetEqual[A] {
+  ): DistributiveAbsorptionEqual[A] =
+    new DistributiveAbsorptionEqual[A] {
 
       override def Join: Associative[OrF[A]] = distributiveJoinMeet0.Join
 
