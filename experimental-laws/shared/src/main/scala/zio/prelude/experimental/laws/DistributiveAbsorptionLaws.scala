@@ -40,6 +40,6 @@ object DistributiveAbsorptionLaws extends Lawful[DistributiveAbsorptionEqual] {
    * The set of all laws that instances of `DistributiveAbsorption` must satisfy.
    */
   lazy val laws: Laws[DistributiveAbsorptionEqual] =
-    joinDistributiveAbsorptionLaw + meetDistributiveAbsorptionLaw
+    AbsorptionLaws.laws + joinDistributiveAbsorptionLaw + meetDistributiveAbsorptionLaw
 
 }

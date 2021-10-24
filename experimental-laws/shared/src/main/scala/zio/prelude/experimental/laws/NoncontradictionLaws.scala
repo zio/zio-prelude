@@ -26,6 +26,6 @@ object NoncontradictionLaws extends Lawful[NoncontradictionEqual] {
    * The set of all laws that instances of `Noncontradiction` must satisfy.
    */
   lazy val laws: Laws[NoncontradictionEqual] =
-    noncontradictionLaw
+    AbsorptionLaws.laws + noncontradictionLaw
 
 }

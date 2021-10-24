@@ -26,6 +26,6 @@ object ExcludedMiddleLaws extends Lawful[ExcludedMiddleEqual] {
    * The set of all laws that instances of `ExcludedMiddle` must satisfy.
    */
   lazy val laws: Laws[ExcludedMiddleEqual] =
-    excludedMiddleLaw
+    AbsorptionLaws.laws + excludedMiddleLaw
 
 }
