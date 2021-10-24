@@ -1,6 +1,6 @@
 ---
 id: overview_diagrams
-title: "Type Class diagrams"
+title: "Abstraction Diagrams"
 ---
 
 # AddMultiply

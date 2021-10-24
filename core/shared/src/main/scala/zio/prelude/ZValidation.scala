@@ -1,7 +1,6 @@
 package zio.prelude
 
 import zio.prelude.ZValidation._
-import zio.test.Assertion
 import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
@@ -40,6 +39,20 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def ??[W1 >: W](w1: W1): ZValidation[W1, E, A] =
     log(w1)
+
+  /**
+   * Maps the successful value of this `ZValidation` to the specified constant
+   * value.
+   */
+  final def as[B](b: B): ZValidation[W, E, B] =
+    map(_ => b)
+
+  /**
+   * Maps the error value of this `ZValidation` to the specified constant
+   * value.
+   */
+  final def asError[E2](e: E2): ZValidation[W, E2, A] =
+    mapError(_ => e)
 
   /**
    * Returns whether this `ZValidation` and the specified `ZValidation` are
@@ -191,13 +204,13 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
    */
-  final def toEither[E1 >: E]: Either[NonEmptyChunk[E1], A] =
+  final def toEither: Either[NonEmptyChunk[E], A] =
     fold(Left(_), Right(_))
 
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
-  final def toEitherMultiSet[E1 >: E]: Either[NonEmptyMultiSet[E], A] =
+  final def toEitherMultiSet: Either[NonEmptyMultiSet[E], A] =
     self match {
       case failure @ Failure(_, _) => Left(failure.errorsUnordered)
       case Success(_, value)       => Right(value)
@@ -375,7 +388,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * that either returns the values of all of them, if they all succeed, or
    * else fails with all of their errors.
    */
-  def collectAllPar[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
+  def validateAll[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
     validations.flip
 
   /**
@@ -385,14 +398,11 @@ object ZValidation extends LowPriorityValidationImplicits {
     Failure(Chunk.empty, NonEmptyChunk(error))
 
   /**
-   * Constructs a `ZValidation` from a value and an assertion about that value.
-   * The resulting `ZValidation` will be a success if the value satisfies the
-   * assertion or else will contain a string rendering describing how the
-   * value did not satisfy the assertion.
+   * Constructs a `ZValidation` that fails with the specified `NonEmptyChunk`
+   * of errors.
    */
-  def fromAssert[A](value: A)(assertion: Assertion[A]): Validation[String, A] =
-    if (assertion.test(value)) succeed(value)
-    else fail(s"$value did not satisfy ${assertion.render}")
+  def failNonEmptyChunk[E](errors: NonEmptyChunk[E]): Validation[E, Nothing] =
+    Failure(Chunk.empty, errors)
 
   /**
    * Constructs a `ZValidation` from an `Either`.
@@ -401,10 +411,24 @@ object ZValidation extends LowPriorityValidationImplicits {
     value.fold(fail, succeed)
 
   /**
+   * Constructs a `ZValidation` from an `Either` that fails with a
+   * `NonEmptyChunk` of errors.
+   */
+  def fromEitherNonEmptyChunk[E, A](value: Either[NonEmptyChunk[E], A]): Validation[E, A] =
+    value.fold(failNonEmptyChunk, succeed)
+
+  /**
    * Constructs a `ZValidation` from an `Option`.
    */
   def fromOption[A](value: Option[A]): Validation[Unit, A] =
     value.fold[Validation[Unit, A]](fail(()))(succeed)
+
+  /**
+   * Construts a `Validation` from an `Option`, failing with the error
+   * provided.
+   */
+  def fromOptionWith[E, A](error: => E)(value: Option[A]): Validation[E, A] =
+    value.fold[Validation[E, A]](fail(error))(succeed)
 
   /**
    * Constructs a `Validation` from a predicate, failing with None.
@@ -434,6 +458,16 @@ object ZValidation extends LowPriorityValidationImplicits {
    */
   def log[W](w: W): ZValidation[W, Nothing, Unit] =
     Success(Chunk(w), ())
+
+  /**
+   * Converts an `Option` to a `ZValidation`, treating `None` as a success with
+   * no information and `Some` as a failure with the specified error.
+   */
+  def noneOrFail[E](option: Option[E]): Validation[E, Unit] =
+    option match {
+      case None    => ZValidation.unit
+      case Some(e) => ZValidation.fail(e)
+    }
 
   /**
    * Constructs a `Validation` that succeeds with the specified value.

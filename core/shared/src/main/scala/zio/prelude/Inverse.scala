@@ -16,10 +16,6 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.EqualInverse
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
-
 import scala.annotation.tailrec
 
 /**
@@ -57,27 +53,7 @@ trait Inverse[A] extends PartialInverse[A] {
     Some(multiplyBy(n)(a))
 }
 
-object Inverse extends Lawful[EqualInverse] {
-
-  /**
-   * The inverse law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
-   *
-   * {{{
-   * a * a === identity
-   * }}}
-   */
-  lazy val inverseLaw: Laws[EqualInverse] =
-    new Laws.Law1[EqualInverse]("rightInverseLaw") {
-      def apply[A](a: A)(implicit I: EqualInverse[A]): TestResult =
-        I.inverse(a, a) <-> I.identity
-    }
-
-  /**
-   * The set of all laws that instances of `Inverse` must satisfy.
-   */
-  lazy val laws: Laws[EqualInverse] =
-    inverseLaw + PartialInverse.laws
+object Inverse {
 
   /**
    * Summons an implicit `Inverse[A]`.

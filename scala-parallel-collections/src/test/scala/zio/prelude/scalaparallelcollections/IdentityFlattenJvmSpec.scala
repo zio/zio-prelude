@@ -2,6 +2,7 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
+import zio.prelude.laws._
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -31,7 +32,7 @@ object IdentityFlattenJvmSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("IdentityFlattenJvmSpec")(
       suite("laws")(
-        testM("parSeq")(checkAllLaws(IdentityFlatten)(genParSeq, Gen.anyInt))
+        testM("parSeq")(checkAllLaws(IdentityFlattenLaws)(genParSeq, Gen.anyInt))
       )
     )
 }

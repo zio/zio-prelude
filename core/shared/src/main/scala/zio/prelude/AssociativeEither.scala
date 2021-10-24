@@ -17,11 +17,8 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.AssociativeEitherDeriveEqualInvariant
 import zio.prelude.newtypes.Failure
 import zio.stream.ZStream
-import zio.test.TestResult
-import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,38 +38,24 @@ trait AssociativeEither[F[_]] {
   def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
 }
 
-object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] {
-
-  /**
-   * For all `fa`, `fb`, and `fc`, `either(fa, either(fb, fc))` is
-   * equivalent to `either(either(fa, fb), fc)`.
-   */
-  lazy val associativityLaw: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
-    new LawsF.Invariant.Law3[AssociativeEitherDeriveEqualInvariant, Equal]("associativityLaw") {
-      def apply[F[_]: AssociativeEitherDeriveEqualInvariant, A: Equal, B: Equal, C: Equal](
-        fa: F[A],
-        fb: F[B],
-        fc: F[C]
-      ): TestResult = {
-        val left  = fa.orElseEither(fb.orElseEither(fc))
-        val right = (fa.orElseEither(fb)).orElseEither(fc)
-        val left2 = Invariant[F].invmap(Equivalence.either[A, B, C]).to(left)
-        left2 <-> right
-      }
-    }
-
-  /**
-   * The set of law laws that instances of `AssociativeEither` must
-   * satisfy.
-   */
-  lazy val laws: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
-    associativityLaw
+object AssociativeEither {
 
   /**
    * Summons an implicit `AssociativeEither[F]`.
    */
   def apply[F[_]](implicit associativeEither: AssociativeEither[F]): AssociativeEither[F] =
     associativeEither
+
+  /**
+   * The `IdentityEither` instance for `Chunk`.
+   */
+  implicit val ChunkIdentityEither: IdentityEither[Chunk] =
+    new IdentityEither[Chunk] {
+      def either[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[Either[A, B]] =
+        fa.map(Left(_)) ++ fb.map(Right(_))
+      val none: Chunk[Nothing]                                                =
+        Chunk.empty
+    }
 
   /**
    * The `AssociativeEither` instance for `Either`.
@@ -143,6 +126,17 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
+   * The `IdentityEither` instance for `List`.
+   */
+  implicit val ListIdentityEither: IdentityEither[List] =
+    new IdentityEither[List] {
+      def either[A, B](fa: => List[A], fb: => List[B]): List[Either[A, B]] =
+        fa.map(Left(_)) ::: fb.map(Right(_))
+      val none: List[Nothing]                                              =
+        List.empty
+    }
+
+  /**
    * The `IdentityEither` (and `AssociativeEither`) instance for `Option`.
    */
   implicit val OptionIdentityEither: IdentityEither[Option] =
@@ -164,12 +158,34 @@ object AssociativeEither extends LawfulF.Invariant[AssociativeEitherDeriveEqualI
     }
 
   /**
+   * The `CommutativeEither` and `IdentityEither` instance for `Set`.
+   */
+  implicit val SetCommutativeEitherIdentityEither: CommutativeEither[Set] with IdentityEither[Set] =
+    new CommutativeEither[Set] with IdentityEither[Set] {
+      def either[A, B](fa: => Set[A], fb: => Set[B]): Set[Either[A, B]] =
+        fa.map(Left(_)) ++ fb.map(Right(_))
+      val none: Set[Nothing]                                            =
+        Set.empty
+    }
+
+  /**
    * The `AssociativeEither` instance for `Try`.
    */
   implicit val TryAssociativeEither: AssociativeEither[Try] =
     new AssociativeEither[Try] {
       def either[A, B](fa: => Try[A], fb: => Try[B]): Try[Either[A, B]] =
         fa.map(Left(_)) orElse fb.map(Right(_))
+    }
+
+  /**
+   * The `IdentityEither` instance for `Vector`.
+   */
+  implicit val VectorIdentityEither: IdentityEither[Vector] =
+    new IdentityEither[Vector] {
+      def either[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[Either[A, B]] =
+        fa.map(Left(_)) ++ fb.map(Right(_))
+      val none: Vector[Nothing]                                                  =
+        Vector.empty
     }
 
   /**

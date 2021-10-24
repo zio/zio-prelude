@@ -16,10 +16,6 @@
 
 package zio.prelude
 
-import zio.prelude.coherent.ContravariantDeriveEqual
-import zio.test.TestResult
-import zio.test.laws._
-
 trait ContravariantSubset[F[-_], Subset[_]] {
   def contramapSubset[A, B: Subset](f: B => A): F[A] => F[B]
 }
@@ -76,39 +72,7 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
     }
 }
 
-object Contravariant extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
-
-  /**
-   * Contramapping with the identity function must not change the structure.
-   */
-  lazy val identityLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
-    new LawsF.Contravariant.Law1[ContravariantDeriveEqual, Equal]("identityLaw") {
-      def apply[F[-_]: ContravariantDeriveEqual, A: Equal](fa: F[A]): TestResult =
-        fa.contramap(identity[A]) <-> fa
-    }
-
-  /**
-   * Contramapping by `f` followed by `g` must be the same as contramapping
-   * with the composition of `f` and `g`.
-   */
-  lazy val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
-    new LawsF.Contravariant.ComposeLaw[ContravariantDeriveEqual, Equal]("compositionLaw") {
-      def apply[F[-_]: ContravariantDeriveEqual, A: Equal, B: Equal, C: Equal](
-        fa: F[A],
-        f: B => A,
-        g: C => B
-      ): TestResult = {
-        // Dotty can't infer this https://github.com/zio/zio-prelude/issues/273
-        implicit val equalFC: Equal[F[C]] = Equal.DeriveEqual[F, C]
-        fa.contramap(f).contramap(g) <-> fa.contramap(f compose g)
-      }
-    }
-
-  /**
-   * The set of all laws that instances of `Contravariant` must satisfy.
-   */
-  lazy val laws: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
-    identityLaw + compositionLaw
+object Contravariant {
 
   /**
    * Summons an implicit `Contravariant[F]`.
