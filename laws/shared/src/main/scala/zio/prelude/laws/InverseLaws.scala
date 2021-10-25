@@ -40,5 +40,5 @@ object InverseLaws extends Lawful[EqualInverse] {
    * The set of all laws that instances of `Inverse` must satisfy.
    */
   lazy val laws: Laws[EqualInverse] =
-    inverseLaw + IdentityLaws.laws
+    PartialInverseLaws.laws + inverseLaw
 }

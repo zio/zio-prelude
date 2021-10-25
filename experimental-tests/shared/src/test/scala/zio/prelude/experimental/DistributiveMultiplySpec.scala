@@ -1,6 +1,8 @@
 package zio.prelude.experimental
 
-import zio.prelude.{Equal, Gens}
+import zio.prelude._
+import zio.prelude.experimental.laws._
+import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
@@ -11,11 +13,11 @@ object DistributiveMultiplySpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("DistributiveMultiplySpec")(
       suite("laws")(
-        testM("double distributive multiply")(checkAllLaws(DistributiveMultiply)(Gen.anyDouble)),
-        testM("int distributive multiply")(checkAllLaws(DistributiveMultiply)(Gen.anyInt)),
+        testM("double distributive multiply")(checkAllLaws(DistributiveMultiplyLaws)(Gen.anyDouble)),
+        testM("int distributive multiply")(checkAllLaws(DistributiveMultiplyLaws)(Gen.anyInt)),
 //        depends on https://github.com/zio/zio/pull/5242
 //        testM("Cause distributive multiply")(checkAllLaws(DistributiveMultiply)(Gen.causes(Gen.anyInt, Gen.throwable))),
-        testM("ParSeq distributive multiply")(checkAllLaws(DistributiveMultiply)(Gens.parSeq(Gen.unit, Gen.anyInt)))
+        testM("ParSeq distributive multiply")(checkAllLaws(DistributiveMultiplyLaws)(Gens.parSeq(Gen.unit, Gen.anyInt)))
       )
     )
 }

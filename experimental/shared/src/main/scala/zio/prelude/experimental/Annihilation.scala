@@ -1,10 +1,7 @@
 package zio.prelude
 package experimental
 
-import zio.prelude.experimental.coherent.AnnihilationEqual
 import zio.prelude.newtypes.{Prod, Sum}
-import zio.test.TestResult
-import zio.test.laws.{Lawful, Laws}
 
 trait Annihilation[A] extends AddMultiplyShape[A] {
 
@@ -13,46 +10,12 @@ trait Annihilation[A] extends AddMultiplyShape[A] {
   def annihilation: A = Addition.identity
 }
 
-object Annihilation extends Lawful[AnnihilationEqual] {
+object Annihilation {
 
   type Aux[A, +addition[x] <: Identity[x], +multiplication[x] <: Associative[x]] = Annihilation[A] {
     type Addition[x] <: addition[x]
     type Multiplication[x] <: multiplication[x]
   }
-
-  /**
-   * The left annihilation law states that for the multiplication operator `*`,
-   * 0 (the identity value for addition) and for any value `a`, the following must hold:
-   *
-   * {{{
-   * 0 * a === 0
-   * }}}
-   */
-  lazy val leftAnnihilationLaw: Laws[AnnihilationEqual] =
-    new Laws.Law1[AnnihilationEqual]("leftAnnihilationLaw") {
-      def apply[A](a: A)(implicit A: AnnihilationEqual[A]): TestResult =
-        (A.annihilation *** a) <-> A.annihilation
-    }
-
-  /**
-   * The right annihilation law states that for the multiplication operator `*`,
-   * 0 (the identity value for addition) and for any value `a`, the following must hold:
-   *
-   * {{{
-   * a * 0 === 0
-   * }}}
-   */
-  lazy val rightAnnihilationLaw: Laws[AnnihilationEqual] =
-    new Laws.Law1[AnnihilationEqual]("rightAnnihilationLaw") {
-      def apply[A](a: A)(implicit A: AnnihilationEqual[A]): TestResult =
-        (a *** A.annihilation) <-> A.annihilation
-    }
-
-  /**
-   * The set of all laws that instances of `Annihilation` must satisfy.
-   */
-  lazy val laws: Laws[AnnihilationEqual] =
-    leftAnnihilationLaw + rightAnnihilationLaw
 
   /**
    * Summons an implicit `Annihilation[A]`.

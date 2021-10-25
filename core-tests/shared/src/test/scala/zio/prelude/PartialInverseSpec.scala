@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.laws._
 import zio.prelude.newtypes.Prod
 import zio.test.TestAspect.ignore
 import zio.test._
@@ -13,7 +14,7 @@ object PartialInverseSpec extends DefaultRunnableSpec {
     suite("PartialInverseSpec")(
       suite("laws")(
         suite("floating point")(
-          testM("double prod")(checkAllLaws(PartialInverse)(nonZeroDoubleProd))
+          testM("double prod")(checkAllLaws(PartialInverseLaws)(nonZeroDoubleProd))
         ) @@ ignore // floating point ignored because slight differences in the results make the test fail
       )
     )
