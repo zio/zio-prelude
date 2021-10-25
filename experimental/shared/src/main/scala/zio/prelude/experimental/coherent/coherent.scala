@@ -4,10 +4,7 @@ import zio.prelude._
 import zio.prelude.experimental._
 import zio.prelude.newtypes.{Prod, Sum}
 
-trait AnnihilationEqual[A] extends Annihilation[A] with Equal[A] {
-  type Addition[x]       = Identity[x]
-  type Multiplication[x] = Associative[x]
-}
+trait AnnihilationEqual[A] extends Annihilation[A] with Equal[A]
 
 object AnnihilationEqual {
   implicit def derive[A](implicit
@@ -15,6 +12,10 @@ object AnnihilationEqual {
     equal0: Equal[A]
   ): AnnihilationEqual[A] =
     new AnnihilationEqual[A] {
+
+      override type Addition[x] = Identity[x]
+
+      override type Multiplication[x] = Associative[x]
 
       override def add(l: => A, r: => A): A = annihilatingZero0.add(l, r)
 
@@ -28,10 +29,7 @@ object AnnihilationEqual {
     }
 }
 
-trait DistributiveMultiplyEqual[A] extends DistributiveMultiply[A] with Equal[A] {
-  type Addition[x]       = Associative[x]
-  type Multiplication[x] = Associative[x]
-}
+trait DistributiveMultiplyEqual[A] extends DistributiveMultiply[A] with Equal[A]
 
 object DistributiveMultiplyEqual {
   implicit def derive[A](implicit
@@ -39,6 +37,10 @@ object DistributiveMultiplyEqual {
     equal0: Equal[A]
   ): DistributiveMultiplyEqual[A] =
     new DistributiveMultiplyEqual[A] {
+
+      override type Addition[x] = Associative[x]
+
+      override type Multiplication[x] = Associative[x]
 
       override def add(l: => A, r: => A): A = distributive0.add(l, r)
 
