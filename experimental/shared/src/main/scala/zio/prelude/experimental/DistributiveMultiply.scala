@@ -21,7 +21,7 @@ trait DistributiveMultiply[A] {
 
 }
 
-object DistributiveMultiply {
+object DistributiveMultiply extends DistributiveMultiplyLowPriorityImplicits {
 
   type Aux[A, +addition[x] <: Associative[x], +multiplication[x] <: Associative[x]] = DistributiveMultiply[A] {
     type Addition[x] <: addition[x]
@@ -116,6 +116,10 @@ object DistributiveMultiply {
       }
     }
 
+}
+
+trait DistributiveMultiplyLowPriorityImplicits {
+
   implicit def FxCauseDistributiveMultiply[A]: DistributiveMultiply[fx.Cause[A]] =
     new DistributiveMultiply[fx.Cause[A]] {
       type Addition[x]       = Commutative[x]
@@ -131,6 +135,7 @@ object DistributiveMultiply {
           Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
       }
     }
+
 }
 
 trait DistributiveMultiplySyntax {
