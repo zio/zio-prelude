@@ -20,8 +20,8 @@ package object experimental
     extends AbsorptionSyntax
     with ApplicationComposeSyntax
     with BothComposeSyntax
-    with EitherComposeSyntax
-    with NoncontradictionSyntax {
+    with ComplementSyntax
+    with EitherComposeSyntax {
 
   object classic {
 

@@ -1,9 +1,7 @@
 package zio.prelude
 package experimental
 
-trait ExcludedMiddle[A] extends Absorption[A] {
-
-  def complement(a: A): A
+trait ExcludedMiddle[A] extends Complement[A] {
 
   override type Meet[x] <: Identity[x]
 
@@ -24,29 +22,4 @@ object ExcludedMiddle {
     excludedMiddle: ExcludedMiddle.Aux[A, Join, Meet]
   ): ExcludedMiddle.Aux[A, Join, Meet] =
     excludedMiddle
-}
-
-trait ExcludedMiddleSyntax extends InvolutionSyntax {
-
-  /**
-   * Provides infix syntax for the ExcludedMiddle of the value.
-   */
-  implicit class ExcludedMiddleOps[A](private val self: A)(implicit
-    excludedMiddle: ExcludedMiddle.Aux[A, Associative, Identity]
-  ) {
-
-    /**
-     * A symbolic alias for `complement`.
-     */
-    def unary_! : A =
-      excludedMiddle.complement(self)
-
-    /**
-     * The complement of the value.
-     */
-    def complement: A =
-      excludedMiddle.complement(self)
-
-  }
-
 }
