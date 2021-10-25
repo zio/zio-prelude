@@ -17,13 +17,10 @@
 package zio.prelude
 
 package object experimental
-    extends AddMultiplyShapeSyntax
+    extends DistributiveMultiplySyntax
     with ApplicationComposeSyntax
     with BothComposeSyntax
-    with DivideShapeSyntax
-    with EitherComposeSyntax
-    with PartialDivideShapeSyntax
-    with SubtractShapeSyntax {
+    with EitherComposeSyntax {
 
   object classic {
 
@@ -33,11 +30,11 @@ package object experimental
       type Addition[x] <: CommutativeMonoid[x]
       type Multiplication[x] <: Identity[x]
     }
-    type Ring[A]     = Semiring[A] with SubtractShape[A] {
+    type Ring[A]     = Semiring[A] with Subtract[A] {
       type Addition[x] <: AbelianGroup[x]
       type Multiplication[x] <: Identity[x]
     }
-    type Field[A]    = Ring[A] with PartialDivideShape[A] {
+    type Field[A]    = Ring[A] with PartialDivide[A] {
       type Addition[x] <: AbelianGroup[x]
       type Multiplication[x] <: PartialInverse[x]
     }

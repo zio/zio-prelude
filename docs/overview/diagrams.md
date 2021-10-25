@@ -3,43 +3,6 @@ id: overview_diagrams
 title: "Abstraction Diagrams"
 ---
 
-# AddMultiply
-
-[![AddMultiply hierarchy](https://user-images.githubusercontent.com/9019485/101298059-6c341080-382c-11eb-8d3d-27aa6d325731.png)][AddMultiply-link]
-
-<details><summary>Mermaid</summary>
-
-```mermaid
-classDiagram
-  class Annihilation~A~{
-    Double [ Addition = Commutative & Inverse ; Multiplication = Commutative & PartialInverse ]
-    Int [ Addition = Commutative & Inverse ; Multiplication = Commutative & Identity ]
-
-    (type) Addition <: Identity
-    (type) Multiplication <: Associative
-    () Addition: Addition[Sum[A]]
-    () Multiplication: Multiplication[Prod[A]]
-    () add(=> A, => A): A
-    () multiply(=> A, => A): A
-  }
-  class DistributiveMultiply~A~{
-    Double [ Addition = Commutative & Inverse ; Multiplication = Commutative & Identity]
-    Int [ Addition = Commutative & Inverse ; Multiplication = Commutative & Identity]
-
-    (type) Addition <: Associative
-    (type) Multiplication <: Associative
-    () Addition: Addition[Sum[A]]
-    () Multiplication: Multiplication[Prod[A]]
-    () add(=> A, => A): A
-    () multiply(=> A, => A): A
-  }
-```
-
-</details>
-
-[AddMultiply-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIGNsYXNzIEFubmloaWxhdGlvbn5BfntcbiAgICBEb3VibGUgWyBBZGRpdGlvbiA9IENvbW11dGF0aXZlICYgSW52ZXJzZSA7IE11bHRpcGxpY2F0aW9uID0gQ29tbXV0YXRpdmUgJiBJbnZlcnNlTm9uWmVybyBdXG4gICAgSW50IFsgQWRkaXRpb24gPSBDb21tdXRhdGl2ZSAmIEludmVyc2UgOyBNdWx0aXBsaWNhdGlvbiA9IENvbW11dGF0aXZlICYgSWRlbnRpdHkgXVxuXG4gICAgKHR5cGUpIEFkZGl0aW9uIDw6IElkZW50aXR5XG4gICAgKHR5cGUpIE11bHRpcGxpY2F0aW9uIDw6IEFzc29jaWF0aXZlXG4gICAgKCkgQWRkaXRpb246IEFkZGl0aW9uW1N1bVtBXV1cbiAgICAoKSBNdWx0aXBsaWNhdGlvbjogTXVsdGlwbGljYXRpb25bUHJvZFtBXV1cbiAgICAoKSBhZGQoPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtdWx0aXBseSg9PiBBLCA9PiBBKTogQVxuICB9XG4gIGNsYXNzIERpc3RyaWJ1dGl2ZU11bHRpcGx5fkF-e1xuICAgIERvdWJsZSBbIEFkZGl0aW9uID0gQ29tbXV0YXRpdmUgJiBJbnZlcnNlIDsgTXVsdGlwbGljYXRpb24gPSBDb21tdXRhdGl2ZSAmIElkZW50aXR5XVxuICAgIEludCBbIEFkZGl0aW9uID0gQ29tbXV0YXRpdmUgJiBJbnZlcnNlIDsgTXVsdGlwbGljYXRpb24gPSBDb21tdXRhdGl2ZSAmIElkZW50aXR5XVxuXG4gICAgKHR5cGUpIEFkZGl0aW9uIDw6IEFzc29jaWF0aXZlXG4gICAgKHR5cGUpIE11bHRpcGxpY2F0aW9uIDw6IEFzc29jaWF0aXZlXG4gICAgKCkgQWRkaXRpb246IEFkZGl0aW9uW1N1bVtBXV1cbiAgICAoKSBNdWx0aXBsaWNhdGlvbjogTXVsdGlwbGljYXRpb25bUHJvZFtBXV1cbiAgICAoKSBhZGQoPT4gQSwgPT4gQSk6IEFcbiAgICAoKSBtdWx0aXBseSg9PiBBLCA9PiBBKTogQVxuICB9XG4iLCJtZXJtYWlkIjp7fSwidXBkYXRlRWRpdG9yIjpmYWxzZX0
-
-
 # Associative
 
 [![Associative hierarchy](https://user-images.githubusercontent.com/9019485/106969899-10aed200-674c-11eb-84e2-49d70a42d142.png)][Associative-link]
@@ -348,6 +311,34 @@ classDiagram
 </details>
 
 [AssociativeFlatten-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlRmxhdHRlbn5GPCtfPn4gPHwtLSBJZGVudGl0eUZsYXR0ZW5-RjxfPn5cbiAgY2xhc3MgQXNzb2NpYXRpdmVGbGF0dGVufkY8K18-fntcbiAgICBNYXBbSywgKypdXG4gICAgXG4gICAgKCkgZmxhdHRlbltBXShGW0ZbQV1dKTogRltBXVxuICB9XG4gIGNsYXNzIElkZW50aXR5RmxhdHRlbn5GPCtfPn57XG4gICAgQ2F1c2VbKypdXG4gICAgQ2h1bmtbKypdXG4gICAgRWl0aGVyW0wsICsqXVxuICAgIEV4aXRbRSwgKypdXG4gICAgRnV0dXJlWysqXVxuICAgIElkWysqXVxuICAgIExpc3RbKypdXG4gICAgTm9uRW1wdHlDaHVua1srKl1cbiAgICBPcHRpb25bKypdXG4gICAgVHJ5WysqXVxuICAgIFZlY3RvclsrKl1cbiAgICBaSU9bUiwgRSwgKypdXG4gICAgWk1hbmFnZWRbUiwgRSwgKypdXG4gICAgWlN0cmVhbVtSLCBFLCArKl1cblxuICAgICgpIGFueTogRltBbnldXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ
+
+
+# DistributiveMultiply
+
+[![AddMultiply hierarchy](https://user-images.githubusercontent.com/9019485/138622023-aefce8a1-8aab-460c-a7d4-d370ec35c221.png)][DistributiveMultiply-link]
+
+<details><summary>Mermaid</summary>
+
+```mermaid
+classDiagram
+  DistributiveMultiply~A~ <|-- Annihilation~A~
+  class DistributiveMultiply~A~{
+    (type) Addition <: Associative
+    (type) Multiplication <: Associative
+    () Addition: Addition[Sum[A]]
+    () Multiplication: Multiplication[Prod[A]]
+    () add(=> A, => A): A
+    () multiply(=> A, => A): A
+  }
+  class Annihilation~A~{
+    Double [ Addition = Commutative & Inverse ; Multiplication = Commutative & PartialInverse ]
+    Int [ Addition = Commutative & Inverse ; Multiplication = Commutative & Identity ]
+  }
+```
+
+</details>
+
+[DistributiveMultiply-link]: https://mermaid-js.github.io/mermaid-live-editor/edit/#eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIERpc3RyaWJ1dGl2ZU11bHRpcGx5fkF-IDx8LS0gQW5uaWhpbGF0aW9ufkF-XG4gIGNsYXNzIERpc3RyaWJ1dGl2ZU11bHRpcGx5fkF-e1xuICAgICh0eXBlKSBBZGRpdGlvbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNdWx0aXBsaWNhdGlvbiA8OiBBc3NvY2lhdGl2ZVxuICAgICgpIEFkZGl0aW9uOiBBZGRpdGlvbltTdW1bQV1dXG4gICAgKCkgTXVsdGlwbGljYXRpb246IE11bHRpcGxpY2F0aW9uW1Byb2RbQV1dXG4gICAgKCkgYWRkKD0-IEEsID0-IEEpOiBBXG4gICAgKCkgbXVsdGlwbHkoPT4gQSwgPT4gQSk6IEFcbiAgfVxuICBjbGFzcyBBbm5paGlsYXRpb25-QX57XG4gICAgRG91YmxlIFsgQWRkaXRpb24gPSBDb21tdXRhdGl2ZSAmIEludmVyc2UgOyBNdWx0aXBsaWNhdGlvbiA9IENvbW11dGF0aXZlICYgUGFydGlhbEludmVyc2UgXVxuICAgIEludCBbIEFkZGl0aW9uID0gQ29tbXV0YXRpdmUgJiBJbnZlcnNlIDsgTXVsdGlwbGljYXRpb24gPSBDb21tdXRhdGl2ZSAmIElkZW50aXR5IF1cbiAgfSIsIm1lcm1haWQiOiJ7XG4gIFwidGhlbWVcIjogXCJkZWZhdWx0XCJcbn0iLCJ1cGRhdGVFZGl0b3IiOmZhbHNlLCJhdXRvU3luYyI6dHJ1ZSwidXBkYXRlRGlhZ3JhbSI6ZmFsc2V9
 
 
 # Equal

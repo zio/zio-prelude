@@ -40,6 +40,6 @@ object AnnihilationLaws extends Lawful[AnnihilationEqual] {
    * The set of all laws that instances of `Annihilation` must satisfy.
    */
   lazy val laws: Laws[AnnihilationEqual] =
-    leftAnnihilationLaw + rightAnnihilationLaw
+    DistributiveMultiplyLaws.laws + leftAnnihilationLaw + rightAnnihilationLaw
 
 }

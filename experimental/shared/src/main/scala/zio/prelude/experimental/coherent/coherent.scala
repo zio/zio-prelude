@@ -4,7 +4,7 @@ import zio.prelude._
 import zio.prelude.experimental._
 import zio.prelude.newtypes.{Prod, Sum}
 
-trait AnnihilationEqual[A] extends Annihilation[A] with Equal[A]
+trait AnnihilationEqual[A] extends Annihilation[A] with DistributiveMultiplyEqual[A]
 
 object AnnihilationEqual {
   implicit def derive[A](implicit
