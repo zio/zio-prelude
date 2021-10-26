@@ -2,31 +2,61 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 
-trait NewtypeCompanionVersionSpecific {
-  def assert[A](assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.refine_impl[A]
+/**
+ * The class of objects corresponding to newtypes. Users should implement an
+ * object that extends this class to create their own newtypes, specifying
+ * `A` as the underlying type to wrap.
+ *
+ * {{{
+ * object Meter extends Newtype[Double]
+ * type Meter = Meter.Type
+ * }}}
+ */
+
+abstract class Newtype[A] {
+
+  type Base
+  trait Tag extends Any
+  type Type = Base with Tag
+
+  def assertion: QuotedAssertion[A] = new QuotedAssertion[A] {
+    override def assertion: Assertion[A] = Assertion.anything
+  }
+
+  /**
+   * Derives an instance of a type class for the new type given an instance
+   * of the type class for the underlying type. The caller is responsible for
+   * the type class being a valid instance for the new type.
+   */
+  protected def derive[TypeClass[_]](implicit instance: TypeClass[A]): TypeClass[Type] =
+    instance.asInstanceOf[TypeClass[Type]]
+
+  /**
+   * Allows pattern matching on newtype instances to convert them back to
+   * instances of the underlying type.
+   */
+  def unapply(value: Type): Some[A] = Some(unwrap(value))
 
   /**
    * Converts an instance of the underlying type to an instance of the
-   * newtype, ignoring any [[Assertion]].
+   * newtype. Ignores the assertion.
    */
-  def unsafeWrap[A, T <: NewtypeModule#Newtype[A]](newtype: T, value: A): T#Type = {
-    val _ = newtype
-    value.asInstanceOf[T#Type]
-  }
+  protected def wrap(value: A): Type = value.asInstanceOf[Type]
 
   /**
-   * Converts an instance of a type parameterized on the underlying type
-   * to an instance of a type parameterized on the newtype, ignoring any
-   * [[Assertion]]. For example, this could be used to convert a list of
-   * instances of the underlying type to a list of instances of the newtype.
+   * Converts an instance of the newtype back to an instance of the
+   * underlying type.
    */
-  def unsafeWrapAll[F[_], A, T <: NewtypeModule#Newtype[A]](newtype: T, value: F[A]): F[T#Type] = {
-    val _ = newtype
-    value.asInstanceOf[F[T#Type]]
-  }
-}
+  def unwrap(value: Type): A = value.asInstanceOf[A]
 
-trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
+  /**
+   * Converts an instance of a type parameterized on the newtype back to an
+   * instance of a type parameterized on the underlying type. For example,
+   * this could be used to convert a list of instances of the newtype back
+   * to a list of instances of the underlying type.
+   */
+
+  def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
 
   /**
    * Converts an instance of the underlying type to an instance of the newtype.
@@ -93,4 +123,28 @@ trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
    */
   def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.Macros.wrapAll_impl[F, A, Type]
 
+}
+
+object Newtype {
+  def assert[A](assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.refine_impl[A]
+
+  /**
+   * Converts an instance of the underlying type to an instance of the
+   * newtype, ignoring any [[Assertion]].
+   */
+  def unsafeWrap[A, T <: Newtype[A]](newtype: T, value: A): newtype.Type = {
+    val _ = newtype
+    value.asInstanceOf[newtype.Type]
+  }
+
+  /**
+   * Converts an instance of a type parameterized on the underlying type
+   * to an instance of a type parameterized on the newtype, ignoring any
+   * [[Assertion]]. For example, this could be used to convert a list of
+   * instances of the underlying type to a list of instances of the newtype.
+   */
+  def unsafeWrapAll[F[_], A, T <: Newtype[A]](newtype: T, value: F[A]): F[T#Type] = {
+    val _ = newtype
+    value.asInstanceOf[F[T#Type]]
+  }
 }

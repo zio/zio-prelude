@@ -8,7 +8,7 @@ object SmartTypes extends App {
 
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {
-    val assertion = assert(greaterThanOrEqualTo(0) && lessThanOrEqualTo(100))
+    override val assertion = assert(greaterThanOrEqualTo(0) && lessThanOrEqualTo(100))
 
     implicit class NaturalOps(private val self: Natural) extends AnyVal {
       def add(that: Natural): Natural = wrap(unwrap(self) + unwrap(that))
@@ -17,7 +17,7 @@ object SmartTypes extends App {
 
   type Age = Age.Type
   object Age extends Subtype[Int] {
-    def assertion = assert {
+    override def assertion = assert {
       greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
     }
   }
@@ -37,7 +37,7 @@ object SmartTypes extends App {
 
   type MyRegex = MyRegex.Type
   object MyRegex extends Newtype[String] {
-    def assertion = assert {
+    override def assertion = assert {
       matches {
         anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace.* ~ digit.min(0) ~ nonDigit.min(1) ~
           literal("hello").+ ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
