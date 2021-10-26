@@ -5,10 +5,46 @@ import zio.NonEmptyChunk
 import scala.quoted.*
 import zio.prelude.ConsoleUtils.*
 
-trait NewtypeCompanionVersionSpecific
+abstract class Newtype[A] {
 
+  type Base
+  trait Tag extends Any
+  type Type = Base with Tag
 
-trait NewtypeVersionSpecific[A] { self: NewtypeModule#Newtype[A] =>
+  /**
+   * Derives an instance of a type class for the new type given an instance
+   * of the type class for the underlying type. The caller is responsible for
+   * the type class being a valid instance for the new type.
+   */
+  protected def derive[TypeClass[_]](implicit instance: TypeClass[A]): TypeClass[Type] =
+    instance.asInstanceOf[TypeClass[Type]]
+
+  /**
+   * Allows pattern matching on newtype instances to convert them back to
+   * instances of the underlying type.
+   */
+  def unapply(value: Type): Some[A] = Some(unwrap(value))
+
+  /**
+   * Converts an instance of the underlying type to an instance of the
+   * newtype. Ignores the assertion.
+   */
+  protected def wrap(value: A): Type = value.asInstanceOf[Type]
+
+  /**
+   * Converts an instance of the newtype back to an instance of the
+   * underlying type.
+   */
+  def unwrap(value: Type): A = value.asInstanceOf[A]
+
+  /**
+   * Converts an instance of a type parameterized on the newtype back to an
+   * instance of a type parameterized on the underlying type. For example,
+   * this could be used to convert a list of instances of the newtype back
+   * to a list of instances of the underlying type.
+   */
+
+  def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
 
   /**
    * Converts an instance of the underlying type to an instance of the
@@ -47,10 +83,10 @@ object Macros extends Liftables {
           case LiteralUnlift(x) =>
             assertion(x.asInstanceOf[A]) match {
               case Right(_)    => '{ $a.asInstanceOf[T] }
-              case Left(error) => report.throwError(s"$refinementErrorHeader\n" + error.render(x.toString))
+              case Left(error) => report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
             }
           case _               =>
-            report.throwError(s"$refinementErrorHeader\nMust use literal value for macro.")
+            report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
         }
 
       case None =>
@@ -68,7 +104,7 @@ object Macros extends Liftables {
           case Varargs(exprs) =>
             val validated = exprs.map {
               case LiteralUnlift(x) => assertion(x.asInstanceOf[A]).left.map(_.render(x.toString))
-              case _ => report.throwError(s"$refinementErrorHeader\nMust use literal value for macro.")
+              case _ => report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
             }
 
             val (errors, _) = validated.partitionMap(identity)
@@ -76,18 +112,18 @@ object Macros extends Liftables {
             // val rendered = ${dim("assertion =")} ${assertion}
 
             if (errors.nonEmpty)
-               report.throwError(s"""$refinementErrorHeader
+               report.errorAndAbort(s"""$refinementErrorHeader
 ${errors.mkString("\n")}
 """)
 
             '{ NonEmptyChunk($a, $as*).asInstanceOf[NonEmptyChunk[T]] }
 
           case _ =>
-              report.throwError(s"NO VARARGS!?")
+              report.errorAndAbort(s"NO VARARGS!?")
         }
       
       case None =>
-        report.throwError(s"NO REFINEMENT!?")
+        report.errorAndAbort(s"NO REFINEMENT!?")
     }
   }
 
