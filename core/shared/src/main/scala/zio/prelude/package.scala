@@ -42,7 +42,6 @@ package object prelude
     with IdentitySyntax
     with InvariantSyntax
     with InverseSyntax
-    with NewtypeExports
     with NewtypeFExports
     with NonEmptyForEachSyntax
     with NonEmptyListSyntax

@@ -9,7 +9,7 @@ object NewtypeSpecTypes {
   type MegaString = MegaString.Type
   object MegaString extends Newtype[String] {
     import Assertion._
-    def assertion =
+    override def assertion =
       assert(startsWith("START-") && endsWith("-END") && hasLength(greaterThan(5)) && contains("love"))
   }
 
@@ -18,7 +18,7 @@ object NewtypeSpecTypes {
   // A type that uses EVERY SINGLE numeric assertion
   type MegaInt = MegaInt.Type
   object MegaInt extends Newtype[Int] {
-    def assertion =
+    override def assertion =
       assert(
         Assertion.between(0, 100) &&
           Assertion.divisibleBy(9) &&
@@ -36,7 +36,7 @@ object NewtypeSpecTypes {
 
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {
-    def assertion =
+    override def assertion =
       assert(Assertion.greaterThanOrEqualTo(0))
 
     val two: Natural = Natural(2)
@@ -46,7 +46,7 @@ object NewtypeSpecTypes {
 
   type LuckyNumber = LuckyNumber.Type
   object LuckyNumber extends Newtype[Double] {
-    def assertion =
+    override def assertion =
       assert(Assertion.between(10.0, 20.0))
   }
 
@@ -57,7 +57,7 @@ object NewtypeSpecTypes {
   object Email extends Newtype[String] {
 
     // Mega Email Regex pilfered from https://stackoverflow.com/a/201378
-    def assertion =
+    override def assertion =
       assert(
         Assertion.matches(
           "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])".r
@@ -73,7 +73,7 @@ object NewtypeSpecTypes {
   type Username = Username.Type
   object Username extends Newtype[String] {
 
-    def assertion =
+    override def assertion =
       assert(Assertion.matches("\\w{3,8}\\d\\d"))
   }
 
@@ -85,7 +85,7 @@ object NewtypeSpecTypes {
   type Password = Password.Type
   object Password extends Newtype[String] {
 
-    def assertion =
+    override def assertion =
       assert(Assertion.matches(literal("a").+ ~ anyChar.between(1, 3) ~ literal("oh").*))
   }
 
@@ -96,7 +96,7 @@ object NewtypeSpecTypes {
 
   type PowerOfTwo = PowerOfTwo.Type
   object PowerOfTwo extends Newtype[Int] {
-    def assertion =
+    override def assertion =
       assert(Assertion.powerOf(2))
   }
 
@@ -104,7 +104,7 @@ object NewtypeSpecTypes {
 
   type Pin = Pin.Type
   object Pin extends Subtype[Int] {
-    def assertion =
+    override def assertion =
       assert(Assertion.between(1000, 9999))
   }
 
