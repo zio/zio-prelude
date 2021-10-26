@@ -15,7 +15,9 @@ import zio.NonEmptyChunk
 
 abstract class Newtype[A] {
 
-  type Type
+  type Base
+  trait Tag extends Any
+  type Type = Base with Tag
 
   def assertion: QuotedAssertion[A] = new QuotedAssertion[A] {
     override def assertion: Assertion[A] = Assertion.anything
