@@ -1,18 +1,30 @@
 package zio.prelude
 package experimental
 
-trait PartialDivide[A] extends DistributiveMultiply[A] {
+import zio.prelude.newtypes.Prod
 
-  override type Multiplication[x] <: PartialInverse[x]
-
-  def divideOption(l: => A, r: => A): Option[A]
+trait PartialDivide[A] extends DistributiveProd[A] {
+  def Prod: PartialInverse[Prod[A]]
+  def divideOption(l: => A, r: => A): Option[A] = Prod.inverseOption(newtypes.Prod(l), newtypes.Prod(r))
 }
 
-object PartialDivide {
+trait PartialDivideSyntax {
 
-  type Aux[A, +addition[x] <: Associative[x], +multiplication[x] <: PartialInverse[x]] = PartialDivide[A] {
-    type Addition[x] <: addition[x]
-    type Multiplication[x] <: multiplication[x]
+  /**
+   * Provides infix syntax for dividing two values, with possible failure.
+   */
+  implicit class PartialDivideOps[A](private val l: A) {
+
+    /**
+     * A symbolic alias for `divideOption`.
+     */
+    def -/-(r: => A)(implicit partialDivide: PartialDivide[A]): Option[A] =
+      partialDivide.divideOption(l, r)
+
+    /**
+     * Divides `l` by `r`, possibly failing.
+     */
+    def divideOption(r: => A)(implicit partialDivide: PartialDivide[A]): Option[A] =
+      partialDivide.divideOption(l, r)
   }
-
 }

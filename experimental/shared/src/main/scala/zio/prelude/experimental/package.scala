@@ -17,27 +17,17 @@
 package zio.prelude
 
 package object experimental
-    extends DistributiveMultiplySyntax
+    extends DistributiveProdSyntax
     with ApplicationComposeSyntax
     with BothComposeSyntax
-    with EitherComposeSyntax {
+    with DivideSyntax
+    with EitherComposeSyntax
+    with PartialDivideSyntax
+    with SubtractSyntax {
 
   object classic {
 
     import zio.prelude.classic._
-
-    type Semiring[A] = Annihilation[A] with DistributiveMultiply[A] {
-      type Addition[x] <: CommutativeMonoid[x]
-      type Multiplication[x] <: Identity[x]
-    }
-    type Ring[A]     = Semiring[A] with Subtract[A] {
-      type Addition[x] <: AbelianGroup[x]
-      type Multiplication[x] <: Identity[x]
-    }
-    type Field[A]    = Ring[A] with PartialDivide[A] {
-      type Addition[x] <: AbelianGroup[x]
-      type Multiplication[x] <: PartialInverse[x]
-    }
 
     type CartesianCategory[=>:[-_, +_], :*:[+_, +_]]                     = Category[=>:] with BothCompose.Aux[=>:, :*:]
     type ClosedCartesianCategory[=>:[-_, +_], :*:[+_, +_], -->:[-_, +_]] = CartesianCategory[=>:, :*:]

@@ -1,18 +1,29 @@
 package zio.prelude
 package experimental
+import zio.prelude.newtypes.Sum
 
-trait Subtract[A] extends DistributiveMultiply[A] {
-
-  override type Addition[x] <: Inverse[x]
-
-  def subtract(l: => A, r: => A): A
+trait Subtract[A] extends DistributiveProd[A] {
+  def Sum: Inverse[Sum[A]]
+  def subtract(l: => A, r: => A): A = Sum.inverse(newtypes.Sum(l), newtypes.Sum(r))
 }
 
-object Subtract {
+trait SubtractSyntax {
 
-  type Aux[A, +addition[x] <: Inverse[x], +multiplication[x] <: Associative[x]] = Subtract[A] {
-    type Addition[x] <: addition[x]
-    type Multiplication[x] <: multiplication[x]
+  /**
+   * Provides infix syntax for subtracting two values.
+   */
+  implicit class SubtractOps[A](private val l: A) {
+
+    /**
+     * A symbolic alias for `subtract`.
+     */
+    def ---(r: => A)(implicit subtract: Subtract[A]): A =
+      subtract.subtract(l, r)
+
+    /**
+     * Subtract two values.
+     */
+    def subtract(r: => A)(implicit subtract: Subtract[A]): A =
+      subtract.subtract(l, r)
   }
-
 }

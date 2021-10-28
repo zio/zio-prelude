@@ -313,32 +313,30 @@ classDiagram
 [AssociativeFlatten-link]: https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFzc29jaWF0aXZlRmxhdHRlbn5GPCtfPn4gPHwtLSBJZGVudGl0eUZsYXR0ZW5-RjxfPn5cbiAgY2xhc3MgQXNzb2NpYXRpdmVGbGF0dGVufkY8K18-fntcbiAgICBNYXBbSywgKypdXG4gICAgXG4gICAgKCkgZmxhdHRlbltBXShGW0ZbQV1dKTogRltBXVxuICB9XG4gIGNsYXNzIElkZW50aXR5RmxhdHRlbn5GPCtfPn57XG4gICAgQ2F1c2VbKypdXG4gICAgQ2h1bmtbKypdXG4gICAgRWl0aGVyW0wsICsqXVxuICAgIEV4aXRbRSwgKypdXG4gICAgRnV0dXJlWysqXVxuICAgIElkWysqXVxuICAgIExpc3RbKypdXG4gICAgTm9uRW1wdHlDaHVua1srKl1cbiAgICBPcHRpb25bKypdXG4gICAgVHJ5WysqXVxuICAgIFZlY3RvclsrKl1cbiAgICBaSU9bUiwgRSwgKypdXG4gICAgWk1hbmFnZWRbUiwgRSwgKypdXG4gICAgWlN0cmVhbVtSLCBFLCArKl1cblxuICAgICgpIGFueTogRltBbnldXG4gIH0iLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ
 
 
-# DistributiveMultiply
+# DistributiveProd
 
-[![AddMultiply hierarchy](https://user-images.githubusercontent.com/9019485/138622023-aefce8a1-8aab-460c-a7d4-d370ec35c221.png)][DistributiveMultiply-link]
+[![AddMultiply hierarchy](https://user-images.githubusercontent.com/9019485/139323063-586943a8-7cdd-4eda-b44f-232dbb47da1a.png)][DistributiveProd-link]
 
 <details><summary>Mermaid</summary>
 
 ```mermaid
 classDiagram
-  DistributiveMultiply~A~ <|-- Annihilation~A~
-  class DistributiveMultiply~A~{
-    (type) Addition <: Associative
-    (type) Multiplication <: Associative
-    () Addition: Addition[Sum[A]]
-    () Multiplication: Multiplication[Prod[A]]
-    () add(=> A, => A): A
-    () multiply(=> A, => A): A
+  DistributiveProd~A~ <|-- Annihilation~A~
+  class DistributiveProd~A~{
+    () Sum: Associative[Sum[A]]
+    () Prod: Associative[Prod[A]]
+    () sum(=> A, => A): A
+    () prod(=> A, => A): A
   }
   class Annihilation~A~{
-    Double [ Addition = Commutative & Inverse ; Multiplication = Commutative & PartialInverse ]
-    Int [ Addition = Commutative & Inverse ; Multiplication = Commutative & Identity ]
+    Double
+    Int
   }
 ```
 
 </details>
 
-[DistributiveMultiply-link]: https://mermaid-js.github.io/mermaid-live-editor/edit/#eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIERpc3RyaWJ1dGl2ZU11bHRpcGx5fkF-IDx8LS0gQW5uaWhpbGF0aW9ufkF-XG4gIGNsYXNzIERpc3RyaWJ1dGl2ZU11bHRpcGx5fkF-e1xuICAgICh0eXBlKSBBZGRpdGlvbiA8OiBBc3NvY2lhdGl2ZVxuICAgICh0eXBlKSBNdWx0aXBsaWNhdGlvbiA8OiBBc3NvY2lhdGl2ZVxuICAgICgpIEFkZGl0aW9uOiBBZGRpdGlvbltTdW1bQV1dXG4gICAgKCkgTXVsdGlwbGljYXRpb246IE11bHRpcGxpY2F0aW9uW1Byb2RbQV1dXG4gICAgKCkgYWRkKD0-IEEsID0-IEEpOiBBXG4gICAgKCkgbXVsdGlwbHkoPT4gQSwgPT4gQSk6IEFcbiAgfVxuICBjbGFzcyBBbm5paGlsYXRpb25-QX57XG4gICAgRG91YmxlIFsgQWRkaXRpb24gPSBDb21tdXRhdGl2ZSAmIEludmVyc2UgOyBNdWx0aXBsaWNhdGlvbiA9IENvbW11dGF0aXZlICYgUGFydGlhbEludmVyc2UgXVxuICAgIEludCBbIEFkZGl0aW9uID0gQ29tbXV0YXRpdmUgJiBJbnZlcnNlIDsgTXVsdGlwbGljYXRpb24gPSBDb21tdXRhdGl2ZSAmIElkZW50aXR5IF1cbiAgfSIsIm1lcm1haWQiOiJ7XG4gIFwidGhlbWVcIjogXCJkZWZhdWx0XCJcbn0iLCJ1cGRhdGVFZGl0b3IiOmZhbHNlLCJhdXRvU3luYyI6dHJ1ZSwidXBkYXRlRGlhZ3JhbSI6ZmFsc2V9
+[DistributiveProd-link]: https://mermaid-js.github.io/mermaid-live-editor/edit/#eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIERpc3RyaWJ1dGl2ZVByb2R-QX4gPHwtLSBBbm5paGlsYXRpb25-QX5cbiAgY2xhc3MgRGlzdHJpYnV0aXZlUHJvZH5BfntcbiAgICAoKSBTdW06IEFzc29jaWF0aXZlW1N1bVtBXV1cbiAgICAoKSBQcm9kOiBBc3NvY2lhdGl2ZVtQcm9kW0FdXVxuICAgICgpIHN1bSg9PiBBLCA9PiBBKTogQVxuICAgICgpIHByb2QoPT4gQSwgPT4gQSk6IEFcbiAgfVxuICBjbGFzcyBBbm5paGlsYXRpb25-QX57XG4gICAgRG91YmxlXG4gICAgSW50XG4gIH1cbiIsIm1lcm1haWQiOiJ7XG4gIFwidGhlbWVcIjogXCJkZWZhdWx0XCJcbn0iLCJ1cGRhdGVFZGl0b3IiOmZhbHNlLCJhdXRvU3luYyI6dHJ1ZSwidXBkYXRlRGlhZ3JhbSI6ZmFsc2V9
 
 
 # Equal
