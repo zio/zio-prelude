@@ -180,7 +180,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * collection.
    */
   def mapAccum[S, A, B](fa: F[A])(s: S)(f: (S, A) => (S, B)): (S, F[B]) =
-    forEach[({ type lambda[+A] = State[S, A] })#lambda, A, B](fa)(a => State.modify((s: S) => f(s, a))).run(s)
+    forEach[({ type lambda[+A] = State[S, A] })#lambda, A, B](fa)(a => State.modify((s: S) => f(s, a).swap)).run(s)
 
   /**
    * Returns the largest value in the collection if one exists or `None`
@@ -363,7 +363,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    */
   def zipWithIndex[A](fa: F[A]): F[(A, Int)] =
     forEach[({ type lambda[+A] = State[Int, A] })#lambda, A, (A, Int)](fa)(a =>
-      State.modify((n: Int) => (n + 1, (a, n)))
+      State.modify((n: Int) => ((a, n), n + 1))
     ).runResult(0)
 
   final def compose[G[+_]: ForEach]: ForEach[({ type lambda[+A] = F[G[A]] })#lambda] =
