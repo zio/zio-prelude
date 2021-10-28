@@ -1,25 +1,17 @@
 package zio.prelude
 package experimental
+import zio.prelude.newtypes.OrF
 
 trait Noncontradiction[A] extends Complement[A] {
-
-  override type Join[x] <: Identity[x]
-
-  def bottom: A = Join.identity
+  def bottom: A = Or.identity
+  def Or: Identity[OrF[A]]
 }
 
 object Noncontradiction {
 
-  type Aux[A, +join[x] <: Identity[x], +meet[x] <: Associative[x]] = Noncontradiction[A] {
-    type Join[x] <: join[x]
-    type Meet[x] <: meet[x]
-  }
-
   /**
    * Summons an implicit `Noncontradiction[A]`.
    */
-  def apply[A, Join[x] <: Identity[x], Meet[x] <: Associative[x]](implicit
-    noncontradiction: Noncontradiction.Aux[A, Join, Meet]
-  ): Noncontradiction.Aux[A, Join, Meet] =
+  def apply[A](implicit noncontradiction: Noncontradiction[A]): Noncontradiction[A] =
     noncontradiction
 }

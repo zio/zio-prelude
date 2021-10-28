@@ -31,19 +31,6 @@ package object experimental
     type ClosedCartesianCategory[=>:[-_, +_], :*:[+_, +_], -->:[-_, +_]] = CartesianCategory[=>:, :*:]
       with ApplicationCompose.Aux[=>:, :*:, -->:]
     type CoCartesianCategory[=>:[-_, +_], :+:[+_, +_]]                   = Category[=>:] with EitherCompose.Aux[=>:, :+:]
-
-    type Lattice[A]                  = Absorption.Aux[A, Semilattice, Semilattice]
-    type BoundedLattice[A]           = Absorption.Aux[A, BoundedSemilattice, BoundedSemilattice]
-    type OrthoComplementedLattice[A] = ExcludedMiddle[A] with Involution[A] with Noncontradiction[A] {
-      type Join[x] = BoundedSemilattice[x]
-      type Meet[x] = BoundedSemilattice[x]
-    }
-    type DistributiveLattice[A]      = DistributiveAbsorption.Aux[A, Semilattice, Semilattice]
-    type BooleanAlgebra[A]           =
-      DistributiveAbsorption[A] with ExcludedMiddle[A] with Involution[A] with Noncontradiction[A] {
-        type Join[x] = BoundedSemilattice[x]
-        type Meet[x] = BoundedSemilattice[x]
-      }
   }
 
 }

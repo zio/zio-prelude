@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.laws.CommutativeLaws
-import zio.prelude.newtypes.{And, Max, Min, Or, Prod, Sum}
+import zio.prelude.newtypes.{And, Max, Min, Or, OrF, Prod, Sum}
 import zio.random.Random
 import zio.test._
 import zio.test.laws._
@@ -38,7 +38,7 @@ object CommutativeSpec extends DefaultRunnableSpec {
         testM("long multiplication")(checkAllLaws(CommutativeLaws)(Gen.anyLong.map(Prod(_)))),
         testM("map")(checkAllLaws(CommutativeLaws)(Gen.mapOf(anySumInt, anySumInt))),
         testM("option")(checkAllLaws(CommutativeLaws)(Gen.option(anySumInt))),
-        testM("set")(checkAllLaws(CommutativeLaws)(Gen.setOf(anySumInt))),
+        testM("set")(checkAllLaws(CommutativeLaws)(Gen.setOf(anySumInt).map(OrF(_)))),
         testM("short addition")(checkAllLaws(CommutativeLaws)(Gen.anyShort.map(Sum(_)))),
         testM("short multiplication")(checkAllLaws(CommutativeLaws)(Gen.anyShort.map(Prod(_)))),
         testM("tuple2")(checkAllLaws(CommutativeLaws)(anySumInt.zip(anySumInt))),

@@ -4,7 +4,7 @@ title: "Abstraction Diagrams"
 ---
 # Absorption
 
-[![Absorption hierarchy](https://user-images.githubusercontent.com/9019485/138617130-b5181109-d026-4aee-a623-998c7759f816.png)][Absorption-link]
+[![Absorption hierarchy](https://user-images.githubusercontent.com/9019485/139312934-c76ebe2a-98d9-40ab-a5eb-f59af3c1396a.png)][Absorption-link]
 
 <details><summary>Mermaid</summary>
 
@@ -15,38 +15,32 @@ classDiagram
   Absorption~A~ <|-- Noncontradiction~A~
   Absorption~A~ <|-- ExcludedMiddle~A~
   class Absorption~A~{
-    (type) Join <: Associative
-    (type) Meet <: Associative
-    () Join: Join[OrF[A]]
-    () Meet: Meet[AndF[A]]
-    () join(=> A, => A): A
-    () meet(=> A, => A): A
+    () or(=> A, => A): A
+    () and(=> A, => A): A
   }
   class DistributiveAbsorption~A~{
-    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
-    Set[A] [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent ]
+    Boolean
+    Set[A]
   }
   class Involution~A~{
-    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
+    Boolean
     () complement(=> A): A
   }
   class Noncontradiction~A~{
-    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
+    Boolean
     () complement(=> A): A
-    (type) Join <: Identity
     () bottom: A
   }
   class ExcludedMiddle~A~{
-    Boolean [ Join = Commutative & Idempotent & Inverse ; Meet = Commutative & Idempotent & Inverse ]
+    Boolean
     () complement(=> A): A
-    (type) Meet <: Identity
     () top: A
   }
 ```
 
 </details>
 
-[Absorption-link]: https://mermaid-js.github.io/mermaid-live-editor/edit/#eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFic29ycHRpb25-QX4gPHwtLSBEaXN0cmlidXRpdmVBYnNvcnB0aW9ufkF-XG4gIEFic29ycHRpb25-QX4gPHwtLSBJbnZvbHV0aW9ufkF-XG4gIEFic29ycHRpb25-QX4gPHwtLSBOb25jb250cmFkaWN0aW9ufkF-XG4gIEFic29ycHRpb25-QX4gPHwtLSBFeGNsdWRlZE1pZGRsZX5BflxuICBjbGFzcyBBYnNvcnB0aW9ufkF-e1xuICAgICh0eXBlKSBKb2luIDw6IEFzc29jaWF0aXZlXG4gICAgKHR5cGUpIE1lZXQgPDogQXNzb2NpYXRpdmVcbiAgICAoKSBKb2luOiBKb2luW09yRltBXV1cbiAgICAoKSBNZWV0OiBNZWV0W0FuZEZbQV1dXG4gICAgKCkgam9pbig9PiBBLCA9PiBBKTogQVxuICAgICgpIG1lZXQoPT4gQSwgPT4gQSk6IEFcbiAgfVxuICBjbGFzcyBEaXN0cmlidXRpdmVBYnNvcnB0aW9ufkF-e1xuICAgIEJvb2xlYW4gWyBKb2luID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSA7IE1lZXQgPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIF1cbiAgICBTZXRbQV0gWyBKb2luID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSA7IE1lZXQgPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgXVxuICB9XG4gIGNsYXNzIEludm9sdXRpb25-QX57XG4gICAgQm9vbGVhbiBbIEpvaW4gPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIDsgTWVldCA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgXVxuICAgICgpIGNvbXBsZW1lbnQoPT4gQSk6IEFcbiAgfVxuICBjbGFzcyBOb25jb250cmFkaWN0aW9ufkF-e1xuICAgIEJvb2xlYW4gWyBKb2luID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSA7IE1lZXQgPSBDb21tdXRhdGl2ZSAmIElkZW1wb3RlbnQgJiBJbnZlcnNlIF1cbiAgICAoKSBjb21wbGVtZW50KD0-IEEpOiBBXG4gICAgKHR5cGUpIEpvaW4gPDogSWRlbnRpdHlcbiAgICAoKSBib3R0b206IEFcbiAgfVxuICBjbGFzcyBFeGNsdWRlZE1pZGRsZX5BfntcbiAgICBCb29sZWFuIFsgSm9pbiA9IENvbW11dGF0aXZlICYgSWRlbXBvdGVudCAmIEludmVyc2UgOyBNZWV0ID0gQ29tbXV0YXRpdmUgJiBJZGVtcG90ZW50ICYgSW52ZXJzZSBdXG4gICAgKCkgY29tcGxlbWVudCg9PiBBKTogQVxuICAgICh0eXBlKSBNZWV0IDw6IElkZW50aXR5XG4gICAgKCkgdG9wOiBBXG4gIH1cbiIsIm1lcm1haWQiOiJ7XG4gIFwidGhlbWVcIjogXCJkZWZhdWx0XCJcbn0iLCJ1cGRhdGVFZGl0b3IiOnRydWUsImF1dG9TeW5jIjp0cnVlLCJ1cGRhdGVEaWFncmFtIjp0cnVlfQ
+[Absorption-link]: https://mermaid-js.github.io/mermaid-live-editor/edit/#eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4gIEFic29ycHRpb25-QX4gPHwtLSBEaXN0cmlidXRpdmVBYnNvcnB0aW9ufkF-XG4gIEFic29ycHRpb25-QX4gPHwtLSBJbnZvbHV0aW9ufkF-XG4gIEFic29ycHRpb25-QX4gPHwtLSBOb25jb250cmFkaWN0aW9ufkF-XG4gIEFic29ycHRpb25-QX4gPHwtLSBFeGNsdWRlZE1pZGRsZX5BflxuICBjbGFzcyBBYnNvcnB0aW9ufkF-e1xuICAgICgpIG9yKD0-IEEsID0-IEEpOiBBXG4gICAgKCkgYW5kKD0-IEEsID0-IEEpOiBBXG4gIH1cbiAgY2xhc3MgRGlzdHJpYnV0aXZlQWJzb3JwdGlvbn5BfntcbiAgICBCb29sZWFuXG4gICAgU2V0W0FdXG4gIH1cbiAgY2xhc3MgSW52b2x1dGlvbn5BfntcbiAgICBCb29sZWFuXG4gICAgKCkgY29tcGxlbWVudCg9PiBBKTogQVxuICB9XG4gIGNsYXNzIE5vbmNvbnRyYWRpY3Rpb25-QX57XG4gICAgQm9vbGVhblxuICAgICgpIGNvbXBsZW1lbnQoPT4gQSk6IEFcbiAgICAoKSBib3R0b206IEFcbiAgfVxuICBjbGFzcyBFeGNsdWRlZE1pZGRsZX5BfntcbiAgICBCb29sZWFuXG4gICAgKCkgY29tcGxlbWVudCg9PiBBKTogQVxuICAgICgpIHRvcDogQVxuICB9IiwibWVybWFpZCI6IntcbiAgXCJ0aGVtZVwiOiBcImRlZmF1bHRcIlxufSIsInVwZGF0ZUVkaXRvciI6ZmFsc2UsImF1dG9TeW5jIjp0cnVlLCJ1cGRhdGVEaWFncmFtIjpmYWxzZX0
 
 # Associative
 
