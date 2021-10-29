@@ -265,7 +265,7 @@ import zio.prelude.Assertion._
 object SequenceNumber extends Subtype[Int] {
 
   // Scala 2
-  def assertion = assert { 
+  override def assertion = assert { 
     greaterThanOrEqualTo(0)
   }
   
@@ -314,7 +314,7 @@ import zio.prelude.{Subtype, Validation}
 import zio.prelude.Assertion._
 
 object SequenceNumber extends Subtype[Int] {
-  def assertion = assert { 
+  override def assertion = assert { 
     greaterThanOrEqualTo(0)
   }
   
@@ -338,7 +338,7 @@ import zio.prelude.{Subtype, Validation}
 import zio.prelude.Assertion._
 
 object SequenceNumber extends Subtype[Int] {
-  def assertion = assert { 
+  override def assertion = assert { 
     greaterThanOrEqualTo(0)
   }
 

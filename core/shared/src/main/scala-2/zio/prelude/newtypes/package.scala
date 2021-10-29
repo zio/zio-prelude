@@ -100,14 +100,14 @@ package object newtypes {
   object Natural extends Subtype[Int] {
 
     // scalafix:off
-    def assertion = assert(Assertion.greaterThanOrEqualTo(0))
+    override def assertion = assert(Assertion.greaterThanOrEqualTo(0))
     // scalafix:on
-
-    val one: Natural =
-      Natural(1)
 
     val zero: Natural =
       Natural(0)
+
+    val one: Natural =
+      Natural(1)
 
     def successor(n: Natural): Natural =
       wrap(n + 1)

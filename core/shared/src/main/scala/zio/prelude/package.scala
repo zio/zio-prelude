@@ -42,13 +42,12 @@ package object prelude
     with IdentitySyntax
     with InvariantSyntax
     with InverseSyntax
-    with PartialInverseSyntax
-    with NewtypeExports
     with NewtypeFExports
     with NonEmptyForEachSyntax
     with NonEmptyListSyntax
     with NonEmptySetSyntax
     with OrdSyntax
+    with PartialInverseSyntax
     with PartialOrdSyntax
     with ZNonEmptySetSyntax
     with ZSetSyntax

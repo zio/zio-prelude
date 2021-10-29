@@ -137,23 +137,14 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
   def make_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[A]): c.Tree = {
     val expr = value
 
-    val quotedAssertion = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
+    val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)"
 
-    quotedAssertion match {
-      case Some(quotedAssertion) =>
-        val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)"
-        q"""
+    q"""
 _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
-  $quotedAssertion.assertion.apply($value)
+  ${c.prefix}.assertion.assertion.apply($value)
     .left.map(e => _root_.zio.NonEmptyChunk.fromCons(e.toNel($value.toString)))
 }.as($result)
 """
-
-      case None =>
-        val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)"
-        q"_root_.zio.prelude.Validation.succeed($result)"
-    }
 
   }
 
