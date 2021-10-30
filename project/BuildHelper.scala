@@ -227,7 +227,7 @@ object BuildHelper {
 
   def stdSettings(prjName: String) = Seq(
     name                                   := s"$prjName",
-    crossScalaVersions                     := Seq(Scala211, Scala212, Scala213),
+    crossScalaVersions                     := Seq(Scala211, Scala212, Scala213, Scala3),
     ThisBuild / scalaVersion               := Scala213,
     scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
@@ -292,7 +292,8 @@ object BuildHelper {
   def nativeSettings = Seq(
     Test / test             := (Test / compile).value,
     doc / skip              := true,
-    Compile / doc / sources := Seq.empty
+    Compile / doc / sources := Seq.empty,
+    crossScalaVersions -= Scala3
   )
 
   val scalaReflectTestSettings: List[Setting[_]] = List(

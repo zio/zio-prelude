@@ -239,11 +239,11 @@ lazy val scalaParallelCollections = project
   .settings(
     libraryDependencies ++= {
       scalaVersion.value match {
-        case BuildHelper.Scala213 | BuildHelper.Scala3 =>
-          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
-          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
-        case _                                         =>
+        // Only 2.11 and 2.12 standard library contains Parallel Scala collections
+        case BuildHelper.Scala211 | BuildHelper.Scala212 =>
           List()
+        case _                                           =>
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
       }
     }
   )
