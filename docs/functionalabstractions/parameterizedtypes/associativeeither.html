@@ -115,7 +115,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: =&gt; <span class="hljs-type">Chunk</span>[<span class="hljs-type">A</span>], bs: =&gt; <span class="hljs-type">Chunk</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Chunk</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
       as.map(<span class="hljs-type">Left</span>(_)) ++ bs.map(<span class="hljs-type">Right</span>(_))
   }
-<span class="hljs-comment">// ChunkAssociativeEither: AssociativeEither[Chunk] = repl.MdocSession$App0$$anon$1@6c493f70</span>
+<span class="hljs-comment">// ChunkAssociativeEither: AssociativeEither[Chunk] = repl.MdocSession$App0$$anon$1@f840dc8</span>
 </code></pre>
 <p>Here we are concatenating the two <code>Chunk</code> values, putting the elements from the left <code>Chunk</code> in a <code>Left</code> and the elements from the right <code>Chunk</code> in a <code>Right</code>. We can think of this as running the left <code>Chunk</code> until it fails by running out of elements and then running the right <code>Chunk</code>.</p>
 <p>We can see a similar interpretation in the implementation of the <code>orElseEither</code> operator for the <code>Schedule</code> data type from <code>ZIO</code>. It runs the left schedule while it wants to continue and when it stops runs the right schedule, emitting either a <code>Left</code> with the output of the left schedule or a <code>Right</code> with the output of the right schedule each time.</p>
