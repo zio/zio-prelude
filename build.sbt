@@ -186,47 +186,6 @@ lazy val experimentalJVM = experimental.jvm
 
 lazy val experimentalNative = experimental.native
   .settings(nativeSettings)
-lazy val experimentalLaws   = crossProject(JSPlatform, JVMPlatform, NativePlatform)
-  .in(file("experimental-laws"))
-  .dependsOn(experimental, laws)
-  .settings(stdSettings("zio-prelude-experimental-laws"))
-  .settings(crossProjectSettings)
-  .settings(buildInfoSettings("zio.prelude.experimental.laws"))
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
-  .enablePlugins(BuildInfoPlugin)
-
-lazy val experimentalLawsJS = experimentalLaws.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val experimentalLawsJVM = experimentalLaws.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
-
-lazy val experimentalLawsNative = experimentalLaws.native
-  .settings(nativeSettings)
-
-lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform)
-  .in(file("experimental-tests"))
-  .dependsOn(experimentalLaws)
-  .settings(stdSettings("zio-prelude-experimental-tests"))
-  .settings(crossProjectSettings)
-  .settings(buildInfoSettings("zio.prelude.experimental.tests"))
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
-  .enablePlugins(BuildInfoPlugin)
-
-lazy val experimentalTestsJS = experimentalTests.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val experimentalTestsJVM = experimentalTests.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
 
 lazy val experimentalLaws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental-laws"))
