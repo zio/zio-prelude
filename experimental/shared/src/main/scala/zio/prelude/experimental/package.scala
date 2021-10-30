@@ -17,9 +17,11 @@
 package zio.prelude
 
 package object experimental
-    extends DistributiveProdSyntax
+    extends AbsorptionSyntax
     with ApplicationComposeSyntax
     with BothComposeSyntax
+    with ComplementSyntax
+    with DistributiveProdSyntax
     with DivideSyntax
     with EitherComposeSyntax
     with PartialDivideSyntax
