@@ -10,5 +10,5 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           PR_FILTER: "labelled"
-          PR_LABELS: "dependency-update,autoupdate"
+          PR_LABELS: "type: dependencies,autoupdate"
           EXCLUDED_LABELS: "do-not-autoupdate"
