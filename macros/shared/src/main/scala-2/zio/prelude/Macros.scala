@@ -113,7 +113,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
                 c.abort(c.enclosingPosition, message)
 
               case Right(_) =>
-                c.Expr[T](q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)")
+                c.Expr[T](q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix})($expr)")
             }
 
           case _ =>
@@ -129,7 +129,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
         }
 
       case None =>
-        c.Expr[T](q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)")
+        c.Expr[T](q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix})($expr)")
     }
 
   }
@@ -137,7 +137,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
   def make_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[A]): c.Tree = {
     val expr = value
 
-    val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix}, $expr)"
+    val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix})($expr)"
 
     q"""
 _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
