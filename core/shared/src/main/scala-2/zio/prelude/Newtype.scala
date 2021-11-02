@@ -14,6 +14,7 @@ import zio.NonEmptyChunk
  */
 
 abstract class Newtype[A] {
+  type Wrapped = A
 
   type Base
   trait Tag extends Any
@@ -132,7 +133,7 @@ object Newtype {
    * Converts an instance of the underlying type to an instance of the
    * newtype, ignoring any [[Assertion]].
    */
-  def unsafeWrap[A, T <: Newtype[A]](newtype: T, value: A): newtype.Type = {
+  def unsafeWrap[T <: Newtype[_]](newtype: T)(value: newtype.Wrapped): newtype.Type = {
     val _ = newtype
     value.asInstanceOf[newtype.Type]
   }
