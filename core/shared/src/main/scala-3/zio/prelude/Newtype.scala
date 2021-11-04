@@ -51,7 +51,7 @@ abstract class Newtype[A] {
    * newtype.
    */
   inline def apply(inline value: A): Type =  
-    ${Macros.make_Impl[A, Type]('{assertion}, 'value)}
+    ${Macros.make_Impl[A, Type]('assertion, 'value)}
 
   inline def apply(inline value: A, inline values: A*): NonEmptyChunk[Type] = 
     ${Macros.makeMany_Impl[A, Type]('{assertion}, 'value, 'values)}
@@ -74,31 +74,48 @@ abstract class Newtype[A] {
 
 object Macros extends Liftables {
 
-  def make_Impl[A: Type, T: Type](refinementExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[T] = {
+  def make_Impl[A: Type, T: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[T] = {
     import quotes.reflect.*
 
-    refinementExpr.value match {
+
+    assertionExpr.value match {
       case Some(assertion) =>
         a match {
           case LiteralUnlift(x) =>
             assertion(x.asInstanceOf[A]) match {
               case Right(_)    => '{ $a.asInstanceOf[T] }
-              case Left(error) => report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
+              case Left(error) => 
+                report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
             }
           case _               =>
             report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
         }
 
       case None =>
+        assertionExpr.asTerm.underlying match {
+          case Select(ident @ Ident(name), _) if ident.symbol.declarations.find(_.name == "assertion").exists { expr =>
+              expr.flags.is(Flags.Override)
+            } =>
+
+            val message = s"""$refinementErrorHeader
+
+We were unable to read your ${magenta(name)} assertion at compile-time.
+You must annotate ${yellow("def assertion")} with the ${yellow("inline")} keyword:
+
+    ${yellow("override ") + yellow(underlined("inline")) + yellow(" def assertion = ???")}.
+            """
+            report.errorAndAbort(message)
+          case _ => ()
+        }
         '{ $a.asInstanceOf[T] }
     }
   }
 
-  def makeMany_Impl[A: Type, T: Type](refinementExpr: Expr[Assertion[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
+  def makeMany_Impl[A: Type, T: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
   ): Expr[NonEmptyChunk[T]] = {
     import quotes.reflect.*
 
-    refinementExpr.value match {
+    assertionExpr.value match {
       case Some(assertion) =>
         as match {
           case Varargs(exprs) =>
