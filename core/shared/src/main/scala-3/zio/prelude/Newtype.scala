@@ -10,6 +10,8 @@ abstract class Newtype[A] {
   type Base
   trait Tag extends Any
   type Type = Base with Tag
+  
+  def assertion: Assertion[A] = Assertion.anything
 
   /**
    * Derives an instance of a type class for the new type given an instance
@@ -55,8 +57,6 @@ abstract class Newtype[A] {
 
   inline def apply(inline value: A, inline values: A*): NonEmptyChunk[Type] = 
     ${Macros.makeMany_Impl[A, Type]('{assertion}, 'value, 'values)}
-  
-  def assertion: Assertion[A] = Assertion.anything
 
   def make(value: A): Validation[String, Type] = 
     Validation.fromEitherNonEmptyChunk(
@@ -87,12 +87,14 @@ object Macros extends Liftables {
               case Left(error) => 
                 report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
             }
+
           case _               =>
             report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
         }
 
       case None =>
         assertionExpr.asTerm.underlying match {
+          // The user forgot to use the `inline` keyword
           case Select(ident @ Ident(name), _) if ident.symbol.declarations.find(_.name == "assertion").exists { expr =>
               expr.flags.is(Flags.Override)
             } =>
@@ -105,9 +107,27 @@ You must annotate ${yellow("def assertion")} with the ${yellow("inline")} keywor
     ${yellow("override ") + yellow(underlined("inline")) + yellow(" def assertion = ???")}.
             """
             report.errorAndAbort(message)
-          case _ => ()
+
+          case Select(ident @ Ident(name), "assertion") if ident.tpe <:< TypeRepr.of[Newtype[_]]=> 
+            '{ $a.asInstanceOf[T] }
+
+          case other => 
+            val source = scala.util.Try(assertionExpr.asTerm.pos.sourceCode.get).getOrElse(assertionExpr.show)
+            val message = s"""$refinementErrorHeader
+
+We were unable to read your assertion at compile-time.
+
+You must either define your assertion directly or refer to other inline definitions:
+
+    ${yellow("override inline def assertion = greaterThan(10) && lessThan(100)")}.
+
+    or
+
+    ${yellow("inline def extracted = greaterThan(10) && lessThan(100)")}.
+    ${yellow("override inline def assertion = extracted")}.
+            """
+            report.errorAndAbort(message)
         }
-        '{ $a.asInstanceOf[T] }
     }
   }
 
