@@ -8,10 +8,11 @@ object SmartTypes extends App {
 
   type Natural = Natural.Type
   object Natural extends Subtype[Int] {
-    override val assertion = assert(greaterThanOrEqualTo(0) && lessThanOrEqualTo(100))
+    override def assertion = assert(greaterThanOrEqualTo(0) && lessThanOrEqualTo(100))
 
     implicit class NaturalOps(private val self: Natural) extends AnyVal {
-      def add(that: Natural): Natural = wrap(unwrap(self) + unwrap(that))
+      def add(that: Natural): Natural =
+        wrap(unwrap(self) + unwrap(that))
     }
   }
 

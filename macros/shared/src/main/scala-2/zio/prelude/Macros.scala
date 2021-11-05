@@ -177,7 +177,7 @@ $forall.forEach($value) { value =>
 
   }
 
-  def refine_impl[A: c.WeakTypeTag](assertion: c.Tree): c.Tree = {
+  def assert_impl[A: c.WeakTypeTag](assertion: c.Tree): c.Tree = {
     val (_, _, codeString) = text(assertion)
     q"""
 new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
@@ -193,46 +193,60 @@ new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
   private def getAssertion[T: c.WeakTypeTag, A: c.WeakTypeTag](
     quotedAssertion: c.universe.Symbol
   ): (Assertion[A], String) = {
-    val trees = quotedAssertion.typeSignature.resultType.decls
-      .flatMap(_.annotations)
-      .flatMap(_.tree.children.lastOption)
+    val anns           = quotedAssertion.typeSignature.resultType.decls.toList.flatMap(_.annotations)
+    val assertionQuote = anns.find(_.tree.tpe <:< c.weakTypeOf[assertionQuote[_]]).flatMap(_.tree.children.lastOption)
+    val codeQuote      = anns.find(_.tree.tpe <:< c.weakTypeOf[assertionString]).flatMap(_.tree.children.lastOption)
 
-    val maybeAssertion: Option[Assertion[A]] = trees.collectFirst { case q"${assertion: Assertion[A]}" =>
-      assertion
-    }
+    val assertion: Assertion[A] = assertionQuote match {
+      case Some(q"${assertion: Assertion[A]}") => assertion
 
-    val maybeCodeString: Option[String] = trees.collectFirst { case q"${string: String}" =>
-      string
-    }
+      case Some(_) =>
+        val message =
+          s"""
+             |$assertionErrorHeader
+             |You have defined your Assertion in a way that cannot be read at compile-time.
+             |Due to the limitations of macros, assertions cannot be abstracted into other definitions.
+             |
+             |Make certain your definition looks something like this:
+             |
+             |      ${yellow("import zio.prelude.Assertion._")}
+             |      ${yellow("override def assertion = assert(greaterThan(40) && lessThan(80))")}
+             |      
+             |""".stripMargin
 
-    (maybeAssertion, maybeCodeString) match {
-      case (Some(assertion), Some(code)) =>
-        (assertion, code)
-      case _                             =>
+        c.abort(c.enclosingPosition, message)
+
+      case None =>
         val signatureExample =
-          yellow("def assertion: ") + underlined(yellow(s"QuotedAssertion[${weakTypeOf[A]}]")) +
+          yellow("override def assertion: ") + underlined(yellow(s"QuotedAssertion[${weakTypeOf[A]}]")) +
             yellow(" = assert(...)")
-        val message          =
+
+        val fixedSignatureExample = yellow("override def assertion = assert(...)")
+
+        val message =
           s"""
              |$assertionErrorHeader
              |We were unable to read your assertion at compile-time.
-             |This could be for one of two reasons:
+             |This is because you have annotated `def assertion` with its type signature:
              |
-             | ${red("1.")} You have annotated `def assertion` with its type signature.
-             |      $signatureExample
+             |    $signatureExample
              |   
-             |    Due to the macro machinery powering this feature, you ${red("MUST NOT ANNOTATE")} this method. 
-             |    ${underlined("Try deleting the type annotation and recompiling.")}
+             |Due to the macro machinery powering this feature, you ${red("MUST NOT ANNOTATE")} this method. 
+             |${underlined("Try deleting the type annotation and recompiling.")} Something like:
+             |
+             |    $fixedSignatureExample
              |    
-             | ${red("2.")} You have defined your Assertion in a way that cannot be read at compile-time.
-             |    Due to the limitations of macros, assertions cannot be abstracted into other definitions.
-             |    Make certain your definition looks something like this:
-             |      ${yellow("import zio.prelude.Assertion._")}
-             |      ${yellow("def assertion = assert(greaterThan(40) && lessThan(80))")}
-             |      
              |""".stripMargin
+
         c.abort(c.enclosingPosition, message)
     }
+
+    val code: String = codeQuote match {
+      case Some(q"${string: String}") => string
+      case _                          => "<CODE>"
+    }
+
+    (assertion, code)
   }
 
   private val assertionErrorHeader =
