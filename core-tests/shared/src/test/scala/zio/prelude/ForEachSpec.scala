@@ -153,6 +153,13 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
+        testM("intersperse") {
+          check(genList, genInt) { (as, s) =>
+            val actual   = ForEach[List].intersperse(as.map(Sum.apply), Sum(s))
+            val expected = Sum(as.sum + math.max(0, as.size - 1) * s)
+            assert(actual)(equalTo(expected))
+          }
+        },
         testM("map") {
           check(genList, genIntFunction) { (as, f) =>
             val actual   = ForEach[List].map(f)(as)
