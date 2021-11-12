@@ -485,7 +485,7 @@ object ZValidation extends LowPriorityValidationImplicits {
         case Success(w, b)  => (w, IdentityEither[F].none, b.succeed[F])
       }
     }
-    
+
     ZValidation.Success(w, (es, bs))
   }
 
