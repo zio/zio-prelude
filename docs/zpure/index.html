@@ -112,7 +112,7 @@
   one.map(_ + <span class="hljs-number">1</span>)
 <span class="hljs-comment">// two: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(</span>
 <span class="hljs-comment">//   value = Succeed(value = 1),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$15866/842346906@737e3f5c,</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$15821/2088806110@7011a832,</span>
 <span class="hljs-comment">//   compose = RightIdentity()</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
@@ -121,7 +121,7 @@
   one.zipWith(two)(_ + _)
 <span class="hljs-comment">// three: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(</span>
 <span class="hljs-comment">//   value = Succeed(value = 1),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$ZPureSyntax$$$Lambda$15873/1015896183@6b524cef,</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$ZPureSyntax$$$Lambda$15828/1875351804@35c5a225,</span>
 <span class="hljs-comment">//   compose = LeftIdentity()</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
@@ -207,7 +207,7 @@
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> accountEnvironment: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">AccountEnvironment</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">AccountEnvironment</span>] =
   <span class="hljs-type">ZPure</span>.environment
 <span class="hljs-comment">// accountEnvironment: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, AccountEnvironment] = Access(</span>
-<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$15941/1131733267@5673ac03</span>
+<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$15896/749096915@1577d78b</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>This computation does not use logging or state and cannot fail, but it now depends on an <code>AccountEnvironment</code> and just returns the <code>AccountEnvironment</code>. Since this computation now succeeds with an <code>AccountEnvironment</code> we can use all of our normal operators for transforming success values like <code>map</code> and <code>flatMap</code> to work with it.</p>
@@ -215,7 +215,7 @@
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> interestRate: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">AccountEnvironment</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Double</span>] =
   <span class="hljs-type">ZPure</span>.access(_.interestRate)
 <span class="hljs-comment">// interestRate: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] = Access(</span>
-<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$15941/1131733267@54f5ed4e</span>
+<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$15896/749096915@68dabd2f</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>There is also an <code>accessM</code> variant for when we want to perform another computation based on the value from the environment.</p>
@@ -273,8 +273,8 @@
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> withdrawalComputation: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountError</span>, <span class="hljs-type">Unit</span>] =
   withdraw(<span class="hljs-number">10</span>).provideState(<span class="hljs-type">AccountState</span>(<span class="hljs-number">100</span>, <span class="hljs-literal">true</span>))
 <span class="hljs-comment">// withdrawalComputation: ZPure[Nothing, Any, AccountState, Any, AccountError, Unit] = FlatMap(</span>
-<span class="hljs-comment">//   value = Modify(run0 = zio.prelude.fx.ZPure$$$Lambda$15950/66384520@733e6752),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$ZPureSyntax$$$Lambda$15873/1015896183@af278ee,</span>
+<span class="hljs-comment">//   value = Modify(run0 = zio.prelude.fx.ZPure$$$Lambda$15905/710548558@3281c494),</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$ZPureSyntax$$$Lambda$15828/1875351804@2acd8c6b,</span>
 <span class="hljs-comment">//   compose = Compose()</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
@@ -300,13 +300,11 @@
   withdrawLog(<span class="hljs-number">10</span>)
 <span class="hljs-comment">// withdrawalComputationLog: ZPure[String, AccountState, AccountState, Any, AccountError, Unit] = FlatMap(</span>
 <span class="hljs-comment">//   value = FlatMap(</span>
-<span class="hljs-comment">//     value = Modify(</span>
-<span class="hljs-comment">//       run0 = zio.prelude.fx.ZPure$$$Lambda$15949/777964107@41aade07</span>
-<span class="hljs-comment">//     ),</span>
+<span class="hljs-comment">//     value = Modify(run0 = zio.prelude.fx.ZPure$$$Lambda$15904/216089978@1adcd36),</span>
 <span class="hljs-comment">//     continue = &lt;function1&gt;,</span>
 <span class="hljs-comment">//     compose = Compose()</span>
 <span class="hljs-comment">//   ),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$ZPureSyntax$$$Lambda$15873/1015896183@3a4ed4e1,</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$ZPureSyntax$$$Lambda$15828/1875351804@3ca32be9,</span>
 <span class="hljs-comment">//   compose = RightIdentity()</span>
 <span class="hljs-comment">// )</span>
 
