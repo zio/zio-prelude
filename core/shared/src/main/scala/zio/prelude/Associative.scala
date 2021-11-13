@@ -45,8 +45,14 @@ import scala.annotation.tailrec
  * can be combined in ways that are associative, commutative, and have an
  * identity element, supporting much more interesting modes of composition.
  */
-trait Associative[A] {
+trait Associative[A] { self =>
   def combine(l: => A, r: => A): A
+
+  final def intersperse(middle: A): Associative[A] =
+    new Associative[A] {
+      def combine(l: => A, r: => A): A =
+        self.combine(l, self.combine(middle, r))
+    }
 
   final def repeat(a: A)(n: Int): A = {
     @tailrec
