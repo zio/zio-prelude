@@ -123,9 +123,22 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, if successful, or the provided `fallback` value.
+   */
+  final def getOrElse[A1 >: A](fallback: => A1): A1 =
+    self match {
+      case Failure(_, _) => fallback
+      case Success(_, a) => a
+    }
+
+  /**
    * Returns the successful value or handles the errors that have accumulated.
    */
-  final def getOrElseWith[A1 >: A](f: NonEmptyChunk[E] => A1): A1 = fold(f, identity)
+  final def getOrElseWith[A1 >: A](f: NonEmptyChunk[E] => A1): A1 =
+    self match {
+      case Failure(_, e) => f(e)
+      case Success(_, a) => a
+    }
 
   /**
    * Writes an entry to the log.
