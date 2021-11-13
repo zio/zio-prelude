@@ -493,6 +493,26 @@ object ZValidation extends LowPriorityValidationImplicits {
     }
 
   /**
+   * Validates each element in a collection, collecting the results into a
+   * collection of failed results and a collection of successful results.
+   */
+  def partition[F[+_]: ForEach: IdentityBoth: IdentityEither, W, E, A, B](
+    fa: F[A]
+  )(f: A => ZValidation[W, E, B]): ZValidation[W, Nothing, (F[E], F[B])] = {
+    implicit val leftIdentity: Identity[F[E]]  = Identity.fromIdentityEitherCovariant
+    implicit val rightIdentity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
+
+    val (w, es, bs) = fa.foldMap { a =>
+      f(a) match {
+        case Failure(w, es) => (w, es.foldMap(_.succeed[F]), IdentityEither[F].none)
+        case Success(w, b)  => (w, IdentityEither[F].none, b.succeed[F])
+      }
+    }
+
+    ZValidation.Success(w, (es, bs))
+  }
+
+  /**
    * Constructs a `Validation` that succeeds with the specified value.
    */
   def succeed[A](value: A): Validation[Nothing, A] =

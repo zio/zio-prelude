@@ -240,6 +240,16 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   }
 
   /**
+   * Partitions the collection based on the specified validation function.
+   */
+  def partitionMapV[W, E, A, B](
+    fa: F[A]
+  )(f: A => ZValidation[W, E, B])(implicit both: IdentityBoth[F], either: IdentityEither[F]): (F[E], F[B]) = {
+    implicit val forEach = self
+    ZValidation.partition(fa)(f).get
+  }
+
+  /**
    * Partitions the collection based on the specified effectual function.
    */
   def partitionMapM[G[+_]: IdentityFlatten: Covariant, A, B, C](
