@@ -109,6 +109,11 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, because no error has occurred.
+   */
+  final def get(implicit ev: E <:< Nothing): A = self.asInstanceOf[Success[W, A]].value
+
+  /**
    * Returns the value of the log.
    */
   final def getLog: Chunk[W] =
@@ -116,6 +121,11 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case Failure(w, _) => w
       case Success(w, _) => w
     }
+
+  /**
+   * Returns the successful value or handles the errors that have accumulated.
+   */
+  final def getOrElseWith[A1 >: A](f: NonEmptyChunk[E] => A1): A1 = fold(f, identity)
 
   /**
    * Writes an entry to the log.
@@ -244,16 +254,6 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       nec => ZIO.halt(nec.reduceMapLeft(zio.Cause.fail)((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
       ZIO.succeedNow
     )
-
-  /**
-   * Returns the value, because no error has occurred.
-   */
-  final def value(implicit ev: E <:< Nothing): A = self.asInstanceOf[Success[W, A]].value
-
-  /**
-   * Returns the successful value or handles the errors that have accumulated.
-   */
-  final def valueOr[A1 >: A](f: NonEmptyChunk[E] => A1): A1 = fold(f, identity)
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
