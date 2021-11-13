@@ -208,6 +208,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception` with the first error as `cause`.
+   */
+  final def toEitherException(implicit ev: E <:< Throwable): Either[Failure.Exception[W, E], A] = self match {
+    case Success(_, value)       => Right(value)
+    case failure @ Failure(_, _) => Left(failure.toException)
+  }
+
+  /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
   final def toEitherMultiSet: Either[NonEmptyMultiSet[E], A] =
@@ -230,11 +238,20 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(_ => None, Some(_))
 
   /**
-   * Transforms this `ZValidation` to a `Try`, discarding all but the first
-   * error and the log.
+   * Transforms this `ZValidation` to a `Future`, discarding the log.
    */
-  final def toTry(implicit ev: E <:< Throwable): scala.util.Try[A] =
-    fold(es => scala.util.Failure(ev(es.head)), scala.util.Success(_))
+  final def toFuture(implicit ev: E <:< Throwable): scala.concurrent.Future[A] = self match {
+    case Success(_, value)       => scala.concurrent.Future.successful(value)
+    case failure @ Failure(_, _) => scala.concurrent.Future.failed(failure.toException)
+  }
+
+  /**
+   * Transforms this `ZValidation` to a `Try`, discarding the log.
+   */
+  final def toTry(implicit ev: E <:< Throwable): scala.util.Try[A] = self match {
+    case Success(_, value)       => scala.util.Success(value)
+    case failure @ Failure(_, _) => scala.util.Failure(failure.toException)
+  }
 
   /**
    * Converts this `ZValidation` into a `ZIO` effect, discarding the log.
@@ -287,9 +304,27 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 object ZValidation extends LowPriorityValidationImplicits {
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
+
+    /** The errors represented in a way which discards the order in which they occurred. */
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
+
+    /** The description of the failure. */
+    lazy val message: String =
+      s"errors:\n  ${errors.map(_.toString).mkString("\n  ")}\nlog:\n  ${log.map(_.toString).mkString("\n  ")}"
+
+    /** The same failure, but represented as an `Exception` which also has the `cause` set to the first error that occurred */
+    def toException(implicit ev: E <:< Throwable): Failure.Exception[W, E] = Failure.Exception(this)
   }
-  final case class Success[+W, +A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
+
+  object Failure {
+    final case class Exception[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
+        extends RuntimeException(failure.message) {
+      failure.errors.tail.foreach(addSuppressed(_))
+      val _ = initCause(failure.errors.head)
+    }
+  }
+
+  final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
 
   /**
    * The `Covariant` instance for `ZValidation`.
