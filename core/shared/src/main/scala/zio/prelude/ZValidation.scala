@@ -320,7 +320,7 @@ object ZValidation extends LowPriorityValidationImplicits {
     final case class Exception[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
         extends RuntimeException(failure.message) {
       failure.errors.tail.foreach(addSuppressed(_))
-      val _ = initCause(failure.errors.head)
+      initCause(failure.errors.head)
     }
   }
 
