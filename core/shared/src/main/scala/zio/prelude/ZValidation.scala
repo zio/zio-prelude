@@ -109,12 +109,35 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, because no error has occurred.
+   */
+  final def get(implicit ev: E <:< Nothing): A = self.asInstanceOf[Success[W, A]].value
+
+  /**
    * Returns the value of the log.
    */
   final def getLog: Chunk[W] =
     self match {
       case Failure(w, _) => w
       case Success(w, _) => w
+    }
+
+  /**
+   * Returns the value, if successful, or the provided `fallback` value.
+   */
+  final def getOrElse[A1 >: A](fallback: => A1): A1 =
+    self match {
+      case Failure(_, _) => fallback
+      case Success(_, a) => a
+    }
+
+  /**
+   * Returns the successful value or handles the errors that have accumulated.
+   */
+  final def getOrElseWith[A1 >: A](f: NonEmptyChunk[E] => A1): A1 =
+    self match {
+      case Failure(_, e) => f(e)
+      case Success(_, a) => a
     }
 
   /**
