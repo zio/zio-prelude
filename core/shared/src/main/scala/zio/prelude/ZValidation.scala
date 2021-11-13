@@ -246,6 +246,16 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     )
 
   /**
+   * Returns the value, because no error has occurred.
+   */
+  final def value(implicit ev: E <:< Nothing): A = self.asInstanceOf[Success[W, A]].value
+
+  /**
+   * Returns the successful value or handles the errors that have accumulated.
+   */
+  final def valueOr[A1 >: A](f: NonEmptyChunk[E] => A1): A1 = fold(f, identity)
+
+  /**
    * A variant of `zipPar` that keeps only the left success value, but returns
    * a failure with all errors if either this `ZValidation` or the specified
    * `ZValidation` fail.
