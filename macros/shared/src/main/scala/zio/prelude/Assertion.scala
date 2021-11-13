@@ -76,6 +76,8 @@ object Assertion {
 
   def matches(regexString: String): Assertion[String] = Matches(regexString)
 
+  def predicate[A](f: A => Boolean, name: String = "custom"): Assertion[A] = Predicate(f, name)
+
   /**
    * Matches a [[scala.util.matching.Regex]].
    *
@@ -200,6 +202,17 @@ object Assertion {
     }
   }
 
+  private[prelude] case class Predicate[A](f: A => Boolean, name: String) extends Assertion[A] {
+    protected def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
+      if (!negated) {
+        if (f(a)) Right(())
+        else Left(AssertionError.failure(s"matchesPredicate($name)"))
+      } else {
+        if (!f(a)) Right(())
+        else Left(AssertionError.failure(s"notMatchesPredicate($name)"))
+      }
+  }
+
   private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
@@ -279,6 +292,10 @@ object Assertion {
   private[prelude] object Anything extends Assertion[Any] {
     def apply(a: Any, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) Right(()) else Left(AssertionError.failure("never"))
+  }
+
+  final case class ReflectedFunction1[A, B](val tree: String, val f: Function1[A, B]) extends Function1[A, B] {
+    def apply(v1: A): B = f(v1)
   }
 
   sealed trait Regex { self =>
