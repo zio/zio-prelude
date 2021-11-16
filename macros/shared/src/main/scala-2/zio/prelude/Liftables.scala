@@ -80,6 +80,10 @@ trait Liftables {
         Assertion.Regex.inRange(start, end)
       case q"${A(_)}.Regex.notInRange(${start: Char}, ${end: Char})"                                          =>
         Assertion.Regex.notInRange(start, end)
+      case q"${A(_)}.Regex.start"                                                                             =>
+        Assertion.Regex.start
+      case q"${A(_)}.Regex.end"                                                                               =>
+        Assertion.Regex.end
       case q"${A(_)}.Regex.Repeat.apply(${regex: Assertion.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
         Assertion.Regex.Repeat(regex, min, max)
       case q"${regex: Assertion.Regex}.min(${n: Int})"                                                        =>
@@ -92,6 +96,8 @@ trait Liftables {
         regex.*
       case q"${regex: Assertion.Regex}.+"                                                                     =>
         regex.*
+      case q"${regex: Assertion.Regex}.?"                                                                     =>
+        regex.?
       case q"${A(_)}.Regex.AndThen.apply(${first: Assertion.Regex}, ${second: Assertion.Regex})"              =>
         Assertion.Regex.AndThen(first, second)
       case q"${left: Assertion.Regex}.~(${right: Assertion.Regex})"                                           =>
@@ -157,6 +163,9 @@ trait Liftables {
 
       case q"${A(_)}.hasLength(${assertion: Assertion[Int]})" =>
         Assertion.hasLength(assertion).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.isEmptyString" =>
+        Assertion.isEmptyString.asInstanceOf[Assertion[A]]
 
       case q"${A(_)}.lessThan[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.lessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])

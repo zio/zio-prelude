@@ -38,9 +38,9 @@ object SmartTypes extends App {
   object MyRegex extends Newtype[String] {
     override inline def assertion = {
       matches {
-        anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
-          literal("hello") ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').min(0).max(1) ~
-          inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3)
+        start ~ anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
+          literal("hello") ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').? ~
+          inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3) ~ end
       }
     }
   }

@@ -66,6 +66,8 @@ object Assertion {
 
   def hasLength(lengthAssertion: Assertion[Int]): Assertion[String] = HasLength(lengthAssertion)
 
+  val isEmptyString: Assertion[String] = hasLength(equalTo(0))
+
   def lessThan[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = LessThan(value)
 
   def lessThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = !greaterThan(value)
@@ -291,6 +293,8 @@ object Assertion {
 
     def + : Regex = min(1)
 
+    def ? : Regex = between(0, 1)
+
     def between(min: Int, max: Int): Regex =
       Repeat(self, Some(min), Some(max))
 
@@ -318,6 +322,8 @@ object Assertion {
     val nonWhitespace: Regex   = Whitespace(reversed = true)
     val digit: Regex           = Digit(reversed = false)
     val nonDigit: Regex        = Digit(reversed = true)
+    val start: Regex           = Start
+    val end: Regex             = End
 
     def literal(str: String): Regex =
       str.toList.foldLeft(anything)((acc, char) => acc ~ Literal(char))
