@@ -60,6 +60,40 @@ object NewtypeSpec extends DefaultRunnableSpec {
           assert(Natural.make(-1))(
             isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))
           )
+        },
+        testM("issue #752") {
+          assertM(
+            typeCheck(
+              """import zio.prelude._
+                |import zio.prelude.Assertion._
+                |import zio.random.Random
+                |import zio.ZIO
+                |import zio.test.{Gen, Sized}
+                |
+                |object types {
+                |  private val isNonEmptyString: Assertion[String] = hasLength(greaterThan(0))
+                |
+                |  object NonEmptyString extends Subtype[String] {
+                |    def assertion = assert(isNonEmptyString)
+                |  }
+                |  type NonEmptyString = NonEmptyString.Type
+                |}
+                |import types._
+                |
+                |object TestKitGenerators {
+                | 
+                |  final case class GeneratorException(message: String) extends RuntimeException
+                |  def makeGen[R, A, B](gen: Gen[R, A])(make: A => Validation[String, B]): Gen[R, B] =
+                |    gen.mapM((a: A) => make(a).fold(failure => ZIO.die(GeneratorException(failure.mkString)), ZIO.succeed(_)))
+                |
+                |  private def genNewType[R, A](n: Newtype[A])(gen: Gen[R, A]) = makeGen(gen)(n.make(_))
+                |  private def genNewType[R, A](n: Subtype[A])(gen: Gen[R, A]) = makeGen(gen)(n.make(_))
+                |
+                |  val anyNonEmptyString: Gen[Random with Sized, NonEmptyString]     = genNewType(NonEmptyString)(Gen.anyString.filter(_.nonEmpty))
+                |}
+                |""".stripMargin
+            )
+          )(isRight(anything))
         }
       ),
       suite("Subtype")(
