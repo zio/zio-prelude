@@ -93,7 +93,7 @@ none &lt;+&gt; fa === fa
     <span class="hljs-keyword">val</span> none: <span class="hljs-type">Option</span>[<span class="hljs-type">Nothing</span>] =
       <span class="hljs-type">None</span>
   }
-<span class="hljs-comment">// OptionIdentityEither: IdentityEither[Option] = repl.MdocSession$App0$$anon$1@23b2d107</span>
+<span class="hljs-comment">// OptionIdentityEither: IdentityEither[Option] = repl.MdocSession$App0$$anon$1@6de145dc</span>
 </code></pre>
 <p>If we think of an <code>Option[A]</code> as representing either a success with a value of type <code>A</code> or a failure with no useful information, then the implementation of <code>none</code> is <code>None</code>. Combining any <code>Option[A]</code> with <code>None</code> with <code>orElseEither</code> won't change its result.</p>
 <p>Now let's compare that to <code>Either</code> to see why we can't define a <code>IdentityEither</code> instance for <code>Either</code>.</p>
@@ -124,7 +124,7 @@ none &lt;+&gt; fa === fa
     <span class="hljs-keyword">val</span> none: <span class="hljs-type">Chunk</span>[<span class="hljs-type">Nothing</span>] =
       <span class="hljs-type">Chunk</span>.empty
   }
-<span class="hljs-comment">// ChunkIdentityEither: IdentityEither[Chunk] = repl.MdocSession$App0$$anon$2@7c2281bc</span>
+<span class="hljs-comment">// ChunkIdentityEither: IdentityEither[Chunk] = repl.MdocSession$App0$$anon$2@6c2598f1</span>
 </code></pre>
 <p>Here the identity element is just the empty chunk. If we think of running a collection as producing a set of values and then failing when the collection is empty, <code>none</code> is the collection that doesn't produce any values and fails immediately.</p>
 <p>Another more mathematical way to think about it is that if concatenation corresponds to addition then the empty collection corresponds to zero. or this reason, we can also see that collections that cannot be empty, such as <code>NonEmptyChunk</code> from ZIO or <code>NonEmptyList</code> from ZIO Prelude, cannot have <code>IdentityEither</code> instances defined for them.</p>
