@@ -39,11 +39,27 @@ object SmartTypes extends App {
     override inline def assertion = {
       matches {
         start ~ anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
-          literal("hello") ~ anyOf('a', 'b', 'c').min(2) ~ notAnyOf('d', 'e', 'f').? ~
+          literal("hello") ~ anyCharOf('a', 'b', 'c').min(2) ~ notAnyCharOf('d', 'e', 'f').? ~
           inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3) ~ end
       }
     }
   }
 
   val myRegex: MyRegex = MyRegex("ab#l*helloccayj678")
+
+  object Email extends Subtype[String] {
+    override inline def assertion = {
+      matches {
+        start
+           ~ anyRegexOf(alphanumeric, literal("-"), literal("\\.")).+
+           ~ literal("@")
+           ~ anyRegexOf(alphanumeric, literal("-")).+
+           ~ literal("\\.").+
+           ~ anyRegexOf(alphanumeric, literal("-")).between(2, 4)
+           ~ end
+      }
+    }
+  }
+  type Email = Email.Type
+  val email: Email = Email("test@test.com")
 }

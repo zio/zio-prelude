@@ -328,10 +328,16 @@ object Assertion {
     def literal(str: String): Regex =
       str.toList.foldLeft(anything)((acc, char) => acc ~ Literal(char))
 
-    def anyOf(first: Char, second: Char, rest: Char*): Regex =
+    def anyCharOf(first: Char, second: Char, rest: Char*): Regex =
+      anyRegexOf(literal(first.toString), literal(second.toString), rest.map(c => literal(c.toString)): _*)
+
+    def anyRegexOf(first: Regex, second: Regex, rest: Regex*): Regex =
       CharacterSet(Set(first, second) ++ rest.toSet, reversed = false)
 
-    def notAnyOf(first: Char, second: Char, rest: Char*): Regex =
+    def notAnyCharOf(first: Char, second: Char, rest: Char*): Regex =
+      notAnyRegexOf(literal(first.toString), literal(second.toString), rest.map(c => literal(c.toString)): _*)
+
+    def notAnyRegexOf(first: Regex, second: Regex, rest: Regex*): Regex =
       CharacterSet(Set(first, second) ++ rest.toSet, reversed = true)
 
     def inRange(start: Char, end: Char): Regex = Range(start, end, reversed = false)
@@ -366,8 +372,8 @@ object Assertion {
       def compile: String = s"$char"
     }
 
-    final case class CharacterSet(set: Set[Char], reversed: Boolean) extends Regex {
-      def compile: String = set.mkString(if (reversed) "[^" else "[", "", "]")
+    final case class CharacterSet(set: Set[Regex], reversed: Boolean) extends Regex {
+      def compile: String = set.map(_.compile).mkString(if (reversed) "[^" else "[", "", "]")
     }
 
     final case class Range(start: Char, end: Char, reversed: Boolean) extends Regex {
