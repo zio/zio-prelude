@@ -85,11 +85,11 @@ identity &lt;*&gt; fa === fa
 
 <span class="hljs-keyword">val</span> helloUnit: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;*&gt; <span class="hljs-type">ZIO</span>.unit
-<span class="hljs-comment">// helloUnit: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@205d44b9</span>
+<span class="hljs-comment">// helloUnit: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@226a8aca</span>
 
 <span class="hljs-keyword">val</span> unitHello: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   <span class="hljs-type">ZIO</span>.unit &lt;*&gt; console.putStrLn(<span class="hljs-string">"Hello"</span>)
-<span class="hljs-comment">// unitHello: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@41569d2c</span>
+<span class="hljs-comment">// unitHello: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@8018005</span>
 </code></pre>
 <p>These programs are identical because <code>ZIO.unit</code> does not do anything at all and always succeeds.</p>
 <p>Similarly, the <code>any</code> with respect to data types such as <code>Either</code> and <code>Option</code> that model failure is a successful value that contains no useful information.</p>
@@ -146,7 +146,7 @@ identity &lt;*&gt; fa === fa
 <p>For example we can use the <code>succeed</code> operator on <code>ZIO</code> to wrap any arbitrary block of Scala code in a <code>ZIO</code> effect.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> helloScala: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Any</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>] =
   <span class="hljs-type">ZIO</span>.succeed(println(<span class="hljs-string">"Hello, Scala!"</span>))
-<span class="hljs-comment">// helloScala: ZIO[Any, Nothing, Unit] = zio.ZIO$EffectTotal@371c6316</span>
+<span class="hljs-comment">// helloScala: ZIO[Any, Nothing, Unit] = zio.ZIO$EffectTotal@205d44b9</span>
 </code></pre>
 <p>This is also quite useful in ZIO Prelude in particular because many operators are only defined for data types that have an <code>IdentityBoth</code> instance, such as the <code>forEach</code> operator on the <code>ForEach</code> abstraction.</p>
 <p>As with concrete data types, it is quite useful to have an identity element with respect to the combining operator for parameterized types.</p>
