@@ -318,7 +318,7 @@ object ZValidation extends LowPriorityValidationImplicits {
 
   object Failure {
     final case class Exception[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
-        extends RuntimeException(failure.message) {
+        extends scala.Exception(failure.message) {
       failure.errors.tail.foreach(addSuppressed(_))
       initCause(failure.errors.head)
     }
@@ -336,7 +336,7 @@ object ZValidation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * Derives a `Debug[ZValidation[W, E, A]]` given a `Debug[W], a `Debug[E]`,
+   * Derives a `Debug[ZValidation[W, E, A]]` given a `Debug[W]`, a `Debug[E]`,
    * and a `Debug[A]`.
    */
   implicit def ZValidationDebug[W: Debug, E: Debug, A: Debug]: Debug[ZValidation[W, E, A]] = {
