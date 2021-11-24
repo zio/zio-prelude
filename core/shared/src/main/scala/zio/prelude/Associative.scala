@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{And, First, Last, Max, Min, Natural, Or, Prod, Sum}
+import zio.prelude.newtypes.{And, AndF, First, Last, Max, Min, Natural, Or, OrF, Prod, Sum}
 import zio.{Chunk, Duration => ZIODuration, NonEmptyChunk}
 
 import scala.annotation.tailrec
@@ -44,8 +44,14 @@ import scala.annotation.tailrec
  * can be combined in ways that are associative, commutative, and have an
  * identity element, supporting much more interesting modes of composition.
  */
-trait Associative[A] {
+trait Associative[A] { self =>
   def combine(l: => A, r: => A): A
+
+  final def intersperse(middle: A): Associative[A] =
+    new Associative[A] {
+      def combine(l: => A, r: => A): A =
+        self.combine(l, self.combine(middle, r))
+    }
 
   final def repeat(a: A)(n: Int): A = {
     @tailrec
@@ -98,6 +104,28 @@ object Associative extends AssociativeLowPriority {
       def combine(l: => Or, r: => Or): Or = Or.create(l || r)
       val identity: Or                    = Or.create(false)
       def inverse(l: => Or, r: => Or): Or = Or.create(l && !r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` and `Inverse` instance for the `AndF` of `Boolean` values.
+   */
+  implicit val BooleanAndFCommutativeIdempotentInverse
+    : Commutative[AndF[Boolean]] with Idempotent[AndF[Boolean]] with Inverse[AndF[Boolean]] =
+    new Commutative[AndF[Boolean]] with Idempotent[AndF[Boolean]] with Inverse[AndF[Boolean]] {
+      override def inverse(l: => AndF[Boolean], r: => AndF[Boolean]): AndF[Boolean] = AndF(l || r)
+      override def identity: AndF[Boolean]                                          = AndF(true)
+      override def combine(l: => AndF[Boolean], r: => AndF[Boolean]): AndF[Boolean] = AndF(l && r)
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` and `Inverse` instance for the `OrF`` of `Boolean` values.
+   */
+  implicit val BooleanOrFCommutativeIdempotentInverse
+    : Commutative[OrF[Boolean]] with Idempotent[OrF[Boolean]] with Inverse[OrF[Boolean]] =
+    new Commutative[OrF[Boolean]] with Idempotent[OrF[Boolean]] with Inverse[OrF[Boolean]] {
+      override def inverse(l: => OrF[Boolean], r: => OrF[Boolean]): OrF[Boolean] = OrF(l && r)
+      override def identity: OrF[Boolean]                                        = OrF(false)
+      override def combine(l: => OrF[Boolean], r: => OrF[Boolean]): OrF[Boolean] = OrF(l || r)
     }
 
   /**
@@ -534,14 +562,22 @@ object Associative extends AssociativeLowPriority {
     )
 
   /**
-   * The `Commutative`, `Idempotent` and `Inverse` instance for the union of `Set[A]`
-   * values.
+   * The `Commutative` and `Idempotent` instance for the intersection of `Set[A]` values.
    */
-  implicit def SetIdempotentInverse[A]: Commutative[Set[A]] with Idempotent[Set[A]] with Inverse[Set[A]] =
-    new Commutative[Set[A]] with Idempotent[Set[A]] with Inverse[Set[A]] {
-      def combine(l: => Set[A], r: => Set[A]): Set[A] = l | r
-      val identity: Set[A]                            = Set.empty
-      def inverse(l: => Set[A], r: => Set[A]): Set[A] = l &~ r
+  implicit def SetAndFCommutativeIdempotent[A]: Commutative[AndF[Set[A]]] with Idempotent[AndF[Set[A]]] =
+    new Commutative[AndF[Set[A]]] with Idempotent[AndF[Set[A]]] {
+      def combine(l: => AndF[Set[A]], r: => AndF[Set[A]]): AndF[Set[A]] = AndF((l: Set[A]) & (r: Set[A]))
+    }
+
+  /**
+   * The `Commutative`, `Idempotent` and `Inverse` instance for the union of `Set[A]` values.
+   */
+  implicit def SetOrFCommutativeIdempotentInverse[A]
+    : Commutative[OrF[Set[A]]] with Idempotent[OrF[Set[A]]] with Inverse[OrF[Set[A]]] =
+    new Commutative[OrF[Set[A]]] with Idempotent[OrF[Set[A]]] with Inverse[OrF[Set[A]]] {
+      def combine(l: => OrF[Set[A]], r: => OrF[Set[A]]): OrF[Set[A]] = OrF((l: Set[A]) | (r: Set[A]))
+      val identity: OrF[Set[A]]                                      = OrF(Set.empty)
+      def inverse(l: => OrF[Set[A]], r: => OrF[Set[A]]): OrF[Set[A]] = OrF((l: Set[A]) &~ (r: Set[A]))
     }
 
   /**

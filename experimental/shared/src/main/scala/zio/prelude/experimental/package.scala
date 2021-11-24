@@ -16,7 +16,12 @@
 
 package zio.prelude
 
-package object experimental extends ApplicationComposeSyntax with BothComposeSyntax with EitherComposeSyntax {
+package object experimental
+    extends AbsorptionSyntax
+    with ApplicationComposeSyntax
+    with BothComposeSyntax
+    with ComplementSyntax
+    with EitherComposeSyntax {
 
   object classic {
 

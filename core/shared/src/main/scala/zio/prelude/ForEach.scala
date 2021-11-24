@@ -168,6 +168,16 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     foldMap(fa)(_ => And.create(false))
 
   /**
+   * Folds over the elements of this collection using an associative operation
+   * with the middle element interspersed between every element.
+   */
+  def intersperse[A](fa: F[A], middle: A)(implicit I: Identity[A]): A =
+    reduceAssociative(fa)(I.intersperse(middle)) match {
+      case Some(a) => a
+      case None    => I.identity
+    }
+
+  /**
    * Lifts a function operating on values to a function that operates on each
    * element of a collection.
    */
@@ -237,6 +247,16 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
         case Right(c) => (either.none, c.succeed)
       }
     }
+  }
+
+  /**
+   * Partitions the collection based on the specified validation function.
+   */
+  def partitionMapV[W, E, A, B](
+    fa: F[A]
+  )(f: A => ZValidation[W, E, B])(implicit both: IdentityBoth[F], either: IdentityEither[F]): (F[E], F[B]) = {
+    implicit val forEach = self
+    ZValidation.partition(fa)(f).get
   }
 
   /**
@@ -416,6 +436,8 @@ trait ForEachSyntax {
       F.forEach_(self)(f)
     def isEmpty(implicit F: ForEach[F]): Boolean                                                                =
       F.isEmpty(self)
+    def intersperse[A1 >: A](middle: A1)(implicit F: ForEach[F], I: Identity[A1]): A1                           =
+      F.intersperse(self, middle)
     def mapAccum[S, B](s: S)(f: (S, A) => (S, B))(implicit F: ForEach[F]): (S, F[B])                            =
       F.mapAccum(self)(s)(f)
     def maxOption(implicit A: Ord[A], F: ForEach[F]): Option[A]                                                 =

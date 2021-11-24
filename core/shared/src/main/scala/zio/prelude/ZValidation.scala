@@ -109,12 +109,35 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, because no error has occurred.
+   */
+  final def get(implicit ev: E <:< Nothing): A = self.asInstanceOf[Success[W, A]].value
+
+  /**
    * Returns the value of the log.
    */
   final def getLog: Chunk[W] =
     self match {
       case Failure(w, _) => w
       case Success(w, _) => w
+    }
+
+  /**
+   * Returns the value, if successful, or the provided `fallback` value.
+   */
+  final def getOrElse[A1 >: A](fallback: => A1): A1 =
+    self match {
+      case Failure(_, _) => fallback
+      case Success(_, a) => a
+    }
+
+  /**
+   * Returns the successful value or handles the errors that have accumulated.
+   */
+  final def getOrElseWith[A1 >: A](f: NonEmptyChunk[E] => A1): A1 =
+    self match {
+      case Failure(_, e) => f(e)
+      case Success(_, a) => a
     }
 
   /**
@@ -458,6 +481,36 @@ object ZValidation extends LowPriorityValidationImplicits {
    */
   def log[W](w: W): ZValidation[W, Nothing, Unit] =
     Success(Chunk(w), ())
+
+  /**
+   * Converts an `Option` to a `ZValidation`, treating `None` as a success with
+   * no information and `Some` as a failure with the specified error.
+   */
+  def noneOrFail[E](option: Option[E]): Validation[E, Unit] =
+    option match {
+      case None    => ZValidation.unit
+      case Some(e) => ZValidation.fail(e)
+    }
+
+  /**
+   * Validates each element in a collection, collecting the results into a
+   * collection of failed results and a collection of successful results.
+   */
+  def partition[F[+_]: ForEach: IdentityBoth: IdentityEither, W, E, A, B](
+    fa: F[A]
+  )(f: A => ZValidation[W, E, B]): ZValidation[W, Nothing, (F[E], F[B])] = {
+    implicit val leftIdentity: Identity[F[E]]  = Identity.fromIdentityEitherCovariant
+    implicit val rightIdentity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
+
+    val (w, es, bs) = fa.foldMap { a =>
+      f(a) match {
+        case Failure(w, es) => (w, es.foldMap(_.succeed[F]), IdentityEither[F].none)
+        case Success(w, b)  => (w, IdentityEither[F].none, b.succeed[F])
+      }
+    }
+
+    ZValidation.Success(w, (es, bs))
+  }
 
   /**
    * Constructs a `Validation` that succeeds with the specified value.

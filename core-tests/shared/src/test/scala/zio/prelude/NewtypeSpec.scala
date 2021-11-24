@@ -94,6 +94,20 @@ object NewtypeSpec extends DefaultRunnableSpec {
       )
     )
 
+  /**
+   * Testing Nested Subtypes
+   */
+
+  object Foo extends Subtype[String]
+  type Foo = Foo.Type
+
+  object Bar extends Subtype[String]
+  type Bar = Bar.Type
+
+  val foo: Foo     = Foo("Foo")
+  val cool: String = foo
+  val bar: Bar     = Bar("hi")
+
   type Meter = Meter.Type
   object Meter extends Newtype[Double] {
     implicit final class MeterOps(private val self: Meter) extends AnyVal {
