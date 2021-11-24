@@ -97,9 +97,9 @@ object These {
   def fromOptions[A,B](opA:Option[A],opB:Option[B]):Option[These[A,B]] =
     (opA,opB) match {
       case (Some(a),Some(b)) => Some(Both(a,b))
-      case (Some(a),None) => Some(Left(a))
-      case (None,Some(b)) => Some(Right(b))
-      case (None,None) => None
+      case (Some(a),_) => Some(Left(a))
+      case (_,Some(b)) => Some(Right(b))
+      case _  => None
     }
 
 
