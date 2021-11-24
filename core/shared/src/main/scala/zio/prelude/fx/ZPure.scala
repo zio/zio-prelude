@@ -900,7 +900,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Submerges the full cause of failures of this computation.
    */
   def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
-    foldM(e => ZPure.halt(ev(e)), a => ZPure.succeed(a))
+    foldM(e => ZPure.failCause(ev(e)), a => ZPure.succeed(a))
 
   /**
    * Combines this computation with the specified computation, passing the

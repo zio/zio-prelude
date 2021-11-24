@@ -10,7 +10,7 @@ object InvolutionSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("InvolutionSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(InvolutionLaws)(Gen.boolean))
+        test("boolean")(checkAllLaws(InvolutionLaws)(Gen.boolean))
       )
     )
 }

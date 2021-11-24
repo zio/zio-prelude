@@ -10,7 +10,7 @@ object NoncontradictionSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("NoncontradictionSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(NoncontradictionLaws)(Gen.boolean))
+        test("boolean")(checkAllLaws(NoncontradictionLaws)(Gen.boolean))
       )
     )
 }

@@ -10,8 +10,8 @@ object DistributiveAbsorptionSpec extends DefaultRunnableSpec {
   def spec: ZSpec[Environment, Failure] =
     suite("DistributiveAbsorptionSpec")(
       suite("laws")(
-        testM("set")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.setOf(Gen.anyInt))),
-        testM("boolean")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.boolean))
+        test("set")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.setOf(Gen.int))),
+        test("boolean")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.boolean))
       )
     )
 }
