@@ -90,4 +90,14 @@ object These {
       override def combine(l: => These[A, B], r: => These[A, B]): These[A, B] = l.combine(r)
     }
 
+  /**
+   *  constructor from two options to an option of These.
+   */
+  def fromOptions[A, B](opA: Option[A], opB: Option[B]): Option[These[A, B]] =
+    (opA, opB) match {
+      case (Some(a), Some(b)) => Some(Both(a, b))
+      case (Some(a), _)       => Some(Left(a))
+      case (_, Some(b))       => Some(Right(b))
+      case _                  => None
+    }
 }
