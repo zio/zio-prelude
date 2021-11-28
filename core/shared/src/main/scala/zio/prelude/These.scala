@@ -31,6 +31,14 @@ sealed trait These[+A, +B] { self =>
       case (Both(l, r1), Right(r2))     => Both(l, B1.combine(r1, r2))
       case (Both(l1, r1), Both(l2, r2)) => Both(A1.combine(l1, l2), B1.combine(r1, r2))
     }
+
+  def reduceMap[C](f: A => C, g: B => C)(implicit C: Associative[C]): C =
+    self match {
+      case Left(l)    => f(l)
+      case Right(r)   => g(r)
+      case Both(l, r) => f(l) combine g(r)
+    }
+
 }
 
 object These {
