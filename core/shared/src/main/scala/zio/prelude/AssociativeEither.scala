@@ -218,7 +218,7 @@ object AssociativeEither {
   implicit def ZLayerAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
     new AssociativeEither[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
       def either[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, Either[A, B]] =
-        fa.map(Left(_)) orElse fb.map(Right(_))
+        fa.map(e => ZEnvironment(Left(e.get[A]))) orElse fb.map(e => ZEnvironment(Right(e.get[B])))
     }
 
   /**

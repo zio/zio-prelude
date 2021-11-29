@@ -1768,9 +1768,10 @@ trait LowPriorityInvariantImplicits {
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `ZSink`.
    */
-  implicit def ZSinkContravariant[R, E, L, Z]: Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] {
-      def contramap[A, C](f: C => A): ZSink[R, E, A, L, Z] => ZSink[R, E, C, L, Z] =
+  implicit def ZSinkContravariant[R, InErr, OutErr, L, Z]
+    : Contravariant[({ type lambda[-x] = ZSink[R, InErr, x, OutErr, L, Z] })#lambda] =
+    new Contravariant[({ type lambda[-x] = ZSink[R, InErr, x, OutErr, L, Z] })#lambda] {
+      def contramap[A, C](f: C => A): ZSink[R, InErr, A, OutErr, L, Z] => ZSink[R, InErr, C, OutErr, L, Z] =
         sink => sink.contramap(f)
     }
 

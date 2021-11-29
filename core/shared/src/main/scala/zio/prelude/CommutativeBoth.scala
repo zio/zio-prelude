@@ -177,9 +177,13 @@ object CommutativeBoth {
   /**
    * The `CommutativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkCommutativeBoth[R, E, I, L]: CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, (A, B)] = fa zipPar fb
+  implicit def ZSinkCommutativeBoth[R, InErr, In, OutErr, L <: In]
+    : CommutativeBoth[({ type lambda[+a] = ZSink[R, InErr, In, OutErr, L, a] })#lambda] =
+    new CommutativeBoth[({ type lambda[+a] = ZSink[R, InErr, In, OutErr, L, a] })#lambda] {
+      def both[A, B](
+        fa: => ZSink[R, InErr, In, OutErr, L, A],
+        fb: => ZSink[R, InErr, In, OutErr, L, B]
+      ): ZSink[R, InErr, In, OutErr, L, (A, B)] = fa.zipPar(fb)
     }
 
   /**

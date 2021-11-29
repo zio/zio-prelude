@@ -300,10 +300,10 @@ object Equal {
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
-   * `Hash` and `Ord` and (and thus also `Equal`) instance for `FiberId` values.
+   * `Hash` and (and thus also `Equal`) instance for `FiberId` values.
    */
-  implicit lazy val FiberIdHashOrd: Hash[FiberId] with Ord[FiberId] =
-    HashOrd.derive[(Long, Long)].contramap[FiberId](fid => (fid.startTimeMillis, fid.seqNumber))
+  implicit lazy val FiberIdHashOrd: Hash[FiberId] =
+    Hash.default
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
