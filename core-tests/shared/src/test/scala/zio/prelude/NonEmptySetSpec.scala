@@ -1,9 +1,9 @@
 package zio.prelude
 
+import zio.Random
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.Random
 
 object NonEmptySetSpec extends DefaultRunnableSpec {
 

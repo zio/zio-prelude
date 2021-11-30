@@ -1,9 +1,9 @@
 package zio.prelude
 
+import zio.Random
 import zio.prelude.Debug.{Renderer, Repr, _}
 import zio.prelude.laws._
 import zio.test.{TestResult, _}
-import zio.Random
 
 import scala.collection.immutable.ListMap
 
