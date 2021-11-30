@@ -40,19 +40,6 @@ trait Zivariant[Z[-_, +_, +_]] { self =>
         fa => Failure.wrap(self.mapLeft(f)(Failure.unwrap(fa)))
     }
 
-//  def deriveContravariant[E, A]: Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] =
-//    new Contravariant[({ type lambda[-R] = Z[R, E, A] })#lambda] {
-//      def contramap[R, R1](f: R1 => R): Z[R, E, A] => Z[R1, E, A] = self.contramap(f)
-//    }
-//
-//  def deriveDivariant[E]: Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] =
-//    new Divariant[({ type lambda[-R, +A] = Z[R, E, A] })#lambda] {
-//
-//      def leftContramap[R, A, RR](f: RR => R): Z[R, E, A] => Z[RR, E, A] = self.contramap(f)
-//
-//      def rightMap[R, A, AA](f: A => AA): Z[R, E, A] => Z[R, E, AA] = self.map(f)
-//    }
-
   def zimap[R, E, A, R1, E1, A1](
     r: ZEnvironment[R1] => ZEnvironment[R],
     e: E => E1,
