@@ -1,10 +1,10 @@
 package zio.prelude
 
+import zio.ZIO
 import zio.prelude.Common.finiteDurationScala
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.{Has, ZIO}
 
 object OrdSpec extends DefaultRunnableSpec {
 
@@ -13,7 +13,7 @@ object OrdSpec extends DefaultRunnableSpec {
 
   def scalaOrderingConsistency[R, A: Ord](
     gen: Gen[R, A]
-  )(implicit ord: scala.math.Ordering[A]): ZIO[R with Has[TestConfig], Nothing, TestResult] =
+  )(implicit ord: scala.math.Ordering[A]): ZIO[R with TestConfig, Nothing, TestResult] =
     check(gen, gen) { (a1, a2) =>
       assert(a1 =?= a2)(equalTo(Ordering.fromCompare(ord.compare(a1, a2)))) &&
       assert(sign(Ord[A].toScala.compare(a1, a2)))(equalTo(sign(ord.compare(a1, a2))))

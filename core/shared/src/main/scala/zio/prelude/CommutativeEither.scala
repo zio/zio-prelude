@@ -52,13 +52,13 @@ object CommutativeEither {
   /**
    * The `CommutativeEither` instance for `ZSink`.
    */
-  implicit def ZSinkCommutativeEither[R, InErr, In, OutErr, L]
-    : CommutativeEither[({ type lambda[+a] = ZSink[R, InErr, In, OutErr, L, a] })#lambda] =
-    new CommutativeEither[({ type lambda[+a] = ZSink[R, InErr, In, OutErr, L, a] })#lambda] {
+  implicit def ZSinkCommutativeEither[R, E, In, L]
+    : CommutativeEither[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] =
+    new CommutativeEither[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] {
       def either[A, B](
-        fa: => ZSink[R, InErr, In, OutErr, L, A],
-        fb: => ZSink[R, InErr, In, OutErr, L, B]
-      ): ZSink[R, InErr, In, OutErr, L, Either[A, B]] =
+        fa: => ZSink[R, E, In, L, A],
+        fb: => ZSink[R, E, In, L, B]
+      ): ZSink[R, E, In, L, Either[A, B]] =
         fa.raceBoth(fb)
     }
 

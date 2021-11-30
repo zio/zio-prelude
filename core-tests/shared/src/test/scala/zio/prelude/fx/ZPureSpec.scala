@@ -4,35 +4,35 @@ import zio.prelude._
 import zio.prelude.laws._
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
-import zio.{CanFail, Chunk, Has, NonEmptyChunk, Random}
+import zio.{CanFail, Chunk, NonEmptyChunk, Random}
 
 import java.util.NoSuchElementException
 import scala.util.Try
 
 object ZPureSpec extends DefaultRunnableSpec {
 
-  lazy val genInt: Gen[Has[Random], Int] =
+  lazy val genInt: Gen[Random, Int] =
     Gen.int
 
-  lazy val genString: Gen[Has[Random] with Has[Sized], String] =
+  lazy val genString: Gen[Random with Sized, String] =
     Gen.string
 
-  lazy val genIntIntToInt: Gen[Has[Random], (Int, Int) => Int] =
+  lazy val genIntIntToInt: Gen[Random, (Int, Int) => Int] =
     Gen.function2(genInt)
 
-  lazy val genIntToInt: Gen[Has[Random], Int => Int] =
+  lazy val genIntToInt: Gen[Random, Int => Int] =
     Gen.function(genInt)
 
-  lazy val genIntToIntInt: Gen[Has[Random], Int => (Int, Int)] =
+  lazy val genIntToIntInt: Gen[Random, Int => (Int, Int)] =
     Gen.function(genInt <*> genInt)
 
-  lazy val genIntToState: Gen[Has[Random], Int => State[Int, Int]] =
+  lazy val genIntToState: Gen[Random, Int => State[Int, Int]] =
     Gen.function(genState)
 
-  lazy val genState: Gen[Has[Random], State[Int, Int]] =
+  lazy val genState: Gen[Random, State[Int, Int]] =
     Gens.state(genInt, genInt)
 
-  lazy val genStateState: Gen[Has[Random], State[Int, State[Int, Int]]] =
+  lazy val genStateState: Gen[Random, State[Int, State[Int, Int]]] =
     Gens.state(genInt, genState)
 
   def spec: ZSpec[Environment, Failure] =

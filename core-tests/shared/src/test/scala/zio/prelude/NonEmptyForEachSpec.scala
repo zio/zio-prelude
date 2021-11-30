@@ -3,20 +3,20 @@ package zio.prelude
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.{Has, Random}
+import zio.Random
 
 object NonEmptyForEachSpec extends DefaultRunnableSpec {
 
-  val genInt: Gen[Has[Random], Int] =
+  val genInt: Gen[Random, Int] =
     Gen.int
 
-  val genNonEmptyList: Gen[Has[Random] with Has[Sized], NonEmptyList[Int]] =
+  val genNonEmptyList: Gen[Random with Sized, NonEmptyList[Int]] =
     Gens.nonEmptyListOf(genInt)
 
-  val genIntFunction: Gen[Has[Random], Int => Int] =
+  val genIntFunction: Gen[Random, Int => Int] =
     Gen.function(genInt)
 
-  val genIntFunction2: Gen[Has[Random], (Int, Int) => Int] =
+  val genIntFunction2: Gen[Random, (Int, Int) => Int] =
     Gen.function2(genInt)
 
   def spec: ZSpec[Environment, Failure] =

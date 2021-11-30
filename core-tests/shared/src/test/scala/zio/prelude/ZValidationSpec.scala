@@ -6,18 +6,18 @@ import zio.prelude.ZValidation._
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.{Has, Random}
+import zio.Random
 
 object ZValidationSpec extends DefaultRunnableSpec {
 
-  val genValidation: Gen[Has[Random] with Has[Sized], ZValidation[Int, Int, Int]] =
+  val genValidation: Gen[Random with Sized, ZValidation[Int, Int, Int]] =
     Gens.validation(Gen.int, Gen.int, Gen.int)
 
-  val genFValidation: GenF[Has[Random] with Has[Sized], ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
+  val genFValidation: GenF[Random with Sized, ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
     GenFs.validation(Gen.int, Gen.int)
 
   val genFValidationFailure
-    : GenF[Has[Random] with Has[Sized], ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
+    : GenF[Random with Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
     GenFs.validationFailure(Gen.int, Gen.int)
 
   def spec: ZSpec[Environment, Failure] = suite("ZValidationSpec")(

@@ -42,7 +42,7 @@ import zio._
 
 import java.io.IOException
 
-val greet: ZIO[Has[Random], Nothing, ZIO[Has[Console], IOException, Unit]] =
+val greet: ZIO[Random, Nothing, ZIO[Has[Console], IOException, Unit]] =
   Random.nextIntBounded(100).map { n =>
     Console.printLine(s"The number is $n")
   }
