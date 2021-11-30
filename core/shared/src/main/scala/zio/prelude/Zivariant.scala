@@ -149,16 +149,6 @@ object Zivariant {
       rea => rea.mapBoth(e, a).provideSomeEnvironment(r)
   }
 
-//  implicit val ZLayerZivariant: Zivariant[ZLayer] =
-//    new Zivariant[ZLayer] {
-//      override def zimap[E, A, R, EE, AA, RR](
-//        r: ZEnvironment[EE] => ZEnvironment[E],
-//        e: A => AA,
-//        a: R => RR
-//      ): ZLayer[E, A, R] => ZLayer[EE, AA, RR] =
-//        rea => ZLayer.fromFunctionEnvironment(r) >>> rea.map(a).mapError(e)
-//    }
-
   implicit val ZManagedZivariant: Zivariant[ZManaged] =
     new Zivariant[ZManaged] {
       override def zimap[E, A, R, EE, AA, RR](

@@ -1234,16 +1234,6 @@ object AssociativeBoth {
         }
     }
 
-//  /**
-//   * The `IdentityBoth` instance for `ZLayer`.
-//   */
-//  implicit def ZLayerIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-//    new IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-//      val any: ZLayer[R, E, Any] = ZLayer.succeed(())
-//
-//      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
-//    }
-
   /**
    * The `AssociativeBoth` instance for `ZManaged`.
    */

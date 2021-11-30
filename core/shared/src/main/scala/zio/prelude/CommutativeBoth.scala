@@ -143,14 +143,6 @@ object CommutativeBoth {
         }
     }
 
-//  /**
-//   * The `CommutativeBoth` instance for `ZLayer`.
-//   */
-//  implicit def ZLayerCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-//    new CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-//      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
-//    }
-
   /**
    * The `CommutativeBoth` instance for `ZManaged`.
    */

@@ -1305,18 +1305,6 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit def ZIOFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
     Zivariant.ZioZivariant.deriveFailureCovariant
 
-//  /**
-//   * The `Covariant` (and thus `Invariant`) for `ZLayer`
-//   */
-//  implicit def ZLayerCovariant[R, E]: Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] =
-//    Zivariant.ZLayerZivariant.deriveCovariant
-//
-//  /**
-//   * The `Covariant` (and thus `Invariant`) for a failed `ZLayer`
-//   */
-//  implicit def ZLayerFailureCovariant[R, Out]: Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] =
-//    Zivariant.ZLayerZivariant.deriveFailureCovariant
-
   /**
    * The `Covariant` (and thus `Invariant`) for `ZManaged`
    */
@@ -1715,24 +1703,6 @@ trait LowPriorityInvariantImplicits {
         schedule => schedule.contramap(f)
     }
 
-//  /**
-//   * The `Contravariant` (and thus `Invariant`) instance for `ZIO`.
-//   */
-//  implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
-//    Zivariant.ZioZivariant.deriveContravariant
-//
-//  /**
-//   * The `Contravariant` (and thus `Invariant`) instance for `ZLayer`.
-//   */
-//  implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
-//    Zivariant.ZLayerZivariant.deriveContravariant
-//
-//  /**
-//   * The `Contravariant` (and thus `Invariant`) instance for `ZManaged`.
-//   */
-//  implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
-//    Zivariant.ZManagedZivariant.deriveContravariant
-
   /**
    * The `Contravariant` (and thus `Invariant`) instance for `ZQueue`.
    */
@@ -1774,17 +1744,6 @@ trait LowPriorityInvariantImplicits {
         sink => sink.contramap(f)
     }
 
-//  /**
-//   * The `Contravariant` (and thus `Invariant`) instance for `ZStream`.
-//   */
-//  implicit def ZStreamContravariant[E, A]: Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] =
-//    Zivariant.ZStreamZivariant.deriveContravariant
-//
-//  /**
-//   * The `Contravariant` (and thus `Invariant`) instance for `ZSTM`.
-//   */
-//  implicit def ZSTMZivariantContravariant[E, A]: Contravariant[({ type lambda[-x] = ZSTM[x, E, A] })#lambda] =
-//    Zivariant.ZSTMZivariant.deriveContravariant
 }
 
 trait InvariantSyntax {
