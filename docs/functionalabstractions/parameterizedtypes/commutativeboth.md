@@ -36,10 +36,10 @@ import zio._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Has[Console], IOException, Unit] =
+val helloZIO: ZIO[Console, IOException, Unit] =
   Console.printLine("Hello") <*> Console.printLine("ZIO")
 
-val zioHello: ZIO[Has[Console], IOException, Unit] =
+val zioHello: ZIO[Console, IOException, Unit] =
   Console.printLine("ZIO") <*> Console.printLine("Hello")
 ```
 
@@ -50,10 +50,10 @@ The first will print `Hello` to the console on one line followed by `ZIO` on the
 We can also see this in the context of failures.
 
 ```scala mdoc
-val failZIO: ZIO[Has[Console], IOException, Unit] =
+val failZIO: ZIO[Console, IOException, Unit] =
   ZIO.fail(new IOException("Fail")) <*> Console.printLine("ZIO")
 
-val zioFail: ZIO[Has[Console], IOException, (Unit, Unit)] =
+val zioFail: ZIO[Console, IOException, (Unit, Unit)] =
   Console.printLine("ZIO") <*> ZIO.fail(new IOException("Fail"))
 ```
 
@@ -64,7 +64,7 @@ What would a commutative version of this operator be? It would have to run both 
 The `zipPar` operator on `ZIO` does just this.
 
 ```scala mdoc
-val helloZIOPar: ZIO[Has[Console], IOException, Unit] =
+val helloZIOPar: ZIO[Console, IOException, Unit] =
   Console.printLine("Hello") <&> Console.printLine("ZIO")
 ```
 

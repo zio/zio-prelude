@@ -36,10 +36,10 @@ import zio._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+val helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] =
   Console.printLine("Hello").orElseEither(Console.printLine("ZIO"))
 
-val zioHello: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+val zioHello: ZIO[Console, IOException, Either[Unit, Unit]] =
   Console.printLine("ZIO").orElseEither(Console.printLine("Hello"))
 ```
 
@@ -58,10 +58,10 @@ import zio._
 
 import java.io.IOException
 
-val helloZIO: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+val helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] =
   Console.printLine("Hello").raceEither(Console.printLine("ZIO"))
 
-val zioHello: ZIO[Has[Console], IOException, Either[Unit, Unit]] =
+val zioHello: ZIO[Console, IOException, Either[Unit, Unit]] =
   Console.printLine("ZIO").raceEither(Console.printLine("Hello"))
 ```
 

@@ -38,7 +38,7 @@ import zio._
 
 import java.io.IOException
 
-val helloIdentity: ZIO[Has[Console], IOException, Unit] =
+val helloIdentity: ZIO[Console, IOException, Unit] =
   ZIO.unit.map { _ =>
     Console.printLine("Hello from an identity!")
   }.flatten
