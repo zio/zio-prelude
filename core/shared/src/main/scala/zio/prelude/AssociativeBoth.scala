@@ -1235,16 +1235,6 @@ object AssociativeBoth {
     }
 
   /**
-   * The `IdentityBoth` instance for `ZLayer`.
-   */
-  implicit def ZLayerIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-    new IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-      val any: ZLayer[R, E, Any] = ZLayer.succeed(())
-
-      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
-    }
-
-  /**
    * The `AssociativeBoth` instance for `ZManaged`.
    */
   implicit def ZManagedAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
@@ -1270,9 +1260,13 @@ object AssociativeBoth {
   /**
    * The `AssociativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkAssociativeBoth[R, E, I]: AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, I, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, I, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, I, A], fb: => ZSink[R, E, I, I, B]): ZSink[R, E, I, I, (A, B)] = fa zip fb
+  implicit def ZSinkAssociativeBoth[R, E, In, L <: In]
+    : AssociativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] =
+    new AssociativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] {
+      def both[A, B](
+        fa: => ZSink[R, E, In, L, A],
+        fb: => ZSink[R, E, In, L, B]
+      ): ZSink[R, E, In, L, (A, B)] = fa.zip(fb)
     }
 
   /**

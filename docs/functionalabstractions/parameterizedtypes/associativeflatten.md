@@ -42,7 +42,7 @@ import zio._
 
 import java.io.IOException
 
-val greet: ZIO[Has[Random], Nothing, ZIO[Has[Console], IOException, Unit]] =
+val greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] =
   Random.nextIntBounded(100).map { n =>
     Console.printLine(s"The number is $n")
   }
@@ -67,7 +67,7 @@ This is exactly what the `flatten` operator does for us. It takes a `ZIO` workfl
 Let's see how we can use the `flatten` operator to fix our code from above.
 
 ```scala mdoc:nest
-val greet: ZIO[Has[Random] with Has[Console], IOException, Unit] =
+val greet: ZIO[Random with Console, IOException, Unit] =
   Random.nextIntBounded(100).map { n =>
     Console.printLine(s"The number is $n")
   }.flatten
@@ -78,7 +78,7 @@ Now we have eliminated the nested workflows. This workflow will do exactly what 
 Of course if we are working with `ZIO` we quickly learn to use the `flatMap` operator, which just combines `map` and `flatten`.
 
 ```scala mdoc:nest
-val greet: ZIO[Has[Random] with Has[Console], IOException, Unit] =
+val greet: ZIO[Random with Console, IOException, Unit] =
   Random.nextIntBounded(100).flatMap { n =>
     Console.printLine(s"The number is $n")
   }

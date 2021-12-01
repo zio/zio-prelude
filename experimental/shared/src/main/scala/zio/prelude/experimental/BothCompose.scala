@@ -17,8 +17,6 @@
 package zio.prelude
 package experimental
 
-import zio._
-
 trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
 
   type :*:[+_, +_]
@@ -74,51 +72,6 @@ object BothCompose {
       g(a)(b)
     }
 
-  }
-
-  implicit val URIOApplicationCompose: BothCompose[URIO] = new BothCompose[URIO] {
-
-    type :*:[+f, +s] = Tuple2[f, s]
-
-    def fromFirst[A]: URIO[(A, Any), A] = URIO.access[(A, Any)](_._1)
-
-    def fromSecond[B]: URIO[(Any, B), B] = URIO.access[(Any, B)](_._2)
-
-    def toBoth[A, B, C](a2b: URIO[A, B])(a2c: URIO[A, C]): URIO[A, (B, C)] =
-      a2b.zip(a2c)
-
-    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] =
-      AssociativeCompose.URIOIdentityCompose.compose(bc, ab)
-  }
-
-  implicit val URLayerApplicationCompose: BothCompose[URLayer] = new BothCompose[URLayer] {
-
-    type :*:[+f, +s] = Tuple2[f, s]
-
-    def fromFirst[A]: URLayer[(A, Any), A] = ZLayer.first
-
-    def fromSecond[B]: URLayer[(Any, B), B] = ZLayer.second
-
-    def toBoth[A, B, C](a2b: URLayer[A, B])(a2c: URLayer[A, C]): URLayer[A, (B, C)] =
-      a2b <&> a2c
-
-    def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] =
-      AssociativeCompose.URLayerIdentityCompose.compose(bc, ab)
-  }
-
-  implicit val URManagedApplicationCompose: BothCompose[URManaged] = new BothCompose[URManaged] {
-
-    type :*:[+f, +s] = Tuple2[f, s]
-
-    def fromFirst[A]: URManaged[(A, Any), A] = ZManaged.access(_._1)
-
-    def fromSecond[B]: URManaged[(Any, B), B] = ZManaged.access(_._2)
-
-    def toBoth[A, B, C](a2b: URManaged[A, B])(a2c: URManaged[A, C]): URManaged[A, (B, C)] =
-      a2b.zip(a2c)
-
-    def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] =
-      AssociativeCompose.URManagedIdentityCompose.compose(bc, ab)
   }
 
 }

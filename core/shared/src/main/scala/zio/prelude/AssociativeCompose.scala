@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.ZLayer.ZLayerProvideSomeOps
 import zio._
 
 trait AssociativeCompose[=>:[-_, +_]] {
@@ -44,23 +45,32 @@ object AssociativeCompose {
 
   }
 
-  implicit val URIOIdentityCompose: IdentityCompose[URIO] = new IdentityCompose[URIO] {
-    def identity[A]: URIO[A, A] = URIO.environment
+  implicit val URIOIdentityCompose: IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] =
+    new IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] {
+      def identity[A]: URIO[A, ZEnvironment[A]] = URIO.environment
 
-    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab.flatMap(bc.provide(_))
-  }
+      def compose[A, B, C](bc: URIO[B, ZEnvironment[C]], ab: URIO[A, ZEnvironment[B]]): URIO[A, ZEnvironment[C]] =
+        ab.flatMap(b => bc.provideEnvironment(b))
+    }
 
   implicit val URLayerIdentityCompose: IdentityCompose[URLayer] = new IdentityCompose[URLayer] {
     def identity[A]: URLayer[A, A] = ZLayer.environment
 
-    def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] = ab >>> bc
+    def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] =
+      new ZLayerProvideSomeOps[A, Nothing, B](ab) >>> bc
   }
 
-  implicit val URManagedIdentityCompose: IdentityCompose[URManaged] = new IdentityCompose[URManaged] {
-    def identity[A]: URManaged[A, A] = ZManaged.environment
+  implicit val URManagedIdentityCompose
+    : IdentityCompose[({ type lambda[-r, +a] = URManaged[r, ZEnvironment[a]] })#lambda] =
+    new IdentityCompose[({ type lambda[-r, +a] = URManaged[r, ZEnvironment[a]] })#lambda] {
+      def identity[A]: URManaged[A, ZEnvironment[A]] = ZManaged.environment
 
-    def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] = ab.flatMap(bc.provide(_))
-  }
+      def compose[A, B, C](
+        bc: URManaged[B, ZEnvironment[C]],
+        ab: URManaged[A, ZEnvironment[B]]
+      ): URManaged[A, ZEnvironment[C]] =
+        ab.flatMap(b => bc.provideEnvironment(b))
+    }
 }
 
 trait AssociativeComposeSyntax {

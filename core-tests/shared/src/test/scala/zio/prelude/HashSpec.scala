@@ -1,14 +1,14 @@
 package zio.prelude
 
+import zio.ZIO
 import zio.prelude.Common.finiteDurationScala
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.{Has, ZIO}
 
 object HashSpec extends DefaultRunnableSpec {
 
-  final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R with Has[TestConfig], Nothing, TestResult] =
+  final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R with TestConfig, Nothing, TestResult] =
     check(gen)(a => assert(a.hash)(equalTo(a.hashCode)))
 
   def spec: ZSpec[Environment, Failure] =

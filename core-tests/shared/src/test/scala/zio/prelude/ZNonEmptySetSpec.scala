@@ -8,11 +8,11 @@ import zio.prelude.laws._
 import zio.prelude.newtypes._
 import zio.test._
 import zio.test.laws._
-import zio.{Chunk, Has, Random, ZTraceElement}
+import zio.{Chunk, Random, ZTraceElement}
 
 object ZNonEmptySetSpec extends DefaultRunnableSpec {
 
-  def genFZNonEmptySet[R <: Has[Random] with Has[Sized], B](
+  def genFZNonEmptySet[R <: Random with Sized, B](
     b: Gen[R, B]
   ): GenF[R, ({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
@@ -20,10 +20,10 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
         genZNonEmptySet(a, b)
     }
 
-  def genZNonEmptySet[R <: Has[Random] with Has[Sized], A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZNonEmptySet[A, B]] =
+  def genZNonEmptySet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZNonEmptySet[A, B]] =
     Gen.mapOf1(a, b).map(ZNonEmptySet.fromMapOption(_).get)
 
-  val smallInts: Gen[Has[Random] with Has[Sized], Chunk[Int]] =
+  val smallInts: Gen[Random with Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
@@ -39,8 +39,8 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
           checkAllLaws[
             CovariantDeriveEqual,
             Equal,
-            Has[TestConfig],
-            Has[Random] with Has[Sized] with Has[TestConfig],
+            TestConfig,
+            Random with Sized with TestConfig,
             ({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda,
             Int
           ](CovariantLaws)(genFZNonEmptySet(Gen.int), Gen.int)(

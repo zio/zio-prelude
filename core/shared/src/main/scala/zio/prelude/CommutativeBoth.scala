@@ -144,14 +144,6 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `ZLayer`.
-   */
-  implicit def ZLayerCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
-    }
-
-  /**
    * The `CommutativeBoth` instance for `ZManaged`.
    */
   implicit def ZManagedCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
@@ -177,9 +169,13 @@ object CommutativeBoth {
   /**
    * The `CommutativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkCommutativeBoth[R, E, I, L]: CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, (A, B)] = fa zipPar fb
+  implicit def ZSinkCommutativeBoth[R, E, In, L <: In]
+    : CommutativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] =
+    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] {
+      def both[A, B](
+        fa: => ZSink[R, E, In, L, A],
+        fb: => ZSink[R, E, In, L, B]
+      ): ZSink[R, E, In, L, (A, B)] = fa.zipPar(fb)
     }
 
   /**

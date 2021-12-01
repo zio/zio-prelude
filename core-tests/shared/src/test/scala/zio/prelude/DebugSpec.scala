@@ -1,9 +1,9 @@
 package zio.prelude
 
+import zio.Random
 import zio.prelude.Debug.{Renderer, Repr, _}
 import zio.prelude.laws._
 import zio.test.{TestResult, _}
-import zio.{Has, Random}
 
 import scala.collection.immutable.ListMap
 
@@ -17,7 +17,7 @@ object DebugSpec extends DefaultRunnableSpec {
   def primFullTest[A: Debug](a: A, exp: Option[String] = None): TestResult   = primitiveTest[A](Renderer.Full)(a, exp)
 
   final case class TestCase(string: String, number: Int, list: List[Double])
-  val genTestCase: Gen[Has[Random] with Has[Sized], TestCase] = for {
+  val genTestCase: Gen[Random with Sized, TestCase] = for {
     str    <- Gen.string
     number <- Gen.int
     list   <- Gen.listOf(Gen.double)
@@ -40,7 +40,7 @@ object DebugSpec extends DefaultRunnableSpec {
     case TestObject2 => Repr.Object(List("DebugSpec"), "TestObject2")
   }
 
-  val genTestTrait: Gen[Has[Random], TestTrait] = Gen.elements(List[TestTrait](TestObject1, TestObject2): _*)
+  val genTestTrait: Gen[Random, TestTrait] = Gen.elements(List[TestTrait](TestObject1, TestObject2): _*)
 
   def expectedTupleFull(n: Int)(v: Int): String   = s"scala.Tuple$n(${List.fill(n)(v).mkString(", ")})"
   def expectedTupleSimple(n: Int)(v: Int): String = s"(${List.fill(n)(v).mkString(", ")})"
