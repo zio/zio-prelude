@@ -81,13 +81,13 @@
 
 <span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@225e0c28</span>
+<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@7e9d02a4</span>
 </code></pre>
 <p>This will print <code>Hello</code> to the console on the first line and then <code>ZIO</code> on the second line.</p>
 <p>If the first workflow fails then the second workflow will never be run.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> failZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
   <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>)) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@41479d0d</span>
+<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@24da59f0</span>
 </code></pre>
 <p>Now <code>ZIO</code> will never be printed to the console.</p>
 <p>What it means to run the left value and run the right value will vary between data types.</p>
@@ -185,7 +185,7 @@
   console.putStrLn(<span class="hljs-string">"Hello"</span>) *&gt;
     console.putStrLn(<span class="hljs-string">"From"</span>) *&gt;
     console.putStrLn(<span class="hljs-string">"AssociativeBoth"</span>)
-<span class="hljs-comment">// helloFromAssociativeBoth: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@de8f592</span>
+<span class="hljs-comment">// helloFromAssociativeBoth: ZIO[Console, IOException, Unit] = zio.ZIO$FlatMap@2a4fd756</span>
 </code></pre>
 <p>There is also a variant of <code>zipWith</code> for contravariant types called <code>bothWith</code> that combines <code>zip</code> and <code>contramap</code>.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bothWith</span></span>[<span class="hljs-type">F</span>[-_]: <span class="hljs-type">AssociativeBoth</span> : <span class="hljs-type">Contravariant</span>, <span class="hljs-type">A</span>, <span class="hljs-type">B</span>, <span class="hljs-type">C</span>](
@@ -203,20 +203,20 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(words: <span class="hljs-type">List</span>[<span class="hljs-type">String</span>]): <span class="hljs-type">Boolean</span> =
       !words.exists(_.contains(<span class="hljs-string">"get rich"</span>))
   }
-<span class="hljs-comment">// noSuspiciousWords: Predicate[List[String]] = repl.MdocSession$App0$$anon$5@71e865de</span>
+<span class="hljs-comment">// noSuspiciousWords: Predicate[List[String]] = repl.MdocSession$App0$$anon$5@29ee3a1c</span>
 
 <span class="hljs-keyword">val</span> noSuspiciousSender: <span class="hljs-type">Predicate</span>[<span class="hljs-type">String</span>] =
   <span class="hljs-keyword">new</span> <span class="hljs-type">Predicate</span>[<span class="hljs-type">String</span>] {
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span></span>(sender: <span class="hljs-type">String</span>): <span class="hljs-type">Boolean</span> =
       !sender.contains(<span class="hljs-string">"unclaimedfunds"</span>)
   }
-<span class="hljs-comment">// noSuspiciousSender: Predicate[String] = repl.MdocSession$App0$$anon$6@23851887</span>
+<span class="hljs-comment">// noSuspiciousSender: Predicate[String] = repl.MdocSession$App0$$anon$6@3f7085a7</span>
 
 <span class="hljs-keyword">val</span> spamFilter: <span class="hljs-type">Predicate</span>[<span class="hljs-type">Email</span>] =
   noSuspiciousWords.bothWith(noSuspiciousSender) { 
     <span class="hljs-keyword">case</span> <span class="hljs-type">Email</span>(lines, sender) =&gt; (lines, sender)
   }
-<span class="hljs-comment">// spamFilter: Predicate[Email] = repl.MdocSession$App0$Predicate$1$$anon$1@5e57460f</span>
+<span class="hljs-comment">// spamFilter: Predicate[Email] = repl.MdocSession$App0$Predicate$1$$anon$1@49135e60</span>
 </code></pre>
 <p>The composed predicate will extract the lines and the sender, sending the lines to the <code>nonSuspiciousWords</code> predicate and then if it passes sending the sender to the <code>nonSuspiciousSender</code> predicate.</p>
 <p>We can use the <code>bothWith</code> operator with other contravariant types as well. For example, we could combine two sinks to produce a new sink that sends all inputs first to one sink and then to the other.</p>
