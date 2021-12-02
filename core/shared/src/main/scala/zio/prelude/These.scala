@@ -32,6 +32,13 @@ sealed trait These[+A, +B] { self =>
       case (Both(l1, r1), Both(l2, r2)) => Both(A1.combine(l1, l2), B1.combine(r1, r2))
     }
 
+  def fold[C](left: A => C, right: B => C, both: (A, B) => C): C =
+    self match {
+      case Left(a)    => left(a)
+      case Right(b)   => right(b)
+      case Both(a, b) => both(a, b)
+    }
+
   def reduceMap[C](f: A => C, g: B => C)(implicit C: Associative[C]): C =
     self match {
       case Left(l)    => f(l)
@@ -108,4 +115,10 @@ object These {
       case (_, Some(b))       => Some(Right(b))
       case _                  => None
     }
+
+  /**
+   * constructor for lifting Either into a These
+   */
+  def fromEither[A, B](e: Either[A, B]): These[A, B] =
+    e.fold(Left(_), Right(_))
 }
