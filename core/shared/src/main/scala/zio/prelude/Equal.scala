@@ -1,14 +1,30 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 
-import zio.Exit.{ Failure, Success }
-import zio.prelude.coherent.HashOrd
-import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
-import zio.{ Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace }
+import zio.Exit.{Failure, Success}
+import zio.duration.{Duration => ZIODuration}
+import zio.prelude.coherent.{HashOrd, HashPartialOrd}
+import zio.{Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace}
 
 import scala.annotation.implicitNotFound
+import scala.concurrent.duration.{Duration => ScalaDuration}
 import scala.util.Try
-import scala.{ math => sm }
+import scala.{math => sm}
 
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be
@@ -89,42 +105,7 @@ trait Equal[-A] { self =>
   def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
-object Equal extends Lawful[Equal] {
-
-  /**
-   * For all values `a1`, `a1` is equal to `a1`.
-   */
-  val reflexiveLaw: Laws.Law1[Equal] =
-    new Laws.Law1[Equal]("reflexiveLaw") {
-      def apply[A: Equal](a1: A): TestResult =
-        a1 <-> a1
-    }
-
-  /**
-   * For all values `a1` and `a2`, if `a1` is equal to `a2` then `a2` is equal
-   * to `a1`.
-   */
-  val symmetryLaw: Laws.Law2[Equal] =
-    new Laws.Law2[Equal]("symmetryLaw") {
-      def apply[A: Equal](a1: A, a2: A): TestResult =
-        (a1 <-> a2) ==> (a2 <-> a1)
-    }
-
-  /**
-   * For all values `a1`, `a2`, and `a3`, if `a1` is equal to `a2` and `a2` is
-   * equal `a3`, then `a1` is equal to `a3`.
-   */
-  val transitivityLaw: Laws.Law3[Equal] =
-    new Laws.Law3[Equal]("transitivityLaw") {
-      def apply[A: Equal](a1: A, a2: A, a3: A): TestResult =
-        ((a1 <-> a2) && (a2 <-> a3)) ==> (a1 <-> a3)
-    }
-
-  /**
-   * The set of all laws that instances of `Equal` must satisfy.
-   */
-  val laws: Laws[Equal] =
-    reflexiveLaw + symmetryLaw + transitivityLaw
+object Equal {
 
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
@@ -195,14 +176,26 @@ object Equal extends Lawful[Equal] {
    * values for value equality.
    */
   def make[A](equal: (A, A) => Boolean): Equal[A] =
-    (l, r) => refEq(l, r) || equal(l, r)
+    (l, r) => equal(l, r)
 
   /**
    * Constructs an `Equal[A]` that uses the default notion of equality
    * embodied in the implementation of `equals` for values of type `A`.
    */
   def default[A]: Equal[A] =
-    make(_ == _)
+    DefaultEqual
+
+  /**
+   * The `Hash` and `Ord` instance for `BigDecimal`.
+   */
+  implicit val BigDecimalHashOrd: Hash[BigDecimal] with Ord[BigDecimal] =
+    HashOrd.default
+
+  /**
+   * The `Hash` and `Ord` instance for `BigInt`.
+   */
+  implicit val BigIntHashOrd: Hash[BigInt] with Ord[BigInt] =
+    HashOrd.default
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Boolean` values.
@@ -247,6 +240,14 @@ object Equal extends Lawful[Equal] {
     Derive[F, Equal].derive(Equal[A])
 
   /**
+   * `Equal` instance for `Double` for imprecise equality with configurable tolerance.
+   */
+  def DoubleEqualWithEpsilon(epsilon: Double = 1 / (1024d * 1024 * 1024 * 1024)): Equal[Double] = {
+    (l: Double, r: Double) =>
+      (l - r).abs < epsilon
+  }
+
+  /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Double` values.
    *
    * Note that to honor the contract
@@ -258,13 +259,32 @@ object Equal extends Lawful[Equal] {
    * `Double.NaN` will be treated as greater than any other number.
    */
   implicit val DoubleHashOrd: Hash[Double] with Ord[Double] =
-    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
+    HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
+
+  /**
+   * `Hash` and `Ord` (and thus also `Equal`) instance for Scala `Duration` values.
+   */
+  implicit val DurationScalaHashOrd: Hash[ScalaDuration] with Ord[ScalaDuration] =
+    HashOrd.default
+
+  /**
+   * `Hash` and `Ord` (and thus also `Equal`) instance for ZIO `Duration` values.
+   */
+  implicit val DurationZIOHashOrd: Hash[ZIODuration] with Ord[ZIODuration] =
+    HashOrd.default
 
   /**
    * Derives an `Equal[Either[A, B]]` given an `Equal[A]` and an `Equal[B]`.
    */
   implicit def EitherEqual[A: Equal, B: Equal]: Equal[Either[A, B]] =
     Equal[A] either Equal[B]
+
+  /**
+   * `Equal` instance for `Float` for imprecise equality with configurable tolerance.
+   */
+  def FloatEqualWithEpsilon(epsilon: Float = 1 / (1024f * 1024)): Equal[Float] = { (l: Float, r: Float) =>
+    (l - r).abs < epsilon
+  }
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Float` values.
@@ -278,7 +298,7 @@ object Equal extends Lawful[Equal] {
    * `Float.NaN` will be treated as greater than any other number.
    */
   implicit val FloatHashOrd: Hash[Float] with Ord[Float] =
-    HashOrd.make(_.hashCode, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
+    HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
    * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
@@ -305,14 +325,18 @@ object Equal extends Lawful[Equal] {
     HashOrd.default
 
   /**
-   * Derives an `Equal[Map[A, B]]` given an `Equal[B]`. Due to the limitations
-   * of Scala's `Map`, this uses object equality and hash code on the keys.
+   * Derives a `PartialOrd[Map[A, B]]` (and thus `Equal[Map[A, B]]`) given an `Equal[B]`.
+   * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    */
-  implicit def MapEqual[A, B: Equal]: Equal[Map[A, B]] =
-    make { (map1, map2) =>
-      map1.size === map2.size &&
-      map1.forall { case (key, value) => map2.get(key).fold(false)(_ === value) }
-    }
+  implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] = new PartialOrd[Map[A, B]] {
+
+    protected def checkCompare(l: Map[A, B], r: Map[A, B]): PartialOrdering =
+      l.compareStrict(r)
+
+    override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
+      l.size == r.size &&
+        l.forall { case (key, value) => r.get(key).fold(false)(_ === value) }
+  }
 
   /**
    * Derives an `Equal[NonEmptyChunk[A]]` given an `Equal[A]`.
@@ -331,12 +355,20 @@ object Equal extends Lawful[Equal] {
     }
 
   /**
-   * `Hash` (and thus also `Equal`) instance for `Set[A]` values.
+   * `PartialOrd` and `Hash` (and thus also `Equal`) instance for `Set[A]` values.
    * Due to the limitations of Scala's `Set`,
    * this uses object equality and hash code on the elements.
    */
-  implicit def SetHash[A]: Hash[Set[A]] =
-    Hash.default
+  implicit def SetHashPartialOrd[A]: Hash[Set[A]] with PartialOrd[Set[A]] =
+    HashPartialOrd.make(
+      _.hashCode,
+      (l, r) =>
+        if (l == r) Ordering.Equals
+        else if (l.subsetOf(r)) Ordering.LessThan
+        else if (r.subsetOf(l)) Ordering.GreaterThan
+        else PartialOrdering.Incomparable,
+      _ == _
+    )
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `String` values.
@@ -845,8 +877,7 @@ object Equal extends Lawful[Equal] {
    * Note, that it doesn't take `Hash[A]` nor `Equal[A]` into account.
    */
   implicit def CauseHash[A]: Hash[Cause[A]] =
-    // we have to resort to equals, because the structure is opaque, namely Cause.Internal.Meta
-    // `Equal` and `Hash` instances will be possible once this PR gets merged: https://github.com/zio/zio/pull/4179
+    // we have to resort to equals, because the structure uses `Set` internally
     Hash.default
 
   /**
@@ -870,6 +901,13 @@ object Equal extends Lawful[Equal] {
    */
   private[prelude] def refEq[A](l: A, r: A): Boolean =
     l.asInstanceOf[AnyRef] eq r.asInstanceOf[AnyRef]
+
+  /**
+   * An `Equal` instance for `Any` values that uses Scala's default notion of
+   * equality embodied in `equals`.
+   */
+  private lazy val DefaultEqual: Equal[Any] =
+    Equal.make(_ == _)
 }
 
 trait EqualSyntax {

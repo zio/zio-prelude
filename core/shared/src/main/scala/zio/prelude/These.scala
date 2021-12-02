@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 
 import zio.NonEmptyChunk
@@ -135,7 +151,7 @@ sealed trait These[+A, +B] { self =>
    * Transforms the successful result of this compuation with the specified
    * effectual function, leaving any error value unchanged.
    */
-  final def foreach[F[+_]: IdentityBoth: Covariant, C](f: B => F[C]): F[These[A, C]] =
+  final def forEach[F[+_]: IdentityBoth: Covariant, C](f: B => F[C]): F[These[A, C]] =
     self match {
       case Left(a)    => left(a).succeed
       case Right(b)   => f(b).map(right)
@@ -309,6 +325,14 @@ sealed trait These[+A, +B] { self =>
       case (Both(a, b), Right(c))    => both(a, f(b, c))
       case (Both(a, b), Both(a1, c)) => both(a <> a1, f(b, c))
     }
+
+  def reduceMap[C](f: A => C, g: B => C)(implicit C: Associative[C]): C =
+    self match {
+      case Left(l)    => f(l)
+      case Right(r)   => g(r)
+      case Both(l, r) => f(l) combine g(r)
+    }
+
 }
 
 object These {
@@ -406,6 +430,15 @@ object These {
     }
 
   /**
+   * The `ForEach` instance for `These`.
+   */
+  implicit def TheseForEach[A]: ForEach[({ type lambda[+b] = These[A, b] })#lambda] =
+    new ForEach[({ type lambda[+b] = These[A, b] })#lambda] {
+      def forEach[F[+_]: IdentityBoth: Covariant, B, C](fa: These[A, B])(f: B => F[C]): F[These[A, C]] =
+        fa.forEach(f)
+    }
+
+  /**
    * Derives a `Hash[These[A, B]]` given a `Hash[A]` and a `Hash[B]`.
    */
   implicit def TheseHash[A: Hash, B: Hash]: Hash[These[A, B]] =
@@ -442,15 +475,6 @@ object These {
     }
 
   /**
-   * The `Traversable` instance for `These`.
-   */
-  implicit def TheseTraversable[A]: Traversable[({ type lambda[+b] = These[A, b] })#lambda] =
-    new Traversable[({ type lambda[+b] = These[A, b] })#lambda] {
-      def foreach[F[+_]: IdentityBoth: Covariant, B, C](fa: These[A, B])(f: B => F[C]): F[These[A, C]] =
-        fa.foreach(f)
-    }
-
-  /**
    * Constucts a `Both` with an `A` value and a `B` value.
    */
   def both[A, B](a: A, b: B): These[A, B] =
@@ -476,6 +500,17 @@ object These {
    */
   def fromOption[A](ob: Option[A]): These[Unit, A] =
     ob.fold[These[Unit, A]](left(()))(right)
+
+  /**
+   *  constructor from two options to an option of These.
+   */
+  def fromOptions[A, B](opA: Option[A], opB: Option[B]): Option[These[A, B]] =
+    (opA, opB) match {
+      case (Some(a), Some(b)) => Some(Both(a, b))
+      case (Some(a), _)       => Some(Left(a))
+      case (_, Some(b))       => Some(Right(b))
+      case _                  => None
+    }
 
   /**
    * Constructs a `These` from a `Validation` value.

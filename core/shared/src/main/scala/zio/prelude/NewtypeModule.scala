@@ -1,16 +1,34 @@
-package zio.prelude
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import zio.test.Assertion
+package zio.prelude
 
 /**
  * The `Newtype` module provides functionality for creating zero overhead
  * newtypes. Newtypes wrap an existing type and have the same representation as
  * the underlying type at runtime but are treated as distinct types by the
  * Scala compiler. Newtypes can be used to increase type safety in modeling a
- * domain, for example by creating separate types for `Meter` and `Foot`. They
- * can also be used to provide coherent instances for types that can support
- * more than one version of a typeclass. For example, the `And` and `Or`
- * types can be used to distinguish boolean conjunction and disjunction.
+ * domain, for example by creating separate types for `Meter` and `Foot`.
+ * Additionally, Smart Newtypes allow for compile-time validation of values,
+ * e.g., ensuring an Int is 4 digits long (a PIN) or that a String matches a
+ * particular Regex (an Email).
+ *
+ * Newtypes can also be used to provide coherent instances for types that can
+ * support more than one version of a typeclass. For example, the `And` and
+ * `Or` types can be used to distinguish boolean conjunction and disjunction.
  *
  * To create a newtype, simply implement an object which extends `Newtype[A]`,
  * where `A` is the underlying type you are wrapping. Then implement a type
@@ -92,310 +110,58 @@ import zio.test.Assertion
  * underlying type, so this technique is most useful for creating coherent
  * typeclasses instances rather than type safe domain specific languages.
  *
- * Finally, it is possible to create newtypes that require smart constructors
- * by extending `NewTypeSmart` or `SubtypeSmart`. In this case we must provide
- * an additional argument to the class we are extending indicating how to
- * validate an instance of the underlying type. For example, let's create a
- * newtype for natural numbers, which must be equal to or greater than zero.
+ * Finally, it is possible to create Smart Newtypes that can be validated at
+ * compile-time when constructed with a literal value, or at run-time with a
+ * dynamic value, returning a [[Validation]]. In this case we must define an
+ * additional `def assertion` method on the Object, indicating how to validate
+ * an instance of the underlying type. For example, let's create a newtype for
+ * natural numbers, which must be equal to or greater than zero. (Note that the
+ * syntax differs between Scala 2 and 3 due to changes in the macro API).
  *
  * {{{
- * object Natural extends NewtypeSmart[Int](isGreaterThanEqualTo(0))
+ * import zio.prelude.Assertion.greaterThanOrEqualTo
+ *
  * type Natural = Natural.Type
+ * object Natural extends Newtype[Int] {
+ *   // Scala 2 — be sure you DO NOT give a type annotation to `assertion`
+ *   def assertion = assert {
+ *     greaterThanOrEqualTo(0)
+ *   }
+ *
+ *   // Scala 3
+ *   override inline def assertion: Assertion[Int] =
+ *     greaterThanOrEqualTo(0)
+ * }
  * }}}
  *
  * In this case, attempting to convert an integer to a natural number will
- * return a `Validation[String, Natural]` that will either contain a`Natural`
- * if the integer was equal to or greater than zero or a string with a
- * descriptive error message if the condition was not satisfied.
+ * return a `Natural` that will either return a`Natural` if the integer was
+ * equal to or greater than zero or a fail to compile with a descriptive error
+ * message if the condition was not satisfied.
+ *
+ * {{{
+ *   val compiles = Natural(10)
+ *   val fails    = Natural(-99) // -99 does not satisfy greaterThanOrEqualTo(0)
+ * }}}
+ *
+ * If you need to supply a variable or other run-time validation to a Smart
+ * Newtype, use the `make` method instead, which will return a [[Validation]].
+ *
+ * {{{
+ *   val result: Validation[String, Natural] = Natural.make(10)
+ * }}}
  */
-private[prelude] sealed trait NewtypeModule {
 
-  def newtype[A]: Newtype[A]
-
-  def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A]
-
-  def subtype[A]: Subtype[A]
-
-  def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A]
-
-  private[this] type Id[+A] = A
-
-  private implicit val IdTraversable: Traversable[Id] =
-    new Traversable[Id] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
-        f(fa)
-    }
-
-  sealed trait Newtype[A] {
-    type Type
-
-    /**
-     * Converts an instance of the underlying type to an instance of the
-     * newtype.
-     */
-    def apply(value: A): Type = wrap(value)
-
-    /**
-     * Allows pattern matching on newtype instances to convert them back to
-     * instances of the underlying type.
-     */
-    def unapply(value: Type): Some[A] = Some(unwrap(value))
-
-    /**
-     * Converts an instance of the underlying type to an instance of the
-     * newtype.
-     */
-    def wrap(value: A): Type = wrapAll[Id](value)
-
-    /**
-     * Converts an instance of the newtype back to an instance of the
-     * underlying type.
-     */
-    def unwrap(value: Type): A = unwrapAll[Id](value)
-
-    /**
-     * Converts an instance of a type parameterized on the underlying type
-     * to an instance of a type parameterized on the newtype. For example,
-     * this could be used to convert a list of instances of the underlying
-     * type to a list of instances of the newtype.
-     */
-    def wrapAll[F[_]](value: F[A]): F[Type]
-
-    /**
-     * Converts an instance of a type parameterized on the newtype back to an
-     * instance of a type parameterized on the underlying type. For example,
-     * this could be used to convert a list of instances of the newtype back
-     * to a list of instances of the underlying type.
-     */
-    def unwrapAll[F[_]](value: F[Type]): F[A]
-  }
-
-  sealed trait NewtypeSmart[A] {
-    type Type
-
-    /**
-     * Converts an instance of the underlying type to an instance of the
-     * newtype.
-     */
-    protected def apply(value: A): Type = wrap(value)
-
-    /**
-     * Attempts to convert an instance of the underlying type to an instance
-     * of the newtype, returning a `Validation` containing either a valid
-     * instance of the newtype or a string message describing why the instance
-     * was invalid.
-     */
-    def make(value: A): Validation[String, Type] = makeAll[Id](value)
-
-    /**
-     * Allows pattern matching on newtype instances to convert them back to
-     * instances of the underlying type.
-     */
-    def unapply(value: Type): Some[A] = Some(unwrap(value))
-
-    /**
-     * Converts an instance of the underlying type to an instance of the
-     * newtype.
-     */
-    protected def wrap(value: A): Type = wrapAll[Id](value)
-
-    /**
-     * Converts an instance of the newtype back to an instance of the
-     * underlying type.
-     */
-    def unwrap(value: Type): A = unwrapAll[Id](value)
-
-    /**
-     * Attempts to convert a collection of instances of the underlying type to
-     * a collection of instances of the newtype, returning a `Validation`
-     * containing either a collection of valid instances of the newtype or an
-     * accumulation of validation errors.
-     */
-    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]]
-
-    /**
-     * Converts an instance of a type parameterized on the underlying type
-     * to an instance of a type parameterized on the newtype. For example,
-     * this could be used to convert a list of instances of the underlying
-     * type to a list of instances of the newtype.
-     */
-    protected def wrapAll[F[_]](value: F[A]): F[Type]
-
-    /**
-     * Converts an instance of a type parameterized on the newtype back to an
-     * instance of a type parameterized on the underlying type. For example,
-     * this could be used to convert a list of instances of the newtype back
-     * to a list of instances of the underlying type.
-     */
-    def unwrapAll[F[_]](value: F[Type]): F[A]
-
-    private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[Type]
-  }
-
-  sealed trait Subtype[A] extends Newtype[A] {
-    type Type <: A
-  }
-
-  sealed trait SubtypeSmart[A] extends NewtypeSmart[A] {
-    type Type <: A
-  }
-}
-
-private[prelude] object NewtypeModule {
-  val instance: NewtypeModule =
-    new NewtypeModule {
-      def newtype[A]: Newtype[A] =
-        new Newtype[A] {
-          type Type = A
-
-          def wrapAll[F[_]](value: F[A]): F[Type] = value
-
-          def unwrapAll[F[_]](value: F[Type]): F[A] = value
-        }
-
-      def newtypeSmart[A](assertion: Assertion[A]): NewtypeSmart[A] =
-        new NewtypeSmart[A] {
-          type Type = A
-
-          def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
-            Traversable[F].foreach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
-              Validation.fromAssert(_)(assertion)
-            )
-
-          protected def wrapAll[F[_]](value: F[A]): F[A] = value
-
-          def unwrapAll[F[_]](value: F[A]): F[A] = value
-
-          private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[A] = value
-        }
-
-      def subtype[A]: Subtype[A] =
-        new Subtype[A] {
-          type Type = A
-
-          def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
-
-          def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
-        }
-
-      def subtypeSmart[A](assertion: Assertion[A]): SubtypeSmart[A] =
-        new SubtypeSmart[A] {
-          type Type = A
-
-          def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[A]] =
-            Traversable[F].foreach[({ type lambda[+A] = Validation[String, A] })#lambda, A, A](value)(
-              Validation.fromAssert(_)(assertion)
-            )
-
-          protected def wrapAll[F[_]](value: F[A]): F[A] = value
-
-          def unwrapAll[F[_]](value: F[A]): F[A] = value
-
-          private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[A] = value
-        }
-    }
-}
-
-trait NewtypeExports {
-  import NewtypeModule._
-
-  /**
-   * The class of objects corresponding to newtypes. Users should implement an
-   * object that extends this class to create their own newtypes, specifying
-   * `A` as the underlying type to wrap.
-   *
-   * {{{
-   * object Meter extends Newtype[Double]
-   * type Meter = Meter.Type
-   * }}}
-   */
-  abstract class Newtype[A] extends instance.Newtype[A] {
-    val newtype: instance.Newtype[A] = instance.newtype[A]
-
-    trait Tag extends Any
-    type Type = newtype.Type with Tag
-
-    def wrapAll[F[_]](value: F[A]): F[Type] = newtype.wrapAll(value).asInstanceOf[F[Type]]
-
-    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value.asInstanceOf[F[newtype.Type]])
-  }
-
-  /**
-   * The class of objects corresponding to newtypes with smart constructors
-   * where not all instances of the underlying type are valid instances of the
-   * newtype. Users should implement an object that extends this class to
-   * create their own newtypes, specifying `A` as the underlying type to wrap
-   * and an assertion that valid instances of the underlying type should
-   * satisfy.
-   *
-   * {{{
-   * object Natural extends NewtypeSmart[Int](isGreaterThanEqualTo(0))
-   * type Natural = Natural.Type
-   * }}}
-   */
-  abstract class NewtypeSmart[A](assertion: Assertion[A]) extends instance.NewtypeSmart[A] {
-    val newtype: instance.NewtypeSmart[A] = instance.newtypeSmart[A](assertion)
-
-    trait Tag extends Any
-    type Type = newtype.Type with Tag
-
-    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =
-      newtype.makeAll(value).asInstanceOf[Validation[String, F[Type]]]
-
-    protected def wrapAll[F[_]](value: F[A]): F[Type] = unsafeWrapAll(value)
-
-    def unwrapAll[F[_]](value: F[Type]): F[A] = newtype.unwrapAll(value.asInstanceOf[F[newtype.Type]])
-
-    private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[Type] = newtype.unsafeWrapAll(value).asInstanceOf[F[Type]]
-  }
-
-  /**
-   * The class of objects corresponding to subtypes. Users should implement an
-   * object that extends this class to create their own subtypes, specifying
-   * `A` as the underlying type to wrap.
-   *
-   * {{{
-   * object And extends Subtype[Boolean]
-   * type And = And.Type
-   * }}}
-   */
-  abstract class Subtype[A] extends instance.Subtype[A] {
-    val subtype: instance.Subtype[A] = instance.subtype[A]
-
-    trait Tag extends Any
-    type Type = subtype.Type with Tag
-
-    def wrapAll[F[_]](value: F[A]): F[Type] = subtype.wrapAll(value).asInstanceOf[F[Type]]
-
-    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
-  }
-
-  /**
-   * The class of objects corresponding to subtypes with smart constructors
-   * where not all instances of the underlying type are valid instances of the
-   * subtype. Users should implement an object that extends this class to
-   * create their own subtypes, specifying `A` as the underlying type to wrap
-   * and an assertion that valid instances of the underlying type should
-   * satisfy.
-   *
-   * {{{
-   * object Natural extends SubtypeSmart[Int](isGreaterThanEqualTo(0))
-   * type Natural = Natural.Type
-   * }}}
-   */
-  abstract class SubtypeSmart[A](assertion: Assertion[A]) extends instance.SubtypeSmart[A] {
-    val subtype: instance.SubtypeSmart[A] = instance.subtypeSmart[A](assertion)
-
-    trait Tag extends Any
-    type Type = subtype.Type with Tag
-
-    def makeAll[F[+_]: Traversable](value: F[A]): Validation[String, F[Type]] =
-      subtype.makeAll(value).asInstanceOf[Validation[String, F[Type]]]
-
-    protected def wrapAll[F[_]](value: F[A]): F[Type] = unsafeWrapAll(value)
-
-    def unwrapAll[F[_]](value: F[Type]): F[A] = subtype.unwrapAll(value.asInstanceOf[F[subtype.Type]])
-
-    private[prelude] def unsafeWrapAll[F[_]](value: F[A]): F[Type] = subtype.unsafeWrapAll(value).asInstanceOf[F[Type]]
-  }
+/**
+ * The class of objects corresponding to subtypes. Users should implement an
+ * object that extends this class to create their own subtypes, specifying
+ * `A` as the underlying type to wrap.
+ *
+ * {{{
+ * object And extends Subtype[Boolean]
+ * type And = And.Type
+ * }}}
+ */
+abstract class Subtype[A] extends Newtype[A] {
+  type Base <: A
 }

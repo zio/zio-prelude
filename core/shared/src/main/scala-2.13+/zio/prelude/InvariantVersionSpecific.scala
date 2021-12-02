@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 
 import scala.collection.BuildFrom
@@ -5,11 +21,11 @@ import scala.collection.BuildFrom
 trait InvariantVersionSpecific {
 
   /**
-   * Derives a `Traverable[F]` from an `Iterable[F]`.
+   * Derives a `ForEach[F]` from an `Iterable[F]`.
    */
-  implicit def IterableTraversable[F[+a] <: Iterable[a]](implicit derive: DeriveBuildFrom[F]): Traversable[F] =
-    new Traversable[F] {
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+  implicit def IterableForEach[F[+a] <: Iterable[a]](implicit derive: DeriveBuildFrom[F]): ForEach[F] =
+    new ForEach[F] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         fa.foldLeft(derive.derive[B].newBuilder(fa).succeed)((bs, a) => bs.zipWith(f(a))(_ += _)).map(_.result())
     }
 

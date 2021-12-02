@@ -1,21 +1,33 @@
-import sbt._
-import Keys._
 import explicitdeps.ExplicitDepsPlugin.autoImport._
-import sbtcrossproject.CrossPlugin.autoImport._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import sbt.Keys._
+import sbt._
+import sbtbuildinfo.BuildInfoKeys._
 import sbtbuildinfo._
-import dotty.tools.sbtplugin.DottyPlugin.autoImport._
-import BuildInfoKeys._
+import sbtcrossproject.CrossPlugin.autoImport._
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
-  // Keep this consistent with the version in .circleci/config.yml
-  val Scala211   = "2.11.12"
-  val Scala212   = "2.12.12"
-  val Scala213   = "2.13.3"
-  val ScalaDotty = "0.27.0-RC1"
+  private val versions: Map[String, String] = {
+    import org.snakeyaml.engine.v2.api.{Load, LoadSettings}
 
-  val SilencerVersion = "1.7.1"
+    import java.util.{List => JList, Map => JMap}
+    import scala.jdk.CollectionConverters._
+
+    val doc  = new Load(LoadSettings.builder().build())
+      .loadFromReader(scala.io.Source.fromFile(".github/workflows/ci.yml").bufferedReader())
+    val yaml = doc.asInstanceOf[JMap[String, JMap[String, JMap[String, JMap[String, JMap[String, JList[String]]]]]]]
+    val list = yaml.get("jobs").get("test").get("strategy").get("matrix").get("scala").asScala
+    list.map { v =>
+      val vs = v.split('.'); val init = vs.take(vs(0) match { case "2" => 2; case _ => 1 }); (init.mkString("."), v)
+    }.toMap
+  }
+  val Scala211: String                      = versions("2.11")
+  val Scala212: String                      = versions("2.12")
+  val Scala213: String                      = versions("2.13")
+  val Scala3: String                        = versions("3")
+
+  val SilencerVersion = "1.7.7"
 
   private val stdOptions = Seq(
     "-deprecation",
@@ -51,35 +63,29 @@ object BuildHelper {
 
   def buildInfoSettings(packageName: String) =
     Seq(
-      buildInfoKeys := Seq[BuildInfoKey](organization, moduleName, name, version, scalaVersion, sbtVersion, isSnapshot),
+      buildInfoKeys    := Seq[BuildInfoKey](organization, moduleName, name, version, scalaVersion, sbtVersion, isSnapshot),
       buildInfoPackage := packageName
     )
 
   val dottySettings = Seq(
-    crossScalaVersions += ScalaDotty,
-    scalacOptions ++= {
-      if (isDotty.value)
-        Seq("-noindent")
-      else
-        Seq()
-    },
+    crossScalaVersions += Scala3,
     scalacOptions --= {
-      if (isDotty.value)
+      if (scalaVersion.value == Scala3)
         Seq("-Xfatal-warnings")
       else
         Seq()
     },
-    sources in (Compile, doc) := {
+    Compile / doc / sources  := {
       val old = (Compile / doc / sources).value
-      if (isDotty.value) {
+      if (scalaVersion.value == Scala3) {
         Nil
       } else {
         old
       }
     },
-    parallelExecution in Test := {
+    Test / parallelExecution := {
       val old = (Test / parallelExecution).value
-      if (isDotty.value) {
+      if (scalaVersion.value == Scala3) {
         false
       } else {
         old
@@ -119,7 +125,7 @@ object BuildHelper {
     // One of -Ydelambdafy:inline or -Yrepl-class-based must be given to
     // avoid deadlocking on parallel operations, see
     //   https://issues.scala-lang.org/browse/SI-9076
-    scalacOptions in Compile in console := Seq(
+    Compile / console / scalacOptions   := Seq(
       "-Ypartial-unification",
       "-language:higherKinds",
       "-language:existentials",
@@ -127,12 +133,12 @@ object BuildHelper {
       "-Xsource:2.13",
       "-Yrepl-class-based"
     ),
-    initialCommands in Compile in console := initialCommandsStr
+    Compile / console / initialCommands := initialCommandsStr
   )
 
-  def extraOptions(scalaVersion: String, isDotty: Boolean, optimize: Boolean) =
+  def extraOptions(scalaVersion: String, optimize: Boolean) =
     CrossVersion.partialVersion(scalaVersion) match {
-      case _ if isDotty  =>
+      case Some((3, 0))  =>
         Seq(
           "-language:implicitConversions",
           "-Xignore-scala2-macros"
@@ -184,16 +190,16 @@ object BuildHelper {
     if result.exists
   } yield result
 
-  def crossPlatformSources(scalaVer: String, platform: String, conf: String, baseDir: File, isDotty: Boolean) = {
+  def crossPlatformSources(scalaVer: String, platform: String, conf: String, baseDir: File) = {
     val versions = CrossVersion.partialVersion(scalaVer) match {
       case Some((2, 11)) =>
-        List("2.11", "2.11+", "2.11-2.12", "2.x")
+        List("2.11+", "2.11-2.12")
       case Some((2, 12)) =>
-        List("2.12", "2.11+", "2.12+", "2.11-2.12", "2.12-2.13", "2.x")
+        List("2.11+", "2.12+", "2.11-2.12", "2.12-2.13")
       case Some((2, 13)) =>
-        List("2.13", "2.11+", "2.12+", "2.13+", "2.12-2.13", "2.x")
-      case _ if isDotty  =>
-        List("dotty", "2.11+", "2.12+", "2.13+", "3.x")
+        List("2.11+", "2.12+", "2.13+", "2.12-2.13")
+      case Some((3, _))  =>
+        List("2.11+", "2.12+", "2.13+")
       case _             =>
         List()
     }
@@ -206,8 +212,7 @@ object BuildHelper {
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "main",
-        baseDirectory.value,
-        isDotty.value
+        baseDirectory.value
       )
     },
     Test / unmanagedSourceDirectories ++= {
@@ -215,41 +220,39 @@ object BuildHelper {
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "test",
-        baseDirectory.value,
-        isDotty.value
+        baseDirectory.value
       )
     }
   )
 
   def stdSettings(prjName: String) = Seq(
-    name := s"$prjName",
-    crossScalaVersions := Seq(Scala211, Scala212, Scala213),
-    scalaVersion in ThisBuild := Scala212,
-    scalacOptions := stdOptions ++ extraOptions(scalaVersion.value, isDotty.value, optimize = !isSnapshot.value),
+    name                                   := s"$prjName",
+    crossScalaVersions                     := Seq(Scala211, Scala212, Scala213, Scala3),
+    ThisBuild / scalaVersion               := Scala213,
+    scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
-      if (isDotty.value)
+      if (scalaVersion.value == Scala3)
         Seq(
-          ("com.github.ghik" % s"silencer-lib_$Scala213" % SilencerVersion % Provided)
-            .withDottyCompat(scalaVersion.value)
+          "com.github.ghik" % s"silencer-lib_$Scala213" % SilencerVersion % Provided
         )
       else
         Seq(
-          "com.github.ghik" % "silencer-lib" % SilencerVersion % Provided cross CrossVersion.full,
+          "com.github.ghik" % "silencer-lib"            % SilencerVersion % Provided cross CrossVersion.full,
           compilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full),
-          compilerPlugin("org.typelevel"  %% "kind-projector"  % "0.11.2" cross CrossVersion.full)
+          compilerPlugin("org.typelevel"  %% "kind-projector"  % "0.13.2" cross CrossVersion.full)
         )
     },
-    semanticdbEnabled := !isDotty.value, // enable SemanticDB
+    semanticdbEnabled                      := scalaVersion.value != Scala3, // enable SemanticDB
     semanticdbOptions += "-P:semanticdb:synthetics:on",
-    semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+    semanticdbVersion                      := scalafixSemanticdb.revision,  // use Scalafix compatible version
     ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
     ThisBuild / scalafixDependencies ++= List(
-      "com.github.liancheng" %% "organize-imports" % "0.4.4",
-      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.16"
+      "com.github.liancheng" %% "organize-imports" % "0.5.0",
+      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.20"
     ),
-    parallelExecution in Test := true,
+    Test / parallelExecution               := true,
     incOptions ~= (_.withLogRecompileOnMacro(false)),
-    autoAPIMappings := true,
+    autoAPIMappings                        := true,
     unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
   )
 
@@ -272,7 +275,7 @@ object BuildHelper {
   def macroDefinitionSettings = Seq(
     scalacOptions += "-language:experimental.macros",
     libraryDependencies ++= {
-      if (isDotty.value) Seq()
+      if (scalaVersion.value == Scala3) Seq()
       else
         Seq(
           "org.scala-lang" % "scala-reflect"  % scalaVersion.value % "provided",
@@ -282,19 +285,24 @@ object BuildHelper {
   )
 
   def jsSettings = Seq(
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"      % "2.0.0",
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.0.0"
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"      % "2.3.0",
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.3.0"
   )
 
   def nativeSettings = Seq(
-    scalaVersion := Scala211,
-    crossScalaVersions := Seq(scalaVersion.value),
-    Test / skip := true,
-    doc / skip := true,
-    SettingKey[Boolean](
-      "ide-skip-project" // Exclude from Intellij because Scala Native projects break it - https://github.com/scala-native/scala-native/issues/1007#issuecomment-370402092
-    ) := true,
-    Compile / doc / sources := Seq.empty
+    Test / test             := (Test / compile).value,
+    doc / skip              := true,
+    Compile / doc / sources := Seq.empty,
+    crossScalaVersions -= Scala3
+  )
+
+  val scalaReflectTestSettings: List[Setting[_]] = List(
+    libraryDependencies ++= {
+      if (scalaVersion.value == Scala3)
+        Seq("org.scala-lang" % "scala-reflect" % Scala213           % Test)
+      else
+        Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value % Test)
+    }
   )
 
   def welcomeMessage = onLoadMessage := {

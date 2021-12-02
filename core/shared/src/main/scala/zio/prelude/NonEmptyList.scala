@@ -1,8 +1,24 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 
 import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
-import zio.prelude.newtypes.{ Max, Min, Prod, Sum }
+import zio.prelude.newtypes.{Max, Min, Prod, Sum}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -12,7 +28,7 @@ import scala.util.hashing.MurmurHash3
  * A `NonEmptyList[A]` is a list of one or more values of type A. Unlike a
  * `List`, a `NonEmptyList` is guaranteed to contain at least one element.
  * This additional structure allows some operations to be defined on
- * `NonEmptyList` that are not safe on `List`, such as `head` and `reduce`.
+ * `NonEmptyList` that are not safe on `List`, such as `head` and `reduceAll`.
  *
  * For interoperability with Scala's collection library an implicit conversion
  * is provided from `NonEmptyList` to the `::` case of `List`. Operations that
@@ -61,6 +77,21 @@ sealed trait NonEmptyList[+A] { self =>
     reduceMapLeft(a => (single(a), Set(a))) { case ((as, seen), a) =>
       if (seen(a)) (as, seen) else (cons(a, as), seen + a)
     }._1.reverse
+
+  /** Decomposes the `NonEmptyList` into an element and a (possibly empty) `List` */
+  final def peel: (A, List[A]) = self match {
+    case Single(head)     => (head, List())
+    case Cons(head, tail) => (head, tail.toList)
+  }
+
+  /**
+   * Returns an element of this `NonEmptyList`
+   * and the remainder or `None`, if the remainder is empty.
+   */
+  final def peelNonEmpty: (A, Option[NonEmptyList[A]]) = self match {
+    case Single(head)     => (head, None)
+    case Cons(head, tail) => (head, Some(tail))
+  }
 
   /**
    * Drops the first `n` elements from this `NonEmptyList` returning a `List`.
@@ -171,7 +202,7 @@ sealed trait NonEmptyList[+A] { self =>
    * Transforms each element of this `NonEmptyList` with the specified
    * effectual function.
    */
-  final def foreach[F[+_]: AssociativeBoth: Covariant, B](f: A => F[B]): F[NonEmptyList[B]] =
+  final def forEach[F[+_]: AssociativeBoth: Covariant, B](f: A => F[B]): F[NonEmptyList[B]] =
     reduceMapRight(f(_).map(single))((a, fas) => f(a).zipWith(fas)(cons))
 
   /**
@@ -285,7 +316,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Reduces the elements of this `NonEmptyList` from left to right using the
    * function `map` to transform the first value to the type `B` and then the
-   * function `reduce` to combine the `B` value with each other `A` value.
+   * function `reduceAll` to combine the `B` value with each other `A` value.
    */
   final def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B): B =
     self match {
@@ -296,7 +327,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Reduces the elements of this `NonEmptyList` from right to left using the
    * function `map` to transform the first value to the type `B` and then the
-   * function `reduce` to combine the `B` value with each other `A` value.
+   * function `reduceAll` to combine the `B` value with each other `A` value.
    */
   final def reduceMapRight[B](map: A => B)(reduce: (A, B) => B): B =
     self.reverse.reduceMapLeft(map)((b, a) => reduce(a, b))
@@ -323,7 +354,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Returns the tail of this `NonEmptyList` if it exists or `None` otherwise.
    */
-  final def tailOption: Option[NonEmptyList[A]] =
+  final def tailNonEmpty: Option[NonEmptyList[A]] =
     self match {
       case Cons(_, t) => Some(t)
       case _          => None
@@ -334,7 +365,7 @@ sealed trait NonEmptyList[+A] { self =>
    * each of its tails, ending with a singleton `NonEmptyList`.
    */
   final def tails: NonEmptyList[NonEmptyList[A]] =
-    unfold(self)(identity)(_.tailOption)
+    unfold(self)(identity)(_.tailNonEmpty)
 
   /**
    * Takes the first `n` elements from this `NonEmptyList` returning a `List`.
@@ -436,6 +467,15 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     Associative.make(_ ++ _)
 
   /**
+   * The `AssociativeEither` instance for `NonEmptyList`.
+   */
+  implicit val NonEmptyListAssociativeEither: AssociativeEither[NonEmptyList] =
+    new AssociativeEither[NonEmptyList] {
+      def either[A, B](as: => NonEmptyList[A], bs: => NonEmptyList[B]): NonEmptyList[Either[A, B]] =
+        as.map(Left(_)) ++ bs.map(Right(_))
+    }
+
+  /**
    * The `IdentityFlatten` instance for `NonEmptyList`.
    */
   implicit val NonEmptyListIdentityFlatten: IdentityFlatten[NonEmptyList] =
@@ -493,12 +533,12 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     }
 
   /**
-   * The `NonEmptyTraversable` instance for `NonEmptyList`.
+   * The `NonEmptyForEach` instance for `NonEmptyList`.
    */
-  implicit val NonEmptyListNonEmptyTraversable: NonEmptyTraversable[NonEmptyList] =
-    new NonEmptyTraversable[NonEmptyList] {
-      def foreach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
-        fa.foreach(f)
+  implicit val NonEmptyListNonEmptyForEach: NonEmptyForEach[NonEmptyList] =
+    new NonEmptyForEach[NonEmptyList] {
+      def forEach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
+        fa.forEach(f)
     }
 
   /**
@@ -536,6 +576,12 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
    */
   def fromIterable[A](head: A, tail: Iterable[A]): NonEmptyList[A] =
     fromCons(::(head, tail.toList))
+
+  /**
+   * Constructs a `NonEmptyList` from a `NonEmptyChunk`.
+   */
+  def fromNonEmptyChunk[A](nonEmptyChunk: NonEmptyChunk[A]): NonEmptyList[A] =
+    nonEmptyChunk.reduceMapRight(single)(cons)
 
   /**
    * Constructs a `NonEmptyList` from an initial state `start` by repeatedly
@@ -595,19 +641,29 @@ trait LowPriorityNonEmptyListImplicits {
   /**
    * Derives an `Ord[NonEmptyList[A]]` given an `Ord[A]`.
    */
-  implicit def NonEmptyListOrd[A: Ord]: Ord[NonEmptyList[A]] = {
+  implicit def NonEmptyListOrd[A: Ord]: Ord[NonEmptyList[A]] =
+    Ord[List[A]].contramap(_.toList)
 
-    @tailrec
-    def loop(left: NonEmptyList[A], right: NonEmptyList[A]): Ordering =
-      (left, right) match {
-        case (Single(h1), Single(h2))     => Ord[A].compare(h1, h2)
-        case (Single(h1), Cons(h2, _))    => Ord[A].compare(h1, h2) <> Ordering.LessThan
-        case (Cons(h1, _), Single(h2))    => Ord[A].compare(h1, h2) <> Ordering.GreaterThan
-        case (Cons(h1, t1), Cons(h2, t2)) =>
-          val compare = Ord[A].compare(h1, h2)
-          if (compare.isEqual) loop(t1, t2) else compare
-      }
+  /**
+   * Derives a `PartialOrd[NonEmptyList[A]]` given a `PartialOrd[A]`.
+   */
+  implicit def NonEmptyListPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyList[A]] =
+    PartialOrd[List[A]].contramap(_.toList)
+}
 
-    Ord.make((l, r) => loop(l, r))
+trait NonEmptyListSyntax {
+  implicit final class NonEmptyListListOps[A](self: List[A]) {
+
+    /**
+     * Converts to a `NonEmptyList` or `None` if empty.
+     */
+    def toNonEmptyList: Option[NonEmptyList[A]] = NonEmptyList.fromIterableOption(self)
+  }
+  implicit final class NonEmptyListConsOps[A](self: ::[A]) {
+
+    /**
+     * Converts to a `NonEmptyList`.
+     */
+    def toNonEmptyList: NonEmptyList[A] = NonEmptyList.fromCons(self)
   }
 }

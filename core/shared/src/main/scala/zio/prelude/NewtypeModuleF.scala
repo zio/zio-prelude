@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 
 /**
@@ -58,11 +74,18 @@ package zio.prelude
  * also available.
  */
 private[prelude] sealed trait NewtypeModuleF {
+
   def newtypeF: NewtypeF
 
   def subtypeF: SubtypeF
 
-  private type Id[+A] = A
+  private[this] type Id[+A] = A
+
+  private implicit val IdForEach: ForEach[Id] =
+    new ForEach[Id] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: Id[A])(f: A => G[B]): G[Id[B]] =
+        f(fa)
+    }
 
   sealed trait NewtypeF {
     type Type[+A]
@@ -108,11 +131,80 @@ private[prelude] sealed trait NewtypeModuleF {
     def unwrapAll[F[_], A](value: F[Type[A]]): F[A]
   }
 
+  @deprecated("deprecated", "1.0.0-RC8")
+  sealed trait NewtypeSmartF[A[_]] {
+    type Type[x]
+
+    /**
+     * Converts an instance of the underlying type to an instance of the
+     * newtype.
+     */
+    protected def apply[x](value: A[x]): Type[x] = wrap(value)
+
+    /**
+     * Attempts to convert an instance of the underlying type to an instance
+     * of the newtype, returning a `Validation` containing either a valid
+     * instance of the newtype or a string message describing why the instance
+     * was invalid.
+     */
+    def make[x](value: A[x]): Validation[String, Type[x]] = makeAll[Id, x](value)
+
+    /**
+     * Allows pattern matching on newtype instances to convert them back to
+     * instances of the underlying type.
+     */
+    def unapply[x](value: Type[x]): Some[A[x]] = Some(unwrap(value))
+
+    /**
+     * Converts an instance of the underlying type to an instance of the
+     * newtype.
+     */
+    protected def wrap[x](value: A[x]): Type[x] = wrapAll[Id, x](value)
+
+    /**
+     * Converts an instance of the newtype back to an instance of the
+     * underlying type.
+     */
+    def unwrap[x](value: Type[x]): A[x] = unwrapAll[Id, x](value)
+
+    /**
+     * Attempts to convert a collection of instances of the underlying type to
+     * a collection of instances of the newtype, returning a `Validation`
+     * containing either a collection of valid instances of the newtype or an
+     * accumulation of validation errors.
+     */
+    def makeAll[F[+_]: ForEach, x](value: F[A[x]]): Validation[String, F[Type[x]]]
+
+    /**
+     * Converts an instance of a type parameterized on the underlying type
+     * to an instance of a type parameterized on the newtype. For example,
+     * this could be used to convert a list of instances of the underlying
+     * type to a list of instances of the newtype.
+     */
+    protected def wrapAll[F[_], x](value: F[A[x]]): F[Type[x]]
+
+    /**
+     * Converts an instance of a type parameterized on the newtype back to an
+     * instance of a type parameterized on the underlying type. For example,
+     * this could be used to convert a list of instances of the newtype back
+     * to a list of instances of the underlying type.
+     */
+    def unwrapAll[F[_], x](value: F[Type[x]]): F[A[x]]
+
+    private[prelude] def unsafeWrapAll[F[_], x](value: F[A[x]]): F[Type[x]]
+  }
+
   sealed trait SubtypeF extends NewtypeF {
     type Type[+A] <: A
   }
+
+  @deprecated("deprecated", "1.0.0-RC8")
+  sealed trait SubtypeSmartF[A[_]] extends NewtypeSmartF[A] {
+    type Type[x] <: A[x]
+  }
 }
-private[prelude] object NewtypeModuleF       {
+
+private[prelude] object NewtypeModuleF {
   val instance: NewtypeModuleF =
     new NewtypeModuleF {
       def newtypeF: NewtypeF =
@@ -134,7 +226,8 @@ private[prelude] object NewtypeModuleF       {
         }
     }
 }
-trait NewtypeFExports                        {
+
+trait NewtypeFExports {
   import NewtypeModuleF._
 
   /**

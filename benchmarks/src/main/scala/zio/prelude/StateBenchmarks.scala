@@ -1,11 +1,11 @@
 package zio.prelude
 
-import java.util.concurrent.TimeUnit
-
-import cats.data.{ EitherT, Kleisli, State => CatsState }
+import cats.data.{EitherT, Kleisli, State => CatsState}
 import cats.instances.list._
 import cats.syntax.traverse._
-import org.openjdk.jmh.annotations.{ State => BenchmarkState, _ }
+import org.openjdk.jmh.annotations.{State => BenchmarkState, _}
+
+import java.util.concurrent.TimeUnit
 
 @BenchmarkState(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
@@ -26,7 +26,7 @@ class StateBenchmarks {
 
   type CatsStack[A] = Kleisli[CatsEitherIntState, Any, A]
   object CatsStack {
-    def get: CatsStack[Int] = {
+    def get: CatsStack[Int]                        = {
       val eitherT: CatsEitherIntState[Int] =
         EitherT.liftF[CatsIntState, Nothing, Int](CatsState.get)
       Kleisli.liftF(eitherT)
@@ -35,7 +35,7 @@ class StateBenchmarks {
       Kleisli.pure(a)
     def runState[A](fa: CatsStack[A])(s: Int): Int =
       fa.run(()).merge.runS(s).value
-    def set(n: Int): CatsStack[Unit] = {
+    def set(n: Int): CatsStack[Unit]               = {
       val eitherT: CatsEitherIntState[Unit] =
         EitherT.liftF[CatsIntState, Nothing, Unit](CatsState.set(n))
       Kleisli.liftF(eitherT)
@@ -116,7 +116,7 @@ class StateBenchmarks {
   @Benchmark
   def zioEffectfulTraversal(): Int =
     State
-      .foreach(list) { el =>
+      .forEach(list) { el =>
         State.get[Int].flatMap(s => State.set(s + el))
       }
       .runState(0)

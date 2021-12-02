@@ -1,14 +1,27 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude
 
 import zio._
-import zio.prelude.coherent.AssociativeFlattenCovariantDeriveEqual
 import zio.stream.ZStream
-import zio.test.TestResult
-import zio.test.laws._
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
-import scala.util.{ Success, Try }
+import scala.util.{Success, Try}
 
 /**
  * `AssociativeFlatten` describes a type that can be "flattened" in an
@@ -27,23 +40,7 @@ trait AssociativeFlatten[F[+_]] {
   def flatten[A](ffa: F[F[A]]): F[A]
 }
 
-object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] {
-
-  /**
-   * For all `fffa`, `flatten(flatten(fffa))` is equivalent to
-   * `flatten(fffa.map(flatten))`.
-   */
-  val associativityLaw: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
-    new LawsF.Covariant.FlattenLaw[AssociativeFlattenCovariantDeriveEqual, Equal]("associativityLaw") {
-      def apply[F[+_]: AssociativeFlattenCovariantDeriveEqual, A: Equal](fffa: F[F[F[A]]]): TestResult =
-        fffa.flatten.flatten <-> fffa.map(_.flatten).flatten
-    }
-
-  /**
-   * The set of all laws that instances of `AssociativeFlatten` must satisfy.
-   */
-  val laws: LawsF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] =
-    associativityLaw
+object AssociativeFlatten {
 
   /**
    * Summons an implicit `AssociativeFlatten[F]`.
@@ -69,6 +66,15 @@ object AssociativeFlatten extends LawfulF.Covariant[AssociativeFlattenCovariantD
       def any: Chunk[Any] = Chunk.unit
 
       def flatten[A](ffa: Chunk[Chunk[A]]): Chunk[A] = ffa.flatten
+    }
+
+  /**
+   * The `AssociativeFlatten` instance for `Const`.
+   */
+  implicit def ConstAssociativeFlatten[A]: AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+    new AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] {
+      def flatten[B](ffb: Const[A, Const[A, B]]): Const[A, B] =
+        Const.wrap(Const.unwrap(ffb))
     }
 
   /**

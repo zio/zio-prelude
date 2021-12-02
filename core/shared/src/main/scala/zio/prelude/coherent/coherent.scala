@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package zio.prelude.coherent
 
 import zio.prelude._
@@ -102,6 +118,16 @@ object CommutativeEqual {
     }
 }
 
+trait CommutativeIdentity[A] extends Commutative[A] with Identity[A]
+
+object CommutativeIdentity {
+  implicit def derive[A](implicit commutative0: Commutative[A], identity0: Identity[A]): CommutativeIdentity[A] =
+    new CommutativeIdentity[A] {
+      def combine(l: => A, r: => A): A = commutative0.combine(l, r)
+      def identity: A                  = identity0.identity
+    }
+}
+
 trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 
 object CovariantDeriveEqual {
@@ -183,33 +209,33 @@ object DeriveEqualIdentityEitherInvariant {
     }
 }
 
-trait DeriveEqualNonEmptyTraversable[F[+_]] extends DeriveEqualTraversable[F] with NonEmptyTraversable[F]
+trait DeriveEqualNonEmptyForEach[F[+_]] extends DeriveEqualForEach[F] with NonEmptyForEach[F]
 
-object DeriveEqualNonEmptyTraversable {
+object DeriveEqualNonEmptyForEach {
   implicit def derive[F[+_]](implicit
     deriveEqual0: DeriveEqual[F],
-    nonEmptyTraversable0: NonEmptyTraversable[F]
-  ): DeriveEqualNonEmptyTraversable[F] =
-    new DeriveEqualNonEmptyTraversable[F] {
+    nonEmptyForEach0: NonEmptyForEach[F]
+  ): DeriveEqualNonEmptyForEach[F] =
+    new DeriveEqualNonEmptyForEach[F] {
       def derive[A: Equal]: Equal[F[A]]                                                      =
         deriveEqual0.derive
-      def foreach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-        nonEmptyTraversable0.foreach1(fa)(f)
+      def forEach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+        nonEmptyForEach0.forEach1(fa)(f)
     }
 }
 
-trait DeriveEqualTraversable[F[+_]] extends CovariantDeriveEqual[F] with Traversable[F]
+trait DeriveEqualForEach[F[+_]] extends CovariantDeriveEqual[F] with ForEach[F]
 
-object DeriveEqualTraversable {
+object DeriveEqualForEach {
   implicit def derive[F[+_]](implicit
     deriveEqual0: DeriveEqual[F],
-    traversable0: Traversable[F]
-  ): DeriveEqualTraversable[F] =
-    new DeriveEqualTraversable[F] {
+    forEach0: ForEach[F]
+  ): DeriveEqualForEach[F] =
+    new DeriveEqualForEach[F] {
       def derive[A: Equal]: Equal[F[A]]                                                  =
         deriveEqual0.derive
-      def foreach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-        traversable0.foreach(fa)(f)
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+        forEach0.forEach(fa)(f)
     }
 }
 
@@ -246,7 +272,51 @@ object EqualInverse {
     }
 }
 
-trait HashOrd[-A] extends Hash[A] with Ord[A] { self =>
+trait HashPartialOrd[-A] extends Hash[A] with PartialOrd[A] { self =>
+  override def contramap[B](f: B => A): Hash[B] with PartialOrd[B] =
+    new HashPartialOrd[B] {
+      def hash(b: B): Int                                     = self.hash(f(b))
+      protected def checkCompare(l: B, r: B): PartialOrdering = self.compare(f(l), f(r))
+      override protected def checkEqual(l: B, r: B): Boolean  = self.equal(f(l), f(r))
+    }
+}
+
+object HashPartialOrd {
+  implicit def derive[A](implicit hash0: Hash[A], ord0: PartialOrd[A]): HashPartialOrd[A] =
+    new HashPartialOrd[A] {
+      def hash(a: A): Int                                     = hash0.hash(a)
+      protected def checkCompare(l: A, r: A): PartialOrdering = ord0.compare(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean  = ord0.equal(l, r)
+    }
+
+  /**
+   * Constructs an instance from a `hash0` function, an `ord`` function and a `equal0` function.
+   * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
+   */
+  def make[A](hash0: A => Int, ord: (A, A) => PartialOrdering, equal0: (A, A) => Boolean): Hash[A] with PartialOrd[A] =
+    new HashPartialOrd[A] {
+      def hash(a: A): Int                                              = hash0(a)
+      override protected def checkCompare(l: A, r: A): PartialOrdering = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean           = equal0(l, r)
+    }
+
+  /**
+   * Constructs an instance from a hash function, equal function and ord function.
+   * Checking equality is delegated to `ord`, so short-circuiting the equality check (failing fast) is not possible.
+   */
+  def make[A](hash0: A => Int, ord: (A, A) => PartialOrdering): Hash[A] with PartialOrd[A] =
+    new HashPartialOrd[A] {
+      def hash(a: A): Int                                              = hash0(a)
+      override protected def checkCompare(l: A, r: A): PartialOrdering = ord(l, r)
+      override protected def checkEqual(l: A, r: A): Boolean           = ord(l, r) match {
+        case Ordering.Equals => true
+        case _               => false
+      }
+    }
+
+}
+
+trait HashOrd[-A] extends HashPartialOrd[A] with Ord[A] { self =>
   final override def contramap[B](f: B => A): Hash[B] with Ord[B] =
     new HashOrd[B] {
       def hash(b: B): Int                                    = self.hash(f(b))
@@ -290,6 +360,6 @@ object HashOrd {
    * the implementation of `hashCode` for values of type `A` and ordering from [[scala.math.Ordering]].
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Hash[A] with Ord[A] =
-    make(_.hashCode(), (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
+    make(_.##, (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
 
 }

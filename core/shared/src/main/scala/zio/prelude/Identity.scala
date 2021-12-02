@@ -1,8 +1,20 @@
-package zio.prelude
+/*
+ * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import zio.prelude.coherent.EqualIdentity
-import zio.test.TestResult
-import zio.test.laws.{ Lawful, Laws }
+package zio.prelude
 
 /**
  * The `Identity` type class describes an associative binary operator for a
@@ -29,46 +41,24 @@ trait Identity[A] extends Associative[A] {
     else super.multiplyOption(n)(a)
 }
 
-object Identity extends Lawful[EqualIdentity] {
-
-  /**
-   * The left identity law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
-   *
-   * {{{
-   * identity * a === a
-   * }}}
-   */
-  val leftIdentityLaw: Laws[EqualIdentity] =
-    new Laws.Law1[EqualIdentity]("leftIdentityLaw") {
-      def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
-        (I.identity <> a) <-> a
-    }
-
-  /**
-   * The left identity law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
-   *
-   * {{{
-   * a * identity === a
-   * }}}
-   */
-  val rightIdentityLaw: Laws[EqualIdentity] =
-    new Laws.Law1[EqualIdentity]("rightIdentityLaw") {
-      def apply[A](a: A)(implicit I: EqualIdentity[A]): TestResult =
-        (a <> I.identity) <-> a
-    }
-
-  /**
-   * The set of all laws that instances of `Identity` must satisfy.
-   */
-  val laws: Laws[EqualIdentity] =
-    leftIdentityLaw + rightIdentityLaw + Associative.laws
+object Identity {
 
   /**
    * Summons an implicit `Identity[A]`.
    */
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
+
+  /**
+   * Constructs an `Identity` instance from an `IdentityEither` instance and a
+   * `Covariant` instance.
+   */
+  def fromIdentityEitherCovariant[F[+_]: IdentityEither: Covariant, A]: Identity[F[A]] =
+    new Identity[F[A]] {
+      def identity: F[A]                        =
+        IdentityEither[F].none
+      def combine(l: => F[A], r: => F[A]): F[A] =
+        l orElse r
+    }
 
   /**
    * Constructs an `Identity` instance from an associative binary operator and
@@ -808,7 +798,7 @@ object Identity extends Lawful[EqualIdentity] {
     )
 }
 
-trait IdentitySyntax extends PlatformSpecificIdentitySyntax {
+trait IdentitySyntax {
 
   /**
    * Provides infix syntax for combining two values with an associative
