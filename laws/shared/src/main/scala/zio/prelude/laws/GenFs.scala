@@ -110,6 +110,7 @@ object GenFs {
     new GenF[R, ({ type lambda[+b] = These[A, b] })#lambda] {
       def apply[R1 <: R, B](b: Gen[R1, B]): Gen[R1, These[A, B]] =
         Gens.these(a, b)
+    }
 
   /**
    * A generator of `Try` values.
