@@ -140,7 +140,7 @@ sealed trait These[+A, +B] { self =>
   /**
    * Folds each of the possibile cases into a summary value.
    */
-  final def fold[C](left: A => C, right: B => C, both: (A, B) => C): C =
+  final def fold[C](left: A => C, right: B => C)(both: (A, B) => C): C =
     self match {
       case Left(a)    => left(a)
       case Right(b)   => right(b)
@@ -162,19 +162,19 @@ sealed trait These[+A, +B] { self =>
    * Returns whether this value is a `Left`.
    */
   final def isLeft: Boolean =
-    fold(_ => true, _ => false, (_, _) => false)
+    fold(_ => true, _ => false)((_, _) => false)
 
   /**
    * Returns whether this value is a `Right`.
    */
   final def isRight: Boolean =
-    fold(_ => false, _ => true, (_, _) => false)
+    fold(_ => false, _ => true)((_, _) => false)
 
   /**
    * Returns whether this value is a `Both`.
    */
   final def isBoth: Boolean =
-    fold(_ => false, _ => false, (_, _) => true)
+    fold(_ => false, _ => false)((_, _) => true)
 
   /**
    * Transforms the `B` value with the specified function.
@@ -217,7 +217,7 @@ sealed trait These[+A, +B] { self =>
    * errors in the case of success.
    */
   final def toEither: Either[A, B] =
-    fold(a => scala.util.Left(a), b => scala.util.Right(b), (_, b) => scala.util.Right(b))
+    fold(a => scala.util.Left(a), b => scala.util.Right(b))((_, b) => scala.util.Right(b))
 
   /**
    * Converts this value to an `Option` containing `Some` if this value
@@ -225,7 +225,7 @@ sealed trait These[+A, +B] { self =>
    * errors in the case of success.
    */
   final def toOption: Option[B] =
-    fold(_ => None, b => Some(b), (_, b) => Some(b))
+    fold(_ => None, b => Some(b))((_, b) => Some(b))
 
   /**
    * Converts this value to a validation success if this value contains a
@@ -233,7 +233,7 @@ sealed trait These[+A, +B] { self =>
    * any errors in the case of success.
    */
   final def toValidation: Validation[A, B] =
-    fold(a => Validation.fail(a), b => Validation.succeed(b), (_, b) => Validation.succeed(b))
+    fold(a => Validation.fail(a), b => Validation.succeed(b))((_, b) => Validation.succeed(b))
 
   /**
    * Converts this value to a validation success if this value contains a
@@ -242,7 +242,7 @@ sealed trait These[+A, +B] { self =>
    * errors in the case of success.
    */
   final def toValidationNonEmptyChunk[A1](implicit ev: A <:< NonEmptyChunk[A1]): Validation[A1, B] =
-    ???
+    fold(a => Validation.failNonEmptyChunk(ev(a)), b => Validation.succeed(b))((_, b) => Validation.succeed(b))
 
   /**
    * Combines this computation sequentially with that computation, combining
@@ -502,7 +502,7 @@ object These {
     ob.fold[These[Unit, A]](left(()))(right)
 
   /**
-   *  constructor from two options to an option of These.
+   *  Constructor from two options to an option of These.
    */
   def fromOptions[A, B](opA: Option[A], opB: Option[B]): Option[These[A, B]] =
     (opA, opB) match {
@@ -516,7 +516,7 @@ object These {
    * Constructs a `These` from a `Validation` value.
    */
   def fromValidation[E, A](validation: Validation[E, A]): These[NonEmptyChunk[E], A] =
-    ???
+    validation.fold(left, right)
 
   /**
    * Constructs a `Left` with an `A` value.
