@@ -32,7 +32,7 @@ sealed trait These[+A, +B] { self =>
       case (Both(l1, r1), Both(l2, r2)) => Both(A1.combine(l1, l2), B1.combine(r1, r2))
     }
 
-  def fold[C](left: A => C, right: B => C, both: (A, B) => C): C =
+  def fold[C](left: A => C, right: B => C)(both: (A, B) => C): C =
     self match {
       case Left(a)    => left(a)
       case Right(b)   => right(b)
@@ -106,7 +106,7 @@ object These {
     }
 
   /**
-   *  constructor from two options to an option of These.
+   *  Constructor from two options to an option of These.
    */
   def fromOptions[A, B](opA: Option[A], opB: Option[B]): Option[These[A, B]] =
     (opA, opB) match {
@@ -117,7 +117,7 @@ object These {
     }
 
   /**
-   * constructor for lifting Either into a These
+   * Construct a `These` from an `Either`.
    */
   def fromEither[A, B](e: Either[A, B]): These[A, B] =
     e.fold(Left(_), Right(_))
