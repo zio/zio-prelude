@@ -35,8 +35,6 @@ addCommandAlias(
   ";lawsNative/test;experimentalLawsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-// TODO: revert back to a stable version ASAP
-ThisBuild / resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 val zioVersion = "2.0.0-RC1"
 
 lazy val root = project
