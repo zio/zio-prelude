@@ -45,7 +45,7 @@ object IdempotentSpec extends DefaultRunnableSpec {
         test("option")(checkAllLaws(IdempotentLaws)(Gen.option(anyMaxInt))),
         test("ordering")(checkAllLaws(IdempotentLaws)(anyOrdering)),
         test("partial ordering")(checkAllLaws(IdempotentLaws)(anyPartialOrdering)),
-        test("set")(checkAllLaws(IdempotentLaws)(Gen.setOf(Gen.int).map(OrF(_).map(OrF(_))))),
+        test("set")(checkAllLaws(IdempotentLaws)(Gen.setOf(Gen.int).map(OrF(_)))),
         test("tuple2")(checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt))),
         test("tuple3")(
           checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt))

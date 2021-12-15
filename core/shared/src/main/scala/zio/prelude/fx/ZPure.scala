@@ -85,20 +85,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self zip that
 
   /**
-   * A symbolic alias for `zipLeft`.
-   */
-  final def <*[W1 >: W, S3, R1 <: R, E1 >: E, B](that: ZPure[W1, S2, S3, R1, E1, B]): ZPure[W1, S1, S3, R1, E1, A] =
-    self zipLeft that
-
-  /**
-   * A symbolic alias for `zip`.
-   */
-  final def <*>[W1 >: W, S3, R1 <: R, E1 >: E, B](
-    that: ZPure[W1, S2, S3, R1, E1, B]
-  ): ZPure[W1, S1, S3, R1, E1, (A, B)] =
-    self zip that
-
-  /**
    * A symbolic alias for `orElseEither`.
    */
   final def <+>[W1 >: W, S0 <: S1, S3 >: S2, R1 <: R, E1, B](

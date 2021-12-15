@@ -19,7 +19,7 @@ object InverseSpec extends DefaultRunnableSpec {
         test("float addition")(checkAllLaws(InverseLaws)(Gen.float.map(Sum(_)))),
         test("int addition")(checkAllLaws(InverseLaws)(Gen.int.map(Sum(_)))),
         test("long addition")(checkAllLaws(InverseLaws)(Gen.long.map(Sum(_)))),
-        test("set")(checkAllLaws(InverseLaws)(Gen.setOf(Gen.int).map(OrF(_).map(OrF(_))))),
+        test("set")(checkAllLaws(InverseLaws)(Gen.setOf(Gen.int).map(OrF(_)))),
         test("short addition")(checkAllLaws(InverseLaws)(Gen.short.map(Sum(_)))),
         test("tuple2")(checkAllLaws(InverseLaws)(Gen.int.map(Sum(_)).zip(Gen.int.map(Sum(_))))),
         test("tuple3")(
