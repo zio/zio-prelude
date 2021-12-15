@@ -66,4 +66,3 @@ object SmartTypes extends App {
   val email: Email = Email("test@test.com")
 }
 // scalafix:on
-
