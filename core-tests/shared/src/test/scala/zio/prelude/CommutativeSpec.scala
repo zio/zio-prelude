@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.Random
 import zio.prelude.laws.CommutativeLaws
-import zio.prelude.newtypes._
+import zio.prelude.newtypes.{And, Max, Min, Or, OrF, Prod, Sum}
 import zio.test._
 import zio.test.laws._
 

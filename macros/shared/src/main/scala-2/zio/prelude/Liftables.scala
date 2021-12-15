@@ -1,6 +1,7 @@
 package zio.prelude
 
 import com.github.ghik.silencer.silent
+import zio.prelude.Assertion.Regex
 
 import scala.reflect.macros.whitebox
 
@@ -69,17 +70,33 @@ trait Liftables {
       case q"${A(_)}.Regex.literal(${str: String})"                                                           =>
         Assertion.Regex.literal(str)
       case q"${A(_)}.Regex.CharacterSet.apply(scala.Predef.Set.apply[$_](..$set), ${reversed: Boolean})"      =>
-        Assertion.Regex.CharacterSet(set.map(t => c.eval[Char](c.Expr[Char](t))).toSet, reversed)
-      case q"${A(_)}.Regex.anyOf(${first: Char}, ${second: Char}, ..$rest)"                                   =>
-        Assertion.Regex.anyOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
-      case q"${A(_)}.Regex.notAnyOf(${first: Char}, ${second: Char}, ..$rest)"                                =>
-        Assertion.Regex.notAnyOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
+        Assertion.Regex.CharacterSet(set.map(t => c.eval[Regex](c.Expr[Regex](t))).toSet, reversed)
+      case q"${A(_)}.Regex.anyCharOf(${first: Char}, ${second: Char})"                                        =>
+        Assertion.Regex.anyCharOf(first, second)
+      case q"${A(_)}.Regex.anyCharOf(${first: Char}, ${second: Char}, ..$rest)"                               =>
+        Assertion.Regex.anyCharOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
+      case q"${A(_)}.Regex.anyRegexOf(${first: Regex}, ${second: Regex})"                                     =>
+        Assertion.Regex.anyRegexOf(first, second)
+      case q"${A(_)}.Regex.anyRegexOf(${first: Regex}, ${second: Regex}, ..$rest)"                            =>
+        Assertion.Regex.anyRegexOf(first, second, unliftRegexes(rest): _*)
+      case q"${A(_)}.Regex.notAnyCharOf(${first: Char}, ${second: Char})"                                     =>
+        Assertion.Regex.notAnyCharOf(first, second)
+      case q"${A(_)}.Regex.notAnyCharOf(${first: Char}, ${second: Char}, ..$rest)"                            =>
+        Assertion.Regex.notAnyCharOf(first, second, rest.map(t => c.eval[Char](c.Expr[Char](t))): _*)
+      case q"${A(_)}.Regex.notAnyRegexOf(${first: Regex}, ${second: Regex})"                                  =>
+        Assertion.Regex.notAnyRegexOf(first, second)
+      case q"${A(_)}.Regex.notAnyRegexOf(${first: Regex}, ${second: Regex}, ..$rest)"                         =>
+        Assertion.Regex.notAnyRegexOf(first, second, unliftRegexes(rest): _*)
       case q"${A(_)}.Regex.Range.apply(${start: Char}, ${end: Char}, ${reversed: Boolean})"                   =>
         Assertion.Regex.Range(start, end, reversed)
       case q"${A(_)}.Regex.inRange(${start: Char}, ${end: Char})"                                             =>
         Assertion.Regex.inRange(start, end)
       case q"${A(_)}.Regex.notInRange(${start: Char}, ${end: Char})"                                          =>
         Assertion.Regex.notInRange(start, end)
+      case q"${A(_)}.Regex.start"                                                                             =>
+        Assertion.Regex.start
+      case q"${A(_)}.Regex.end"                                                                               =>
+        Assertion.Regex.end
       case q"${A(_)}.Regex.Repeat.apply(${regex: Assertion.Regex}, ${min: Option[Int]}, ${max: Option[Int]})" =>
         Assertion.Regex.Repeat(regex, min, max)
       case q"${regex: Assertion.Regex}.min(${n: Int})"                                                        =>
@@ -92,6 +109,8 @@ trait Liftables {
         regex.*
       case q"${regex: Assertion.Regex}.+"                                                                     =>
         regex.*
+      case q"${regex: Assertion.Regex}.?"                                                                     =>
+        regex.?
       case q"${A(_)}.Regex.AndThen.apply(${first: Assertion.Regex}, ${second: Assertion.Regex})"              =>
         Assertion.Regex.AndThen(first, second)
       case q"${left: Assertion.Regex}.~(${right: Assertion.Regex})"                                           =>
@@ -101,6 +120,8 @@ trait Liftables {
       case q"${left: Assertion.Regex}.|(${right: Assertion.Regex})"                                           =>
         left | right
     }
+
+  def unliftRegexes(ts: Seq[c.Tree]): Seq[Regex] = ts.map(t => regexUnliftable.unapply(t).get)
 
   // Match on zio.prelude.Assertion path prefix
   object A {
@@ -157,6 +178,9 @@ trait Liftables {
 
       case q"${A(_)}.hasLength(${assertion: Assertion[Int]})" =>
         Assertion.hasLength(assertion).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.isEmptyString" =>
+        Assertion.isEmptyString.asInstanceOf[Assertion[A]]
 
       case q"${A(_)}.lessThan[$_](${LiteralUnlift(value)})($_)" =>
         Assertion.lessThan(value.asInstanceOf[A])(orderingForValue(value).asInstanceOf[Ordering[A]])
