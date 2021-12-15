@@ -50,12 +50,12 @@ object NewtypeSpec extends DefaultRunnableSpec {
                 containsStringWithoutAnsi("-3 did not satisfy greaterThanOrEqualTo(0)")
             )
           )
-        } @@ TestAspect.exceptDotty,
+        } @@ TestAspect.exceptScala3,
         test("invalid value at run-time") {
           assertM(typeCheck("Natural(-1)"))(
             isLeft(containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)"))
           )
-        } @@ TestAspect.exceptDotty,
+        } @@ TestAspect.exceptScala3,
         test("invalid values at run-time") {
           assert(Natural.make(-1))(
             isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))

@@ -37,7 +37,7 @@ addCommandAlias(
 
 // TODO: revert back to a stable version ASAP
 ThisBuild / resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-val zioVersion = "2.0.0-M6-2+21-fe2582e9-SNAPSHOT"
+val zioVersion = "2.0.0-RC1"
 
 lazy val root = project
   .in(file("."))
