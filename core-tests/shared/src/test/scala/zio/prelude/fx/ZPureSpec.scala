@@ -4,7 +4,7 @@ import zio.prelude._
 import zio.prelude.laws._
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
-import zio.{CanFail, Chunk, NonEmptyChunk, Random}
+import zio.{CanFail, Chunk, NonEmptyChunk, Random, ZEnvironment}
 
 import java.util.NoSuchElementException
 import scala.util.Try
@@ -41,57 +41,51 @@ object ZPureSpec extends DefaultRunnableSpec {
         suite("constructors")(
           test("access") {
             check(genIntToInt, genInt, genInt) { (f, r, s) =>
-              val actual   = ZPure.access(f).provide(r).run(s)
+              val actual   = ZPure.serviceWith(f).provideEnvironment(ZEnvironment(r)).run(s)
               val expected = (s, f(r))
               assert(actual)(equalTo(expected))
             }
           },
           test("accessM") {
-            val zPure = ZPure.accessZPure[Int](n => State.update[Int, Int](_ + n))
-            assert(zPure.provide(2).runState(3))(equalTo(5))
+            val zPure = ZPure.environmentWithPure[Int](n => State.update[Int, Int](_ + n.get))
+            assert(zPure.provideEnvironment(ZEnvironment(2)).runState(3))(equalTo(5))
           },
           test("provide is scoped correctly") {
             val zPure = for {
-              start <- ZPure.environment[Any, Int]
+              start <- ZPure.service[Any, Int]
               inner <- (for {
-                         innerStart <- ZPure.environment[Any, Int]
-                         innerInner <- ZPure.environment[Any, Int].provide(111)
-                         innerEnd   <- ZPure.environment[Any, Int]
-                       } yield (innerStart, innerInner, innerEnd)).provide(11)
-              end   <- ZPure.environment[Any, Int]
+                         innerStart <- ZPure.service[Any, Int]
+                         innerInner <- ZPure.service[Any, Int].provideEnvironment(ZEnvironment(111))
+                         innerEnd   <- ZPure.service[Any, Int]
+                       } yield (innerStart, innerInner, innerEnd)).provideEnvironment(ZEnvironment(11))
+              end   <- ZPure.service[Any, Int]
             } yield (start, inner, end)
-            assert(zPure.provide(1).run)(equalTo((1, (11, 111, 11), 1)))
+            assert(zPure.provideEnvironment(ZEnvironment(1)).run)(equalTo((1, (11, 111, 11), 1)))
           },
           test("provided environment should be restored on error") {
             val zPure = for {
-              _   <- (ZPure.fail(()): ZPure[Nothing, Any, Any, Int, Unit, Nothing]).provide(1).either
-              end <- ZPure.environment[Any, Int]
+              _   <- (ZPure
+                       .fail(()): ZPure[Nothing, Any, Any, Int, Unit, Nothing]).provideEnvironment(ZEnvironment(1)).either
+              end <- ZPure.service[Any, Int]
             } yield end
-            assert(zPure.provide(0).run)(equalTo(0))
+            assert(zPure.provideEnvironment(ZEnvironment(0)).run)(equalTo(0))
           },
           test("providing environment should preserve errors") {
             val zPure: ZPure[Nothing, Unit, Unit, (Int, Int), Int, Int] =
               ZPure.tupledPar(ZPure.fail(1), ZPure.fail(2)).as(0)
-            val actual                                                  = zPure.provide((1, 2)).runValidation
+            val actual                                                  = zPure.provideEnvironment(ZEnvironment((1, 2))).runValidation
             val expected                                                = Validation.Failure(Chunk.empty, NonEmptyChunk(1, 2))
             assert(actual)(equalTo(expected))
           },
           test("provideSome") {
-            val zPure = ZPure.environment[Any, Int].provideSome[String](_.split(" ").length)
-            assert(zPure.provide("The quick brown fox").run)(equalTo(4))
+            val zPure =
+              ZPure.service[Any, Int].provideSomeEnvironment[String](env => ZEnvironment(env.get.split(" ").length))
+            assert(zPure.provideEnvironment(ZEnvironment("The quick brown fox")).run)(equalTo(4))
           }
         )
       ),
       suite("state")(
         suite("methods")(
-          test("|||") {
-            check(genInt, genInt, genInt, genInt, genInt) { (s0, s1, s2, a1, a2) =>
-              val z1 = ZPure.fromFunction[Int, Unit, Int](_ => a1).asState(s1)
-              val z2 = ZPure.fromFunction[Int, Unit, Int](_ => a2).asState(s2)
-              assert((z1 ||| z2).provide(Left(())).run(s0))(equalTo((s1, a1))) &&
-              assert((z1 ||| z2).provide(Right(())).run(s0))(equalTo((s2, a2)))
-            }
-          },
           test("contramap") {
             check(genState, genIntToInt, genInt) { (fa, f, s) =>
               val (s1, a1) = fa.run(s)
@@ -151,14 +145,6 @@ object ZPureSpec extends DefaultRunnableSpec {
             check(genInt) { s =>
               val optOrHead = ZPure.succeed[Int, List[String]](List.empty).head.getState.either.runResult(s)
               assert(optOrHead)(isLeft(equalTo(Option.empty[String])))
-            }
-          },
-          test("join") {
-            check(genInt, genInt, genInt, genInt, genInt) { (s0, s1, s2, a1, a2) =>
-              val z1 = ZPure.fromFunction[Int, Unit, Int](_ => a1).asState(s1)
-              val z2 = ZPure.fromFunction[Int, Unit, Int](_ => a2).asState(s2)
-              assert(z1.join(z2).provide(Left(())).run(s0))(equalTo((s1, a1))) &&
-              assert(z1.join(z2).provide(Right(())).run(s0))(equalTo((s2, a2)))
             }
           },
           test("map") {

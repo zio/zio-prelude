@@ -209,37 +209,39 @@ case class AccountEnvironment(interestRate: Double)
 
 We can work with the environment using the same operators we use for `ZIO`, with the caveat described above that we use the more generic environment operators instead of the ones specialized for the module pattern.
 
-We access the environment using the `environment` operator, so if we wanted to access the environment we could do it like this:
+We access a service in the environment using the `service` operator, so if we wanted to access the `AccountEnvironment` service we could do it like this:
 
 ```scala mdoc
 val accountEnvironment: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, AccountEnvironment] =
-  ZPure.environment
+  ZPure.service
 ```
 
 This computation does not use logging or state and cannot fail, but it now depends on an `AccountEnvironment` and just returns the `AccountEnvironment`. Since this computation now succeeds with an `AccountEnvironment` we can use all of our normal operators for transforming success values like `map` and `flatMap` to work with it.
 
-If we just want to do one thing with the environment like get the interest rate we can do this slightly more concisely with the `access` operator.
+If we just want to do one thing with the environment like get the interest rate we can do this slightly more concisely with the `serviceWith` operator.
 
 ```scala mdoc
 val interestRate: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] =
-  ZPure.access(_.interestRate)
+  ZPure.serviceWith(_.interestRate)
 ```
 
-There is also an `accessZPure` variant for when we want to perform another computation based on the value from the environment.
+There is also a `serviceWithPure` variant for when we want to perform another computation based on the value from the environment.
 
 ```scala mdoc:nest
 def computeSimpleInterest(balance: Double, days: Int, interestRate: Double): ZPure[Nothing, Unit, Unit, Any, Nothing, Double] =
   ZPure.succeed(balance * days / 365 * interestRate)
 
 def accruedInterest(balance: Double, days: Int): ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] =
-  ZPure.accessZPure(r => computeSimpleInterest(balance, days, r.interestRate))
+  ZPure.serviceWithPure(r => computeSimpleInterest(balance, days, r.interestRate))
 ```
 
 To run a computation we need to provide it with its required environment, which we can do with the `provide` operator.
 
 ```scala mdoc:nest
+import zio.ZEnvironment
+
 val interestComputation: ZPure[Nothing, Unit, Unit, Any, Nothing, Double] =
-  accruedInterest(100000, 30).provide(AccountEnvironment(0.05))
+  accruedInterest(100000, 30).provideEnvironment(ZEnvironment(AccountEnvironment(0.05)))
 ```
 
 Once we have provided our application with our required environment we are ready ro run it.
