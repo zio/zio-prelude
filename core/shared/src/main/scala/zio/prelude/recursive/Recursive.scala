@@ -3,7 +3,10 @@ package zio.prelude.recursive
 import zio._
 import zio.prelude._
 
-final case class Recursive[Case[+_], +Annotations](caseValue: Case[Recursive[Case, Annotations]], annotations: ZEnvironment[Annotations]) {
+final case class Recursive[Case[+_], +Annotations](
+  caseValue: Case[Recursive[Case, Annotations]],
+  annotations: ZEnvironment[Annotations]
+) {
 
   def fold[Z](f: Case[Z] => Z)(implicit covariant: Covariant[Case]): Z =
     f(caseValue.map(_.fold(f)))
