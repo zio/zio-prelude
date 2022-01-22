@@ -390,6 +390,17 @@ object ZValidation extends LowPriorityValidationImplicits {
     }
 
   /**
+   * The `IdentityFlatten` instance for `ZValidation`.
+   */
+  implicit def ZValidationIdentityFlatten[W, E]: IdentityFlatten[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] {
+      val any: Validation[Nothing, Any]                                                  =
+        ZValidation.unit
+      def flatten[A](ffa: ZValidation[W, E, ZValidation[W, E, A]]): ZValidation[W, E, A] =
+        ffa.flatten
+    }
+
+  /**
    * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
    */
   implicit def ZValidationPartialOrd[W, E: PartialOrd, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
