@@ -19,7 +19,7 @@ package zio.prelude.fx
 import com.github.ghik.silencer.silent
 import zio.internal.{Stack, StackBool}
 import zio.prelude._
-import zio.{CanFail, Chunk, ChunkBuilder, IsNotIntersection, NeedsEnv, NonEmptyChunk, Tag, ZEnvironment, ZIO}
+import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk, Tag, ZEnvironment, ZIO}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.reflect.ClassTag
@@ -1064,7 +1064,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   /**
    * Accesses the specified service in the environment of the computation.
    */
-  def service[S, R: Tag: IsNotIntersection]: ZPure[Nothing, S, S, R, Nothing, R] =
+  def service[S, R: Tag]: ZPure[Nothing, S, S, R, Nothing, R] =
     serviceWith(identity)
 
   /**
@@ -1143,14 +1143,14 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   }
 
   final class ServiceWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
-    def apply[S, A](f: R => A)(implicit ev: IsNotIntersection[R], tag: Tag[R]): ZPure[Nothing, S, S, R, Nothing, A] =
+    def apply[S, A](f: R => A)(implicit tag: Tag[R]): ZPure[Nothing, S, S, R, Nothing, A] =
       serviceWithPure(r => ZPure.succeed(f(r)))
   }
 
   final class ServiceWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[W, S1, S2, E, A](
       f: R => ZPure[W, S1, S2, Any, E, A]
-    )(implicit ev: IsNotIntersection[R], tag: Tag[R]): ZPure[W, S1, S2, R, E, A] =
+    )(implicit tag: Tag[R]): ZPure[W, S1, S2, R, E, A] =
       environmentWithPure(env => f(env.get))
   }
 
