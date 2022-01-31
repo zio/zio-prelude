@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1213,7 +1213,7 @@ object AssociativeBoth {
    */
   implicit def ZIOIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
     new IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      val any: ZIO[R, E, Any] = ZIO.succeed(())
+      val any: ZIO[R, E, Any] = ZIO.unit
 
       def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zip fb
     }
@@ -1237,17 +1237,19 @@ object AssociativeBoth {
   /**
    * The `AssociativeBoth` instance for `ZManaged`.
    */
-  implicit def ZManagedAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
+  implicit def ZManagedIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
+    new IdentityBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
+      val any: ZManaged[R, E, Any]                                                               = ZManaged.unit
       def both[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, (A, B)] = fa zip fb
     }
 
   /**
-   * The `AssociativeBoth` instance for failed `ZManaged`.
+   * The `IdentityBoth` instance for failed `ZManaged`.
    */
-  implicit def ZManagedFailureAssociativeBoth[R, A]
-    : AssociativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new AssociativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
+  implicit def ZManagedFailureIdentityBoth[R, A]
+    : IdentityBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
+    new IdentityBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
+      val any: Failure[ZManaged[R, Any, A]] = Failure.wrap(ZManaged.fail(()))
       def both[EA, EB](
         fa: => Failure[ZManaged[R, EA, A]],
         fb: => Failure[ZManaged[R, EB, A]]
@@ -1270,10 +1272,11 @@ object AssociativeBoth {
     }
 
   /**
-   * The `AssociativeBoth` instance for `ZSTM`.
+   * The `IdentityBoth` instance for `ZSTM`.
    */
-  implicit def ZSTMAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
+  implicit def ZSTMIdentityBothBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
+    new IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
+      val any: ZSTM[R, E, Any]                                                       = ZSTM.unit
       def both[A, B](fa: => ZSTM[R, E, A], fb: => ZSTM[R, E, B]): ZSTM[R, E, (A, B)] = fa zip fb
     }
 
