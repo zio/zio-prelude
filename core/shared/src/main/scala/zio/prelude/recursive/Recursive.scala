@@ -13,10 +13,12 @@ final case class Recursive[Case[+_], +Annotations](
   def fold[Z](f: Case[Z] => Z)(implicit covariant: Covariant[Case]): Z =
     f(caseValue.map(_.fold(f)))
 
-  def foldDown[Z](z: Z)(f: (Z, Recursive[Case]) => Z)(implicit foreach: ForEach[Case]): Z =
+  def foldDown[Z](z: Z)(f: (Z, Recursive[Case, Annotations]) => Z)(implicit foreach: ForEach[Case]): Z =
     caseValue.foldLeft(f(z, self))((z, recursive) => recursive.foldDown(z)(f))
 
-  def foldDownSome[Z](z: Z)(pf: PartialFunction[(Z, Recursive[Case]), Z])(implicit foreach: ForEach[Case]): Z =
+  def foldDownSome[Z](z: Z)(pf: PartialFunction[(Z, Recursive[Case, Annotations]), Z])(implicit
+    foreach: ForEach[Case]
+  ): Z =
     foldDown(z)((z, recursive) => pf.lift(z -> recursive).getOrElse(z))
 
   def foldM[F[+_]: AssociativeFlatten: Covariant: IdentityBoth, Z](f: Case[Z] => F[Z])(implicit
@@ -38,10 +40,12 @@ final case class Recursive[Case[+_], +Annotations](
   def foldSTM[R, E, Z](f: Case[Z] => ZSTM[R, E, Z])(implicit foreach: ForEach[Case]): ZSTM[R, E, Z] =
     foldM(f)
 
-  def foldUp[Z](z: Z)(f: (Z, Recursive[Case]) => Z)(implicit foreach: ForEach[Case]): Z =
+  def foldUp[Z](z: Z)(f: (Z, Recursive[Case, Annotations]) => Z)(implicit foreach: ForEach[Case]): Z =
     f(caseValue.foldLeft(z)((z, recursive) => recursive.foldDown(z)(f)), self)
 
-  def foldUpSome[Z](z: Z)(pf: PartialFunction[(Z, Recursive[Case]), Z])(implicit foreach: ForEach[Case]): Z =
+  def foldUpSome[Z](z: Z)(pf: PartialFunction[(Z, Recursive[Case, Annotations]), Z])(implicit
+    foreach: ForEach[Case]
+  ): Z =
     foldUp(z)((z, recursive) => pf.lift(z -> recursive).getOrElse(z))
 
   def foldValidation[W, E, Z](f: Case[Z] => ZValidation[W, E, Z])(implicit
@@ -52,27 +56,35 @@ final case class Recursive[Case[+_], +Annotations](
   def foldZIO[R, E, Z](f: Case[Z] => ZIO[R, E, Z])(implicit foreach: ForEach[Case]): ZIO[R, E, Z] =
     foldM(f)
 
-  def transformDown(f: Recursive[Case] => Recursive[Case])(implicit covariant: Covariant[Case]): Recursive[Case] = {
-    def loop(recursive: Recursive[Case]): Recursive[Case] =
-      Recursive(f(recursive).caseValue.map(loop))
+  def transformDown[Annotations0 >: Annotations](
+    f: Recursive[Case, Annotations0] => Recursive[Case, Annotations0]
+  )(implicit covariant: Covariant[Case]): Recursive[Case, Annotations0] = {
+    def loop(recursive: Recursive[Case, Annotations0]): Recursive[Case, Annotations] =
+      Recursive(f(recursive).caseValue.map(loop), annotations)
     loop(self)
   }
 
-  def transformDownSome(pf: PartialFunction[Recursive[Case], Recursive[Case]])(implicit
+  def transformDownSome[Annotations0 >: Annotations](
+    pf: PartialFunction[Recursive[Case, Annotations0], Recursive[Case, Annotations0]]
+  )(implicit
     covariant: Covariant[Case]
-  ): Recursive[Case] =
-    transformDown((recursive => pf.lift(recursive).getOrElse(recursive)))
+  ): Recursive[Case, Annotations0] =
+    transformDown[Annotations0]((recursive => pf.lift(recursive).getOrElse(recursive)))
 
-  def transformUp(f: Recursive[Case] => Recursive[Case])(implicit covariant: Covariant[Case]): Recursive[Case] = {
-    def loop(recursive: Recursive[Case]): Recursive[Case] =
-      f(Recursive(recursive.caseValue.map(loop)))
+  def transformUp[Annotations0 >: Annotations](
+    f: Recursive[Case, Annotations0] => Recursive[Case, Annotations0]
+  )(implicit covariant: Covariant[Case]): Recursive[Case, Annotations0] = {
+    def loop(recursive: Recursive[Case, Annotations0]): Recursive[Case, Annotations0] =
+      f(Recursive(recursive.caseValue.map(loop), annotations))
     loop(self)
   }
 
-  def transformUpSome(pf: PartialFunction[Recursive[Case], Recursive[Case]])(implicit
+  def transformUpSome[Annotations0 >: Annotations](
+    pf: PartialFunction[Recursive[Case, Annotations0], Recursive[Case, Annotations0]]
+  )(implicit
     covariant: Covariant[Case]
-  ): Recursive[Case] =
-    transformUp((recursive => pf.lift(recursive).getOrElse(recursive)))
+  ): Recursive[Case, Annotations0] =
+    transformUp[Annotations0]((recursive => pf.lift(recursive).getOrElse(recursive)))
 }
 
 object Recursive {
