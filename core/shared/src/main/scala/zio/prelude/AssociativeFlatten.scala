@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio._
+import zio.stm.ZSTM
 import zio.stream.ZStream
 
 import scala.annotation.implicitNotFound
@@ -199,6 +200,16 @@ object AssociativeFlatten {
       def any: ZManaged[R, E, Any] = ZManaged.unit
 
       def flatten[A](ffa: ZManaged[R, E, ZManaged[R, E, A]]): ZManaged[R, E, A] = ffa.flatten
+    }
+
+  /**
+   * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZSTM`.
+   */
+  implicit def ZSTMIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
+      def any: ZSTM[R, E, Any] = ZSTM.unit
+
+      def flatten[A](ffa: ZSTM[R, E, ZSTM[R, E, A]]): ZSTM[R, E, A] = ffa.flatten
     }
 
   /**
