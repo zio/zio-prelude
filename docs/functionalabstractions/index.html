@@ -86,7 +86,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">Int</span>, right: =&gt; <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span> =
       left + right
   }
-<span class="hljs-comment">// IntAssociative: Associative[Int] = repl.MdocSession$App$$anon$1@13ba2c47</span>
+<span class="hljs-comment">// IntAssociative: Associative[Int] = repl.MdocSession$App$$anon$1@63a30b66</span>
 </code></pre>
 <p>Note however that the signature of the trait is not sufficient to define the abstraction.</p>
 <p>The signature merely says that we must take two <code>A</code> values and return an <code>A</code> value. It doesn't say anything about what this combining operation is supposed to do with the value.</p>
@@ -96,7 +96,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">combine</span></span>(left: =&gt; <span class="hljs-type">Int</span>, right: =&gt; <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span> =
       left - right <span class="hljs-comment">// don't do this</span>
   }
-<span class="hljs-comment">// IntNotAssociative: Associative[Int] = repl.MdocSession$App$$anon$2@56881c7b</span>
+<span class="hljs-comment">// IntNotAssociative: Associative[Int] = repl.MdocSession$App$$anon$2@772bc093</span>
 </code></pre>
 <p>This shows that abstractions are not meaningful without laws. Abstractions describe some common structure that is shared between different data types but without laws we don't know what this structure is supposed to be.</p>
 <p>In this case the law is that the combining operation must be associative, which we can write in pseudocode as.</p>
