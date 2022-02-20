@@ -18,6 +18,7 @@ package zio.prelude
 
 
 import zio.NonEmptyChunk
+
 import scala.language.implicitConversions
 
 /**
@@ -170,6 +171,40 @@ object NonEmptyMap {
     nonEmptyMap.toMap
 
   private val NonEmptyMapSeed: Int = 1247820194
+
+  /**
+   * GroupByOption function returns an option of a nonEmpty map instead of a map because by definition
+   * the elements will be non-empty - returns None if from is
+   */
+  def groupByOption[A, K](from: Iterable[A])(f: A  => K): Option[NonEmptyMap[K, Iterable[A]]] =
+    from.headOption.map(_ => NonEmptyMap(from.groupBy(f)))
+
+  /**
+   * from a non-empty chunk we can create a non-empty map of non-empty chunks
+   */
+  def groupByFromNonEmptyChunk[A, K](from: NonEmptyChunk[A])(f: A  => K): NonEmptyMap[K, NonEmptyChunk[A]] = {
+    val gb = from.groupBy(f)
+    val asChunks =gb.map{ p => (p._1 -> NonEmptyChunk.fromIterableOption(p._2).get) } // safe!
+    NonEmptyMap(asChunks)
+  }
+
+  /**
+   * from a non-empty set we can create a non-empty map of non-empty sets
+   */
+  def groupByFromNonEmptySet[A, K](from: NonEmptySet[A])(f: A  => K): NonEmptyMap[K, NonEmptySet[A]] = {
+    val gb = from.groupBy(f)
+    val asSets = gb.map { p => (p._1 -> NonEmptySet.fromIterableOption(p._2).get) } // safe!
+    NonEmptyMap(asSets)
+  }
+
+  /**
+   * from a non-empty list we can create a non-empty map of non-empty list
+   */
+  def groupByFromNonEmptyList[A, K](from: NonEmptyList[A])(f: A  => K): NonEmptyMap[K, NonEmptyList[A]] = {
+    val gb = from.groupBy(f)
+    val asLists = gb.map { p => (p._1 -> NonEmptyList.fromIterableOption(p._2).get) } // safe!
+    NonEmptyMap(asLists)
+  }
 
 }
 
