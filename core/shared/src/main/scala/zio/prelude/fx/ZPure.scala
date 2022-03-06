@@ -426,6 +426,13 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZPure.Provide(r, self)
 
   /**
+   * Provides this computation with the single service it requires. If the
+   * computation requires multiple services use `provideEnvironment` instead.
+   */
+  final def provideService[Service <: R](service: => Service)(implicit tag: Tag[Service]): ZPure[W, S1, S2, Any, E, A] =
+    provideEnvironment(ZEnvironment(service))
+
+  /**
    * Provides this computation with part of its required environment, leaving
    * the remainder.
    */
