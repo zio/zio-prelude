@@ -408,7 +408,7 @@ trait ForEachSyntax {
    * Provides infix syntax for traversing collections.
    */
   implicit class ForEachOps[F[+_], A](private val self: F[A]) {
-    def concatenate(implicit F: ForEach[F], A: Identity[A]): A                                               =
+    def concatenate(implicit F: ForEach[F], A: Identity[A]): A                                                  =
       F.concatenate(self)
     def forEach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: ForEach[F]): G[F[B]]               =
       F.forEach(self)(f)
