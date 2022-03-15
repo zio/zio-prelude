@@ -4,22 +4,23 @@ import zio.Chunk
 
 import scala.language.implicitConversions
 
-/** Custom option type to be used for wrapping external data models where most of the fields are
-  * defined to be optional.
-  *
-  * Instances of Optional are either [[Optional.Present]] or [[Optional.Absent]].
-  *
-  * The only difference between this type and [[scala.Option]] is that there is an implicit
-  * conversion defined from `A`` to `Optional[A]`, and from `Option[A]`` to `Optional[A]`.
-  *
-  */
+/**
+ * Custom option type to be used for wrapping external data models where most of the fields are
+ * defined to be optional.
+ *
+ * Instances of Optional are either [[Optional.Present]] or [[Optional.Absent]].
+ *
+ * The only difference between this type and [[scala.Option]] is that there is an implicit
+ * conversion defined from `A`` to `Optional[A]`, and from `Option[A]`` to `Optional[A]`.
+ */
 sealed trait Optional[+A] { self =>
   val isEmpty: Boolean
   val isDefined: Boolean
   val nonEmpty: Boolean
 
-  /** Converts this optional value to standard [[scala.Option]]
-    */
+  /**
+   * Converts this optional value to standard [[scala.Option]]
+   */
   final def toOption: Option[A] = self match {
     case Optional.Present(get) => Some(get)
     case Optional.Absent       => None
@@ -82,10 +83,10 @@ sealed trait Optional[+A] { self =>
   final def withFilter(p: A => Boolean): WithFilter = new WithFilter(p)
 
   class WithFilter(p: A => Boolean) {
-    def map[B](f: A => B): Optional[B] = self filter p map f
+    def map[B](f: A => B): Optional[B]               = self filter p map f
     def flatMap[B](f: A => Optional[B]): Optional[B] = self filter p flatMap f
-    def foreach[U](f: A => U): Unit = self filter p foreach f
-    def withFilter(q: A => Boolean): WithFilter = new WithFilter(x => p(x) && q(x))
+    def foreach[U](f: A => U): Unit                  = self filter p foreach f
+    def withFilter(q: A => Boolean): WithFilter      = new WithFilter(x => p(x) && q(x))
   }
 
   final def contains[A1 >: A](elem: A1): Boolean =
@@ -151,27 +152,29 @@ sealed trait Optional[+A] { self =>
 
 object Optional {
 
-  /** Optional value that is present
-    * @param get
-    *   the value
-    * @tparam A
-    *   type of the value
-    */
+  /**
+   * Optional value that is present
+   * @param get
+   *   the value
+   * @tparam A
+   *   type of the value
+   */
   final case class Present[+A](get: A) extends Optional[A] {
-    override val isEmpty: Boolean = false
+    override val isEmpty: Boolean   = false
     override val isDefined: Boolean = true
-    override val nonEmpty: Boolean = true
+    override val nonEmpty: Boolean  = true
   }
 
-  /** Optional value that is absent
-    */
+  /**
+   * Optional value that is absent
+   */
   case object Absent extends Optional[Nothing] {
-    override val isEmpty: Boolean = true
+    override val isEmpty: Boolean   = true
     override val isDefined: Boolean = false
-    override val nonEmpty: Boolean = false
+    override val nonEmpty: Boolean  = false
   }
 
-  implicit def AllValuesAreNullable[A](value: A): Optional[A] = Present(value)
+  implicit def AllValuesAreNullable[A](value: A): Optional[A]     = Present(value)
   implicit def OptionIsNullable[A](value: Option[A]): Optional[A] =
     value match {
       case Some(value) => Present(value)
