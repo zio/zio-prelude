@@ -19,7 +19,7 @@ package zio.prelude
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.ZStream
-import zio.{ZEnvironment, ZIO, ZManaged}
+import zio.{ZEnvironment, ZIO}
 
 import scala.Predef.{identity => id}
 
@@ -135,16 +135,6 @@ object Zivariant {
     ): ZIO[R, E, A] => ZIO[R1, E1, A1] =
       rea => rea.mapBoth(e, a).provideSomeEnvironment(r)
   }
-
-  implicit val ZManagedZivariant: Zivariant[ZManaged] =
-    new Zivariant[ZManaged] {
-      override def zimap[E, A, R, EE, AA, RR](
-        r: ZEnvironment[EE] => ZEnvironment[E],
-        e: A => AA,
-        a: R => RR
-      ): ZManaged[E, A, R] => ZManaged[EE, AA, RR] =
-        rea => rea.mapBoth(e, a).provideSomeEnvironment(r)
-    }
 
   implicit val ZStreamZivariant: Zivariant[ZStream] =
     new Zivariant[ZStream] {

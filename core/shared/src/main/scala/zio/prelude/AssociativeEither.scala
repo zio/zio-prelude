@@ -213,30 +213,6 @@ object AssociativeEither {
     }
 
   /**
-   * The `AssociativeEither` instance for `ZManaged`.
-   */
-  implicit def ZManagedAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def either[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, Either[A, B]] =
-        fa.orElseEither(fb)
-    }
-
-  /**
-   * The `AssociativeEither` instance for failed `ZManaged`.
-   */
-  implicit def ZManagedFailureAssociativeEither[R, A]
-    : AssociativeEither[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new AssociativeEither[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      def either[EA, EB](
-        fa: => Failure[ZManaged[R, EA, A]],
-        fb: => Failure[ZManaged[R, EB, A]]
-      ): Failure[ZManaged[R, Either[EA, EB], A]] =
-        Failure.wrap {
-          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
-        }
-    }
-
-  /**
    * The `AssociativeEither` instance for `ZStream`.
    */
   implicit def ZStreamAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =

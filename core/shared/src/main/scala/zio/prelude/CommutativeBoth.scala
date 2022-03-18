@@ -144,29 +144,6 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `ZManaged`.
-   */
-  implicit def ZManagedCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, (A, B)] = fa zipPar fb
-    }
-
-  /**
-   * The `CommutativeBoth` instance for failed `ZManaged`.
-   */
-  implicit def ZManagedFailureCommutativeBoth[R, A]
-    : CommutativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new CommutativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      def both[EA, EB](
-        fa: => Failure[ZManaged[R, EA, A]],
-        fb: => Failure[ZManaged[R, EB, A]]
-      ): Failure[ZManaged[R, (EA, EB), A]] =
-        Failure.wrap {
-          (Failure.unwrap(fa).flip zipPar Failure.unwrap(fb).flip).flip
-        }
-    }
-
-  /**
    * The `CommutativeBoth` instance for `ZSink`.
    */
   implicit def ZSinkCommutativeBoth[R, E, In, L <: In]

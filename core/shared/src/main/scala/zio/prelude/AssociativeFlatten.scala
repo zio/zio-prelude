@@ -193,16 +193,6 @@ object AssociativeFlatten {
     }
 
   /**
-   * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZManaged`.
-   */
-  implicit def ZManagedIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def any: ZManaged[R, E, Any] = ZManaged.unit
-
-      def flatten[A](ffa: ZManaged[R, E, ZManaged[R, E, A]]): ZManaged[R, E, A] = ffa.flatten
-    }
-
-  /**
    * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZSTM`.
    */
   implicit def ZSTMIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =

@@ -19,7 +19,7 @@ package zio.prelude
 import zio.prelude.newtypes.{Failure, FailureIn, FailureOut}
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
-import zio.{Cause, Chunk, ChunkBuilder, Exit, Fiber, NonEmptyChunk, Schedule, ZIO, ZManaged, ZQueue, ZRef}
+import zio.{Cause, Chunk, ChunkBuilder, Exit, Fiber, NonEmptyChunk, Schedule, ZIO, ZQueue, ZRef}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -1304,18 +1304,6 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit def ZIOFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
     Zivariant.ZioZivariant.deriveFailureCovariant
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for `ZManaged`
-   */
-  implicit def ZManagedCovariant[R, E]: Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    Zivariant.ZManagedZivariant.deriveCovariant
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZManaged`
-   */
-  implicit def ZManagedFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    Zivariant.ZManagedZivariant.deriveFailureCovariant
 
   /**
    * The `Covariant` (and thus `Invariant`) for `ZQueue`

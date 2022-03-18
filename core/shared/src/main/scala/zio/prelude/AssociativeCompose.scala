@@ -59,18 +59,6 @@ object AssociativeCompose {
     def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] =
       new ZLayerProvideSomeOps[A, Nothing, B](ab) >>> bc
   }
-
-  implicit val URManagedIdentityCompose
-    : IdentityCompose[({ type lambda[-r, +a] = URManaged[r, ZEnvironment[a]] })#lambda] =
-    new IdentityCompose[({ type lambda[-r, +a] = URManaged[r, ZEnvironment[a]] })#lambda] {
-      def identity[A]: URManaged[A, ZEnvironment[A]] = ZManaged.environment
-
-      def compose[A, B, C](
-        bc: URManaged[B, ZEnvironment[C]],
-        ab: URManaged[A, ZEnvironment[B]]
-      ): URManaged[A, ZEnvironment[C]] =
-        ab.flatMap(b => bc.provideEnvironment(b))
-    }
 }
 
 trait AssociativeComposeSyntax {

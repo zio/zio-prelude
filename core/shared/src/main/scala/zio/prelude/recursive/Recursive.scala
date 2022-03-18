@@ -21,19 +21,10 @@ final case class Recursive[Case[+_], +Annotations](
   ): Z =
     foldDown(z)((z, recursive) => pf.lift(z -> recursive).getOrElse(z))
 
-  def foldDown[Z](z: Z)(f: (Z, Recursive[Case]) => Z)(implicit foreach: ForEach[Case]): Z =
-    caseValue.foldLeft(f(z, self))((z, recursive) => recursive.foldDown(z)(f))
-
-  def foldDownSome[Z](z: Z)(pf: PartialFunction[(Z, Recursive[Case]), Z])(implicit foreach: ForEach[Case]): Z =
-    foldDown(z)((z, recursive) => pf.lift(z -> recursive).getOrElse(z))
-
   def foldM[F[+_]: AssociativeFlatten: Covariant: IdentityBoth, Z](f: Case[Z] => F[Z])(implicit
     foreach: ForEach[Case]
   ): F[Z] =
     fold[F[Z]](_.flip.flatMap(f))
-
-  def foldManaged[R, E, Z](f: Case[Z] => ZManaged[R, E, Z])(implicit foreach: ForEach[Case]): ZManaged[R, E, Z] =
-    foldM(f)
 
   def foldPure[W, S, R, E, Z](f: Case[Z] => ZPure[W, S, S, R, E, Z])(implicit
     foreach: ForEach[Case]
