@@ -232,8 +232,7 @@ object Assertion {
 
   private[prelude] case class Matches(regexString: String) extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
-      val compiled = s"^$regexString$$".r
-      val result   = compiled.findFirstIn(a).isDefined
+      val result = a.matches(regexString)
       if (!negated) {
         if (result) Right(())
         else Left(AssertionError.Failure(s"matches(${regexString.r})"))

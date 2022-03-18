@@ -26,9 +26,6 @@ final case class Recursive[Case[+_], +Annotations](
   ): F[Z] =
     fold[F[Z]](_.flip.flatMap(f))
 
-  def foldManaged[R, E, Z](f: Case[Z] => ZManaged[R, E, Z])(implicit foreach: ForEach[Case]): ZManaged[R, E, Z] =
-    foldM(f)
-
   def foldPure[W, S, R, E, Z](f: Case[Z] => ZPure[W, S, S, R, E, Z])(implicit
     foreach: ForEach[Case]
   ): ZPure[W, S, S, R, E, Z] =

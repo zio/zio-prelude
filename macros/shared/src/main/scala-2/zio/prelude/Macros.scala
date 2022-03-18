@@ -59,11 +59,12 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
                 case Right(_)    => None
               }
             case _                        =>
-              val message = s"""
-                               |$assertionErrorHeader
-                               |Could not validate Assertion at compile-time.
-                               |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrapAll(List($value, ..$values))"${Console.RESET}
-                               |""".stripMargin
+              val message =
+                s"""
+                   |$assertionErrorHeader
+                   |Could not validate Assertion at compile-time.
+                   |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrapAll(List($value, ..$values))"${Console.RESET}
+                   |""".stripMargin
 
               c.abort(c.enclosingPosition, message)
           }

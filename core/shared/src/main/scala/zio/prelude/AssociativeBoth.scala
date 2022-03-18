@@ -1235,31 +1235,6 @@ object AssociativeBoth {
     }
 
   /**
-   * The `AssociativeBoth` instance for `ZManaged`.
-   */
-  implicit def ZManagedIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new IdentityBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      val any: ZManaged[R, E, Any]                                                               = ZManaged.unit
-      def both[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, (A, B)] = fa zip fb
-    }
-
-  /**
-   * The `IdentityBoth` instance for failed `ZManaged`.
-   */
-  implicit def ZManagedFailureIdentityBoth[R, A]
-    : IdentityBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new IdentityBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      val any: Failure[ZManaged[R, Any, A]] = Failure.wrap(ZManaged.fail(()))
-      def both[EA, EB](
-        fa: => Failure[ZManaged[R, EA, A]],
-        fb: => Failure[ZManaged[R, EB, A]]
-      ): Failure[ZManaged[R, (EA, EB), A]] =
-        Failure.wrap {
-          (Failure.unwrap(fa).flip zip Failure.unwrap(fb).flip).flip
-        }
-    }
-
-  /**
    * The `AssociativeBoth` instance for `ZSink`.
    */
   implicit def ZSinkAssociativeBoth[R, E, In, L <: In]

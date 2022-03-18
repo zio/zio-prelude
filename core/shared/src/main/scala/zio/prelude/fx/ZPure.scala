@@ -19,7 +19,7 @@ package zio.prelude.fx
 import com.github.ghik.silencer.silent
 import zio.internal.{Stack, StackBool}
 import zio.prelude._
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk, Tag, ZEnvironment, ZIO}
+import zio.{CanFail, Chunk, ChunkBuilder, NonEmptyChunk, Tag, ZEnvironment, ZIO}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.reflect.ClassTag
@@ -422,7 +422,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Provides this computation with its required environment.
    */
-  final def provideEnvironment(r: ZEnvironment[R])(implicit ev: NeedsEnv[R]): ZPure[W, S1, S2, Any, E, A] =
+  final def provideEnvironment(r: ZEnvironment[R]): ZPure[W, S1, S2, Any, E, A] =
     ZPure.Provide(r, self)
 
   /**
