@@ -97,8 +97,8 @@
 <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">RunningAverageSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DefaultRunnableSpec</span> </span>{
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">spec</span> </span>= suite(<span class="hljs-string">"RunningAverageSpec"</span>) {
-    testM(<span class="hljs-string">"commutative"</span>) {
-      <span class="hljs-keyword">val</span> runningAverageGen = <span class="hljs-type">Gen</span>.anyLong.zipWith(<span class="hljs-type">Gen</span>.anyInt)(<span class="hljs-type">RunningAverage</span>(_, _))
+    test(<span class="hljs-string">"commutative"</span>) {
+      <span class="hljs-keyword">val</span> runningAverageGen = <span class="hljs-type">Gen</span>.long.zipWith(<span class="hljs-type">Gen</span>.int)(<span class="hljs-type">RunningAverage</span>(_, _))
       checkAllLaws(<span class="hljs-type">CommutativeLaws</span>)(runningAverageGen)
     }
   }
