@@ -98,10 +98,10 @@
 <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">EquivalenceSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DefaultRunnableSpec</span> </span>{
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">spec</span> </span>= suite(<span class="hljs-string">"EquivalenceSpec"</span>) {
-    test(<span class="hljs-string">"chunkListEquivalence"</span>) {
+    testM(<span class="hljs-string">"chunkListEquivalence"</span>) {
       <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> equivalence = listChunkEquivalence[<span class="hljs-type">Int</span>]
-      <span class="hljs-keyword">val</span> listGen = <span class="hljs-type">Gen</span>.listOf(<span class="hljs-type">Gen</span>.int)
-      <span class="hljs-keyword">val</span> chunkGen = <span class="hljs-type">Gen</span>.chunkOf(<span class="hljs-type">Gen</span>.int)
+      <span class="hljs-keyword">val</span> listGen = <span class="hljs-type">Gen</span>.listOf(<span class="hljs-type">Gen</span>.anyInt)
+      <span class="hljs-keyword">val</span> chunkGen = <span class="hljs-type">Gen</span>.chunkOf(<span class="hljs-type">Gen</span>.anyInt)
       checkAllLaws(<span class="hljs-type">EquivalenceLaws</span>)(listGen, chunkGen)
     }
   }
