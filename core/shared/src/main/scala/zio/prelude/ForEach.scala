@@ -304,6 +304,14 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     reduceAssociative(fa)(Idempotent[A].idempotent)
 
   /**
+    * Reduces the collection to a summary value using the associative operation.
+    * Alias for `fold`.
+    */
+   def reduceIdentity[A: Identity](fa: F[A]): A =
+     foldMap(fa)(identity[A])
+
+
+  /**
    * Maps each element of the collection to a type `B` for which an
    * associative operation exists and then reduces the values using the
    * associative operation, returning `None` if the collection is empty.
@@ -456,6 +464,8 @@ trait ForEachSyntax {
       F.reduceAssociative(self)
     def reduceIdempotent(implicit F: ForEach[F], ia: Idempotent[A], ea: Equal[A]): Option[A]                    =
       F.reduceIdempotent(self)
+    def reduceIdentity(implicit F: ForEach[F], A: Identity[A]): A                                               =
+       F.reduceIdentity(self)
     def product(implicit A: Identity[Prod[A]], F: ForEach[F]): A                                                =
       F.product(self)
     def reduceMapOption[B: Associative](f: A => B)(implicit F: ForEach[F]): Option[B]                           =
