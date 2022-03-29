@@ -112,7 +112,7 @@
   one.map(_ + <span class="hljs-number">1</span>)
 <span class="hljs-comment">// two: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(</span>
 <span class="hljs-comment">//   value = Succeed(value = 1),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$16027/1309342452@6e67c007</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$15843/1835938302@47d40698</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>We can combine the values of two computations with the <code>zipWith</code> operator.</p>
@@ -120,7 +120,7 @@
   one.zipWith(two)(_ + _)
 <span class="hljs-comment">// three: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(</span>
 <span class="hljs-comment">//   value = Succeed(value = 1),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$16035/38329632@50541e6</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$15851/1724723932@7ada22ce</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>We can also chain computations using the <code>flatMap</code> operator and Scala's for comprehension syntax.</p>
@@ -204,7 +204,7 @@
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> accountEnvironment: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">AccountEnvironment</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">AccountEnvironment</span>] =
   <span class="hljs-type">ZPure</span>.environment
 <span class="hljs-comment">// accountEnvironment: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, AccountEnvironment] = Access(</span>
-<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$16103/484411956@76ad1a71</span>
+<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$15919/989315988@70f9704b</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>This computation does not use logging or state and cannot fail, but it now depends on an <code>AccountEnvironment</code> and just returns the <code>AccountEnvironment</code>. Since this computation now succeeds with an <code>AccountEnvironment</code> we can use all of our normal operators for transforming success values like <code>map</code> and <code>flatMap</code> to work with it.</p>
@@ -212,7 +212,7 @@
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> interestRate: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>, <span class="hljs-type">AccountEnvironment</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">Double</span>] =
   <span class="hljs-type">ZPure</span>.access(_.interestRate)
 <span class="hljs-comment">// interestRate: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] = Access(</span>
-<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$16103/484411956@7dcb7098</span>
+<span class="hljs-comment">//   access = zio.prelude.fx.ZPure$AccessPartiallyApplied$$$Lambda$15919/989315988@266b334a</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>There is also an <code>accessM</code> variant for when we want to perform another computation based on the value from the environment.</p>
@@ -269,8 +269,8 @@
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> withdrawalComputation: <span class="hljs-type">ZPure</span>[<span class="hljs-type">Nothing</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountState</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">AccountError</span>, <span class="hljs-type">Unit</span>] =
   withdraw(<span class="hljs-number">10</span>).provideState(<span class="hljs-type">AccountState</span>(<span class="hljs-number">100</span>, <span class="hljs-literal">true</span>))
 <span class="hljs-comment">// withdrawalComputation: ZPure[Nothing, Any, AccountState, Any, AccountError, Unit] = FlatMap(</span>
-<span class="hljs-comment">//   value = Modify(run0 = zio.prelude.fx.ZPure$$$Lambda$16112/412966606@2dfcf0de),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$16035/38329632@2d99ef6</span>
+<span class="hljs-comment">//   value = Modify(run0 = zio.prelude.fx.ZPure$$$Lambda$15928/1271999862@41ec01d9),</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$15851/1724723932@6a0b8778</span>
 <span class="hljs-comment">// )</span>
 </code></pre>
 <p>We will use the <code>runEither</code> operator, which is a variant of <code>run</code> that allows the computation to fail and just converts the failure to the left side of an <code>Either</code>. The <code>run</code> and <code>runEither</code> operators just return the final value, so let's use the <code>get</code> operator to get the final state before we run our computation since we only care about the final state.</p>
@@ -296,11 +296,11 @@
 <span class="hljs-comment">// withdrawalComputationLog: ZPure[String, AccountState, AccountState, Any, AccountError, Unit] = FlatMap(</span>
 <span class="hljs-comment">//   value = FlatMap(</span>
 <span class="hljs-comment">//     value = Modify(</span>
-<span class="hljs-comment">//       run0 = zio.prelude.fx.ZPure$$$Lambda$16111/169703800@1c39624e</span>
+<span class="hljs-comment">//       run0 = zio.prelude.fx.ZPure$$$Lambda$15927/984002893@51cbc95a</span>
 <span class="hljs-comment">//     ),</span>
 <span class="hljs-comment">//     continue = &lt;function1&gt;</span>
 <span class="hljs-comment">//   ),</span>
-<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$16113/1168472595@3ad09ee1</span>
+<span class="hljs-comment">//   continue = zio.prelude.fx.ZPure$$Lambda$15929/1063610384@2ec5514a</span>
 <span class="hljs-comment">// )</span>
 
 <span class="hljs-keyword">val</span> log: <span class="hljs-type">Chunk</span>[<span class="hljs-type">String</span>] =
