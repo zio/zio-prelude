@@ -289,7 +289,9 @@ val oops = SequenceNumber(-10)
 // • -10 did not satisfy greaterThanOrEqualTo(0)
 ```
 
-Smart Newtypes can only be validated at compile-time when called with literals, such as `9000` or `"Fancy Pants"`. When wrapping variables or run-time values, you can use the `make` or `makeAll`.
+Smart Newtypes can only be validated at compile-time when called with literals, such as `9000` or `"Fancy Pants"`. Attempting to wrap a variable or run-time value with `apply` will result in a compilation error warning you about this.
+
+When wrapping variables or run-time values, you can use the `make` or `makeAll` constructors, which will perform the validation at run-time instead.
 
 ```scala mdoc
 import zio.Chunk
