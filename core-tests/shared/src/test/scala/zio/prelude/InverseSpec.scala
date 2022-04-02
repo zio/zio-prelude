@@ -2,8 +2,8 @@ package zio.prelude
 
 import zio.prelude.laws.InverseLaws
 import zio.prelude.newtypes.{OrF, Sum}
-import zio.test.laws._
 import zio.test._
+import zio.test.laws._
 
 object InverseSpec extends ZIOSpecDefault {
 

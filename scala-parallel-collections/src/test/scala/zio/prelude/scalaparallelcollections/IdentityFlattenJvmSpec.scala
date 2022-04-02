@@ -2,10 +2,10 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
+import zio.ZTraceElement
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.ZTraceElement
 
 import scala.collection.parallel.{immutable => par}
 

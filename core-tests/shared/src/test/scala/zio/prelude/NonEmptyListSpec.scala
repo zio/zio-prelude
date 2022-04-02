@@ -1,9 +1,9 @@
 package zio.prelude
 
+import zio.NonEmptyChunk
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.NonEmptyChunk
 
 object NonEmptyListSpec extends ZIOSpecDefault {
 
