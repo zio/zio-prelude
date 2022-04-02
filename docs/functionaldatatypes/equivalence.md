@@ -63,7 +63,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object EquivalenceSpec extends DefaultRunnableSpec {
+object EquivalenceSpec extends ZIOSpecDefault {
 
   def spec = suite("EquivalenceSpec") {
     test("chunkListEquivalence") {

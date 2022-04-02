@@ -9,26 +9,26 @@ import zio.prelude.newtypes._
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
 import zio.test.laws._
-import zio.{Chunk, Random, ZTraceElement}
+import zio.{Chunk, ZTraceElement}
 
-object ZSetSpec extends DefaultRunnableSpec {
+object ZSetSpec extends ZIOSpecDefault {
 
-  def genFZSet[R <: Random with Sized, B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] =
+  def genFZSet[R <: Sized, B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] {
       def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: ZTraceElement): Gen[R1, ZSet[A, B]] =
         genZSet(a, b)
     }
 
-  def genZSet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
+  def genZSet[R <: Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
     Gen.mapOf(a, b).map(ZSet.fromMap)
 
-  lazy val smallInts: Gen[Random with Sized, Chunk[Int]] =
+  lazy val smallInts: Gen[Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  def natural(min: Natural, max: Natural)(implicit trace: ZTraceElement): Gen[Random, Natural] =
+  def natural(min: Natural, max: Natural)(implicit trace: ZTraceElement): Gen[Any, Natural] =
     Gen.int(min, max).map(_.asInstanceOf[Natural])
 
-  def naturals: Gen[Random with Sized, Natural] =
+  def naturals: Gen[Sized, Natural] =
     Gen.small(n => natural(0.asInstanceOf[Natural], n.asInstanceOf[Natural]))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
@@ -45,7 +45,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             CovariantDeriveEqual,
             Equal,
             TestConfig,
-            Random with Sized with TestConfig,
+            Sized with TestConfig,
             ({ type lambda[+x] = ZSet[x, Int] })#lambda,
             Int
           ](CovariantLaws)(genFZSet(Gen.int), Gen.int)(
@@ -63,7 +63,7 @@ object ZSetSpec extends DefaultRunnableSpec {
             DeriveEqualForEach,
             Equal,
             TestConfig,
-            Random with Sized with TestConfig,
+            Sized with TestConfig,
             MultiSet,
             Int
           ](ForEachLaws)(genFZSet(naturals), Gen.int)(

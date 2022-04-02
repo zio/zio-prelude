@@ -1,14 +1,13 @@
 package zio.prelude
 
-import zio.Random
 import zio.prelude.laws.CommutativeLaws
 import zio.prelude.newtypes.{And, Max, Min, Or, OrF, Prod, Sum}
 import zio.test._
 import zio.test.laws._
 
-object CommutativeSpec extends DefaultRunnableSpec {
+object CommutativeSpec extends ZIOSpecDefault {
 
-  val anySumInt: Gen[Random, Sum[Int]] = Gen.int.map(Sum(_))
+  val anySumInt: Gen[Any, Sum[Int]] = Gen.int.map(Sum(_))
 
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()

@@ -7,7 +7,7 @@ import zio.test._
 import zio.test.laws._
 
 @silent("Unused import")
-object PartialOrdJvmSpec extends DefaultRunnableSpec {
+object PartialOrdJvmSpec extends ZIOSpecDefault {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters

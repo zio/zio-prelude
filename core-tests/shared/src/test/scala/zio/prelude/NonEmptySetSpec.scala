@@ -1,22 +1,21 @@
 package zio.prelude
 
-import zio.Random
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object NonEmptySetSpec extends DefaultRunnableSpec {
+object NonEmptySetSpec extends ZIOSpecDefault {
 
-  private lazy val genSet: Gen[Random with Sized, Set[Int]] =
+  private lazy val genSet: Gen[Sized, Set[Int]] =
     Gen.setOf1(genInt)
 
-  private lazy val genSetFunction: Gen[Random with Sized, Int => Set[Int]] =
+  private lazy val genSetFunction: Gen[Sized, Int => Set[Int]] =
     Gen.function(genSet)
 
-  private lazy val genInt: Gen[Random, Int] =
+  private lazy val genInt: Gen[Any, Int] =
     Gen.int(-10, 10)
 
-  private lazy val genNonEmptySet: Gen[Random with Sized, NonEmptySet[Int]] =
+  private lazy val genNonEmptySet: Gen[Sized, NonEmptySet[Int]] =
     genSet.map(NonEmptySet.fromSetOption(_).get)
 
   def spec: ZSpec[Environment, Failure] =

@@ -5,12 +5,12 @@ import com.github.ghik.silencer.silent
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.{Random, ZTraceElement}
+import zio.ZTraceElement
 
 import scala.collection.parallel.{immutable => par}
 
 @silent("Unused import")
-object IdentityFlattenJvmSpec extends DefaultRunnableSpec {
+object IdentityFlattenJvmSpec extends ZIOSpecDefault {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters
@@ -23,9 +23,9 @@ object IdentityFlattenJvmSpec extends DefaultRunnableSpec {
   }
   import ParallelCollectionCompatibility._
 
-  val genParSeq: GenF[Random with Sized, par.ParSeq] =
-    new GenF[Random with Sized, par.ParSeq] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A])(implicit
+  val genParSeq: GenF[Sized, par.ParSeq] =
+    new GenF[Sized, par.ParSeq] {
+      def apply[R1 <: Sized, A](gen: Gen[R1, A])(implicit
         trace: ZTraceElement
       ): Gen[R1, par.ParSeq[A]] =
         Gen.listOf(gen).map(_.par)

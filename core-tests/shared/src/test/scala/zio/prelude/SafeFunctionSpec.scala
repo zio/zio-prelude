@@ -3,7 +3,7 @@ package zio.prelude
 import zio.prelude.laws._
 import zio.test._
 
-object SafeFunctionSpec extends DefaultRunnableSpec {
+object SafeFunctionSpec extends ZIOSpecDefault {
 
   val string: String = "The quick brown fox"
 

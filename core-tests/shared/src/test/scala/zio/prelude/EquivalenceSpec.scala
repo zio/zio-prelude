@@ -5,7 +5,7 @@ import zio.stream.ZStream
 import zio.test._
 import zio.test.laws._
 
-object EquivalenceSpec extends DefaultRunnableSpec {
+object EquivalenceSpec extends ZIOSpecDefault {
 
   val genAny: Gen[Any, Any] =
     Gen.unit

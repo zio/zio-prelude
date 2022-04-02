@@ -2,14 +2,14 @@ package zio.prelude
 
 import zio.test.laws.GenF
 import zio.test.{Gen, Sized}
-import zio.{Chunk, Random, ZTraceElement}
+import zio.{Chunk, ZTraceElement}
 
 object Fixtures {
   type ChunkOption[+A] = Chunk[Option[A]]
 
-  val chunkOptionGenF: GenF[Random with Sized, ChunkOption] =
-    new GenF[Random with Sized, ChunkOption] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A])(implicit
+  val chunkOptionGenF: GenF[Sized, ChunkOption] =
+    new GenF[Sized, ChunkOption] {
+      def apply[R1 <: Sized, A](gen: Gen[R1, A])(implicit
         trace: ZTraceElement
       ): Gen[R1, Chunk[Option[A]]] =
         Gen.chunkOf(Gen.option(gen))
