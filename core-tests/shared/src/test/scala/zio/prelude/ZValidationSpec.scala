@@ -15,8 +15,7 @@ object ZValidationSpec extends ZIOSpecDefault {
   val genFValidation: GenF[Sized, ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
     GenFs.validation(Gen.int, Gen.int)
 
-  val genFValidationFailure
-    : GenF[Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
+  val genFValidationFailure: GenF[Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
     GenFs.validationFailure(Gen.int, Gen.int)
 
   def spec: ZSpec[Environment, Failure] = suite("ZValidationSpec")(
