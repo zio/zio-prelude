@@ -51,7 +51,7 @@ object RunningAverage {
     Equal.default
 }
 
-object RunningAverageSpec extends DefaultRunnableSpec {
+object RunningAverageSpec extends ZIOSpecDefault {
 
   def spec = suite("RunningAverageSpec") {
     test("commutative") {

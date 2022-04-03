@@ -1,17 +1,16 @@
 package zio.prelude
 
-import zio.Random
 import zio.prelude.ParSeq._
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object ParSeqSpec extends DefaultRunnableSpec {
+object ParSeqSpec extends ZIOSpecDefault {
 
-  val parSeq: Gen[Random with Sized, ParSeq[Unit, Int]] =
+  val parSeq: Gen[Sized, ParSeq[Unit, Int]] =
     Gens.parSeq(Gen.unit, Gen.int)
 
-  val equalparSeqs: Gen[Random with Sized, (ParSeq[Unit, Int], ParSeq[Unit, Int])] =
+  val equalparSeqs: Gen[Sized, (ParSeq[Unit, Int], ParSeq[Unit, Int])] =
     (parSeq <*> parSeq <*> parSeq).flatMap { case (a, b, c) =>
       Gen.elements(
         (a, a),

@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.Random
 import zio.prelude.laws._
 import zio.prelude.newtypes._
 import zio.test._
@@ -8,11 +7,11 @@ import zio.test.laws._
 
 import scala.math.abs
 
-object IdempotentSpec extends DefaultRunnableSpec {
+object IdempotentSpec extends ZIOSpecDefault {
 
-  val anyMaxInt: Gen[Random, Max[Int]] = Gen.int.map(Max(_))
+  val anyMaxInt: Gen[Any, Max[Int]] = Gen.int.map(Max(_))
 
-  val anyOrdering: Gen[Random, Ordering] = Gen.int.map { n =>
+  val anyOrdering: Gen[Any, Ordering] = Gen.int.map { n =>
     abs(n) % 3 match {
       case 0 => Ordering.LessThan
       case 1 => Ordering.Equals
@@ -20,7 +19,7 @@ object IdempotentSpec extends DefaultRunnableSpec {
     }
   }
 
-  val anyPartialOrdering: Gen[Random, PartialOrdering] = Gen.int.map { n =>
+  val anyPartialOrdering: Gen[Any, PartialOrdering] = Gen.int.map { n =>
     abs(n) % 4 match {
       case 0 => Ordering.LessThan
       case 1 => Ordering.Equals

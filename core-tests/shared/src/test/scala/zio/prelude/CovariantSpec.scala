@@ -5,7 +5,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object CovariantSpec extends DefaultRunnableSpec {
+object CovariantSpec extends ZIOSpecDefault {
   import Fixtures._
 
   implicit val chunkOptionCovariant: Covariant[ChunkOption] =

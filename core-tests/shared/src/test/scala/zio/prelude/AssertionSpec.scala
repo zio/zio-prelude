@@ -1,9 +1,9 @@
 package zio.prelude
 
 import zio.test.Assertion._
-import zio.test.{DefaultRunnableSpec, ZSpec, assert}
+import zio.test.{ZIOSpecDefault, ZSpec, assert}
 
-object AssertionSpec extends DefaultRunnableSpec {
+object AssertionSpec extends ZIOSpecDefault {
 
   def spec: ZSpec[Environment, Failure] = suite("Assertion")(
     test("matches must fail when the regex only match a part of the string") {

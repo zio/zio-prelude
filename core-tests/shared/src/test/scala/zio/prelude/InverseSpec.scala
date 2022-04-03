@@ -2,10 +2,10 @@ package zio.prelude
 
 import zio.prelude.laws.InverseLaws
 import zio.prelude.newtypes.{OrF, Sum}
+import zio.test._
 import zio.test.laws._
-import zio.test.{DefaultRunnableSpec, _}
 
-object InverseSpec extends DefaultRunnableSpec {
+object InverseSpec extends ZIOSpecDefault {
 
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()

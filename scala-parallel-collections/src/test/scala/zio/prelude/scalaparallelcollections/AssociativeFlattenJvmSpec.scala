@@ -2,15 +2,15 @@ package zio.prelude
 package scalaparallelcollections
 
 import com.github.ghik.silencer.silent
+import zio.ZTraceElement
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
-import zio.{Random, ZTraceElement}
 
 import scala.collection.parallel.{immutable => par}
 
 @silent("Unused import")
-object AssociativeFlattenJvmSpec extends DefaultRunnableSpec {
+object AssociativeFlattenJvmSpec extends ZIOSpecDefault {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters
@@ -23,7 +23,7 @@ object AssociativeFlattenJvmSpec extends DefaultRunnableSpec {
   }
   import ParallelCollectionCompatibility._
 
-  def genParMap[R <: Random with Sized, K](
+  def genParMap[R <: Sized, K](
     k: Gen[R, K]
   ): GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
     new GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] {

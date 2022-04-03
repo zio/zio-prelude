@@ -5,7 +5,7 @@ import zio.prelude.experimental.laws._
 import zio.test._
 import zio.test.laws._
 
-object ExcludedMiddleSpec extends DefaultRunnableSpec {
+object ExcludedMiddleSpec extends ZIOSpecDefault {
 
   def spec: ZSpec[Environment, Failure] =
     suite("ExcludedMiddleSpec")(

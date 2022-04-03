@@ -4,7 +4,7 @@ import zio.prelude.laws.CommutativeEitherLaws
 import zio.test._
 import zio.test.laws._
 
-object CommutativeEitherSpec extends DefaultRunnableSpec {
+object CommutativeEitherSpec extends ZIOSpecDefault {
 
   IdentityEither[Set]
   CommutativeEither[Set]

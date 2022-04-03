@@ -8,7 +8,7 @@ import zio.test.Assertion.{equalTo => _, _}
 import zio.test.AssertionM.Render.param
 import zio.test.{Assertion => TestAssertion, _}
 
-object NewtypeSpec extends DefaultRunnableSpec {
+object NewtypeSpec extends ZIOSpecDefault {
 
   def spec =
     suite("NewtypeSpec")(

@@ -4,7 +4,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object AssociativeFlattenSpec extends DefaultRunnableSpec {
+object AssociativeFlattenSpec extends ZIOSpecDefault {
 
   def spec: ZSpec[Environment, Failure] =
     suite("AssociativeFlattenSpec")(

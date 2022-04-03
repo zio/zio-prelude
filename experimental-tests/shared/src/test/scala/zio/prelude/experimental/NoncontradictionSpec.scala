@@ -5,7 +5,7 @@ import zio.prelude.experimental.laws._
 import zio.test._
 import zio.test.laws._
 
-object NoncontradictionSpec extends DefaultRunnableSpec {
+object NoncontradictionSpec extends ZIOSpecDefault {
 
   def spec: ZSpec[Environment, Failure] =
     suite("NoncontradictionSpec")(

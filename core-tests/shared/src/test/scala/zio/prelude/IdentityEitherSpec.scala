@@ -4,7 +4,7 @@ import zio.prelude.laws.IdentityEitherlaws
 import zio.test._
 import zio.test.laws._
 
-object IdentityEitherSpec extends DefaultRunnableSpec {
+object IdentityEitherSpec extends ZIOSpecDefault {
 
   def spec: ZSpec[Environment, Failure] =
     suite("IdentityEitherSpec")(

@@ -4,39 +4,39 @@ import zio.prelude.laws._
 import zio.prelude.newtypes._
 import zio.test._
 import zio.test.laws._
-import zio.{Chunk, NonEmptyChunk, Random, Ref}
+import zio.{Chunk, NonEmptyChunk, Ref}
 
-object ForEachSpec extends DefaultRunnableSpec {
+object ForEachSpec extends ZIOSpecDefault {
   import Fixtures._
 
-  val genBoolean: Gen[Random, Boolean] =
+  val genBoolean: Gen[Any, Boolean] =
     Gen.boolean
 
-  val genInt: Gen[Random, Int] =
+  val genInt: Gen[Any, Int] =
     Gen.int
 
-  val genChunk: Gen[Random with Sized, Chunk[Int]] =
+  val genChunk: Gen[Sized, Chunk[Int]] =
     Gen.chunkOf(genInt)
 
-  val genList: Gen[Random with Sized, List[Int]] =
+  val genList: Gen[Sized, List[Int]] =
     Gen.listOf(genInt)
 
-  val genBooleanFunction: Gen[Random, Int => Boolean] =
+  val genBooleanFunction: Gen[Any, Int => Boolean] =
     Gen.function(genBoolean)
 
-  val genIntFunction: Gen[Random, Int => Int] =
+  val genIntFunction: Gen[Any, Int => Int] =
     Gen.function(genInt)
 
-  val genIntFunction2: Gen[Random, (Int, Int) => Int] =
+  val genIntFunction2: Gen[Any, (Int, Int) => Int] =
     Gen.function2(genInt)
 
-  val genIntIntFunction2: Gen[Random, (Int, Int) => (Int, Int)] =
+  val genIntIntFunction2: Gen[Any, (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
-  val genTheseFunction: Gen[Random, These[Int, Int] => Int] =
+  val genTheseFunction: Gen[Any, These[Int, Int] => Int] =
     Gen.function(genInt)
 
-  val genEitherIntIntFunction: Gen[Random, Int => Either[Int, Int]] =
+  val genEitherIntIntFunction: Gen[Any, Int => Either[Int, Int]] =
     Gen.function(Gen.either(genInt, genInt))
 
   implicit val chunkOptionForEach: ForEach[ChunkOption] =

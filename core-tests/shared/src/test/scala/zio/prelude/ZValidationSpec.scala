@@ -1,6 +1,5 @@
 package zio.prelude
 
-import zio.Random
 import zio.prelude.Equal._
 import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.ZValidation._
@@ -8,16 +7,15 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object ZValidationSpec extends DefaultRunnableSpec {
+object ZValidationSpec extends ZIOSpecDefault {
 
-  val genValidation: Gen[Random with Sized, ZValidation[Int, Int, Int]] =
+  val genValidation: Gen[Sized, ZValidation[Int, Int, Int]] =
     Gens.validation(Gen.int, Gen.int, Gen.int)
 
-  val genFValidation: GenF[Random with Sized, ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
+  val genFValidation: GenF[Sized, ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
     GenFs.validation(Gen.int, Gen.int)
 
-  val genFValidationFailure
-    : GenF[Random with Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
+  val genFValidationFailure: GenF[Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
     GenFs.validationFailure(Gen.int, Gen.int)
 
   def spec: ZSpec[Environment, Failure] = suite("ZValidationSpec")(

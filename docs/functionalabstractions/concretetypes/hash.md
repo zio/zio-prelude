@@ -48,7 +48,7 @@ import zio.prelude.laws.HashLaws
 import zio.test._
 import zio.test.laws._
 
-object HashSpec extends DefaultRunnableSpec {
+object HashSpec extends ZIOSpecDefault {
 
   def spec = suite("HashSpec") {
     test("StringHash") {

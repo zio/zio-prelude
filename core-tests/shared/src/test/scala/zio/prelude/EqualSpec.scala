@@ -5,7 +5,7 @@ import zio.test.Gen.oneOf
 import zio.test._
 import zio.test.laws._
 
-object EqualSpec extends DefaultRunnableSpec {
+object EqualSpec extends ZIOSpecDefault {
 
   def spec: ZSpec[Environment, Failure] =
     suite("EqualSpec")(

@@ -2,10 +2,10 @@ package zio.prelude
 
 import zio.prelude.laws.IdentityLaws
 import zio.prelude.newtypes._
+import zio.test._
 import zio.test.laws._
-import zio.test.{DefaultRunnableSpec, _}
 
-object IdentitySpec extends DefaultRunnableSpec {
+object IdentitySpec extends ZIOSpecDefault {
 
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()

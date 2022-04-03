@@ -5,7 +5,7 @@ import zio.prelude.newtypes.{Prod, Sum}
 import zio.test._
 import zio.test.laws._
 
-object NaturalSpec extends DefaultRunnableSpec {
+object NaturalSpec extends ZIOSpecDefault {
 
   def spec: ZSpec[Environment, Failure] =
     suite("NaturalSpec")(
