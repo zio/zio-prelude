@@ -7,7 +7,7 @@ import zio.test.laws._
 
 object DistributiveAbsorptionSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("DistributiveAbsorptionSpec")(
       suite("laws")(
         test("set")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.setOf(Gen.int))),

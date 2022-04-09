@@ -5,7 +5,7 @@ import zio.test.{ZIOSpecDefault, ZSpec, assert}
 
 object AssertionSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Failure] = suite("Assertion")(
+  def spec: ZSpec[Environment, Any] = suite("Assertion")(
     test("matches must fail when the regex only match a part of the string") {
       assert((Assertion.matches("biking").apply("toto like biking")))(isLeft(anything))
     },

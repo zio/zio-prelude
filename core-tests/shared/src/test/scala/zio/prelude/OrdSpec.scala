@@ -40,7 +40,7 @@ object OrdSpec extends ZIOSpecDefault {
       }
     }
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("OrdSpec")(
       suite("laws")(
         test("boolean")(checkAllLaws(OrdLaws)(Gen.boolean)),

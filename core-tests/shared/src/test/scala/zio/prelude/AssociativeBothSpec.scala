@@ -11,7 +11,7 @@ object AssociativeBothSpec extends ZIOSpecDefault {
   implicit val chunkOptionAssociativeBoth: AssociativeBoth[ChunkOption] =
     AssociativeBoth.compose[Chunk, Option]
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("AssociativeBothSpec")(
       suite("laws")(
         test("chunk . option")(checkAllLaws(AssociativeBothLaws)(chunkOptionGenF, Gen.int))

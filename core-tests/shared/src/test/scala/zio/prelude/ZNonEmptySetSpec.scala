@@ -29,7 +29,7 @@ object ZNonEmptySetSpec extends ZIOSpecDefault {
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
     Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("ZNonEmptySetSpec")(
       suite("laws")(
         test("combine commutative")(

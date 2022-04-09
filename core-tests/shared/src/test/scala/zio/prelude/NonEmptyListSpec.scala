@@ -43,7 +43,7 @@ object NonEmptyListSpec extends ZIOSpecDefault {
       index <- Gen.int(-2, cons.length + 2)
     } yield (cons, index)
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("NonEmptyListSpec")(
       suite("laws")(
         test("associative")(checkAllLaws(AssociativeLaws)(genNonEmptyList)),

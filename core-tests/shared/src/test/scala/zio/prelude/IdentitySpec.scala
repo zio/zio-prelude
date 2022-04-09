@@ -10,7 +10,7 @@ object IdentitySpec extends ZIOSpecDefault {
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("IdentitySpec")(
       suite("laws")(
         test("boolean conjuction")(checkAllLaws(IdentityLaws)(Gen.boolean.map(And(_)))),

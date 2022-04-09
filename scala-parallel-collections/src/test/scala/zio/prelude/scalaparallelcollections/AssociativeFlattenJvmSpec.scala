@@ -31,7 +31,7 @@ object AssociativeFlattenJvmSpec extends ZIOSpecDefault {
         Gen.mapOf(k, v).map(_.par)
     }
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("AssociativeFlattenJvmSpec")(
       suite("laws")(
         test("parMap")(checkAllLaws(AssociativeFlattenLaws)(genParMap(Gen.int), Gen.int))
