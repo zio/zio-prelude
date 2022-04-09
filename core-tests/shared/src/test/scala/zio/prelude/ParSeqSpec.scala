@@ -26,7 +26,7 @@ object ParSeqSpec extends ZIOSpecDefault {
 
   val hash = ParSeq.parSeqHash
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Nothing] =
     suite("parSeqSpec")(
       suite("laws")(
         test("covariant") {

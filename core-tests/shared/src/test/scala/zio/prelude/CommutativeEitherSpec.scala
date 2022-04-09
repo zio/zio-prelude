@@ -11,7 +11,7 @@ object CommutativeEitherSpec extends ZIOSpecDefault {
 
   coherent.CommutativeEitherDeriveEqualInvariant.derive[Set]
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Nothing] =
     suite("CommutativeEitherSpec")(
       suite("laws")(
         test("set")(checkAllLaws(CommutativeEitherLaws)(GenF.set, Gen.int))

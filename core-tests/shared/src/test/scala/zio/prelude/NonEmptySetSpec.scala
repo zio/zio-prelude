@@ -18,7 +18,7 @@ object NonEmptySetSpec extends ZIOSpecDefault {
   private lazy val genNonEmptySet: Gen[Sized, NonEmptySet[Int]] =
     genSet.map(NonEmptySet.fromSetOption(_).get)
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Nothing] =
     suite("NonEmptySetSpec")(
       suite("laws")(
         test("commutativeEither")(checkAllLaws(CommutativeEitherLaws)(GenFs.nonEmptySet, Gen.int)),

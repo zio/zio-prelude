@@ -10,7 +10,7 @@ object InverseSpec extends ZIOSpecDefault {
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Nothing] =
     suite("InverseSpec")(
       suite("laws")(
         test("byte addition")(checkAllLaws(InverseLaws)(Gen.byte.map(Sum(_)))),

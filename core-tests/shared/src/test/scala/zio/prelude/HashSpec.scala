@@ -11,7 +11,7 @@ object HashSpec extends ZIOSpecDefault {
   final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R with TestConfig, Nothing, TestResult] =
     check(gen)(a => assert(a.hash)(equalTo(a.hashCode)))
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Nothing] =
     suite("HashSpec")(
       suite("laws")(
         test("boolean")(checkAllLaws(HashLaws)(Gen.boolean)),

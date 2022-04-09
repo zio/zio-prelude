@@ -11,7 +11,7 @@ object CovariantSpec extends ZIOSpecDefault {
   implicit val chunkOptionCovariant: Covariant[ChunkOption] =
     Covariant[Chunk].compose(Covariant[Option])
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Nothing] =
     suite("CovariantSpec")(
       suite("laws")(
         test("cause")(checkAllLaws(CovariantLaws)(GenFs.cause, Gen.int)),

@@ -13,7 +13,7 @@ object EquivalenceSpec extends ZIOSpecDefault {
   val genNothing: Gen[Any, Nothing] =
     Gen(ZStream.empty)
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Nothing] =
     suite("EquivalenceSpec")(
       suite("laws")(
         test("either") {
