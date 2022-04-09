@@ -31,7 +31,7 @@ object IdentityFlattenJvmSpec extends ZIOSpecDefault {
         Gen.listOf(gen).map(_.par)
     }
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("IdentityFlattenJvmSpec")(
       suite("laws")(
         test("parSeq")(checkAllLaws(IdentityFlattenLaws)(genParSeq, Gen.int))

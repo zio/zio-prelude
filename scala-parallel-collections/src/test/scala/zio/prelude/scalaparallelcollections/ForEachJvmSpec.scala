@@ -39,7 +39,7 @@ object ForEachJvmSpec extends ZIOSpecDefault {
         Gen.listOf(gen).map(_.par)
     }
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("ForEachJvmSpec")(
       suite("laws")(
         test("parMap")(checkAllLaws(ForEachLaws)(genParMap(Gen.int), Gen.int)),

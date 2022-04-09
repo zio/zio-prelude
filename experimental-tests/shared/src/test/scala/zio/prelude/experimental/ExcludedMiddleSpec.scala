@@ -7,7 +7,7 @@ import zio.test.laws._
 
 object ExcludedMiddleSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: ZSpec[Environment, Any] =
     suite("ExcludedMiddleSpec")(
       suite("laws")(
         test("boolean")(checkAllLaws(ExcludedMiddleLaws)(Gen.boolean))

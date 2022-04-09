@@ -31,7 +31,7 @@ object IdempotentSpec extends ZIOSpecDefault {
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
 
-  def spec: ZSpec[Environment, Nothing] =
+  def spec: ZSpec[Environment, Any] =
     suite("IdempotentSpec")(
       suite("laws")(
         test("boolean conjuction")(checkAllLaws(IdempotentLaws)(Gen.boolean.map(And(_)))),

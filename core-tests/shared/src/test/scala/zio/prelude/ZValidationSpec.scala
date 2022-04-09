@@ -18,7 +18,7 @@ object ZValidationSpec extends ZIOSpecDefault {
   val genFValidationFailure: GenF[Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
     GenFs.validationFailure(Gen.int, Gen.int)
 
-  def spec: ZSpec[Environment, Nothing] = suite("ZValidationSpec")(
+  def spec: ZSpec[Environment, Any] = suite("ZValidationSpec")(
     suite("laws")(
       test("associativeBoth")(checkAllLaws(AssociativeBothLaws)(genFValidation, Gen.int)),
       test("commutativeBoth")(checkAllLaws(CommutativeBothLaws)(genFValidation, Gen.int)),

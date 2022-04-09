@@ -6,7 +6,7 @@ import zio.test.laws._
 
 object PartialOrdSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Nothing] =
+  def spec: ZSpec[Environment, Any] =
     suite("OrdSpec")(
       suite("laws")(
         test("map")(checkAllLaws(PartialOrdLaws)(Gen.mapOf(Gen.int, Gen.int))),

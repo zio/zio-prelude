@@ -6,7 +6,7 @@ import zio.test.laws._
 
 object IdentityEitherSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Nothing] =
+  def spec: ZSpec[Environment, Any] =
     suite("IdentityEitherSpec")(
       suite("laws")(
         test("chunk")(checkAllLaws(IdentityEitherlaws)(GenF.chunk, Gen.int)),

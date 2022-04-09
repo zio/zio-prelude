@@ -6,7 +6,7 @@ import zio.test.laws._
 
 object AssociativeFlattenSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Nothing] =
+  def spec: ZSpec[Environment, Any] =
     suite("AssociativeFlattenSpec")(
       suite("laws")(
         test("map")(checkAllLaws(AssociativeFlattenLaws)(GenFs.map(Gen.int), Gen.int))

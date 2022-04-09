@@ -44,7 +44,7 @@ object DebugSpec extends ZIOSpecDefault {
   def expectedTupleFull(n: Int)(v: Int): String   = s"scala.Tuple$n(${List.fill(n)(v).mkString(", ")})"
   def expectedTupleSimple(n: Int)(v: Int): String = s"(${List.fill(n)(v).mkString(", ")})"
 
-  def spec: ZSpec[Environment, Nothing] =
+  def spec: ZSpec[Environment, Any] =
     suite("DebugSpec")(
       suite("ScalaRenderer")(
         test("unit")(check(Gen.unit)(primScalaTest(_, Some("()")))),

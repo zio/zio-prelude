@@ -42,7 +42,7 @@ object ForEachSpec extends ZIOSpecDefault {
   implicit val chunkOptionForEach: ForEach[ChunkOption] =
     ForEach[Chunk].compose[Option]
 
-  def spec: ZSpec[Environment, Nothing] =
+  def spec: ZSpec[Environment, Any] =
     suite("ForEachSpec")(
       suite("laws")(
         test("chunk")(checkAllLaws(ForEachLaws)(GenF.chunk, Gen.int)),
