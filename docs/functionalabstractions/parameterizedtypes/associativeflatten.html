@@ -79,14 +79,16 @@
 <p>To see what this looks like let's start as we have before with <code>ZIO</code>.</p>
 <p>A common mistake we might make when getting started with <code>ZIO</code> is accidentally creating a nested <code>ZIO</code> workflow like this:</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+<span class="hljs-keyword">import</span> zio.console._
+<span class="hljs-keyword">import</span> zio.random._
 
 <span class="hljs-keyword">import</span> java.io.<span class="hljs-type">IOException</span>
 
 <span class="hljs-keyword">val</span> greet: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Random</span>, <span class="hljs-type">Nothing</span>, <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>]] =
-  <span class="hljs-type">Random</span>.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
-    <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
+  random.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
+    console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }
-<span class="hljs-comment">// greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] = &lt;function1&gt;</span>
+<span class="hljs-comment">// greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] = zio.ZIO$FlatMap@1f671012</span>
 </code></pre>
 <p>This is very understandable.</p>
 <p>We want to perform a second <code>ZIO</code> workflow, in this case printing to the console, based on the result of the first workflow. So we use the <code>map</code> operator, which is described by the <code>Covariant</code> abstraction, to get the success value of the first workflow and transform it with a function.</p>
@@ -98,18 +100,18 @@
 <p>This is exactly what the <code>flatten</code> operator does for us. It takes a <code>ZIO</code> workflow that produces another workflow and flattens it down to a single workflow that conceptually runs the first workflow and then runs the resulting workflow.</p>
 <p>Let's see how we can use the <code>flatten</code> operator to fix our code from above.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> greet: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Random</span> <span class="hljs-keyword">with</span> <span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
-  <span class="hljs-type">Random</span>.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
-    <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
+  random.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
+    console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }.flatten
-<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = &lt;function1&gt;</span>
+<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@d77e7e5</span>
 </code></pre>
 <p>Now we have eliminated the nested workflows. This workflow will do exactly what we want, first generating a random number and then printing it to the console.</p>
 <p>Of course if we are working with <code>ZIO</code> we quickly learn to use the <code>flatMap</code> operator, which just combines <code>map</code> and <code>flatten</code>.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> greet: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Random</span> <span class="hljs-keyword">with</span> <span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
-  <span class="hljs-type">Random</span>.nextIntBounded(<span class="hljs-number">100</span>).flatMap { n =&gt;
-    <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
+  random.nextIntBounded(<span class="hljs-number">100</span>).flatMap { n =&gt;
+    console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }
-<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = &lt;function1&gt;</span>
+<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@6a0fe941</span>
 </code></pre>
 <p>The <code>flatMap</code> operator is extremely convenient, especially in combination with Scala's syntax for for comprehensions. However, we are now in a position to see that there isn't really anything special about the <code>flatMap</code> operator itself.</p>
 <p>The <code>flatMap</code> operator is just a combination of <code>map</code> and <code>flatten</code> and <code>map</code> is a very basic operator defined on all covariant data types. The real work here is in the <code>flatten</code> operator.</p>
