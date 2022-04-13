@@ -35,7 +35,7 @@ addCommandAlias(
   ";lawsNative/test;experimentalLawsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-val zioVersion = "1.0.13"
+val zioVersion = "1.0.14"
 
 lazy val root = project
   .in(file("."))
