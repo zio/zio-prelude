@@ -39,6 +39,13 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
 
   /**
+   * Reduces the collection to a summary value using the associative operation.
+   * Alias for `fold`.
+   */
+  def concatenate[A: Identity](fa: F[A]): A =
+    foldMap(fa)(identity[A])
+
+  /**
    * Returns whether the collection contains the specified element.
    */
   def contains[A, A1 >: A](fa: F[A])(a: A1)(implicit A: Equal[A1]): Boolean =
@@ -408,6 +415,8 @@ trait ForEachSyntax {
    * Provides infix syntax for traversing collections.
    */
   implicit class ForEachOps[F[+_], A](private val self: F[A]) {
+    def concatenate(implicit F: ForEach[F], A: Identity[A]): A                                                  =
+      F.concatenate(self)
     def forEach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: ForEach[F]): G[F[B]]               =
       F.forEach(self)(f)
     def contains[A1 >: A](a: A1)(implicit A: Equal[A1], F: ForEach[F]): Boolean                                 =
