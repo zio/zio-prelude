@@ -80,7 +80,7 @@ trait TestAssertions {
       case _                         => None
     }
 
-  def assertionRec[A, B](name: String)(assertion: Assertion[B])(get: (=> A) => Option[B]): TestAssertion[A] =
+  def assertionRec[A, B](name: String)(assertion: TestAssertion[B])(get: (=> A) => Option[B]): TestAssertion[A] =
     TestAssertion(
       TestArrow
         .make[A, B] { a =>
