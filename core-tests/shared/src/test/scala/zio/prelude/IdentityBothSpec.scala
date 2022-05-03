@@ -6,7 +6,7 @@ import zio.test.laws._
 
 object IdentityBothSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("IdentityBothSpec")(
       suite("laws")(
         test("either")(checkAllLaws(IdentityBothLaws)(GenF.either(Gen.int), Gen.int)),

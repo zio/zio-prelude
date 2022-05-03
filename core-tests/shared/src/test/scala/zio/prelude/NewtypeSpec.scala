@@ -5,7 +5,6 @@ import zio.prelude.NewtypeSpecTypes._
 import zio.prelude.laws._
 import zio.prelude.newtypes.{And, Or, Sum}
 import zio.test.Assertion.{equalTo => _, _}
-import zio.test.AssertionM.Render.param
 import zio.test.{Assertion => TestAssertion, _}
 
 object NewtypeSpec extends ZIOSpecDefault {
@@ -43,7 +42,7 @@ object NewtypeSpec extends ZIOSpecDefault {
           )
         },
         test("invalid values at compile-time") {
-          assertM(typeCheck("Natural(-1, -8, 4, -3)"))(
+          assertZIO(typeCheck("Natural(-1, -8, 4, -3)"))(
             isLeft(
               containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)") &&
                 containsStringWithoutAnsi("-8 did not satisfy greaterThanOrEqualTo(0)") &&
@@ -52,7 +51,7 @@ object NewtypeSpec extends ZIOSpecDefault {
           )
         } @@ TestAspect.exceptScala3,
         test("invalid value at run-time") {
-          assertM(typeCheck("Natural(-1)"))(
+          assertZIO(typeCheck("Natural(-1)"))(
             isLeft(containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)"))
           )
         } @@ TestAspect.exceptScala3,
@@ -149,5 +148,5 @@ object NewtypeSpec extends ZIOSpecDefault {
   }
 
   private def containsStringWithoutAnsi(element: String): TestAssertion[String] =
-    TestAssertion.assertion("containsStringWithoutAnsi")(param(element))(_.removingAnsiCodes.contains(element))
+    TestAssertion.assertion("containsStringWithoutAnsi")(_.removingAnsiCodes.contains(element))
 }
