@@ -35,7 +35,7 @@ object ZPureSpec extends ZIOSpecDefault {
   lazy val genStateState: Gen[Any, State[Int, State[Int, Int]]] =
     Gens.state(genInt, genState)
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("ZPureSpec")(
       suite("context")(
         suite("constructors")(

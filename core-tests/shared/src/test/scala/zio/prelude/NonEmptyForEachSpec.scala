@@ -18,7 +18,7 @@ object NonEmptyForEachSpec extends ZIOSpecDefault {
   val genIntFunction2: Gen[Any, (Int, Int) => Int] =
     Gen.function2(genInt)
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("NonEmptyForEachSpec")(
       suite("laws")(
         test("nonEmptyChunk")(checkAllLaws(NonEmptyForEachLaws)(GenFs.nonEmptyChunk, Gen.int))

@@ -47,7 +47,7 @@ object AssociativeCompose {
 
   implicit val URIOIdentityCompose: IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] =
     new IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] {
-      def identity[A]: URIO[A, ZEnvironment[A]] = URIO.environment
+      def identity[A]: URIO[A, ZEnvironment[A]] = ZIO.environment
 
       def compose[A, B, C](bc: URIO[B, ZEnvironment[C]], ab: URIO[A, ZEnvironment[B]]): URIO[A, ZEnvironment[C]] =
         ab.flatMap(b => bc.provideEnvironment(b))

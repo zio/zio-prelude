@@ -7,7 +7,7 @@ import zio.test.laws._
 
 object EqualSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("EqualSpec")(
       suite("laws")(
         {

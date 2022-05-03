@@ -8,7 +8,7 @@ import scala.concurrent.{Future, blocking}
 
 object FutureCommutativeEitherSpec extends ZIOSpecDefault {
 
-  def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
+  def spec: Spec[Any, Throwable] =
     suite("FutureCommutativeEitherSpec")(
       test("FutureCommutativeEither returns the first future that is completed") {
         ZIO.blocking {

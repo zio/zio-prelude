@@ -6,7 +6,7 @@ import zio.test.laws._
 
 object CommutativeBothSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("CommutativeBothSpec")(
       suite("laws")(
         test("chunk")(checkAllLaws(CommutativeBothLaws)(GenF.chunk, Gen.chunkOf(Gen.int))),

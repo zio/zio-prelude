@@ -18,7 +18,7 @@ package zio.prelude
 
 import zio.Exit.{Failure, Success}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.{Cause, Chunk, Duration => ZIODuration, Exit, FiberId, NonEmptyChunk, ZTrace}
+import zio.{Cause, Chunk, Duration => ZIODuration, Exit, FiberId, NonEmptyChunk, StackTrace}
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.duration.{Duration => ScalaDuration}
@@ -890,9 +890,9 @@ object Equal {
     }
 
   /**
-   * `Hash` (and thus also `Equal`) instance for `ZTrace` values.
+   * `Hash` (and thus also `Equal`) instance for `StackTrace` values.
    */
-  implicit val ZTraceHash: Hash[ZTrace] =
+  implicit val StackTraceHash: Hash[StackTrace] =
     Hash.default
 
   /**

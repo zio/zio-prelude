@@ -20,7 +20,7 @@ object OrdJvmSpec extends ZIOSpecDefault {
   }
   import ParallelCollectionCompatibility._
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("OrdJvmSpec")(
       suite("laws")(
         test("parSeq")(checkAllLaws(OrdLaws)(Gen.listOf(Gen.int).map(_.par)))

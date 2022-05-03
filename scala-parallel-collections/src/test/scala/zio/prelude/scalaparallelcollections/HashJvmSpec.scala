@@ -21,7 +21,7 @@ object HashJvmSpec extends ZIOSpecDefault {
   }
   import ParallelCollectionCompatibility._
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("HashJvmSpec")(
       suite("laws")(
         test("parMap")(checkAllLaws(HashLaws)(Gen.mapOf(Gen.int, Gen.int).map(_.par))),

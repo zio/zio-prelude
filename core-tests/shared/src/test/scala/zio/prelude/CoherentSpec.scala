@@ -9,7 +9,7 @@ import zio.test._
 
 object CoherentSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("CoherentSpec")(
       test("HashOrd") {
         val instance = implicitly[HashOrd[Double]].contramap[Int](_.toDouble)

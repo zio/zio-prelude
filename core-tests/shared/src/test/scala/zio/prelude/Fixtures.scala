@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.test.laws.GenF
 import zio.test.{Gen, Sized}
-import zio.{Chunk, ZTraceElement}
+import zio.{Chunk, Trace}
 
 object Fixtures {
   type ChunkOption[+A] = Chunk[Option[A]]
@@ -10,7 +10,7 @@ object Fixtures {
   val chunkOptionGenF: GenF[Sized, ChunkOption] =
     new GenF[Sized, ChunkOption] {
       def apply[R1 <: Sized, A](gen: Gen[R1, A])(implicit
-        trace: ZTraceElement
+        trace: Trace
       ): Gen[R1, Chunk[Option[A]]] =
         Gen.chunkOf(Gen.option(gen))
     }

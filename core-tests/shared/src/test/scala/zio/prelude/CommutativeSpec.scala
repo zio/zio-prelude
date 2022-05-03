@@ -12,7 +12,7 @@ object CommutativeSpec extends ZIOSpecDefault {
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("CommutativeSpec")(
       suite("laws")(
         test("boolean conjuction")(checkAllLaws(CommutativeLaws)(Gen.boolean.map(And(_)))),

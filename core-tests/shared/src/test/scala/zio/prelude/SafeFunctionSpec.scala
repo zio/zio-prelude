@@ -16,7 +16,7 @@ object SafeFunctionSpec extends ZIOSpecDefault {
   def increment(n: Int): Int =
     n + 1
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("SafeFunctionSpec")(
       test("andThen") {
         val wordCount = SafeFunction(words) andThen SafeFunction(count)

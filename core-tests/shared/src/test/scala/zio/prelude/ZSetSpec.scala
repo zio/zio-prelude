@@ -9,13 +9,13 @@ import zio.prelude.newtypes._
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
 import zio.test.laws._
-import zio.{Chunk, ZTraceElement}
+import zio.{Chunk, Trace}
 
 object ZSetSpec extends ZIOSpecDefault {
 
   def genFZSet[R <: Sized, B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] {
-      def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: ZTraceElement): Gen[R1, ZSet[A, B]] =
+      def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: Trace): Gen[R1, ZSet[A, B]] =
         genZSet(a, b)
     }
 
@@ -25,7 +25,7 @@ object ZSetSpec extends ZIOSpecDefault {
   lazy val smallInts: Gen[Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  def natural(min: Natural, max: Natural)(implicit trace: ZTraceElement): Gen[Any, Natural] =
+  def natural(min: Natural, max: Natural)(implicit trace: Trace): Gen[Any, Natural] =
     Gen.int(min, max).map(_.asInstanceOf[Natural])
 
   def naturals: Gen[Sized, Natural] =
@@ -34,7 +34,7 @@ object ZSetSpec extends ZIOSpecDefault {
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
     Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("ZSetSpec")(
       suite("laws")(
         test("combine commutative")(
@@ -55,7 +55,7 @@ object ZSetSpec extends ZIOSpecDefault {
               ZSetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
             IntHashOrd,
-            implicitly[ZTraceElement]
+            implicitly[Trace]
           )
         ),
         test("foreach")(
@@ -73,7 +73,7 @@ object ZSetSpec extends ZIOSpecDefault {
               MultiSetForEach
             ),
             IntHashOrd,
-            implicitly[ZTraceElement]
+            implicitly[Trace]
           )
         ),
         test("hash")(checkAllLaws(HashLaws)(genZSet(Gen.int, Gen.int)))

@@ -8,7 +8,7 @@ import zio.prelude.laws._
 import zio.prelude.newtypes._
 import zio.test._
 import zio.test.laws._
-import zio.{Chunk, ZTraceElement}
+import zio.{Chunk, Trace}
 
 object ZNonEmptySetSpec extends ZIOSpecDefault {
 
@@ -16,7 +16,7 @@ object ZNonEmptySetSpec extends ZIOSpecDefault {
     b: Gen[R, B]
   ): GenF[R, ({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
-      def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: ZTraceElement): Gen[R1, ZNonEmptySet[A, B]] =
+      def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: Trace): Gen[R1, ZNonEmptySet[A, B]] =
         genZNonEmptySet(a, b)
     }
 
@@ -29,7 +29,7 @@ object ZNonEmptySetSpec extends ZIOSpecDefault {
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
     Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("ZNonEmptySetSpec")(
       suite("laws")(
         test("combine commutative")(
@@ -50,7 +50,7 @@ object ZNonEmptySetSpec extends ZIOSpecDefault {
               ZNonEmptySetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
             IntHashOrd,
-            implicitly[ZTraceElement]
+            implicitly[Trace]
           )
         ),
         test("hash")(checkAllLaws(HashLaws)(genZNonEmptySet(Gen.int, Gen.int)))

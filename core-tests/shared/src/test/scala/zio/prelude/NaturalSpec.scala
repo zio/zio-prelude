@@ -7,7 +7,7 @@ import zio.test.laws._
 
 object NaturalSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("NaturalSpec")(
       suite("laws")(
         test("product commutative")(checkAllLaws(CommutativeLaws)(Gens.anyNatural.map(Prod(_)))),

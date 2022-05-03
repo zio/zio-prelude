@@ -7,7 +7,7 @@ import zio.test.laws._
 
 object InvolutionSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("InvolutionSpec")(
       suite("laws")(
         test("boolean")(checkAllLaws(InvolutionLaws)(Gen.boolean))

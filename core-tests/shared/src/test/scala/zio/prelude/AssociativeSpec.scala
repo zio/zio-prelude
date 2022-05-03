@@ -4,7 +4,7 @@ import zio.test._
 
 object AssociativeSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("AssociativeSpec")(
       suite("laws")(
       )

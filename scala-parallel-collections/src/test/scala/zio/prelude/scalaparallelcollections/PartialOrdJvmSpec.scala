@@ -20,7 +20,7 @@ object PartialOrdJvmSpec extends ZIOSpecDefault {
   }
   import ParallelCollectionCompatibility._
 
-  def spec: ZSpec[Environment, Any] =
+  def spec: Spec[Environment, Any] =
     suite("EqualJvmSpec")(
       suite("laws")(
         test("parMap")(checkAllLaws(PartialOrdLaws)(Gen.mapOf(Gen.int, Gen.int).map(_.par))),
