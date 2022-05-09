@@ -77,15 +77,16 @@
 <p>We can see this by noting that the requirement that the <code>either</code> operator is commutative places significant limitations on our implementation. We must choose on some basis between the left and right values but we can't run one and then if it fails run the other because that would in general not be commutative.</p>
 <p><code>ZIO</code> provides a good example of why running the left value and then running the right value if it fails is not commutative and what a commutative operator would look like.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+<span class="hljs-keyword">import</span> zio.console._
 
 <span class="hljs-keyword">import</span> java.io.<span class="hljs-type">IOException</span>
 
 <span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Either</span>[<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>]] =
-  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"Hello"</span>).orElseEither(<span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>))
+  console.putStrLn(<span class="hljs-string">"Hello"</span>).orElseEither(console.putStrLn(<span class="hljs-string">"ZIO"</span>))
 <span class="hljs-comment">// helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] = &lt;function1&gt;</span>
 
 <span class="hljs-keyword">val</span> zioHello: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Either</span>[<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>]] =
-  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>).orElseEither(<span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"Hello"</span>))
+  console.putStrLn(<span class="hljs-string">"ZIO"</span>).orElseEither(console.putStrLn(<span class="hljs-string">"Hello"</span>))
 <span class="hljs-comment">// zioHello: ZIO[Console, IOException, Either[Unit, Unit]] = &lt;function1&gt;</span>
 </code></pre>
 <p>If the <code>orElseEither</code> operator was commutative then these two programs should be the same. But they obviously are not.</p>
@@ -94,16 +95,17 @@
 <p>We have to return either of the values but the order can't matter. The <code>raceEither</code> operator on <code>ZIO</code> does just that.</p>
 <p>It runs both effects concurrently, returning the first one to complete successfully and safely interrupting the other. With it we can make our example above satisfy the commutative law.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
+<span class="hljs-keyword">import</span> zio.console._
 
 <span class="hljs-keyword">import</span> java.io.<span class="hljs-type">IOException</span>
 
 <span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Either</span>[<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>]] =
-  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"Hello"</span>).raceEither(<span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>))
-<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] = zio.ZIO$Descriptor@49015b73</span>
+  console.putStrLn(<span class="hljs-string">"Hello"</span>).raceEither(console.putStrLn(<span class="hljs-string">"ZIO"</span>))
+<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] = &lt;function1&gt;</span>
 
 <span class="hljs-keyword">val</span> zioHello: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Either</span>[<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>]] =
-  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>).raceEither(<span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"Hello"</span>))
-<span class="hljs-comment">// zioHello: ZIO[Console, IOException, Either[Unit, Unit]] = zio.ZIO$Descriptor@1f798d36</span>
+  console.putStrLn(<span class="hljs-string">"ZIO"</span>).raceEither(console.putStrLn(<span class="hljs-string">"Hello"</span>))
+<span class="hljs-comment">// zioHello: ZIO[Console, IOException, Either[Unit, Unit]] = &lt;function1&gt;</span>
 </code></pre>
 <p>Now both <code>ZIO</code> workflows will begin execution at the same time.</p>
 <p>For an individual execution of this workflow either <code>Hello</code> or <code>ZIO</code> may be printed to the console, or possibly both if the loser is not interrupted before it runs. But both the left and right workflows have an equal opportunity to be run and we can say that both <code>helloZIO</code> and <code>zioHello</code> describe the same program.</p>
@@ -125,7 +127,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">either</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](left: =&gt; <span class="hljs-type">Set</span>[<span class="hljs-type">A</span>], right: =&gt; <span class="hljs-type">Set</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">Set</span>[<span class="hljs-type">Either</span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>]] =
       left.map(<span class="hljs-type">Left</span>(_)) ++ right.map(<span class="hljs-type">Right</span>(_))
   }
-<span class="hljs-comment">// SetCommutativeEither: CommutativeEither[Set] = repl.MdocSession$App$$anon$1@3a3fd918</span>
+<span class="hljs-comment">// SetCommutativeEither: CommutativeEither[Set] = repl.MdocSession$App$$anon$1@5bf7963d</span>
 </code></pre>
 <p>In this case there is no actual concurrency going on but we are combining the left <code>Set</code> and right <code>Set</code>, wrapping their values in <code>Left</code> and <code>Right</code> respectively.</p>
 <p>This is like the interpretation of <code>orElseEither</code> as concatenating two collections except normally concatenation would not be commutative since order matters. In the case of a <code>Set</code> the order of elements doesn't matter.</p>
