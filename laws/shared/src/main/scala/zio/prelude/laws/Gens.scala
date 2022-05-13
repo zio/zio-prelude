@@ -93,6 +93,12 @@ object Gens {
     Gen.function[R, S, (A, S)](a <*> s).map(State.modify)
 
   /**
+   * A generator of `These` values.
+   */
+  def these[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, These[A, B]] =
+    Gen.oneOf(a.map(These.left), b.map(These.right), a.zipWith(b)(These.both))
+
+  /**
    * A generator of `Validation` values.
    */
   def validation[R <: Random with Sized, W, E, A](

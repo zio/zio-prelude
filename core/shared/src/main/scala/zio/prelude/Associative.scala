@@ -1393,7 +1393,7 @@ trait AssociativeSyntax {
    * Provides infix syntax for combining two values with an associative
    * operation.
    */
-  implicit class AssociativeOps[A](l: A) {
+  implicit class AssociativeOps[+A](l: A) {
 
     /**
      * A symbolic alias for `combine`.
@@ -1410,13 +1410,13 @@ trait AssociativeSyntax {
     /**
      * Associatively repeats value 'n' times
      */
-    def repeat(n: Int)(implicit associative: Associative[A]): A =
+    def repeat[A1 >: A](n: Int)(implicit associative: Associative[A1]): A1 =
       associative.repeat(l)(n)
 
     /**
      * Associatively multiplies value 'n' times
      */
-    def multiplyOption(n: Int)(implicit associative: Associative[A]): Option[A] =
+    def multiplyOption[A1 >: A](n: Int)(implicit associative: Associative[A1]): Option[A1] =
       associative.multiplyOption(n)(l)
   }
 
