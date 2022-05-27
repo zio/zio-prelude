@@ -314,8 +314,11 @@ object Associative extends AssociativeLowPriority {
   /**
    * The `Identity` instance for `Cause`.
    */
-  implicit def CauseIdentity[A]: Identity[Cause[A]] =
-    Identity.make(Cause.empty, _ && _)
+  implicit def CauseCommutativeIdentity[A]: Commutative[Cause[A]] with Identity[Cause[A]] =
+    new Commutative[Cause[A]] with Identity[Cause[A]] {
+      def combine(l: => Cause[A], r: => Cause[A]): Cause[A] = l && r
+      val identity: Cause[A]                                = Cause.empty
+    }
 
   /**
    * The `Identity` instance for the concatenation of `Chunk[A]` values.
