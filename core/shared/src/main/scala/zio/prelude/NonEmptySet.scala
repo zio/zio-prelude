@@ -96,6 +96,15 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
   def remove(elem: A): Set[A] = set - elem
 
   /**
+   * removes the elem from  `NonEmptySet`, returning Some(NonEmptySet) if there's anything
+   * left, otherwise None
+   */
+  def removeNonEmpty(elem: A): Option[NonEmptySet[A]] = {
+    val newSet = set - elem
+    if (newSet.nonEmpty) Some(new NonEmptySet(set)) else None
+  }
+
+  /**
    * Returns the tail of this `NonEmptySet` if it exists or `None` otherwise.
    */
   def tailNonEmpty: Option[NonEmptySet[A]] = peelNonEmpty._2
