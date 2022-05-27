@@ -16,12 +16,12 @@
 
 package zio.prelude
 
-import scala.math.{Ordering => SOrdering}
 import zio.NonEmptyChunk
 import zio.prelude.coherent.HashPartialOrd
 
 import scala.collection.immutable.{SortedSet, TreeSet}
 import scala.language.implicitConversions
+import scala.math.{Ordering => SOrdering}
 
 final class NonEmptySortedSet[A] private (private val set: SortedSet[A]) { self =>
 
