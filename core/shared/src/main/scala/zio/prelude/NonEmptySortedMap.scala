@@ -16,7 +16,6 @@ package zio.prelude
  * limitations under the License.
  */
 
-
 import zio.NonEmptyChunk
 
 import scala.collection.immutable.SortedMap
@@ -27,9 +26,10 @@ import scala.math.{Ordering => SOrdering}
  * A non-empty wrapper for the scala immutable map. Note - this does not attempt to implement all features of
  * map but what the author considers to be the "normal ones".
  */
-case class NonEmptySortedMap[K, V] private(private val map: SortedMap[K, V])(implicit sOrdering: SOrdering[K]) { self =>
+case class NonEmptySortedMap[K, V] private (private val map: SortedMap[K, V])(implicit sOrdering: SOrdering[K]) {
+  self =>
 
-  private def newMap[V2](map: SortedMap[K, V2]): NonEmptySortedMap[K,V2] = new NonEmptySortedMap(map)
+  private def newMap[V2](map: SortedMap[K, V2]): NonEmptySortedMap[K, V2] = new NonEmptySortedMap(map)
 
   /** Converts this `NonEmptySortedMap` to a `SortedMap`. */
   def toMap: SortedMap[K, V] = map
@@ -52,7 +52,6 @@ case class NonEmptySortedMap[K, V] private(private val map: SortedMap[K, V])(imp
       (head, Some(newMap(tail)))
   }
 
-
   /**
    * Creates a new `NonEmptySortedMap` with an additional element, unless the element is
    *  already present.
@@ -61,7 +60,7 @@ case class NonEmptySortedMap[K, V] private(private val map: SortedMap[K, V])(imp
    *  @return a new map that contains all elements of this map and that also
    *          contains `elem`.
    */
-  def +(elem: (K,V)): NonEmptySortedMap[K, V] = newMap(map + elem)
+  def +(elem: (K, V)): NonEmptySortedMap[K, V] = newMap(map + elem)
 
   /**
    * Creates a new `NonEmptySortedMap` by adding all elements contained in another collection to this `NonEmptySortedMap`, omitting duplicates.
@@ -91,10 +90,10 @@ case class NonEmptySortedMap[K, V] private(private val map: SortedMap[K, V])(imp
   def tailNonEmpty: Option[NonEmptySortedMap[K, V]] = peelNonEmpty._2
 
   /**
-   * Produces a new non empty map where values mapped according to function f. 
+   * Produces a new non empty map where values mapped according to function f.
    */
-  def mapValues[V1](f: V => V1) = {
-    val newInner = map.map{ p => (p._1, f(p._2))}
+  def mapValues[V1](f: V => V1): NonEmptySortedMap[K, V1] = {
+    val newInner = map.map(p => (p._1, f(p._2)))
     newMap(newInner)
   }
 
@@ -103,7 +102,7 @@ case class NonEmptySortedMap[K, V] private(private val map: SortedMap[K, V])(imp
   override def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
-      case that: NonEmptySortedMap[_, _]          => self.map == that.toMap
+      case that: NonEmptySortedMap[_, _] => self.map == that.toMap
       case _                             => false
     }
 
@@ -113,7 +112,7 @@ case class NonEmptySortedMap[K, V] private(private val map: SortedMap[K, V])(imp
 object NonEmptySortedMap {
 
   def apply[K, V](elem: (K, V), others: Iterable[(K, V)])(implicit sOrdering: SOrdering[K]): NonEmptySortedMap[K, V] =
-    new NonEmptySortedMap(SortedMap.from(others.toMap) + elem)
+    new NonEmptySortedMap(SortedMap(others.toList:_*) + elem)
 
   /**
    * Creates a `NonEmptySortedMap` with the specified elements.
@@ -148,14 +147,15 @@ object NonEmptySortedMap {
   /**
    * Constructs a `NonEmptySortedMap` from a `SortedMap` or `None` otherwise.
    */
-  def fromMapOption[K, V](map: SortedMap[K, V])(implicit sOrdering: SOrdering[K]): Option[NonEmptySortedMap[K, V]]
-  = map.headOption.map(fromMap(_, map.tail))
+  def fromMapOption[K, V](map: SortedMap[K, V])(implicit sOrdering: SOrdering[K]): Option[NonEmptySortedMap[K, V]] =
+    map.headOption.map(fromMap(_, map.tail))
 
   /**
    * Constructs a `NonEmptySortedMap` from an `Iterable` or `None` otherwise.
    */
-  def fromIterableOption[K, V](iterable: Iterable[(K, V)])(implicit sOrdering: SOrdering[K])
-  : Option[NonEmptySortedMap[K, V]] =
+  def fromIterableOption[K, V](iterable: Iterable[(K, V)])(implicit
+    sOrdering: SOrdering[K]
+  ): Option[NonEmptySortedMap[K, V]] =
     iterable.headOption.fold(None: Option[NonEmptySortedMap[K, V]])(h => Some(apply(h, iterable.tail)))
 
   /**
@@ -176,8 +176,9 @@ object NonEmptySortedMap {
 }
 
 trait NonEmptySortedMapSyntax {
-  implicit final class NonEmptySortedMapIterableOps[K, V](private val iterable: Iterable[(K, V)])(
-    implicit sOrdering: SOrdering[K]) {
+  implicit final class NonEmptySortedMapIterableOps[K, V](private val iterable: Iterable[(K, V)])(implicit
+    sOrdering: SOrdering[K]
+  ) {
 
     /**
      * Constructs a `NonEmptySortedMap` from an `Iterable` or `None` otherwise.

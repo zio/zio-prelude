@@ -16,7 +16,6 @@ package zio.prelude
  * limitations under the License.
  */
 
-
 import zio.NonEmptyChunk
 
 import scala.language.implicitConversions
@@ -25,9 +24,9 @@ import scala.language.implicitConversions
  * A non-empty wrapper for the scala immutable map. Note - this does not attempt to implement all features of
  * map but what the author considers to be the "normal ones".
  */
-case class NonEmptyMap[K, V] private(private val map: Map[K, V]) { self =>
+case class NonEmptyMap[K, V] private (private val map: Map[K, V]) { self =>
 
-  private def newMap[V2](map: Map[K, V2]): NonEmptyMap[K,V2] = new NonEmptyMap(map)
+  private def newMap[V2](map: Map[K, V2]): NonEmptyMap[K, V2] = new NonEmptyMap(map)
 
   /** Converts this `NonEmptyMap` to a `Map`. */
   def toMap: Map[K, V] = map
@@ -50,7 +49,6 @@ case class NonEmptyMap[K, V] private(private val map: Map[K, V]) { self =>
       (head, Some(newMap(tail)))
   }
 
-
   /**
    * Creates a new `NonEmptyMap` with an additional element, unless the element is
    *  already present.
@@ -59,7 +57,7 @@ case class NonEmptyMap[K, V] private(private val map: Map[K, V]) { self =>
    *  @return a new map that contains all elements of this map and that also
    *          contains `elem`.
    */
-  def +(elem: (K,V)): NonEmptyMap[K, V] = newMap(map + elem)
+  def +(elem: (K, V)): NonEmptyMap[K, V] = newMap(map + elem)
 
   /**
    * Creates a new `NonEmptyMap` by adding all elements contained in another collection to this `NonEmptyMap`, omitting duplicates.
@@ -102,7 +100,7 @@ case class NonEmptyMap[K, V] private(private val map: Map[K, V]) { self =>
   override def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
-      case that: NonEmptyMap[_, _]          => self.map == that.toMap
+      case that: NonEmptyMap[_, _]       => self.map == that.toMap
       case _                             => false
     }
 
@@ -176,33 +174,33 @@ object NonEmptyMap {
    * GroupByOption function returns an option of a nonEmpty map instead of a map because by definition
    * the elements will be non-empty - returns None if from is
    */
-  def groupByOption[A, K](from: Iterable[A])(f: A  => K): Option[NonEmptyMap[K, Iterable[A]]] =
+  def groupByOption[A, K](from: Iterable[A])(f: A => K): Option[NonEmptyMap[K, Iterable[A]]] =
     from.headOption.map(_ => NonEmptyMap(from.groupBy(f)))
 
   /**
    * from a non-empty chunk we can create a non-empty map of non-empty chunks
    */
-  def groupByFromNonEmptyChunk[A, K](from: NonEmptyChunk[A])(f: A  => K): NonEmptyMap[K, NonEmptyChunk[A]] = {
-    val gb = from.groupBy(f)
-    val asChunks =gb.map{ p => (p._1 -> NonEmptyChunk.fromIterableOption(p._2).get) } // safe!
+  def groupByFromNonEmptyChunk[A, K](from: NonEmptyChunk[A])(f: A => K): NonEmptyMap[K, NonEmptyChunk[A]] = {
+    val gb       = from.groupBy(f)
+    val asChunks = gb.map(p => (p._1 -> NonEmptyChunk.fromIterableOption(p._2).get)) // safe!
     NonEmptyMap(asChunks)
   }
 
   /**
    * from a non-empty set we can create a non-empty map of non-empty sets
    */
-  def groupByFromNonEmptySet[A, K](from: NonEmptySet[A])(f: A  => K): NonEmptyMap[K, NonEmptySet[A]] = {
-    val gb = from.groupBy(f)
-    val asSets = gb.map { p => (p._1 -> NonEmptySet.fromIterableOption(p._2).get) } // safe!
+  def groupByFromNonEmptySet[A, K](from: NonEmptySet[A])(f: A => K): NonEmptyMap[K, NonEmptySet[A]] = {
+    val gb     = from.groupBy(f)
+    val asSets = gb.map(p => (p._1 -> NonEmptySet.fromIterableOption(p._2).get)) // safe!
     NonEmptyMap(asSets)
   }
 
   /**
    * from a non-empty list we can create a non-empty map of non-empty list
    */
-  def groupByFromNonEmptyList[A, K](from: NonEmptyList[A])(f: A  => K): NonEmptyMap[K, NonEmptyList[A]] = {
-    val gb = from.groupBy(f)
-    val asLists = gb.map { p => (p._1 -> NonEmptyList.fromIterableOption(p._2).get) } // safe!
+  def groupByFromNonEmptyList[A, K](from: NonEmptyList[A])(f: A => K): NonEmptyMap[K, NonEmptyList[A]] = {
+    val gb      = from.groupBy(f)
+    val asLists = gb.map(p => (p._1 -> NonEmptyList.fromIterableOption(p._2).get)) // safe!
     NonEmptyMap(asLists)
   }
 
@@ -224,4 +222,3 @@ trait NonEmptyMapSyntax {
     def toNonEmptyMap: Option[NonEmptyMap[K, V]] = NonEmptyMap.fromMapOption(self)
   }
 }
-

@@ -118,7 +118,7 @@ final class NonEmptySortedSet[A] private (private val set: SortedSet[A]) { self 
   override def equals(that: Any): Boolean =
     that match {
       case that: AnyRef if self.eq(that) => true
-      case that: NonEmptySortedSet[_]          => self.set == that.toSet
+      case that: NonEmptySortedSet[_]    => self.set == that.toSet
       case _                             => false
     }
 
@@ -131,7 +131,7 @@ object NonEmptySortedSet {
     new NonEmptySortedSet(treeSet)
   }
 
-  def apply[A](elem: A, others:A*)(implicit ordering: SOrdering[A]): NonEmptySortedSet[A] =
+  def apply[A](elem: A, others: A*)(implicit ordering: SOrdering[A]): NonEmptySortedSet[A] =
     apply(elem, others)
 
   def unapply[A](arg: NonEmptySortedSet[A]): Some[(A, SortedSet[A])] = Some(arg.peel)
@@ -185,17 +185,19 @@ object NonEmptySortedSet {
   /**
    * The `CommutativeEither` instance for `NonEmptySortedSet`.
    * todo
-  implicit val NonEmptySortedSetCommutativeEither: CommutativeEither[NonEmptySortedSet] =
-    new CommutativeEither[NonEmptySortedSet] {
-      def either[A, B](fa: => NonEmptySortedSet[A], fb: => NonEmptySortedSet[B])(
-        implicit aOrd: SOrdering[A], bOrd: SOrdering[B]): NonEmptySortedSet[Either[A, B]] =
-        fa.map[Either[A, B]](Left(_)).union(fb.map[Either[A, B]](Right(_)))
-    }
-*/
+   *  implicit val NonEmptySortedSetCommutativeEither: CommutativeEither[NonEmptySortedSet] =
+   *    new CommutativeEither[NonEmptySortedSet] {
+   *      def either[A, B](fa: => NonEmptySortedSet[A], fb: => NonEmptySortedSet[B])(
+   *        implicit aOrd: SOrdering[A], bOrd: SOrdering[B]): NonEmptySortedSet[Either[A, B]] =
+   *        fa.map[Either[A, B]](Left(_)).union(fb.map[Either[A, B]](Right(_)))
+   *    }
+   */
   /**
    * The `Commutative` and `Idempotent` (and thus `Associative`) instance for `NonEmptySortedSet`.
    */
-  implicit def NonEmptySortedSetCommutativeIdempotent[A](implicit aOrd: SOrdering[A]): Commutative[NonEmptySortedSet[A]] with Idempotent[NonEmptySortedSet[A]] =
+  implicit def NonEmptySortedSetCommutativeIdempotent[A](implicit
+    aOrd: SOrdering[A]
+  ): Commutative[NonEmptySortedSet[A]] with Idempotent[NonEmptySortedSet[A]] =
     new Commutative[NonEmptySortedSet[A]] with Idempotent[NonEmptySortedSet[A]] {
       override def combine(l: => NonEmptySortedSet[A], r: => NonEmptySortedSet[A]): NonEmptySortedSet[A] =
         l union r.toSet
@@ -205,7 +207,8 @@ object NonEmptySortedSet {
    * Derives a `Debug[NonEmptySortedSet[A]]` given a `Debug[A]`.
    */
   implicit def NonEmptySortedSetDebug[A: Debug]: Debug[NonEmptySortedSet[A]] =
-    chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptySortedSet", chunk.toNonEmptyList.map(_.debug).toCons)
+    chunk =>
+      Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptySortedSet", chunk.toNonEmptyList.map(_.debug).toCons)
 
   /**
    * The `DeriveEqual` instance for `NonEmptySortedSet`.
@@ -216,7 +219,6 @@ object NonEmptySortedSet {
         NonEmptySortedSetHashPartialOrd
     }
 
-
   /**
    * Derives a `Hash[NonEmptySortedSet[A]]` and `PartialOrd[NonEmptySortedSet[A]]` (and thus `Equal[NonEmptyList[A]]`) instance.
    */
@@ -226,12 +228,12 @@ object NonEmptySortedSet {
   /**
    * The `Invariant` instance for `NonEmptySortedSet`.
    * todo - don't understand
-  implicit val NonEmptySortedSetInvariant: Invariant[NonEmptySortedSet] =
-    new Invariant[NonEmptySortedSet] {
-      def invmap[A, B](f: A <=> B)(implicit aOrd: SOrdering[A], bOrd: SOrdering[B]): NonEmptySortedSet[A] <=> NonEmptySortedSet[B] =
-        Equivalence[NonEmptySortedSet[A], NonEmptySortedSet[B]](a => a.map(f.to), b => b.map(f.from))
-    }
-  */
+   *  implicit val NonEmptySortedSetInvariant: Invariant[NonEmptySortedSet] =
+   *    new Invariant[NonEmptySortedSet] {
+   *      def invmap[A, B](f: A <=> B)(implicit aOrd: SOrdering[A], bOrd: SOrdering[B]): NonEmptySortedSet[A] <=> NonEmptySortedSet[B] =
+   *        Equivalence[NonEmptySortedSet[A], NonEmptySortedSet[B]](a => a.map(f.to), b => b.map(f.from))
+   *    }
+   */
 
   /**
    * Provides an implicit conversion from `NonEmptySortedSet` to the `Set`
@@ -240,9 +242,8 @@ object NonEmptySortedSet {
   implicit def toSet[A](nonEmptySet: NonEmptySortedSet[A]): Set[A] =
     nonEmptySet.toSet
 
-
   private val NonEmptySortedSetSeed: Int = 1247120194
-  
+
 }
 
 trait NonEmptySortedSetSyntax {
@@ -261,4 +262,3 @@ trait NonEmptySortedSetSyntax {
     def toNonEmptySortedSet: Option[NonEmptySortedSet[A]] = NonEmptySortedSet.fromSetOption(self)
   }
 }
-
