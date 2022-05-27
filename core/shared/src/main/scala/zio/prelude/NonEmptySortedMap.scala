@@ -26,7 +26,7 @@ import scala.math.{Ordering => SOrdering}
  * A non-empty wrapper for the scala immutable map. Note - this does not attempt to implement all features of
  * map but what the author considers to be the "normal ones".
  */
-case class NonEmptySortedMap[K, V] private (private val map: SortedMap[K, V])(implicit sOrdering: SOrdering[K]) {
+final class NonEmptySortedMap[K, V] private (private val map: SortedMap[K, V])(implicit sOrdering: SOrdering[K]) {
   self =>
 
   private def newMap[V2](map: SortedMap[K, V2]): NonEmptySortedMap[K, V2] = new NonEmptySortedMap(map)
@@ -112,7 +112,7 @@ case class NonEmptySortedMap[K, V] private (private val map: SortedMap[K, V])(im
 object NonEmptySortedMap {
 
   def apply[K, V](elem: (K, V), others: Iterable[(K, V)])(implicit sOrdering: SOrdering[K]): NonEmptySortedMap[K, V] =
-    new NonEmptySortedMap(SortedMap(others.toList:_*) + elem)
+    new NonEmptySortedMap(SortedMap(others.toList: _*) + elem)
 
   /**
    * Creates a `NonEmptySortedMap` with the specified elements.

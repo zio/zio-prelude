@@ -183,16 +183,6 @@ object NonEmptySortedSet {
     union(r, l)
 
   /**
-   * The `CommutativeEither` instance for `NonEmptySortedSet`.
-   * todo
-   *  implicit val NonEmptySortedSetCommutativeEither: CommutativeEither[NonEmptySortedSet] =
-   *    new CommutativeEither[NonEmptySortedSet] {
-   *      def either[A, B](fa: => NonEmptySortedSet[A], fb: => NonEmptySortedSet[B])(
-   *        implicit aOrd: SOrdering[A], bOrd: SOrdering[B]): NonEmptySortedSet[Either[A, B]] =
-   *        fa.map[Either[A, B]](Left(_)).union(fb.map[Either[A, B]](Right(_)))
-   *    }
-   */
-  /**
    * The `Commutative` and `Idempotent` (and thus `Associative`) instance for `NonEmptySortedSet`.
    */
   implicit def NonEmptySortedSetCommutativeIdempotent[A](implicit
@@ -224,16 +214,6 @@ object NonEmptySortedSet {
    */
   implicit def NonEmptySortedSetHashPartialOrd[A]: Hash[NonEmptySortedSet[A]] with PartialOrd[NonEmptySortedSet[A]] =
     HashPartialOrd.derive[Set[A]].contramap(_.toSet)
-
-  /**
-   * The `Invariant` instance for `NonEmptySortedSet`.
-   * todo - don't understand
-   *  implicit val NonEmptySortedSetInvariant: Invariant[NonEmptySortedSet] =
-   *    new Invariant[NonEmptySortedSet] {
-   *      def invmap[A, B](f: A <=> B)(implicit aOrd: SOrdering[A], bOrd: SOrdering[B]): NonEmptySortedSet[A] <=> NonEmptySortedSet[B] =
-   *        Equivalence[NonEmptySortedSet[A], NonEmptySortedSet[B]](a => a.map(f.to), b => b.map(f.from))
-   *    }
-   */
 
   /**
    * Provides an implicit conversion from `NonEmptySortedSet` to the `Set`

@@ -24,7 +24,7 @@ import scala.language.implicitConversions
  * A non-empty wrapper for the scala immutable map. Note - this does not attempt to implement all features of
  * map but what the author considers to be the "normal ones".
  */
-case class NonEmptyMap[K, V] private (private val map: Map[K, V]) { self =>
+final class NonEmptyMap[K, V] private (private val map: Map[K, V]) { self =>
 
   private def newMap[V2](map: Map[K, V2]): NonEmptyMap[K, V2] = new NonEmptyMap(map)
 
@@ -175,7 +175,7 @@ object NonEmptyMap {
    * the elements will be non-empty - returns None if from is
    */
   def groupByOption[A, K](from: Iterable[A])(f: A => K): Option[NonEmptyMap[K, Iterable[A]]] =
-    from.headOption.map(_ => NonEmptyMap(from.groupBy(f)))
+    from.headOption.map(_ => new NonEmptyMap(from.groupBy(f)))
 
   /**
    * from a non-empty chunk we can create a non-empty map of non-empty chunks
@@ -183,7 +183,7 @@ object NonEmptyMap {
   def groupByFromNonEmptyChunk[A, K](from: NonEmptyChunk[A])(f: A => K): NonEmptyMap[K, NonEmptyChunk[A]] = {
     val gb       = from.groupBy(f)
     val asChunks = gb.map(p => (p._1 -> NonEmptyChunk.fromIterableOption(p._2).get)) // safe!
-    NonEmptyMap(asChunks)
+    new NonEmptyMap(asChunks)
   }
 
   /**
@@ -192,7 +192,7 @@ object NonEmptyMap {
   def groupByFromNonEmptySet[A, K](from: NonEmptySet[A])(f: A => K): NonEmptyMap[K, NonEmptySet[A]] = {
     val gb     = from.groupBy(f)
     val asSets = gb.map(p => (p._1 -> NonEmptySet.fromIterableOption(p._2).get)) // safe!
-    NonEmptyMap(asSets)
+    new NonEmptyMap(asSets)
   }
 
   /**
@@ -201,7 +201,7 @@ object NonEmptyMap {
   def groupByFromNonEmptyList[A, K](from: NonEmptyList[A])(f: A => K): NonEmptyMap[K, NonEmptyList[A]] = {
     val gb      = from.groupBy(f)
     val asLists = gb.map(p => (p._1 -> NonEmptyList.fromIterableOption(p._2).get)) // safe!
-    NonEmptyMap(asLists)
+    new NonEmptyMap(asLists)
   }
 
 }
