@@ -18,7 +18,7 @@ package zio.prelude
 
 import zio.duration.{Duration => ZIODuration}
 import zio.prelude.newtypes.{And, AndF, First, Last, Max, Min, Natural, Or, OrF, Prod, Sum}
-import zio.{Chunk, NonEmptyChunk}
+import zio.{Cause, Chunk, NonEmptyChunk}
 
 import scala.annotation.tailrec
 
@@ -310,6 +310,12 @@ object Associative extends AssociativeLowPriority {
       val identity: Sum[Char]                                  = Sum(0)
       def inverse(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l - r).toChar)
     }
+
+  /**
+   * The `Identity` instance for `Cause`.
+   */
+  implicit def CauseIdentity[A]: Identity[Cause[A]] =
+    Identity.make(Cause.empty, _ && _)
 
   /**
    * The `Identity` instance for the concatenation of `Chunk[A]` values.
