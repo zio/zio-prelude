@@ -10,6 +10,8 @@ abstract class Newtype[A] {
   type Base
   trait Tag extends Any
   type Type = Base with Tag
+  
+  def assertion: Assertion[A] = Assertion.anything
 
   /**
    * Derives an instance of a type class for the new type given an instance
@@ -51,12 +53,10 @@ abstract class Newtype[A] {
    * newtype.
    */
   inline def apply(inline value: A): Type =  
-    ${Macros.make_Impl[A, Type]('{assertion}, 'value)}
+    ${Macros.make_Impl[A, Type]('assertion, 'value)}
 
   inline def apply(inline value: A, inline values: A*): NonEmptyChunk[Type] = 
     ${Macros.makeMany_Impl[A, Type]('{assertion}, 'value, 'values)}
-  
-  def assertion: Assertion[A] = Assertion.anything
 
   def make(value: A): Validation[String, Type] = 
     Validation.fromEitherNonEmptyChunk(
@@ -74,31 +74,68 @@ abstract class Newtype[A] {
 
 object Macros extends Liftables {
 
-  def make_Impl[A: Type, T: Type](refinementExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[T] = {
+  def make_Impl[A: Type, T: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[T] = {
     import quotes.reflect.*
 
-    refinementExpr.value match {
+
+    assertionExpr.value match {
       case Some(assertion) =>
         a match {
           case LiteralUnlift(x) =>
             assertion(x.asInstanceOf[A]) match {
               case Right(_)    => '{ $a.asInstanceOf[T] }
-              case Left(error) => report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
+              case Left(error) => 
+                report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
             }
+
           case _               =>
             report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
         }
 
       case None =>
-        '{ $a.asInstanceOf[T] }
+        assertionExpr.asTerm.underlying match {
+          // The user forgot to use the `inline` keyword
+          case Select(ident @ Ident(name), _) if ident.symbol.declarations.find(_.name == "assertion").exists { expr =>
+              expr.flags.is(Flags.Override)
+            } =>
+
+            val message = s"""$refinementErrorHeader
+
+We were unable to read your ${magenta(name)} assertion at compile-time.
+You must annotate ${yellow("def assertion")} with the ${yellow("inline")} keyword:
+
+    ${yellow("override ") + yellow(underlined("inline")) + yellow(" def assertion = ???")}.
+            """
+            report.errorAndAbort(message)
+
+          case Select(ident @ Ident(name), "assertion") if ident.tpe <:< TypeRepr.of[Newtype[_]]=> 
+            '{ $a.asInstanceOf[T] }
+
+          case other => 
+            val source = scala.util.Try(assertionExpr.asTerm.pos.sourceCode.get).getOrElse(assertionExpr.show)
+            val message = s"""$refinementErrorHeader
+
+We were unable to read your assertion at compile-time.
+
+You must either define your assertion directly or refer to other inline definitions:
+
+    ${yellow("override inline def assertion = greaterThan(10) && lessThan(100)")}.
+
+    or
+
+    ${yellow("inline def extracted = greaterThan(10) && lessThan(100)")}.
+    ${yellow("override inline def assertion = extracted")}.
+            """
+            report.errorAndAbort(message)
+        }
     }
   }
 
-  def makeMany_Impl[A: Type, T: Type](refinementExpr: Expr[Assertion[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
+  def makeMany_Impl[A: Type, T: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
   ): Expr[NonEmptyChunk[T]] = {
     import quotes.reflect.*
 
-    refinementExpr.value match {
+    assertionExpr.value match {
       case Some(assertion) =>
         as match {
           case Varargs(exprs) =>

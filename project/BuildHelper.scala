@@ -27,7 +27,7 @@ object BuildHelper {
   val Scala213: String                      = versions("2.13")
   val Scala3: String                        = versions("3")
 
-  val SilencerVersion = "1.7.6"
+  val SilencerVersion = "1.7.8"
 
   private val stdOptions = Seq(
     "-deprecation",
@@ -227,7 +227,7 @@ object BuildHelper {
 
   def stdSettings(prjName: String) = Seq(
     name                                   := s"$prjName",
-    crossScalaVersions                     := Seq(Scala211, Scala212, Scala213),
+    crossScalaVersions                     := Seq(Scala211, Scala212, Scala213, Scala3),
     ThisBuild / scalaVersion               := Scala213,
     scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
@@ -292,7 +292,8 @@ object BuildHelper {
   def nativeSettings = Seq(
     Test / test             := (Test / compile).value,
     doc / skip              := true,
-    Compile / doc / sources := Seq.empty
+    Compile / doc / sources := Seq.empty,
+    crossScalaVersions -= Scala3
   )
 
   val scalaReflectTestSettings: List[Setting[_]] = List(

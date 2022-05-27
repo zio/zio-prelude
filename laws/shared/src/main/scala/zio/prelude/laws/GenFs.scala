@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,12 @@ object GenFs {
     new GenF[R, ({ type lambda[+x] = ParSeq[Z, x] })#lambda] {
       def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, ParSeq[Z, A]] =
         Gens.parSeq(z, a)
+    }
+
+  def these[R <: Random with Sized, A](a: Gen[R, A]): GenF[R, ({ type lambda[+b] = These[A, b] })#lambda] =
+    new GenF[R, ({ type lambda[+b] = These[A, b] })#lambda] {
+      def apply[R1 <: R, B](b: Gen[R1, B]): Gen[R1, These[A, B]] =
+        Gens.these(a, b)
     }
 
   /**

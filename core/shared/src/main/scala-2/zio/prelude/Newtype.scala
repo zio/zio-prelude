@@ -14,6 +14,7 @@ import zio.NonEmptyChunk
  */
 
 abstract class Newtype[A] {
+  type Wrapped = A
 
   type Base
   trait Tag extends Any
@@ -110,7 +111,7 @@ abstract class Newtype[A] {
    * compile-time and will fail with a message containing this very same
    * information.
    */
-  def assert(assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.refine_impl[A]
+  def assert(assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.assert_impl[A]
 
   /**
    * Converts an instance of a type parameterized on the underlying type
@@ -126,13 +127,13 @@ abstract class Newtype[A] {
 }
 
 object Newtype {
-  def assert[A](assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.refine_impl[A]
+  def assert[A](assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.assert_impl[A]
 
   /**
    * Converts an instance of the underlying type to an instance of the
    * newtype, ignoring any [[Assertion]].
    */
-  def unsafeWrap[A, T <: Newtype[A]](newtype: T, value: A): newtype.Type = {
+  def unsafeWrap[T <: Newtype[_]](newtype: T)(value: newtype.Wrapped): newtype.Type = {
     val _ = newtype
     value.asInstanceOf[newtype.Type]
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,6 +153,15 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       def map[A, B](f: A => B): Fiber[E, A] => Fiber[E, B] = { fiber =>
         fiber.map(f)
       }
+    }
+
+  /**
+   * The `Covariant` (and thus `Invariant`) for `Function0`
+   */
+  implicit lazy val Function0Covariant: Covariant[Function0] =
+    new Covariant[Function0] {
+      override def map[A, B](f: A => B): (() => A) => () => B =
+        function => () => f(function())
     }
 
   /**

@@ -35,7 +35,7 @@ addCommandAlias(
   ";lawsNative/test;experimentalLawsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-val zioVersion = "1.0.12"
+val zioVersion = "1.0.14"
 
 lazy val root = project
   .in(file("."))
@@ -239,11 +239,11 @@ lazy val scalaParallelCollections = project
   .settings(
     libraryDependencies ++= {
       scalaVersion.value match {
-        case BuildHelper.Scala213 | BuildHelper.Scala3 =>
-          // 2.13 and Dotty standard library doesn't contain Parallel Scala collections
-          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
-        case _                                         =>
+        // Only 2.11 and 2.12 standard library contains Parallel Scala collections
+        case BuildHelper.Scala211 | BuildHelper.Scala212 =>
           List()
+        case _                                           =>
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
       }
     }
   )
@@ -260,7 +260,7 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "2.6.1"
+      "org.typelevel" %% "cats-core" % "2.7.0"
     )
   )
   .dependsOn(coreJVM)

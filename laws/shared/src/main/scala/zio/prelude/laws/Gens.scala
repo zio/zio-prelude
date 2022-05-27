@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,12 @@ object Gens {
    */
   def state[R, S, A](s: Gen[R, S], a: Gen[R, A]): Gen[R, State[S, A]] =
     Gen.function[R, S, (A, S)](a <*> s).map(State.modify)
+
+  /**
+   * A generator of `These` values.
+   */
+  def these[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, These[A, B]] =
+    Gen.oneOf(a.map(These.left), b.map(These.right), a.zipWith(b)(These.both))
 
   /**
    * A generator of `Validation` values.

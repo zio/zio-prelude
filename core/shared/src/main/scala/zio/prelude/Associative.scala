@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,14 @@ import scala.annotation.tailrec
  * can be combined in ways that are associative, commutative, and have an
  * identity element, supporting much more interesting modes of composition.
  */
-trait Associative[A] {
+trait Associative[A] { self =>
   def combine(l: => A, r: => A): A
+
+  final def intersperse(middle: A): Associative[A] =
+    new Associative[A] {
+      def combine(l: => A, r: => A): A =
+        self.combine(l, self.combine(middle, r))
+    }
 
   final def repeat(a: A)(n: Int): A = {
     @tailrec
@@ -1447,7 +1453,7 @@ trait AssociativeSyntax {
    * Provides infix syntax for combining two values with an associative
    * operation.
    */
-  implicit class AssociativeOps[A](l: A) {
+  implicit class AssociativeOps[+A](l: A) {
 
     /**
      * A symbolic alias for `combine`.
@@ -1464,13 +1470,13 @@ trait AssociativeSyntax {
     /**
      * Associatively repeats value 'n' times
      */
-    def repeat(n: Int)(implicit associative: Associative[A]): A =
+    def repeat[A1 >: A](n: Int)(implicit associative: Associative[A1]): A1 =
       associative.repeat(l)(n)
 
     /**
      * Associatively multiplies value 'n' times
      */
-    def multiplyOption(n: Int)(implicit associative: Associative[A]): Option[A] =
+    def multiplyOption[A1 >: A](n: Int)(implicit associative: Associative[A1]): Option[A1] =
       associative.multiplyOption(n)(l)
   }
 

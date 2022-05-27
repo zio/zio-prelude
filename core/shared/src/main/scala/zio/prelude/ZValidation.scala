@@ -109,12 +109,35 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Returns the value, because no error has occurred.
+   */
+  final def get(implicit ev: E <:< Nothing): A = self.asInstanceOf[Success[W, A]].value
+
+  /**
    * Returns the value of the log.
    */
   final def getLog: Chunk[W] =
     self match {
       case Failure(w, _) => w
       case Success(w, _) => w
+    }
+
+  /**
+   * Returns the value, if successful, or the provided `fallback` value.
+   */
+  final def getOrElse[A1 >: A](fallback: => A1): A1 =
+    self match {
+      case Failure(_, _) => fallback
+      case Success(_, a) => a
+    }
+
+  /**
+   * Returns the successful value or handles the errors that have accumulated.
+   */
+  final def getOrElseWith[A1 >: A](f: NonEmptyChunk[E] => A1): A1 =
+    self match {
+      case Failure(_, e) => f(e)
+      case Success(_, a) => a
     }
 
   /**
@@ -367,6 +390,17 @@ object ZValidation extends LowPriorityValidationImplicits {
     }
 
   /**
+   * The `IdentityFlatten` instance for `ZValidation`.
+   */
+  implicit def ZValidationIdentityFlatten[W, E]: IdentityFlatten[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] {
+      val any: Validation[Nothing, Any]                                                  =
+        ZValidation.unit
+      def flatten[A](ffa: ZValidation[W, E, ZValidation[W, E, A]]): ZValidation[W, E, A] =
+        ffa.flatten
+    }
+
+  /**
    * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
    */
   implicit def ZValidationPartialOrd[W, E: PartialOrd, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
@@ -468,6 +502,26 @@ object ZValidation extends LowPriorityValidationImplicits {
       case None    => ZValidation.unit
       case Some(e) => ZValidation.fail(e)
     }
+
+  /**
+   * Validates each element in a collection, collecting the results into a
+   * collection of failed results and a collection of successful results.
+   */
+  def partition[F[+_]: ForEach: IdentityBoth: IdentityEither, W, E, A, B](
+    fa: F[A]
+  )(f: A => ZValidation[W, E, B]): ZValidation[W, Nothing, (F[E], F[B])] = {
+    implicit val leftIdentity: Identity[F[E]]  = Identity.fromIdentityEitherCovariant
+    implicit val rightIdentity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
+
+    val (w, es, bs) = fa.foldMap { a =>
+      f(a) match {
+        case Failure(w, es) => (w, es.foldMap(_.succeed[F]), IdentityEither[F].none)
+        case Success(w, b)  => (w, IdentityEither[F].none, b.succeed[F])
+      }
+    }
+
+    ZValidation.Success(w, (es, bs))
+  }
 
   /**
    * Constructs a `Validation` that succeeds with the specified value.

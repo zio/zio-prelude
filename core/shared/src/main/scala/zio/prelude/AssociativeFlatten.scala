@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio._
+import zio.stm.ZSTM
 import zio.stream.ZStream
 
 import scala.annotation.implicitNotFound
@@ -202,6 +203,16 @@ object AssociativeFlatten {
     }
 
   /**
+   * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZSTM`.
+   */
+  implicit def ZSTMIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
+      def any: ZSTM[R, E, Any] = ZSTM.unit
+
+      def flatten[A](ffa: ZSTM[R, E, ZSTM[R, E, A]]): ZSTM[R, E, A] = ffa.flatten
+    }
+
+  /**
    * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZStream`.
    */
   implicit def ZStreamIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
@@ -230,9 +241,7 @@ trait AssociativeFlattenSyntax {
   /**
    * Provides infix syntax for flattening covariant types.
    */
-  implicit class AssociativeFlattenCovariantOps[F[+_], A](fa: F[A])(implicit
-    ev: Not[CustomAssociativeFlattenSyntax[F[A]]]
-  ) {
+  implicit class AssociativeFlattenCovariantOps[F[+_], A](fa: F[A]) {
 
     /**
      * Maps a function `A => F[B]` over an `F[A]` value and then flattens the
@@ -242,11 +251,3 @@ trait AssociativeFlattenSyntax {
       flatten.flatten(covariant.map(f)(fa))
   }
 }
-
-/**
- * Provides implicit evidence that a data type defines its own implementation
- * of operators defined by `AssociativeFlattenSyntax` as extension methods and
- * that the implementations provided by `AssociativeFlattenSyntax` should not
- * be used.
- */
-trait CustomAssociativeFlattenSyntax[A]
