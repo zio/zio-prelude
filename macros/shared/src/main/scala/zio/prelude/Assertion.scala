@@ -76,7 +76,9 @@ object Assertion {
 
   def matches(regexString: String): Assertion[String] = Matches(regexString)
 
-  def predicate[A](f: A => Boolean, name: String = "custom"): Assertion[A] = Predicate(f, name)
+  def predicate[A](f: A => Boolean): Assertion[A] = Predicate(f, "custom function")
+
+  def predicate[A](f: A => Boolean, name: String): Assertion[A] = Predicate(f, name)
 
   /**
    * Matches a [[scala.util.matching.Regex]].
