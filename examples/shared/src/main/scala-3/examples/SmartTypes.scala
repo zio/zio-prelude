@@ -46,4 +46,16 @@ object SmartTypes extends App {
   }
 
   val myRegex: MyRegex = MyRegex("ab#l*helloccayj678")
+
+  type CustomFunctionExample = CustomFunctionExample.Type
+  object CustomFunctionExample extends SubtypeSmart[Int] {
+    override inline def validateInline(inline value: Int) =
+      ${ CustomFunctionExampleValidator.validateInlineImpl('value) }
+
+    override def validate(value: Int) =
+      CustomFunctionExampleValidator.validate(value)
+  }
+
+  val biggerThan10 = CustomFunctionExample(11)
+  // val notBiggerThan10 = CustomFunctionExample(10)
 }

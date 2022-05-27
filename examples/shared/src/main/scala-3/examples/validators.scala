@@ -21,3 +21,4 @@ object MyRegexValidator extends Validator[String](
     }
 )
 
+object CustomFunctionExampleValidator extends Validator[Int](predicate(_ > 10, "bigger than 10"))
