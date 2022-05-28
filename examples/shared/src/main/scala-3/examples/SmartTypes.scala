@@ -63,12 +63,12 @@ object SmartTypes extends App {
   type Email = Email.Type
   val email: Email = Email("test@test.com")
 
-  type ListWithSumSmallerThan10 = ListWithSumSmallerThan10.type
-  object ListWithSumSmallerThan10 extends NewtypeCustom[List[Int]] {
-    override def assertion = ListWithSumSmallerThan10Validator.assertion
+  type MatchesCustomFunction = MatchesCustomFunction.type
+  object MatchesCustomFunction extends NewtypeCustom[Int] {
+    override def assertion = MatchesCustomFunctionValidator.assertion
 
-    inline def validateInline(inline value: List[Int]) =
-      ${ ListWithSumSmallerThan10Validator.validateInlineImpl('value) }
+    inline def validateInline(inline value: Int) =
+      ${ MatchesCustomFunctionValidator.validateInlineImpl('value) }
   }
-  ListWithSumSmallerThan10(List(4, 4, 4))
+  val matchesCustomFunction = MatchesCustomFunction(10)
 }
