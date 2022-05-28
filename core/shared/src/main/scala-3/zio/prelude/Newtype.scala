@@ -58,6 +58,12 @@ abstract class NewtypeCustom[A] {
   protected def wrap(value: A): Type = value.asInstanceOf[Type]
 
   /**
+   * Converts an instance of a type parameterized on the underlying type to an
+   * instance of a type parameterized on the newtype.
+   */
+  protected def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
+
+  /**
    * Converts an instance of the newtype back to an instance of the
    * underlying type.
    */
@@ -69,7 +75,6 @@ abstract class NewtypeCustom[A] {
    * this could be used to convert a list of instances of the newtype back
    * to a list of instances of the underlying type.
    */
-
   def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
 
   def make(value: A): Validation[String, Type] =
