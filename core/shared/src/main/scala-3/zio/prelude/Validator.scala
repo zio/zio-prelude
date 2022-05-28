@@ -3,13 +3,11 @@ package zio.prelude
 import scala.quoted._
 
 abstract class Validator[A](
-  assertion: Assertion[A]
-) (using FromExpr[A]) {
+  val assertion: Assertion[A]
+) {
 
-  final def validate(value: A): Either[AssertionError, A] =
-    assertion(value).as(value)
-
-  final def validateInlineImpl(expr: Expr[A])(using Quotes): Expr[A] =
+  final def validateInlineImpl(expr: Expr[A])(using Quotes): Expr[A] = {
+    given FromExpr[A] = summon[FromExpr[A]]
     expr.value match {
       case Some(a) =>
         assertion(a) match {
@@ -22,5 +20,6 @@ abstract class Validator[A](
         quotes.reflect.report.error("Validator args must be statically known")
         ???
     }
+  }
 
 }

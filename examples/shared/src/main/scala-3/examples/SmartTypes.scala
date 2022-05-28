@@ -3,26 +3,22 @@ package examples
 import zio.prelude.*
 
 object SmartTypes extends App {
+  import Assertion.*
 
   type Natural = Natural.Type
-  object Natural extends SubtypeSmart[Int] {
-    override inline def validateInline(inline value: Int) =
-      ${ NaturalValidator.validateInlineImpl('value) }
+  object Natural extends Subtype[Int] {
+    override inline def assertion = greaterThanOrEqualTo(0) && lessThanOrEqualTo(100)
 
-    override def validate(value: Int) =
-      NaturalValidator.validate(value)
     extension (self: Natural) {
       infix def add(that: Natural): Natural = wrap(unwrap(self) + unwrap(that))
     }
   }
 
   type Age = Age.Type
-  object Age extends SubtypeSmart[Int] {
-    override inline def validateInline(inline value: Int) =
-      ${ AgeValidator.validateInlineImpl('value) }
-
-    override def validate(value: Int) =
-      AgeValidator.validate(value)
+  object Age extends Subtype[Int] {
+    override inline def assertion = {
+      greaterThanOrEqualTo(0) && lessThanOrEqualTo(150)
+    }
   }
 
   val natural: Natural = Natural(5) add Natural(8)
@@ -36,26 +32,43 @@ object SmartTypes extends App {
   val x: Natural                 = Natural(0)
   // val y: Either[String, Natural] = Natural.unsafeWrap(scala.util.Random.nextInt)
 
-  type MyRegex = MyRegex.Type
-  object MyRegex extends SubtypeSmart[String] {
-    override inline def validateInline(inline value: String) =
-      ${ MyRegexValidator.validateInlineImpl('value) }
+  import Regex.*
 
-    override def validate(value: String) =
-      MyRegexValidator.validate(value)
+  type MyRegex = MyRegex.Type
+  object MyRegex extends Newtype[String] {
+    override inline def assertion = {
+      matches {
+        start ~ anyChar ~ alphanumeric ~ (nonAlphanumeric | whitespace) ~ nonWhitespace ~ digit.min(0) ~ nonDigit.min(1) ~
+          literal("hello") ~ anyCharOf('a', 'b', 'c').min(2) ~ notAnyCharOf('d', 'e', 'f').? ~
+          inRange('a', 'z').max(2) ~ notInRange('1', '5').min(1).max(3) ~ end
+      }
+    }
   }
 
   val myRegex: MyRegex = MyRegex("ab#l*helloccayj678")
 
-  type CustomFunctionExample = CustomFunctionExample.Type
-  object CustomFunctionExample extends SubtypeSmart[Int] {
-    override inline def validateInline(inline value: Int) =
-      ${ CustomFunctionExampleValidator.validateInlineImpl('value) }
-
-    override def validate(value: Int) =
-      CustomFunctionExampleValidator.validate(value)
+  object Email extends Subtype[String] {
+    override inline def assertion = {
+      matches {
+        start
+           ~ anyRegexOf(alphanumeric, literal("-"), literal("\\.")).+
+           ~ literal("@")
+           ~ anyRegexOf(alphanumeric, literal("-")).+
+           ~ literal("\\.").+
+           ~ anyRegexOf(alphanumeric, literal("-")).between(2, 4)
+           ~ end
+      }
+    }
   }
+  type Email = Email.Type
+  val email: Email = Email("test@test.com")
 
-  val biggerThan10 = CustomFunctionExample(11)
-  // val notBiggerThan10 = CustomFunctionExample(10)
+  type ListWithSumSmallerThan10 = ListWithSumSmallerThan10.type
+  object ListWithSumSmallerThan10 extends NewtypeCustom[List[Int]] {
+    override def assertion = ListWithSumSmallerThan10Validator.assertion
+
+    inline def validateInline(inline value: List[Int]) =
+      ${ ListWithSumSmallerThan10Validator.validateInlineImpl('value) }
+  }
+  ListWithSumSmallerThan10(List(4, 4, 4))
 }

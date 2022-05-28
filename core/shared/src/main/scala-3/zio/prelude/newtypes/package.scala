@@ -100,12 +100,9 @@ package object newtypes {
   type FailureOut[+A] = FailureOut.Type[A]
 
   type Natural = Natural.Type
-  object Natural extends SubtypeSmart[Int] {
-    override inline def validateInline(inline value: Int) =
-      ${ NaturalValidator.validateInlineImpl('value) }
+  object Natural extends Subtype[Int] {
 
-    override def validate(value: Int) =
-      NaturalValidator.validate(value)
+    override inline def assertion = Assertion.greaterThanOrEqualTo(0)
 
     val one: Natural =
       Natural(1)
