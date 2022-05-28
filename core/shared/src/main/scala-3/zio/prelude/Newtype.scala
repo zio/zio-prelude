@@ -25,16 +25,16 @@ abstract class NewtypeCustom[A] {
   inline def apply(inline a1: A, inline a2: A): NonEmptyChunk[Type] =
     NonEmptyChunk(apply(a1), apply(a2))
 
-  inline def apply(inline a1: A, inline a2: A, a3: A): NonEmptyChunk[Type] =
+  inline def apply(inline a1: A, inline a2: A, inline a3: A): NonEmptyChunk[Type] =
     NonEmptyChunk(apply(a1), apply(a2), apply(a3))
 
-  inline def apply(inline a1: A, inline a2: A, a3: A, a4: A): NonEmptyChunk[Type] =
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A): NonEmptyChunk[Type] =
     NonEmptyChunk(apply(a1), apply(a2), apply(a3), apply(a4))
 
-  inline def apply(inline a1: A, inline a2: A, a3: A, a4: A, a5: A): NonEmptyChunk[Type] =
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A): NonEmptyChunk[Type] =
     NonEmptyChunk(apply(a1), apply(a2), apply(a3), apply(a4), apply(a5))
 
-  inline def apply(inline a1: A, inline a2: A, a3: A, a4: A, a5: A, a6: A): NonEmptyChunk[Type] =
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A, inline a6: A): NonEmptyChunk[Type] =
     NonEmptyChunk(apply(a1), apply(a2), apply(a3), apply(a4), apply(a5), apply(a6))
 
   /**
