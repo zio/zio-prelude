@@ -25,6 +25,18 @@ abstract class NewtypeCustom[A] {
   inline def apply(inline a1: A, inline a2: A): NonEmptyChunk[Type] =
     NonEmptyChunk(apply(a1), apply(a2))
 
+  inline def apply(inline a1: A, inline a2: A, a3: A): NonEmptyChunk[Type] =
+    NonEmptyChunk(apply(a1), apply(a2), apply(a3))
+
+  inline def apply(inline a1: A, inline a2: A, a3: A, a4: A): NonEmptyChunk[Type] =
+    NonEmptyChunk(apply(a1), apply(a2), apply(a3), apply(a4))
+
+  inline def apply(inline a1: A, inline a2: A, a3: A, a4: A, a5: A): NonEmptyChunk[Type] =
+    NonEmptyChunk(apply(a1), apply(a2), apply(a3), apply(a4), apply(a5))
+
+  inline def apply(inline a1: A, inline a2: A, a3: A, a4: A, a5: A, a6: A): NonEmptyChunk[Type] =
+    NonEmptyChunk(apply(a1), apply(a2), apply(a3), apply(a4), apply(a5), apply(a6))
+
   /**
    * Derives an instance of a type class for the new type given an instance
    * of the type class for the underlying type. The caller is responsible for

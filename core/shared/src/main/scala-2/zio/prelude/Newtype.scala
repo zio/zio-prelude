@@ -149,7 +149,3 @@ object Newtype {
     value.asInstanceOf[F[T#Type]]
   }
 }
-
-abstract class Subtype[A] extends Newtype[A] {
-  type Base <: A
-}
