@@ -23,19 +23,19 @@ abstract class NewtypeCustom[A] {
     validateInline(a1).asInstanceOf[Type]
 
   inline def apply(inline a1: A, inline a2: A): NonEmptyChunk[Type] =
-    NonEmptyChunk[Type](apply(a1), apply(a2))
+    NonEmptyChunk(validateInline(a1), validateInline(a2)).asInstanceOf[NonEmptyChunk[Type]]
 
   inline def apply(inline a1: A, inline a2: A, inline a3: A): NonEmptyChunk[Type] =
-    NonEmptyChunk[Type](apply(a1), apply(a2), apply(a3))
+    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3)).asInstanceOf[NonEmptyChunk[Type]]
 
   inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A): NonEmptyChunk[Type] =
-    NonEmptyChunk[Type](apply(a1), apply(a2), apply(a3), apply(a4))
+    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3), validateInline(a4)).asInstanceOf[NonEmptyChunk[Type]]
 
   inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A): NonEmptyChunk[Type] =
-    NonEmptyChunk[Type](apply(a1), apply(a2), apply(a3), apply(a4), apply(a5))
+    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3), validateInline(a4), validateInline(a5)).asInstanceOf[NonEmptyChunk[Type]]
 
   inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A, inline a6: A): NonEmptyChunk[Type] =
-    NonEmptyChunk[Type](apply(a1), apply(a2), apply(a3), apply(a4), apply(a5), apply(a6))
+    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3), validateInline(a4), validateInline(a5), validateInline(a6)).asInstanceOf[NonEmptyChunk[Type]]
 
   /**
    * Derives an instance of a type class for the new type given an instance
