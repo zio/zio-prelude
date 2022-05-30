@@ -17,8 +17,8 @@
 package zio.prelude
 
 import zio.duration.{Duration => ZIODuration}
-import zio.prelude.newtypes.{And, AndF, First, Last, Max, Min, Natural, Or, OrF, Prod, Sum}
-import zio.{Chunk, NonEmptyChunk}
+import zio.prelude.newtypes.{And, AndF, AndThen, Both, First, Last, Max, Min, Natural, Or, OrF, Prod, Sum}
+import zio.{Cause, Chunk, NonEmptyChunk}
 
 import scala.annotation.tailrec
 
@@ -309,6 +309,32 @@ object Associative extends AssociativeLowPriority {
       def combine(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l + r).toChar)
       val identity: Sum[Char]                                  = Sum(0)
       def inverse(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l - r).toChar)
+    }
+
+  /**
+   * The `Commutative` and `Identity` instance for `Cause`.
+   */
+  implicit def CauseCommutativeIdentity[A]: Commutative[Both[Cause[A]]] with Identity[Both[Cause[A]]] =
+    new Commutative[Both[Cause[A]]] with Identity[Both[Cause[A]]] {
+      def combine(l: => Both[Cause[A]], r: => Both[Cause[A]]): Both[Cause[A]] = {
+        val lUnwrapped: Cause[A] = l
+        val rUnwrapped: Cause[A] = r
+        Both(lUnwrapped && rUnwrapped)
+      }
+      val identity: Both[Cause[A]]                                            = Both(Cause.empty)
+    }
+
+  /**
+   * The `Associative` and `Identity` instance for `Cause`.
+   */
+  implicit def CauseAssociativeIdentity[A]: Associative[AndThen[Cause[A]]] with Identity[AndThen[Cause[A]]] =
+    new Associative[AndThen[Cause[A]]] with Identity[AndThen[Cause[A]]] {
+      def combine(l: => AndThen[Cause[A]], r: => AndThen[Cause[A]]): AndThen[Cause[A]] = {
+        val lUnwrapped: Cause[A] = l
+        val rUnwrapped: Cause[A] = r
+        AndThen(lUnwrapped ++ rUnwrapped)
+      }
+      val identity: AndThen[Cause[A]]                                                  = AndThen(Cause.empty)
     }
 
   /**
