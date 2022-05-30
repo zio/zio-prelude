@@ -5,6 +5,8 @@ import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
 
+import newtypes.Both
+
 /**
  * `ZValidation` represents either a success of type `A` or a collection of one
  * or more errors of type `E` along with in either case a log with entries of
@@ -273,7 +275,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def toZIO: IO[E, A] =
     self.fold(
-      nec => ZIO.halt(nec.reduceMap(zio.Cause.fail)),
+      nec => ZIO.halt(nec.reduceMap(e => Both(zio.Cause.fail(e)))),
       ZIO.succeedNow
     )
 
