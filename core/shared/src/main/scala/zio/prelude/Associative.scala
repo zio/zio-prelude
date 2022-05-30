@@ -325,10 +325,10 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Associative` and `Identity` instance for `Cause`.
+   * The `Identity` instance for `Cause`.
    */
-  implicit def CauseAssociativeIdentity[A]: Associative[AndThen[Cause[A]]] with Identity[AndThen[Cause[A]]] =
-    new Associative[AndThen[Cause[A]]] with Identity[AndThen[Cause[A]]] {
+  implicit def CauseIdentity[A]: Identity[AndThen[Cause[A]]] =
+    new Identity[AndThen[Cause[A]]] {
       def combine(l: => AndThen[Cause[A]], r: => AndThen[Cause[A]]): AndThen[Cause[A]] = {
         val lUnwrapped: Cause[A] = l
         val rUnwrapped: Cause[A] = r
