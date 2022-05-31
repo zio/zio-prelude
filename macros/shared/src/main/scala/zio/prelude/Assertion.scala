@@ -296,10 +296,6 @@ object Assertion {
       if (!negated) Right(()) else Left(AssertionError.failure("never"))
   }
 
-  final case class ReflectedFunction1[A, B](val tree: String, val f: Function1[A, B]) extends Function1[A, B] {
-    def apply(v1: A): B = f(v1)
-  }
-
   sealed trait Regex { self =>
     import Regex._
 
