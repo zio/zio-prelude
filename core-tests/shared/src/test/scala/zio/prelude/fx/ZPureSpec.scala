@@ -4,7 +4,7 @@ import zio.prelude._
 import zio.prelude.laws._
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
-import zio.{CanFail, Chunk, NonEmptyChunk, ZEnvironment}
+import zio.{CanFail, Chunk, NonEmptyChunk, ZEnvironment, ZIO}
 
 import java.util.NoSuchElementException
 import scala.util.Try
@@ -958,6 +958,13 @@ object ZPureSpec extends ZIOSpecDefault {
           val zPure                                                       = log(1) *> ZPure.fail("baz")
           assert(zPure.clearLogOnError.runAll("")._2)(isLeft(anything))
         }
-      )
+      ),
+      test("toZIO infers correctly") {
+        for {
+          result <- ZPure.succeed(1).toZIO
+          _      <- ZIO.unit
+        } yield assertTrue(result == 1)
+      }
     )
+
 }
