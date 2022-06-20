@@ -49,6 +49,16 @@ final class NonEmptyMap[K, V] private (private val map: Map[K, V]) { self =>
       (head, Some(newMap(tail)))
   }
 
+  def keySet: NonEmptySet[K] = {
+    val (head, tail) = peel
+    NonEmptySet.fromIterable(head._1, tail.keys)
+  }
+
+  def values: NonEmptyChunk[V] = {
+    val (head, tail) = peel
+    NonEmptyChunk.fromIterable(head._2, tail.values)
+  }
+
   /**
    * Creates a new `NonEmptyMap` with an additional element, unless the element is
    *  already present.

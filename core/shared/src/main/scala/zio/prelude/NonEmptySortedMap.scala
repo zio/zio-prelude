@@ -52,6 +52,16 @@ final class NonEmptySortedMap[K, V] private (private val map: SortedMap[K, V])(i
       (head, Some(newMap(tail)))
   }
 
+  def keySet: NonEmptySortedSet[K] = {
+    val (head, tail) = peel
+    NonEmptySortedSet(head._1, tail.keySet)
+  }
+
+  def values: NonEmptyChunk[V] = {
+    val (head, tail) = peel
+    NonEmptyChunk.fromIterable(head._2, tail.values)
+  }
+
   /**
    * Creates a new `NonEmptySortedMap` with an additional element, unless the element is
    *  already present.
