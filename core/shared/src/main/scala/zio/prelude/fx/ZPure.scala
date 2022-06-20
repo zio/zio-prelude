@@ -789,8 +789,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * The original state is supposed to be `()`.
    */
-  def toZIO[R1 <: R](implicit ev: Unit <:< S1, tag: Tag[R1]): zio.ZIO[R1, E, A] =
-    ZIO.environmentWithZIO[R1] { r =>
+  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] =
+    ZIO.environmentWithZIO[R] { r =>
       provideEnvironment(r).runAll(())._2 match {
         case Left(cause)   => ZIO.failCause(cause.toCause)
         case Right((_, a)) => ZIO.succeedNow(a)
@@ -800,8 +800,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    */
-  def toZIOWith[R1 <: R](s1: S1)(implicit tag: Tag[R1]): zio.ZIO[R1, E, A] =
-    ZIO.environmentWithZIO[R1] { r =>
+  def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
+    ZIO.environmentWithZIO[R] { r =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
         case Left(cause)   => ZIO.failCause(cause.toCause)
@@ -812,8 +812,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
    */
-  def toZIOWithState[R1 <: R](s1: S1)(implicit tag: Tag[R1]): zio.ZIO[R1, E, (S2, A)] =
-    ZIO.environmentWithZIO[R1] { r =>
+  def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
+    ZIO.environmentWithZIO[R] { r =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
         case Left(cause)   => ZIO.failCause(cause.toCause)
@@ -824,8 +824,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
    */
-  def toZIOWithAll[R1 <: R](s1: S1)(implicit tag: Tag[R1]): ZIO[R1, E, (Chunk[W], S2, A)] =
-    ZIO.environmentWithZIO[R1] { r =>
+  def toZIOWithAll(s1: S1): ZIO[R, E, (Chunk[W], S2, A)] =
+    ZIO.environmentWithZIO[R] { r =>
       val (log, result) = provideEnvironment(r).runAll(s1)
       result match {
         case Left(cause)    => ZIO.failCause(cause.toCause)
