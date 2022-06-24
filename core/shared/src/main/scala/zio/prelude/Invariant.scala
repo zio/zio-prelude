@@ -121,7 +121,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] {
       override def map[A, B](f: A => B): Exit[E, A] => Exit[E, B] = { exit =>
-        exit.map(f)
+        exit.mapExit(f)
       }
     }
 

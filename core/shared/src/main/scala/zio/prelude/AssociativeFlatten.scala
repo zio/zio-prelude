@@ -100,7 +100,7 @@ object AssociativeFlatten {
     new IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def any: Exit[E, Any] = Exit.unit
 
-      def flatten[A](ffa: Exit[E, Exit[E, A]]): Exit[E, A] = ffa.flatten
+      def flatten[A](ffa: Exit[E, Exit[E, A]]): Exit[E, A] = ffa.flattenExit
     }
 
   /**

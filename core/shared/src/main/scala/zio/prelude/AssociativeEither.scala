@@ -88,8 +88,8 @@ object AssociativeEither {
   implicit def ExitAssociativeEither[E]: AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def either[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, Either[A, B]] =
-        fa.map(Left(_)) match {
-          case Exit.Failure(_) => fb.map(Right(_))
+        fa.mapExit(Left(_)) match {
+          case Exit.Failure(_) => fb.mapExit(Right(_))
           case res             => res
         }
     }
@@ -101,7 +101,7 @@ object AssociativeEither {
     new AssociativeEither[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
       def either[EA, EB](fa: => Failure[Exit[EA, A]], fb: => Failure[Exit[EB, A]]): Failure[Exit[Either[EA, EB], A]] =
         Failure.wrap {
-          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
+          Failure.unwrap(fa).mapErrorExit(Left(_)) *> Failure.unwrap(fb).mapErrorExit(Right(_))
         }
     }
 

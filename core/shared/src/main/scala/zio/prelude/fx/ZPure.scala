@@ -17,7 +17,7 @@
 package zio.prelude.fx
 
 import com.github.ghik.silencer.silent
-import zio.internal.{Stack, StackBool}
+import zio.internal.Stack
 import zio.prelude._
 import zio.{CanFail, Chunk, ChunkBuilder, NonEmptyChunk, Tag, ZEnvironment, ZIO}
 
@@ -567,7 +567,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
     val environments: Stack[ZEnvironment[Any]]                   = Stack()
     val logs: Stack[ChunkBuilder[Any]]                           = Stack(ChunkBuilder.make())
-    val clearLogOnError: StackBool                               = StackBool()
+    var clearLogOnError                                          = false
     var s0: Any                                                  = s
     var a: Any                                                   = null
     var failed                                                   = false
@@ -637,7 +637,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
               zPure.value,
               (cause: Cause[Any]) =>
                 ZPure.suspend(Succeed({
-                  val clear   = clearLogOnError.peekOrElse(false)
+                  val clear   = clearLogOnError
                   val builder = logs.pop()
                   if (!clear) logs.peek() ++= builder.result()
                 })) *> ZPure.set(state) *> zPure.failure(cause),
@@ -677,14 +677,15 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           val zPure = curZPure.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
           zPure.flag match {
             case FlagType.ClearLogOnError =>
-              clearLogOnError.push(zPure.value)
+              val oldValue = clearLogOnError
+              clearLogOnError = zPure.value
               curZPure = zPure.continue.bimap(
                 e => {
                   if (zPure.value) logs.peek().clear()
-                  clearLogOnError.popOrElse(false)
+                  clearLogOnError = oldValue
                   e
                 },
-                a => { clearLogOnError.popOrElse(false); a }
+                a => { clearLogOnError = oldValue; a }
               )
           }
       }
