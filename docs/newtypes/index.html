@@ -285,7 +285,8 @@
 <span class="hljs-comment">// Newtype Assertion Failed </span>
 <span class="hljs-comment">// • -10 did not satisfy greaterThanOrEqualTo(0)</span>
 </code></pre>
-<p>Smart Newtypes can only be validated at compile-time when called with literals, such as <code>9000</code> or <code>&quot;Fancy Pants&quot;</code>. When wrapping variables or run-time values, you can use the <code>make</code> or <code>makeAll</code>.</p>
+<p>Smart Newtypes can only be validated at compile-time when called with literals, such as <code>9000</code> or <code>&quot;Fancy Pants&quot;</code>. Attempting to wrap a variable or run-time value with <code>apply</code> will result in a compilation error warning you about this.</p>
+<p>When wrapping variables or run-time values, you can use the <code>make</code> or <code>makeAll</code> constructors, which will perform the validation at run-time instead.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio.<span class="hljs-type">Chunk</span>
 
 <span class="hljs-keyword">val</span> a = <span class="hljs-number">10</span>
