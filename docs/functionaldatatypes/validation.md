@@ -213,7 +213,7 @@ There are variants of `validateWith` for combining up to twenty two different `V
 
 There is also a `validate` variant that combines multiple `Validation` values but does not take a combining function. In this case the returned `Validation` just contains a tuple with all the original values and you can combine them yourself later using `map`.
 
-If you have a whole collection of values you want to validate you can use the `collectAllPar` operator to validate them all at the same time.
+If you have a whole collection of values you want to validate you can use the `validateAll` operator to validate them all at the same time.
 
 ### Chaining Validations
 
