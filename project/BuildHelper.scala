@@ -27,7 +27,7 @@ object BuildHelper {
   val Scala213: String                      = versions("2.13")
   val Scala3: String                        = versions("3")
 
-  val SilencerVersion = "1.7.8"
+  val SilencerVersion = "1.7.9"
 
   private val stdOptions = Seq(
     "-deprecation",
@@ -285,8 +285,8 @@ object BuildHelper {
   )
 
   def jsSettings = Seq(
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"      % "2.3.0",
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.3.0"
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"      % "2.4.0",
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.4.0"
   )
 
   def nativeSettings = Seq(
