@@ -426,6 +426,14 @@ object ZValidation extends LowPriorityValidationImplicits {
     validations.flip
 
   /**
+   * Combine a set of `ZValidation` values into a single `ZValidation` that
+   * either returns the values of all of them, if they all succeed, or else
+   * fails with all of their errors.
+   */
+  def validateAll[W, E, A](validations: Set[ZValidation[W, E, A]]): ZValidation[W, E, Set[A]] =
+    validateAll[Iterable, W, E, A](validations).map(_.toSet)
+
+  /**
    * Constructs a `ZValidation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
