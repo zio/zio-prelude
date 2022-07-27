@@ -3,6 +3,8 @@ package examples
 
 import zio.prelude._
 
+import java.util.UUID
+
 object SmartTypes extends App {
   import Assertion._
 
@@ -64,5 +66,12 @@ object SmartTypes extends App {
   }
   type Email = Email.Type
   val email: Email = Email("test@test.com")
+
+  object GenericItemId extends Newtype[UUID]
+  type GenericItemId = GenericItemId.Type
+
+  object SpecificItemId extends Subtype[GenericItemId]
+  type SpecificItemId = SpecificItemId.Type
+
 }
 // scalafix:on

@@ -163,5 +163,5 @@ package zio.prelude
  * }}}
  */
 abstract class Subtype[A] extends Newtype[A] {
-  type Base <: A
+  type Type <: A
 }
