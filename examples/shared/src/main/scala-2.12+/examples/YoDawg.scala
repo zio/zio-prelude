@@ -13,7 +13,6 @@ object YoDawg {
   object SpecificItemId extends Subtype[GenericItemId]
   type SpecificItemId = SpecificItemId.Type
 
-
   implicitly[GreatTypeclass[GenericItemId]]
   implicitly[GreatTypeclass[SpecificItemId]]
 
