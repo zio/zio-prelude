@@ -7,9 +7,7 @@ import zio.prelude.ConsoleUtils.*
 
 abstract class Newtype[A] {
 
-  type Base
-  trait Tag extends Any
-  type Type = Base with Tag
+  type Type
   
   def assertion: Assertion[A] = Assertion.anything
 
