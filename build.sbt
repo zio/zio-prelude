@@ -35,7 +35,7 @@ addCommandAlias(
   ";lawsNative/test;experimentalLawsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-val zioVersion = "1.0.14"
+val zioVersion = "1.0.16"
 
 lazy val root = project
   .in(file("."))
@@ -260,7 +260,7 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "2.7.0"
+      "org.typelevel" %% "cats-core" % "2.8.0"
     )
   )
   .dependsOn(coreJVM)

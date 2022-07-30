@@ -43,6 +43,14 @@ package object newtypes {
    */
   type AndF[+A] = AndF.Type[A]
 
+  object AndThen extends SubtypeF
+
+  type AndThen[+A] = AndThen.Type[A]
+
+  object Both extends SubtypeF
+
+  type Both[+A] = Both.Type[A]
+
   object OrF extends SubtypeF
 
   /**
