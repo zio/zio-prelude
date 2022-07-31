@@ -18,9 +18,16 @@ package zio.prelude.laws
 
 import zio.prelude._
 import zio.prelude.coherent.DeriveEqualForEach
+import zio.test.TestResult
 import zio.test.laws._
 
 object ForEachLaws extends LawfulF.Covariant[DeriveEqualForEach, Equal] {
+
+  lazy val forEachIdentityLaw: LawsF.Covariant[DeriveEqualForEach, Equal] =
+    new LawsF.Covariant.Law1[DeriveEqualForEach, Equal]("forEachIdentityLaw") {
+      def apply[F[+_]: DeriveEqualForEach, A: Equal](fa: F[A]): TestResult =
+        fa.forEach(Id(_)) <-> Id(fa)
+    }
 
   /**
    * The set of all laws that instances of `ForEach` must satisfy.

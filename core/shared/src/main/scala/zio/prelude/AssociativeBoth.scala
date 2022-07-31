@@ -17,7 +17,7 @@
 package zio.prelude
 
 import zio._
-import zio.prelude.newtypes.{AndF, Failure, OrF}
+import zio.prelude.newtypes.{AndF, Failure, Nested, OrF}
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
 
@@ -1053,7 +1053,7 @@ object AssociativeBoth {
   /**
    * The `IdentityBoth` instance for `Chunk`.
    */
-  implicit val ChunkIdentityeBoth: IdentityBoth[Chunk] =
+  implicit val ChunkIdentityBoth: IdentityBoth[Chunk] =
     new IdentityBoth[Chunk] {
       def any: Chunk[Any]                                             = Chunk.unit
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
@@ -1141,6 +1141,21 @@ object AssociativeBoth {
         List(())
 
       def both[A, B](fa: => List[A], fb: => List[B]): List[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
+    }
+
+  /**
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Nested[F, G, A]`.
+   */
+  implicit def NestedIdentityBoth[F[+_]: IdentityBoth: Covariant, G[+_]](implicit
+    G: IdentityBoth[G]
+  ): IdentityBoth[({ type lambda[+A] = Nested[F, G, A] })#lambda] =
+    new IdentityBoth[({ type lambda[+A] = Nested[F, G, A] })#lambda] {
+      override def any: Nested[F, G, Any] = Nested(G.any.succeed[F])
+
+      override def both[A, B](fa: => Nested[F, G, A], fb: => Nested[F, G, B]): Nested[F, G, (A, B)] =
+        Nested {
+          Nested.unwrap[F[G[A]]](fa).zipWith(Nested.unwrap[F[G[B]]](fb))(_ zip _)
+        }
     }
 
   /**
