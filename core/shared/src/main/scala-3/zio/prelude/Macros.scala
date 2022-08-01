@@ -5,7 +5,7 @@ import zio.prelude.ConsoleUtils.*
 
 object Macros extends Liftables {
 
-  def validateInlineImpl[A: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[A] = {
+  def validateInlineImpl[A: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[Unit] = {
     import quotes.reflect.*
 
 
@@ -14,7 +14,7 @@ object Macros extends Liftables {
         a match {
           case LiteralUnlift(x) =>
             assertion(x.asInstanceOf[A]) match {
-              case Right(_)    => a
+              case Right(_)    => '{()}
               case Left(error) =>
                 report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
             }
@@ -40,7 +40,7 @@ You must annotate ${yellow("def assertion")} with the ${yellow("inline")} keywor
             report.errorAndAbort(message)
 
           case Select(ident @ Ident(name), "assertion") if ident.tpe <:< TypeRepr.of[Newtype[_]]=>
-            a
+            '{()}
 
           case other =>
             val source = scala.util.Try(assertionExpr.asTerm.pos.sourceCode.get).getOrElse(assertionExpr.show)

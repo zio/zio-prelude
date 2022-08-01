@@ -1,11 +1,7 @@
 package examples
 
-import zio.prelude.Validator
-import zio.prelude.Assertion._
-import scala.quoted.FromExpr._
-import scala.quoted.Type._
-import scala.quoted.FromExpr
+import zio.prelude._
 
-object MatchesCustomFunctionValidator extends Validator[Int](
-  predicate(_ > 0, "greater than zero")
+object PalindromeValidator extends Validator[String](str =>
+  if (str.reverse == str) Right(()) else Left(AssertionError.Failure("isPalindrome"))
 )

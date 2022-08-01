@@ -63,12 +63,13 @@ object SmartTypes extends App {
   type Email = Email.Type
   val email: Email = Email("test@test.com")
 
-  type MatchesCustomFunction = MatchesCustomFunction.type
-  object MatchesCustomFunction extends NewtypeCustom[Int] {
-    override def assertion = MatchesCustomFunctionValidator.assertion
+  object Palindrome extends NewtypeCustom[String] {
+    protected def validate(value: String) =
+      PalindromeValidator.validate(value)
 
-    inline def validateInline(inline value: Int) =
-      ${ MatchesCustomFunctionValidator.validateInlineImpl('value) }
+    protected inline def validateInline(inline value: String) =
+      ${ PalindromeValidator.validateInlineImpl('value) }
   }
-  val matchesCustomFunction = MatchesCustomFunction(10)
+
+  Palindrome("racecar")
 }

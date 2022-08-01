@@ -64,12 +64,5 @@ object SmartTypes extends App {
   }
   type Email = Email.Type
   val email: Email = Email("test@test.com")
-
-  object CustomFunctionExample extends Subtype[Int] {
-    override def assertion = assert(predicate(_ > 10, "bigger than 10"))
-  }
-  type CustomFunctionExample = CustomFunctionExample.Type
-
-  val biggerThan10 = CustomFunctionExample(11)
 }
 // scalafix:on

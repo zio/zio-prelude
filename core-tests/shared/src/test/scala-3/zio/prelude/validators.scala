@@ -1,8 +1,8 @@
 package zio.prelude
 
-import zio.prelude.Assertion._
+import zio.prelude._
 
-object MatchesCustomFunctionValidator extends Validator[Int](
-  predicate(_ > 0, "greater than zero")
+object PalindromeValidator extends Validator[String](str =>
+  if (str.reverse == str) Right(()) else Left(AssertionError.Failure("isPalindrome"))
 )
 

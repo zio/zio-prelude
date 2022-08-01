@@ -9,31 +9,66 @@ abstract class NewtypeCustom[A] {
 
   type Type
 
-  def assertion: Assertion[A] = Assertion.anything
+  /**
+   * Function that will used to check runtime values before
+   * lifting them into the newtype. Should be consistent with `validateInline`.
+   */
+  protected def validate(value: A): Either[AssertionError, Unit]
 
-  inline def validateInline(inline value: A): A
+  /**
+   * Function that will be used to check compile-time values before
+   * lifting them into the newtype. Should be consistent with `validate`.
+   */
+  protected inline def validateInline(inline value: A): Unit
 
   /**
    * Converts an instance of the underlying type to an instance of the
    * newtype.
    */
-  inline def apply(inline a1: A): Type =
-    validateInline(a1).asInstanceOf[Type]
+  inline def apply(inline a1: A): Type = {
+    validateInline(a1)
+    a1.asInstanceOf[Type]
+  }
 
-  inline def apply(inline a1: A, inline a2: A): NonEmptyChunk[Type] =
-    NonEmptyChunk(validateInline(a1), validateInline(a2)).asInstanceOf[NonEmptyChunk[Type]]
+  inline def apply(inline a1: A, inline a2: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    NonEmptyChunk(a1, a2).asInstanceOf[NonEmptyChunk[Type]]
+  }
 
-  inline def apply(inline a1: A, inline a2: A, inline a3: A): NonEmptyChunk[Type] =
-    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3)).asInstanceOf[NonEmptyChunk[Type]]
+  inline def apply(inline a1: A, inline a2: A, inline a3: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    NonEmptyChunk(a1, a2, a3).asInstanceOf[NonEmptyChunk[Type]]
+  }
 
-  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A): NonEmptyChunk[Type] =
-    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3), validateInline(a4)).asInstanceOf[NonEmptyChunk[Type]]
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    validateInline(a4)
+    NonEmptyChunk(a1, a2, a3, a4).asInstanceOf[NonEmptyChunk[Type]]
+  }
 
-  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A): NonEmptyChunk[Type] =
-    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3), validateInline(a4), validateInline(a5)).asInstanceOf[NonEmptyChunk[Type]]
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    validateInline(a4)
+    validateInline(a5)
+    NonEmptyChunk(a1, a2, a3, a4, a5).asInstanceOf[NonEmptyChunk[Type]]
+  }
 
-  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A, inline a6: A): NonEmptyChunk[Type] =
-    NonEmptyChunk(validateInline(a1), validateInline(a2), validateInline(a3), validateInline(a4), validateInline(a5), validateInline(a6)).asInstanceOf[NonEmptyChunk[Type]]
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A, inline a6: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    validateInline(a4)
+    validateInline(a5)
+    validateInline(a6)
+    NonEmptyChunk(a1, a2, a3, a4, a5, a6).asInstanceOf[NonEmptyChunk[Type]]
+  }
 
   /**
    * Derives an instance of a type class for the new type given an instance
@@ -77,14 +112,14 @@ abstract class NewtypeCustom[A] {
 
   def make(value: A): Validation[String, Type] =
     Validation.fromEitherNonEmptyChunk(
-      assertion.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
+      validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
     ).as(value.asInstanceOf[Type])
 
 
   def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
     ForEach[F].forEach(value) { value =>
       Validation.fromEitherNonEmptyChunk(
-        assertion.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
+        validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
       )
     }.as(value.asInstanceOf[F[Type]])
 }
@@ -94,8 +129,10 @@ abstract class SubtypeCustom[A] extends NewtypeCustom[A] {
 }
 
 abstract class Newtype[A] extends NewtypeCustom[A] {
+  def assertion: Assertion[A] = Assertion.anything
 
-  inline def validateInline(inline value: A): A =
-    ${Macros.validateInlineImpl[A]('assertion, 'value)}
+  protected def validate(value: A): Either[AssertionError, Unit] = assertion(value)
+
+  protected inline def validateInline(inline value: A): Unit = ${Macros.validateInlineImpl[A]('assertion, 'value)}
 
 }

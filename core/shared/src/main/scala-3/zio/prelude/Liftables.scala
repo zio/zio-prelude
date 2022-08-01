@@ -85,7 +85,6 @@ trait Liftables {
         case '{ (${Expr(left)}: Assertion[A]).||(${Expr(right)}) }                       => Some(Assertion.Or(left, right))
         case '{ Assertion.powerOf[A](${LiteralUnlift(value)})($_) }                      => Some(Assertion.powerOf(value)(numericForValue(value)))
         case '{ Assertion.startsWith(${Expr(value)}) }                                   => Some(Assertion.startsWith(value).asInstanceOf[Assertion[A]])
-        case '{ Assertion.predicate[A]($_) } | '{ Assertion.predicate[A]($_, $_) }       => report.throwError("Custom predicates are not supported by Newtype. Please switch to NewtypeCustom.")
         case _ => None
       }
     }

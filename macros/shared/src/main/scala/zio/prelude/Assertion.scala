@@ -76,10 +76,6 @@ object Assertion {
 
   def matches(regexString: String): Assertion[String] = Matches(regexString)
 
-  def predicate[A](f: A => Boolean): Assertion[A] = Predicate(f, "custom function")
-
-  def predicate[A](f: A => Boolean, name: String): Assertion[A] = Predicate(f, name)
-
   /**
    * Matches a [[scala.util.matching.Regex]].
    *
@@ -202,17 +198,6 @@ object Assertion {
         else Left(AssertionError.failure(s"notBetween($min, $max)"))
       }
     }
-  }
-
-  private[prelude] case class Predicate[A](f: A => Boolean, name: String) extends Assertion[A] {
-    protected def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
-      if (!negated) {
-        if (f(a)) Right(())
-        else Left(AssertionError.failure(s"matchesPredicate($name)"))
-      } else {
-        if (!f(a)) Right(())
-        else Left(AssertionError.failure(s"notMatchesPredicate($name)"))
-      }
   }
 
   private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {

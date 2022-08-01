@@ -202,12 +202,6 @@ trait Liftables {
       case q"${A(_)}.startsWith(${value: String})" =>
         Assertion.startsWith(value).asInstanceOf[Assertion[A]]
 
-      case q"${A(_)}.predicate[$_](${tree: Tree})" =>
-        Assertion.Predicate(c.eval(c.Expr[Function1[A, Boolean]](c.untypecheck(tree.duplicate))), show(tree))
-
-      case q"${A(_)}.predicate[$_](${tree: Tree}, ${name: String})" =>
-        Assertion.Predicate(c.eval(c.Expr[Function1[A, Boolean]](c.untypecheck(tree.duplicate))), name)
-
       case q"!${assertion: Assertion[A]}" =>
         Assertion.Not(assertion)
 
