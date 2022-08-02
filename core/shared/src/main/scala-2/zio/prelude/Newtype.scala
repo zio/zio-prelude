@@ -225,7 +225,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
 
   /**
    * This method is used to generate Newtype that can be validated at
-   * compile-time. This must wrap a [[Assertion]] and be assigned to
+   * compile-time. This must wrap a Assertion and be assigned to
    * `def assertion`.
    *
    * For example, here is a refined Newtype for Natural numbers. Natural
@@ -289,7 +289,7 @@ object Newtype {
 
   /**
    * Converts an instance of the underlying type to an instance of the
-   * newtype, ignoring any [[Assertion]].
+   * newtype, ignoring any Assertion.
    */
   def unsafeWrap[T <: Newtype[_]](newtype: T)(value: newtype.Wrapped): newtype.Type = {
     val _ = newtype
@@ -299,7 +299,7 @@ object Newtype {
   /**
    * Converts an instance of a type parameterized on the underlying type
    * to an instance of a type parameterized on the newtype, ignoring any
-   * [[Assertion]]. For example, this could be used to convert a list of
+   * Assertion. For example, this could be used to convert a list of
    * instances of the underlying type to a list of instances of the newtype.
    */
   def unsafeWrapAll[F[_], A, T <: Newtype[A]](newtype: T, value: F[A]): F[T#Type] = {
