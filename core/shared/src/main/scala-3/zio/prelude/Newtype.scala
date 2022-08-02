@@ -5,11 +5,70 @@ import zio.NonEmptyChunk
 import scala.quoted.*
 import zio.prelude.ConsoleUtils.*
 
-abstract class Newtype[A] {
+abstract class NewtypeCustom[A] {
 
   type Type
-  
-  def assertion: Assertion[A] = Assertion.anything
+
+  /**
+   * Function that will used to check runtime values before
+   * lifting them into the newtype. Should be consistent with `validateInline`.
+   */
+  protected def validate(value: A): Either[AssertionError, Unit]
+
+  /**
+   * Function that will be used to check compile-time values before
+   * lifting them into the newtype. Should be consistent with `validate`.
+   */
+  protected inline def validateInline(inline value: A): Unit
+
+  /**
+   * Converts an instance of the underlying type to an instance of the
+   * newtype.
+   */
+  inline def apply(inline a1: A): Type = {
+    validateInline(a1)
+    a1.asInstanceOf[Type]
+  }
+
+  inline def apply(inline a1: A, inline a2: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    NonEmptyChunk(a1, a2).asInstanceOf[NonEmptyChunk[Type]]
+  }
+
+  inline def apply(inline a1: A, inline a2: A, inline a3: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    NonEmptyChunk(a1, a2, a3).asInstanceOf[NonEmptyChunk[Type]]
+  }
+
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    validateInline(a4)
+    NonEmptyChunk(a1, a2, a3, a4).asInstanceOf[NonEmptyChunk[Type]]
+  }
+
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    validateInline(a4)
+    validateInline(a5)
+    NonEmptyChunk(a1, a2, a3, a4, a5).asInstanceOf[NonEmptyChunk[Type]]
+  }
+
+  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A, inline a6: A): NonEmptyChunk[Type] = {
+    validateInline(a1)
+    validateInline(a2)
+    validateInline(a3)
+    validateInline(a4)
+    validateInline(a5)
+    validateInline(a6)
+    NonEmptyChunk(a1, a2, a3, a4, a5, a6).asInstanceOf[NonEmptyChunk[Type]]
+  }
 
   /**
    * Derives an instance of a type class for the new type given an instance
@@ -32,6 +91,12 @@ abstract class Newtype[A] {
   protected def wrap(value: A): Type = value.asInstanceOf[Type]
 
   /**
+   * Converts an instance of a type parameterized on the underlying type to an
+   * instance of a type parameterized on the newtype.
+   */
+  protected def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
+
+  /**
    * Converts an instance of the newtype back to an instance of the
    * underlying type.
    */
@@ -43,125 +108,31 @@ abstract class Newtype[A] {
    * this could be used to convert a list of instances of the newtype back
    * to a list of instances of the underlying type.
    */
-
   def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
 
-  /**
-   * Converts an instance of the underlying type to an instance of the
-   * newtype.
-   */
-  inline def apply(inline value: A): Type =  
-    ${Macros.make_Impl[A, Type]('assertion, 'value)}
-
-  inline def apply(inline value: A, inline values: A*): NonEmptyChunk[Type] = 
-    ${Macros.makeMany_Impl[A, Type]('{assertion}, 'value, 'values)}
-
-  def make(value: A): Validation[String, Type] = 
+  def make(value: A): Validation[String, Type] =
     Validation.fromEitherNonEmptyChunk(
-      assertion.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
+      validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
     ).as(value.asInstanceOf[Type])
 
 
   def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
     ForEach[F].forEach(value) { value =>
       Validation.fromEitherNonEmptyChunk(
-        assertion.apply(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
+        validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
       )
     }.as(value.asInstanceOf[F[Type]])
 }
 
-object Macros extends Liftables {
+abstract class SubtypeCustom[A] extends NewtypeCustom[A] {
+  type Base <: A
+}
 
-  def make_Impl[A: Type, T: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[T] = {
-    import quotes.reflect.*
+abstract class Newtype[A] extends NewtypeCustom[A] {
+  def assertion: Assertion[A] = Assertion.anything
 
+  protected def validate(value: A): Either[AssertionError, Unit] = assertion(value)
 
-    assertionExpr.value match {
-      case Some(assertion) =>
-        a match {
-          case LiteralUnlift(x) =>
-            assertion(x.asInstanceOf[A]) match {
-              case Right(_)    => '{ $a.asInstanceOf[T] }
-              case Left(error) => 
-                report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
-            }
+  protected inline def validateInline(inline value: A): Unit = ${Macros.validateInlineImpl[A]('assertion, 'value)}
 
-          case _               =>
-            report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
-        }
-
-      case None =>
-        assertionExpr.asTerm.underlying match {
-          // The user forgot to use the `inline` keyword
-          case Select(ident @ Ident(name), _) if ident.symbol.declarations.find(_.name == "assertion").exists { expr =>
-              expr.flags.is(Flags.Override)
-            } =>
-
-            val message = s"""$refinementErrorHeader
-
-We were unable to read your ${magenta(name)} assertion at compile-time.
-You must annotate ${yellow("def assertion")} with the ${yellow("inline")} keyword:
-
-    ${yellow("override ") + yellow(underlined("inline")) + yellow(" def assertion = ???")}.
-            """
-            report.errorAndAbort(message)
-
-          case Select(ident @ Ident(name), "assertion") if ident.tpe <:< TypeRepr.of[Newtype[_]]=> 
-            '{ $a.asInstanceOf[T] }
-
-          case other => 
-            val source = scala.util.Try(assertionExpr.asTerm.pos.sourceCode.get).getOrElse(assertionExpr.show)
-            val message = s"""$refinementErrorHeader
-
-We were unable to read your assertion at compile-time.
-
-You must either define your assertion directly or refer to other inline definitions:
-
-    ${yellow("override inline def assertion = greaterThan(10) && lessThan(100)")}.
-
-    or
-
-    ${yellow("inline def extracted = greaterThan(10) && lessThan(100)")}.
-    ${yellow("override inline def assertion = extracted")}.
-            """
-            report.errorAndAbort(message)
-        }
-    }
-  }
-
-  def makeMany_Impl[A: Type, T: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A], as: Expr[Seq[A]])(using Quotes
-  ): Expr[NonEmptyChunk[T]] = {
-    import quotes.reflect.*
-
-    assertionExpr.value match {
-      case Some(assertion) =>
-        as match {
-          case Varargs(exprs) =>
-            val validated = exprs.map {
-              case LiteralUnlift(x) => assertion(x.asInstanceOf[A]).left.map(_.render(x.toString))
-              case _ => report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
-            }
-
-            val (errors, _) = validated.partitionMap(identity)
-
-            // val rendered = ${dim("assertion =")} ${assertion}
-
-            if (errors.nonEmpty)
-               report.errorAndAbort(s"""$refinementErrorHeader
-${errors.mkString("\n")}
-""")
-
-            '{ NonEmptyChunk($a, $as*).asInstanceOf[NonEmptyChunk[T]] }
-
-          case _ =>
-              report.errorAndAbort(s"NO VARARGS!?")
-        }
-      
-      case None =>
-        report.errorAndAbort(s"NO REFINEMENT!?")
-    }
-  }
-
-  private val refinementErrorHeader =
-    s"${Console.BOLD + Console.RED + Console.REVERSED} Assertion Failed ${Console.RESET}"
 }

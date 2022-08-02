@@ -163,7 +163,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
   type Wrapped = A
 
   def assertion: QuotedAssertion[A] = new QuotedAssertion[A] {
-    override def assertion: Assertion[A] = Assertion.anything
+    def run(value: A): Either[AssertionError, Unit] = Assertion.anything(value)
   }
 
   /**
@@ -225,7 +225,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
 
   /**
    * This method is used to generate Newtype that can be validated at
-   * compile-time. This must wrap a [[Assertion]] and be assigned to
+   * compile-time. This must wrap a Assertion and be assigned to
    * `def assertion`.
    *
    * For example, here is a refined Newtype for Natural numbers. Natural
@@ -256,6 +256,22 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
   def assert(assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.assert_impl[A]
 
   /**
+   * This method is used as an escape hatch for `assert` to allow Newtypes to use custom functions.
+   * If at all possible, you should use [[assert]] instead.
+   *
+   * This will use whitebox.Context.eval under the hood, so all limitations of that function apply here.
+   * See here for details: https://github.com/scala/scala/blob/2.13.x/src/reflect/scala/reflect/macros/Evals.scala#L69
+   *
+   * IMPORTANT: Due to the macro machinery powering this feature, you must be
+   * sure to NOT ANNOTATE `def assertion` with a type (`QuotedAssertion`). If
+   * you do so, the macro will not be able to run the provided assertion at
+   * compile-time and will fail with a message containing this very same
+   * information.
+   */
+  def assertCustom(f: A => Either[AssertionError, Unit]): QuotedAssertion[A] =
+    macro zio.prelude.Macros.assertCustom_impl[A]
+
+  /**
    * Converts an instance of a type parameterized on the underlying type
    * to an instance of a type parameterized on the newtype. For example,
    * this could be used to convert a list of instances of the underlying
@@ -273,7 +289,7 @@ object Newtype {
 
   /**
    * Converts an instance of the underlying type to an instance of the
-   * newtype, ignoring any [[Assertion]].
+   * newtype, ignoring any Assertion.
    */
   def unsafeWrap[T <: Newtype[_]](newtype: T)(value: newtype.Wrapped): newtype.Type = {
     val _ = newtype
@@ -283,7 +299,7 @@ object Newtype {
   /**
    * Converts an instance of a type parameterized on the underlying type
    * to an instance of a type parameterized on the newtype, ignoring any
-   * [[Assertion]]. For example, this could be used to convert a list of
+   * Assertion. For example, this could be used to convert a list of
    * instances of the underlying type to a list of instances of the newtype.
    */
   def unsafeWrapAll[F[_], A, T <: Newtype[A]](newtype: T, value: F[A]): F[T#Type] = {

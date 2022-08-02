@@ -1,5 +1,7 @@
 package zio.prelude
 
+import scala.quoted._
+
 package object newtypes {
 
   object Sum extends SubtypeF
@@ -105,10 +107,10 @@ package object newtypes {
 
   type FailureOut[+A] = FailureOut.Type[A]
 
+  type Natural = Natural.Type
   object Natural extends Subtype[Int] {
 
-    override inline def assertion: Assertion[Int] =
-      Assertion.greaterThanOrEqualTo(0)
+    override inline def assertion = Assertion.greaterThanOrEqualTo(0)
 
     val one: Natural =
       Natural(1)
@@ -116,17 +118,20 @@ package object newtypes {
     val zero: Natural =
       Natural(0)
 
+    val max: Natural =
+      Natural(Int.MaxValue)
+
     def successor(n: Natural): Natural =
       wrap(n + 1)
 
     def times(x: Natural, y: Natural): Natural = {
       val product = x * y
-      if (x == 0 || product / x != y) Natural(Int.MaxValue) else wrap(product)
+      if (x == 0 || product / x != y) max else wrap(product)
     }
 
     def plus(x: Natural, y: Natural): Natural = {
       val sum = x + y
-      if (sum < 0) Natural(Int.MaxValue) else wrap(sum)
+      if (sum < 0) max else wrap(sum)
     }
 
     def minus(x: Natural, y: Natural): Natural = {
@@ -137,6 +142,4 @@ package object newtypes {
     private[prelude] def unsafeMake(n: Int): Natural =
       wrap(n)
   }
-
-  type Natural = Natural.Type
 }
