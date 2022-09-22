@@ -203,6 +203,16 @@ object AssociativeFlatten {
     }
 
   /**
+   * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZSTM`.
+   */
+  implicit def ZSTMIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
+    new IdentityFlatten[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
+      def any: ZSTM[R, E, Any] = ZSTM.unit
+
+      def flatten[A](ffa: ZSTM[R, E, ZSTM[R, E, A]]): ZSTM[R, E, A] = ffa.flatten
+    }
+
+  /**
    * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZStream`.
    */
   implicit def ZStreamIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =

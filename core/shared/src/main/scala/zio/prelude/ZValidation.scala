@@ -5,6 +5,8 @@ import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
 
+import newtypes.Both
+
 /**
  * `ZValidation` represents either a success of type `A` or a collection of one
  * or more errors of type `E` along with in either case a log with entries of
@@ -231,6 +233,15 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(Left(_), Right(_))
 
   /**
+   * Transforms this `ZValidation` to an `Either`, aggregating errors using provided `Associative` instance, discarding the log.
+   */
+  final def toEitherAssociative[E1 >: E](implicit A: Associative[E1]): Either[E1, A] =
+    self match {
+      case Failure(_, errors) => Left(errors.reduceMap[E1](identity))
+      case Success(_, value)  => Right(value)
+    }
+
+  /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
    */
   final def toEitherMultiSet: Either[NonEmptyMultiSet[E], A] =
@@ -265,6 +276,15 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   final def toZIO: IO[E, A] =
     self.fold(
       nec => ZIO.failCause(nec.reduceMapLeft(e => zio.Cause.fail(e))((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
+      ZIO.succeedNow
+    )
+
+  /**
+   * Transforms this `ZValidation` to an `ZIO` effect, aggregating errors using provided `Associative` instance, discarding the log.
+   */
+  final def toZIOAssociative[E1 >: E](implicit A: Associative[E1]): IO[E1, A] =
+    self.fold(
+      nec => ZIO.fail(nec.reduceMap[E1](identity)),
       ZIO.succeedNow
     )
 

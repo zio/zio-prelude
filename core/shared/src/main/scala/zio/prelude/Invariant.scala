@@ -142,6 +142,15 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
+   * The `Covariant` (and thus `Invariant`) for `Function0`
+   */
+  implicit lazy val Function0Covariant: Covariant[Function0] =
+    new Covariant[Function0] {
+      override def map[A, B](f: A => B): (() => A) => () => B =
+        function => () => f(function())
+    }
+
+  /**
    * The `Covariant` (and thus `Invariant`) for `Function1`
    */
   implicit def Function1Covariant[T]: Covariant[({ type lambda[+x] = T => x })#lambda] =

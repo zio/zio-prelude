@@ -260,4 +260,14 @@ def sumProd[F[+_]: ForEach, A](as: F[A])(implicit sum: Identity[Sum[A]], product
 
 As you can see by using `foldMap` with the functional abstractions in ZIO Prelude for describing ways of combining concrete types we can implement folds like this in an extremely high level and compositional way.
 
+One common variant of a fold that can be particularly useful is `concatenate`, which allows us to combine all the elements of a collection into one using an `Identity` instance already defined for the element type. For example, here is how we could use it to combine a list of strings:
+
+```scala
+val strings = List("Hello", ", ", "World", "!")
+
+strings.concatenate
+```
+
+Note that as with other extension methods in ZIO Prelude we need to do `import zio.prelude._` to bring these extension methods into scope.
+
 In summary, `ForEach` is one of the most useful abstractions in ZIO Prelude in terms of providing a very large number of practically useful operators for implementing a single method. So if you are implementing your own parameterized type that contains zero or more values of the type it is parameterized on then defining a `ForEach` instance is a great "quick win" to immediately add a lot of functionality to your data type.
