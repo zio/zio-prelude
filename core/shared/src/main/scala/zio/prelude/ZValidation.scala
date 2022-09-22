@@ -5,8 +5,6 @@ import zio.{Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
 
-import newtypes.Both
-
 /**
  * `ZValidation` represents either a success of type `A` or a collection of one
  * or more errors of type `E` along with in either case a log with entries of
