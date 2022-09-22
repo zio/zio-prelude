@@ -88,7 +88,7 @@
   random.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
     console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }
-<span class="hljs-comment">// greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] = zio.ZIO$FlatMap@5f5bb974</span>
+<span class="hljs-comment">// greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] = zio.ZIO$FlatMap@438cd957</span>
 </code></pre>
 <p>This is very understandable.</p>
 <p>We want to perform a second <code>ZIO</code> workflow, in this case printing to the console, based on the result of the first workflow. So we use the <code>map</code> operator, which is described by the <code>Covariant</code> abstraction, to get the success value of the first workflow and transform it with a function.</p>
@@ -103,7 +103,7 @@
   random.nextIntBounded(<span class="hljs-number">100</span>).map { n =&gt;
     console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }.flatten
-<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@3c2c851b</span>
+<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@77224288</span>
 </code></pre>
 <p>Now we have eliminated the nested workflows. This workflow will do exactly what we want, first generating a random number and then printing it to the console.</p>
 <p>Of course if we are working with <code>ZIO</code> we quickly learn to use the <code>flatMap</code> operator, which just combines <code>map</code> and <code>flatten</code>.</p>
@@ -111,7 +111,7 @@
   random.nextIntBounded(<span class="hljs-number">100</span>).flatMap { n =&gt;
     console.putStrLn(<span class="hljs-string">s"The number is <span class="hljs-subst">$n</span>"</span>)
   }
-<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@45be48d0</span>
+<span class="hljs-comment">// greet: ZIO[Random with Console, IOException, Unit] = zio.ZIO$FlatMap@5d5e5b8</span>
 </code></pre>
 <p>The <code>flatMap</code> operator is extremely convenient, especially in combination with Scala's syntax for for comprehensions. However, we are now in a position to see that there isn't really anything special about the <code>flatMap</code> operator itself.</p>
 <p>The <code>flatMap</code> operator is just a combination of <code>map</code> and <code>flatten</code> and <code>map</code> is a very basic operator defined on all covariant data types. The real work here is in the <code>flatten</code> operator.</p>
