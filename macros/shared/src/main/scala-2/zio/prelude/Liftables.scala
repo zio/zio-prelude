@@ -28,8 +28,7 @@ trait Liftables {
       case Assertion.Regex.Whitespace(reversed)        => q"$AssertionPrefix.Regex.Whitespace($reversed)"
       case Assertion.Regex.Digit(reversed)             => q"$AssertionPrefix.Regex.Digit($reversed)"
       case Assertion.Regex.Literal(char)               => q"$AssertionPrefix.Regex.Literal($char)"
-      case Assertion.Regex.CharacterSet(set, reversed) =>
-        q"$AssertionPrefix.Regex.CharacterSet(Set(..$set), $reversed)"
+      case Assertion.Regex.CharacterSet(set, reversed) => q"$AssertionPrefix.Regex.CharacterSet(Set(..$set), $reversed)"
       case Assertion.Regex.Range(start, end, reversed) => q"$AssertionPrefix.Regex.Range($start, $end, $reversed)"
       case Assertion.Regex.Start                       => q"$AssertionPrefix.Regex.Start"
       case Assertion.Regex.Repeat(regex, min, max)     => q"$AssertionPrefix.Regex.Repeat($regex, $min, $max)"

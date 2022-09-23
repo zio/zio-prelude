@@ -117,6 +117,12 @@ object GenFs {
         Gens.parSeq(z, a)
     }
 
+  def these[R <: Sized, A](a: Gen[R, A]): GenF[R, ({ type lambda[+b] = These[A, b] })#lambda] =
+    new GenF[R, ({ type lambda[+b] = These[A, b] })#lambda] {
+      def apply[R1 <: R, B](b: Gen[R1, B])(implicit trace: Trace): Gen[R1, These[A, B]] =
+        Gens.these(a, b)
+    }
+
   /**
    * A generator of `Try` values.
    */

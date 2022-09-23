@@ -57,7 +57,7 @@ trait Liftables {
       }
     }
   }
-  
+
   given [A](using Type[A]): FromExpr[Assertion[A]] with {
     def unapply(assertion: Expr[Assertion[A]])(using Quotes): Option[Assertion[A]] = {
       import quotes.reflect.*
