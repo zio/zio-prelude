@@ -22,52 +22,46 @@ addCommandAlias(
   "; scalafmtSbtCheck; scalafmtCheckAll; Test/compile; compile:scalafix --check; test:scalafix --check"
 )
 
-addCommandAlias(
-  "testJVM",
-  ";coreTestsJVM/test;experimentalTestsJVM/test;scalaParallelCollections/test"
-)
-addCommandAlias(
-  "testJS",
-  ";coreTestsJS/test;experimentalTestsJS/test"
-)
-addCommandAlias(
-  "testNative",
-  ";lawsNative/test;experimentalLawsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
+val zioVersion = "1.0.17"
+
+val projectsCommon = List(
+  core,
+  coreTests,
+  examples,
+  experimental,
+  experimentalLaws,
+  experimentalTests,
+  laws,
+  macros
 )
 
-val zioVersion = "1.0.16"
+val projectsJvmOnly = List[ProjectReference](
+  benchmarks,
+  docs,
+  scalaParallelCollections
+)
+
+lazy val rootJVM = project
+  .in(file("target/rootJVM"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.map(_.jvm: ProjectReference): _*)
+  .aggregate(projectsJvmOnly: _*)
+
+lazy val rootJS = project
+  .in(file("target/rootJS"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.map(_.js: ProjectReference): _*)
+
+lazy val rootNative = project
+  .in(file("target/rootNative"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.map(_.native: ProjectReference): _*)
 
 lazy val root = project
   .in(file("."))
-  .settings(
-    publish / skip := true,
-    unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
-  )
-  .aggregate(
-    benchmarks,
-    coreJS,
-    coreJVM,
-    coreNative,
-    coreTestsJS,
-    coreTestsJVM,
-    docs,
-    examplesJVM,
-    experimentalJS,
-    experimentalJVM,
-    experimentalNative,
-    experimentalLawsJS,
-    experimentalLawsJVM,
-    experimentalLawsNative,
-    experimentalTestsJS,
-    experimentalTestsJVM,
-    lawsJS,
-    lawsJVM,
-    lawsNative,
-    macrosJS,
-    macrosJVM,
-    macrosNative,
-    scalaParallelCollections
-  )
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
+  .aggregate(projectsJvmOnly: _*)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
@@ -82,24 +76,13 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       "dev.zio" %%% "zio-streams" % zioVersion
     )
   )
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(macros)
 
-lazy val coreJS = core.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val coreJVM = core.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
-
-lazy val coreNative = core.native
-  .settings(nativeSettings)
-
-lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
+lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core-tests"))
   .settings(stdSettings("zio-prelude-tests"))
   .settings(crossProjectSettings)
@@ -107,19 +90,14 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .settings(buildInfoSettings("zio.prelude.tests"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(laws)
   .settings(publish / skip := true)
-
-lazy val coreTestsJS = coreTests.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val coreTestsJVM = coreTests.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
 
 lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("laws"))
@@ -130,21 +108,13 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(core)
-
-lazy val lawsJS = laws.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val lawsJVM = laws.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
-
-lazy val lawsNative = laws.native
-  .settings(nativeSettings)
 
 lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("macros"))
@@ -153,17 +123,10 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(macroDefinitionSettings)
   .settings(buildInfoSettings("zio.prelude.macros"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings(dottySettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
-
-lazy val macrosJS = macros.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-
-lazy val macrosJVM = macros.jvm
-  .settings(dottySettings)
-
-lazy val macrosNative = macros.native
-  .settings(nativeSettings)
 
 lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental"))
@@ -172,20 +135,12 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental"))
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
-
-lazy val experimentalJS = experimental.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val experimentalJVM = experimental.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
-
-lazy val experimentalNative = experimental.native
-  .settings(nativeSettings)
 
 lazy val experimentalLaws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental-laws"))
@@ -195,43 +150,30 @@ lazy val experimentalLaws = crossProject(JSPlatform, JVMPlatform, NativePlatform
   .settings(buildInfoSettings("zio.prelude.experimental.laws"))
   .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
 
-lazy val experimentalLawsJS = experimentalLaws.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val experimentalLawsJVM = experimentalLaws.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
-
-lazy val experimentalLawsNative = experimentalLaws.native
-  .settings(nativeSettings)
-
-lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform)
+lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental-tests"))
   .dependsOn(experimentalLaws)
   .settings(stdSettings("zio-prelude-experimental-tests"))
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.prelude.experimental.tests"))
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
-
-lazy val experimentalTestsJS = experimentalTests.js
-  .settings(jsSettings)
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-
-lazy val experimentalTestsJVM = experimentalTests.jvm
-  .settings(dottySettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
 
 lazy val scalaParallelCollections = project
   .in(file("scala-parallel-collections"))
-  .dependsOn(coreJVM % "compile->compile;test->test", coreTestsJVM % "test->test")
+  .dependsOn(core.jvm % "compile->compile;test->test", coreTests.jvm % "test->test")
   .settings(stdSettings("zio-prelude-scala-parallel-collections"))
   .settings(buildInfoSettings("zio.prelude.scalaparallelcollections"))
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
@@ -263,7 +205,7 @@ lazy val benchmarks = project
       "org.typelevel" %% "cats-core" % "2.8.0"
     )
   )
-  .dependsOn(coreJVM)
+  .dependsOn(core.jvm)
   .enablePlugins(JmhPlugin)
 
 lazy val docs = project
@@ -273,14 +215,21 @@ lazy val docs = project
     moduleName                                 := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(coreJVM, experimentalJVM),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
+      core.jvm,
+      experimental.jvm,
+      experimentalLaws.jvm,
+      laws.jvm,
+      macros.jvm,
+      scalaParallelCollections
+    ),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
     docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
   .settings(macroDefinitionSettings)
-  .dependsOn(coreJVM, experimentalJVM, lawsJVM)
+  .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, macros.jvm, scalaParallelCollections)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val examples =
@@ -291,6 +240,3 @@ lazy val examples =
     .settings(crossProjectSettings)
     .settings(macroExpansionSettings)
     .settings(publish / skip := true)
-
-lazy val examplesJVM = examples.jvm
-  .settings(dottySettings)

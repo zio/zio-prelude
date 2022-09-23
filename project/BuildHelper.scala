@@ -68,7 +68,6 @@ object BuildHelper {
     )
 
   val dottySettings = Seq(
-    crossScalaVersions += Scala3,
     scalacOptions --= {
       if (scalaVersion.value == Scala3)
         Seq("-Xfatal-warnings")
@@ -91,10 +90,6 @@ object BuildHelper {
         old
       }
     }
-  )
-
-  val scalaReflectSettings = Seq(
-    libraryDependencies ++= Seq("dev.zio" %%% "izumi-reflect" % "1.0.0-M10")
   )
 
   // Keep this consistent with the version in .core-tests/shared/src/test/scala/REPLSpec.scala
@@ -285,15 +280,12 @@ object BuildHelper {
   )
 
   def jsSettings = Seq(
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time"      % "2.4.0",
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.4.0"
+    Test / fork := crossProjectPlatform.value == JVMPlatform // set fork to `true` on JVM to improve log readability, JS and Native need `false`
   )
 
   def nativeSettings = Seq(
-    Test / test             := (Test / compile).value,
-    doc / skip              := true,
-    Compile / doc / sources := Seq.empty,
-    crossScalaVersions -= Scala3
+    Test / test := (Test / compile).value,
+    Test / fork := crossProjectPlatform.value == JVMPlatform // set fork to `true` on JVM to improve log readability, JS and Native need `false`
   )
 
   val scalaReflectTestSettings: List[Setting[_]] = List(
