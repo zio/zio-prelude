@@ -220,7 +220,6 @@ lazy val docs = project
       experimental.jvm,
       experimentalLaws.jvm,
       laws.jvm,
-      macros.jvm,
       scalaParallelCollections
     ),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
@@ -229,7 +228,7 @@ lazy val docs = project
     docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
   .settings(macroDefinitionSettings)
-  .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, macros.jvm, scalaParallelCollections)
+  .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val examples =
