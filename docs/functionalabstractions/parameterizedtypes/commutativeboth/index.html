@@ -77,35 +77,69 @@
 <p>We can see this because to produce a tuple <code>(A, B)</code> we need to run both the left value and the right value and to do it in a way that order doesn't matter we need to run the left value and the right value in parallel. This doesn't necessarily mean we are actually forking separate fibers to run the left and right values but it does mean that we run the left and right values in a way that the result does not depend on the order in which they are run.</p>
 <p>To get a better sense of what it means for a combining operation on parameterized types to be commutative, let's start with looking at why the <code>zip</code> operator on <code>ZIO</code> is not commutative.</p>
 <pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> zio._
-<span class="hljs-keyword">import</span> zio.console._
 
 <span class="hljs-keyword">import</span> java.io.<span class="hljs-type">IOException</span>
 
-<span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
-  console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@3eeca0ce</span>
+<span class="hljs-keyword">val</span> helloZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"Hello"</span>) &lt;*&gt; <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// helloZIO: ZIO[Console, IOException, Unit] = OnSuccess(</span>
+<span class="hljs-comment">//   trace = "repl.MdocSession.MdocApp0.helloZIO(commutativeboth.md:29)",</span>
+<span class="hljs-comment">//   first = Stateful(</span>
+<span class="hljs-comment">//     trace = "repl.MdocSession.MdocApp0.helloZIO(commutativeboth.md:29)",</span>
+<span class="hljs-comment">//     onState = zio.FiberRef$unsafe$$anon$2$$Lambda$15815/213980981@4bb34204</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   successK = zio.ZIO$$Lambda$15817/561449230@487f9362</span>
+<span class="hljs-comment">// )</span>
 
-<span class="hljs-keyword">val</span> zioHello: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
-  console.putStrLn(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; console.putStrLn(<span class="hljs-string">"Hello"</span>)
-<span class="hljs-comment">// zioHello: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@2042dc71</span>
+<span class="hljs-keyword">val</span> zioHello: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"Hello"</span>)
+<span class="hljs-comment">// zioHello: ZIO[Console, IOException, Unit] = OnSuccess(</span>
+<span class="hljs-comment">//   trace = "repl.MdocSession.MdocApp0.zioHello(commutativeboth.md:33)",</span>
+<span class="hljs-comment">//   first = Stateful(</span>
+<span class="hljs-comment">//     trace = "repl.MdocSession.MdocApp0.zioHello(commutativeboth.md:33)",</span>
+<span class="hljs-comment">//     onState = zio.FiberRef$unsafe$$anon$2$$Lambda$15815/213980981@7d2ab60</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   successK = zio.ZIO$$Lambda$15817/561449230@333fbcdf</span>
+<span class="hljs-comment">// )</span>
 </code></pre>
 <p>If the <code>zip</code> operator was commutative these two <code>ZIO</code> workflows would be the same. But they obviously are not.</p>
 <p>The first will print <code>Hello</code> to the console on one line followed by <code>ZIO</code> on the next whereas the second will print <code>ZIO</code> to the console followed by <code>Hello</code>. We can easily observe this by running the program ourselves or using a test implementation of the <code>Console</code> service like <code>TestConsole</code> from ZIO Test.</p>
 <p>We can also see this in the context of failures.</p>
-<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> failZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
-  <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>)) &lt;*&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// failZIO: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$Fail@7a6db954</span>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> failZIO: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>)) &lt;*&gt; <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// failZIO: ZIO[Console, IOException, Unit] = OnSuccess(</span>
+<span class="hljs-comment">//   trace = "repl.MdocSession.MdocApp0.failZIO(commutativeboth.md:40)",</span>
+<span class="hljs-comment">//   first = OnSuccess(</span>
+<span class="hljs-comment">//     trace = "repl.MdocSession.MdocApp0.failZIO(commutativeboth.md:40)",</span>
+<span class="hljs-comment">//     first = GenerateStackTrace(</span>
+<span class="hljs-comment">//       trace = "repl.MdocSession.MdocApp0.failZIO(commutativeboth.md:40)"</span>
+<span class="hljs-comment">//     ),</span>
+<span class="hljs-comment">//     successK = zio.ZIO$$$Lambda$15819/1381316856@624d6bde</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   successK = zio.ZIO$$Lambda$15817/561449230@569d0076</span>
+<span class="hljs-comment">// )</span>
 
 <span class="hljs-keyword">val</span> zioFail: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
-  console.putStrLn(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>))
-<span class="hljs-comment">// zioFail: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$FlatMap@606dbcc5</span>
+  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>) &lt;*&gt; <span class="hljs-type">ZIO</span>.fail(<span class="hljs-keyword">new</span> <span class="hljs-type">IOException</span>(<span class="hljs-string">"Fail"</span>))
+<span class="hljs-comment">// zioFail: ZIO[Console, IOException, (Unit, Unit)] = OnSuccess(</span>
+<span class="hljs-comment">//   trace = "repl.MdocSession.MdocApp0.zioFail(commutativeboth.md:44)",</span>
+<span class="hljs-comment">//   first = Stateful(</span>
+<span class="hljs-comment">//     trace = "repl.MdocSession.MdocApp0.zioFail(commutativeboth.md:44)",</span>
+<span class="hljs-comment">//     onState = zio.FiberRef$unsafe$$anon$2$$Lambda$15815/213980981@4406286e</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   successK = zio.ZIO$$Lambda$15817/561449230@a91bd75</span>
+<span class="hljs-comment">// )</span>
 </code></pre>
 <p>Again if the <code>zip</code> operator was commutative these two <code>ZIO</code> workflows should be the same but they are not. The first program will fail immediately and never print <code>ZIO</code> to the console, whereas the second will print <code>ZIO</code> to the console and then fail.</p>
 <p>What would a commutative version of this operator be? It would have to run both the left and right values at the same time so they both had the same opportunity to run.</p>
 <p>The <code>zipPar</code> operator on <code>ZIO</code> does just this.</p>
-<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> helloZIOPar: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, (<span class="hljs-type">Unit</span>, <span class="hljs-type">Unit</span>)] =
-  console.putStrLn(<span class="hljs-string">"Hello"</span>) &lt;&amp;&gt; console.putStrLn(<span class="hljs-string">"ZIO"</span>)
-<span class="hljs-comment">// helloZIOPar: ZIO[Console, IOException, (Unit, Unit)] = zio.ZIO$GetForkScope@3b5c8ad6</span>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> helloZIOPar: <span class="hljs-type">ZIO</span>[<span class="hljs-type">Console</span>, <span class="hljs-type">IOException</span>, <span class="hljs-type">Unit</span>] =
+  <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"Hello"</span>) &lt;&amp;&gt; <span class="hljs-type">Console</span>.printLine(<span class="hljs-string">"ZIO"</span>)
+<span class="hljs-comment">// helloZIOPar: ZIO[Console, IOException, Unit] = Dynamic(</span>
+<span class="hljs-comment">//   trace = "repl.MdocSession.MdocApp0.helloZIOPar(commutativeboth.md:51)",</span>
+<span class="hljs-comment">//   update = 1L,</span>
+<span class="hljs-comment">//   f = zio.ZIO$$$Lambda$15854/874253888@38b3462</span>
+<span class="hljs-comment">// )</span>
 </code></pre>
 <p>Now <code>Hello</code> and <code>World</code> will be printed to the console at the same time. For any given execution one will appear before the other but they each have the same opportunity to appear first and both this and the version with the order reversed describe the same <code>ZIO</code> workflow.</p>
 <p>This interpretation of <code>zipPar</code> as running the left and right values on separate fibers is the most natural one but not the only one. The left and right values can be run in parallel as long as the result of running one does not depend on the result of running the other and information from both has equal opportunity to be included in the result.</p>
@@ -138,7 +172,7 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">both</span></span>[<span class="hljs-type">A</span>, <span class="hljs-type">B</span>](as: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">A</span>], bs: =&gt; <span class="hljs-type">List</span>[<span class="hljs-type">B</span>]): <span class="hljs-type">List</span>[(<span class="hljs-type">A</span>, <span class="hljs-type">B</span>)] =
       as.zip(bs)
   }
-<span class="hljs-comment">// ListCommutativeBoth: CommutativeBoth[List] = repl.MdocSession$MdocApp0$$anon$1@dcb6898</span>
+<span class="hljs-comment">// ListCommutativeBoth: CommutativeBoth[List] = repl.MdocSession$MdocApp0$$anon$1@3dab1ad5</span>
 </code></pre>
 <p>Again we are not forking any fibers here but values from the left list and the right list have an equal opportunity to be included in the zipped list.</p>
 <p>We can see this if we zip together two lists of different lengths.</p>
