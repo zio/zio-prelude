@@ -46,6 +46,10 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Check generation of ScalaDoc
         run: ./sbt +Test/doc
 
@@ -105,6 +109,10 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Run tests
         run: ./sbt root${{ matrix.scala }}/test
 
@@ -127,6 +135,10 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Test on different JVM versions
         run: ./sbt root${{ matrix.platform }}/test
 
@@ -149,6 +161,10 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Test on different Scala target platforms
         run: ./sbt root${{ matrix.platform }}/test
 
