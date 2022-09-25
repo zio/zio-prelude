@@ -21,8 +21,12 @@ jobs:
         uses: actions/checkout@v3.0.2
         with:
           fetch-depth: 0
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: temurin
+          java-version: 17
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Lint code
@@ -30,12 +34,16 @@ jobs:
 
   doc:
     runs-on: ubuntu-20.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3.0.2
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: temurin
+          java-version: 17
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Check generation of ScalaDoc
@@ -47,8 +55,12 @@ jobs:
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3.0.2
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: temurin
+          java-version: 8 # ensure it works on 8 because we publish for 8
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Check that building packages works
@@ -60,8 +72,12 @@ jobs:
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3.0.2
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: temurin
+          java-version: 8 # ensure it works on 8 because we publish for 8
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Check Website Generation
@@ -73,19 +89,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: ['2.11.12', '2.12.16', '2.13.8', '3.2.0']
+        scala: ['211', '212', '213', '3']
+        java: ['17']
         platform: ['JVM']
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3.0.2
         with:
           fetch-depth: 0
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Run tests
-        run: ./sbt ++${{ matrix.scala }} root${{ matrix.platform }}/test
+        run: ./sbt root${{ matrix.scala }}/test
 
   testJvms:
     runs-on: ubuntu-20.04
@@ -98,10 +119,12 @@ jobs:
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3.0.2
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
         with:
+          distribution: temurin
           java-version: ${{ matrix.java }}
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Test on different JVM versions
@@ -113,12 +136,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        java: ['17']
         platform: ['JS', 'Native']
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3.0.2
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Test on different Scala target platforms
@@ -141,8 +169,12 @@ jobs:
         uses: actions/checkout@v3.0.2
         with:
           fetch-depth: 0
-      - name: Setup Scala and Java
-        uses: olafurpg/setup-scala@v13
+      - name: Setup Java
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: temurin
+          java-version: 8 # publish for 8
+          check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Release artifacts

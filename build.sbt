@@ -57,11 +57,23 @@ lazy val rootNative = project
   .settings(publish / skip := true)
   .aggregate(projectsCommon.map(_.native: ProjectReference): _*)
 
-lazy val root = project
-  .in(file("."))
+lazy val root211 = project
+  .in(file("target/root211"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
+  .aggregate(scalaParallelCollections)
+
+lazy val root212 = project
+  .in(file("target/root212"))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
   .aggregate(projectsJvmOnly: _*)
+
+lazy val root213 = root212
+
+lazy val root3 = root212
+
+lazy val root = root212
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
@@ -173,7 +185,7 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
 
 lazy val scalaParallelCollections = project
   .in(file("scala-parallel-collections"))
-  .dependsOn(core.jvm % "compile->compile;test->test", coreTests.jvm % "test->test")
+  .dependsOn(core.jvm, coreTests.jvm % "test->test")
   .settings(stdSettings("zio-prelude-scala-parallel-collections"))
   .settings(buildInfoSettings("zio.prelude.scalaparallelcollections"))
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
@@ -211,6 +223,7 @@ lazy val benchmarks = project
 lazy val docs = project
   .in(file("zio-prelude-docs"))
   .settings(
+    scalaVersion                               := BuildHelper.Scala213,
     publish / skip                             := true,
     moduleName                                 := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
