@@ -20,6 +20,12 @@ jobs:
           distribution: temurin
           java-version: 8 # publish for 8
           check-latest: true
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - run: sbt docs/docusaurusPublishGhpages
         env:
           GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}

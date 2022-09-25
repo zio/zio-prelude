@@ -29,8 +29,14 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Lint code
-        run: ./sbt root213/check
+        run: ./sbt check
 
   doc:
     runs-on: ubuntu-20.04
@@ -46,6 +52,8 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -67,6 +75,12 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Check that building packages works
         run: ./sbt +publishLocal
 
@@ -84,6 +98,12 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Check Website Generation
         run: ./sbt docs/docusaurusCreateSite
 
@@ -109,6 +129,8 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -135,6 +157,8 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -161,6 +185,8 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -193,6 +219,12 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
+      - name: Install libuv
+        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 7
       - name: Release artifacts
         run: ./sbt ci-release
         env:
