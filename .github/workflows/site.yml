@@ -26,6 +26,7 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
+      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - run: sbt docs/docusaurusPublishGhpages
         env:
           GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}

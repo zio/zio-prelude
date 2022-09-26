@@ -67,7 +67,7 @@ lazy val root212 = project
   .in(file("target/root212"))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
-  .aggregate(projectsJvmOnly: _*)
+  .aggregate(benchmarks, scalaParallelCollections)
 
 lazy val root213 = project
   .in(file("target/root213"))
@@ -79,7 +79,7 @@ lazy val root3 = project
   .in(file("target/root3"))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
-  .aggregate(projectsJvmOnly: _*)
+  .aggregate(benchmarks, scalaParallelCollections)
 
 lazy val root = project
   .in(file("."))
