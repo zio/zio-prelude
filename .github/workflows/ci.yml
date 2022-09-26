@@ -36,7 +36,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: Lint code
         run: ./sbt check
 
@@ -60,7 +59,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: Check generation of ScalaDoc
         run: ./sbt +Test/doc
 
@@ -84,7 +82,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: Check that building packages works
         run: ./sbt +publishLocal
 
@@ -108,7 +105,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: Check Website Generation
         run: ./sbt docs/docusaurusCreateSite
 
@@ -140,7 +136,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: tests 2.11
         if: ${{ startsWith(matrix.scala, '2.11.') }}
         run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root211/test
@@ -179,7 +174,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: Test on different JVM versions
         run: ./sbt root${{ matrix.platform }}/test
 
@@ -208,7 +202,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: Test on different Scala target platforms
         run: ./sbt root${{ matrix.platform }}/test
 
@@ -243,7 +236,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, $SBT_PAR), Tags.limit(Tags.Test, $SBT_PAR))" >> ~/.sbt/1.0/build.sbt
       - name: Release artifacts
         run: ./sbt ci-release
         env:
