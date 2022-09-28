@@ -206,7 +206,7 @@ jobs:
 
   ci:
     runs-on: ubuntu-20.04
-    needs: [lint, doc, publishLocal, website, test, testJvms, testPlatforms]
+    needs: [lint, compile, publishLocal, website, test, testJvms, testPlatforms]
     steps:
       - name: Aggregate of lint, and all tests
         run: echo "ci passed"
