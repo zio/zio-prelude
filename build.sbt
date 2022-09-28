@@ -78,14 +78,12 @@ lazy val root213 = project
 lazy val root3 = project
   .in(file("target/root3"))
   .settings(publish / skip := true)
-  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
-  .aggregate(benchmarks, scalaParallelCollections)
+  .aggregate(root212)
 
 lazy val root = project
   .in(file("."))
   .settings(publish / skip := true)
-  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
-  .aggregate(projectsJvmOnly: _*)
+  .aggregate(root213)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))

@@ -63,8 +63,11 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
+      - name: concurrentRestrictions for Native
+        if: ${{ matrix.platform == 'Native') }}
+        run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, 4))" >> ~/.sbt/1.0/build.sbt
       - name: Check all code compiles
-        run: free --si -tmws 10 & ./sbt +root${{ matrix.platform }}/Test/compile
+        run: free --si -tmws 10 & ./sbt "; show concurrentRestrictions; +root${{ matrix.platform }}/Test/compile"
 
   publishLocal:
     runs-on: ubuntu-20.04
