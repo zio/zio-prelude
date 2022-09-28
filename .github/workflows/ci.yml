@@ -41,6 +41,11 @@ jobs:
   compile:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['17']
+        platform: ['JVM', 'JS', 'Native']
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3.0.2
@@ -58,8 +63,8 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - name: Check generation of ScalaDoc
-        run: free --si -tmws 10 & ./sbt +Test/compile
+      - name: Check all code compiles
+        run: free --si -tmws 10 & ./sbt +root${{ matrix.platform }}/Test/compile
 
   publishLocal:
     runs-on: ubuntu-20.04
