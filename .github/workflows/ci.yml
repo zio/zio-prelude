@@ -65,7 +65,7 @@ jobs:
           swap-size-gb: 7
       - name: concurrentRestrictions for Native
         if: ${{ matrix.platform == 'Native' }}
-        run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, 4))" >> ~/.sbt/1.0/build.sbt
+        run: echo "Global / concurrentRestrictions ++= List(Tags.limit(Tags.Compile, 2))" >> ~/.sbt/1.0/build.sbt
       - name: Check all code compiles
         run: free --si -tmws 10 & ./sbt "; show concurrentRestrictions; +root${{ matrix.platform }}/Test/compile"
 
