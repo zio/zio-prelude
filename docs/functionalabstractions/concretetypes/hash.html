@@ -88,11 +88,11 @@
 <span class="hljs-keyword">import</span> zio.test._
 <span class="hljs-keyword">import</span> zio.test.laws._
 
-<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">HashSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ZIOSpecDefault</span> </span>{
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">HashSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DefaultRunnableSpec</span> </span>{
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">spec</span> </span>= suite(<span class="hljs-string">"HashSpec"</span>) {
-    test(<span class="hljs-string">"StringHash"</span>) {
-      <span class="hljs-keyword">val</span> stringGen = <span class="hljs-type">Gen</span>.string
+    testM(<span class="hljs-string">"StringHash"</span>) {
+      <span class="hljs-keyword">val</span> stringGen = <span class="hljs-type">Gen</span>.anyString
       checkAllLaws(<span class="hljs-type">HashLaws</span>)(stringGen)
     }
   }
