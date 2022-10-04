@@ -249,5 +249,11 @@ trait AssociativeFlattenSyntax {
      */
     def flatMap[B](f: A => F[B])(implicit flatten: AssociativeFlatten[F], covariant: Covariant[F]): F[B] =
       flatten.flatten(covariant.map(f)(fa))
+
+    /**
+     * A symbolic alias for `flatMap`.
+     */
+    def >==[B](f: A => F[B])(implicit flatten: AssociativeFlatten[F], covariant: Covariant[F]): F[B] =
+      flatMap(f)
   }
 }
