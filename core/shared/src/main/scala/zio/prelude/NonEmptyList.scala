@@ -44,8 +44,8 @@ sealed trait NonEmptyList[+A] { self =>
     foldRight(that)(cons)
 
   /**
-    * Prepends the specified value to this `NonEmptyList`.
-    */
+   * Prepends the specified value to this `NonEmptyList`.
+   */
   final def ::[A1 >: A](a: A1): NonEmptyList[A1] =
     cons(a, self)
 
@@ -292,8 +292,8 @@ sealed trait NonEmptyList[+A] { self =>
     start + reduceMapLeft(_.toString)((b, a) => b + sep + a.toString) + end
 
   /**
-    * Prepends the specified value to this `NonEmptyList`.
-    */
+   * Prepends the specified value to this `NonEmptyList`.
+   */
   final def prepended[A1 >: A](a: A1): NonEmptyList[A1] =
     cons(a, self)
 
