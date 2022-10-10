@@ -63,6 +63,13 @@ object NonEmptyListSpec extends ZIOSpecDefault {
             actual <-> expected
           }
         },
+        test("::") {
+          check(genInt, genCons) { (a, as) =>
+            val actual   = (a :: NonEmptyList.fromCons(as)).toCons
+            val expected = a :: as
+            actual <-> expected
+          }
+        },
         test("contains") {
           check(genCons, genInt) { (as, a) =>
             NonEmptyList.fromCons(as).contains(a) <-> as.contains(a)
@@ -178,6 +185,11 @@ object NonEmptyListSpec extends ZIOSpecDefault {
         test("mkString") {
           check(genCons, genString, genString, genString) { (as, start, sep, end) =>
             NonEmptyList.fromCons(as).mkString(start, sep, end) <-> as.mkString(start, sep, end)
+          }
+        },
+        test("prepended") {
+          check(genCons, genInt) { (as, a) =>
+            NonEmptyList.fromCons(as).prepended(a).toCons <-> as.prepended(a)
           }
         },
         test("product") {
