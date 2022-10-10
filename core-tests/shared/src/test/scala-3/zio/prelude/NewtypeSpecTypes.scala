@@ -87,4 +87,13 @@ object NewtypeSpecTypes {
   Pin(1000)
   Pin(1000, 1001, 9998, 9999)
 
+  object Palindrome extends NewtypeCustom[String] {
+    protected def validate(value: String) =
+      PalindromeValidator.validate(value)
+
+    protected inline def validateInline(inline value: String) =
+      ${ PalindromeValidator.validateInlineImpl('value) }
+  }
+
+  Palindrome("racecar")
 }

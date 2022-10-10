@@ -16,6 +16,7 @@
 
 package zio.prelude.laws
 
+import zio.Trace
 import zio.prelude._
 import zio.prelude.fx.Cause
 import zio.prelude.newtypes.Natural
@@ -36,7 +37,7 @@ object Gens {
    * A generator of natural numbers inside the specified range: [start, end].
    * The shrinker will shrink toward the lower end of the range ("smallest").
    */
-  def natural(min: Natural, max: Natural): Gen[Any, Natural] =
+  def natural(min: Natural, max: Natural)(implicit trace: Trace): Gen[Any, Natural] =
     Gen.int(min, max).map(Natural.unsafeMake)
 
   def parSeq[R <: Sized, Z <: Unit, A](z: Gen[R, Z], a: Gen[R, A]): Gen[R, ParSeq[Z, A]] = {
@@ -90,6 +91,12 @@ object Gens {
    */
   def state[R, S, A](s: Gen[R, S], a: Gen[R, A]): Gen[R, State[S, A]] =
     Gen.function[R, S, (A, S)](a <*> s).map(State.modify)
+
+  /**
+   * A generator of `These` values.
+   */
+  def these[R <: Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, These[A, B]] =
+    Gen.oneOf(a.map(These.left), b.map(These.right), a.zipWith(b)(These.both))
 
   /**
    * A generator of `Validation` values.

@@ -16,8 +16,8 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{And, AndF, First, Last, Max, Min, Natural, Or, OrF, Prod, Sum}
-import zio.{Chunk, Duration => ZIODuration, NonEmptyChunk}
+import zio.prelude.newtypes.{And, AndF, AndThen, Both, First, Last, Max, Min, Natural, Or, OrF, Prod, Sum}
+import zio.{Cause, Chunk, Duration => ZIODuration, NonEmptyChunk}
 
 import scala.annotation.tailrec
 
@@ -308,6 +308,32 @@ object Associative extends AssociativeLowPriority {
       def combine(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l + r).toChar)
       val identity: Sum[Char]                                  = Sum(0)
       def inverse(l: => Sum[Char], r: => Sum[Char]): Sum[Char] = Sum((l - r).toChar)
+    }
+
+  /**
+   * The `Commutative` and `Identity` instance for `Cause`.
+   */
+  implicit def CauseCommutativeIdentity[A]: Commutative[Both[Cause[A]]] with Identity[Both[Cause[A]]] =
+    new Commutative[Both[Cause[A]]] with Identity[Both[Cause[A]]] {
+      def combine(l: => Both[Cause[A]], r: => Both[Cause[A]]): Both[Cause[A]] = {
+        val lUnwrapped: Cause[A] = l
+        val rUnwrapped: Cause[A] = r
+        Both(lUnwrapped && rUnwrapped)
+      }
+      val identity: Both[Cause[A]]                                            = Both(Cause.empty)
+    }
+
+  /**
+   * The `Identity` instance for `Cause`.
+   */
+  implicit def CauseIdentity[A]: Identity[AndThen[Cause[A]]] =
+    new Identity[AndThen[Cause[A]]] {
+      def combine(l: => AndThen[Cause[A]], r: => AndThen[Cause[A]]): AndThen[Cause[A]] = {
+        val lUnwrapped: Cause[A] = l
+        val rUnwrapped: Cause[A] = r
+        AndThen(lUnwrapped ++ rUnwrapped)
+      }
+      val identity: AndThen[Cause[A]]                                                  = AndThen(Cause.empty)
     }
 
   /**
@@ -1392,7 +1418,7 @@ trait AssociativeSyntax {
    * Provides infix syntax for combining two values with an associative
    * operation.
    */
-  implicit class AssociativeOps[A](l: A) {
+  implicit class AssociativeOps[+A](l: A) {
 
     /**
      * A symbolic alias for `combine`.
@@ -1409,13 +1435,13 @@ trait AssociativeSyntax {
     /**
      * Associatively repeats value 'n' times
      */
-    def repeat(n: Int)(implicit associative: Associative[A]): A =
+    def repeat[A1 >: A](n: Int)(implicit associative: Associative[A1]): A1 =
       associative.repeat(l)(n)
 
     /**
      * Associatively multiplies value 'n' times
      */
-    def multiplyOption(n: Int)(implicit associative: Associative[A]): Option[A] =
+    def multiplyOption[A1 >: A](n: Int)(implicit associative: Associative[A1]): Option[A1] =
       associative.multiplyOption(n)(l)
   }
 
