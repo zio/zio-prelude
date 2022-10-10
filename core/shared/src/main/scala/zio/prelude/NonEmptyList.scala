@@ -292,12 +292,6 @@ sealed trait NonEmptyList[+A] { self =>
     start + reduceMapLeft(_.toString)((b, a) => b + sep + a.toString) + end
 
   /**
-   * Prepends the specified value to this `NonEmptyList`.
-   */
-  final def prepended[A1 >: A](a: A1): NonEmptyList[A1] =
-    cons(a, self)
-
-  /**
    * Returns the product of the elements of this `NonEmptyList`.
    */
   final def product[A1 >: A](implicit A: Associative[Prod[A1]]): A1 =

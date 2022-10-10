@@ -187,11 +187,6 @@ object NonEmptyListSpec extends ZIOSpecDefault {
             NonEmptyList.fromCons(as).mkString(start, sep, end) <-> as.mkString(start, sep, end)
           }
         },
-        test("prepended") {
-          check(genCons, genInt) { (as, a) =>
-            NonEmptyList.fromCons(as).prepended(a).toCons <-> as.prepended(a)
-          }
-        },
         test("product") {
           check(genCons) { as =>
             NonEmptyList.fromCons(as).product <-> as.product
