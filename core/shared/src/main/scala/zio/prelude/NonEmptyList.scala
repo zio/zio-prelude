@@ -44,6 +44,12 @@ sealed trait NonEmptyList[+A] { self =>
     foldRight(that)(cons)
 
   /**
+   * Prepends the specified value to this `NonEmptyList`.
+   */
+  final def ::[A1 >: A](a: A1): NonEmptyList[A1] =
+    cons(a, self)
+
+  /**
    * Returns whether this `NonEmptyList` contains the specified element.
    */
   final def contains[A1 >: A](a: A1)(implicit A: Equal[A1]): Boolean =
@@ -407,8 +413,11 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Converts this `NonEmptyList` to the `::` case of a `List`.
    */
-  final def toCons[A1 >: A]: ::[A1] =
-    reduceMapRight[::[A1]](::(_, Nil))(::(_, _))
+  final def toCons[A1 >: A]: ::[A1] = {
+    import scala.collection.immutable.{:: => cons}
+
+    reduceMapRight[cons[A1]](cons(_, Nil))(cons(_, _))
+  }
 
   /**
    * Renders this `NonEmptyList` as a `String`.

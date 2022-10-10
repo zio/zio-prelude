@@ -63,6 +63,13 @@ object NonEmptyListSpec extends ZIOSpecDefault {
             actual <-> expected
           }
         },
+        test("::") {
+          check(genInt, genCons) { (a, as) =>
+            val actual   = (a :: NonEmptyList.fromCons(as)).toCons
+            val expected = a :: as
+            actual <-> expected
+          }
+        },
         test("contains") {
           check(genCons, genInt) { (as, a) =>
             NonEmptyList.fromCons(as).contains(a) <-> as.contains(a)
