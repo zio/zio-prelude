@@ -168,9 +168,9 @@ object Assertion {
       val result = a.endsWith(suffix)
       if (!negated) {
         if (result) Right(())
-        else Left(AssertionError.Failure(s"startsWith($suffix)"))
+        else Left(AssertionError.Failure(s"endsWith($suffix)"))
       } else {
-        if (result) Left(AssertionError.Failure(s"doesNotStartWith($suffix)"))
+        if (result) Left(AssertionError.Failure(s"doesNotEndWith($suffix)"))
         else Right(())
       }
     }
