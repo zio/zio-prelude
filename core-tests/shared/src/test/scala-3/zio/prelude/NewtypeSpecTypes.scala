@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.Assertion.equalTo
 import zio.prelude.Assertion.Regex.*
 
 object NewtypeSpecTypes {
