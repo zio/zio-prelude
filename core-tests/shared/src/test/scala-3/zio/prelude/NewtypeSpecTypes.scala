@@ -96,4 +96,10 @@ object NewtypeSpecTypes {
   }
 
   Palindrome("racecar")
+
+  object Five extends Newtype[Int] {
+    override inline def assertion = equalTo(5)
+  }
+
+  Five(5)
 }

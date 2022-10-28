@@ -61,29 +61,28 @@ trait Liftables {
   given [A](using Type[A]): FromExpr[Assertion[A]] with {
     def unapply(assertion: Expr[Assertion[A]])(using Quotes): Option[Assertion[A]] = {
       import quotes.reflect.*
-
       assertion match {
         case '{ Assertion.anything }                                                     => Some(Assertion.anything)
-        case '{ Assertion.between[A](${LiteralUnlift(min)}, ${LiteralUnlift(max)})($_) } => Some(Assertion.between(min, max)(orderingForValue(min)))
+        case '{ Assertion.between(${LiteralUnlift(min)}, ${LiteralUnlift(max)})($_) } => Some(Assertion.between(min, max)(orderingForValue(min)))
         case '{ Assertion.contains(${Expr(value)}) }                                     => Some(Assertion.contains(value).asInstanceOf[Assertion[A]])
-        case '{ Assertion.divisibleBy[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.divisibleBy(value)(numericForValue(value)))
+        case '{ Assertion.divisibleBy(${LiteralUnlift(value)})($_) }                  => Some(Assertion.divisibleBy(value)(numericForValue(value)))
         case '{ Assertion.never }                                                        => Some(Assertion.never)
         case '{ Assertion.endsWith(${Expr(value)}) }                                     => Some(Assertion.endsWith(value).asInstanceOf[Assertion[A]])
         case '{ (${Expr(left)}: Assertion[A]).&&(${Expr(right)}) }                       => Some(Assertion.And(left, right))
-        case '{ Assertion.equalTo[A](${LiteralUnlift(value)}) }                          => Some(Assertion.equalTo(value))
-        case '{ Assertion.notEqualTo[A](${LiteralUnlift(value)}) }                       => Some(Assertion.notEqualTo(value))
-        case '{ Assertion.greaterThan[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.greaterThan(value)(orderingForValue(value)))
-        case '{ Assertion.greaterThanOrEqualTo[A](${LiteralUnlift(value)})($_) }         => Some(Assertion.greaterThanOrEqualTo(value)(orderingForValue(value)))
+        case '{ Assertion.equalTo(${LiteralUnlift(value)}) }                          => Some(Assertion.EqualTo(value))
+        case '{ Assertion.notEqualTo(${LiteralUnlift(value)}) }                       => Some(Assertion.notEqualTo(value))
+        case '{ Assertion.greaterThan(${LiteralUnlift(value)})($_) }                  => Some(Assertion.greaterThan(value)(orderingForValue(value)))
+        case '{ Assertion.greaterThanOrEqualTo(${LiteralUnlift(value)})($_) }         => Some(Assertion.greaterThanOrEqualTo(value)(orderingForValue(value)))
         case '{ Assertion.hasLength(${Expr(assertion)}) }                                => Some(Assertion.hasLength(assertion).asInstanceOf[Assertion[A]])
         case '{ Assertion.isEmptyString }                                                => Some(Assertion.isEmptyString.asInstanceOf[Assertion[A]])
-        case '{ Assertion.lessThan[A](${LiteralUnlift(value)})($_) }                     => Some(Assertion.lessThan(value)(orderingForValue(value)))
-        case '{ Assertion.lessThanOrEqualTo[A](${LiteralUnlift(value)})($_) }            => Some(Assertion.lessThanOrEqualTo(value)(orderingForValue(value)))
+        case '{ Assertion.lessThan(${LiteralUnlift(value)})($_) }                     => Some(Assertion.lessThan(value)(orderingForValue(value)))
+        case '{ Assertion.lessThanOrEqualTo(${LiteralUnlift(value)})($_) }            => Some(Assertion.lessThanOrEqualTo(value)(orderingForValue(value)))
         case '{ Assertion.matches(${Expr(regex)}: Assertion.Regex) }                     => Some(Assertion.matches(regex).asInstanceOf[Assertion[A]])
         case '{ Assertion.matches((${Expr(regex)}: String).r) }                          => Some(Assertion.matches(regex.r).asInstanceOf[Assertion[A]])
         case '{ Assertion.matches(${Expr(regex)}: String) }                              => Some(Assertion.matches(regex).asInstanceOf[Assertion[A]])
         case '{ !(${Expr(assertion)}: Assertion[A]) }                                    => Some(Assertion.Not(assertion))
         case '{ (${Expr(left)}: Assertion[A]).||(${Expr(right)}) }                       => Some(Assertion.Or(left, right))
-        case '{ Assertion.powerOf[A](${LiteralUnlift(value)})($_) }                      => Some(Assertion.powerOf(value)(numericForValue(value)))
+        case '{ Assertion.powerOf(${LiteralUnlift(value)})($_) }                      => Some(Assertion.powerOf(value)(numericForValue(value)))
         case '{ Assertion.startsWith(${Expr(value)}) }                                   => Some(Assertion.startsWith(value).asInstanceOf[Assertion[A]])
         case _ => None
       }
@@ -104,18 +103,20 @@ trait Liftables {
   }
 
   object LiteralUnlift {
-    def unapply[A: Type](expr: Expr[A])(using Quotes): Option[A] = expr match {
-      case '{ ${Expr(int)}: Int }       => Some(int)
-      case '{ Int.MaxValue }            => Some(Int.MaxValue.asInstanceOf[A])
-      case '{ Int.MinValue }            => Some(Int.MinValue.asInstanceOf[A])
-      case '{ ${Expr(string)}: String } => Some(string)
-      case '{ ${Expr(double)}: Double } => Some(double)
-      case '{ ${Expr(float)}: Float }   => Some(float)
-      case '{ ${Expr(long)}: Long }     => Some(long)
-      case '{ ${Expr(short)}: Short }   => Some(short)
-      case '{ ${Expr(byte)}: Byte }     => Some(byte)
-      case '{ ${Expr(char)}: Char }     => Some(char)
-      case _                            => None
+    def unapply[A: Type](expr: Expr[A])(using Quotes): Option[A] = {
+      expr match {
+        case '{ ${Expr(int)}: Int }       => Some(int)
+        case '{ Int.MaxValue }            => Some(Int.MaxValue.asInstanceOf[A])
+        case '{ Int.MinValue }            => Some(Int.MinValue.asInstanceOf[A])
+        case '{ ${Expr(string)}: String } => Some(string)
+        case '{ ${Expr(double)}: Double } => Some(double)
+        case '{ ${Expr(float)}: Float }   => Some(float)
+        case '{ ${Expr(long)}: Long }     => Some(long)
+        case '{ ${Expr(short)}: Short }   => Some(short)
+        case '{ ${Expr(byte)}: Byte }     => Some(byte)
+        case '{ ${Expr(char)}: Char }     => Some(char)
+        case _                            => None
+      }
     }
   }
 
