@@ -61,7 +61,6 @@ trait Liftables {
   given [A](using Type[A]): FromExpr[Assertion[A]] with {
     def unapply(assertion: Expr[Assertion[A]])(using Quotes): Option[Assertion[A]] = {
       import quotes.reflect.*
-
       assertion match {
         case '{ Assertion.anything }                                                     => Some(Assertion.anything)
         case '{ Assertion.between[A](${LiteralUnlift(min)}, ${LiteralUnlift(max)})($_) } => Some(Assertion.between(min, max)(orderingForValue(min)))
@@ -70,8 +69,8 @@ trait Liftables {
         case '{ Assertion.never }                                                        => Some(Assertion.never)
         case '{ Assertion.endsWith(${Expr(value)}) }                                     => Some(Assertion.endsWith(value).asInstanceOf[Assertion[A]])
         case '{ (${Expr(left)}: Assertion[A]).&&(${Expr(right)}) }                       => Some(Assertion.And(left, right))
-        case '{ Assertion.equalTo[A](${LiteralUnlift(value)}) }                          => Some(Assertion.equalTo(value))
-        case '{ Assertion.notEqualTo[A](${LiteralUnlift(value)}) }                       => Some(Assertion.notEqualTo(value))
+        case '{ Assertion.equalTo(${LiteralUnlift(value)}) }                             => Some(Assertion.equalTo(value))
+        case '{ Assertion.notEqualTo(${LiteralUnlift(value)}) }                          => Some(Assertion.notEqualTo(value))
         case '{ Assertion.greaterThan[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.greaterThan(value)(orderingForValue(value)))
         case '{ Assertion.greaterThanOrEqualTo[A](${LiteralUnlift(value)})($_) }         => Some(Assertion.greaterThanOrEqualTo(value)(orderingForValue(value)))
         case '{ Assertion.hasLength(${Expr(assertion)}) }                                => Some(Assertion.hasLength(assertion).asInstanceOf[Assertion[A]])
