@@ -1,5 +1,5 @@
 ---
-id: overview_diagrams
+id: abstraction-diagrams
 title: "Abstraction Diagrams"
 ---
 # Absorption
