@@ -34,10 +34,13 @@ import scala.annotation.tailrec
  * natural numbers, since subtracting a number from itself always returns
  * zero.
  */
-trait Inverse[A] extends Identity[A] {
+trait Inverse[A] extends PartialInverse[A] {
+
   def inverse(l: => A, r: => A): A
 
-  def multiply(n: Int)(a: A): A = {
+  final override def inverseOption(l: => A, r: => A): Some[A] = Some(inverse(l, r))
+
+  def multiplyBy(n: Int)(a: A): A = {
     @tailrec
     def multiplyHelper(res: A, n: Int): A =
       if (n == 0) res
@@ -46,8 +49,8 @@ trait Inverse[A] extends Identity[A] {
     multiplyHelper(identity, n)
   }
 
-  override def multiplyOption(n: Int)(a: A): Some[A] =
-    Some(multiply(n)(a))
+  final override def multiplyOption(n: Int)(a: A): Some[A] =
+    Some(multiplyBy(n)(a))
 }
 
 object Inverse {
@@ -903,7 +906,7 @@ trait InverseSyntax {
     /**
      * Multiplies value 'n' times
      */
-    def multiply(n: Int)(implicit inverse: Inverse[A]): A =
-      inverse.multiply(n)(l)
+    def multiplyBy(n: Int)(implicit inverse: Inverse[A]): A =
+      inverse.multiplyBy(n)(l)
   }
 }

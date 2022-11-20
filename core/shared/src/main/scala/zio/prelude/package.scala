@@ -47,6 +47,7 @@ package object prelude
     with NonEmptyListSyntax
     with NonEmptySetSyntax
     with OrdSyntax
+    with PartialInverseSyntax
     with PartialOrdSyntax
     with ZNonEmptySetSyntax
     with ZSetSyntax
