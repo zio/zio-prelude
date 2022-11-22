@@ -27,15 +27,7 @@ expressive effect types like ZIO and `ZPure`.
 
 # Documentation
 
-Learn more on the [ZIO Prelude Microsite](https://zio.github.io/zio-prelude/)!
-
-# Contributing
-
-[Documentation for contributors](https://zio.github.io/zio-prelude/docs/about/about_contributing)
-
-## Code of Conduct
-
-See the [Code of Conduct](https://zio.github.io/zio-prelude/docs/about/about_coc)
+Learn more on the [ZIO Prelude Microsite](https://zio.dev/zio-prelude/)!
 
 ## Support
 

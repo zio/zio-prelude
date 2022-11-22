@@ -3,7 +3,7 @@ import BuildHelper._
 inThisBuild(
   List(
     organization := "dev.zio",
-    homepage     := Some(url("https://zio.github.io/zio-prelude/")),
+    homepage     := Some(url("https://zio.dev/zio-prelude/")),
     licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     developers   := List(
       Developer(
@@ -37,7 +37,6 @@ val projectsCommon = List(
 
 val projectsJvmOnly = List[ProjectReference](
   benchmarks,
-  docs,
   scalaParallelCollections
 )
 
@@ -233,26 +232,15 @@ lazy val benchmarks = project
 lazy val docs = project
   .in(file("zio-prelude-docs"))
   .settings(
-    scalaVersion                               := BuildHelper.Scala213,
-    publish / skip                             := true,
-    moduleName                                 := "zio-prelude-docs",
+    scalaVersion   := BuildHelper.Scala213,
+    publish / skip := true,
+    moduleName     := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
-    scalacOptions -= "-Xfatal-warnings",
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
-      core.jvm,
-      experimental.jvm,
-      experimentalLaws.jvm,
-      laws.jvm,
-      scalaParallelCollections
-    ),
-    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
-    cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
-    docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
+    scalacOptions -= "-Xfatal-warnings"
   )
   .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
-  .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
+  .enablePlugins(WebsitePlugin)
 
 lazy val examples =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)
