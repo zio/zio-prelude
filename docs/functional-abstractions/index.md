@@ -11,8 +11,8 @@ ZIO Prelude features a next generation approach to functional abstractions. This
 
 The functional abstractions in ZIO Prelude can be broadly divided into two categories.
 
-- **[Abstractions For Concrete Types](concretetypes/index.md)** - These abstractions define properties of concrete types, such as `Int` and `String`, as well as ways of combining those values.
-- **[Abstractions For Parameterized Types](parameterizedtypes/index.md)** - These abstractions define properties of parameterized types such as `List` and `ZIO` and ways of combining them.
+- **[Abstractions For Concrete Types](concrete-types/index.md)** - These abstractions define properties of concrete types, such as `Int` and `String`, as well as ways of combining those values.
+- **[Abstractions For Parameterized Types](parameterized-types/index.md)** - These abstractions define properties of parameterized types such as `List` and `ZIO` and ways of combining them.
 
 As we will see, there is a deep symmetry between the abstractions defined on concrete and parameterized types, such as concepts of associative operations, commutative operations, and identity. This reflects the fundamental nature of these algebraic properties and their ability to unify what were previously separate concepts.
 
