@@ -24,8 +24,7 @@ ZIO Prelude gives us:
 - **[Functional Data Types](functional-data-types/index.md)**— Additional data types to supplement the ones in the Scala standard library such as `Validation` and `NonEmptyList` to enable more accurate domain modeling and handle common problems like data validation. For example:
     - `NonEmptyList`, `NonEmptySet`
     - `ZSet`, `ZNonEmptySet`
-    - `Validation`
-    - `ZPure`
+    - `Validation`, `ZValidation`
 - **[Functional Abstractions](functional-abstractions/index.md)**— Functional abstractions to describe different ways of combining data, making it easy for us to combine complex data types in a principled way.
 - **[New Types](newtypes/index.md)** that allow to _increase type safety_ in domain modeling. Wrapping existing type adding no runtime overhead. These refined newtypes allow us to increase the type safety of our code base with zero overhead and minimal boilerplate.
 - **[ZPure](zpure/index.md)**— A description of a computation that supports logging, context, state, and errors, providing all the functionality traditionally offered by monad transformers with dramatically better performance and ergonomics.
