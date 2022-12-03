@@ -5,44 +5,44 @@ const sidebars = {
     {
       type: "category",
       label: "Functional Abstractions",
-      link: { type: "doc", id: "functionalabstractions/index" },
+      link: { type: "doc", id: "functional-abstractions/index" },
       collapsed: false,
       items: [
         {
           type: "category",
           label: "Concrete Types",
-          link: { type: "doc", id: "functionalabstractions/concretetypes/index" },
+          link: { type: "doc", id: "functional-abstractions/concrete-types/index" },
           collapsed: false,
           items: [
-            "functionalabstractions/concretetypes/associative",
-            "functionalabstractions/concretetypes/commutative",
-            "functionalabstractions/concretetypes/debug",
-            "functionalabstractions/concretetypes/equal",
-            "functionalabstractions/concretetypes/hash",
-            "functionalabstractions/concretetypes/identity",
-            "functionalabstractions/concretetypes/inverse",
-            "functionalabstractions/concretetypes/ord"
+            "functional-abstractions/concrete-types/associative",
+            "functional-abstractions/concrete-types/commutative",
+            "functional-abstractions/concrete-types/debug",
+            "functional-abstractions/concrete-types/equal",
+            "functional-abstractions/concrete-types/hash",
+            "functional-abstractions/concrete-types/identity",
+            "functional-abstractions/concrete-types/inverse",
+            "functional-abstractions/concrete-types/ord"
           ]
         },
         {
           type: "category",
           label: "Parameterized Types",
-          link: { type: "doc", id: "functionalabstractions/parameterizedtypes/index" },
+          link: { type: "doc", id: "functional-abstractions/parameterized-types/index" },
           collapsed: false,
           items: [
-            "functionalabstractions/parameterizedtypes/associativeboth",
-            "functionalabstractions/parameterizedtypes/associativeeither",
-            "functionalabstractions/parameterizedtypes/associativeflatten",
-            "functionalabstractions/parameterizedtypes/commutativeboth",
-            "functionalabstractions/parameterizedtypes/commutativeeither",
-            "functionalabstractions/parameterizedtypes/contravariant",
-            "functionalabstractions/parameterizedtypes/covariant",
-            "functionalabstractions/parameterizedtypes/foreach",
-            "functionalabstractions/parameterizedtypes/identityboth",
-            "functionalabstractions/parameterizedtypes/identityeither",
-            "functionalabstractions/parameterizedtypes/identityflatten",
-            "functionalabstractions/parameterizedtypes/invariant",
-            "functionalabstractions/parameterizedtypes/nonemptyforeach"
+            "functional-abstractions/parameterized-types/associativeboth",
+            "functional-abstractions/parameterized-types/associativeeither",
+            "functional-abstractions/parameterized-types/associativeflatten",
+            "functional-abstractions/parameterized-types/commutativeboth",
+            "functional-abstractions/parameterized-types/commutativeeither",
+            "functional-abstractions/parameterized-types/contravariant",
+            "functional-abstractions/parameterized-types/covariant",
+            "functional-abstractions/parameterized-types/foreach",
+            "functional-abstractions/parameterized-types/identityboth",
+            "functional-abstractions/parameterized-types/identityeither",
+            "functional-abstractions/parameterized-types/identityflatten",
+            "functional-abstractions/parameterized-types/invariant",
+            "functional-abstractions/parameterized-types/nonemptyforeach"
           ]
         },
 
