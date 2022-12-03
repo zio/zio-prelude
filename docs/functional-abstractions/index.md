@@ -14,11 +14,11 @@ The functional abstractions in ZIO Prelude can be broadly divided into two categ
 - **[Abstractions For Concrete Types](concrete-types/index.md)** - These abstractions define properties of concrete types, such as `Int` and `String`, as well as ways of combining those values.
 - **[Abstractions For Parameterized Types](parameterized-types/index.md)** - These abstractions define properties of parameterized types such as `List` and `ZIO` and ways of combining them.
 
-As we will see, there is a deep symmetry between the abstractions defined on concrete and parameterized types, such as concepts of associative operations, commutative operations, and identity. This reflects the fundamental nature of these algebraic properties and their ability to unify what were previously separate concepts.
+As we will see, there is a deep symmetry between the abstractions defined on concrete and parameterized types, such as concepts of _associative operations_, _commutative operations_, and _identity_. This reflects the fundamental nature of these algebraic properties and their ability to unify what were previously separate concepts.
 
 ## Abstractions
 
-An _abstraction_ describes some common structure that different data types share. In Scala we can encode this using a trait that describes that common structure in terms of a set of operators as well as laws that those operators must follow.
+An _abstraction_ describes some common structure that different data types share. In Scala, we can encode this using a trait that describes that common structure in terms of a set of operators as well as laws that those operators must follow.
 
 For example, we can think of many data types that share the structure of having an associative combining operation. Integer addition is associative, as is string concatenation and list concatenation, among others.
 
@@ -66,7 +66,7 @@ Here `<>` represents the combining operation and `a`, `b`, and `c` represent any
 
 Every abstraction in ZIO Prelude is described by a trait like the one above and is defined in terms of a set of laws.
 
-ZIO Prelude provides instances for these abstractions for a variety of types from ZIO and the Scala standard library. ZIO Prelude also provides tools for testing that instances of an abstraction satisfy the appropriate laws.
+ZIO Prelude provides **instances for these abstractions** for a variety of types from ZIO and the Scala standard library. ZIO Prelude also provides **tools for testing** that instances of an abstraction satisfy the appropriate laws.
 
 ## Using Abstractions
 
@@ -78,7 +78,7 @@ The common structure described by these abstractions exists independent of any l
 
 However, thinking about whether an associative combining operation exists for your data type, and what it would look like, can help you write better code.
 
-As a simple example, say you want to compute the average of values from some large data set and you would like to split the work up between different concurrent processes or possibly even different nodes in a distributed network.
+As a simple example, say you want to compute the average of values from some large data set, and you would like to split the work up between different concurrent processes or possibly even different nodes in a distributed network.
 
 Your first stab at the accumulator for the running average might look like this:
 
@@ -86,7 +86,7 @@ Your first stab at the accumulator for the running average might look like this:
 case class RunningAverage(value: Double)
 ```
 
-However, if you think about it for a minute you will realize that this data type does not support an associative combining operation for combining two averages. This is going to be a serious problem because it means the result is not going to be well defined if you combine averages from different processes or nodes.
+However, if you think about it for a minute you will realize that this data type does not support an associative combining operation for combining two averages. This is going to be a serious problem because it means the result is not going to be well-defined if you combine averages from different processes or nodes.
 
 Thinking about the abstractions in ZIO Prelude you might come up with a representation like this:
 
@@ -106,7 +106,7 @@ object RunningAverage {
 
 Now this data type does have an associative combining operation. In fact the combining operation is both associative and commutative and has an identity element.
 
-This will make it much easier for you to solve your problem because now the different processes or nodes can compute the averages for their partitions independently and you can combine them in any order.
+This will make it much easier for you to solve your problem because now the different processes or nodes can compute the averages for their partitions independently, and you can combine them in any order.
 
 And you didn't need to use any code from ZIO Prelude to do this. ZIO Prelude was hopefully just a good source of ideas of different algebraic properties that can exist and how they can be important.
 
@@ -168,7 +168,7 @@ val list: List[Int] =
   List(1, 2, 3) <> List(4, 5, 6)
 ```
 
-Of course we didn't really need all of this machinery to add two numbers or concatenate two lists, but where this pattern gets powerful is when we can use it to combine more complex data types in a principled way.
+Of course, we didn't really need all of this machinery to add two numbers or concatenate two lists, but where this pattern gets powerful is when we can use it to combine more complex data types in a principled way.
 
 For example, say we have an application where users can vote on content they are interested in learning more about. We might have a data structure to keep track of the number of votes for different topics like this.
 
@@ -198,13 +198,13 @@ final case class VoteMap(map: Map[Topic, Votes]) { self =>
 }
 ```
 
-This isn't the worst but it isn't really the kind of code we want to be writing. We want to be thinking about the logic of our application rather than how to combine maps.
+This isn't the worst, but it isn't really the kind of code we want to be writing. We want to be thinking about the logic of our application rather than how to combine maps.
 
 This is where ZIO Prelude can help.
 
 The way we're combining these maps actually follows a pattern. If a key is in a single map we include it in the combined map with its associated key and if a key is in both maps we include it in the combined map with the result of combining the values associated with that key.
 
-We might see that ourselves but it would be hard to generalize that logic in a way that is worth factoring out. How often are we going to combine maps like this and what exactly does it mean to combine the keys?
+We might see that ourselves, but it would be hard to generalize that logic in a way that is worth factoring out. How often are we going to combine maps like this and what exactly does it mean to combine the keys?
 
 Let's look at how ZIO Prelude can help us clean this up.
 
