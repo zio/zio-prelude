@@ -13,7 +13,7 @@ case class Equivalence[A, B](to: A => B, from: B => A)
 
 To be a valid `Equivalence` the functions `to` and `from` must satisfy an identity law, which says that for any value of type `A`, if we transform it to a `B` using `to` and then back using `from` we get the same value. The same property must also apply for the reverse.
 
-Simple examples of an equivalence relationship would be between an `List[A]` and a `Chunk[A]`. We can transform any `List` into a `Chunk` using the `Chunk.fromIterable` operator and we can transform any `Chunk` into a `List` using the `toList` operator.
+Simple examples of an equivalence relationship would be between an `List[A]` and a `Chunk[A]`. We can transform any `List` into a `Chunk` using the `Chunk.fromIterable` operator, and we can transform any `Chunk` into a `List` using the `toList` operator:
 
 ```scala mdoc:reset
 import zio.Chunk
@@ -76,6 +76,6 @@ object EquivalenceSpec extends DefaultRunnableSpec {
 }
 ```
 
-ZIO Test will generate a large number of `A` and `B` values and check that the identity law holds. This can be helpful to catch corner cases where we think two things are equivalent but they are really not.
+ZIO Test will generate a large number of `A` and `B` values and check that the identity law holds. This can be helpful to catch corner cases where we think two things are equivalent, but they are really not.
 
 With these equivalence relationships in hand we can then convert between different representations of our data in a straightforward and principled way. This is helpful when we need to implement higher level logic that needs to rely on this equivalence relationship existing between certain data types.
