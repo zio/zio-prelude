@@ -33,7 +33,7 @@ import zio.{Chunk, NonEmptyChunk}
 trait ZValidation[+W, +E, +A]
 
 object ZValidation {
-  case class Success[W, A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
+  case class Success[W, A](log: Chunk[W], value: A)                 extends ZValidation[W, Nothing, A]
   case class Failure[W, E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing]
 }
 ```

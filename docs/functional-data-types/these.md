@@ -7,8 +7,8 @@ title: "These"
 
 ```scala mdoc
 sealed trait These[+A, +B] {
-  case class Left[+A](a: A) extends These[A, Nothing]
-  case class Right[+B](b: B) extends These[Nothing, B]
+  case class Left[+A](a: A)           extends These[A, Nothing]
+  case class Right[+B](b: B)          extends These[Nothing, B]
   case class Both[+A, +B](a: A, b: B) extends These[A, B]
 }
 ```
@@ -60,4 +60,4 @@ def zipAllWith[A, B, C](
 
 Now the function `f` bundles up all the logic that was previously in `left`, `right`, and `both`. The caller gets to provide a single function that handles all three of these cases.
 
-The `These` data type is a relatively modest one but it captures a situation that can arise where we can have both values in addition to one or the other. Otherwise we would have to create our own data type for each of these situations but now we can simply use `These`.
+The `These` data type is a relatively modest one, but it captures a situation that can arise where we can have both values in addition to one or the other. Otherwise, we would have to create our own data type for each of these situations, but now we can simply use `These`.

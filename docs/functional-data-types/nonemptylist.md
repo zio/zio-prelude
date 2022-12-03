@@ -11,15 +11,13 @@ For example, we might be handling a collection of errors. If an error has occurr
 
 However, if we are working with a collection type from the Scala standard library such as `List`, `Vector`, or `Iterable` then the Scala compiler does not know that. It will force us to handle the case where the collection is empty even though we know that cannot occur.
 
-Or perhaps we are implementing a batched API and need to handle a collection of requests. We know the collection is not empty or we would not have been called at all, but now we have to handle the case of an empty collection.
+Or perhaps we are implementing a batched API and need to handle a collection of requests. We know the collection is not empty, or we would not have been called at all, but now we have to handle the case of an empty collection.
 
 Sometimes there are sensible defaults in these cases, but other times we are forced to resort to potentially unsafe operators like `head` or to throw exceptions in branches of logic we know should never occur. This wastes developer time, makes code harder to understand, and encourages bad coding practices.
 
 To avoid these problems we want a data type that is specific enough to describe at the type level what we know to be true, in this case that a collection is not empty.
 
-We can try to represent this using the `::` case of `List` from the Scala standard library but unfortunately `::` itself has extremely poor ergonomics. It is hard to construct `::` values and it is easy for operators to forget the more specific type.
-
-This is where `NonEmptyList` comes in.
+We can try to represent this using the `::` case of `List` from the Scala standard library but unfortunately `::` itself has extremely poor ergonomics. It is hard to construct `::` values, and it is easy for operators to forget the more specific type. This is where `NonEmptyList` comes in.
 
 A `NonEmptyList` looks like this:
 
@@ -27,7 +25,7 @@ A `NonEmptyList` looks like this:
 sealed trait NonEmptyList[+A]
 
 object NonEmptyList {
-  case class Single[A](head: A) extends NonEmptyList[A]
+  case class Single[A](head: A)                      extends NonEmptyList[A]
   case class Cons[A](head: A, tail: NonEmptyList[A]) extends NonEmptyList[A]
 }
 ```
@@ -58,7 +56,7 @@ object NonEmptyList {
 }
 ```
 
-Notice that `fromIterableOption` returns an `Option[NonEmptyList[A]]` because the original collection might be empty and so we might not be able to construct a `NonEmptyList` from it.
+Notice that `fromIterableOption` returns an `Option[NonEmptyList[A]]` because the original collection might be empty, and so we might not be able to construct a `NonEmptyList` from it.
 
 If we know the collection is not empty we can use the `fromIterable` operator and provide the first element of the collection to establish that it is not empty.
 
@@ -156,7 +154,7 @@ def toNonEmptyChunk[A](as: NonEmptyList[A]): NonEmptyChunk[A] =
 
 This would have been difficult to express with `foldLeft` because we would have had to start with an initial value that was an empty chunk and thus would have gotten back a `Chunk` instead of a `NonEmptyChunk`.
 
-Of course we could have just used the `toNonEmptyChunk` operator on `NonEmptyList`.
+Of course, we could have just used the `toNonEmptyChunk` operator on `NonEmptyList`.
 
 ```scala mdoc:nest
 def toNonEmptyChunk[A](as: NonEmptyList[A]): NonEmptyChunk[A] =
