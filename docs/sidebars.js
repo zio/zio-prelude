@@ -51,19 +51,20 @@ const sidebars = {
     {
       type: "category",
       label: "Functional Data Types",
-      link: { type: "doc", id: "functionaldatatypes/index" },
+      link: { type: "doc", id: "functional-data-types/index" },
       collapsed: false,
       items: [
-        "functionaldatatypes/equivalence",
-        "functionaldatatypes/nonemptylist",
-        "functionaldatatypes/these",
-        "functionaldatatypes/validation",
-        "functionaldatatypes/zset",
-        "functionaldatatypes/zvalidation"
+        "functional-data-types/equivalence",
+        "functional-data-types/nonemptylist",
+        "functional-data-types/these",
+        "functional-data-types/validation",
+        "functional-data-types/zset",
+        "functional-data-types/zvalidation"
       ]
     },
     "newtypes/index",
-    "zpure/index"
+    "zpure/index",
+    "resources"
   ]
 };
 
