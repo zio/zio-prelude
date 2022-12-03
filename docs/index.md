@@ -28,7 +28,7 @@ ZIO Prelude gives us:
   - `Validation`, `ZValidation`
 
 - **[Functional Abstractions](functional-abstractions/index.md)**— Functional abstractions to describe different ways of combining data, making it easy for us to combine complex data types in a principled way.
-- **[New Types](newtypes/index.md)** that allow to _increase type safety_ in domain modeling. Wrapping existing type adding no runtime overhead. These refined newtypes allow us to increase the type safety of our code base with zero overhead and minimal boilerplate.
+- **[New Types](newtypes/index.md)**— that allow to _increase type safety_ in domain modeling. Wrapping existing type adding no runtime overhead. These refined newtypes allow us to increase the type safety of our code base with zero overhead and minimal boilerplate.
 - **[ZPure](zpure/index.md)**— A description of a computation that supports logging, context, state, and errors, providing all the functionality traditionally offered by monad transformers with dramatically better performance and ergonomics.
 
 ZIO Prelude is a library focused on providing a core set of functional data types and abstractions that can help you solve a variety of day to day problems. The tools provided by ZIO Prelude fall into the following main categories:
