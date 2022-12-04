@@ -1,6 +1,7 @@
 ---
 id: index
-title: "Summary"
+title: "Functional Data Types in ZIO Prelude"
+sidebar_label: "Functional Data Types"
 ---
 
 ZIO Prelude includes several data types to help us model our domains more accurately and solve common problems.

@@ -1,9 +1,8 @@
 ---
 id: abstraction-diagrams
-title: "Abstraction Diagrams"
+title: "ZIO Prelude Abstraction Diagrams"
+sidebar_label: "Abstraction Diagrams"
 ---
-
-# Abstraction Diagrams
 
 ## Absorption
 
