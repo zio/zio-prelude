@@ -218,10 +218,10 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    */
   def apply(value: A, values: A*): NonEmptyChunk[Type] = macro zio.prelude.Macros.applyMany_impl[A, Type]
 
-  def make(value: A): Validation[String, Type] = macro zio.prelude.Macros.make_impl[A, Type]
+  def make(value: A): Validation[String, Type] = macro zio.prelude.Macros.make_impl[A]
 
   def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
-    macro zio.prelude.Macros.makeAll_impl[F, A, Type]
+    macro zio.prelude.Macros.makeAll_impl[F, A]
 
   /**
    * This method is used to generate Newtype that can be validated at

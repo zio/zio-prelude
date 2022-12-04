@@ -883,7 +883,7 @@ object Equal {
   /**
    * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.
    */
-  implicit def ExitEqual[E: Equal, A: Equal]: Equal[Exit[E, A]] =
+  implicit def ExitEqual[E, A: Equal]: Equal[Exit[E, A]] =
     make {
       case (Success(a), Success(b))  => a === b
       case (Failure(c), Failure(c1)) => c === c1

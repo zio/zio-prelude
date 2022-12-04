@@ -18,5 +18,6 @@ package zio.prelude
 
 sealed trait AnyType[A]
 object AnyType {
-  implicit def apply[A]: AnyType[A] = new AnyType[A] {}
+  private val instance              = new AnyType[Any] {}
+  implicit def apply[A]: AnyType[A] = instance.asInstanceOf[AnyType[A]]
 }
