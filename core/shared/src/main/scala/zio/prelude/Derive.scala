@@ -551,7 +551,7 @@ object Derive {
   /**
    * The `DeriveEqual` instance for `Exit`.
    */
-  implicit def ExitDeriveEqual[E: Equal]: DeriveEqual[({ type lambda[+a] = Exit[E, a] })#lambda] =
+  implicit def ExitDeriveEqual[E]: DeriveEqual[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new DeriveEqual[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def derive[A: Equal]: Equal[Exit[E, A]] =
         Equal.ExitEqual
