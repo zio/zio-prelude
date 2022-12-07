@@ -236,7 +236,14 @@ lazy val docs = project
     publish / skip := true,
     moduleName     := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
-    scalacOptions -= "-Xfatal-warnings"
+    scalacOptions -= "-Xfatal-warnings",
+    badgeInfo      := Some(
+      BadgeInfo(
+        projectName = "ZIO Prelude",
+        artifact = "zio-prelude_2.12",
+        projectStage = ProjectStage.ProductionReady
+      )
+    )
   )
   .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)

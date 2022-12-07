@@ -6,11 +6,17 @@ sidebar_label: "ZIO Prelude"
 
 [ZIO Prelude](https://github.com/zio/zio-prelude) is a lightweight, distinctly Scala takes on **functional abstractions**, with tight ZIO integration.
 
+@PROJECT_BADGES@
+
 ## Introduction
 
-ZIO Prelude is a small library that brings common, useful algebraic abstractions and data types to scala developers.
+ZIO Prelude is a small library that brings common, useful algebraic abstractions and data types to scala developers. It is an alternative to libraries like _Scalaz_ and _Cats_ based on radical ideas that embrace **modularity** and **subtyping** in Scala and offer **new levels of power and ergonomics**. It throws out the classic functor hierarchy in favor of a modular algebraic approach that is smaller, easier to understand and teach, and more expressive.
 
-It is an alternative to libraries like _Scalaz_ and _Cats_ based on radical ideas that embrace **modularity** and **subtyping** in Scala and offer **new levels of power and ergonomics**. It throws out the classic functor hierarchy in favor of a modular algebraic approach that is smaller, easier to understand and teach, and more expressive.
+ZIO Prelude has three key areas of focus:
+
+1. **Data structures, and type classes for traversing them.** ZIO Prelude embraces the collections in the Scala standard library, and extends them with new instances and new useful additions.
+2. **Patterns of composition for types.** ZIO Prelude provides a small catalog of patterns for binary operators, which combine two values into another value of the same type. These patterns are named after the algebraic laws they satisfy: associativity, commutativity, and identity.
+3. **Patterns of composition for type constructors.** ZIO Prelude provides a catalog of patterns for binary operators on type constructors (things like `Future`, `Option`, ZIO `Task`). These patterns are named after the algebraic laws they satisfy (associativity, commutativity, and identity) and the structure they produce, whether a tuple or an either.
 
 Design principles behind ZIO Prelude:
 
@@ -26,10 +32,11 @@ ZIO Prelude gives us:
   - `NonEmptyList`, `NonEmptySet`
   - `ZSet`, `ZNonEmptySet`
   - `Validation`, `ZValidation`
-
 - **[Functional Abstractions](functional-abstractions/index.md)**— Functional abstractions to describe different ways of combining data, making it easy for us to combine complex data types in a principled way.
 - **[New Types](newtypes/index.md)**— that allow to _increase type safety_ in domain modeling. Wrapping existing type adding no runtime overhead. These refined newtypes allow us to increase the type safety of our code base with zero overhead and minimal boilerplate.
 - **[ZPure](zpure/index.md)**— A description of a computation that supports logging, context, state, and errors, providing all the functionality traditionally offered by monad transformers with dramatically better performance and ergonomics.
+
+The library has a small research-stage package (`zio.prelude.fx`) that provides abstraction over expressive effect types like ZIO and `ZPure`.
 
 ZIO Prelude is a library focused on providing a core set of functional data types and abstractions that can help you solve a variety of day to day problems. The tools provided by ZIO Prelude fall into the following main categories:
 
