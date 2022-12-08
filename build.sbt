@@ -237,9 +237,9 @@ lazy val docs = project
     moduleName     := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
+    projectName := "ZIO Prelude",
     badgeInfo      := Some(
       BadgeInfo(
-        projectName = "ZIO Prelude",
         artifact = "zio-prelude_2.12",
         projectStage = ProjectStage.ProductionReady
       )
