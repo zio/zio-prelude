@@ -232,11 +232,19 @@ lazy val benchmarks = project
 lazy val docs = project
   .in(file("zio-prelude-docs"))
   .settings(
-    scalaVersion   := BuildHelper.Scala213,
-    publish / skip := true,
-    moduleName     := "zio-prelude-docs",
+    scalaVersion      := BuildHelper.Scala213,
+    publish / skip    := true,
+    moduleName        := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
-    scalacOptions -= "-Xfatal-warnings"
+    scalacOptions -= "-Xfatal-warnings",
+    projectName       := "ZIO Prelude",
+    badgeInfo         := Some(
+      BadgeInfo(
+        artifact = "zio-prelude_2.12",
+        projectStage = ProjectStage.ProductionReady
+      )
+    ),
+    docsPublishBranch := "master"
   )
   .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
