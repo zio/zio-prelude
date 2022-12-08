@@ -243,7 +243,8 @@ lazy val docs = project
         artifact = "zio-prelude_2.12",
         projectStage = ProjectStage.ProductionReady
       )
-    )
+    ),
+    docsPublishBranch := "master"
   )
   .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
