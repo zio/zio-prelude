@@ -43,6 +43,12 @@ trait TestAssertions {
     }
 
   /**
+   * Makes a new assertion that requires a validation failure.
+   */
+  val isFailureV: TestAssertion[ZValidation[Any, Any, Any]] =
+    isFailureV(TestAssertion.anything)
+
+  /**
    * Makes a new assertion that requires the value be greater than the
    * specified reference value.
    */
@@ -71,7 +77,7 @@ trait TestAssertions {
     TestAssertion.assertion("isLessThanEqualTo")(param(reference))(_ <= reference)
 
   /**
-   * Makes a new assertion that requires a validation failure satisfying a
+   * Makes a new assertion that requires a validation success satisfying a
    * specified assertion.
    */
   def isSuccessV[A](assertion: TestAssertion[A]): TestAssertion[ZValidation[Any, Any, A]] =
@@ -79,4 +85,10 @@ trait TestAssertions {
       case ZValidation.Success(_, a) => Some(a)
       case _                         => None
     }
+
+  /**
+   * Makes a new assertion that requires a validation success.
+   */
+  val isSuccessV: TestAssertion[ZValidation[Any, Any, Any]] =
+    isSuccessV(TestAssertion.anything)
 }
