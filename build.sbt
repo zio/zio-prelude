@@ -22,7 +22,7 @@ addCommandAlias(
   "; scalafmtSbtCheck; scalafmtCheckAll; Test/compile; compile:scalafix --check; test:scalafix --check"
 )
 
-val zioVersion = "2.0.2"
+val zioVersion = "2.0.5"
 
 val projectsCommon = List(
   core,
