@@ -11,7 +11,7 @@ object BuildHelper {
   val Scala211: String = "2.11.12"
   val Scala212: String = "2.12.16"
   val Scala213: String = "2.13.8"
-  val Scala3: String   = "3.2.0"
+  val Scala3: String   = "3.2.1"
 
   val SilencerVersion = "1.7.11"
 
