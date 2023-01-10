@@ -3,7 +3,7 @@ import BuildHelper._
 inThisBuild(
   List(
     organization := "dev.zio",
-    homepage     := Some(url("https://zio.github.io/zio-prelude/")),
+    homepage     := Some(url("https://zio.dev/zio-prelude/")),
     licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     developers   := List(
       Developer(
@@ -238,6 +238,9 @@ lazy val docs = project
     moduleName                                 := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
+    projectName                                := "ZIO Prelude",
+    mainModuleName                             := (core.jvm / moduleName).value,
+    projectStage                               := ProjectStage.ProductionReady,
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
       core.jvm,
       experimental.jvm,
@@ -245,14 +248,11 @@ lazy val docs = project
       laws.jvm,
       scalaParallelCollections
     ),
-    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
-    cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
-    docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
+    docsPublishBranch                          := "series/2.x"
   )
   .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
-  .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
+  .enablePlugins(WebsitePlugin)
 
 lazy val examples =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)

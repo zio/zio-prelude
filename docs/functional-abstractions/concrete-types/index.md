@@ -21,7 +21,7 @@ For example, the `Equal` type class prevents us from doing equality checks on un
 
 The `Equal` abstraction describes a type that can be compared for equality. Its fundamental representation is as a function `(A, A) => Boolean`.
 
-The `Equal` abstraction allows us to define what it means for two instances of a type to be equal, avoiding pitfalls in Scala such as reference equality for arrays. It also lets us avoid bugs caused by accidentally comparing two unrelated types or checking equality for types such as functions that do not have well defined notions of equality.
+The `Equal` abstraction allows us to define what it means for two instances of a type to be equal, avoiding pitfalls in Scala such as reference equality for arrays. It also lets us avoid bugs caused by accidentally comparing two unrelated types or checking equality for types such as functions that do not have well-defined notions of equality.
 
 ### Ord
 
