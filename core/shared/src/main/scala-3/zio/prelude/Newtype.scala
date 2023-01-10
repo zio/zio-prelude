@@ -75,7 +75,7 @@ abstract class NewtypeCustom[A] {
    * of the type class for the underlying type. The caller is responsible for
    * the type class being a valid instance for the new type.
    */
-  protected def derive[TypeClass[_]](implicit instance: TypeClass[A]): TypeClass[Type] =
+  def derive[TypeClass[_]](implicit instance: TypeClass[A]): TypeClass[Type] =
     instance.asInstanceOf[TypeClass[Type]]
 
   /**
@@ -88,13 +88,13 @@ abstract class NewtypeCustom[A] {
    * Converts an instance of the underlying type to an instance of the
    * newtype. Ignores the assertion.
    */
-  protected def wrap(value: A): Type = value.asInstanceOf[Type]
+  def wrap(value: A): Type = value.asInstanceOf[Type]
 
   /**
    * Converts an instance of a type parameterized on the underlying type to an
    * instance of a type parameterized on the newtype.
    */
-  protected def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
+  def wrapAll[F[_]](value: F[A]): F[Type] = value.asInstanceOf[F[Type]]
 
   /**
    * Converts an instance of the newtype back to an instance of the
