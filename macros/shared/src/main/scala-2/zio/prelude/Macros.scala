@@ -21,7 +21,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
 
   type RunnableAssertion[A] = A => Either[AssertionError, Unit]
 
-  def wrapAll_impl[F[_], A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[F[A]]): c.Expr[F[T]] = {
+  def wrapAll_impl[F[_], A, T](value: c.Expr[F[A]]): c.Expr[F[T]] = {
     val expr = value
 
     val quotedAssertion = c.prefix.actualType.decls
@@ -41,7 +41,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
     }
   }
 
-  def applyMany_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](
+  def applyMany_impl[A, T](
     value: c.Expr[A],
     values: c.Expr[A]*
   ): c.Tree = {
@@ -92,7 +92,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
     }
   }
 
-  def wrap_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[A]): c.Expr[T] = {
+  def wrap_impl[A, T](value: c.Expr[A]): c.Expr[T] = {
     val expr = value
 
     val quotedAssertion = c.prefix.actualType.decls
@@ -138,7 +138,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
 
   }
 
-  def make_impl[A: c.WeakTypeTag, T: c.WeakTypeTag](value: c.Expr[A]): c.Tree = {
+  def make_impl[A, T](value: c.Expr[A]): c.Tree = {
     val expr = value
 
     val result = q"_root_.zio.prelude.Newtype.unsafeWrap(${c.prefix})($expr)"
@@ -152,7 +152,7 @@ _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
 
   }
 
-  def makeAll_impl[F[+_], A: c.WeakTypeTag, T: c.WeakTypeTag](
+  def makeAll_impl[F[+_], A, T](
     value: c.Expr[F[A]]
   )(forall: c.Tree): c.Tree = {
     val expr = value
@@ -209,7 +209,7 @@ new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
        """
   }
 
-  private def getAssertion[T: c.WeakTypeTag, A: c.WeakTypeTag](
+  private def getAssertion[T, A](
     quotedAssertion: c.universe.Symbol
   ): (RunnableAssertion[A], String) = {
     val anns           = quotedAssertion.typeSignature.resultType.decls.toList.flatMap(_.annotations)
@@ -284,7 +284,7 @@ new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
 
   // Pilfered (with immense gratitude & minor modifications)
   // from https://github.com/com-lihaoyi/sourcecode
-  private def text[T: c.WeakTypeTag](tree: c.Tree): (Int, Int, String) = {
+  private def text[T](tree: c.Tree): (Int, Int, String) = {
     val fileContent  = new String(tree.pos.source.content)
     var start        = tree.collect { case treeVal =>
       treeVal.pos match {

@@ -132,14 +132,14 @@ trait Liftables {
       }
   }
 
-  implicit def scalaRegexUnliftable[A: c.WeakTypeTag]: Unliftable[scala.util.matching.Regex] =
+  implicit def scalaRegexUnliftable[A]: Unliftable[scala.util.matching.Regex] =
     Unliftable[scala.util.matching.Regex] {
       case q"scala.Predef.augmentString(${string: String}).r"      => string.r
       case q"scala.this.Predef.augmentString(${string: String}).r" => string.r
     }
 
   @silent("Implicit resolves to enclosing method")
-  implicit def assertionUnliftable[A: c.WeakTypeTag]: Unliftable[Assertion[A]] =
+  implicit def assertionUnliftable[A]: Unliftable[Assertion[A]] =
     Unliftable[Assertion[A]] {
 
       case q"${A(_)}.anything" =>

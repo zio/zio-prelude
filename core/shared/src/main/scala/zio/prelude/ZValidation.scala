@@ -359,7 +359,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * The `DeriveEqual` instance for `ZValidation`.
    */
-  implicit def ZValidationDeriveEqual[W, E: Equal]: DeriveEqual[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] =
+  implicit def ZValidationDeriveEqual[W, E]: DeriveEqual[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] =
     new DeriveEqual[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] {
       def derive[A: Equal]: Equal[ZValidation[W, E, A]] =
         ZValidationEqual
@@ -378,7 +378,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * The `DeriveEqual` instance for `ZValidation` with respect to its error type.
    */
-  implicit def ZValidationFailureDeriveEqual[W: Equal, A: Equal]
+  implicit def ZValidationFailureDeriveEqual[W, A: Equal]
     : DeriveEqual[({ type lambda[+e] = newtypes.Failure[ZValidation[W, e, A]] })#lambda] =
     new DeriveEqual[({ type lambda[+e] = newtypes.Failure[ZValidation[W, e, A]] })#lambda] {
       def derive[E: Equal]: Equal[newtypes.Failure[ZValidation[W, E, A]]] =
@@ -421,7 +421,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
    */
-  implicit def ZValidationPartialOrd[W, E: PartialOrd, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
+  implicit def ZValidationPartialOrd[W, E, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
     PartialOrd[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 
   /**
