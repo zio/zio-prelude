@@ -232,9 +232,8 @@ lazy val benchmarks = project
 
 lazy val docs = project
   .in(file("zio-prelude-docs"))
+  .settings(stdSettings("zio-prelude-docs"))
   .settings(
-    scalaVersion                               := BuildHelper.Scala213,
-    moduleName                                 := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     projectName                                := "ZIO Prelude",
