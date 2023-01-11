@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.ZValidation._
-import zio.{Chunk, IO, NonEmptyChunk, ZIO}
+import zio.{Cause, Chunk, IO, NonEmptyChunk, ZIO}
 
 import scala.util.Try
 
@@ -276,6 +276,13 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       nec => ZIO.failCause(nec.reduceMapLeft(e => zio.Cause.fail(e))((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
       ZIO.succeedNow
     )
+
+  /**
+   * Converts this `ZValidation` into a `ZIO` effect and exposes all parallel
+   * errors in a single call, discarding the log.
+   */
+  final def toZIOParallelErrors: IO[NonEmptyChunk[E], A] =
+    self.fold(es => ZIO.refailCause(Cause.fail(es)), ZIO.succeedNow)
 
   /**
    * Transforms this `ZValidation` to an `ZIO` effect, aggregating errors using provided `Associative` instance, discarding the log.
