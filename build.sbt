@@ -234,7 +234,6 @@ lazy val docs = project
   .in(file("zio-prelude-docs"))
   .settings(
     scalaVersion                               := BuildHelper.Scala213,
-    publish / skip                             := true,
     moduleName                                 := "zio-prelude-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
