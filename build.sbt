@@ -236,6 +236,8 @@ lazy val docs = project
   .settings(
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
+    scalaVersion                               := Scala213,
+    crossScalaVersions -= Scala211,
     projectName                                := "ZIO Prelude",
     mainModuleName                             := (core.jvm / moduleName).value,
     projectStage                               := ProjectStage.ProductionReady,
