@@ -18,8 +18,16 @@ object AssociativeBothSpec extends ZIOSpecDefault {
       ),
       test("associativeBoth can be derived from Covariant and AssociativeFlatten") {
         trait F[+A]
-        implicit def covariant: Covariant[F]                   = ???
-        implicit def associativeFlatten: AssociativeFlatten[F] = ???
+        implicit val covariant: Covariant[F]                   =
+          new Covariant[F] {
+            def map[A, B](f: A => B): F[A] => F[B] =
+              ???
+          }
+        implicit val associativeFlatten: AssociativeFlatten[F] =
+          new AssociativeFlatten[F] {
+            def flatten[A](ffa: F[F[A]]): F[A] =
+              ???
+          }
         implicitly[AssociativeBoth[F]]
         assertCompletes
       }
