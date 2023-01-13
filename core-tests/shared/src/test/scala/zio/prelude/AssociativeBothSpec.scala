@@ -15,6 +15,13 @@ object AssociativeBothSpec extends ZIOSpecDefault {
     suite("AssociativeBothSpec")(
       suite("laws")(
         test("chunk . option")(checkAllLaws(AssociativeBothLaws)(chunkOptionGenF, Gen.int))
-      )
+      ),
+      test("associativeBoth can be derived from Covariant and AssociativeFlatten") {
+        trait F[+A]
+        implicit def covariant: Covariant[F]                   = ???
+        implicit def associativeFlatten: AssociativeFlatten[F] = ???
+        implicitly[AssociativeBoth[F]]
+        assertCompletes
+      }
     )
 }

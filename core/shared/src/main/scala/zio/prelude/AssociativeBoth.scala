@@ -46,7 +46,7 @@ object AssociativeBoth {
   def apply[F[_]](implicit associativeBoth: AssociativeBoth[F]): AssociativeBoth[F] =
     associativeBoth
 
-  def fromCovariantAssociativeFlatten[F[+_]](implicit
+  implicit def fromCovariantAssociativeFlatten[F[+_]](implicit
     covariant: Covariant[F],
     identityFlatten: AssociativeFlatten[F]
   ): AssociativeBoth[F] =
