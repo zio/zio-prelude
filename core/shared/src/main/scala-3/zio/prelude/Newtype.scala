@@ -4,6 +4,7 @@ import zio.NonEmptyChunk
 
 import scala.quoted.*
 import zio.prelude.ConsoleUtils.*
+import scala.reflect.ClassTag
 
 abstract class NewtypeCustom[A] {
 
@@ -115,13 +116,17 @@ abstract class NewtypeCustom[A] {
       validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
     ).as(value.asInstanceOf[Type])
 
-
   def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
     ForEach[F].forEach(value) { value =>
       Validation.fromEitherNonEmptyChunk(
         validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
       )
     }.as(value.asInstanceOf[F[Type]])
+
+  implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] =
+    new ClassTag[Type] {
+      val runtimeClass = underlying.runtimeClass
+    }
 }
 
 abstract class SubtypeCustom[A] extends NewtypeCustom[A] {

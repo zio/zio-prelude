@@ -106,7 +106,6 @@ package object newtypes {
   type FailureOut[+A] = FailureOut.Type[A]
 
   object Natural extends Subtype[Int] {
-
     // scalafix:off
     override def assertion = assert(Assertion.greaterThanOrEqualTo(0))
     // scalafix:on
