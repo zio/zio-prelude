@@ -1,6 +1,7 @@
 package zio.prelude
 
 import zio.NonEmptyChunk
+
 import scala.reflect.ClassTag
 
 /**
@@ -322,9 +323,8 @@ object Newtype {
       }
   }
 
-  implicit def classTag[N <: Newtype[_]: ClassTagWrapper]: ClassTag[N#Type] = {
+  implicit def classTag[N <: Newtype[_]: ClassTagWrapper]: ClassTag[N#Type] =
     new ClassTag[N#Type] {
       def runtimeClass: Class[_] = ClassTagWrapper[N].classTag.runtimeClass
     }
-  }
 }

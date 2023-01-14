@@ -6,6 +6,7 @@ import zio.prelude.laws._
 import zio.prelude.newtypes.{And, Or, Sum}
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test.{Assertion => TestAssertion, _}
+
 import scala.reflect.ClassTag
 
 object NewtypeSpec extends ZIOSpecDefault {
