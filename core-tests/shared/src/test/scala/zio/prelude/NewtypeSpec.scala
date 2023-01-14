@@ -7,6 +7,8 @@ import zio.prelude.newtypes.{And, Or, Sum}
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test.{Assertion => TestAssertion, _}
 
+import scala.reflect.ClassTag
+
 object NewtypeSpec extends ZIOSpecDefault {
 
   def spec =
@@ -59,12 +61,38 @@ object NewtypeSpec extends ZIOSpecDefault {
           assert(Natural.make(-1))(
             isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))
           )
+        },
+        test("can summon classtag for newtype") {
+          assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
+        },
+        test("allows creating subtypes of newtypes") {
+          val compile = typeCheck {
+            """import java.util.UUID
+               object GenericItemId extends Newtype[UUID]
+               type GenericItemId = GenericItemId.Type
+
+               object SpecificItemId extends Subtype[GenericItemId]
+               type SpecificItemId = SpecificItemId.Type
+               """
+          }
+          assertZIO(compile)(isRight)
+        } @@ TestAspect.exceptScala211,
+        test("allows creating arrays of newtypes") {
+          val data = Array.fill(2)(Natural(0))
+          data(1) = Natural(1)
+          assertTrue(data.toList === List(Natural(0): Natural, Natural(1): Natural))
+        },
+        test("classtag reports same runtimeclass as underlying primitive") {
+          assertTrue(implicitly[ClassTag[Natural]].runtimeClass === implicitly[ClassTag[Int]].runtimeClass)
         }
       ),
       suite("Subtype")(
         test("subtypes values") {
           val two = 2
           assertTrue(two + Natural.two == 2 + 2)
+        },
+        test("can summon classtag for subtype") {
+          assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
         }
       ),
       suite("examples from documentation")(

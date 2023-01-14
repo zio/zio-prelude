@@ -2,6 +2,8 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 
+import scala.reflect.ClassTag
+
 /**
  * The `Newtype` module provides functionality for creating zero overhead
  * newtypes. Newtypes wrap an existing type and have the same representation as
@@ -282,6 +284,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    */
   def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.Macros.wrapAll_impl[F, A, Type]
 
+  implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = Newtype.classTag
 }
 
 object Newtype {
@@ -306,4 +309,22 @@ object Newtype {
     val _ = newtype
     value.asInstanceOf[F[T#Type]]
   }
+
+  private trait ClassTagWrapper[-A] {
+    def classTag: ClassTag[_]
+  }
+
+  private object ClassTagWrapper {
+    def apply[A](implicit ev: ClassTagWrapper[A]): ClassTagWrapper[A] = ev
+
+    implicit def classTagWrapperForNewtype[A](implicit underlying: ClassTag[A]): ClassTagWrapper[Newtype[A]] =
+      new ClassTagWrapper[Newtype[A]] {
+        def classTag: ClassTag[_] = underlying
+      }
+  }
+
+  implicit def classTag[N <: Newtype[_]: ClassTagWrapper]: ClassTag[N#Type] =
+    new ClassTag[N#Type] {
+      def runtimeClass: Class[_] = ClassTagWrapper[N].classTag.runtimeClass
+    }
 }
