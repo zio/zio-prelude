@@ -72,4 +72,14 @@ object SmartTypes extends App {
   }
 
   Palindrome("racecar")
+
+
+  object NonEmptyString extends Subtype[String] {
+    override inline def assertion = !equalTo("")
+  }
+
+  type NonEmptyString = NonEmptyString.Type
+
+  NonEmptyString("toto")
+
 }
