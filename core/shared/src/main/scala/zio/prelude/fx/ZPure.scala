@@ -926,7 +926,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
 }
 
-object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
+object ZPure extends ZPureArities {
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
@@ -1036,14 +1036,7 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def mapParN[W, S, R, E, A, B, C](left: ZPure[W, S, S, R, E, A], right: ZPure[W, S, S, R, E, B])(
     f: (A, B) => C
   ): ZPure[W, S, S, R, E, C] =
-    left.foldCauseM(
-      c1 =>
-        right.foldCauseM(
-          c2 => ZPure.failCause(c1 && c2),
-          _ => ZPure.failCause(c1)
-        ),
-      a => right.map(b => f(a, b))
-    )
+    left.zipWithPar(right)(f)
 
   /**
    * Combines the results of the specified `ZPure` values using the function
@@ -1297,17 +1290,24 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   object FlagType {
     case object ClearLogOnError extends FlagType
   }
-}
 
-trait ZPureLowPriorityImplicits {
-
-  /**
-   * The `CommutativeBoth` instance for `ZPure`.
-   */
-  implicit def ZPureCommutativeBoth[W, S, R, E]
-    : CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
-    new CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
-      def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
-        ZPure.tupledPar(fa, fb)
-    }
+  implicit final class ZipWithParSyntax[W, S, R, E, A](private val self: ZPure[W, S, S, R, E, A]) extends AnyVal {
+    def <&>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                      =
+      self.zipPar(that)
+    def zipPar[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                   =
+      self.zipWithPar(that)((_, _))
+    def zipParLeft[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                    =
+      self.zipWithPar(that)((a, _) => a)
+    def zipParRight[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                   =
+      self.zipWithPar(that)((_, b) => b)
+    def zipWithPar[B, C](that: ZPure[W, S, S, R, E, B])(f: (A, B) => C): ZPure[W, S, S, R, E, C] =
+      self.foldCauseM(
+        c1 =>
+          that.foldCauseM(
+            c2 => ZPure.failCause(c1 && c2),
+            _ => ZPure.failCause(c1)
+          ),
+        a => that.map(b => f(a, b))
+      )
+  }
 }
