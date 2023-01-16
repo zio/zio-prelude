@@ -37,6 +37,9 @@ import scala.util.Try
 sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
+  /**
+   * A symbolic alias for `zipParRight`.
+   */
   final def &>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
     that: ZPure[W1, S3, S3, R1, E1, B]
   ): ZPure[W1, S3, S3, R1, E1, B] =
@@ -48,11 +51,17 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def *>[W1 >: W, S3, R1 <: R, E1 >: E, B](that: ZPure[W1, S2, S3, R1, E1, B]): ZPure[W1, S1, S3, R1, E1, B] =
     self zipRight that
 
+  /**
+   * A symbolic alias for `zipParLeft`.
+   */
   final def <&[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
     that: ZPure[W1, S3, S3, R1, E1, B]
   ): ZPure[W1, S3, S3, R1, E1, A] =
     self zipParLeft that
 
+  /**
+   * A symbolic alias for `zipPar`.
+   */
   final def <&>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(implicit
     zippable: Zippable[A, B]
   ): ZPure[W1, S3, S3, R1, E1, zippable.Out] =
