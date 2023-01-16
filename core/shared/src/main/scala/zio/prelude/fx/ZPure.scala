@@ -37,11 +37,20 @@ import scala.util.Try
 sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
+   final def &>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, B] =
+    self zipParRight that
+
   /**
    * A symbolic alias for `zipRight`.
    */
   final def *>[W1 >: W, S3, R1 <: R, E1 >: E, B](that: ZPure[W1, S2, S3, R1, E1, B]): ZPure[W1, S1, S3, R1, E1, B] =
     self zipRight that
+
+   final def <&[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, A] =
+    self zipParLeft that
+
+   final def <&>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, (A, B)] =
+    self zipPar that
 
   /**
    * A symbolic alias for `zipLeft`.
@@ -880,6 +889,25 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   )(f: (A, B) => C): ZPure[W1, S1, S3, R1, E1, C] =
     self.flatMap(a => that.flatMap(b => State.succeed(f(a, b))))
 
+  final def zipWithPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(f: (A, B) => C): ZPure[W1, S3, S3, R1, E1, C] =
+    self.foldCauseM(
+      c1 =>
+        that.foldCauseM(
+          c2 => ZPure.failCause(c1 && c2),
+          _ => ZPure.failCause(c1)
+        ),
+      a => that.map(b => f(a, b))
+    )
+
+   final def zipPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, (A, B)] =
+    self.zipWithPar(that)((_, _))
+
+   final def zipParLeft[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, A] =
+    self.zipWith(that)((a, _) => a)
+
+   final def zipParRight[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, B] =
+    self.zipWith(that)((_, b) => b)
+
   /**
    * Returns a successful computation if the value is `Right`, or fails with error `None`.
    */
@@ -1289,25 +1317,5 @@ object ZPure extends ZPureArities {
   sealed trait FlagType
   object FlagType {
     case object ClearLogOnError extends FlagType
-  }
-
-  implicit final class ZipWithParSyntax[W, S, R, E, A](private val self: ZPure[W, S, S, R, E, A]) extends AnyVal {
-    def <&>[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                      =
-      self.zipPar(that)
-    def zipPar[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)]                   =
-      self.zipWithPar(that)((_, _))
-    def zipParLeft[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, A]                    =
-      self.zipWithPar(that)((a, _) => a)
-    def zipParRight[B](that: ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, B]                   =
-      self.zipWithPar(that)((_, b) => b)
-    def zipWithPar[B, C](that: ZPure[W, S, S, R, E, B])(f: (A, B) => C): ZPure[W, S, S, R, E, C] =
-      self.foldCauseM(
-        c1 =>
-          that.foldCauseM(
-            c2 => ZPure.failCause(c1 && c2),
-            _ => ZPure.failCause(c1)
-          ),
-        a => that.map(b => f(a, b))
-      )
   }
 }
