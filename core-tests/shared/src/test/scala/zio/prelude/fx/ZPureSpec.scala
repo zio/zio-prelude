@@ -72,7 +72,7 @@ object ZPureSpec extends ZIOSpecDefault {
           },
           test("providing environment should preserve errors") {
             val zPure: ZPure[Nothing, Unit, Unit, (Int, Int), Int, Int] =
-              ZPure.tupledPar(ZPure.fail(1), ZPure.fail(2)).as(0)
+              ZPure.fail(1).zipPar(ZPure.fail(2)).as(0)
             val actual                                                  = zPure.provideEnvironment(ZEnvironment((1, 2))).runValidation
             val expected                                                = Validation.Failure(Chunk.empty, NonEmptyChunk(1, 2))
             assert(actual)(equalTo(expected))

@@ -19,7 +19,7 @@ package zio.prelude.fx
 import com.github.ghik.silencer.silent
 import zio.internal.Stack
 import zio.prelude._
-import zio.{CanFail, Chunk, ChunkBuilder, NonEmptyChunk, Tag, ZEnvironment, ZIO}
+import zio.{CanFail, Chunk, ChunkBuilder, NonEmptyChunk, Tag, ZEnvironment, ZIO, Zippable}
 
 import scala.annotation.{implicitNotFound, switch}
 import scala.reflect.ClassTag
@@ -37,7 +37,9 @@ import scala.util.Try
 sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
-   final def &>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, B] =
+  final def &>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, B] =
     self zipParRight that
 
   /**
@@ -46,10 +48,14 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def *>[W1 >: W, S3, R1 <: R, E1 >: E, B](that: ZPure[W1, S2, S3, R1, E1, B]): ZPure[W1, S1, S3, R1, E1, B] =
     self zipRight that
 
-   final def <&[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, A] =
+  final def <&[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, A] =
     self zipParLeft that
 
-   final def <&>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, (A, B)] =
+  final def <&>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZPure[W1, S3, S3, R1, E1, zippable.Out] =
     self zipPar that
 
   /**
@@ -61,9 +67,9 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * A symbolic alias for `zip`.
    */
-  final def <*>[W1 >: W, S3, R1 <: R, E1 >: E, B](
-    that: ZPure[W1, S2, S3, R1, E1, B]
-  ): ZPure[W1, S1, S3, R1, E1, (A, B)] =
+  final def <*>[W1 >: W, S3, R1 <: R, E1 >: E, B](that: ZPure[W1, S2, S3, R1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZPure[W1, S1, S3, R1, E1, zippable.Out] =
     self zip that
 
   /**
@@ -856,8 +862,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def zip[W1 >: W, S3, R1 <: R, E1 >: E, B](
     that: ZPure[W1, S2, S3, R1, E1, B]
-  ): ZPure[W1, S1, S3, R1, E1, (A, B)] =
-    self.zipWith(that)((_, _))
+  )(implicit zippable: Zippable[A, B]): ZPure[W1, S1, S3, R1, E1, zippable.Out] =
+    self.zipWith(that)(zippable.zip(_, _))
 
   /**
    * Combines this computation with the specified computation, passing the
@@ -889,7 +895,9 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   )(f: (A, B) => C): ZPure[W1, S1, S3, R1, E1, C] =
     self.flatMap(a => that.flatMap(b => State.succeed(f(a, b))))
 
-  final def zipWithPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(f: (A, B) => C): ZPure[W1, S3, S3, R1, E1, C] =
+  final def zipWithPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  )(f: (A, B) => C): ZPure[W1, S3, S3, R1, E1, C] =
     self.foldCauseM(
       c1 =>
         that.foldCauseM(
@@ -899,13 +907,19 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       a => that.map(b => f(a, b))
     )
 
-   final def zipPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, (A, B)] =
-    self.zipWithPar(that)((_, _))
+  final def zipPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZPure[W1, S3, S3, R1, E1, zippable.Out] =
+    self.zipWithPar(that)(zippable.zip(_, _))
 
-   final def zipParLeft[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, A] =
+  final def zipParLeft[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, A] =
     self.zipWith(that)((a, _) => a)
 
-   final def zipParRight[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B]): ZPure[W1, S3, S3, R1, E1, B] =
+  final def zipParRight[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, B] =
     self.zipWith(that)((_, b) => b)
 
   /**
@@ -954,7 +968,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
 }
 
-object ZPure extends ZPureArities {
+object ZPure {
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
@@ -1058,24 +1072,6 @@ object ZPure extends ZPureArities {
     ZPure.Log(w)
 
   /**
-   * Combines the results of the specified `ZPure` values using the function
-   * `f`, failing with the accumulation of all errors if any fail.
-   */
-  def mapParN[W, S, R, E, A, B, C](left: ZPure[W, S, S, R, E, A], right: ZPure[W, S, S, R, E, B])(
-    f: (A, B) => C
-  ): ZPure[W, S, S, R, E, C] =
-    left.zipWithPar(right)(f)
-
-  /**
-   * Combines the results of the specified `ZPure` values using the function
-   * `f`, failing with the first error if any fail.
-   */
-  def mapN[W, S, R, E, A, B, C](left: ZPure[W, S, S, R, E, A], right: ZPure[W, S, S, R, E, B])(
-    f: (A, B) => C
-  ): ZPure[W, S, S, R, E, C] =
-    left.zipWith(right)(f)
-
-  /**
    * Constructs a computation from the specified modify function.
    */
   def modify[S1, S2, A](f: S1 => (A, S2)): ZPure[Nothing, S1, S2, Any, Nothing, A] =
@@ -1127,26 +1123,6 @@ object ZPure extends ZPureArities {
    */
   def suspend[W, S1, S2, R, E, A](pure: => ZPure[W, S1, S2, R, E, A]): ZPure[W, S1, S2, R, E, A] =
     ZPure.unit.flatMap(_ => pure)
-
-  /**
-   * Combines the results of the specified `ZPure` values into a tuple, failing
-   * with the first error if any fail.
-   */
-  def tupled[W, S, R, E, A, B](
-    left: ZPure[W, S, S, R, E, A],
-    right: ZPure[W, S, S, R, E, B]
-  ): ZPure[W, S, S, R, E, (A, B)] =
-    mapN(left, right)((_, _))
-
-  /**
-   * Combines the results of the specified `ZPure` values into a tuple, failing
-   * with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, S, R, E, A0, A1](
-    zPure1: ZPure[W, S, S, R, E, A0],
-    zPure2: ZPure[W, S, S, R, E, A1]
-  ): ZPure[W, S, S, R, E, (A0, A1)] =
-    mapParN(zPure1, zPure2)((_, _))
 
   /**
    * Constructs a computation that always returns the `Unit` value, passing the
