@@ -1249,7 +1249,7 @@ object AssociativeBoth {
   /**
    * The `IdentityBoth` instance for `ZSTM`.
    */
-  implicit def ZSTMIdentityBothBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
+  implicit def ZSTMIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
     new IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
       val any: ZSTM[R, E, Any]                                                       = ZSTM.unit
       def both[A, B](fa: => ZSTM[R, E, A], fb: => ZSTM[R, E, B]): ZSTM[R, E, (A, B)] = fa zip fb
