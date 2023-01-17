@@ -38,21 +38,13 @@ trait AssociativeBoth[F[_]] {
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
-object AssociativeBoth {
+object AssociativeBoth extends AssociativeBothLowPriority {
 
   /**
    * Summons an implicit `AssociativeBoth[F]`.
    */
   def apply[F[_]](implicit associativeBoth: AssociativeBoth[F]): AssociativeBoth[F] =
     associativeBoth
-
-  def fromCovariantAssociativeFlatten[F[+_]](implicit
-    covariant: Covariant[F],
-    identityFlatten: AssociativeFlatten[F]
-  ): AssociativeBoth[F] =
-    new AssociativeBoth[F] {
-      override def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = fa.map(a => fb.map(b => (a, b))).flatten
-    }
 
   def compose[F[+_]: AssociativeBoth, G[+_]: AssociativeBoth](implicit
     f: Covariant[F],
@@ -1249,7 +1241,7 @@ object AssociativeBoth {
   /**
    * The `IdentityBoth` instance for `ZSTM`.
    */
-  implicit def ZSTMIdentityBothBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
+  implicit def ZSTMIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
     new IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
       val any: ZSTM[R, E, Any]                                                       = ZSTM.unit
       def both[A, B](fa: => ZSTM[R, E, A], fb: => ZSTM[R, E, B]): ZSTM[R, E, (A, B)] = fa zip fb
@@ -1261,6 +1253,17 @@ object AssociativeBoth {
   implicit def ZStreamAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa cross fb
+    }
+}
+
+trait AssociativeBothLowPriority {
+
+  implicit def fromCovariantAssociativeFlatten[F[+_]](implicit
+    covariant: Covariant[F],
+    identityFlatten: AssociativeFlatten[F]
+  ): AssociativeBoth[F] =
+    new AssociativeBoth[F] {
+      override def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = fa.map(a => fb.map(b => (a, b))).flatten
     }
 }
 

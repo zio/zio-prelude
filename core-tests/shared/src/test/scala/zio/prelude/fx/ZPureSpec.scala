@@ -72,7 +72,7 @@ object ZPureSpec extends ZIOSpecDefault {
           },
           test("providing environment should preserve errors") {
             val zPure: ZPure[Nothing, Unit, Unit, (Int, Int), Int, Int] =
-              ZPure.tupledPar(ZPure.fail(1), ZPure.fail(2)).as(0)
+              ZPure.fail(1).zipPar(ZPure.fail(2)).as(0)
             val actual                                                  = zPure.provideEnvironment(ZEnvironment((1, 2))).runValidation
             val expected                                                = Validation.Failure(Chunk.empty, NonEmptyChunk(1, 2))
             assert(actual)(equalTo(expected))
@@ -861,20 +861,6 @@ object ZPureSpec extends ZIOSpecDefault {
             if (authorized) ZPure.unit else ZPure.fail("Not authorized")
           val validation                                                                             =
             validateName("Jane Doe") zipPar validateAge(17) zipPar validateAuthorized(false)
-          val result                                                                                 = validation.sandbox.either.run
-          assert(result)(
-            isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
-          )
-        },
-        test("implicit syntax") {
-          def validateName(s: String): ZPure[Nothing, Unit, Unit, Any, String, String]               =
-            if (s == "John Doe") ZPure.succeed(s) else ZPure.fail("Wrong name!")
-          def validateAge(age: Int): ZPure[Nothing, Unit, Unit, Any, String, Int]                    =
-            if (age >= 18) ZPure.succeed(age) else ZPure.fail("Under age")
-          def validateAuthorized(authorized: Boolean): ZPure[Nothing, Unit, Unit, Any, String, Unit] =
-            if (authorized) ZPure.unit else ZPure.fail("Not authorized")
-          val validation                                                                             =
-            (validateName("Jane Doe"), validateAge(17), validateAuthorized(false)).tupledPar
           val result                                                                                 = validation.sandbox.either.run
           assert(result)(
             isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
