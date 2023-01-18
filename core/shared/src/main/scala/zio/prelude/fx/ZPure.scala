@@ -892,7 +892,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def zipRight[W1 >: W, S3, R1 <: R, E1 >: E, B](
     that: ZPure[W1, S2, S3, R1, E1, B]
   ): ZPure[W1, S1, S3, R1, E1, B] =
-    self.zipWith(that)((_, b) => b)
+    self.flatMap(_ => that)
 
   /**
    * Combines this computation with the specified computation, passing the
