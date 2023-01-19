@@ -727,7 +727,7 @@ object ZPureSpec extends ZIOSpecDefault {
                 assert(result.getState.either.runResult(s))(isLeft(isSubtype[Int](equalTo(e))))
               }
             }
-          ),
+          )
         ),
         suite("reject")(
           test("success") {
