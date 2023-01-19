@@ -1168,20 +1168,6 @@ object ZPure {
       environmentWithPure(env => f(env.get))
   }
 
-  @implicitNotFound(
-    "Pattern guards are only supported when the error type is a supertype of NoSuchElementException. However, your effect has ${E} for the error type."
-  )
-  abstract class CanFilter[+E] {
-    def apply(t: NoSuchElementException): E
-  }
-
-  object CanFilter {
-    implicit def canFilter[E >: NoSuchElementException]: CanFilter[E] =
-      new CanFilter[E] {
-        def apply(t: NoSuchElementException): E = t
-      }
-  }
-
   /**
    * The `Covariant` instance for `ZPure`.
    */
