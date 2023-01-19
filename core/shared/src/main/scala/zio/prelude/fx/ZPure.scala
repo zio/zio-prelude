@@ -21,7 +21,7 @@ import zio.internal.Stack
 import zio.prelude._
 import zio.{CanFail, Chunk, ChunkBuilder, NonEmptyChunk, Tag, ZEnvironment, ZIO, Zippable}
 
-import scala.annotation.{implicitNotFound, switch}
+import scala.annotation.switch
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -1168,20 +1168,6 @@ object ZPure {
       environmentWithPure(env => f(env.get))
   }
 
-  @implicitNotFound(
-    "Pattern guards are only supported when the error type is a supertype of NoSuchElementException. However, your effect has ${E} for the error type."
-  )
-  abstract class CanFilter[+E] {
-    def apply(t: NoSuchElementException): E
-  }
-
-  object CanFilter {
-    implicit def canFilter[E >: NoSuchElementException]: CanFilter[E] =
-      new CanFilter[E] {
-        def apply(t: NoSuchElementException): E = t
-      }
-  }
-
   /**
    * The `Covariant` instance for `ZPure`.
    */
@@ -1221,25 +1207,6 @@ object ZPure {
      */
     def refineToOrDie[E1 <: E: ClassTag](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
       self.refineOrDie { case e: E1 => e }
-  }
-
-  implicit final class ZPureWithFilterOps[W, S1, S2, R, E, A](private val self: ZPure[W, S1, S2, R, E, A])
-      extends AnyVal {
-
-    /**
-     * Enables to check conditions in the value produced by ZPure
-     * If the condition is not satisfied, it fails with NoSuchElementException
-     * this provide the syntax sugar in for-comprehension:
-     * for {
-     *   (i, j) <- zpure1
-     *   positive <- zpure2 if positive > 0
-     *  } yield ()
-     */
-    def withFilter(predicate: A => Boolean)(implicit ev: CanFilter[E]): ZPure[W, S1, S2, R, E, A] =
-      self.flatMap { a =>
-        if (predicate(a)) ZPure.succeed(a)
-        else ZPure.fail(ev(new NoSuchElementException("The value doesn't satisfy the predicate")))
-      }
   }
 
   @silent("never used")

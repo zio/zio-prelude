@@ -727,37 +727,6 @@ object ZPureSpec extends ZIOSpecDefault {
                 assert(result.getState.either.runResult(s))(isLeft(isSubtype[Int](equalTo(e))))
               }
             }
-          ),
-          suite("withFilter")(
-            test("withFilter success") {
-              val zpure1: ZPure[Any, Unit, Unit, Any, NoSuchElementException, (Int, Int)] = ZPure.succeed((1, 2))
-              val zpure2: ZPure[Any, Unit, Unit, Any, RuntimeException, Int]              = ZPure.succeed(3)
-
-              val program = for {
-                (i, j)   <- zpure1
-                positive <- zpure2 if positive > 0
-              } yield positive
-              assert(program.getState.either.run)(isRight(equalTo(((), 3))))
-            },
-            test("withFilter fail") {
-              val zpure1: ZPure[Any, Unit, Unit, Any, RuntimeException, (Int, Int)] = ZPure.succeed((1, 2))
-              val zpure2: ZPure[Any, Unit, Unit, Any, NoSuchElementException, Int]  = ZPure.succeed(-3)
-
-              val program = for {
-                (i, j)   <- zpure1
-                positive <- zpure2 if positive > 0
-              } yield positive
-              assert(program.getState.either.run) {
-                implicit val eq: Equal[RuntimeException] = Equal.ThrowableHash
-                isLeft(
-                  equalTo(
-                    new NoSuchElementException(
-                      "The value doesn't satisfy the predicate"
-                    ): RuntimeException // upcast to RuntimeException because of Dotty
-                  )
-                )
-              }
-            }
           )
         ),
         suite("reject")(
