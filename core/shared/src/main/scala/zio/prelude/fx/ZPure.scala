@@ -21,7 +21,7 @@ import zio.internal.Stack
 import zio.prelude._
 import zio.{CanFail, Chunk, ChunkBuilder, NonEmptyChunk, Tag, ZEnvironment, ZIO, Zippable}
 
-import scala.annotation.{implicitNotFound, switch}
+import scala.annotation.switch
 import scala.reflect.ClassTag
 import scala.util.Try
 
