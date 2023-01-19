@@ -902,7 +902,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def zipWith[W1 >: W, S3, R1 <: R, E1 >: E, B, C](
     that: ZPure[W1, S2, S3, R1, E1, B]
   )(f: (A, B) => C): ZPure[W1, S1, S3, R1, E1, C] =
-    self.flatMap(a => that.flatMap(b => State.succeed(f(a, b))))
+    self.flatMap(a => that.map(b => f(a, b)))
 
   final def zipWithPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
     that: ZPure[W1, S3, S3, R1, E1, B]
