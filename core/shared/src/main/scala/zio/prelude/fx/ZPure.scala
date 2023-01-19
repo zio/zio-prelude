@@ -1223,25 +1223,6 @@ object ZPure {
       self.refineOrDie { case e: E1 => e }
   }
 
-  implicit final class ZPureWithFilterOps[W, S1, S2, R, E, A](private val self: ZPure[W, S1, S2, R, E, A])
-      extends AnyVal {
-
-    /**
-     * Enables to check conditions in the value produced by ZPure
-     * If the condition is not satisfied, it fails with NoSuchElementException
-     * this provide the syntax sugar in for-comprehension:
-     * for {
-     *   (i, j) <- zpure1
-     *   positive <- zpure2 if positive > 0
-     *  } yield ()
-     */
-    def withFilter(predicate: A => Boolean)(implicit ev: CanFilter[E]): ZPure[W, S1, S2, R, E, A] =
-      self.flatMap { a =>
-        if (predicate(a)) ZPure.succeed(a)
-        else ZPure.fail(ev(new NoSuchElementException("The value doesn't satisfy the predicate")))
-      }
-  }
-
   @silent("never used")
   private object Tags {
     final val FlatMap     = 0
