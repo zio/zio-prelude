@@ -242,11 +242,7 @@ lazy val docs = project
     mainModuleName                             := (core.jvm / moduleName).value,
     projectStage                               := ProjectStage.ProductionReady,
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
-      core.jvm,
-      experimental.jvm,
-      experimentalLaws.jvm,
-      laws.jvm,
-      scalaParallelCollections
+      core.jvm
     ),
     docsPublishBranch                          := "series/2.x"
   )
