@@ -31,7 +31,7 @@ On the other hand, string concatenation is associative but not commutative. `"a"
 
 We can use the `Commutative` abstraction to specify at the type level whether one of our data types can be combined in a way that is associative and commutative or only associative. We can also test for it using the laws testing functionality provided by ZIO Prelude.
 
-For example, here is how we could define and test a `Commutative` instance for a version of the `RunningAverage` data type that we discussed in the introduction to functional abstractions.
+For example, here is how we could define and test a `Commutative` instance for a version of the `RunningAverage` data type that we discussed in the introduction to functional abstractions:
 
 ```scala mdoc:reset
 import zio.prelude._

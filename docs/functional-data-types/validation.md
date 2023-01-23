@@ -13,7 +13,7 @@ import zio.NonEmptyChunk
 sealed trait Validation[+E, +A]
 
 object Validation {
-  case class Success[+A](value: A) extends Validation[Nothing, A]
+  case class Success[+A](value: A)                 extends Validation[Nothing, A]
   case class Failure[+E](errors: NonEmptyChunk[E]) extends Validation[E, Nothing]
 }
 ```
@@ -83,7 +83,7 @@ Here we are just using the basic operators on `Validation` of `succeed` and `fai
 
 Note that we are using the `apply` method of `Person` to combine the validated name and age into a `Person`. This is often a convenient pattern when we are modeling our data using case classes.
 
-Now if we validate a person where both the `name` and the `age` are invalid we will get a failure containing both errors, giving us exactly what we need for our internal customer so they can efficiently correct the problem and send us valid data.
+Now if we validate a person where both the `name` and the `age` are invalid we will get a failure containing both errors, giving us exactly what we need for our internal customer, so they can efficiently correct the problem and send us valid data.
 
 ## Constructing Validation Values
 
@@ -91,7 +91,7 @@ Now that we understand what `Validation` is, let's look at how to construct `Val
 
 ### From Existing Values
 
-The simplest ways to construct `Validation` values are the `succeed` and `fail` operators we saw above.
+The simplest ways to construct `Validation` values are the `succeed` and `fail` operators we saw above:
 
 ```scala mdoc:nest
 object Validation {
@@ -106,7 +106,7 @@ These just construct validation successes or failures with the specified value. 
 
 ### From Code That May Throw Exceptions
 
-Another useful constructor of `Validation` values is the `apply` method on `Validation`.
+Another useful constructor of `Validation` values is the `apply` method on `Validation`:
 
 ```scala mdoc:nest
 object Validation {
@@ -119,7 +119,7 @@ The `apply` operator takes a by name argument and evaluates that argument, conve
 
 ### From Predicates
 
-The `fromPredicateWith` constructor is useful for constructing `Validation` values from predicates. This is nice for cleaning up code that constructs a validation failure or success based on some condition like the example we wrote above.
+The `fromPredicateWith` constructor is useful for constructing `Validation` values from predicates. This is nice for cleaning up code that constructs a validation failure or success based on some condition like the example we wrote above:
 
 ```scala mdoc:nest
 object Validation {
@@ -144,7 +144,7 @@ This is the same as the original example but lets us express our logic at a slig
 
 ### From Other Data Types
 
-There are also operators for constructing `Validation` values from a variety of other data types in the Scala standard library such as `Either`, `Option`, and `Try`.
+There are also operators for constructing `Validation` values from a variety of other data types in the Scala standard library such as `Either`, `Option`, and `Try`:
 
 ```scala mdoc:nest
 import scala.util.Try
@@ -171,7 +171,7 @@ A `Validation` constructed using `fromOption` has `Unit` for the error type sinc
 
 Now that we know about creating `Validation` values, the next thing we need to know is how to transform them.
 
-We can transform the value type of the `Validation` using the `map` operator.
+We can transform the value type of the `Validation` using the `map` operator:
 
 ```scala mdoc:nest
 trait Validation[+E, +A] {
@@ -179,7 +179,7 @@ trait Validation[+E, +A] {
 }
 ```
 
-We can transform the error type of the `Validation` using the `mapError` operator.
+We can transform the error type of the `Validation` using the `mapError` operator:
 
 ```scala mdoc:nest
 trait Validation[+E, +A] {
@@ -195,7 +195,7 @@ We can also combine `Validation` values.
 
 ### Accumulating Errors
 
-The most common way to do this is with the `validateWith` operator we saw above.
+The most common way to do this is with the `validateWith` operator we saw above:
 
 ```scala mdoc
 object Validation {
@@ -211,7 +211,7 @@ This will check each of the original `Validation` values and if they are both su
 
 There are variants of `validateWith` for combining up to twenty two different `Validation` values so even if you are working with large cases classes with many fields you can still use `validateWith` to combine them.
 
-There is also a `validate` variant that combines multiple `Validation` values but does not take a combining function. In this case the returned `Validation` just contains a tuple with all the original values and you can combine them yourself later using `map`.
+There is also a `validate` variant that combines multiple `Validation` values but does not take a combining function. In this case the returned `Validation` just contains a tuple with all the original values, and you can combine them yourself later using `map`.
 
 If you have a whole collection of values you want to validate you can use the `validateAll` operator to validate them all at the same time.
 

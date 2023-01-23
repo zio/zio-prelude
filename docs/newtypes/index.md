@@ -208,7 +208,7 @@ AccountNumber(1) === AccountNumber(2)
 
 Attempting to compare two unrelated types results in a compilation error.
 
-```scala mdoc:fail
+```scala
 AccountNumber(1) === 1
 ```
 
@@ -222,7 +222,7 @@ However, it can lead to boilerplate in some cases where we need to explicitly un
 
 For example, say we want to test whether one `SequenceNumber` is after another. Right now this will not work:
 
-```scala mdoc:fail
+```scala
 import zio.prelude.Subtype
 
 object SequenceNumber extends Newtype[Int]

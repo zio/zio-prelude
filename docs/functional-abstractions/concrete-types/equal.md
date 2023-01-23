@@ -86,7 +86,7 @@ We can always check if an instance of a type class exists for a given data type 
 Equal[List[Either[String, Int]]]
 ```
 
-```scala mdoc:fail
+```scala
 Equal[String => Int]
 ```
 
