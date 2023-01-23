@@ -244,7 +244,8 @@ lazy val docs = project
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
       core.jvm
     ),
-    docsPublishBranch                          := "series/2.x"
+    docsPublishBranch                          := "series/2.x",
+    checkArtifactBuildProcessWorkflowStep      := None
   )
   .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
