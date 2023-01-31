@@ -16,6 +16,7 @@
 
 package zio.prelude.coherent
 
+import zio._
 import zio.prelude._
 
 trait AssociativeBothDeriveEqualInvariant[F[_]] extends AssociativeBoth[F] with DeriveEqual[F] with Invariant[F]
@@ -174,6 +175,47 @@ object CovariantDeriveEqualIdentityFlatten {
         identityFlatten0.flatten(ffa)
       def map[A, B](f: A => B): F[A] => F[B] =
         covariant0.map(f)
+    }
+}
+
+trait CovariantIdentityBoth[F[+_]] extends Covariant[F] with IdentityBoth[F] { self =>
+  private implicit val covariant: Covariant[F]       = self
+  private implicit val identityBoth: IdentityBoth[F] = self
+
+  def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => F[B])(implicit
+    bf: BuildFrom[Collection[A], B, Collection[B]]
+  ): F[Collection[B]] =
+    in.foldLeft(bf.newBuilder(in).succeed)((bs, a) => bs.zipWith(f(a))(_ += _)).map(_.result())
+
+  def forEach_[A, B](in: Iterable[A])(f: A => F[Any]): F[Unit] =
+    forEach(in)(f).unit
+}
+
+object CovariantIdentityBoth {
+
+  def apply[F[+_]](implicit covariantIdentityBoth: CovariantIdentityBoth[F]): CovariantIdentityBoth[F] =
+    covariantIdentityBoth
+
+  implicit def derive[F[+_]](implicit
+    covariant: Covariant[F],
+    identityBoth: IdentityBoth[F]
+  ): CovariantIdentityBoth[F] =
+    identityBoth match {
+      case covariantIdentityBoth: CovariantIdentityBoth[F] => covariantIdentityBoth
+      case _                                               => fromCovariantIdentityBoth(covariant, identityBoth)
+    }
+
+  private def fromCovariantIdentityBoth[F[+_]](
+    covariant: Covariant[F],
+    identityBoth: IdentityBoth[F]
+  ): CovariantIdentityBoth[F] =
+    new CovariantIdentityBoth[F] {
+      def any: F[Any]                                     =
+        identityBoth.any
+      def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] =
+        identityBoth.both(fa, fb)
+      def map[A, B](f: A => B): F[A] => F[B]              =
+        covariant.map(f)
     }
 }
 

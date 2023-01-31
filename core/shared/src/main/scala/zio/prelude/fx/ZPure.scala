@@ -19,7 +19,8 @@ package zio.prelude.fx
 import com.github.ghik.silencer.silent
 import zio.internal.Stack
 import zio.prelude._
-import zio.{CanFail, Chunk, ChunkBuilder, NonEmptyChunk, Tag, ZEnvironment, ZIO, Zippable}
+import zio.prelude.coherent.CovariantIdentityBoth
+import zio.{Cause => _, _}
 
 import scala.annotation.switch
 import scala.reflect.ClassTag
@@ -1072,6 +1073,51 @@ object ZPure {
     ForEach[F].forEach[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A, B](fa)(f)
 
   /**
+   * Maps each element of a collection to a computation and combines them all
+   * into a single computation that passes the updated state from each
+   * computation to the next and collects the results.
+   */
+  def foreach[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+    f: A => ZPure[W, S, S, R, E, B]
+  )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+    ZPure.suspend {
+      val iterator = in.iterator
+      val builder  = bf.newBuilder(in)
+
+      lazy val recurse: B => ZPure[W, S, S, R, E, Collection[B]] = { b =>
+        builder += b
+        loop()
+      }
+
+      def loop(): ZPure[W, S, S, R, E, Collection[B]] =
+        if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+        else ZPure.succeed(builder.result())
+
+      loop()
+    }
+
+  def foreach[W, S, R, E, A, B](in: NonEmptyChunk[A])(f: A => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, NonEmptyChunk[B]] =
+    foreach(in.toChunk)(f).map(NonEmptyChunk.nonEmpty)
+
+  /**
+   * Maps each element of a collection to a computation and combines them all
+   * into a single computation that passes the updated state from each
+   * computation to the next and discards the results.
+   */
+  def foreachDiscard[W, S, R, E, A, B](in: Iterable[A])(f: A => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, Unit] =
+    ZPure.suspend {
+      val iterator = in.iterator
+
+      lazy val recurse: Any => ZPure[W, S, S, R, E, Unit] = _ => loop()
+
+      def loop(): ZPure[W, S, S, R, E, Unit] =
+        if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+        else ZPure.unit
+
+      loop()
+    }
+
+  /**
    * Constructs a computation that returns the initial state unchanged.
    */
   def get[S]: ZPure[Nothing, S, S, Any, Nothing, S] =
@@ -1180,12 +1226,25 @@ object ZPure {
   /**
    * The `IdentityBoth` instance for `ZPure`.
    */
-  implicit def ZPureIdentityBoth[W, S, R, E]: IdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
-    new IdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
+  implicit def ZPureCovariantIdentityBoth[W, S, R, E]
+    : CovariantIdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
+    new CovariantIdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
       def any: ZPure[W, S, S, Any, Nothing, Any]                                                                   =
         ZPure.unit
       def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
         fa.zip(fb)
+      def map[A, B](f: A => B): ZPure[W, S, S, R, E, A] => ZPure[W, S, S, R, E, B]                                 =
+        _.map(f)
+      override def forEach[A, B, Collection[+Element] <: Iterable[Element]](
+        in: Collection[A]
+      )(f: A => ZPure[W, S, S, R, E, B])(implicit
+        bf: BuildFrom[Collection[A], B, Collection[B]]
+      ): ZPure[W, S, S, R, E, Collection[B]] =
+        ZPure.foreach(in)(f)
+      override def forEach_[A, B](in: Iterable[A])(
+        f: A => ZPure[W, S, S, R, E, Any]
+      ): ZPure[W, S, S, R, E, Unit] =
+        ZPure.foreachDiscard(in)(f)
     }
 
   /**
