@@ -683,7 +683,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
           .forEach[(K, V), (K, V2), Iterable](map) { case (k, v) => f(v).map(k -> _) }
           .map(_.toMap)
       override def forEach_[G[+_]: IdentityBoth: Covariant, V](map: Map[K, V])(f: V => G[Any]): G[Unit] =
-        CovariantIdentityBoth[G].forEach_(map) { case (k, v) => f(v) }
+        CovariantIdentityBoth[G].forEach_(map) { case (_, v) => f(v) }
     }
 
   /**
