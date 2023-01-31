@@ -1206,11 +1206,11 @@ object AssociativeBoth extends AssociativeBothLowPriority {
    */
   implicit def ZIOCovariantIdentityBoth[R, E]: CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
     new CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      val any: ZIO[R, E, Any]                                                                     =
+      val any: ZIO[R, E, Any]                                                               =
         ZIO.unit
-      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)]                 =
+      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)]           =
         fa.zipWithPar(fb)((_, _))
-      def map[A, B](f: A => B): ZIO[R, E, A] => ZIO[R, E, B]                                      =
+      def map[A, B](f: A => B): ZIO[R, E, A] => ZIO[R, E, B]                                =
         _.map(f)
       override def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => ZIO[R, E, B])(
         implicit bf: BuildFrom[Collection[A], B, Collection[B]]

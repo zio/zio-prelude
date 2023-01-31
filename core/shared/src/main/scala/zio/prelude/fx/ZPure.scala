@@ -1096,7 +1096,9 @@ object ZPure {
       loop()
     }
 
-  def foreach[W, S, R, E, A, B](in: NonEmptyChunk[A])(f: A => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, NonEmptyChunk[B]] =
+  def foreach[W, S, R, E, A, B](in: NonEmptyChunk[A])(
+    f: A => ZPure[W, S, S, R, E, B]
+  ): ZPure[W, S, S, R, E, NonEmptyChunk[B]] =
     foreach(in.toChunk)(f).map(NonEmptyChunk.nonEmpty)
 
   /**
