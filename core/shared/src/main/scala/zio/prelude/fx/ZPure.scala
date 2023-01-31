@@ -1096,11 +1096,6 @@ object ZPure {
       loop()
     }
 
-  def foreach[W, S, R, E, A, B](in: NonEmptyChunk[A])(
-    f: A => ZPure[W, S, S, R, E, B]
-  ): ZPure[W, S, S, R, E, NonEmptyChunk[B]] =
-    foreach(in.toChunk)(f).map(NonEmptyChunk.nonEmpty)
-
   /**
    * Maps each element of a collection to a computation and combines them all
    * into a single computation that passes the updated state from each
