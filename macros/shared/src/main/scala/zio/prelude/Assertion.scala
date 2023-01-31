@@ -47,7 +47,8 @@ sealed trait Assertion[-A] { self =>
 object Assertion {
   val anything: Assertion[Any] = Assertion.Anything
 
-  /** Build custom assertion from a test function that checks argument and returns `Boolean`, e.g.:
+  /**
+   * Build custom assertion from a test function that checks argument and returns `Boolean`, e.g.:
    *
    * {{{
    *   val isBlank: Assertion[String] =

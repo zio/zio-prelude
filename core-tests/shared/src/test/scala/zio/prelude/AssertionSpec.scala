@@ -15,12 +15,10 @@ object AssertionSpec extends ZIOSpecDefault {
     test("matches must work when the regex only match the full string") {
       assert((Assertion.matches("t.*g").apply("toto like biking")))(isRight(isUnit))
     },
-
     suite("fromFunction")(
       test("must succeed if function returns true") {
         assert(isBlank.apply(""))(isRight(isUnit))
       },
-
       test("must fail if function returns false") {
         assert(isBlank.apply("non-blank"))(isLeft(anything))
       }
