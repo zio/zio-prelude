@@ -55,7 +55,7 @@ object Assertion {
    *     Assertion.fromFunction("isBlank")(_.isBlank)
    *
    *   def containsElem[A](elem: A): Assertion[List[A]] =
-   *     Assertion.fromFunction(s"containsElem($elem)")(_.contains(elem))
+   *     Assertion.fromFunction(s"containsElem(\$elem)")(_.contains(elem))
    * }}}
    */
   def fromFunction[A](name: String)(run: A => Boolean): Assertion[A] = FromFunction(name, run)
