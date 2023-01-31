@@ -47,6 +47,18 @@ sealed trait Assertion[-A] { self =>
 object Assertion {
   val anything: Assertion[Any] = Assertion.Anything
 
+  /** Build custom assertion from a test function that checks argument and returns `Boolean`, e.g.:
+   *
+   * {{{
+   *   val isBlank: Assertion[String] =
+   *     Assertion.fromFunction("isBlank")(_.isBlank)
+   *
+   *   def containsElem[A](elem: A): Assertion[List[A]] =
+   *     Assertion.fromFunction(s"containsElem($elem)")(_.contains(elem))
+   * }}}
+   */
+  def fromFunction[A](name: String)(run: A => Boolean): Assertion[A] = FromFunction(name, run)
+
   /**
    * Ensures the value falls between a given min and max (inclusive).
    */
@@ -120,6 +132,19 @@ object Assertion {
           case (_, Left(e2))        => Left(e2)
         }
       } else (!left || !right).apply(a, negated = false)
+  }
+
+  private[prelude] case class FromFunction[A](name: String, run: A => Boolean) extends Assertion[A] {
+    def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = run(a)
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.Failure(s"$name"))
+      } else {
+        if (!result) Left(AssertionError.Failure(s"$name"))
+        else Right(())
+      }
+    }
   }
 
   private[prelude] case class Or[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
