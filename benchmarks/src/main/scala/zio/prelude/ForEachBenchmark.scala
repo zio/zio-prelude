@@ -1,13 +1,13 @@
 package zio.prelude
 
-import cats.effect.{IO => CIO}
 import cats.effect.unsafe.implicits.global
+import cats.effect.{IO => CIO}
 import cats.instances.list._
 import cats.syntax.all._
 import org.openjdk.jmh.annotations.{State => BenchmarkState, _}
 import org.openjdk.jmh.infra.Blackhole
-import zio.{Scope => _, _}
 import zio.prelude.fx.ZPure
+import zio.{Scope => _, _}
 
 import java.util.concurrent.TimeUnit
 
