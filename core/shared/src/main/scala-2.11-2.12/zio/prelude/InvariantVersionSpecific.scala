@@ -16,6 +16,8 @@
 
 package zio.prelude
 
+import zio.prelude.coherent.CovariantIdentityBoth
+
 import scala.collection.generic.CanBuildFrom
 
 trait InvariantVersionSpecific {
@@ -26,7 +28,9 @@ trait InvariantVersionSpecific {
   implicit def IterableForEach[F[+a] <: Iterable[a]](implicit derive: DeriveCanBuildFrom[F]): ForEach[F] =
     new ForEach[F] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
-        fa.foldLeft(derive.derive[B](fa).succeed)((bs, a) => bs.zipWith(f(a))(_ += _)).map(_.result())
+        CovariantIdentityBoth[G].forEach(fa)(f)(derive.derive)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(fa)(f)
     }
 
   trait DeriveCanBuildFrom[F[+_]] {
