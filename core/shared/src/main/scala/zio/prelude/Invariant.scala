@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.prelude.coherent.CovariantIdentityBoth
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
@@ -72,8 +73,10 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit val ChunkForEach: ForEach[Chunk] =
     new ForEach[Chunk] {
-      def forEach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
-        chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]]      =
+        CovariantIdentityBoth[G].forEach(chunk)(f)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, A](chunk: Chunk[A])(f: A => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(chunk)(f)
     }
 
   implicit val CommutativeInvariant: Invariant[Commutative] =
@@ -662,9 +665,12 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit val ListForEach: ForEach[List] =
     new ForEach[List] {
-      def forEach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
-        list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
-      override def map[A, B](f: A => B): List[A] => List[B]                                      = _.map(f)
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]]     =
+        CovariantIdentityBoth[G].forEach(list)(f)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: List[A])(f: A => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(fa)(f)
+      override def map[A, B](f: A => B): List[A] => List[B]                                          =
+        _.map(f)
     }
 
   /**
@@ -672,10 +678,12 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit def MapForEach[K]: ForEach[({ type lambda[+v] = Map[K, v] })#lambda] =
     new ForEach[({ type lambda[+v] = Map[K, v] })#lambda] {
-      def forEach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
-        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) { case (map, (k, v)) =>
-          map.zipWith(f(v))((map, v2) => map + (k -> v2))
-        }
+      def forEach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]]  =
+        CovariantIdentityBoth[G]
+          .forEach[(K, V), (K, V2), Iterable](map) { case (k, v) => f(v).map(k -> _) }
+          .map(_.toMap)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, V](map: Map[K, V])(f: V => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(map) { case (_, v) => f(v) }
     }
 
   /**
@@ -1298,8 +1306,10 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit val VectorForEach: ForEach[Vector] =
     new ForEach[Vector] {
-      def forEach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]] =
-        vector.foldLeft[G[Vector[B]]](Vector.empty.succeed)((bs, a) => bs.zipWith(f(a))(_ :+ _))
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]]     =
+        CovariantIdentityBoth[G].forEach(vector)(f)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, A](vector: Vector[A])(f: A => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(vector)(f)
     }
 
   /**

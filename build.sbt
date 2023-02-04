@@ -224,7 +224,8 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "2.9.0"
+      "org.typelevel" %% "cats-core"   % "2.9.0",
+      "org.typelevel" %% "cats-effect" % "3.4.5"
     )
   )
   .dependsOn(core.jvm)

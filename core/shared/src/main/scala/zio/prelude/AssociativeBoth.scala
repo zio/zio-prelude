@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio._
+import zio.prelude.coherent.CovariantIdentityBoth
 import zio.prelude.newtypes.{AndF, Failure, OrF}
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
@@ -1225,11 +1226,20 @@ object AssociativeBoth extends AssociativeBothLowPriority {
   /**
    * The `IdentityBoth` instance for `ZIO`.
    */
-  implicit def ZIOIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      val any: ZIO[R, E, Any] = ZIO.unit
-
-      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zip fb
+  implicit def ZIOCovariantIdentityBoth[R, E]: CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      val any: ZIO[R, E, Any]                                                               =
+        ZIO.unit
+      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)]           =
+        fa.zipWithPar(fb)((_, _))
+      def map[A, B](f: A => B): ZIO[R, E, A] => ZIO[R, E, B]                                =
+        _.map(f)
+      override def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => ZIO[R, E, B])(
+        implicit bf: BuildFrom[Collection[A], B, Collection[B]]
+      ): ZIO[R, E, Collection[B]] =
+        ZIO.foreach(in)(f)
+      override def forEach_[A, B](in: Iterable[A])(f: A => ZIO[R, E, Any]): ZIO[R, E, Unit] =
+        ZIO.foreachDiscard(in)(f)
     }
 
   /**
