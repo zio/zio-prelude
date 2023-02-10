@@ -13,7 +13,7 @@ trait Syntax {
     )(r: ParMap[K, V]): PartialOrdering = {
       def commonValues(lesserMap: ParMap[K, V]): ParIterable[(V, V)] =
         // `toIterable` so that we don't incidentally create a map (and thus drop duplicate would-be keys)
-        lesserMap.map { case (k, _) => (l(k), r(k)) }
+        lesserMap.toIterable.map { case (k, _) => (l(k), r(k)) }
       if (l.keySet == r.keySet) {
         compareValues(Ordering.Equals, commonValues(l))
       } else if (l.keySet.subsetOf(r.keySet)) {
