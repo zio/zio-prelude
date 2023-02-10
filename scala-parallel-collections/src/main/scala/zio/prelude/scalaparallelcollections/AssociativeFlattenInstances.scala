@@ -1,6 +1,7 @@
 package zio.prelude
 package scalaparallelcollections
 
+import scala.collection.parallel.immutable.ParMap
 import scala.collection.parallel.{immutable => par}
 
 trait AssociativeFlattenInstances {
@@ -8,8 +9,8 @@ trait AssociativeFlattenInstances {
   /**
    * The `AssociativeFlatten` instance for `ParMap`
    */
-  implicit def ParMapAssociativeFlatten[K]: AssociativeFlatten[({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
-    new AssociativeFlatten[({ type lambda[+v] = par.ParMap[K, v] })#lambda] {
+  implicit def ParMapAssociativeFlatten[K]: AssociativeFlatten[ParMap[K, +*]] =
+    new AssociativeFlatten[ParMap[K, +*]] {
       def flatten[V](ffa: par.ParMap[K, par.ParMap[K, V]]): par.ParMap[K, V] =
         ffa.aggregate(par.ParMap.empty[K, V])({ case (l, (_, r)) => l ++ r }, _ ++ _)
     }
