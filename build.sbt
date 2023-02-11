@@ -193,6 +193,44 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
   .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
 
+lazy val derivation = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("derivation"))
+  .dependsOn(core, core % "test->test")
+  .settings(stdSettings("zio-prelude-derivation"))
+  .settings(crossProjectSettings)
+  .settings(buildInfoSettings("zio.prelude.derivation"))
+  .settings(
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _)) =>
+          Vector(
+            "com.softwaremill.magnolia1_3" %%% "magnolia" % "1.1.5"
+          )
+
+        case _ =>
+          Vector(
+            "org.scala-lang"                 % "scala-reflect" % scalaVersion.value % Provided,
+            "com.softwaremill.magnolia1_2" %%% "magnolia"      % "1.1.3"
+          )
+      }
+    }
+  )
+  .enablePlugins(BuildInfoPlugin)
+
+lazy val derivationTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("derivation-tests"))
+  .dependsOn(derivation)
+  .settings(stdSettings("zio-prelude-derivation-tests"))
+  .settings(crossProjectSettings)
+  .settings(buildInfoSettings("zio.prelude.derivation.tests"))
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
+  .enablePlugins(BuildInfoPlugin)
+
 lazy val scalaParallelCollections = project
   .in(file("scala-parallel-collections"))
   .dependsOn(core.jvm, coreTests.jvm % "test->test")
