@@ -349,6 +349,16 @@ object ZValidation extends LowPriorityValidationImplicits {
     }
 
   /**
+   * Derives a `Debug[Validation[E, A]]` given a `Debug[E]` and a `Debug[A]`.
+   */
+  implicit def ValidationDebug[E: Debug, A: Debug]: Debug[Validation[E, A]] = {
+    case ZValidation.Failure(_, errors) =>
+      Debug.Repr.VConstructor(List("zio", "prelude"), "ZValidation.Failure", List(errors.debug))
+    case ZValidation.Success(_, value)  =>
+      Debug.Repr.VConstructor(List("zio", "prelude"), "ZValidation.Success", List(value.debug))
+  }
+
+  /**
    * Derives a `Debug[ZValidation[W, E, A]]` given a `Debug[W], a `Debug[E]`,
    * and a `Debug[A]`.
    */

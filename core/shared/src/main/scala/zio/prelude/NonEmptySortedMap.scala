@@ -17,6 +17,7 @@ package zio.prelude
  */
 
 import zio.NonEmptyChunk
+import zio.prelude.Debug.keyValueDebug
 
 import scala.collection.immutable.SortedMap
 import scala.language.implicitConversions
@@ -183,6 +184,12 @@ object NonEmptySortedMap {
 
   private val NonEmptyMapSeed: Int = 1147820194
 
+  /**
+   * Derives a `Debug[NonEmptySortedMap[K, V]]` given a `Debug[K]` and a `Debug[V]`.
+   */
+  implicit def NonEmptySortedMapDebug[K: Debug, V: Debug]: Debug[NonEmptySortedMap[K, V]] =
+    map =>
+      Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptySortedMap", map.toMap.map(_.debug(keyValueDebug)).toList)
 }
 
 trait NonEmptySortedMapSyntax {

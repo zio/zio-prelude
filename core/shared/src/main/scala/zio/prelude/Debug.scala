@@ -416,6 +416,12 @@ object Debug extends DebugVersionSpecific {
     nonEmptyChunk => Repr.VConstructor(List("zio"), "NonEmptyChunk", nonEmptyChunk.map(_.debug).toList)
 
   /**
+   * Derives a `Debug[Set[A]]` given a `Debug[A]`.
+   */
+  implicit def SetDebug[A: Debug]: Debug[Set[A]] =
+    set => Repr.VConstructor(List("scala", "collection", "immutable"), "Set", set.map(_.debug).toList)
+
+  /**
    * The `Debug`instance for `Nothing`. Note that since there are no values of
    * type `Nothing` this `Debug` instance can never be called.
    */
