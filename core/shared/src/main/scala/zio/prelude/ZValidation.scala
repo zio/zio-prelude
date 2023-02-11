@@ -274,7 +274,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   final def toZIO: IO[E, A] =
     self.fold(
       nec => ZIO.failCause(nec.reduceMapLeft(e => zio.Cause.fail(e))((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
-      ZIO.succeedNow
+      ZIO.succeed(_)
     )
 
   /**
@@ -282,7 +282,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * errors in a single call, discarding the log.
    */
   final def toZIOParallelErrors: IO[NonEmptyChunk[E], A] =
-    self.fold(es => ZIO.refailCause(Cause.fail(es)), ZIO.succeedNow)
+    self.fold(es => ZIO.refailCause(Cause.fail(es)), ZIO.succeed(_))
 
   /**
    * Transforms this `ZValidation` to an `ZIO` effect, aggregating errors using provided `Associative` instance, discarding the log.
@@ -290,7 +290,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   final def toZIOAssociative[E1 >: E](implicit A: Associative[E1]): IO[E1, A] =
     self.fold(
       nec => ZIO.fail(nec.reduceMap[E1](identity)),
-      ZIO.succeedNow
+      ZIO.succeed(_)
     )
 
   /**
