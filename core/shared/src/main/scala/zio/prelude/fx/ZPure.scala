@@ -819,7 +819,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZIO.environmentWithZIO[R] { r =>
       provideEnvironment(r).runAll(())._2 match {
         case Left(cause)   => ZIO.failCause(cause.toCause)
-        case Right((_, a)) => ZIO.succeedNow(a)
+        case Right((_, a)) => ZIO.succeed(a)
       }
     }
 
@@ -831,7 +831,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
         case Left(cause)   => ZIO.failCause(cause.toCause)
-        case Right((_, a)) => ZIO.succeedNow(a)
+        case Right((_, a)) => ZIO.succeed(a)
       }
     }
 
@@ -843,7 +843,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
         case Left(cause)   => ZIO.failCause(cause.toCause)
-        case Right(result) => ZIO.succeedNow(result)
+        case Right(result) => ZIO.succeed(result)
       }
     }
 
@@ -855,7 +855,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       val (log, result) = provideEnvironment(r).runAll(s1)
       result match {
         case Left(cause)    => ZIO.failCause(cause.toCause)
-        case Right((s2, a)) => ZIO.succeedNow((log, s2, a))
+        case Right((s2, a)) => ZIO.succeed((log, s2, a))
       }
     }
 
