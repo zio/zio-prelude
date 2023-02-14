@@ -104,7 +104,7 @@ trait Equal[-A] { self =>
   def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
-object Equal {
+object Equal extends EqualVersionSpecific {
 
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
