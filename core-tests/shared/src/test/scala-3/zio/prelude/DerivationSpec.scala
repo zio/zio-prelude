@@ -5,9 +5,9 @@ import zio.test._
 
 object DerivationSpec extends ZIOSpecDefault {
 
-  final case class Person(name: String, age: Int)
+  final case class Person(name: String, age: Int) derives Equal
 
-  sealed trait Color
+  sealed trait Color derives Equal
 
   object Color {
     case object Red   extends Color

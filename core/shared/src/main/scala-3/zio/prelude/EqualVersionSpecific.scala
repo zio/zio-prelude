@@ -17,20 +17,27 @@
 package zio.prelude
 
 import scala.deriving.*
-import scala.compiletime.{erasedValue, summonInline}
+import scala.compiletime.{erasedValue, summonFrom, summonInline}
 
 trait EqualVersionSpecific {
 
-  inline given derived[A](using mirror: Mirror.Of[A]): Equal[A] =
-    val instances = summonAll[mirror.MirroredElemTypes]
+  inline def derived[A](using mirror: Mirror.Of[A]): Equal[A] =
+    val instances = summonAll[A, mirror.MirroredElemTypes]
     inline mirror match
       case sum: Mirror.SumOf[A] => equalSum(sum, instances)
       case product: Mirror.ProductOf[A] => equalProduct(product, instances)
 
-  private inline def summonAll[A <: Tuple]: List[Equal[_]] =
+  private inline def summonAll[A0, A <: Tuple]: List[Equal[_]] =
     inline erasedValue[A] match {
       case _: EmptyTuple => Nil
-      case _: (t *: ts)  => summonInline[Equal[t]] :: summonAll[ts]
+      case _: (t *: ts)  => summon[A0, t] :: summonAll[A0, ts]
+    }
+
+  private inline def summon[A0, A]: Equal[A] =
+    compiletime.summonFrom {
+      case _: (A =:= A0) => compiletime.error("Cannot derive Equal.")
+      case _: (A <:< A0) => Equal.derived(using summonInline[Mirror.Of[A]])
+      case equal: Equal[A] => equal
     }
 
   private def equalSum[A](sum: Mirror.SumOf[A], elems: List[Equal[_]]): Equal[A] =
