@@ -22,7 +22,7 @@ import scala.compiletime.{erasedValue, summonFrom, summonInline}
 trait EqualVersionSpecific {
 
   inline def derived[A](using mirror: Mirror.Of[A]): Equal[A] =
-    val instances = summonAll[A, mirror.MirroredElemTypes]
+    lazy val instances = summonAll[A, mirror.MirroredElemTypes]
     inline mirror match
       case sum: Mirror.SumOf[A] => equalSum(sum, instances)
       case product: Mirror.ProductOf[A] => equalProduct(product, instances)
@@ -40,14 +40,14 @@ trait EqualVersionSpecific {
       case equal: Equal[A] => equal
     }
 
-  private def equalSum[A](sum: Mirror.SumOf[A], elems: List[Equal[_]]): Equal[A] =
+  private def equalSum[A](sum: Mirror.SumOf[A], elems: => List[Equal[_]]): Equal[A] =
     Equal.make { (left, right) =>
       val leftOrdinal = sum.ordinal(left)
       val rightOrdinal = sum.ordinal(right)
       (leftOrdinal == rightOrdinal) && check(elems(leftOrdinal))(left, right)
     }
 
-  private def equalProduct[A](product: Mirror.ProductOf[A], elems: List[Equal[_]]): Equal[A] =
+  private def equalProduct[A](product: Mirror.ProductOf[A], elems: => List[Equal[_]]): Equal[A] =
     Equal.make { (left, right) =>
       iterator(left).zip(iterator(right)).zip(elems.iterator).forall {
         case ((l, r), elem) => check(elem)(l, r)

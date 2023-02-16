@@ -15,6 +15,13 @@ object DerivationSpec extends ZIOSpecDefault {
     case object Blue  extends Color
   }
 
+  sealed trait NonEmptyList[+A] derives Equal
+
+  object NonEmptyList {
+    final case class Cons[+A](head: A, tail: NonEmptyList[A]) extends NonEmptyList[A]
+    final case class Single[+A](head: A) extends NonEmptyList[A]
+  }
+
   def spec =
     suite("DerivationSpec")(
       suite("equal")(
@@ -25,6 +32,10 @@ object DerivationSpec extends ZIOSpecDefault {
         test("sealed trait") {
           assertTrue(Color.Red === Color.Red) &&
           assertTrue(Color.Red !== Color.Green)
+        },
+        test("recursive") {
+          assertTrue(NonEmptyList.Cons(1, NonEmptyList.Single(2)) === NonEmptyList.Cons(1, NonEmptyList.Single(2))) &&
+          assertTrue(NonEmptyList.Cons(1, NonEmptyList.Single(2)) !== NonEmptyList.Cons(1, NonEmptyList.Single(3)))
         }
       )
     )
