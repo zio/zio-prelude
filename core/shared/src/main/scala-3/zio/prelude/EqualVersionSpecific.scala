@@ -40,14 +40,14 @@ trait EqualVersionSpecific {
       case equal: Equal[A] => equal
     }
 
-  private def equalSum[A](sum: Mirror.SumOf[A], elems: List[Equal[_]]): Equal[A] =
+  private def equalSum[A](sum: Mirror.SumOf[A], elems: => List[Equal[_]]): Equal[A] =
     Equal.make { (left, right) =>
       val leftOrdinal = sum.ordinal(left)
       val rightOrdinal = sum.ordinal(right)
       (leftOrdinal == rightOrdinal) && check(elems(leftOrdinal))(left, right)
     }
 
-  private def equalProduct[A](product: Mirror.ProductOf[A], elems: List[Equal[_]]): Equal[A] =
+  private def equalProduct[A](product: Mirror.ProductOf[A], elems: => List[Equal[_]]): Equal[A] =
     Equal.make { (left, right) =>
       iterator(left).zip(iterator(right)).zip(elems.iterator).forall {
         case ((l, r), elem) => check(elem)(l, r)

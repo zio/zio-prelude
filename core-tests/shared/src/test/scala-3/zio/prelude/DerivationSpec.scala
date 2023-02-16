@@ -34,8 +34,8 @@ object DerivationSpec extends ZIOSpecDefault {
           assertTrue(Color.Red !== Color.Green)
         },
         test("recursive") {
-          assertTrue(NonEmptyList.Cons(1, NonEmptyList.Single(2)) == NonEmptyList.Cons(1, NonEmptyList.Single(2))) &&
-          assertTrue(NonEmptyList.Cons(1, NonEmptyList.Single(2)) != NonEmptyList.Cons(1, NonEmptyList.Single(3)))
+          assertTrue(NonEmptyList.Cons(1, NonEmptyList.Single(2)) === NonEmptyList.Cons(1, NonEmptyList.Single(2))) &&
+          assertTrue(NonEmptyList.Cons(1, NonEmptyList.Single(2)) !== NonEmptyList.Cons(1, NonEmptyList.Single(3)))
         }
       )
     )
