@@ -921,33 +921,31 @@ object ZPureSpec extends ZIOSpecDefault {
         } yield assertTrue(result == 1)
       },
       test("unless") {
-        val zPure = for {
-          _         <- ZPure.unless(true)(ZPure.set(1))
-          val1      <- ZPure.get
-          _         <- ZPure.unless(false)(ZPure.set(2))
-          val2      <- ZPure.get
-        } yield {
-          assert(val1)(equalTo(0)) &&
+        val zPure =
+          for {
+            _    <- ZPure.unless(true)(ZPure.set(1))
+            val1 <- ZPure.get
+            _    <- ZPure.unless(false)(ZPure.set(2))
+            val2 <- ZPure.get
+          } yield assert(val1)(equalTo(0)) &&
           assert(val2)(equalTo(2))
-        }
         zPure.runResult(0)
       },
       test("when") {
-        val zPure = for {
-          _         <- ZPure.when(false)(ZPure.set(1))
-          val1      <- ZPure.get
-          _         <- ZPure.when(true)(ZPure.set(2))
-          val2      <- ZPure.get
-        } yield {
-          assert(val1)(equalTo(0)) &&
+        val zPure =
+          for {
+            _    <- ZPure.when(false)(ZPure.set(1))
+            val1 <- ZPure.get
+            _    <- ZPure.when(true)(ZPure.set(2))
+            val2 <- ZPure.get
+          } yield assert(val1)(equalTo(0)) &&
           assert(val2)(equalTo(2))
-        }
         zPure.runResult(0)
       },
       test("whenCase") {
         val v1: Option[Int] = None
         val v2: Option[Int] = Some(0)
-        val zPure = for {
+        val zPure           = for {
           _    <- ZPure.whenCase(v1) { case Some(_) => ZPure.set(true) }
           res1 <- ZPure.get
           _    <- ZPure.whenCase(v2) { case Some(_) => ZPure.set(true) }
