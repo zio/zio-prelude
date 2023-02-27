@@ -928,7 +928,7 @@ object ZPureSpec extends ZIOSpecDefault {
             _    <- ZPure.unless(false)(ZPure.set(2))
             val2 <- ZPure.get
           } yield assert(val1)(equalTo(0)) &&
-          assert(val2)(equalTo(2))
+            assert(val2)(equalTo(2))
         zPure.runResult(0)
       },
       test("when") {
@@ -939,7 +939,7 @@ object ZPureSpec extends ZIOSpecDefault {
             _    <- ZPure.when(true)(ZPure.set(2))
             val2 <- ZPure.get
           } yield assert(val1)(equalTo(0)) &&
-          assert(val2)(equalTo(2))
+            assert(val2)(equalTo(2))
         zPure.runResult(0)
       },
       test("whenCase") {
