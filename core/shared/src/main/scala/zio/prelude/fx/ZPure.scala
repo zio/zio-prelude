@@ -1139,6 +1139,12 @@ object ZPure {
     }
 
   /**
+   * Constructs a computation that succeeds with the `None` value.
+   */
+  def none[S]: ZPure[Nothing, S, S, Any, Nothing, Option[Nothing]] =
+    succeed(None)
+
+  /**
    * Accesses the specified service in the environment of the computation.
    */
   def service[S, R: Tag]: ZPure[Nothing, S, S, R, Nothing, R] =
@@ -1184,10 +1190,33 @@ object ZPure {
     succeed(())
 
   /**
+   * The moral equivalent of `if (!p) exp`
+   */
+  def unless[W, S, R, E, A](p: Boolean)(pure: ZPure[W, S, S, R, E, A])(implicit
+    trace: Trace
+  ): ZPure[W, S, S, R, E, Option[A]] =
+    if (p) none else pure.asSome
+
+  /**
    * Constructs a computation from the specified update function.
    */
   def update[S1, S2](f: S1 => S2): ZPure[Nothing, S1, S2, Any, Nothing, Unit] =
     modify(s => ((), f(s)))
+
+  /**
+   * The moral equivalent of `if (p) exp`
+   */
+  def when[W, S, R, E, A](p: Boolean)(pure: ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
+    if (p) pure.asSome else none
+
+  /**
+   * Runs a computation when the supplied `PartialFunction` matches for the given
+   * value, otherwise does nothing.
+   */
+  def whenCase[W, S, R, E, A, B](a: A)(
+    pf: PartialFunction[A, ZPure[W, S, S, R, E, B]]
+  ): ZPure[W, S, S, R, E, Option[B]] =
+    pf.andThen(_.asSome).applyOrElse(a, (_: A) => none)
 
   final class EnvironmentWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[S, A](f: ZEnvironment[R] => A): ZPure[Nothing, S, S, R, Nothing, A] =
