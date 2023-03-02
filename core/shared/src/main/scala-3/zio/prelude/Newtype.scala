@@ -129,7 +129,7 @@ abstract class NewtypeCustom[A] {
    *
    * See https://github.com/zio/zio-prelude/issues/1091
    */
-  final def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] =
+  implicit final def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] =
     new ClassTag[Type] {
       val runtimeClass = underlying.runtimeClass
     }

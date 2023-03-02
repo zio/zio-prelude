@@ -290,7 +290,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    *
    * See https://github.com/zio/zio-prelude/issues/1091
    */
-  final def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = Newtype.classTag
+  implicit final def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = Newtype.classTag
 }
 
 object Newtype {
