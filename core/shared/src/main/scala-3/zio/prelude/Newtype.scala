@@ -123,7 +123,7 @@ abstract class NewtypeCustom[A] {
       )
     }.as(value.asInstanceOf[F[Type]])
 
-  /**
+  /*
    * Must not be put as an implicit function.
    * Otherwise, the pattern matching on newtypes behaviour becomes incorrect.
    *
