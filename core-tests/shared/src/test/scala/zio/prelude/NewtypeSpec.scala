@@ -2,6 +2,8 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 import zio.prelude.NewtypeSpecTypes._
+import zio.prelude.laws._
+import zio.prelude.newtypes.{And, Or, Sum}
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test.{Assertion => TestAssertion, _}
 
