@@ -65,14 +65,8 @@ object NewtypeSpec extends ZIOSpecDefault {
         test("classtag reports same runtimeclass as underlying primitive") {
           assertTrue(LuckyNumber.classTag.runtimeClass === implicitly[ClassTag[Double]].runtimeClass)
         },
-        suite("implicitly classtag summoning for newtype")(
-          test("Scala 2.11 - is working") {
-            assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
-          } @@ TestAspect.scala211Only,
-          test("Scala 2.12+ - is not working, needs to be passed explicitly") {
-            assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isLeft) &&
-            assertZIO(typeCheck("implicitly[ClassTag[Natural]](Natural.classTag)"))(isRight)
-          } @@ TestAspect.exceptScala211
+        test("implicitly classtag summoning for newtype")(
+          assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
         ),
         test("allows creating subtypes of newtypes") {
           val compile = typeCheck {
@@ -94,14 +88,8 @@ object NewtypeSpec extends ZIOSpecDefault {
         test("classtag reports same runtimeclass as underlying primitive") {
           assertTrue(Natural.classTag.runtimeClass === implicitly[ClassTag[Int]].runtimeClass)
         },
-        suite("implicitly classtag summoning for subtype")(
-          test("Scala 2.11 - is working") {
-            assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
-          } @@ TestAspect.scala211Only,
-          test("Scala 2.12+ - is not working, needs to be passed explicitly") {
-            assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isLeft) &&
-            assertZIO(typeCheck("implicitly[ClassTag[Natural]](Natural.classTag)"))(isRight)
-          } @@ TestAspect.exceptScala211
+        test("implicitly classtag summoning for subtype")(
+          assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
         ),
         test("pattern matching") {
           val number = LuckyNumber(10.0)
