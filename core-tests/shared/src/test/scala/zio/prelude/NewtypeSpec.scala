@@ -67,7 +67,7 @@ object NewtypeSpec extends ZIOSpecDefault {
         },
         test("cannot implicitly summon classtag for subtype, needs to be passeed explicitly") {
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isLeft) &&
-            assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]](LuckyNumber.classTag)"))(isRight)
+          assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]](LuckyNumber.classTag)"))(isRight)
         },
         test("allows creating subtypes of newtypes") {
           val compile = typeCheck {
@@ -91,7 +91,7 @@ object NewtypeSpec extends ZIOSpecDefault {
         },
         test("cannot implicitly summon classtag for subtype") {
           assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isLeft) &&
-            assertZIO(typeCheck("implicitly[ClassTag[Natural]](Natural.classTag)"))(isRight)
+          assertZIO(typeCheck("implicitly[ClassTag[Natural]](Natural.classTag)"))(isRight)
         },
         test("pattern matching") {
           val number = LuckyNumber(10.0)
