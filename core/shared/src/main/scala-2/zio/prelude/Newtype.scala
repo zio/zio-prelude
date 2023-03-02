@@ -284,7 +284,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    */
   def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.Macros.wrapAll_impl[F, A, Type]
 
-  /**
+  /*
    * Must not be put as an implicit function.
    * Otherwise, the pattern matching on newtypes behaviour becomes incorrect.
    *
