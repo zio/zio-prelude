@@ -65,7 +65,7 @@ object NewtypeSpec extends ZIOSpecDefault {
         test("classtag reports same runtimeclass as underlying primitive") {
           assertTrue(LuckyNumber.classTag.runtimeClass === implicitly[ClassTag[Double]].runtimeClass)
         },
-        test("cannot implicitly summon classtag for subtype, needs to be passeed explicitly") {
+        test("cannot implicitly summon classtag for subtype, needs to be passed explicitly") {
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isLeft) &&
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]](LuckyNumber.classTag)"))(isRight)
         },
@@ -89,7 +89,7 @@ object NewtypeSpec extends ZIOSpecDefault {
         test("classtag reports same runtimeclass as underlying primitive") {
           assertTrue(Natural.classTag.runtimeClass === implicitly[ClassTag[Int]].runtimeClass)
         },
-        test("cannot implicitly summon classtag for subtype") {
+        test("cannot implicitly summon classtag for subtype, needs to be passed explicitly") {
           assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isLeft) &&
           assertZIO(typeCheck("implicitly[ClassTag[Natural]](Natural.classTag)"))(isRight)
         },
