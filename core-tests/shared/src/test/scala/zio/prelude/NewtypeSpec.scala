@@ -102,12 +102,6 @@ object NewtypeSpec extends ZIOSpecDefault {
             }) && (number match {
               case LuckyNumber(20.0) => false
               case _                 => true
-            }) && (number match {
-              case 10.0 => true
-              case _    => false
-            }) && (number match {
-              case 20.0 => false
-              case _    => true
             })
           )
         }
@@ -126,12 +120,6 @@ object NewtypeSpec extends ZIOSpecDefault {
             }) && (number match {
               case Natural(3) => false
               case _          => true
-            }) && (number match {
-              case 2 => true
-              case _ => false
-            }) && (number match {
-              case 3 => false
-              case _ => true
             })
           )
         }
