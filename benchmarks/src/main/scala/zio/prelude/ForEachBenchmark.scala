@@ -54,11 +54,11 @@ class ForEachBenchmarks {
 
   @Benchmark
   def zioForEachZIO(bh: Blackhole): Unit =
-    bh.consume(unsafeRun(list.forEach(ZIO.succeedNow(_))))
+    bh.consume(unsafeRun(list.forEach(ZIO.succeed(_))))
 
   @Benchmark
   def zioForEach_ZIO(bh: Blackhole): Unit =
-    bh.consume(unsafeRun(list.forEach_(ZIO.succeedNow(_))))
+    bh.consume(unsafeRun(list.forEach_(ZIO.succeed(_))))
 
   @Benchmark
   def zioForEachZPure(bh: Blackhole): Unit =

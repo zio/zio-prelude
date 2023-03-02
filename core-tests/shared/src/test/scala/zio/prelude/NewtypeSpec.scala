@@ -84,6 +84,14 @@ object NewtypeSpec extends ZIOSpecDefault {
         },
         test("classtag reports same runtimeclass as underlying primitive") {
           assertTrue(implicitly[ClassTag[Natural]].runtimeClass === implicitly[ClassTag[Int]].runtimeClass)
+        },
+        test("pattern matching") {
+          assertTrue(
+            LuckyNumber(10.0) match {
+              case LuckyNumber(10.0) => true
+              case _                 => false
+            }
+          )
         }
       ),
       suite("Subtype")(
@@ -93,6 +101,14 @@ object NewtypeSpec extends ZIOSpecDefault {
         },
         test("can summon classtag for subtype") {
           assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
+        },
+        test("pattern matching") {
+          assertTrue(
+            Natural.two match {
+              case Natural(2) => true
+              case _          => false
+            }
+          )
         }
       ),
       suite("examples from documentation")(
