@@ -123,16 +123,7 @@ abstract class NewtypeCustom[A] {
       )
     }.as(value.asInstanceOf[F[Type]])
 
-  /*
-   * Must not be put as an implicit function.
-   * Otherwise, the pattern matching on newtypes behaviour becomes incorrect.
-   *
-   * See https://github.com/zio/zio-prelude/issues/1091
-   */
-  final def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] =
-    new ClassTag[Type] {
-      val runtimeClass = underlying.runtimeClass
-    }
+  implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = underlying.asInstanceOf[ClassTag[Type]]
 }
 
 abstract class SubtypeCustom[A] extends NewtypeCustom[A] {
