@@ -62,12 +62,12 @@ object NewtypeSpec extends ZIOSpecDefault {
             isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))
           )
         },
-        test("classtag reports same runtimeclass as underlying primitive") {
-          assertTrue(LuckyNumber.classTag.runtimeClass === implicitly[ClassTag[Double]].runtimeClass)
-        },
         test("implicitly classtag summoning for newtype")(
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
         ),
+        test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[LuckyNumber]].runtimeClass eq implicitly[ClassTag[Double]].runtimeClass)(isTrue)
+        },
         test("allows creating subtypes of newtypes") {
           val compile = typeCheck {
             """import java.util.UUID
@@ -81,16 +81,10 @@ object NewtypeSpec extends ZIOSpecDefault {
           assertZIO(compile)(isRight)
         } @@ TestAspect.exceptScala211,
         test("allows creating arrays of newtypes") {
-          val data = Array.fill(2)(Natural(0))(Natural.classTag)
+          val data = Array.fill(2)(Natural(0))
           data(1) = Natural(1)
           assertTrue(data.toList === List(Natural(0): Natural, Natural(1): Natural))
         },
-        test("classtag reports same runtimeclass as underlying primitive") {
-          assertTrue(Natural.classTag.runtimeClass === implicitly[ClassTag[Int]].runtimeClass)
-        },
-        test("implicitly classtag summoning for subtype")(
-          assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
-        ),
         test("pattern matching") {
           val number = LuckyNumber(10.0)
           assertTrue(
@@ -108,6 +102,12 @@ object NewtypeSpec extends ZIOSpecDefault {
         test("subtypes values") {
           val two = 2
           assertTrue(two + Natural.two == 2 + 2)
+        },
+        test("implicitly classtag summoning for subtype")(
+          assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
+        ),
+        test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[Natural]].runtimeClass eq implicitly[ClassTag[Int]].runtimeClass)(isTrue)
         },
         test("pattern matching") {
           val number = Natural(2)
