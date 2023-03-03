@@ -144,15 +144,17 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("macros"))
-  .settings(stdSettings_("zio-prelude-macros"))
-  .settings(crossProjectSettings_)
-  .settings(macroDefinitionSettings_)
-  .settings(buildInfoSettings_("zio.prelude.macros"))
+  .settings(
+    stdSettings(
+      name = "zio-prelude-macros",
+      packageName = Some("zio.prelude.macros"),
+      enableCrossProject = true
+    )
+  )
+  .settings(macroDefinitionSettings)
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
-  .settings(dottySettings_)
-  .jsSettings(jsSettings_)
-  .nativeSettings(nativeSettings_)
-  .enablePlugins(BuildInfoPlugin)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
 
 lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental"))
