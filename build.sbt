@@ -127,19 +127,19 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 
 lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("laws"))
-  .settings(stdSettings_("zio-laws-laws"))
-  .settings(crossProjectSettings_)
-  .settings(macroDefinitionSettings_)
-  .settings(buildInfoSettings_("zio.prelude.laws"))
+  .settings(
+    stdSettings(
+      name = "zio-laws-laws",
+      packageName = Some("zio.prelude.laws"),
+      enableCrossProject = true
+    )
+  )
+  .settings(enableZIO())
+  .settings(macroDefinitionSettings)
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
-  .settings(dottySettings_)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .jvmSettings(scalaReflectTestSettings_)
-  .jsSettings(jsSettings_)
-  .nativeSettings(nativeSettings_)
-  .enablePlugins(BuildInfoPlugin)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .dependsOn(core)
 
 lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
