@@ -67,7 +67,7 @@ object NewtypeSpec extends ZIOSpecDefault {
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
         ),
         test("classtag reports same runtimeclass as underlying primitive") {
-          assert(implicitly[ClassTag[LuckyNumber]].runtimeClass)(equalTo(implicitly[ClassTag[Double]].runtimeClass))
+          assert(implicitly[ClassTag[LuckyNumber]].runtimeClass == implicitly[ClassTag[Double]].runtimeClass)(isTrue)
         } @@ scala211Only,
         test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[LuckyNumber]].runtimeClass eq implicitly[ClassTag[Double]].runtimeClass)(isTrue)
@@ -111,7 +111,7 @@ object NewtypeSpec extends ZIOSpecDefault {
           assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
         ),
         test("classtag reports same runtimeclass as underlying primitive") {
-          assert(implicitly[ClassTag[Natural]].runtimeClass)(equalTo(implicitly[ClassTag[Int]].runtimeClass))
+          assert(implicitly[ClassTag[Natural]].runtimeClass == implicitly[ClassTag[Int]].runtimeClass)(isTrue)
         } @@ scala211Only,
         test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[Natural]].runtimeClass eq implicitly[ClassTag[Int]].runtimeClass)(isTrue)
@@ -137,10 +137,10 @@ object NewtypeSpec extends ZIOSpecDefault {
           assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
         },
         test("exists") {
-          assert(exists(List(true, false))(identity))(isTrue)
+          assert(exists(List(true, false))(scala.Predef.identity))(isTrue)
         },
         test("forall") {
-          assert(forall(List(true, false))(identity))(isFalse)
+          assert(forall(List(true, false))(scala.Predef.identity))(isFalse)
         },
         test("sumInt") {
           val actual   = sum(List(1, 2, 3))
