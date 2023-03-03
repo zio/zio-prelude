@@ -111,22 +111,33 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(stdSettings(name = "zio-prelude", packageName = Some("zio.prelude"), enableCrossProject = true))
   .settings(enableZIO(enableStreaming = true))
   .settings(macroDefinitionSettings_)
-  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings(
+    Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
+    scalacOptions ~= { _.filterNot(Set("-noindent")) },
+    crossScalaVersions -= scala211.value
+  )
   .jsSettings(jsSettings)
   .nativeSettings(nativeSettings)
   .dependsOn(macros)
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core-tests"))
-  .settings(stdSettings(name = "zio-prelude-tests", packageName = Some("zio.prelude.tests"), enableCrossProject = true))
-  .settings(macroDefinitionSettings)
-  .settings(enableZIO())
-  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings(
+    stdSettings(
+      name = "zio-prelude-tests",
+      packageName = Some("zio.prelude.tests"),
+      enableCrossProject = true
+    ),
+    macroDefinitionSettings,
+    enableZIO(),
+    Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
+    publish / skip := true,
+    crossScalaVersions -= scala211.value
+  )
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings)
   .nativeSettings(nativeSettings)
   .dependsOn(laws)
-  .settings(publish / skip := true)
 
 lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("laws"))
@@ -139,7 +150,11 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .settings(enableZIO())
   .settings(macroDefinitionSettings)
-  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
+  .settings(
+    Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
+    crossScalaVersions -= scala211.value
+  )
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings)
   .nativeSettings(nativeSettings)
@@ -155,7 +170,10 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     )
   )
   .settings(macroDefinitionSettings)
-  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings(
+    Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
+    crossScalaVersions -= scala211.value
+  )
   .jsSettings(jsSettings)
   .nativeSettings(nativeSettings)
 
@@ -168,7 +186,8 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       name = "zio-prelude-experimental",
       packageName = Some("zio.prelude.experimental"),
       enableCrossProject = true
-    )
+    ),
+    crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings)
@@ -182,7 +201,8 @@ lazy val experimentalLaws = crossProject(JSPlatform, JVMPlatform, NativePlatform
       name = "zio-prelude-experimental-laws",
       packageName = Some("zio.prelude.experimental.laws"),
       enableCrossProject = true
-    )
+    ),
+    crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings)
@@ -196,7 +216,8 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
       name = "zio-prelude-experimental-tests",
       packageName = Some("zio.prelude.experimental.tests"),
       enableCrossProject = true
-    )
+    ),
+    crossScalaVersions -= scala211.value
   )
   .settings(enableZIO())
   .jvmSettings(scalaReflectTestSettings)
@@ -222,7 +243,8 @@ lazy val scalaParallelCollections = project
         case _                                           =>
           List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
       }
-    }
+    },
+    crossScalaVersions -= scala211.value
   )
   .settings(scalaReflectTestSettings)
 
@@ -270,6 +292,6 @@ lazy val examples =
     .in(file("examples"))
     .dependsOn(core)
     .settings(stdSettings("zio-prelude-examples"))
-    .settings(crossProjectSettings_)
-    .settings(macroExpansionSettings_)
+    .settings(crossProjectSettings)
+    .settings(macroExpansionSettings)
     .settings(publish / skip := true)
