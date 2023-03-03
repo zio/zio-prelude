@@ -2,6 +2,8 @@ import BuildHelper._
 
 enablePlugins(ZioSbtCiPlugin)
 
+crossScalaVersions := Seq(scala213.value)
+
 inThisBuild(
   List(
     name                                  := "ZIO Prelude",
@@ -90,6 +92,7 @@ lazy val root212 = project
 lazy val root213 = project
   .in(file("target/root213"))
   .settings(publish / skip := true)
+  .settings(crossScalaVersions := Seq(scala213.value))
   .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
   .aggregate(projectsJvmOnly: _*)
 
@@ -246,7 +249,7 @@ lazy val docs = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     scalaVersion                               := Scala213,
-    crossScalaVersions -= Scala211,
+    crossScalaVersions                         := Seq(scala212.value, scala213.value, scala3.value),
     projectName                                := "ZIO Prelude",
     mainModuleName                             := (core.jvm / moduleName).value,
     projectStage                               := ProjectStage.ProductionReady,
