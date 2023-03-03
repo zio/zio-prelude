@@ -1,5 +1,3 @@
-import BuildHelper._
-
 enablePlugins(ZioSbtCiPlugin)
 
 crossScalaVersions := Seq(scala213.value)
@@ -9,6 +7,7 @@ inThisBuild(
     name                                  := "ZIO Prelude",
     ciEnabledBranches                     := Seq("series/2.x"),
     checkArtifactBuildProcessWorkflowStep := None,
+    ciSwapSizeGB                          := 7,
     supportedScalaVersions                := Map(
       (rootJVM / thisProject).value.id -> (rootJVM / crossScalaVersions).value
     ),
@@ -110,7 +109,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
   .settings(stdSettings(name = "zio-prelude", packageName = Some("zio.prelude"), enableCrossProject = true))
   .settings(enableZIO(enableStreaming = true))
-  .settings(macroDefinitionSettings_)
+  .settings(macroDefinitionSettings)
   .settings(
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
     scalacOptions ~= { _.filterNot(Set("-noindent")) },
@@ -236,11 +235,11 @@ lazy val scalaParallelCollections = project
   .settings(enableZIO())
   .settings(
     libraryDependencies ++= {
-      scalaVersion.value match {
+      scalaBinaryVersion.value match {
         // Only 2.11 and 2.12 standard library contains Parallel Scala collections
-        case BuildHelper.Scala211 | BuildHelper.Scala212 =>
+        case "2.11" | "2.12" =>
           List()
-        case _                                           =>
+        case _               =>
           List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
       }
     },
@@ -252,7 +251,7 @@ lazy val benchmarks = project
   .in(file("benchmarks"))
   .settings(stdSettings("zio-prelude-benchmarks"))
   .settings(
-    crossScalaVersions --= List(BuildHelper.Scala211),
+    crossScalaVersions --= List(scala211.value),
     publish / skip := true,
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
@@ -270,7 +269,7 @@ lazy val docs = project
   .settings(
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    scalaVersion                               := Scala213,
+    scalaVersion                               := scala213.value,
     crossScalaVersions                         := Seq(scala212.value, scala213.value, scala3.value),
     projectName                                := "ZIO Prelude",
     mainModuleName                             := (core.jvm / moduleName).value,
