@@ -225,7 +225,7 @@ lazy val scalaParallelCollections = project
 
 lazy val benchmarks = project
   .in(file("benchmarks"))
-  .settings(stdSettings_("zio-prelude-benchmarks"))
+  .settings(stdSettings("zio-prelude-benchmarks"))
   .settings(
     crossScalaVersions --= List(BuildHelper.Scala211),
     publish / skip := true,
@@ -241,7 +241,7 @@ lazy val benchmarks = project
 
 lazy val docs = project
   .in(file("zio-prelude-docs"))
-  .settings(stdSettings_("zio-prelude-docs"))
+  .settings(stdSettings("zio-prelude-docs"))
   .settings(
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
@@ -258,7 +258,7 @@ lazy val docs = project
       scalaParallelCollections
     )
   )
-  .settings(macroDefinitionSettings_)
+  .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
   .enablePlugins(WebsitePlugin)
 
@@ -266,7 +266,7 @@ lazy val examples =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .in(file("examples"))
     .dependsOn(core)
-    .settings(stdSettings_("zio-prelude-examples"))
+    .settings(stdSettings("zio-prelude-examples"))
     .settings(crossProjectSettings_)
     .settings(macroExpansionSettings_)
     .settings(publish / skip := true)
