@@ -174,17 +174,16 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 lazy val experimentalLaws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental-laws"))
   .dependsOn(experimental, laws)
-  .settings(stdSettings_("zio-prelude-experimental-laws"))
-  .settings(crossProjectSettings_)
-  .settings(buildInfoSettings_("zio.prelude.experimental.laws"))
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
-  .settings(dottySettings_)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .jvmSettings(scalaReflectTestSettings_)
-  .jsSettings(jsSettings_)
-  .nativeSettings(nativeSettings_)
-  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    stdSettings(
+      name = "zio-prelude-experimental-laws",
+      packageName = Some("zio.prelude.experimental.laws"),
+      enableCrossProject = true
+    )
+  )
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
 
 lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental-tests"))
