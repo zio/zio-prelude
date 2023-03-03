@@ -15,7 +15,7 @@ object BuildHelper {
 
   val SilencerVersion = "1.7.12"
 
-  private val stdOptions = Seq(
+  private val stdOptions_ = Seq(
     "-deprecation",
     "-encoding",
     "UTF-8",
@@ -29,7 +29,7 @@ object BuildHelper {
     }
   }
 
-  private val std2xOptions = Seq(
+  private val std2xOptions_ = Seq(
     "-language:higherKinds",
     "-language:existentials",
     "-explaintypes",
@@ -39,7 +39,7 @@ object BuildHelper {
     "-Ywarn-value-discard"
   )
 
-  private def optimizerOptions(optimize: Boolean) =
+  private def optimizerOptions_(optimize: Boolean) =
     if (optimize)
       Seq(
         "-opt:l:inline",
@@ -47,13 +47,13 @@ object BuildHelper {
       )
     else Nil
 
-  def buildInfoSettings(packageName: String) =
+  def buildInfoSettings_(packageName: String) =
     Seq(
       buildInfoKeys    := Seq[BuildInfoKey](organization, moduleName, name, version, scalaVersion, sbtVersion, isSnapshot),
       buildInfoPackage := packageName
     )
 
-  val dottySettings = Seq(
+  val dottySettings_ = Seq(
     scalacOptions --= {
       if (scalaVersion.value == Scala3)
         Seq("-Xfatal-warnings")
@@ -72,7 +72,7 @@ object BuildHelper {
   )
 
   // Keep this consistent with the version in .core-tests/shared/src/test/scala/REPLSpec.scala
-  val replSettings = makeReplSettings {
+  val replSettings_ = makeReplSettings_ {
     """|import zio._
        |import zio.Console._
        |import zio.Duration._
@@ -82,7 +82,7 @@ object BuildHelper {
   }
 
   // Keep this consistent with the version in .streams-tests/shared/src/test/scala/StreamREPLSpec.scala
-  val streamReplSettings = makeReplSettings {
+  val streamReplSettings_ = makeReplSettings_ {
     """|import zio._
        |import zio.stream._
        |import zio.Console._
@@ -92,7 +92,7 @@ object BuildHelper {
     """.stripMargin
   }
 
-  def makeReplSettings(initialCommandsStr: String) = Seq(
+  def makeReplSettings_(initialCommandsStr: String) = Seq(
     // In the repl most warnings are useless or worse.
     // This is intentionally := as it's more direct to enumerate the few
     // options we do want than to try to subtract off the ones we don't.
@@ -110,7 +110,7 @@ object BuildHelper {
     Compile / console / initialCommands := initialCommandsStr
   )
 
-  def extraOptions(scalaVersion: String, optimize: Boolean) =
+  def extraOptions_(scalaVersion: String, optimize: Boolean) =
     CrossVersion.partialVersion(scalaVersion) match {
       case Some((3, 0))  =>
         Seq(
@@ -120,7 +120,7 @@ object BuildHelper {
       case Some((2, 13)) =>
         Seq(
           "-Ywarn-unused:params,-implicits"
-        ) ++ std2xOptions ++ optimizerOptions(optimize)
+        ) ++ std2xOptions_ ++ optimizerOptions_(optimize)
       case Some((2, 12)) =>
         Seq(
           "-opt-warnings",
@@ -138,7 +138,7 @@ object BuildHelper {
           "-Xsource:2.13",
           "-Xmax-classfile-name",
           "242"
-        ) ++ std2xOptions ++ optimizerOptions(optimize)
+        ) ++ std2xOptions_ ++ optimizerOptions_(optimize)
       case Some((2, 11)) =>
         Seq(
           "-Ypartial-unification",
@@ -153,18 +153,18 @@ object BuildHelper {
           "-Xsource:2.13",
           "-Xmax-classfile-name",
           "242"
-        ) ++ std2xOptions
+        ) ++ std2xOptions_
       case _             => Seq.empty
     }
 
-  def platformSpecificSources(platform: String, conf: String, baseDirectory: File)(versions: String*) = for {
+  def platformSpecificSources_(platform: String, conf: String, baseDirectory: File)(versions: String*) = for {
     platform <- List("shared", platform)
     version  <- "scala" :: versions.toList.map("scala-" + _)
     result    = baseDirectory.getParentFile / platform.toLowerCase / "src" / conf / version
     if result.exists
   } yield result
 
-  def crossPlatformSources(scalaVer: String, platform: String, conf: String, baseDir: File) = {
+  def crossPlatformSources_(scalaVer: String, platform: String, conf: String, baseDir: File) = {
     val versions = CrossVersion.partialVersion(scalaVer) match {
       case Some((2, 11)) =>
         List("2.11+", "2.11-2.12")
@@ -177,12 +177,12 @@ object BuildHelper {
       case _             =>
         List()
     }
-    platformSpecificSources(platform, conf, baseDir)(versions: _*)
+    platformSpecificSources_(platform, conf, baseDir)(versions: _*)
   }
 
-  lazy val crossProjectSettings = Seq(
+  lazy val crossProjectSettings_ = Seq(
     Compile / unmanagedSourceDirectories ++= {
-      crossPlatformSources(
+      crossPlatformSources_(
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "main",
@@ -190,7 +190,7 @@ object BuildHelper {
       )
     },
     Test / unmanagedSourceDirectories ++= {
-      crossPlatformSources(
+      crossPlatformSources_(
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "test",
@@ -199,11 +199,11 @@ object BuildHelper {
     }
   )
 
-  def stdSettings(prjName: String) = Seq(
+  def stdSettings_(prjName: String) = Seq(
     name                                   := s"$prjName",
     crossScalaVersions                     := Seq(Scala211, Scala212, Scala213, Scala3),
     ThisBuild / scalaVersion               := Scala213,
-    scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
+    scalacOptions ++= stdOptions_ ++ extraOptions_(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
       if (scalaVersion.value == Scala3)
         Seq(
@@ -230,23 +230,23 @@ object BuildHelper {
     unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
   )
 
-  def macroExpansionSettings = Seq(
-    scalacOptions ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 13)) => Seq("-Ymacro-annotations")
-        case _             => Seq.empty
-      }
-    },
-    libraryDependencies ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, x)) if x <= 12 =>
-          Seq(compilerPlugin(("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full)))
-        case _                       => Seq.empty
-      }
-    }
-  )
+//  def macroExpansionSettings_ = Seq(
+//    scalacOptions ++= {
+//      CrossVersion.partialVersion(scalaVersion.value) match {
+//        case Some((2, 13)) => Seq("-Ymacro-annotations")
+//        case _             => Seq.empty
+//      }
+//    },
+//    libraryDependencies ++= {
+//      CrossVersion.partialVersion(scalaVersion.value) match {
+//        case Some((2, x)) if x <= 12 =>
+//          Seq(compilerPlugin(("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full)))
+//        case _                       => Seq.empty
+//      }
+//    }
+//  )
 
-  def macroDefinitionSettings = Seq(
+  def macroDefinitionSettings_ = Seq(
     scalacOptions += "-language:experimental.macros",
     libraryDependencies ++= {
       if (scalaVersion.value == Scala3) Seq()
@@ -258,16 +258,16 @@ object BuildHelper {
     }
   )
 
-  def jsSettings = Seq(
+  def jsSettings_ = Seq(
     Test / fork := crossProjectPlatform.value == JVMPlatform // set fork to `true` on JVM to improve log readability, JS and Native need `false`
   )
 
-  def nativeSettings = Seq(
+  def nativeSettings_ = Seq(
     Test / test := (Test / compile).value,
     Test / fork := crossProjectPlatform.value == JVMPlatform // set fork to `true` on JVM to improve log readability, JS and Native need `false`
   )
 
-  val scalaReflectTestSettings: List[Setting[_]] = List(
+  val scalaReflectTestSettings_ : List[Setting[_]] = List(
     libraryDependencies ++= {
       if (scalaVersion.value == Scala3)
         Seq("org.scala-lang" % "scala-reflect" % Scala213           % Test)
@@ -276,35 +276,7 @@ object BuildHelper {
     }
   )
 
-  def welcomeMessage = onLoadMessage := {
-    import scala.Console
-
-    def header(text: String): String = s"${Console.RED}$text${Console.RESET}"
-
-    def item(text: String): String    = s"${Console.GREEN}> ${Console.CYAN}$text${Console.RESET}"
-    def subItem(text: String): String = s"  ${Console.YELLOW}> ${Console.CYAN}$text${Console.RESET}"
-
-    s"""|${header(" ________ ___")}
-        |${header("|__  /_ _/ _ \\")}
-        |${header("  / / | | | | |")}
-        |${header(" / /_ | | |_| |")}
-        |${header(s"/____|___\\___/   ${version.value}")}
-        |
-        |Useful sbt tasks:
-        |${item("build")} - Prepares sources, compiles and runs tests.
-        |${item("prepare")} - Prepares sources by applying both scalafix and scalafmt
-        |${item("fix")} - Fixes sources files using scalafix
-        |${item("fmt")} - Formats source files using scalafmt
-        |${item("~compileJVM")} - Compiles all JVM modules (file-watch enabled)
-        |${item("testJVM")} - Runs all JVM tests
-        |${item("testJS")} - Runs all ScalaJS tests
-        |${item("testOnly *.YourSpec -- -t \"YourLabel\"")} - Only runs tests with matching term e.g.
-        |${subItem("coreTestsJVM/testOnly *.ZIOSpec -- -t \"happy-path\"")}
-        |${item("docs/docusaurusCreateSite")} - Generates the ZIO microsite
-      """.stripMargin
-  }
-
   implicit class ModuleHelper(p: Project) {
-    def module: Project = p.in(file(p.id)).settings(stdSettings(p.id))
+    def module: Project = p.in(file(p.id)).settings(stdSettings_(p.id))
   }
 }
