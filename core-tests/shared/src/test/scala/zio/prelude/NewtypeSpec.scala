@@ -67,9 +67,6 @@ object NewtypeSpec extends ZIOSpecDefault {
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
         ),
         test("classtag reports same runtimeclass as underlying primitive") {
-          assert(implicitly[ClassTag[LuckyNumber]].runtimeClass == implicitly[ClassTag[Double]].runtimeClass)(isTrue)
-        } @@ scala211Only,
-        test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[LuckyNumber]].runtimeClass eq implicitly[ClassTag[Double]].runtimeClass)(isTrue)
         } @@ exceptScala211,
         test("allows creating subtypes of newtypes") {
@@ -110,9 +107,6 @@ object NewtypeSpec extends ZIOSpecDefault {
         test("implicitly classtag summoning for subtype")(
           assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
         ),
-        test("classtag reports same runtimeclass as underlying primitive") {
-          assert(implicitly[ClassTag[Natural]].runtimeClass == implicitly[ClassTag[Int]].runtimeClass)(isTrue)
-        } @@ scala211Only,
         test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[Natural]].runtimeClass eq implicitly[ClassTag[Int]].runtimeClass)(isTrue)
         } @@ exceptScala211,
