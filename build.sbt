@@ -105,21 +105,12 @@ lazy val root = project
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
-  .settings(stdSettings_("zio-prelude"))
-  .settings(crossProjectSettings_)
+  .settings(stdSettings(name = "zio-prelude", packageName = Some("zio.prelude"), enableCrossProject = true))
+  .settings(enableZIO(enableStreaming = true))
   .settings(macroDefinitionSettings_)
-  .settings(buildInfoSettings_("zio.prelude"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
-  .settings(
-    libraryDependencies ++= Seq(
-      "dev.zio" %%% "zio"         % zioVersion,
-      "dev.zio" %%% "zio-streams" % zioVersion
-    )
-  )
-  .settings(dottySettings_)
-  .jsSettings(jsSettings_)
-  .nativeSettings(nativeSettings_)
-  .enablePlugins(BuildInfoPlugin)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
   .dependsOn(macros)
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
