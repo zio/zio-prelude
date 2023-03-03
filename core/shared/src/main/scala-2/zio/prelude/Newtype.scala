@@ -324,7 +324,5 @@ object Newtype {
   }
 
   implicit def classTag[N <: Newtype[_]: ClassTagWrapper]: ClassTag[N#Type] =
-    new ClassTag[N#Type] {
-      def runtimeClass: Class[_] = ClassTagWrapper[N].classTag.runtimeClass
-    }
+    ClassTagWrapper[N].classTag.asInstanceOf[ClassTag[N#Type]]
 }
