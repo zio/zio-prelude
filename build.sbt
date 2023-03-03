@@ -203,10 +203,13 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
 lazy val scalaParallelCollections = project
   .in(file("scala-parallel-collections"))
   .dependsOn(core.jvm, coreTests.jvm % "test->test")
-  .settings(stdSettings_("zio-prelude-scala-parallel-collections"))
-  .settings(buildInfoSettings_("zio.prelude.scalaparallelcollections"))
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
-  .settings(dottySettings_)
+  .settings(
+    stdSettings(
+      name = "zio-prelude-scala-parallel-collections",
+      packageName = Some("zio.prelude.scalaparallelcollections")
+    )
+  )
+  .settings(enableZIO())
   .settings(
     libraryDependencies ++= {
       scalaVersion.value match {
@@ -218,9 +221,7 @@ lazy val scalaParallelCollections = project
       }
     }
   )
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings_)
-  .enablePlugins(BuildInfoPlugin)
+  .settings(scalaReflectTestSettings)
 
 lazy val benchmarks = project
   .in(file("benchmarks"))
