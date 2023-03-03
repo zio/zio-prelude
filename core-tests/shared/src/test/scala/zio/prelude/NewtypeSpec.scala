@@ -4,7 +4,8 @@ import zio.NonEmptyChunk
 import zio.prelude.NewtypeSpecTypes._
 import zio.prelude.laws._
 import zio.prelude.newtypes.{And, Or, Sum}
-import zio.test.Assertion.{equalTo => _, _}
+import zio.test.Assertion._
+import zio.test.TestAspect._
 import zio.test.{Assertion => TestAssertion, _}
 
 import scala.reflect.ClassTag
@@ -66,8 +67,11 @@ object NewtypeSpec extends ZIOSpecDefault {
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
         ),
         test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[LuckyNumber]].runtimeClass)(equalTo(implicitly[ClassTag[Double]].runtimeClass))
+        } @@ scala211Only,
+        test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[LuckyNumber]].runtimeClass eq implicitly[ClassTag[Double]].runtimeClass)(isTrue)
-        },
+        } @@ exceptScala211,
         test("allows creating subtypes of newtypes") {
           val compile = typeCheck {
             """import java.util.UUID
@@ -107,8 +111,11 @@ object NewtypeSpec extends ZIOSpecDefault {
           assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
         ),
         test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[Natural]].runtimeClass)(equalTo(implicitly[ClassTag[Int]].runtimeClass))
+        } @@ scala211Only,
+        test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[Natural]].runtimeClass eq implicitly[ClassTag[Int]].runtimeClass)(isTrue)
-        },
+        } @@ exceptScala211,
         test("pattern matching") {
           val number = Natural(2)
           assertTrue(
