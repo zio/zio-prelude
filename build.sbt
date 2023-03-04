@@ -244,11 +244,10 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
       enableCrossProject = true
     ),
     crossScalaVersions -= scala211.value,
-    scalacOptions += "-scalajs"
   )
   .settings(enableZIO())
   .jvmSettings(scalaReflectTestSettings)
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalacOptions += "-scalajs")
   .nativeSettings(nativeSettings)
 
 lazy val scalaParallelCollections = project
