@@ -8,6 +8,7 @@ inThisBuild(
     ciEnabledBranches                     := Seq("series/2.x"),
     checkArtifactBuildProcessWorkflowStep := None,
     ciSwapSizeGB                          := 7,
+    sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx16g", "-J-Xms4g", "-J-Xss16m"),
     supportedScalaVersions                := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
@@ -316,7 +317,9 @@ lazy val examples =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .in(file("examples"))
     .dependsOn(core)
-    .settings(stdSettings("zio-prelude-examples"))
-    .settings(crossProjectSettings)
-    .settings(macroExpansionSettings)
-    .settings(publish / skip := true)
+    .settings(stdSettings(name = "zio-prelude-examples", enableCrossProject = true))
+    .settings(
+      macroExpansionSettings,
+      crossScalaVersions -= scala211.value,
+      publish / skip := true
+    )
