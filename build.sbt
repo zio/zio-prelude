@@ -1,3 +1,5 @@
+import scala.util.matching.UnanchoredRegex
+
 enablePlugins(ZioSbtCiPlugin)
 
 crossScalaVersions := Seq(scala213.value)
@@ -8,7 +10,7 @@ inThisBuild(
     ciEnabledBranches                     := Seq("series/2.x"),
     checkArtifactBuildProcessWorkflowStep := None,
     ciSwapSizeGB                          := 7,
-    parallelTestExecution                 := false,
+    parallelTestExecution                 := true,
     javaPlatforms                         := Seq("11"),
     sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx16g", "-J-Xms4g", "-J-Xss16m"),
     supportedScalaVersions                := Map(
@@ -163,7 +165,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
   .dependsOn(laws)
 
@@ -249,8 +251,17 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
   )
   .settings(enableZIO())
   .jvmSettings(scalaReflectTestSettings)
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
+
+lazy val scalajs: Seq[Setting[_]] =
+  Seq(
+    scalacOptions ++= {
+      if (scalaVersion.value == scala3.value) {
+        Seq("-scalajs")
+      } else Seq.empty
+    }
+  )
 
 lazy val scalaParallelCollections = project
   .in(file("scala-parallel-collections"))
