@@ -8,6 +8,8 @@ inThisBuild(
     ciEnabledBranches                     := Seq("series/2.x"),
     checkArtifactBuildProcessWorkflowStep := None,
     ciSwapSizeGB                          := 7,
+    parallelTestExecution                 := false,
+    javaPlatforms                         := Seq("11"),
     sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx16g", "-J-Xms4g", "-J-Xss16m"),
     supportedScalaVersions                := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
@@ -161,7 +163,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
-  .jsSettings(jsSettings, scalacOptions += "-scalajs")
+  .jsSettings(jsSettings)
   .nativeSettings(nativeSettings)
   .dependsOn(laws)
 
@@ -243,7 +245,7 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
       packageName = Some("zio.prelude.experimental.tests"),
       enableCrossProject = true
     ),
-    crossScalaVersions -= scala211.value,
+    crossScalaVersions -= scala211.value
   )
   .settings(enableZIO())
   .jvmSettings(scalaReflectTestSettings)
