@@ -51,6 +51,8 @@ inThisBuild(
   )
 )
 
+val zioVersion = "2.0.9"
+
 val projectsCommon = List(
   core,
   coreTests,
@@ -157,6 +159,7 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .settings(enableZIO())
   .settings(macroDefinitionSettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
   .settings(
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
     crossScalaVersions -= scala211.value
