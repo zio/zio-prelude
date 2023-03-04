@@ -61,7 +61,14 @@ abstract class NewtypeCustom[A] {
     NonEmptyChunk(a1, a2, a3, a4, a5).asInstanceOf[NonEmptyChunk[Type]]
   }
 
-  inline def apply(inline a1: A, inline a2: A, inline a3: A, inline a4: A, inline a5: A, inline a6: A): NonEmptyChunk[Type] = {
+  inline def apply(
+    inline a1: A,
+    inline a2: A,
+    inline a3: A,
+    inline a4: A,
+    inline a5: A,
+    inline a6: A
+  ): NonEmptyChunk[Type] = {
     validateInline(a1)
     validateInline(a2)
     validateInline(a3)
@@ -112,16 +119,20 @@ abstract class NewtypeCustom[A] {
   def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
 
   def make(value: A): Validation[String, Type] =
-    Validation.fromEitherNonEmptyChunk(
-      validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
-    ).as(value.asInstanceOf[Type])
-
-  def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
-    ForEach[F].forEach(value) { value =>
-      Validation.fromEitherNonEmptyChunk(
+    Validation
+      .fromEitherNonEmptyChunk(
         validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
       )
-    }.as(value.asInstanceOf[F[Type]])
+      .as(value.asInstanceOf[Type])
+
+  def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
+    ForEach[F]
+      .forEach(value) { value =>
+        Validation.fromEitherNonEmptyChunk(
+          validate(value).left.map(e => NonEmptyChunk.fromCons(e.toNel(value.toString)))
+        )
+      }
+      .as(value.asInstanceOf[F[Type]])
 
   implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = underlying.asInstanceOf[ClassTag[Type]]
 }
@@ -135,6 +146,6 @@ abstract class Newtype[A] extends NewtypeCustom[A] {
 
   protected def validate(value: A): Either[AssertionError, Unit] = assertion(value)
 
-  protected inline def validateInline(inline value: A): Unit = ${Macros.validateInlineImpl[A]('assertion, 'value)}
+  protected inline def validateInline(inline value: A): Unit = ${ Macros.validateInlineImpl[A]('assertion, 'value) }
 
 }
