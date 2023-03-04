@@ -1,5 +1,3 @@
-import scala.util.matching.UnanchoredRegex
-
 enablePlugins(ZioSbtCiPlugin)
 
 crossScalaVersions := Seq(scala213.value)
