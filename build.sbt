@@ -29,7 +29,7 @@ inThisBuild(
       (experimentalLaws.native / thisProject).value.id  -> (experimentalLaws.native / crossScalaVersions).value,
       (experimentalTests.js / thisProject).value.id     -> (experimentalTests.js / crossScalaVersions).value,
       (experimentalTests.jvm / thisProject).value.id    -> (experimentalTests.jvm / crossScalaVersions).value,
-      (experimentalTests.native / thisProject).value.id -> (experimentalTests.native / crossScalaVersions).value,
+//      (experimentalTests.native / thisProject).value.id -> (experimentalTests.native / crossScalaVersions).value,
       (laws.js / thisProject).value.id                  -> (laws.js / crossScalaVersions).value,
       (laws.jvm / thisProject).value.id                 -> (laws.jvm / crossScalaVersions).value,
       (laws.native / thisProject).value.id              -> (laws.native / crossScalaVersions).value,
