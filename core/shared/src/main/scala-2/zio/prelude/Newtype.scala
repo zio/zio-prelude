@@ -222,8 +222,8 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
 
   def make(value: A): Validation[String, Type] = macro zio.prelude.Macros.make_impl[A, Type]
 
-  def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] = macro
-    zio.prelude.Macros.makeAll_impl[F, A, Type]
+  def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
+    macro zio.prelude.Macros.makeAll_impl[F, A, Type]
 
   /**
    * This method is used to generate Newtype that can be validated at
@@ -270,8 +270,8 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    * compile-time and will fail with a message containing this very same
    * information.
    */
-  def assertCustom(f: A => Either[AssertionError, Unit]): QuotedAssertion[A] = macro
-    zio.prelude.Macros.assertCustom_impl[A]
+  def assertCustom(f: A => Either[AssertionError, Unit]): QuotedAssertion[A] =
+    macro zio.prelude.Macros.assertCustom_impl[A]
 
   /**
    * Converts an instance of a type parameterized on the underlying type

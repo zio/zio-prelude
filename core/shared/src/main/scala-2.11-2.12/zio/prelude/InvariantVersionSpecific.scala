@@ -27,7 +27,7 @@ trait InvariantVersionSpecific {
    */
   implicit def IterableForEach[F[+a] <: Iterable[a]](implicit derive: DeriveCanBuildFrom[F]): ForEach[F] =
     new ForEach[F] {
-      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]          =
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         CovariantIdentityBoth[G].forEach(fa)(f)(derive.derive)
       override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
         CovariantIdentityBoth[G].forEach_(fa)(f)

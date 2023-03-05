@@ -19,7 +19,7 @@ object DerivationSpec extends ZIOBaseSpec {
 
   object NonEmptyList {
     final case class Cons[+A](head: A, tail: NonEmptyList[A]) extends NonEmptyList[A]
-    final case class Single[+A](head: A)                      extends NonEmptyList[A]
+    final case class Single[+A](head: A) extends NonEmptyList[A]
   }
 
   def spec =

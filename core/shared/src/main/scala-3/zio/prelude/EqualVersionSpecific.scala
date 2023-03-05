@@ -24,7 +24,7 @@ trait EqualVersionSpecific {
   inline def derived[A](using mirror: Mirror.Of[A]): Equal[A] =
     lazy val instances = summonAll[A, mirror.MirroredElemTypes]
     inline mirror match
-      case sum: Mirror.SumOf[A]         => equalSum(sum, instances)
+      case sum: Mirror.SumOf[A] => equalSum(sum, instances)
       case product: Mirror.ProductOf[A] => equalProduct(product, instances)
 
   private inline def summonAll[A0, A <: Tuple]: List[Equal[_]] =
@@ -35,22 +35,22 @@ trait EqualVersionSpecific {
 
   private inline def summon[A0, A]: Equal[A] =
     compiletime.summonFrom {
-      case _: (A =:= A0)   => compiletime.error("Cannot derive Equal.")
-      case _: (A <:< A0)   => Equal.derived(using summonInline[Mirror.Of[A]])
+      case _: (A =:= A0) => compiletime.error("Cannot derive Equal.")
+      case _: (A <:< A0) => Equal.derived(using summonInline[Mirror.Of[A]])
       case equal: Equal[A] => equal
     }
 
   private def equalSum[A](sum: Mirror.SumOf[A], elems: => List[Equal[_]]): Equal[A] =
     Equal.make { (left, right) =>
-      val leftOrdinal  = sum.ordinal(left)
+      val leftOrdinal = sum.ordinal(left)
       val rightOrdinal = sum.ordinal(right)
       (leftOrdinal == rightOrdinal) && check(elems(leftOrdinal))(left, right)
     }
 
   private def equalProduct[A](product: Mirror.ProductOf[A], elems: => List[Equal[_]]): Equal[A] =
     Equal.make { (left, right) =>
-      iterator(left).zip(iterator(right)).zip(elems.iterator).forall { case ((l, r), elem) =>
-        check(elem)(l, r)
+      iterator(left).zip(iterator(right)).zip(elems.iterator).forall {
+        case ((l, r), elem) => check(elem)(l, r)
       }
     }
 

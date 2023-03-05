@@ -8,17 +8,18 @@ object Macros extends Liftables {
   def validateInlineImpl[A: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[Unit] = {
     import quotes.reflect.*
 
+
     assertionExpr.value match {
       case Some(assertion) =>
         a match {
           case LiteralUnlift(x) =>
             assertion(x.asInstanceOf[A]) match {
-              case Right(_)    => '{ () }
+              case Right(_)    => '{()}
               case Left(error) =>
                 report.errorAndAbort(s"$refinementErrorHeader\n" + error.render(x.toString))
             }
 
-          case _ =>
+          case _               =>
             report.errorAndAbort(s"$refinementErrorHeader\nMust use literal value for macro.")
         }
 
@@ -26,8 +27,9 @@ object Macros extends Liftables {
         assertionExpr.asTerm.underlying match {
           // The user forgot to use the `inline` keyword
           case Select(ident @ Ident(name), _) if ident.symbol.declarations.find(_.name == "assertion").exists { expr =>
-                expr.flags.is(Flags.Override)
-              } =>
+              expr.flags.is(Flags.Override)
+            } =>
+
             val message = s"""$refinementErrorHeader
 
 We were unable to read your ${magenta(name)} assertion at compile-time.
@@ -37,11 +39,11 @@ You must annotate ${yellow("def assertion")} with the ${yellow("inline")} keywor
             """
             report.errorAndAbort(message)
 
-          case Select(ident @ Ident(name), "assertion") if ident.tpe <:< TypeRepr.of[Newtype[_]] =>
-            '{ () }
+          case Select(ident @ Ident(name), "assertion") if ident.tpe <:< TypeRepr.of[Newtype[_]]=>
+            '{()}
 
           case other =>
-            val source  = scala.util.Try(assertionExpr.asTerm.pos.sourceCode.get).getOrElse(assertionExpr.show)
+            val source = scala.util.Try(assertionExpr.asTerm.pos.sourceCode.get).getOrElse(assertionExpr.show)
             val message = s"""$refinementErrorHeader
 
 We were unable to read your assertion at compile-time.
