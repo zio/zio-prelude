@@ -68,7 +68,9 @@ jobs:
       fail-fast: false
       matrix:
         java:
+        - '8'
         - '11'
+        - '17'
         scala-project:
         - ++2.12.17 benchmarks
         - ++2.13.10 benchmarks

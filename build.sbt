@@ -9,7 +9,6 @@ inThisBuild(
     checkArtifactBuildProcessWorkflowStep := None,
     ciSwapSizeGB                          := 7,
     parallelTestExecution                 := true,
-    javaPlatforms                         := Seq("11"),
     sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx16g", "-J-Xms4g", "-J-Xss16m"),
     supportedScalaVersions                := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
