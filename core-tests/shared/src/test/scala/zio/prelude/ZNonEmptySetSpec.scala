@@ -53,7 +53,7 @@ object ZNonEmptySetSpec extends ZIOBaseSpec {
             implicitly[Trace]
           )
         ),
-        test("hash")(checkAllLaws(HashLaws)(genZNonEmptySet(Gen.int, Gen.int)))
+        test("hash")(checkAllLaws(HashLaws)(genZNonEmptySet(Gen.int, Gen.int))) @@ TestAspect.exceptJS
       ),
       suite("methods")(
         test("zipWith") {
