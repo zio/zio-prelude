@@ -3,7 +3,7 @@ package zio.prelude
 import zio._
 import zio.test._
 
-object DerivationSpec extends ZIOSpecDefault {
+object DerivationSpec extends ZIOBaseSpec {
 
   final case class Person(name: String, age: Int) derives Equal
 

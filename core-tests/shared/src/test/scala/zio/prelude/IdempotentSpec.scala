@@ -7,7 +7,7 @@ import zio.test.laws._
 
 import scala.math.abs
 
-object IdempotentSpec extends ZIOSpecDefault {
+object IdempotentSpec extends ZIOBaseSpec {
 
   val anyMaxInt: Gen[Any, Max[Int]] = Gen.int.map(Max(_))
 

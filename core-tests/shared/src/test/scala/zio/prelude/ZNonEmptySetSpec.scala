@@ -10,7 +10,7 @@ import zio.test._
 import zio.test.laws._
 import zio.{Chunk, Trace}
 
-object ZNonEmptySetSpec extends ZIOSpecDefault {
+object ZNonEmptySetSpec extends ZIOBaseSpec {
 
   def genFZNonEmptySet[R <: Sized, B](
     b: Gen[R, B]

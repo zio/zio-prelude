@@ -5,7 +5,7 @@ import zio.prelude.newtypes._
 import zio.test._
 import zio.test.laws._
 
-object IdentitySpec extends ZIOSpecDefault {
+object IdentitySpec extends ZIOBaseSpec {
 
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()

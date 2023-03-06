@@ -9,7 +9,7 @@ import zio.test.{Assertion => TestAssertion, _}
 
 import scala.reflect.ClassTag
 
-object NewtypeSpec extends ZIOSpecDefault {
+object NewtypeSpec extends ZIOBaseSpec {
 
   def spec =
     suite("NewtypeSpec")(

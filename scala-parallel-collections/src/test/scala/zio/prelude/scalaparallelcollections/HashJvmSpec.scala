@@ -8,7 +8,7 @@ import zio.test._
 import zio.test.laws._
 
 @silent("Unused import")
-object HashJvmSpec extends ZIOSpecDefault {
+object HashJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters
