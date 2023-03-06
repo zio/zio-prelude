@@ -142,6 +142,8 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     publish / skip := true,
     crossScalaVersions -= scala211.value
   )
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
