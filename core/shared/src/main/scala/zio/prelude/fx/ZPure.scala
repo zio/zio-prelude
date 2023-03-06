@@ -1192,9 +1192,7 @@ object ZPure {
   /**
    * The moral equivalent of `if (!p) exp`
    */
-  def unless[W, S, R, E, A](p: Boolean)(pure: ZPure[W, S, S, R, E, A])(implicit
-    trace: Trace
-  ): ZPure[W, S, S, R, E, Option[A]] =
+  def unless[W, S, R, E, A](p: Boolean)(pure: => ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
     if (p) none else pure.asSome
 
   /**
@@ -1206,7 +1204,7 @@ object ZPure {
   /**
    * The moral equivalent of `if (p) exp`
    */
-  def when[W, S, R, E, A](p: Boolean)(pure: ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
+  def when[W, S, R, E, A](p: Boolean)(pure: => ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
     if (p) pure.asSome else none
 
   /**
