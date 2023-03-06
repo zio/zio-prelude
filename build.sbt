@@ -50,7 +50,6 @@ inThisBuild(
   )
 )
 
-val zioVersion = "2.0.9"
 
 val projectsCommon = List(
   core,
@@ -136,14 +135,13 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       packageName = Some("zio.prelude.tests"),
       enableCrossProject = true
     ),
-    macroDefinitionSettings,
     enableZIO(),
+    macroDefinitionSettings,
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
-    publish / skip := true,
-    crossScalaVersions -= scala211.value
+    publish / skip                    := true,
+    crossScalaVersions -= scala211.value,
+    libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion.value % Test
   )
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
@@ -160,7 +158,7 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .settings(enableZIO())
   .settings(macroDefinitionSettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion.value)
   .settings(
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
     crossScalaVersions -= scala211.value
@@ -227,9 +225,10 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
       packageName = Some("zio.prelude.experimental.tests"),
       enableCrossProject = true
     ),
-    crossScalaVersions -= scala211.value
+    enableZIO(),
+    crossScalaVersions -= scala211.value,
+    libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion.value % Test
   )
-  .settings(enableZIO())
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
