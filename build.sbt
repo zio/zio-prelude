@@ -22,6 +22,19 @@ addCommandAlias(
   "; scalafmtSbtCheck; scalafmtCheckAll; Test/compile; compile:scalafix --check; test:scalafix --check"
 )
 
+addCommandAlias(
+  "testJVM",
+  ";coreTestsJVM/test;experimentalTestsJVM/test;scalaParallelCollections/test"
+)
+addCommandAlias(
+  "testJS",
+  ";coreTestsJS/test;experimentalTestsJS/test"
+)
+addCommandAlias(
+  "testNative",
+  ";coreTestsNative/test;experimentalTestsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
+)
+
 val zioVersion = "2.0.10"
 
 val projectsCommon = List(
