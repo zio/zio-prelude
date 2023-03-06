@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.test.Assertion._
-import zio.test.{Spec, ZIOSpecDefault, assert}
+import zio.test.{Spec, assert}
 
 object AssertionSpec extends ZIOBaseSpec {
 
