@@ -10,7 +10,7 @@ inThisBuild(
     ciSwapSizeGB                          := 10,
     parallelTestExecution                 := false,
     sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx20g", "-J-Xms6g", "-J-Xss16m"),
-    ciBackgroundJobs                      := Seq("free --si -tmws 10h"),
+    ciBackgroundJobs                      := Seq("free --si -tmws 10"),
     supportedScalaVersions                := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
