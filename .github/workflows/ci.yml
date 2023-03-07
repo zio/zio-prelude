@@ -24,7 +24,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 7
+        swap-size-gb: 8
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -47,7 +47,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 7
+        swap-size-gb: 8
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -71,87 +71,15 @@ jobs:
         - '8'
         - '11'
         - '17'
-        scala-project:
-        - ++2.12.17 benchmarks
-        - ++2.13.10 benchmarks
-        - ++3.2.2 benchmarks
-        - ++2.12.17 scalaParallelCollections
-        - ++2.13.10 scalaParallelCollections
-        - ++3.2.2 scalaParallelCollections
-        - ++2.12.17 examplesNative
-        - ++2.13.10 examplesNative
-        - ++3.2.2 examplesNative
-        - ++2.12.17 macrosJVM
-        - ++2.13.10 macrosJVM
-        - ++3.2.2 macrosJVM
-        - ++2.12.17 experimentalTestsJS
-        - ++2.13.10 experimentalTestsJS
-        - ++3.2.2 experimentalTestsJS
-        - ++2.12.17 coreTestsJS
-        - ++2.13.10 coreTestsJS
-        - ++3.2.2 coreTestsJS
-        - ++2.12.17 coreNative
-        - ++2.13.10 coreNative
-        - ++3.2.2 coreNative
-        - ++2.12.17 experimentalLawsNative
-        - ++2.13.10 experimentalLawsNative
-        - ++3.2.2 experimentalLawsNative
-        - ++2.12.17 macrosNative
-        - ++2.13.10 macrosNative
-        - ++3.2.2 macrosNative
-        - ++2.12.17 lawsNative
-        - ++2.13.10 lawsNative
-        - ++3.2.2 lawsNative
-        - ++2.12.17 experimentalLawsJS
-        - ++2.13.10 experimentalLawsJS
-        - ++3.2.2 experimentalLawsJS
-        - ++2.12.17 coreJS
-        - ++2.13.10 coreJS
-        - ++3.2.2 coreJS
-        - ++2.12.17 examplesJS
-        - ++2.13.10 examplesJS
-        - ++3.2.2 examplesJS
-        - ++2.12.17 macrosJS
-        - ++2.13.10 macrosJS
-        - ++3.2.2 macrosJS
-        - ++2.12.17 lawsJS
-        - ++2.13.10 lawsJS
-        - ++3.2.2 lawsJS
-        - ++2.12.17 coreTestsJVM
-        - ++2.13.10 coreTestsJVM
-        - ++3.2.2 coreTestsJVM
-        - ++2.12.17 coreJVM
-        - ++2.13.10 coreJVM
-        - ++3.2.2 coreJVM
-        - ++2.12.17 experimentalTestsJVM
-        - ++2.13.10 experimentalTestsJVM
-        - ++3.2.2 experimentalTestsJVM
-        - ++2.12.17 experimentalJS
-        - ++2.13.10 experimentalJS
-        - ++3.2.2 experimentalJS
-        - ++2.12.17 experimentalNative
-        - ++2.13.10 experimentalNative
-        - ++3.2.2 experimentalNative
-        - ++2.12.17 examplesJVM
-        - ++2.13.10 examplesJVM
-        - ++3.2.2 examplesJVM
-        - ++2.12.17 experimentalLawsJVM
-        - ++2.13.10 experimentalLawsJVM
-        - ++3.2.2 experimentalLawsJVM
-        - ++2.12.17 lawsJVM
-        - ++2.13.10 lawsJVM
-        - ++3.2.2 lawsJVM
-        - ++2.12.17 experimentalJVM
-        - ++2.13.10 experimentalJVM
-        - ++3.2.2 experimentalJVM
-        - ++2.12.17 coreTestsNative
-        - ++2.13.10 coreTestsNative
-        - ++3.2.2 coreTestsNative
+        scala:
+        - 2.12.17
+        - 2.13.10
+        - 3.2.2
     steps:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 7
+        swap-size-gb: 8
     - name: Setup Scala
       uses: actions/setup-java@v3.10.0
       with:
@@ -163,7 +91,14 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Test
-      run: sbt -J-XX:+UseG1GC -J-Xmx16g -J-Xms4g -J-Xss16m ${{ matrix.scala-project }}/test
+      if: ${{ matrix.scala == '2.12.17' }}
+      run: sbt -J-XX:+UseG1GC -J-Xmx16g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+    - name: Test
+      if: ${{ matrix.scala == '2.13.10' }}
+      run: sbt -J-XX:+UseG1GC -J-Xmx16g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+    - name: Test
+      if: ${{ matrix.scala == '3.2.2' }}
+      run: sbt -J-XX:+UseG1GC -J-Xmx16g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
   ci:
     name: CI
     runs-on: ubuntu-latest
@@ -188,7 +123,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 7
+        swap-size-gb: 8
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -217,7 +152,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 7
+        swap-size-gb: 8
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -248,7 +183,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 7
+        swap-size-gb: 8
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:

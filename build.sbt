@@ -7,8 +7,8 @@ inThisBuild(
     name                                  := "ZIO Prelude",
     ciEnabledBranches                     := Seq("series/2.x"),
     checkArtifactBuildProcessWorkflowStep := None,
-    ciSwapSizeGB                          := 7,
-    parallelTestExecution                 := true,
+    ciSwapSizeGB                          := 8,
+    parallelTestExecution                 := false,
     sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx16g", "-J-Xms4g", "-J-Xss16m"),
     supportedScalaVersions                := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
