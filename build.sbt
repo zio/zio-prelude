@@ -11,7 +11,6 @@ inThisBuild(
     ciSwapSizeGB                          := 12,
     parallelTestExecution                 := false,
     sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx6g", "-J-Xms4g", "-J-Xss16m"),
-    ciBackgroundJobs                      := Seq("free --si -tmws 10", "echo \"Memory and swap:\"; free -h; echo; swapon --show; echo"),
     supportedScalaVersions                := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
