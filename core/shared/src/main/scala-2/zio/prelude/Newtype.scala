@@ -284,7 +284,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    */
   def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.Macros.wrapAll_impl[F, A, Type]
 
-  implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = Newtype.classTag
+  implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = underlying.asInstanceOf[ClassTag[Type]]
 }
 
 object Newtype {
@@ -324,7 +324,5 @@ object Newtype {
   }
 
   implicit def classTag[N <: Newtype[_]: ClassTagWrapper]: ClassTag[N#Type] =
-    new ClassTag[N#Type] {
-      def runtimeClass: Class[_] = ClassTagWrapper[N].classTag.runtimeClass
-    }
+    ClassTagWrapper[N].classTag.asInstanceOf[ClassTag[N#Type]]
 }
