@@ -7,6 +7,7 @@ inThisBuild(
     name                                  := "ZIO Prelude",
     ciEnabledBranches                     := Seq("series/2.x"),
     checkArtifactBuildProcessWorkflowStep := None,
+    javaPlatforms                         := Seq("17"),
     ciSwapSizeGB                          := 12,
     parallelTestExecution                 := false,
     sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx6g", "-J-Xms4g", "-J-Xss16m"),
