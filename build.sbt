@@ -50,7 +50,6 @@ inThisBuild(
   )
 )
 
-
 val projectsCommon = List(
   core,
   coreTests,
@@ -123,7 +122,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     scalacOptions ~= { _.filterNot(Set("-noindent")) },
     crossScalaVersions -= scala211.value
   )
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
   .dependsOn(macros)
 
@@ -138,9 +137,8 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     enableZIO(),
     macroDefinitionSettings,
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
-    publish / skip                    := true,
-    crossScalaVersions -= scala211.value,
-    libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion.value % Test
+    publish / skip := true,
+    crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings, scalajs)
@@ -164,7 +162,7 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
   .dependsOn(core)
 
@@ -182,7 +180,7 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
     crossScalaVersions -= scala211.value
   )
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
 
 lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -198,7 +196,7 @@ lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
 
 lazy val experimentalLaws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -213,7 +211,7 @@ lazy val experimentalLaws = crossProject(JSPlatform, JVMPlatform, NativePlatform
     crossScalaVersions -= scala211.value
   )
   .jvmSettings(scalaReflectTestSettings)
-  .jsSettings(jsSettings)
+  .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
 
 lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
