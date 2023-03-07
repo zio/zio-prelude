@@ -2,8 +2,6 @@ package zio.prelude
 
 import scala.quoted._
 
-
-
 /**
  * Convience type that helps with defining a Newtype with a custom (so anything that is not expressable
  * with an [[Assertion]]) predicate that should be checked during compile-time.
@@ -29,7 +27,6 @@ import scala.quoted._
  *    ${ PalindromeValidator.validateInlineImpl('value) }
  * }
  * }}}
- *
  */
 abstract class Validator[A: FromExpr](f: A => Either[AssertionError, Unit]) extends Liftables {
   def validate(a: A): Either[AssertionError, Unit] =
@@ -38,7 +35,7 @@ abstract class Validator[A: FromExpr](f: A => Either[AssertionError, Unit]) exte
   final def validateInlineImpl(expr: Expr[A])(using Quotes): Expr[Unit] = {
     val a = expr.valueOrAbort
     validate(a) match {
-      case Right(_) => '{()}
+      case Right(_)  => '{ () }
       case Left(err) =>
         quotes.reflect.report.errorAndAbort(err.render(a.toString))
     }
