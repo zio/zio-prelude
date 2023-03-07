@@ -100,7 +100,7 @@ jobs:
       if: ${{ matrix.scala == '3.2.2' }}
       run: sbt -J-XX:+UseG1GC -J-Xmx20g -J-Xms6g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
   ci:
-    name: CI
+    name: ci
     runs-on: ubuntu-latest
     continue-on-error: false
     needs:
