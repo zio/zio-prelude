@@ -7,7 +7,7 @@ import zio.prelude.newtypes.Sum
 import zio.test.Assertion.{isEmptyString, isTrue}
 import zio.test._
 
-object CoherentSpec extends ZIOSpecDefault {
+object CoherentSpec extends ZIOBaseSpec {
 
   def spec: Spec[Environment, Any] =
     suite("CoherentSpec")(

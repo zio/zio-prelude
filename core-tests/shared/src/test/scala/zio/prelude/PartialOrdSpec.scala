@@ -4,7 +4,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object PartialOrdSpec extends ZIOSpecDefault {
+object PartialOrdSpec extends ZIOBaseSpec {
 
   def spec: Spec[Environment, Any] =
     suite("OrdSpec")(

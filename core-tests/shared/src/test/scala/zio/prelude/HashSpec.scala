@@ -6,7 +6,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object HashSpec extends ZIOSpecDefault {
+object HashSpec extends ZIOBaseSpec {
 
   final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R with TestConfig, Nothing, TestResult] =
     check(gen)(a => assert(a.hash)(equalTo(a.hashCode)))

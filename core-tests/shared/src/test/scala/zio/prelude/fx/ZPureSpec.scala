@@ -9,7 +9,7 @@ import zio.{CanFail, Chunk, NonEmptyChunk, ZEnvironment, ZIO}
 import java.util.NoSuchElementException
 import scala.util.Try
 
-object ZPureSpec extends ZIOSpecDefault {
+object ZPureSpec extends ZIOBaseSpec {
 
   lazy val genInt: Gen[Any, Int] =
     Gen.int

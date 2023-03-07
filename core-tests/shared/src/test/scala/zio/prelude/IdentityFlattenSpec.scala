@@ -4,7 +4,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object IdentityFlattenSpec extends ZIOSpecDefault {
+object IdentityFlattenSpec extends ZIOBaseSpec {
 
   def spec: Spec[Environment, Any] =
     suite("IdentityFlattenSpec")(

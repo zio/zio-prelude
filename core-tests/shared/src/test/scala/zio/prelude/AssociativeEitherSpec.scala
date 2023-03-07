@@ -4,7 +4,7 @@ import zio.prelude.laws.AssociativeEitherLaws
 import zio.test._
 import zio.test.laws._
 
-object AssociativeEitherSpec extends ZIOSpecDefault {
+object AssociativeEitherSpec extends ZIOBaseSpec {
 
   def spec: Spec[Environment, Any] =
     suite("AssociativeEitherSpec")(

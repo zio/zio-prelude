@@ -6,7 +6,7 @@ import zio.test._
 import zio.test.laws._
 import zio.{Chunk, NonEmptyChunk, Ref}
 
-object ForEachSpec extends ZIOSpecDefault {
+object ForEachSpec extends ZIOBaseSpec {
   import Fixtures._
 
   val genBoolean: Gen[Any, Boolean] =

@@ -6,7 +6,7 @@ import zio.test.{TestResult, _}
 
 import scala.collection.immutable.ListMap
 
-object DebugSpec extends ZIOSpecDefault {
+object DebugSpec extends ZIOBaseSpec {
 
   def primitiveTest[A: Debug](renderer: Renderer)(a: A, exp: Option[String] = None): TestResult =
     assert(a.debug.render(renderer))(equalTo(exp.getOrElse(a.toString)))

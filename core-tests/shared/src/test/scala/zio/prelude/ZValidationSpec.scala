@@ -7,7 +7,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object ZValidationSpec extends ZIOSpecDefault {
+object ZValidationSpec extends ZIOBaseSpec {
 
   val genValidation: Gen[Sized, ZValidation[Int, Int, Int]] =
     Gens.validation(Gen.int, Gen.int, Gen.int)
