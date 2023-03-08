@@ -75,6 +75,7 @@ jobs:
         - '11'
         - '17'
         scala:
+        - 2.11.12
         - 2.12.17
         - 2.13.10
         - 3.2.2
@@ -95,6 +96,9 @@ jobs:
       uses: actions/checkout@v3.3.0
       with:
         fetch-depth: '0'
+    - name: Test
+      if: ${{ matrix.scala == '2.11.12' }}
+      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
     - name: Test
       if: ${{ matrix.scala == '2.12.17' }}
       run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
