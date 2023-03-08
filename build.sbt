@@ -51,68 +51,6 @@ inThisBuild(
   )
 )
 
-val projectsCommon = List(
-  core,
-  coreTests,
-  examples,
-  experimental,
-  experimentalLaws,
-  experimentalTests,
-  laws,
-  macros
-)
-
-val projectsJvmOnly = List[ProjectReference](
-  benchmarks,
-  docs,
-  scalaParallelCollections
-)
-
-lazy val rootJVM = project
-  .in(file("target/rootJVM"))
-  .settings(publish / skip := true)
-  .aggregate(projectsCommon.map(_.jvm: ProjectReference): _*)
-  .aggregate(projectsJvmOnly: _*)
-
-lazy val rootJS = project
-  .in(file("target/rootJS"))
-  .settings(publish / skip := true)
-  .aggregate(projectsCommon.map(_.js: ProjectReference): _*)
-
-lazy val rootNative = project
-  .in(file("target/rootNative"))
-  .settings(publish / skip := true)
-  .aggregate(projectsCommon.map(_.native: ProjectReference): _*)
-
-lazy val root211 = project
-  .in(file("target/root211"))
-  .settings(publish / skip := true)
-  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
-  .aggregate(scalaParallelCollections)
-
-lazy val root212 = project
-  .in(file("target/root212"))
-  .settings(publish / skip := true)
-  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
-  .aggregate(benchmarks, scalaParallelCollections)
-
-lazy val root213 = project
-  .in(file("target/root213"))
-  .settings(publish / skip := true)
-  .settings(crossScalaVersions := Seq(scala213.value))
-  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
-  .aggregate(projectsJvmOnly: _*)
-
-lazy val root3 = project
-  .in(file("target/root3"))
-  .settings(publish / skip := true)
-  .aggregate(root212)
-
-lazy val root = project
-  .in(file("."))
-  .settings(publish / skip := true)
-  .aggregate(root213)
-
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
   .settings(stdSettings(name = "zio-prelude", packageName = Some("zio.prelude"), enableCrossProject = true))
