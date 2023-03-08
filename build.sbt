@@ -152,8 +152,7 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
       packageName = Some("zio.prelude.experimental.tests"),
       enableCrossProject = true
     ),
-    enableZIO(),
-    libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion.value % Test
+    enableZIO()
   )
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings, scalajs)
