@@ -13,5 +13,5 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.12.0")
 dependencyOverrides += Defaults.sbtPluginExtra(
   "org.scala-js" % "sbt-scalajs" % "1.12.0",
   sbtBinaryVersion.value,
-  scalaBinaryVersion.value,
+  scalaBinaryVersion.value
 )
