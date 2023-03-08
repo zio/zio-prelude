@@ -53,10 +53,10 @@ inThisBuild(
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
-  .settings(stdSettings(name = "zio-prelude", packageName = Some("zio.prelude"), enableCrossProject = true))
-  .settings(enableZIO(enableStreaming = true))
-  .settings(macroDefinitionSettings)
   .settings(
+    stdSettings(name = "zio-prelude", packageName = Some("zio.prelude"), enableCrossProject = true),
+    enableZIO(enableStreaming = true),
+    macroDefinitionSettings,
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
     scalacOptions ~= { _.filterNot(Set("-noindent")) }
   )
@@ -89,12 +89,10 @@ lazy val laws = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       name = "zio-laws-laws",
       packageName = Some("zio.prelude.laws"),
       enableCrossProject = true
-    )
-  )
-  .settings(enableZIO())
-  .settings(macroDefinitionSettings)
-  .settings(libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion.value)
-  .settings(
+    ),
+    enableZIO(),
+    macroDefinitionSettings,
+    libraryDependencies += "dev.zio" %%% "zio-test" % zioVersion.value,
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) }
   )
   .jvmSettings(scalaReflectTestSettings)
@@ -109,10 +107,8 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       name = "zio-prelude-macros",
       packageName = Some("zio.prelude.macros"),
       enableCrossProject = true
-    )
-  )
-  .settings(macroDefinitionSettings)
-  .settings(
+    ),
+    macroDefinitionSettings,
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) }
   )
   .jsSettings(jsSettings, scalajs)
@@ -121,13 +117,13 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 lazy val experimental = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("experimental"))
   .dependsOn(core)
-  .settings(enableZIO())
   .settings(
     stdSettings(
       name = "zio-prelude-experimental",
       packageName = Some("zio.prelude.experimental"),
       enableCrossProject = true
-    )
+    ),
+    enableZIO()
   )
   .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings, scalajs)
@@ -179,10 +175,8 @@ lazy val scalaParallelCollections = project
     stdSettings(
       name = "zio-prelude-scala-parallel-collections",
       packageName = Some("zio.prelude.scalaparallelcollections")
-    )
-  )
-  .settings(enableZIO())
-  .settings(
+    ),
+    enableZIO(),
     libraryDependencies ++= {
       scalaBinaryVersion.value match {
         // Only 2.11 and 2.12 standard library contains Parallel Scala collections
@@ -197,8 +191,8 @@ lazy val scalaParallelCollections = project
 
 lazy val benchmarks = project
   .in(file("benchmarks"))
-  .settings(stdSettings("zio-prelude-benchmarks"))
   .settings(
+    stdSettings("zio-prelude-benchmarks"),
     publish / skip := true,
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
@@ -212,13 +206,13 @@ lazy val benchmarks = project
 
 lazy val docs = project
   .in(file("zio-prelude-docs"))
-  .settings(stdSettings("zio-prelude-docs"))
   .settings(
+    stdSettings("zio-prelude-docs"),
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     scalaVersion                               := scala213.value,
     crossScalaVersions                         := Seq(scala212.value, scala213.value, scala3.value),
-    projectName                                := "ZIO Prelude",
+    projectName                                := (ThisBuild / name).value,
     mainModuleName                             := (core.jvm / moduleName).value,
     projectStage                               := ProjectStage.ProductionReady,
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
@@ -227,9 +221,9 @@ lazy val docs = project
       experimentalLaws.jvm,
       laws.jvm,
       scalaParallelCollections
-    )
+    ),
+    macroDefinitionSettings
   )
-  .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
   .enablePlugins(WebsitePlugin)
 
@@ -237,8 +231,8 @@ lazy val examples =
   crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .in(file("examples"))
     .dependsOn(core)
-    .settings(stdSettings(name = "zio-prelude-examples", enableCrossProject = true))
     .settings(
+      stdSettings(name = "zio-prelude-examples", enableCrossProject = true),
       macroExpansionSettings,
       publish / skip := true
     )
