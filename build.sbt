@@ -195,6 +195,7 @@ lazy val benchmarks = project
     publish / skip := true,
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
+    crossScalaVersions -= scala211.value,
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core"   % "2.9.0",
       "org.typelevel" %% "cats-effect" % "3.4.7"
