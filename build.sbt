@@ -4,15 +4,14 @@ crossScalaVersions := Seq(scala213.value)
 
 inThisBuild(
   List(
-    name                                  := "ZIO Prelude",
-    ciEnabledBranches                     := Seq("series/2.x"),
-    checkArtifactBuildProcessWorkflowStep := None,
-    javaPlatforms                         := Seq("11", "17"),
-    ciSwapSizeGB                          := 12,
-    ciGroupSimilarTests                   := true,
-    ciMatrixMaxParallel                   := Some(3),
-    sbtBuildOptions                       := List("-J-XX:+UseG1GC", "-J-Xmx6g", "-J-Xms4g", "-J-Xss16m"),
-    supportedScalaVersions                := Map(
+    name                   := "ZIO Prelude",
+    ciEnabledBranches      := Seq("series/2.x"),
+    javaPlatforms          := Seq("11", "17"),
+    ciSwapSizeGB           := 12,
+    ciGroupSimilarTests    := true,
+    ciMatrixMaxParallel    := Some(3),
+    sbtBuildOptions        := List("-J-XX:+UseG1GC", "-J-Xmx6g", "-J-Xms4g", "-J-Xss16m"),
+    supportedScalaVersions := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
       (core.jvm / thisProject).value.id                 -> (core.jvm / crossScalaVersions).value,
@@ -41,7 +40,7 @@ inThisBuild(
       (macros.native / thisProject).value.id            -> (macros.native / crossScalaVersions).value,
       (scalaParallelCollections / thisProject).value.id -> (scalaParallelCollections / crossScalaVersions).value
     ),
-    developers                            := List(
+    developers             := List(
       Developer(
         "jdegoes",
         "John De Goes",
