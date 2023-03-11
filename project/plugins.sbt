@@ -1,8 +1,10 @@
-val zioSbtVersion = "0.3.10+74-a885a0a2-SNAPSHOT"
+val zioSbtVersion = "0.3.10+78-eb4ed5f9-SNAPSHOT"
 
 addSbtPlugin("dev.zio" % "zio-sbt-ecosystem" % zioSbtVersion)
 addSbtPlugin("dev.zio" % "zio-sbt-website"   % zioSbtVersion)
 addSbtPlugin("dev.zio" % "zio-sbt-ci"        % zioSbtVersion)
+
+addSbtPlugin("com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings" % "3.0.2")
 
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.1")
 

@@ -11,6 +11,9 @@ inThisBuild(
     ciGroupSimilarTests    := true,
     ciMatrixMaxParallel    := Some(3),
     sbtBuildOptions        := List("-J-XX:+UseG1GC", "-J-Xmx6g", "-J-Xms4g", "-J-Xss16m"),
+//    scalacOptions ++= {
+//      if (scalaBinaryVersion.value != "3") Seq("-no-link-warnings") else Seq.empty
+//    },
     supportedScalaVersions := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
@@ -58,7 +61,10 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     enableZIO(enableStreaming = true),
     macroDefinitionSettings,
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) },
-    scalacOptions ~= { _.filterNot(Set("-noindent")) }
+    scalacOptions ~= { _.filterNot(Set("-noindent")) },
+    Compile / doc / scalacOptions ++= optionsOnExcept("3")(
+      "-no-link-warnings"
+    ).value // Suppresses problems with Scaladoc's linking
   )
   .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
