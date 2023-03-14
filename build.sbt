@@ -11,7 +11,6 @@ inThisBuild(
     ciGroupSimilarTests    := true,
     ciMatrixMaxParallel    := Some(3),
     ciCheckGithubWorkflow  := Seq.empty,
-    sbtBuildOptions        := List("-J-XX:+UseG1GC", "-J-Xmx6g", "-J-Xms4g", "-J-Xss16m"),
     supportedScalaVersions := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,

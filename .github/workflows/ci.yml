@@ -38,11 +38,11 @@ jobs:
         java-version: '8'
         check-latest: true
     - name: Check all code compiles
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m +Test/compile
+      run: sbt  +Test/compile
     - name: Check artifacts build process
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m +publishLocal
+      run: sbt  +publishLocal
     - name: Check website build process
-      run: sbt docs/clean; sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m docs/buildWebsite
+      run: sbt docs/clean; sbt  docs/buildWebsite
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -65,7 +65,7 @@ jobs:
         java-version: '8'
         check-latest: true
     - name: Lint
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m lint
+      run: sbt  lint
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -100,16 +100,16 @@ jobs:
         fetch-depth: '0'
     - name: Test
       if: ${{ matrix.scala == '2.12.17' }}
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt  ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
     - name: Test
       if: ${{ matrix.scala == '2.13.10' }}
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt  ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
     - name: Test
       if: ${{ matrix.scala == '3.2.2' }}
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt  ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
     - name: Test
       if: ${{ matrix.scala == '2.11.12' }}
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m ++${{ matrix.scala }} scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt  ++${{ matrix.scala }} scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
   ci:
     name: ci
     runs-on: ubuntu-latest
@@ -148,7 +148,7 @@ jobs:
         java-version: '8'
         check-latest: true
     - name: Release
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m ci-release
+      run: sbt  ci-release
       env:
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
         PGP_SECRET: ${{ secrets.PGP_SECRET }}
@@ -184,7 +184,7 @@ jobs:
         node-version: 16.x
         registry-url: https://registry.npmjs.org
     - name: Publish Docs to NPM Registry
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m docs/publishToNpm
+      run: sbt  docs/publishToNpm
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   generate-readme:
@@ -213,7 +213,7 @@ jobs:
         java-version: '8'
         check-latest: true
     - name: Generate Readme
-      run: sbt -J-XX:+UseG1GC -J-Xmx6g -J-Xms4g -J-Xss16m docs/generateReadme
+      run: sbt  docs/generateReadme
     - name: Commit Changes
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
