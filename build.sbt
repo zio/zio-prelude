@@ -10,42 +10,13 @@ inThisBuild(
     ciSwapSizeGB           := 7,
     ciGroupSimilarTests    := true,
     ciCheckGithubWorkflow  := Seq.empty,
-    sbtBuildOptions        := List(
-      "-J-XX:+PrintCommandLineFlags",
-      "-J-XX:MaxMetaspaceSize=4G",
-      "-J-Xms4G",
-      "-J-Xmx8G",
-      "-J-Xss16M",
-      "-J-XX:+UseG1GC",
-      "-J-XX:ReservedCodeCacheSize=256m"
-    ),
     supportedScalaVersions := Map(
-      (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
-      (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
-      (core.jvm / thisProject).value.id                 -> (core.jvm / crossScalaVersions).value,
-      (core.native / thisProject).value.id              -> (core.native / crossScalaVersions).value,
-      (coreTests.js / thisProject).value.id             -> (coreTests.js / crossScalaVersions).value,
       (coreTests.jvm / thisProject).value.id            -> (coreTests.jvm / crossScalaVersions).value,
+      (coreTests.js / thisProject).value.id             -> (coreTests.js / crossScalaVersions).value,
       (coreTests.native / thisProject).value.id         -> (coreTests.native / crossScalaVersions).value,
-      (examples.js / thisProject).value.id              -> (examples.js / crossScalaVersions).value,
-      (examples.jvm / thisProject).value.id             -> (examples.jvm / crossScalaVersions).value,
-      (examples.native / thisProject).value.id          -> (examples.native / crossScalaVersions).value,
-      (examples.native / thisProject).value.id          -> (examples.native / crossScalaVersions).value,
-      (experimental.js / thisProject).value.id          -> (experimental.js / crossScalaVersions).value,
-      (experimental.jvm / thisProject).value.id         -> (experimental.jvm / crossScalaVersions).value,
-      (experimental.native / thisProject).value.id      -> (experimental.native / crossScalaVersions).value,
-      (experimentalLaws.js / thisProject).value.id      -> (experimentalLaws.js / crossScalaVersions).value,
-      (experimentalLaws.jvm / thisProject).value.id     -> (experimentalLaws.jvm / crossScalaVersions).value,
-      (experimentalLaws.native / thisProject).value.id  -> (experimentalLaws.native / crossScalaVersions).value,
-      (experimentalTests.js / thisProject).value.id     -> (experimentalTests.js / crossScalaVersions).value,
       (experimentalTests.jvm / thisProject).value.id    -> (experimentalTests.jvm / crossScalaVersions).value,
+      (experimentalTests.js / thisProject).value.id     -> (experimentalTests.js / crossScalaVersions).value,
       (experimentalTests.native / thisProject).value.id -> (experimentalTests.native / crossScalaVersions).value,
-      (laws.js / thisProject).value.id                  -> (laws.js / crossScalaVersions).value,
-      (laws.jvm / thisProject).value.id                 -> (laws.jvm / crossScalaVersions).value,
-      (laws.native / thisProject).value.id              -> (laws.native / crossScalaVersions).value,
-      (macros.js / thisProject).value.id                -> (macros.js / crossScalaVersions).value,
-      (macros.jvm / thisProject).value.id               -> (macros.jvm / crossScalaVersions).value,
-      (macros.native / thisProject).value.id            -> (macros.native / crossScalaVersions).value,
       (scalaParallelCollections / thisProject).value.id -> (scalaParallelCollections / crossScalaVersions).value
     ),
     developers             := List(
@@ -58,6 +29,68 @@ inThisBuild(
     )
   )
 )
+
+val projectsCommon = List(
+  core,
+  coreTests,
+  examples,
+  experimental,
+  experimentalLaws,
+  experimentalTests,
+  laws,
+  macros
+)
+
+val projectsJvmOnly = List[ProjectReference](
+  benchmarks,
+  docs,
+  scalaParallelCollections
+)
+
+lazy val rootJVM = project
+  .in(file("target/rootJVM"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.map(_.jvm: ProjectReference): _*)
+  .aggregate(projectsJvmOnly: _*)
+
+lazy val rootJS = project
+  .in(file("target/rootJS"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.map(_.js: ProjectReference): _*)
+
+lazy val rootNative = project
+  .in(file("target/rootNative"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.map(_.native: ProjectReference): _*)
+
+lazy val root211 = project
+  .in(file("target/root211"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
+  .aggregate(scalaParallelCollections)
+
+lazy val root212 = project
+  .in(file("target/root212"))
+  .settings(publish / skip := true)
+  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
+  .aggregate(benchmarks, scalaParallelCollections)
+
+lazy val root213 = project
+  .in(file("target/root213"))
+  .settings(publish / skip := true)
+  .settings(crossScalaVersions := Seq(scala213.value))
+  .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
+  .aggregate(projectsJvmOnly: _*)
+
+lazy val root3 = project
+  .in(file("target/root3"))
+  .settings(publish / skip := true)
+  .aggregate(root212)
+
+lazy val root = project
+  .in(file("."))
+  .settings(publish / skip := true)
+  .aggregate(root213)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
