@@ -6,7 +6,7 @@ inThisBuild(
   List(
     name                   := "ZIO Prelude",
     ciEnabledBranches      := Seq("series/2.x"),
-    javaPlatforms          := Seq("11", "17"),
+    javaPlatforms          := Seq("17"),
     ciSwapSizeGB           := 12,
     ciGroupSimilarTests    := true,
     ciMatrixMaxParallel    := Some(3),

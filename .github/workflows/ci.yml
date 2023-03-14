@@ -77,7 +77,6 @@ jobs:
       max-parallel: 3
       matrix:
         java:
-        - '11'
         - '17'
         scala:
         - 2.12.17
