@@ -11,9 +11,6 @@ inThisBuild(
     ciGroupSimilarTests    := true,
     ciMatrixMaxParallel    := Some(3),
     sbtBuildOptions        := List("-J-XX:+UseG1GC", "-J-Xmx6g", "-J-Xms4g", "-J-Xss16m"),
-//    scalacOptions ++= {
-//      if (scalaBinaryVersion.value != "3") Seq("-no-link-warnings") else Seq.empty
-//    },
     supportedScalaVersions := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
@@ -164,15 +161,6 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
   .jsSettings(jsSettings, scalajs)
   .nativeSettings(nativeSettings)
 
-lazy val scalajs: Seq[Setting[_]] =
-  Seq(
-    scalacOptions ++= {
-      if (scalaVersion.value == scala3.value) {
-        Seq("-scalajs")
-      } else Seq.empty
-    }
-  )
-
 lazy val scalaParallelCollections = project
   .in(file("scala-parallel-collections"))
   .dependsOn(core.jvm, coreTests.jvm % "test->test")
@@ -182,17 +170,11 @@ lazy val scalaParallelCollections = project
       packageName = Some("zio.prelude.scalaparallelcollections")
     ),
     enableZIO(),
-    libraryDependencies ++= {
-      scalaBinaryVersion.value match {
-        // Only 2.11 and 2.12 standard library contains Parallel Scala collections
-        case "2.11" | "2.12" =>
-          List()
-        case _               =>
-          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
-      }
-    }
+    scalaReflectTestSettings,
+    addDependenciesOnOrElse("2.11", "2.12")()(
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+    )
   )
-  .settings(scalaReflectTestSettings)
 
 lazy val benchmarks = project
   .in(file("benchmarks"))
@@ -242,3 +224,5 @@ lazy val examples =
       macroExpansionSettings,
       publish / skip := true
     )
+
+lazy val scalajs: Seq[Setting[_]] = addOptionsOn("3")("-scalajs")
