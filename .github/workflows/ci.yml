@@ -2,10 +2,6 @@
 # task and should be included in the git repository. Please do not edit it manually.
 
 name: CI
-env:
-  JDK_JAVA_OPTIONS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M -XX:+UseG1GC # JDK_JAVA_OPTIONS is _the_ env. variable to use for modern Java
-  JVM_OPTS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M -XX:+UseG1GC # for Java 8 only (sadly, it is not modern enough for JDK_JAVA_OPTIONS)
-  NODE_OPTIONS: --max_old_space_size=6144
 'on':
   workflow_dispatch: {}
   release:
@@ -24,7 +20,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
+        swap-size-gb: 7
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -37,12 +33,14 @@ jobs:
         distribution: temurin
         java-version: '8'
         check-latest: true
+    - name: Cache Dependencies
+      uses: coursier/cache-action@v6
     - name: Check all code compiles
-      run: sbt  +Test/compile
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m +Test/compile
     - name: Check artifacts build process
-      run: sbt  +publishLocal
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m +publishLocal
     - name: Check website build process
-      run: sbt docs/clean; sbt  docs/buildWebsite
+      run: sbt docs/clean; sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m docs/buildWebsite
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -51,7 +49,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
+        swap-size-gb: 7
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -64,15 +62,16 @@ jobs:
         distribution: temurin
         java-version: '8'
         check-latest: true
+    - name: Cache Dependencies
+      uses: coursier/cache-action@v6
     - name: Lint
-      run: sbt  lint
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m lint
   test:
     name: Test
     runs-on: ubuntu-latest
     continue-on-error: false
     strategy:
       fail-fast: false
-      max-parallel: 3
       matrix:
         java:
         - '17'
@@ -85,7 +84,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
+        swap-size-gb: 7
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
     - name: Setup Scala
@@ -94,22 +93,24 @@ jobs:
         distribution: temurin
         java-version: ${{ matrix.java }}
         check-latest: true
+    - name: Cache Dependencies
+      uses: coursier/cache-action@v6
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
         fetch-depth: '0'
     - name: Test
       if: ${{ matrix.scala == '2.12.17' }}
-      run: sbt  ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
     - name: Test
       if: ${{ matrix.scala == '2.13.10' }}
-      run: sbt  ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
     - name: Test
       if: ${{ matrix.scala == '3.2.2' }}
-      run: sbt  ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m ++${{ matrix.scala }} benchmarks/test scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
     - name: Test
       if: ${{ matrix.scala == '2.11.12' }}
-      run: sbt  ++${{ matrix.scala }} scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m ++${{ matrix.scala }} scalaParallelCollections/test examplesNative/test experimentalTestsNative/test macrosJVM/test experimentalTestsJS/test coreTestsJS/test coreNative/test experimentalLawsNative/test macrosNative/test lawsNative/test experimentalLawsJS/test coreJS/test examplesJS/test macrosJS/test lawsJS/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test experimentalJS/test experimentalNative/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test coreTestsNative/test
   ci:
     name: ci
     runs-on: ubuntu-latest
@@ -134,7 +135,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
+        swap-size-gb: 7
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -147,8 +148,10 @@ jobs:
         distribution: temurin
         java-version: '8'
         check-latest: true
+    - name: Cache Dependencies
+      uses: coursier/cache-action@v6
     - name: Release
-      run: sbt  ci-release
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m ci-release
       env:
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
         PGP_SECRET: ${{ secrets.PGP_SECRET }}
@@ -165,7 +168,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
+        swap-size-gb: 7
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -178,13 +181,15 @@ jobs:
         distribution: temurin
         java-version: '8'
         check-latest: true
+    - name: Cache Dependencies
+      uses: coursier/cache-action@v6
     - name: Setup NodeJs
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
         registry-url: https://registry.npmjs.org
     - name: Publish Docs to NPM Registry
-      run: sbt  docs/publishToNpm
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m docs/publishToNpm
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   generate-readme:
@@ -198,7 +203,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
+        swap-size-gb: 7
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
@@ -212,8 +217,10 @@ jobs:
         distribution: temurin
         java-version: '8'
         check-latest: true
+    - name: Cache Dependencies
+      uses: coursier/cache-action@v6
     - name: Generate Readme
-      run: sbt  docs/generateReadme
+      run: sbt -J-XX:+PrintCommandLineFlags -J-XX:MaxMetaspaceSize=4G -J-Xms4G -J-Xmx8G -J-Xss16M -J-XX:+UseG1GC -J-XX:ReservedCodeCacheSize=256m docs/generateReadme
     - name: Commit Changes
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"

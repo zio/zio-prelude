@@ -7,10 +7,18 @@ inThisBuild(
     name                   := "ZIO Prelude",
     ciEnabledBranches      := Seq("series/2.x"),
     javaPlatforms          := Seq("17"),
-    ciSwapSizeGB           := 12,
+    ciSwapSizeGB           := 7,
     ciGroupSimilarTests    := true,
-    ciMatrixMaxParallel    := Some(3),
     ciCheckGithubWorkflow  := Seq.empty,
+    sbtBuildOptions        := List(
+      "-J-XX:+PrintCommandLineFlags",
+      "-J-XX:MaxMetaspaceSize=4G",
+      "-J-Xms4G",
+      "-J-Xmx8G",
+      "-J-Xss16M",
+      "-J-XX:+UseG1GC",
+      "-J-XX:ReservedCodeCacheSize=256m"
+    ),
     supportedScalaVersions := Map(
       (benchmarks / thisProject).value.id               -> (benchmarks / crossScalaVersions).value,
       (core.js / thisProject).value.id                  -> (core.js / crossScalaVersions).value,
