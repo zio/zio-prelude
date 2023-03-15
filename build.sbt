@@ -1,25 +1,99 @@
+import zio.sbt.ZioSbtCiPlugin.{CacheDependencies, Checkout, SetSwapSpace, SetupJava, SetupLibuv, SetupNodeJs}
+import zio.sbt.githubactions.Step.{SingleStep, StepSequence}
+import zio.sbt.githubactions.{Condition, Job, Strategy}
+
 enablePlugins(ZioSbtCiPlugin)
 
 crossScalaVersions := Seq(scala213.value)
 
 inThisBuild(
   List(
-    name                   := "ZIO Prelude",
-    ciEnabledBranches      := Seq("series/2.x"),
-    javaPlatforms          := Seq("17"),
-    ciSwapSizeGB           := 7,
-    ciGroupSimilarTests    := true,
-    ciCheckGithubWorkflow  := Seq.empty,
-    supportedScalaVersions := Map(
-      (coreTests.jvm / thisProject).value.id            -> (coreTests.jvm / crossScalaVersions).value,
-      (coreTests.js / thisProject).value.id             -> (coreTests.js / crossScalaVersions).value,
-      (coreTests.native / thisProject).value.id         -> (coreTests.native / crossScalaVersions).value,
-      (experimentalTests.jvm / thisProject).value.id    -> (experimentalTests.jvm / crossScalaVersions).value,
-      (experimentalTests.js / thisProject).value.id     -> (experimentalTests.js / crossScalaVersions).value,
-      (experimentalTests.native / thisProject).value.id -> (experimentalTests.native / crossScalaVersions).value,
-      (scalaParallelCollections / thisProject).value.id -> (scalaParallelCollections / crossScalaVersions).value
+    name                      := "ZIO Prelude",
+    ciEnabledBranches         := Seq("series/2.x"),
+    ciSwapSizeGB              := 7,
+    ciPullRequestApprovalJobs := Seq("lint", "build", "test", "testJvms", "testPlatforms"),
+    ciTestJobs                := Seq(
+      Job(
+        id = "test",
+        name = "Test",
+        runsOn = "ubuntu-20.04",
+        timeoutMinutes = 60,
+        strategy = Some(
+          Strategy(
+            matrix = Map(
+              "scala"    -> List("2.11.*", "2.12.*", "2.13.*", "3.*"),
+              "java"     -> List("17"),
+              "platform" -> List("JVM")
+            )
+          )
+        ),
+        steps = Seq(
+          Checkout.value,
+          SetupJava("${{ matrix.java }}"),
+          CacheDependencies,
+          SetupLibuv,
+          SetSwapSpace.value
+        ) ++ Seq("2.11", "2.12", "2.13", "4").map { sbv =>
+          SingleStep(
+            name = s"tests $sbv",
+            condition = Some(Condition.Expression(s"startsWith(matrix.scala, '$sbv.')")),
+            run = Some("free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}")
+          )
+        }
+      ),
+      Job(
+        id = "testJvms",
+        name = "Test JVMs",
+        runsOn = "ubuntu-20.04",
+        timeoutMinutes = 60,
+        strategy = Some(
+          Strategy(
+            matrix = Map(
+              "java"     -> List("11", "17"),
+              "platform" -> List("JVM")
+            )
+          )
+        ),
+        steps = Seq(
+          Checkout.value,
+          SetupJava("${{ matrix.java }}"),
+          CacheDependencies,
+          SetupLibuv,
+          SetSwapSpace.value,
+          SingleStep(
+            name = "Test on different JVM versions",
+            run = Some("./sbt test${{ matrix.platform }}")
+          )
+        )
+      ),
+      Job(
+        id = "testPlatforms",
+        name = "Test Platforms",
+        runsOn = "ubuntu-20.04",
+        timeoutMinutes = 60,
+        strategy = Some(
+          Strategy(
+            failFast = false,
+            matrix = Map(
+              "java"     -> List("17"),
+              "platform" -> List("JVM", "Native")
+            )
+          )
+        ),
+        steps = Seq(
+          Checkout.value,
+          SetupJava("${{ matrix.java }}"),
+          CacheDependencies,
+          SetupLibuv,
+          SetSwapSpace.value,
+          SingleStep(
+            name = "Test on different Scala target platforms",
+            run = Some("./sbt test${{ matrix.platform }}")
+          )
+        )
+      )
     ),
-    developers             := List(
+    developers                := List(
       Developer(
         "jdegoes",
         "John De Goes",
@@ -28,6 +102,19 @@ inThisBuild(
       )
     )
   )
+)
+
+addCommandAlias(
+  "testJVM",
+  ";coreTestsJVM/test;experimentalTestsJVM/test;scalaParallelCollections/test"
+)
+addCommandAlias(
+  "testJS",
+  ";coreTestsJS/test;experimentalTestsJS/test"
+)
+addCommandAlias(
+  "testNative",
+  ";coreTestsNative/test;experimentalTestsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
 val projectsCommon = List(
