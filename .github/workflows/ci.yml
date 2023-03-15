@@ -116,8 +116,8 @@ jobs:
     - name: tests 2.13
       if: ${{ startsWith(matrix.scala, '2.13.') }}
       run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
-    - name: tests 4
-      if: ${{ startsWith(matrix.scala, '4.') }}
+    - name: tests 3
+      if: ${{ startsWith(matrix.scala, '3.') }}
       run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
   testJvms:
     name: Test JVMs

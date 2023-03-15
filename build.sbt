@@ -33,7 +33,7 @@ inThisBuild(
           CacheDependencies,
           SetupLibuv,
           SetSwapSpace.value
-        ) ++ Seq("2.11", "2.12", "2.13", "4").map { sbv =>
+        ) ++ Seq("2.11", "2.12", "2.13", "3").map { sbv =>
           SingleStep(
             name = s"tests $sbv",
             condition = Some(Condition.Expression(s"startsWith(matrix.scala, '$sbv.')")),
