@@ -50,6 +50,8 @@ jobs:
         swap-size-gb: 7
     - name: Check all code compiles
       run: free --si -tmws 10 & ./sbt +root${{ matrix.platform }}/Test/compile
+    - name: Check all code compiles
+      run: free --si -tmws 10 & ./sbt +benchmarks/Test/compile
   publishLocal:
     name: Publish Local
     runs-on: ubuntu-20.04

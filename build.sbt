@@ -35,6 +35,10 @@ inThisBuild(
           SingleStep(
             name = s"Check all code compiles",
             run = Some("free --si -tmws 10 & ./sbt +root${{ matrix.platform }}/Test/compile")
+          ),
+          SingleStep(
+            name = s"Check all code compiles",
+            run = Some("free --si -tmws 10 & ./sbt +benchmarks/Test/compile")
           )
         )
       ),
@@ -175,9 +179,7 @@ val projectsCommon = List(
 )
 
 val projectsJvmOnly = List[ProjectReference](
-  scalaParallelCollections,
-  benchmarks,
-  docs
+  scalaParallelCollections
 )
 
 lazy val rootJVM = project
