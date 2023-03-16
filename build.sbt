@@ -175,9 +175,9 @@ val projectsCommon = List(
 )
 
 val projectsJvmOnly = List[ProjectReference](
+  scalaParallelCollections,
   benchmarks,
-  docs,
-  scalaParallelCollections
+  docs
 )
 
 lazy val rootJVM = project
