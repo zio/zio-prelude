@@ -54,15 +54,6 @@ jobs:
     name: Publish Local
     runs-on: ubuntu-20.04
     continue-on-error: false
-    strategy:
-      fail-fast: true
-      matrix:
-        java:
-        - '17'
-        platform:
-        - JVM
-        - JS
-        - Native
     steps:
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
@@ -116,7 +107,7 @@ jobs:
     runs-on: ubuntu-20.04
     continue-on-error: false
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         scala:
         - 2.11.*
@@ -163,7 +154,7 @@ jobs:
     runs-on: ubuntu-20.04
     continue-on-error: false
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         java:
         - '11'

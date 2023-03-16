@@ -43,14 +43,6 @@ inThisBuild(
         name = "Publish Local",
         runsOn = "ubuntu-20.04",
         timeoutMinutes = 60,
-        strategy = Some(
-          Strategy(
-            matrix = Map(
-              "java"     -> List("17"),
-              "platform" -> List("JVM", "JS", "Native")
-            )
-          )
-        ),
         steps = Seq(
           Checkout.value,
           SetupJava("8"),
@@ -72,6 +64,7 @@ inThisBuild(
         timeoutMinutes = 60,
         strategy = Some(
           Strategy(
+            failFast = false,
             matrix = Map(
               "scala"    -> List("2.11.*", "2.12.*", "2.13.*", "3.*"),
               "java"     -> List("17"),
@@ -100,6 +93,7 @@ inThisBuild(
         timeoutMinutes = 60,
         strategy = Some(
           Strategy(
+            failFast = false,
             matrix = Map(
               "java"     -> List("11", "17"),
               "platform" -> List("JVM")
