@@ -16,21 +16,58 @@ env:
     - series/2.x
   pull_request: {}
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    continue-on-error: true
+  compile:
+    name: Compile
+    runs-on: ubuntu-20.04
+    continue-on-error: false
+    strategy:
+      fail-fast: true
+      matrix:
+        java:
+        - '17'
+        platform:
+        - JVM
+        - JS
+        - Native
     steps:
-    - name: Set Swap Space
-      uses: pierotofy/set-swap-space@master
-      with:
-        swap-size-gb: 7
     - name: Git Checkout
       uses: actions/checkout@v3.3.0
       with:
         fetch-depth: '0'
+    - name: Setup Scala
+      uses: actions/setup-java@v3.10.0
+      with:
+        distribution: temurin
+        java-version: ${{ matrix.java }}
+        check-latest: true
+    - name: Cache Dependencies
+      uses: coursier/cache-action@v6
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 7
+    - name: Check all code compiles
+      run: free --si -tmws 10 & ./sbt +root${{ matrix.platform }}/Test/compile
+  publishLocal:
+    name: Publish Local
+    runs-on: ubuntu-20.04
+    continue-on-error: false
+    strategy:
+      fail-fast: true
+      matrix:
+        java:
+        - '17'
+        platform:
+        - JVM
+        - JS
+        - Native
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v3.3.0
+      with:
+        fetch-depth: '0'
     - name: Setup Scala
       uses: actions/setup-java@v3.10.0
       with:
@@ -39,12 +76,14 @@ jobs:
         check-latest: true
     - name: Cache Dependencies
       uses: coursier/cache-action@v6
-    - name: Check all code compiles
-      run: sbt  +Test/compile
-    - name: Check artifacts build process
-      run: sbt  +publishLocal
-    - name: Check website build process
-      run: sbt docs/clean; sbt  docs/buildWebsite
+    - name: Install libuv
+      run: sudo apt-get update && sudo apt-get install -y libuv1-dev
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 7
+    - name: Check that building packages works
+      run: ./sbt +publishLocal
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -191,7 +230,8 @@ jobs:
     continue-on-error: false
     needs:
     - lint
-    - build
+    - compile
+    - publishLocal
     - test
     - testJvms
     - testPlatforms
@@ -203,9 +243,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: false
     needs:
-    - build
-    - lint
-    - test
+    - ci
     if: ${{ github.event_name != 'pull_request' }}
     steps:
     - name: Set Swap Space

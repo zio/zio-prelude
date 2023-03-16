@@ -11,7 +11,59 @@ inThisBuild(
     name                      := "ZIO Prelude",
     ciEnabledBranches         := Seq("series/2.x"),
     ciSwapSizeGB              := 7,
-    ciPullRequestApprovalJobs := Seq("lint", "build", "test", "testJvms", "testPlatforms"),
+    ciPullRequestApprovalJobs := Seq("lint", "compile", "publishLocal", "test", "testJvms", "testPlatforms"),
+    ciBuildJobs               := Seq(
+      Job(
+        id = "compile",
+        name = "Compile",
+        runsOn = "ubuntu-20.04",
+        timeoutMinutes = 60,
+        strategy = Some(
+          Strategy(
+            matrix = Map(
+              "java"     -> List("17"),
+              "platform" -> List("JVM", "JS", "Native")
+            )
+          )
+        ),
+        steps = Seq(
+          Checkout.value,
+          SetupJava("${{ matrix.java }}"),
+          CacheDependencies,
+          SetupLibuv,
+          SetSwapSpace.value,
+          SingleStep(
+            name = s"Check all code compiles",
+            run = Some("free --si -tmws 10 & ./sbt +root${{ matrix.platform }}/Test/compile")
+          )
+        )
+      ),
+      Job(
+        id = "publishLocal",
+        name = "Publish Local",
+        runsOn = "ubuntu-20.04",
+        timeoutMinutes = 60,
+        strategy = Some(
+          Strategy(
+            matrix = Map(
+              "java"     -> List("17"),
+              "platform" -> List("JVM", "JS", "Native")
+            )
+          )
+        ),
+        steps = Seq(
+          Checkout.value,
+          SetupJava("8"),
+          CacheDependencies,
+          SetupLibuv,
+          SetSwapSpace.value,
+          SingleStep(
+            name = "Check that building packages works",
+            run = Some("./sbt +publishLocal")
+          )
+        )
+      )
+    ),
     ciTestJobs                := Seq(
       Job(
         id = "test",
