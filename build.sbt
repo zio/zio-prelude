@@ -1,8 +1,8 @@
-import zio.sbt.ZioSbtCiPlugin.{CacheDependencies, Checkout, SetSwapSpace, SetupJava, SetupLibuv, SetupNodeJs}
-import zio.sbt.githubactions.Step.{SingleStep, StepSequence}
+import zio.sbt.ZioSbtCiPlugin._
+import zio.sbt.githubactions.Step.SingleStep
 import zio.sbt.githubactions.{Condition, Job, Strategy}
 
-enablePlugins(ZioSbtCiPlugin)
+enablePlugins(ZioSbtCiPlugin, ZioSbtEcosystemPlugin)
 
 crossScalaVersions := Seq(scala213.value)
 
@@ -12,6 +12,8 @@ inThisBuild(
     ciEnabledBranches         := Seq("series/2.x"),
     ciSwapSizeGB              := 7,
     ciPullRequestApprovalJobs := Seq("lint", "compile", "publishLocal", "test", "testJvms", "testPlatforms"),
+    ciJvmOptions := Seq("-Xmx6G","-Xss4M", "-XX:+UseG1GC"),
+    ciNodeOptions := Seq("--max_old_space_size=6144"),
     ciBuildJobs               := Seq(
       Job(
         id = "compile",
