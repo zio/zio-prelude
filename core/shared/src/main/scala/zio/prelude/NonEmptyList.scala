@@ -44,6 +44,12 @@ sealed trait NonEmptyList[+A] { self =>
     foldRight(that)(cons)
 
   /**
+   * Concatenates this `NonEmptyList` with the specified `Iterable`.
+   */
+  final def ++[A1 >: A](that: Iterable[A1]): NonEmptyList[A1] =
+    NonEmptyList.fromIterableOption(that).fold[NonEmptyList[A1]](self)(self ++ _)
+
+  /**
    * Prepends the specified value to this `NonEmptyList`.
    */
   final def ::[A1 >: A](a: A1): NonEmptyList[A1] =
