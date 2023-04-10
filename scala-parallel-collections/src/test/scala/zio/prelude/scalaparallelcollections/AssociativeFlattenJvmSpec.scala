@@ -10,7 +10,7 @@ import zio.test.laws._
 import scala.collection.parallel.{immutable => par}
 
 @silent("Unused import")
-object AssociativeFlattenJvmSpec extends ZIOSpecDefault {
+object AssociativeFlattenJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters

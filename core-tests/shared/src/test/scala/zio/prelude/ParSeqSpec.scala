@@ -5,7 +5,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object ParSeqSpec extends ZIOSpecDefault {
+object ParSeqSpec extends ZIOBaseSpec {
 
   val parSeq: Gen[Sized, ParSeq[Unit, Int]] =
     Gens.parSeq(Gen.unit, Gen.int)

@@ -22,7 +22,20 @@ addCommandAlias(
   "; scalafmtSbtCheck; scalafmtCheckAll; Test/compile; compile:scalafix --check; test:scalafix --check"
 )
 
-val zioVersion = "2.0.6"
+addCommandAlias(
+  "testJVM",
+  ";coreTestsJVM/test;experimentalTestsJVM/test;scalaParallelCollections/test"
+)
+addCommandAlias(
+  "testJS",
+  ";coreTestsJS/test;experimentalTestsJS/test"
+)
+addCommandAlias(
+  "testNative",
+  ";coreTestsNative/test;experimentalTestsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
+)
+
+val zioVersion = "2.0.10"
 
 val projectsCommon = List(
   core,
@@ -224,7 +237,8 @@ lazy val benchmarks = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "2.9.0"
+      "org.typelevel" %% "cats-core"   % "2.9.0",
+      "org.typelevel" %% "cats-effect" % "3.4.7"
     )
   )
   .dependsOn(core.jvm)

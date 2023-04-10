@@ -2,7 +2,7 @@ package zio.prelude
 
 import zio.test._
 
-object AssociativeSpec extends ZIOSpecDefault {
+object AssociativeSpec extends ZIOBaseSpec {
 
   def spec: Spec[Environment, Any] =
     suite("AssociativeSpec")(

@@ -11,7 +11,7 @@ import zio.test._
 import zio.test.laws._
 import zio.{Chunk, Trace}
 
-object ZSetSpec extends ZIOSpecDefault {
+object ZSetSpec extends ZIOBaseSpec {
 
   def genFZSet[R <: Sized, B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] {

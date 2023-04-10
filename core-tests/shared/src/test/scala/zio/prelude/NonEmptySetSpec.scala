@@ -4,7 +4,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object NonEmptySetSpec extends ZIOSpecDefault {
+object NonEmptySetSpec extends ZIOBaseSpec {
 
   private lazy val genSet: Gen[Sized, Set[Int]] =
     Gen.setOf1(genInt)

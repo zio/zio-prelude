@@ -6,7 +6,7 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object OrdSpec extends ZIOSpecDefault {
+object OrdSpec extends ZIOBaseSpec {
 
   def sign(n: Int): Int =
     if (n > 0) 1 else if (n < 0) -1 else 0

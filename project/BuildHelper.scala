@@ -11,7 +11,7 @@ object BuildHelper {
   val Scala211: String = "2.11.12"
   val Scala212: String = "2.12.17"
   val Scala213: String = "2.13.10"
-  val Scala3: String   = "3.2.1"
+  val Scala3: String   = "3.2.2"
 
   val SilencerVersion = "1.7.12"
 
@@ -68,14 +68,7 @@ object BuildHelper {
         old
       }
     },
-    Test / parallelExecution := {
-      val old = (Test / parallelExecution).value
-      if (scalaVersion.value == Scala3) {
-        false
-      } else {
-        old
-      }
-    }
+    Test / parallelExecution := false
   )
 
   // Keep this consistent with the version in .core-tests/shared/src/test/scala/REPLSpec.scala
@@ -231,7 +224,7 @@ object BuildHelper {
       "com.github.liancheng" %% "organize-imports" % "0.5.0",
       "com.github.vovapolu"  %% "scaluzzi"         % "0.1.20"
     ),
-    Test / parallelExecution               := true,
+    Test / parallelExecution               := false,
     incOptions ~= (_.withLogRecompileOnMacro(false)),
     autoAPIMappings                        := true,
     unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")

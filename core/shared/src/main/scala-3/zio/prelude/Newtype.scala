@@ -123,10 +123,7 @@ abstract class NewtypeCustom[A] {
       )
     }.as(value.asInstanceOf[F[Type]])
 
-  implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] =
-    new ClassTag[Type] {
-      val runtimeClass = underlying.runtimeClass
-    }
+  implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = underlying.asInstanceOf[ClassTag[Type]]
 }
 
 abstract class SubtypeCustom[A] extends NewtypeCustom[A] {

@@ -5,7 +5,7 @@ import zio.prelude.newtypes.{OrF, Sum}
 import zio.test._
 import zio.test.laws._
 
-object InverseSpec extends ZIOSpecDefault {
+object InverseSpec extends ZIOBaseSpec {
 
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()

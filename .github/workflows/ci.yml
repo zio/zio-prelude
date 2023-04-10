@@ -3,6 +3,7 @@ name: CI
 env:
   JDK_JAVA_OPTIONS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M # JDK_JAVA_OPTIONS is _the_ env. variable to use for modern Java
   JVM_OPTS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M # for Java 8 only (sadly, it is not modern enough for JDK_JAVA_OPTIONS)
+  NODE_OPTIONS: --max_old_space_size=6144
 
 on:
   pull_request:
@@ -22,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
           java-version: 17
@@ -50,7 +51,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v3.3.0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
           java-version: 17
@@ -73,7 +74,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v3.3.0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
           java-version: 8 # ensure it works on 8 because we publish for 8
@@ -104,7 +105,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -119,16 +120,16 @@ jobs:
           swap-size-gb: 7
       - name: tests 2.11
         if: ${{ startsWith(matrix.scala, '2.11.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root211/test
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
       - name: tests 2.12
         if: ${{ startsWith(matrix.scala, '2.12.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root212/test
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
       - name: tests 2.13
         if: ${{ startsWith(matrix.scala, '2.13.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root213/test
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
       - name: tests 3
         if: ${{ startsWith(matrix.scala, '3.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root3/test
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
 
   testJvms:
     runs-on: ubuntu-20.04
@@ -142,7 +143,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v3.3.0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -156,7 +157,7 @@ jobs:
         with:
           swap-size-gb: 7
       - name: Test on different JVM versions
-        run: ./sbt root${{ matrix.platform }}/test
+        run: ./sbt test${{ matrix.platform }}
 
   testPlatforms:
     runs-on: ubuntu-20.04
@@ -170,7 +171,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v3.3.0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -184,7 +185,7 @@ jobs:
         with:
           swap-size-gb: 7
       - name: Test on different Scala target platforms
-        run: ./sbt root${{ matrix.platform }}/test
+        run: ./sbt test${{ matrix.platform }}
 
   ci:
     runs-on: ubuntu-20.04
@@ -204,7 +205,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
           java-version: 8 # publish for 8

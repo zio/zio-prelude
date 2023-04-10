@@ -5,7 +5,7 @@ import zio.prelude.laws.AssociativeBothLaws
 import zio.test._
 import zio.test.laws._
 
-object AssociativeBothSpec extends ZIOSpecDefault {
+object AssociativeBothSpec extends ZIOBaseSpec {
   import Fixtures._
 
   implicit val chunkOptionAssociativeBoth: AssociativeBoth[ChunkOption] =

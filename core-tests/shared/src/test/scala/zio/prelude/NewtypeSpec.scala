@@ -2,14 +2,15 @@ package zio.prelude
 
 import zio.NonEmptyChunk
 import zio.prelude.NewtypeSpecTypes._
-import zio.prelude.laws._
+import zio.prelude.laws.{isFailureV, isSuccessV}
 import zio.prelude.newtypes.{And, Or, Sum}
-import zio.test.Assertion.{equalTo => _, _}
+import zio.test.Assertion._
+import zio.test.TestAspect._
 import zio.test.{Assertion => TestAssertion, _}
 
 import scala.reflect.ClassTag
 
-object NewtypeSpec extends ZIOSpecDefault {
+object NewtypeSpec extends ZIOBaseSpec {
 
   def spec =
     suite("NewtypeSpec")(
@@ -62,9 +63,12 @@ object NewtypeSpec extends ZIOSpecDefault {
             isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))
           )
         },
-        test("can summon classtag for newtype") {
+        test("implicitly classtag summoning for newtype")(
           assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
-        },
+        ),
+        test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[LuckyNumber]].runtimeClass eq implicitly[ClassTag[Double]].runtimeClass)(isTrue)
+        } @@ exceptScala211,
         test("allows creating subtypes of newtypes") {
           val compile = typeCheck {
             """import java.util.UUID
@@ -82,8 +86,17 @@ object NewtypeSpec extends ZIOSpecDefault {
           data(1) = Natural(1)
           assertTrue(data.toList === List(Natural(0): Natural, Natural(1): Natural))
         },
-        test("classtag reports same runtimeclass as underlying primitive") {
-          assertTrue(implicitly[ClassTag[Natural]].runtimeClass === implicitly[ClassTag[Int]].runtimeClass)
+        test("pattern matching") {
+          val number = LuckyNumber(10.0)
+          assertTrue(
+            (number match {
+              case LuckyNumber(10.0) => true
+              case _                 => false
+            }) && (number match {
+              case LuckyNumber(20.0) => false
+              case _                 => true
+            })
+          )
         }
       ),
       suite("Subtype")(
@@ -91,8 +104,23 @@ object NewtypeSpec extends ZIOSpecDefault {
           val two = 2
           assertTrue(two + Natural.two == 2 + 2)
         },
-        test("can summon classtag for subtype") {
+        test("implicitly classtag summoning for subtype")(
           assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
+        ),
+        test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[Natural]].runtimeClass eq implicitly[ClassTag[Int]].runtimeClass)(isTrue)
+        } @@ exceptScala211,
+        test("pattern matching") {
+          val number = Natural(2)
+          assertTrue(
+            (number match {
+              case Natural(2) => true
+              case _          => false
+            }) && (number match {
+              case Natural(3) => false
+              case _          => true
+            })
+          )
         }
       ),
       suite("examples from documentation")(
@@ -103,10 +131,10 @@ object NewtypeSpec extends ZIOSpecDefault {
           assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
         },
         test("exists") {
-          assert(exists(List(true, false))(identity))(isTrue)
+          assert(exists(List(true, false))(scala.Predef.identity))(isTrue)
         },
         test("forall") {
-          assert(forall(List(true, false))(identity))(isFalse)
+          assert(forall(List(true, false))(scala.Predef.identity))(isFalse)
         },
         test("sumInt") {
           val actual   = sum(List(1, 2, 3))

@@ -5,7 +5,7 @@ import zio.prelude.newtypes.{And, Max, Min, Or, OrF, Prod, Sum}
 import zio.test._
 import zio.test.laws._
 
-object CommutativeSpec extends ZIOSpecDefault {
+object CommutativeSpec extends ZIOBaseSpec {
 
   val anySumInt: Gen[Any, Sum[Int]] = Gen.int.map(Sum(_))
 

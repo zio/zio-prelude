@@ -4,7 +4,7 @@ import zio.prelude.laws.CommutativeBothLaws
 import zio.test._
 import zio.test.laws._
 
-object CommutativeBothSpec extends ZIOSpecDefault {
+object CommutativeBothSpec extends ZIOBaseSpec {
 
   def spec: Spec[Environment, Any] =
     suite("CommutativeBothSpec")(

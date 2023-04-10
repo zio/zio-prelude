@@ -6,7 +6,7 @@ import zio.test._
 
 import scala.concurrent.{Future, blocking}
 
-object FutureCommutativeEitherSpec extends ZIOSpecDefault {
+object FutureCommutativeEitherSpec extends ZIOBaseSpec {
 
   def spec: Spec[Any, Throwable] =
     suite("FutureCommutativeEitherSpec")(
