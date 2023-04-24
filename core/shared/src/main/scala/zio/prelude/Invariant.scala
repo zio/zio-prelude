@@ -49,6 +49,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   def apply[F[_]](implicit invariant: Invariant[F]): Invariant[F] =
     invariant
 
+  /**
+   * The `Invariant` instance for `Associative`
+   */
   implicit val AssociativeInvariant: Invariant[Associative] =
     new Invariant[Associative] {
       def invmap[A, B](f: A <=> B): Associative[A] <=> Associative[B] =
@@ -79,6 +82,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         CovariantIdentityBoth[G].forEach_(chunk)(f)
     }
 
+  /**
+   * The `Invariant` instance for `Commutative`.
+   */
   implicit val CommutativeInvariant: Invariant[Commutative] =
     new Invariant[Commutative] {
       def invmap[A, B](f: A <=> B): Commutative[A] <=> Commutative[B] =
@@ -632,6 +638,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       }
     }
 
+  /**
+   * The `Invariant` instance for `Identity`
+   */
   implicit val IdentityInvariant: Invariant[Identity] =
     new Invariant[Identity] {
       def invmap[A, B](f: A <=> B): Identity[A] <=> Identity[B] =
@@ -641,6 +650,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         )
     }
 
+  /**
+   * The `Invariant` instance for `Inverse`
+   */
   implicit val InverseInvariant: Invariant[Inverse] =
     new Invariant[Inverse] {
       def invmap[A, B](f: A <=> B): Inverse[A] <=> Inverse[B] =
