@@ -16,7 +16,7 @@ object Unfolder {
         f(a)
     }
 
-  implicit def Unfoldernvariant[Case[+_]: Covariant]: Invariant[({ type lambda[x] = Unfolder[Case, x] })#lambda] =
+  implicit def UnfolderInvariant[Case[+_]: Covariant]: Invariant[({ type lambda[x] = Unfolder[Case, x] })#lambda] =
     new Invariant[({ type lambda[x] = Unfolder[Case, x] })#lambda] {
       def invmap[A, B](f: A <=> B): Unfolder[Case, A] <=> Unfolder[Case, B] =
         Equivalence(

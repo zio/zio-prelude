@@ -557,7 +557,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Inverse` instance for the sum of `Narutal` values.
+   * The `Commutative` and `Inverse` instance for the sum of `Natural` values.
    */
   implicit val NaturalSumCommutativeInverse: Commutative[Sum[Natural]] with Inverse[Sum[Natural]] =
     new Commutative[Sum[Natural]] with Inverse[Sum[Natural]] {
