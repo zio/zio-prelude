@@ -138,7 +138,7 @@ sealed trait These[+A, +B] { self =>
     }
 
   /**
-   * Folds each of the possibile cases into a summary value.
+   * Folds each of the possible cases into a summary value.
    */
   final def fold[C](left: A => C, right: B => C)(both: (A, B) => C): C =
     self match {
@@ -148,7 +148,7 @@ sealed trait These[+A, +B] { self =>
     }
 
   /**
-   * Transforms the successful result of this compuation with the specified
+   * Transforms the successful result of this computation with the specified
    * effectual function, leaving any error value unchanged.
    */
   final def forEach[F[+_]: IdentityBoth: Covariant, C](f: B => F[C]): F[These[A, C]] =
@@ -475,7 +475,7 @@ object These {
     }
 
   /**
-   * Constucts a `Both` with an `A` value and a `B` value.
+   * Constructs a `Both` with an `A` value and a `B` value.
    */
   def both[A, B](a: A, b: B): These[A, B] =
     Both(a, b)

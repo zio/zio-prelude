@@ -258,7 +258,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Folds over the failed or successful results of this computation to yield
    * a computation that does not fail, but succeeds with the value of the left
-   * or righr function passed to `fold`.
+   * or right function passed to `fold`.
    */
   final def fold[S3 >: S2 <: S1, B](failure: E => B, success: A => B)(implicit
     ev: CanFail[E]

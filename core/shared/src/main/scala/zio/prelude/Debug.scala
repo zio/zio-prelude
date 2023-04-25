@@ -125,7 +125,7 @@ object Debug extends DebugVersionSpecific {
 
   /**
    * A `Repr` is a structured representation of a value of that can be rendered
-   * into various human readbale formats.
+   * into various human readable formats.
    */
   sealed trait Repr { self =>
 
@@ -251,7 +251,7 @@ object Debug extends DebugVersionSpecific {
     debug
 
   /**
-   * Constructurs a `Debug` instance for a pair of a key and a value given
+   * Constructs a `Debug` instance for a pair of a key and a value given
    * `Debug` instances for the key and value types.
    */
   def keyValueDebug[A: Debug, B: Debug]: Debug[(A, B)] =
@@ -410,7 +410,7 @@ object Debug extends DebugVersionSpecific {
     map => Repr.VConstructor(List("scala"), "Map", map.map(_.debug(keyValueDebug)).toList)
 
   /**
-   * Derivves a `Debug[NonEmptyChunk[A]]` given a `Debug[A]`.
+   * Derives a `Debug[NonEmptyChunk[A]]` given a `Debug[A]`.
    */
   implicit def NonEmptyChunkDebug[A: Debug]: Debug[NonEmptyChunk[A]] =
     nonEmptyChunk => Repr.VConstructor(List("zio"), "NonEmptyChunk", nonEmptyChunk.map(_.debug).toList)
@@ -423,7 +423,7 @@ object Debug extends DebugVersionSpecific {
     n => n
 
   /**
-   * Dervies a `Debug[Option[A]]` given a `Debug[A]`.
+   * Derives a `Debug[Option[A]]` given a `Debug[A]`.
    */
   implicit def OptionDebug[A: Debug]: Debug[Option[A]] = {
     case None    => Repr.Object(List("scala"), "None")
