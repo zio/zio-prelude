@@ -16,9 +16,9 @@
 
 package zio.prelude
 
-import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{Max, Min, Prod, Sum}
+import zio.{NonEmptyChunk, ZIO}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -244,6 +244,22 @@ sealed trait NonEmptyList[+A] { self =>
    */
   final def map[B](f: A => B): NonEmptyList[B] =
     reduceMapRight(a => single(f(a)))((a, bs) => cons(f(a), bs))
+
+  /**
+   * Effectfully maps the elements of this `NonEmptyList`.
+   */
+  final def mapZIO[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
+    ZIO
+      .foreach[R, E, A, B, Iterable](self)(f)
+      .map(iterable => NonEmptyList.fromIterable(iterable.head, iterable.tail))
+
+  /**
+   * Effectfully maps the elements of this `NonEmptyList` in parallel.
+   */
+  final def mapZIOPar[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
+    ZIO
+      .foreachPar[R, E, A, B, Iterable](self)(f)
+      .map(iterable => NonEmptyList.fromIterable(iterable.head, iterable.tail))
 
   /**
    * Returns the maximum element in this `NonEmptyList`.
