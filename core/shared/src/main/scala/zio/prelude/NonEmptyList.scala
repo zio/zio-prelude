@@ -16,9 +16,9 @@
 
 package zio.prelude
 
-import zio.{NonEmptyChunk, ZIO}
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{Max, Min, Prod, Sum}
+import zio.{NonEmptyChunk, ZIO}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -240,7 +240,7 @@ sealed trait NonEmptyList[+A] { self =>
     reduceMapRight(a => single(f(a)))((a, bs) => cons(f(a), bs))
 
   /**
-   * Effectfully maps the elements of this `NonEmptyChunk`.
+   * Effectfully maps the elements of this `NonEmptyList`.
    */
   final def mapZIO[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
     ZIO
@@ -248,7 +248,7 @@ sealed trait NonEmptyList[+A] { self =>
       .map(iterable => NonEmptyList.fromIterable(iterable.head, iterable.tail))
 
   /**
-   * Effectfully maps the elements of this `NonEmptyChunk` in parallel.
+   * Effectfully maps the elements of this `NonEmptyList` in parallel.
    */
   final def mapZIOPar[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
     ZIO
