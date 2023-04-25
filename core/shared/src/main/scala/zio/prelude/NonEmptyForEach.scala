@@ -194,20 +194,20 @@ trait NonEmptyForEachSyntax {
     /**
      * Reduces the collection to a summary value using the binary function `f`.
      */
-    def reduceAll(f: (A, A) => A)(implicit F: NonEmptyForEach[F]): A                                          =
+    def reduceAll(f: (A, A) => A)(implicit F: NonEmptyForEach[F]): A =
       F.reduceAll(self)(f)
 
     /**
      * Reduces the non-empty collection of associative elements.
      */
-    def reduce1(implicit F: NonEmptyForEach[F], A: Associative[A]): A                                         =
+    def reduce1(implicit F: NonEmptyForEach[F], A: Associative[A]): A =
       F.reduce1(self)
 
     /**
      * Reduces the collection to a summary value using the idempotent operation,
      * returning `None` if the collection is empty.
      */
-    def reduceIdempotent1(implicit F: NonEmptyForEach[F], ia: Idempotent[A], ea: Equal[A]): A                 =
+    def reduceIdempotent1(implicit F: NonEmptyForEach[F], ia: Idempotent[A], ea: Equal[A]): A =
       F.reduceIdempotent1(self)
 
     /**
@@ -215,7 +215,7 @@ trait NonEmptyForEachSyntax {
      * operation is defined using the function `f` and then reduces those values
      * to a single summary using the combine operation.
      */
-    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyForEach[F]): B                               =
+    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyForEach[F]): B =
       F.reduceMap(self)(f)
 
     /**
@@ -223,7 +223,7 @@ trait NonEmptyForEachSyntax {
      * function `map` to transform the first value to the type `B` and then the
      * function `reduceAll` to combine the `B` value with each other `A` value.
      */
-    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyForEach[F]): B                 =
+    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyForEach[F]): B =
       F.reduceMapLeft(self)(map)(reduce)
 
     /**
@@ -231,19 +231,19 @@ trait NonEmptyForEachSyntax {
      * function `map` to transform the first value to the type `B` and then the
      * function `reduceAll` to combine the `B` value with each other `A` value.
      */
-    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyForEach[F]): B                =
+    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyForEach[F]): B =
       F.reduceMapRight(self)(map)(reduce)
 
     /**
      * Converts the collection to a `NonEmptyChunk`.
      */
-    def toNonEmptyChunk(implicit F: NonEmptyForEach[F]): NonEmptyChunk[A]                                     =
+    def toNonEmptyChunk(implicit F: NonEmptyForEach[F]): NonEmptyChunk[A] =
       F.toNonEmptyChunk(self)
 
     /**
      * Converts the collection to a `NonEmptyList`.
      */
-    def toNonEmptyList(implicit F: NonEmptyForEach[F]): NonEmptyList[A]                                       =
+    def toNonEmptyList(implicit F: NonEmptyForEach[F]): NonEmptyList[A] =
       F.toNonEmptyList(self)
   }
 
