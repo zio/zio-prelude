@@ -47,6 +47,11 @@ trait NonEmptyForEach[F[+_]] extends ForEach[F] {
   def flip1[G[+_]: AssociativeBoth: Covariant, A](fa: F[G[A]]): G[F[A]] =
     forEach1(fa)(identity)
 
+  /**
+   * Traverse each element in the collection using the specified effectual
+   * function `f`, returning a new collection with the results in the context
+   * of the effect.
+   */
   override def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
     forEach1(fa)(f)
 
@@ -136,7 +141,7 @@ trait NonEmptyForEach[F[+_]] extends ForEach[F] {
   }
 
   /**
-   * Reduces the elements of this colection from right to left using the
+   * Reduces the elements of this collection from right to left using the
    * function `map` to transform the first value to the type `B` and then the
    * function `reduceAll` to combine the `B` value with each other `A` value.
    */
@@ -170,25 +175,75 @@ trait NonEmptyForEachSyntax {
    * Provides infix syntax for traversing collections.
    */
   implicit class NonEmptyForEachOps[F[+_], A](private val self: F[A]) {
+
+    /**
+     * Traverse each element in the collection using the specified effectual
+     * function `f`, returning a new collection with the results in the context
+     * of the effect.
+     */
     def forEach1[G[+_]: AssociativeBoth: Covariant, B](f: A => G[B])(implicit F: NonEmptyForEach[F]): G[F[B]] =
       F.forEach1(self)(f)
+
+    /**
+     * Traverses each element in the collection with the specified effectual
+     * function `f` purely for its effects.
+     */
     def forEach1_[G[+_]: AssociativeBoth: Covariant](f: A => G[Any])(implicit F: NonEmptyForEach[F]): G[Unit] =
       F.forEach1_(self)(f)
-    def reduceAll(f: (A, A) => A)(implicit F: NonEmptyForEach[F]): A                                          =
+
+    /**
+     * Reduces the collection to a summary value using the binary function `f`.
+     */
+    def reduceAll(f: (A, A) => A)(implicit F: NonEmptyForEach[F]): A =
       F.reduceAll(self)(f)
-    def reduce1(implicit F: NonEmptyForEach[F], A: Associative[A]): A                                         =
+
+    /**
+     * Reduces the non-empty collection of associative elements.
+     */
+    def reduce1(implicit F: NonEmptyForEach[F], A: Associative[A]): A =
       F.reduce1(self)
-    def reduceIdempotent1(implicit F: NonEmptyForEach[F], ia: Idempotent[A], ea: Equal[A]): A                 =
+
+    /**
+     * Reduces the collection to a summary value using the idempotent operation,
+     * returning `None` if the collection is empty.
+     */
+    def reduceIdempotent1(implicit F: NonEmptyForEach[F], ia: Idempotent[A], ea: Equal[A]): A =
       F.reduceIdempotent1(self)
-    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyForEach[F]): B                               =
+
+    /**
+     * Maps each element of the collection to a type `B` for which a combine
+     * operation is defined using the function `f` and then reduces those values
+     * to a single summary using the combine operation.
+     */
+    def reduceMap[B: Associative](f: A => B)(implicit F: NonEmptyForEach[F]): B =
       F.reduceMap(self)(f)
-    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyForEach[F]): B                 =
+
+    /**
+     * Reduces the elements of this collection from left to right using the
+     * function `map` to transform the first value to the type `B` and then the
+     * function `reduceAll` to combine the `B` value with each other `A` value.
+     */
+    def reduceMapLeft[B](map: A => B)(reduce: (B, A) => B)(implicit F: NonEmptyForEach[F]): B =
       F.reduceMapLeft(self)(map)(reduce)
-    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyForEach[F]): B                =
+
+    /**
+     * Reduces the elements of this collection from right to left using the
+     * function `map` to transform the first value to the type `B` and then the
+     * function `reduceAll` to combine the `B` value with each other `A` value.
+     */
+    def reduceMapRight[B](map: A => B)(reduce: (A, B) => B)(implicit F: NonEmptyForEach[F]): B =
       F.reduceMapRight(self)(map)(reduce)
-    def toNonEmptyChunk(implicit F: NonEmptyForEach[F]): NonEmptyChunk[A]                                     =
+
+    /**
+     * Converts the collection to a `NonEmptyChunk`.
+     */
+    def toNonEmptyChunk(implicit F: NonEmptyForEach[F]): NonEmptyChunk[A] =
       F.toNonEmptyChunk(self)
-    def toNonEmptyList(implicit F: NonEmptyForEach[F]): NonEmptyList[A]                                       =
+
+    /**
+     * Converts the collection to a `NonEmptyList`.
+     */
+    def toNonEmptyList(implicit F: NonEmptyForEach[F]): NonEmptyList[A] =
       F.toNonEmptyList(self)
   }
 
@@ -196,6 +251,11 @@ trait NonEmptyForEachSyntax {
    * Provides infix syntax for flip1.
    */
   implicit class Flip1Ops[F[+_], G[+_], A](private val self: F[G[A]]) {
+
+    /**
+     * Converts a collection with elements that are in the context of effects to
+     * a collection of elements in the context of an effect.
+     */
     def flip1[B](implicit
       nonEmptyForEach: NonEmptyForEach[F],
       associativeBoth: AssociativeBoth[G],
