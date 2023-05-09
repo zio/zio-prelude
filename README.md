@@ -45,7 +45,7 @@ ZIO Prelude is a library focused on providing a core set of functional data type
 In order to use this library, we need to add the following line in our `build.sbt` file:
 
 ```scala
-libraryDependencies += "dev.zio" %% "zio-prelude" % "1.0.0-RC18"
+libraryDependencies += "dev.zio" %% "zio-prelude" % "1.0.0-RC19"
 ```
 
 ## Example
