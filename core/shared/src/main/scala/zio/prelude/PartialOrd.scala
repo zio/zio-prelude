@@ -859,6 +859,41 @@ object PartialOrd {
       },
       Equal.VectorEqual
     )
+
+  /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
+  private[prelude] def compareSoft[K, V](l: Map[K, V], r: Map[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
+    def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+      commonValues.foldLeft[PartialOrdering](expected) { case (acc, (l, r)) => acc.unify(l =??= r) }
+    compareWith(l, r)(compareValues)
+  }
+
+  /** Compares two maps, expecting the values for the common keys to be equal. */
+  private[prelude] def compareStrict[K, V](l: Map[K, V], r: Map[K, V])(implicit V: Equal[V]): PartialOrdering = {
+    def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
+      if (commonValues.forall { case (l, r) => l === r }) {
+        expected
+      } else {
+        PartialOrdering.Incomparable
+      }
+    compareWith(l, r)(compareValues)
+  }
+
+  /** Compares two maps, where you supply `compareValues` that compares the common values */
+  private def compareWith[K, V](l: Map[K, V], r: Map[K, V])(
+    compareValues: (Ordering, Iterable[(V, V)]) => PartialOrdering
+  ): PartialOrdering = {
+    def commonValues(lesserMap: Map[K, V]): Iterable[(V, V)] =
+      lesserMap.keys.map(k => (l(k), r(k)))
+    if (l.keySet == r.keySet) {
+      compareValues(Ordering.Equals, commonValues(l))
+    } else if (l.keySet.subsetOf(r.keySet)) {
+      compareValues(Ordering.LessThan, commonValues(l))
+    } else if (r.keySet.subsetOf(l.keySet)) {
+      compareValues(Ordering.GreaterThan, commonValues(r))
+    } else {
+      PartialOrdering.Incomparable
+    }
+  }
 }
 
 trait PartialOrdSyntax {

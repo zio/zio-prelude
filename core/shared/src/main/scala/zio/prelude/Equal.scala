@@ -330,7 +330,7 @@ object Equal extends EqualVersionSpecific {
   implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] = new PartialOrd[Map[A, B]] {
 
     protected def checkCompare(l: Map[A, B], r: Map[A, B]): PartialOrdering =
-      l.compareStrict(r)
+      PartialOrd.compareStrict(l, r)
 
     override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
       l.size == r.size &&
