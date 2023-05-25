@@ -62,6 +62,9 @@ trait NonEmptyForEach[F[+_]] extends ForEach[F] {
   def forEach1_[G[+_]: AssociativeBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     forEach1(fa)(f).as(())
 
+  override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
+    forEach1_(fa)(f)
+
   /**
    * Returns the largest value in the collection if one exists or `None`
    * otherwise.

@@ -570,6 +570,9 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     new NonEmptyForEach[NonEmptyList] {
       def forEach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
         fa.forEach(f)
+
+      override def forEach1_[F[+_]: AssociativeBoth: Covariant, A](fa: NonEmptyList[A])(f: A => F[Any]): F[Unit] =
+        fa.foldLeft(f(fa.head).unit)((acc, a) => acc.tap(_ => f(a)))
     }
 
   /**

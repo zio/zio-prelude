@@ -709,6 +709,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         nonEmptyChunk
           .reduceMapLeft(f(_).map(ChunkBuilder.make() += _))((bs, a) => bs.zipWith(f(a))(_ += _))
           .map(bs => NonEmptyChunk.nonEmpty(bs.result()))
+
+      override def forEach1_[F[+_]: AssociativeBoth: Covariant, A](fa: NonEmptyChunk[A])(f: A => F[Any]): F[Unit] =
+        fa.reduceMapLeft(f(_).unit)((acc, a) => acc.tap(_ => f(a)))
     }
 
   /**
