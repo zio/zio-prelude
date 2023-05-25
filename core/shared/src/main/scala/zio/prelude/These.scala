@@ -40,7 +40,7 @@ import zio.prelude.These._
  * information regarding all errors while still potentially returning a
  * successful computation.
  */
-sealed trait These[+A, +B] { self =>
+sealed trait These[+A, +B] extends Product with Serializable { self =>
 
   /**
    * A symbolic alias for `zipParRight`.
