@@ -59,6 +59,13 @@ trait NonEmptyForEach[F[+_]] extends ForEach[F] {
    * Traverses each element in the collection with the specified effectual
    * function `f` purely for its effects.
    */
+  override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
+    forEach1_(fa)(f)
+
+  /**
+   * Traverses each element in the collection with the specified effectual
+   * function `f` purely for its effects.
+   */
   def forEach1_[G[+_]: AssociativeBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     forEach1(fa)(f).as(())
 
