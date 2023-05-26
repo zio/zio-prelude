@@ -16,7 +16,6 @@
 
 package zio
 
-import com.github.ghik.silencer.silent
 import zio.prelude.newtypes.Natural
 
 package object prelude
@@ -135,61 +134,5 @@ package object prelude
     type Category[=>:[-_, +_]]   = IdentityCompose[=>:]
     type Profunctor[=>:[-_, +_]] = Divariant[=>:]
     type Bifunctor[=>:[+_, +_]]  = Bicovariant[=>:]
-  }
-
-  implicit class MapSyntax[K, V](private val l: Map[K, V]) extends AnyVal {
-
-    /** Compares two maps, where you supply `compareValues` that compares the common values */
-    def compareWith(
-      compareValues: (Ordering, Iterable[(V, V)]) => PartialOrdering
-    )(r: Map[K, V]): PartialOrdering = {
-      def commonValues(lesserMap: Map[K, V]): Iterable[(V, V)] =
-        lesserMap.keys.map(k => (l(k), r(k)))
-      if (l.keySet == r.keySet) {
-        compareValues(Ordering.Equals, commonValues(l))
-      } else if (l.keySet.subsetOf(r.keySet)) {
-        compareValues(Ordering.LessThan, commonValues(l))
-      } else if (r.keySet.subsetOf(l.keySet)) {
-        compareValues(Ordering.GreaterThan, commonValues(r))
-      } else {
-        PartialOrdering.Incomparable
-      }
-    }
-
-    /** Compares two maps, allowing for the values to be lesser in the lesser map or greater in the greater map */
-    def compareSoft(r: Map[K, V])(implicit V: PartialOrd[V]): PartialOrdering = {
-      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
-        commonValues.foldLeft[PartialOrdering](expected) { case (acc, (l, r)) => acc.unify(l =??= r) }
-      compareWith(compareValues)(r)
-    }
-
-    /** Compares two maps, expecting the values for the common keys to be equal. */
-    def compareStrict(r: Map[K, V])(implicit V: Equal[V]): PartialOrdering = {
-      def compareValues(expected: Ordering, commonValues: Iterable[(V, V)]): PartialOrdering =
-        if (commonValues.forall { case (l, r) => l === r }) {
-          expected
-        } else {
-          PartialOrdering.Incomparable
-        }
-      compareWith(compareValues)(r)
-    }
-  }
-
-  val any: Any = ()
-
-  implicit final class AnySyntax[A](private val a: A) extends AnyVal {
-
-    @silent("side-effecting nullary methods are discouraged")
-    /* Ignores the value, if you explicitly want to do so and avoids "Unused value" compiler warnings. */
-    def ignore: Unit = ()
-
-    /** Applies function `f` to a value `a`, like `f(a)`, but in flipped order and doesn't need parentheses. Can be chained, like `x |> f |> g`. */
-    def |>[B](f: A => B): B = f(a)
-
-    /** Applies the function `f` to the value `a`, ignores the result, and returns the original value `a`. Practical for debugging, like `x.someMethod.tee(println(_)).someOtherMethod...` . Similar to the `tee` UNIX command. */
-    def tap(f: A => Any): A = {
-      val _ = f(a)
-      a
-    }
   }
 }

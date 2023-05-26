@@ -188,7 +188,7 @@ trait CovariantIdentityBoth[F[+_]] extends Covariant[F] with IdentityBoth[F] { s
     in.foldLeft(bf.newBuilder(in).succeed)((bs, a) => bs.zipWith(f(a))(_ += _)).map(_.result())
 
   def forEach_[A, B](in: Iterable[A])(f: A => F[Any]): F[Unit] =
-    forEach(in)(f).unit
+    in.foldLeft(identityBoth.any)((bs, a) => bs *> f(a)).unit
 }
 
 object CovariantIdentityBoth {
