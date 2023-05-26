@@ -394,7 +394,10 @@ trait LowPriorityZSetImplicits {
    */
   implicit def ZSetPartialOrd[A, B: PartialOrd](implicit ev: Identity[Sum[B]]): PartialOrd[ZSet[A, B]] =
     PartialOrd.makeFrom(
-      (l, r) => l.toMap.filterNot(_._2 === ev.identity).compareSoft(r.toMap.filterNot(_._2 === ev.identity)),
+      (
+        l,
+        r
+      ) => PartialOrd.compareSoft(l.toMap.filterNot(_._2 === ev.identity), r.toMap.filterNot(_._2 === ev.identity)),
       ZSet.ZSetEqual
     )
 
