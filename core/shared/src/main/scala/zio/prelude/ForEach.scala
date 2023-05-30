@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{And, First, Max, Min, Or, Prod, Sum}
+import zio.prelude.newtypes._
 import zio.{Chunk, ChunkBuilder, NonEmptyChunk}
 
 /**
@@ -147,6 +147,11 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    */
   def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
     forEach(fa)(f).as(())
+
+  def forEachFlatten[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[F[B]])(implicit
+    F: AssociativeFlatten[F]
+  ): G[F[B]] =
+    forEach(fa)(f).map(_.flatten)
 
   def groupByNonEmpty[V, K](fa: F[V])(f: V => K): Map[K, NonEmptyChunk[V]] =
     foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]]) { (m, v) =>
@@ -443,6 +448,10 @@ trait ForEachSyntax {
       F.forall(self)(f)
     def forEach_[G[+_]: IdentityBoth: Covariant](f: A => G[Any])(implicit F: ForEach[F]): G[Unit]               =
       F.forEach_(self)(f)
+    def forEachFlatten[G[+_]: IdentityBoth: Covariant, B](
+      f: A => G[F[B]]
+    )(implicit F: ForEach[F], AF: AssociativeFlatten[F]): G[F[B]] =
+      F.forEachFlatten(self)(f)
     def isEmpty(implicit F: ForEach[F]): Boolean                                                                =
       F.isEmpty(self)
     def intersperse[A1 >: A](middle: A1)(implicit F: ForEach[F], I: Identity[A1]): A1                           =
