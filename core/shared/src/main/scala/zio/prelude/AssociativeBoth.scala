@@ -1068,7 +1068,7 @@ object AssociativeBoth extends AssociativeBothLowPriority {
   /**
    * The `IdentityBoth` instance for `Chunk`.
    */
-  implicit val ChunkIdentityeBoth: IdentityBoth[Chunk] =
+  implicit val ChunkIdentityBoth: IdentityBoth[Chunk] =
     new IdentityBoth[Chunk] {
       def any: Chunk[Any]                                             = Chunk.unit
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))

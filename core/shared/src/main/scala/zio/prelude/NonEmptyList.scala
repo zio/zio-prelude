@@ -16,9 +16,9 @@
 
 package zio.prelude
 
-import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{Max, Min, Prod, Sum}
+import zio.{NonEmptyChunk, ZIO}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -42,6 +42,12 @@ sealed trait NonEmptyList[+A] { self =>
    */
   final def ++[A1 >: A](that: NonEmptyList[A1]): NonEmptyList[A1] =
     foldRight(that)(cons)
+
+  /**
+   * Concatenates this `NonEmptyList` with the specified `Iterable`.
+   */
+  final def ++[A1 >: A](that: Iterable[A1]): NonEmptyList[A1] =
+    NonEmptyList.fromIterableOption(that).fold[NonEmptyList[A1]](self)(self ++ _)
 
   /**
    * Prepends the specified value to this `NonEmptyList`.
@@ -238,6 +244,22 @@ sealed trait NonEmptyList[+A] { self =>
    */
   final def map[B](f: A => B): NonEmptyList[B] =
     reduceMapRight(a => single(f(a)))((a, bs) => cons(f(a), bs))
+
+  /**
+   * Effectfully maps the elements of this `NonEmptyList`.
+   */
+  final def mapZIO[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
+    ZIO
+      .foreach[R, E, A, B, Iterable](self)(f)
+      .map(iterable => NonEmptyList.fromIterable(iterable.head, iterable.tail))
+
+  /**
+   * Effectfully maps the elements of this `NonEmptyList` in parallel.
+   */
+  final def mapZIOPar[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
+    ZIO
+      .foreachPar[R, E, A, B, Iterable](self)(f)
+      .map(iterable => NonEmptyList.fromIterable(iterable.head, iterable.tail))
 
   /**
    * Returns the maximum element in this `NonEmptyList`.
@@ -548,6 +570,8 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     new NonEmptyForEach[NonEmptyList] {
       def forEach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
         fa.forEach(f)
+      override def forEach1_[F[+_]: AssociativeBoth: Covariant, A](fa: NonEmptyList[A])(f: A => F[Any]): F[Unit]   =
+        reduceMapLeft(fa)(f(_))((fas, a) => fas *> f(a)).unit
     }
 
   /**

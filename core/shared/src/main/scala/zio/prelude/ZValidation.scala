@@ -491,7 +491,7 @@ object ZValidation extends LowPriorityValidationImplicits {
     value.fold[Validation[Unit, A]](fail(()))(succeed)
 
   /**
-   * Construts a `Validation` from an `Option`, failing with the error
+   * Constructs a `Validation` from an `Option`, failing with the error
    * provided.
    */
   def fromOptionWith[E, A](error: => E)(value: Option[A]): Validation[E, A] =

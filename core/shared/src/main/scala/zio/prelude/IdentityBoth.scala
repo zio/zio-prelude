@@ -47,7 +47,7 @@ object IdentityBoth {
   /**
    * The `IdentityBoth` instance for `Const`.
    */
-  implicit def ConstIdentityeBoth[A: Identity]: IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+  implicit def ConstIdentityBoth[A: Identity]: IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
     new IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] {
       val any: Const[A, Any]                                                   = Const(Identity[A].identity)
       def both[B, C](fb: => Const[A, B], fc: => Const[A, C]): Const[A, (B, C)] =

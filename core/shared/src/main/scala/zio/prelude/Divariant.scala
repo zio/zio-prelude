@@ -96,10 +96,10 @@ object Divariant {
   implicit val Function1Divariant: Divariant[Function1] =
     new Divariant[Function1] {
       override def leftContramap[A, B, C](c2a: C => A): (A => B) => C => B = { a2b => c =>
-        c |> c2a |> a2b
+        a2b(c2a(c))
       }
       override def rightMap[A, B, C](b2c: B => C): (A => B) => A => C      = { a2b => a =>
-        a |> a2b |> b2c
+        b2c(a2b(a))
       }
     }
 }
