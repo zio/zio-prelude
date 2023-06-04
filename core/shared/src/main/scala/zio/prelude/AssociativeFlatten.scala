@@ -290,17 +290,6 @@ trait AssociativeFlattenSyntax {
     ): F[A] =
       fa.flatMap(a => f(a).flatMap(b => if (b) a.succeed else identityEither.none))
 
-    /**
-     * Filters an `F[A]` value with a predicate `f`.
-     */
-    def filterNot[B](f: A => Boolean)(implicit
-      flatten: AssociativeFlatten[F],
-      covariant: Covariant[F],
-      identityBoth: IdentityBoth[F],
-      identityEither: IdentityEither[F]
-    ): F[A] =
-      filter(a => !f(a))
-
     def withFilter(f: A => Boolean)(implicit
       flatten: AssociativeFlatten[F],
       covariant: Covariant[F],
