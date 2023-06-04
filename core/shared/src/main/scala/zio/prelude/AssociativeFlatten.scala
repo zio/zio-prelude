@@ -289,6 +289,9 @@ trait AssociativeFlattenSyntax {
     ): F[A] =
       fa.flatMap(a => f(a).flatMap(b => if (b) a.succeed else identityEither.none))
 
+    /**
+     * Provides support for filtering `F[A]` values in for comphrensions.
+     */
     def withFilter(f: A => Boolean)(implicit
       flatten: AssociativeFlatten[F],
       covariant: Covariant[F],
