@@ -263,7 +263,6 @@ trait AssociativeFlattenSyntax {
     def collectM[B](pf: PartialFunction[A, F[B]])(implicit
       flatten: AssociativeFlatten[F],
       covariant: Covariant[F],
-      identityBoth: IdentityBoth[F],
       identityEither: IdentityEither[F]
     ): F[B] =
       fa.flatMap(a => pf.lift(a).getOrElse(identityEither.none))
