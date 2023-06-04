@@ -49,7 +49,9 @@ package object prelude
     with PartialOrdSyntax
     with ZNonEmptySetSyntax
     with ZSetSyntax
-    with ZivariantSyntax {
+    with ZivariantSyntax
+    with CovariantFilterSyntax
+    with ForEachFilterSyntax {
 
   type <=>[A, B] = Equivalence[A, B]
 

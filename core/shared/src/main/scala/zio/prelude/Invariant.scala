@@ -1646,7 +1646,6 @@ trait LowPriorityInvariantImplicits {
       def contramap[A, C](f: C => A): ZSink[R, E, A, L, Z] => ZSink[R, E, C, L, Z] =
         sink => sink.contramap(f)
     }
-
 }
 
 trait InvariantSyntax {

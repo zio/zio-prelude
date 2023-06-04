@@ -1240,6 +1240,10 @@ object AssociativeBoth extends AssociativeBothLowPriority {
         ZIO.foreach(in)(f)
       override def forEach_[A, B](in: Iterable[A])(f: A => ZIO[R, E, Any]): ZIO[R, E, Unit] =
         ZIO.foreachDiscard(in)(f)
+      override def forEachFilter[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+        f: A => ZIO[R, E, Option[B]]
+      )(implicit bf: zio.BuildFrom[Collection[A], B, Collection[B]]): ZIO[R, E, Collection[B]] =
+        ZIO.foldLeft(in)(bf.newBuilder(in))((builder, a) => f(a).map(builder ++= _)).map(_.result())
     }
 
   /**

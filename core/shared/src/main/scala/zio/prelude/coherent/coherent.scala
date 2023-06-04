@@ -189,6 +189,11 @@ trait CovariantIdentityBoth[F[+_]] extends Covariant[F] with IdentityBoth[F] { s
 
   def forEach_[A, B](in: Iterable[A])(f: A => F[Any]): F[Unit] =
     in.foldLeft(identityBoth.any)((bs, a) => bs *> f(a)).unit
+
+  def forEachFilter[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => F[Option[B]])(implicit
+    bf: BuildFrom[Collection[A], B, Collection[B]]
+  ): F[Collection[B]] =
+    in.foldLeft(bf.newBuilder(in).succeed)((bs, a) => bs.zipWith(f(a))(_ ++= _)).map(_.result())
 }
 
 object CovariantIdentityBoth {
@@ -278,6 +283,35 @@ object DeriveEqualForEach {
         deriveEqual0.derive
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
         forEach0.forEach(fa)(f)
+    }
+}
+
+trait CovariantFilterDeriveEqual[F[+_]] extends DeriveEqual[F] with CovariantFilter[F]
+
+object CovariantFilterDeriveEqual {
+  implicit def derive[F[+_]](implicit
+    deriveEqual0: DeriveEqual[F],
+    covariantFilter0: CovariantFilter[F]
+  ): CovariantFilterDeriveEqual[F] =
+    new CovariantFilterDeriveEqual[F] {
+      def derive[A: Equal]: Equal[F[A]]                      = deriveEqual0.derive
+      def covariant: Covariant[F]                            = covariantFilter0.covariant
+      def mapFilter[A, B](fa: F[A])(f: A => Option[B]): F[B] = covariantFilter0.mapFilter(fa)(f)
+    }
+}
+
+trait DeriveEqualForEachFilter[F[+_]] extends CovariantFilterDeriveEqual[F] with ForEachFilter[F]
+
+object DeriveEqualForEachFilter {
+  implicit def derive[F[+_]](implicit
+    deriveEqual0: DeriveEqual[F],
+    forEachFilter0: ForEachFilter[F]
+  ): DeriveEqualForEachFilter[F] =
+    new DeriveEqualForEachFilter[F] {
+      def derive[A: Equal]: Equal[F[A]]                                                                = deriveEqual0.derive
+      def forEach: ForEach[F]                                                                          = forEachFilter0.forEach
+      def forEachFilter[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[Option[B]]): G[F[B]] =
+        forEachFilter0.forEachFilter(fa)(f)
     }
 }
 

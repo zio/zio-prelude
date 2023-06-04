@@ -1115,6 +1115,30 @@ object ZPure {
     }
 
   /**
+   * Maps each element of a collection to a computation and combines them all
+   * into a single computation that passes the updated state from each
+   * computation to the next and collects the existing results.
+   */
+  def foreachFilter[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+    f: A => ZPure[W, S, S, R, E, Option[B]]
+  )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+    ZPure.suspend {
+      val iterator = in.iterator
+      val builder  = bf.newBuilder(in)
+
+      lazy val recurse: Option[B] => ZPure[W, S, S, R, E, Collection[B]] = { b =>
+        b.fold(builder)(builder += _)
+        loop()
+      }
+
+      def loop(): ZPure[W, S, S, R, E, Collection[B]] =
+        if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+        else ZPure.succeed(builder.result())
+
+      loop()
+    }
+
+  /**
    * Constructs a computation that returns the initial state unchanged.
    */
   def get[S]: ZPure[Nothing, S, S, Any, Nothing, S] =
@@ -1269,6 +1293,10 @@ object ZPure {
         f: A => ZPure[W, S, S, R, E, Any]
       ): ZPure[W, S, S, R, E, Unit] =
         ZPure.foreachDiscard(in)(f)
+      override def forEachFilter[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+        f: A => ZPure[W, S, S, R, E, Option[B]]
+      )(implicit bf: zio.BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+        ZPure.foreachFilter(in)(f)
     }
 
   /**
