@@ -35,7 +35,7 @@ object CovariantFilter {
       )(f: B => G[Option[C]]): G[Const[A, C]] =
         Const.wrap(Const.unwrap(fa)).succeed
 
-      def forEach: ForEach[Const[A, +*]] = Invariant.ConstForEach[A]
+      def forEach: ForEach[({ type ConstA[+B] = Const[A, B] })#ConstA] = Invariant.ConstForEach[A]
     }
 
   /**

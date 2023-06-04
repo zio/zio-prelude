@@ -43,7 +43,7 @@ object ForEachFilterSpec extends ZIOBaseSpec {
         test("mapFilter") {
           check(genList, genIntOptionBooleanFunction) { (as, f) =>
             val actual   = ForEachFilter[List].mapFilter(as)(f)
-            val expected = as.flatMap(f)
+            val expected = as.flatMap(f(_))
             assert(actual)(equalTo(expected))
           }
         },
