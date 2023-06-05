@@ -120,16 +120,16 @@ jobs:
           swap-size-gb: 7
       - name: tests 2.11
         if: ${{ startsWith(matrix.scala, '2.11.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root211/test
       - name: tests 2.12
         if: ${{ startsWith(matrix.scala, '2.12.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root212/test
       - name: tests 2.13
         if: ${{ startsWith(matrix.scala, '2.13.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root213/test
       - name: tests 3
         if: ${{ startsWith(matrix.scala, '3.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} test${{ matrix.platform }}
+        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root3/test
 
   testJvms:
     runs-on: ubuntu-20.04
@@ -137,7 +137,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: ['11', '17']
+        java: ['8', '11']
         platform: ['JVM']
     steps:
       - name: Checkout current branch
@@ -157,7 +157,7 @@ jobs:
         with:
           swap-size-gb: 7
       - name: Test on different JVM versions
-        run: ./sbt test${{ matrix.platform }}
+        run: ./sbt root${{ matrix.platform }}/test
 
   testPlatforms:
     runs-on: ubuntu-20.04
@@ -185,7 +185,7 @@ jobs:
         with:
           swap-size-gb: 7
       - name: Test on different Scala target platforms
-        run: ./sbt test${{ matrix.platform }}
+        run: ./sbt root${{ matrix.platform }}/test
 
   ci:
     runs-on: ubuntu-20.04
