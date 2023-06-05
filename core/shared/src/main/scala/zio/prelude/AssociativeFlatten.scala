@@ -240,4 +240,64 @@ trait AssociativeFlattenSyntax {
     def flatMap[B](f: A => F[B])(implicit flatten: AssociativeFlatten[F], covariant: Covariant[F]): F[B] =
       flatten.flatten(covariant.map(f)(fa))
   }
+
+  /**
+   * Provides infix syntax for filtering covariant types.
+   */
+  implicit class AssociativeFlattenCovariantIdentityBothIdentityEitherOps[F[+_], A](fa: F[A]) {
+
+    /**
+     * Collects values of `A` for which the partial function `pf` is defined.
+     */
+    def collect[B](pf: PartialFunction[A, B])(implicit
+      flatten: AssociativeFlatten[F],
+      covariant: Covariant[F],
+      identityBoth: IdentityBoth[F],
+      identityEither: IdentityEither[F]
+    ): F[B] =
+      fa.flatMap(a => pf.lift(a).fold[F[B]](identityEither.none)(_.succeed))
+
+    /**
+     * Collects values of `A` for which the partial function `pf` is defined.
+     */
+    def collectM[B](pf: PartialFunction[A, F[B]])(implicit
+      flatten: AssociativeFlatten[F],
+      covariant: Covariant[F],
+      identityEither: IdentityEither[F]
+    ): F[B] =
+      fa.flatMap(a => pf.lift(a).getOrElse(identityEither.none))
+
+    /**
+     * Filters an `F[A]` value with a predicate `f`.
+     */
+    def filter[B](f: A => Boolean)(implicit
+      flatten: AssociativeFlatten[F],
+      covariant: Covariant[F],
+      identityBoth: IdentityBoth[F],
+      identityEither: IdentityEither[F]
+    ): F[A] =
+      fa.flatMap(a => if (f(a)) a.succeed else identityEither.none)
+
+    /**
+     * Filters an `F[A]` value with a predicate `f`.
+     */
+    def filterM[B](f: A => F[Boolean])(implicit
+      flatten: AssociativeFlatten[F],
+      covariant: Covariant[F],
+      identityBoth: IdentityBoth[F],
+      identityEither: IdentityEither[F]
+    ): F[A] =
+      fa.flatMap(a => f(a).flatMap(b => if (b) a.succeed else identityEither.none))
+
+    /**
+     * Provides support for filtering `F[A]` values in for comphrensions.
+     */
+    def withFilter(f: A => Boolean)(implicit
+      flatten: AssociativeFlatten[F],
+      covariant: Covariant[F],
+      identityBoth: IdentityBoth[F],
+      identityEither: IdentityEither[F]
+    ): F[A] =
+      filter(f)
+  }
 }

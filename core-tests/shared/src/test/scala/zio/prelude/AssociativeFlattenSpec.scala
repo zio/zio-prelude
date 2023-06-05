@@ -10,6 +10,19 @@ object AssociativeFlattenSpec extends ZIOSpecDefault {
     suite("AssociativeFlattenSpec")(
       suite("laws")(
         test("map")(checkAllLaws(AssociativeFlattenLaws)(GenFs.map(Gen.int), Gen.int))
+      ),
+      suite("operators")(
+        test("filter") {
+          def filter[F[+_]: AssociativeFlatten: Covariant: IdentityBoth: IdentityEither, A](
+            fa: F[A]
+          )(f: A => Boolean): F[A] =
+            fa.filter(f)
+          check(Gen.listOf(Gen.int), Gen.function(Gen.boolean)) { (as, f) =>
+            val actual   = filter(as)(f)
+            val expected = as.filter(f)
+            assert(actual)(equalTo(expected))
+          }
+        }
       )
     )
 }
