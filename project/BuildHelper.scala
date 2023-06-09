@@ -10,7 +10,7 @@ import scalafix.sbt.ScalafixPlugin.autoImport._
 object BuildHelper {
   val Scala211: String = "2.11.12"
   val Scala212: String = "2.12.17"
-  val Scala213: String = "2.13.10"
+  val Scala213: String = "2.13.11"
   val Scala3: String   = "3.2.2"
 
   val SilencerVersion = "1.7.12"
