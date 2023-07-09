@@ -1240,6 +1240,16 @@ object AssociativeBoth extends AssociativeBothLowPriority {
         ZIO.foreach(in)(f)
       override def forEach_[A, B](in: Iterable[A])(f: A => ZIO[R, E, Any]): ZIO[R, E, Unit] =
         ZIO.foreachDiscard(in)(f)
+      override def forEachCollectSome[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+        f: A => ZIO[R, E, Option[B]]
+      )(implicit bf: zio.BuildFrom[Collection[A], B, Collection[B]]): ZIO[R, E, Collection[B]] = ZIO.suspendSucceed {
+        val iterator = in.iterator
+        val builder  = bf.newBuilder(in)
+
+        ZIO
+          .whileLoop(iterator.hasNext)(f(iterator.next()))(_.fold(builder)(builder += _))
+          .as(builder.result())
+      }
     }
 
   /**
