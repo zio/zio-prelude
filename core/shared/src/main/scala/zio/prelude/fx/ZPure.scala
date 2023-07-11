@@ -1127,7 +1127,7 @@ object ZPure {
       val builder  = bf.newBuilder(in)
 
       lazy val recurse: Option[B] => ZPure[W, S, S, R, E, Collection[B]] = { b =>
-        b.fold(builder)(builder += _)
+        b.foreach(builder += _)
         loop()
       }
 

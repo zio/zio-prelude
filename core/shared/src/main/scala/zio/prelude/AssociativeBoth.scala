@@ -1247,7 +1247,7 @@ object AssociativeBoth extends AssociativeBothLowPriority {
         val builder  = bf.newBuilder(in)
 
         ZIO
-          .whileLoop(iterator.hasNext)(f(iterator.next()))(_.fold(builder)(builder += _))
+          .whileLoop(iterator.hasNext)(f(iterator.next()))(_.foreach(builder += _))
           .as(builder.result())
       }
     }
