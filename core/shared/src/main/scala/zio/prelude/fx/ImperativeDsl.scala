@@ -115,17 +115,44 @@ object ImperativeDsl {
     def interpret[E, A](fa: Op[E, A]): Either[E, A]
   }
 
-  trait Executable[Op[+_, +_]] {
-    def succeed[A](a: A): Op[Nothing, A]
-    def fail[E](e: E): Op[E, Nothing]
-    def eval[E, A](fa: Op[E, A]): Op[E, A]
+  trait Executable[F[+_, +_]] {
+    def succeed[A](a: A): F[Nothing, A]
+    def fail[E](e: E): F[E, Nothing]
+    def eval[E, A](fa: F[E, A]): F[E, A]
     def sequence[E1, E2, A1, A2](
-      fa: Op[E1, A1],
-      onSuccess: A1 => Op[E2, A2],
-      onFailure: E1 => Op[E2, A2]
-    ): Op[E2, A2]
+      fa: F[E1, A1],
+      onSuccess: A1 => F[E2, A2],
+      onFailure: E1 => F[E2, A2]
+    ): F[E2, A2]
   }
 
   // TODO: Consider Making: CompositeOp[+Op1[+_, +_], +Op2[+_, +_], +E, +A]
   final case class CompositeOp[Op1[+_, +_], Op2[+_, +_], +E, +A](run: Either[Op1[E, A], Op2[E, A]]) { self => }
+
+  // TODO: Consider what can be done to make the type lambda here simpler
+  implicit def ZPureExecutable[W]: Executable[({ type lambda[+E, +A] = ZPure[W, Unit, Unit, Any, E, A] })#lambda] = {
+    // ({ type lambda[+E, +A] = ZPure[W, Unit, Unit, Any, E, A] })#lambda
+    type Result[+E, +A] = ZPure[W, Unit, Unit, Any, E, A]
+    val Result: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
+    new Executable[Result] {
+
+      override def succeed[A](a: A): Result[Nothing, A] = Result.succeed(a)
+
+      override def fail[E](e: E): Result[E, Nothing] = Result.fail(e)
+
+      override def eval[E, A](fa: Result[E, A]): Result[E, A] = Result.suspend(fa)
+
+      override def sequence[E1, E2, A1, A2](
+        fa: Result[E1, A1],
+        onSuccess: A1 => Result[E2, A2],
+        onFailure: E1 => Result[E2, A2]
+      ): Result[E2, A2] = Result.suspend {
+        // TODO: Consider if this can be done with foldM since its pissible E1 or E2 is Nothing
+        fa.foldM(
+          onFailure,
+          onSuccess
+        )
+      }
+    }
+  }
 }
