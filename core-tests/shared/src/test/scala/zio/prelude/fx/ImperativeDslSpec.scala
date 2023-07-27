@@ -11,19 +11,16 @@ object ImperativeDslSpec extends ZIOBaseSpec {
     suite("unsafeInterpret")(
       test("Interpreting a getRiderCount after 2 authorized riders") {
         import syntax._
-        val john = new {
-          val ridesCard = Card.TransitRideCard(2)
-        }
+        case class Customer(name:String, card:Card)
 
-        val jane = new {
-          val debitCard = Card.DebitCard(10_00)
-        }
+        val john = Customer("John", Card.TransitRideCard(2))
+        val jane = Customer("Jane", Card.DebitCard(10_00))
 
         val interpreter = transitSystem.interpreters.default(farePriceInCents = 2_50)
 
         val program = for {
-          _ <- authorize(john.ridesCard)
-          _ <- authorize(jane.debitCard)
+          _ <- authorize(john.card)
+          _ <- authorize(jane.card)
           cnt <- getRiderCount
         } yield cnt
 
