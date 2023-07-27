@@ -3,56 +3,69 @@ package zio.prelude.fx
 import scala.annotation.tailrec
 import ImperativeDsl._
 
-sealed trait ImperativeDsl[Op[+_, +_], +E, +A] { self =>
+/**
+ * An `ImperativeDsl[Dsl, E, A]` is a data structure that provides the ability to execute a user provided DSL as a sequence of operations.
+ * From a theoretical standpoint `ImperativeDsl` is an implementation of a Free Monad.
+ * @tparam Dsl - the user's DSL
+ * @tparam E - the error type if any
+ * @tparam A - the result type
+ */
+sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
 
   final def catchAll[E2, A1 >: A](
-    f: E => ImperativeDsl[Op, E2, A1]
-  ): ImperativeDsl[Op, E2, A1] = self match {
-    case free @ Sequence(fa, onSuccess, onOpailure) =>
+    f: E => ImperativeDsl[Dsl, E2, A1]
+  ): ImperativeDsl[Dsl, E2, A1] = self match {
+    case free @ Sequence(fa, onSuccess, onFailure) =>
       Sequence(
         fa,
         (a: free.InSuccess) => onSuccess(a).catchAll(f),
-        (e: free.InOpailure) => onOpailure(e).catchAll(f)
+        (e: free.InFailure) => onFailure(e).catchAll(f)
       )
-    case _                                          => ImperativeDsl.Sequence[Op, E, E2, A, A1](self, ImperativeDsl.Succeed(_), f)
+    case _                                         => ImperativeDsl.Sequence[Dsl, E, E2, A, A1](self, ImperativeDsl.Succeed(_), f)
   }
 
-  final def flatMap[E1 >: E, B](f: A => ImperativeDsl[Op, E1, B]): ImperativeDsl[Op, E1, B] = self match {
+  final def flatMap[E1 >: E, B](f: A => ImperativeDsl[Dsl, E1, B]): ImperativeDsl[Dsl, E1, B] = self match {
     case free @ Sequence(fa, onSuccess, onOpailure) =>
-      Sequence(fa, (a: free.InSuccess) => onSuccess(a).flatMap(f), (e: free.InOpailure) => onOpailure(e).flatMap(f))
-    case _                                          => ImperativeDsl.Sequence[Op, E, E1, A, B](self, f, ImperativeDsl.Opail(_))
+      Sequence(
+        fa,
+        (a: free.InSuccess) =>
+          onSuccess(a)
+            .flatMap(f),
+        (e: free.InFailure) => onOpailure(e).flatMap(f)
+      )
+    case _                                          => ImperativeDsl.Sequence[Dsl, E, E1, A, B](self, f, ImperativeDsl.Opail(_))
   }
 
-  final def flatten[E1 >: E, B](implicit ev: A <:< ImperativeDsl[Op, E1, B]): ImperativeDsl[Op, E1, B] =
+  final def flatten[E1 >: E, B](implicit ev: A <:< ImperativeDsl[Dsl, E1, B]): ImperativeDsl[Dsl, E1, B] =
     self.flatMap(ev)
 
-  def interpret[G[+_, +_]](
-    interpreter: ImperativeDsl.Interpreter[Op, G]
-  )(implicit g: ImperativeDsl.Executable[G]): G[E, A] = self match {
-    case ImperativeDsl.Succeed(a)                                 => g.succeed(a)
-    case ImperativeDsl.Opail(e)                                   => g.fail(e)
-    case ImperativeDsl.Eval(fa)                                   => interpreter.interpret(fa)
-    case free @ ImperativeDsl.Sequence(fa, onSuccess, onOpailure) =>
-      g.sequence(
+  def interpret[Executable[+_, +_]](
+    interpreter: ImperativeDsl.Interpreter[Dsl, Executable]
+  )(implicit exe: ImperativeDsl.ToExecutable[Executable]): Executable[E, A] = self match {
+    case ImperativeDsl.Succeed(a)                                => exe.succeed(a)
+    case ImperativeDsl.Opail(e)                                  => exe.fail(e)
+    case ImperativeDsl.Eval(fa)                                  => interpreter.interpret(fa)
+    case free @ ImperativeDsl.Sequence(fa, onSuccess, onFailure) =>
+      exe.sequence(
         fa.interpret(interpreter),
         (a: free.InSuccess) => onSuccess(a).interpret(interpreter),
-        (e: free.InOpailure) => onOpailure(e).interpret(interpreter)
+        (e: free.InFailure) => onFailure(e).interpret(interpreter)
       )
   }
 
-  final def map[B](f: A => B): ImperativeDsl[Op, E, B] =
+  final def map[B](f: A => B): ImperativeDsl[Dsl, E, B] =
     self.flatMap(a => ImperativeDsl.Succeed(f(a)))
 
-  final def mapError[E2](f: E => E2): ImperativeDsl[Op, E2, A] =
+  final def mapError[E2](f: E => E2): ImperativeDsl[Dsl, E2, A] =
     self.catchAll(e => ImperativeDsl.Opail(f(e)))
 
   def unsafeInterpret(
-    unsafeInterpreter: ImperativeDsl.UnsafeInterpreter[Op]
+    unsafeInterpreter: ImperativeDsl.UnsafeInterpreter[Dsl]
   ): Either[E, A] = {
     @tailrec
     def loop(
-      free: ImperativeDsl[Op, Any, Any],
-      stack: List[ImperativeDsl.Sequence[Op, Any, Any, Any, Any]]
+      free: ImperativeDsl[Dsl, Any, Any],
+      stack: List[ImperativeDsl.Sequence[Dsl, Any, Any, Any, Any]]
     ): Either[E, A] =
       free match {
         case ImperativeDsl.Succeed(a)                                 =>
@@ -62,15 +75,15 @@ sealed trait ImperativeDsl[Op[+_, +_], +E, +A] { self =>
           }
         case ImperativeDsl.Opail(e)                                   =>
           stack match {
-            case ImperativeDsl.Sequence(_, _, onOpailure) :: stack => loop(onOpailure(e), stack)
-            case Nil                                               => Left(e.asInstanceOf[E])
+            case ImperativeDsl.Sequence(_, _, onFailure) :: stack => loop(onFailure(e), stack)
+            case Nil                                              => Left(e.asInstanceOf[E])
           }
         case ImperativeDsl.Eval(fa)                                   =>
           unsafeInterpreter.interpret(fa) match {
             case Left(e)  =>
               stack match {
-                case ImperativeDsl.Sequence(_, _, onOpailure) :: stack => loop(onOpailure(e), stack)
-                case Nil                                               => Left(e.asInstanceOf[E])
+                case ImperativeDsl.Sequence(_, _, onFailure) :: stack => loop(onFailure(e), stack)
+                case Nil                                              => Left(e.asInstanceOf[E])
               }
             case Right(a) =>
               stack match {
@@ -79,7 +92,7 @@ sealed trait ImperativeDsl[Op[+_, +_], +E, +A] { self =>
               }
           }
         case free @ ImperativeDsl.Sequence(fa, onSuccess, onOpailure) =>
-          loop(fa, (free :: stack).asInstanceOf[List[ImperativeDsl.Sequence[Op, Any, Any, Any, Any]]])
+          loop(fa, (free :: stack).asInstanceOf[List[ImperativeDsl.Sequence[Dsl, Any, Any, Any, Any]]])
       }
     loop(self, Nil)
   }
@@ -96,45 +109,55 @@ object ImperativeDsl {
   final case class Sequence[Op[+_, +_], E1, E2, A1, A2] private[ImperativeDsl] (
     fa: ImperativeDsl[Op, E1, A1],
     onSuccess: A1 => ImperativeDsl[Op, E2, A2],
-    onOpailure: E1 => ImperativeDsl[Op, E2, A2]
+    onFailure: E1 => ImperativeDsl[Op, E2, A2]
   ) extends ImperativeDsl[Op, E2, A2] {
-    type InSuccess  = A1
-    type InOpailure = E1
+    type InSuccess = A1
+    type InFailure = E1
   }
 
-  // TODO: Consider renaming G to Dsl/Executable
-  trait Interpreter[Op[+_, +_], G[+_, +_]] {
-    def interpret[E, A](fa: Op[E, A]): G[E, A]
+  /// Interpreter provides the ability to interpret a DSL into an executable program
+  trait Interpreter[Dsl[+_, +_], Executable[+_, +_]] { self =>
+    def interpret[E, A](dsl: Dsl[E, A]): Executable[E, A]
 
-    def combine[Op2[+_, +_]](
-      that: Interpreter[Op2, G]
-    ): Interpreter[({ type lambda[+E, +A] = CompositeOp[Op, Op2, E, A] })#lambda, G] = ???
+    def combine[Dsl2[+_, +_]](
+      that: Interpreter[Dsl2, Executable]
+    ): Interpreter[({ type lambda[+E, +A] = CompositeDsl[Dsl, Dsl2, E, A] })#lambda, Executable] =
+      new Interpreter[({ type lambda[+E, +A] = CompositeDsl[Dsl, Dsl2, E, A] })#lambda, Executable] {
+        override def interpret[E, A](dsl: CompositeDsl[Dsl, Dsl2, E, A]): Executable[E, A] = dsl.eitherDsl match {
+          case Left(dsl)  => self.interpret(dsl)
+          case Right(dsl) => that.interpret(dsl)
+        }
+      }
   }
 
-  trait UnsafeInterpreter[Op[+_, +_]] {
-    def interpret[E, A](fa: Op[E, A]): Either[E, A]
+  trait UnsafeInterpreter[Dsl[+_, +_]] {
+    def interpret[E, A](fa: Dsl[E, A]): Either[E, A]
   }
 
-  trait Executable[F[+_, +_]] {
-    def succeed[A](a: A): F[Nothing, A]
-    def fail[E](e: E): F[E, Nothing]
-    def eval[E, A](fa: F[E, A]): F[E, A]
+  trait ToExecutable[Executable[+_, +_]] {
+    def succeed[A](a: A): Executable[Nothing, A]
+    def fail[E](e: E): Executable[E, Nothing]
+    def eval[E, A](fa: Executable[E, A]): Executable[E, A]
     def sequence[E1, E2, A1, A2](
-      fa: F[E1, A1],
-      onSuccess: A1 => F[E2, A2],
-      onFailure: E1 => F[E2, A2]
-    ): F[E2, A2]
+      fa: Executable[E1, A1],
+      onSuccess: A1 => Executable[E2, A2],
+      onFailure: E1 => Executable[E2, A2]
+    ): Executable[E2, A2]
   }
 
-  // TODO: Consider Making: CompositeOp[+Op1[+_, +_], +Op2[+_, +_], +E, +A]
-  final case class CompositeOp[Op1[+_, +_], Op2[+_, +_], +E, +A](run: Either[Op1[E, A], Op2[E, A]]) { self => }
+  final case class CompositeDsl[+Dsl1[+_, +_], +Dsl2[+_, +_], +E, +A](eitherDsl: Either[Dsl1[E, A], Dsl2[E, A]])
+      extends AnyVal { self =>
+    type InSuccess <: A
+    type InFailure <: E
+  }
 
   // TODO: Consider what can be done to make the type lambda here simpler
-  implicit def ZPureExecutable[W]: Executable[({ type lambda[+E, +A] = ZPure[W, Unit, Unit, Any, E, A] })#lambda] = {
+  implicit def ZPureToExecutable[W]
+    : ToExecutable[({ type lambda[+E, +A] = ZPure[W, Unit, Unit, Any, E, A] })#lambda] = {
     // ({ type lambda[+E, +A] = ZPure[W, Unit, Unit, Any, E, A] })#lambda
     type Result[+E, +A] = ZPure[W, Unit, Unit, Any, E, A]
     val Result: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
-    new Executable[Result] {
+    new ToExecutable[Result] {
 
       override def succeed[A](a: A): Result[Nothing, A] = Result.succeed(a)
 

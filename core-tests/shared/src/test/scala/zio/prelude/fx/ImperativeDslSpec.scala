@@ -2,14 +2,15 @@ package zio.prelude.fx
 
 import zio.prelude._
 import zio.test._
-import ImperativeDslSpec.transitSystem.{ops, dsl}
-import ops.Card
+import ImperativeDslSpec.transitSystem.{Dsl, syntax}
+import Dsl.Card
 import scala.language.reflectiveCalls
 
 object ImperativeDslSpec extends ZIOBaseSpec {
   def spec: Spec[Environment, Any] = suite("ImperativeDslSpec")(
     suite("unsafeInterpret")(
       test("Interpreting a getRiderCount after 2 authorized riders") {
+        import syntax._
         val john = new {
           val ridesCard = Card.TransitRideCard(2)
         }
@@ -21,10 +22,10 @@ object ImperativeDslSpec extends ZIOBaseSpec {
         val interpreter = transitSystem.interpreters.default(farePriceInCents = 2_50)
 
         val program = for {
-          _ <- dsl.authorize(john.ridesCard)
-          _ <- dsl.authorize(jane.debitCard)
-          c <- dsl.getRiderCount
-        } yield c
+          _ <- authorize(john.ridesCard)
+          _ <- authorize(jane.debitCard)
+          cnt <- getRiderCount
+        } yield cnt
 
         val result = program.interpret(interpreter)
         val actual = result.runEither
@@ -35,10 +36,10 @@ object ImperativeDslSpec extends ZIOBaseSpec {
   )
 
   object transitSystem {
-    object ops {
-      sealed trait TransitSystemOp[+E, +A]   extends Product with Serializable
-      final case class Authorize(card: Card) extends TransitSystemOp[AccessDeniedError, Card]
-      case object GetRiderCount              extends TransitSystemOp[Nothing, Int]
+    object Dsl {
+      sealed trait TransitSystemDsl[+E, +A]   extends Product with Serializable
+      final case class Authorize(card: Card) extends TransitSystemDsl[AccessDeniedError, Card]
+      case object GetRiderCount              extends TransitSystemDsl[Nothing, Int]
 
       sealed trait Card
       object Card {
@@ -54,10 +55,10 @@ object ImperativeDslSpec extends ZIOBaseSpec {
       }
     }
 
-    object dsl {
-      import ops._
+    object syntax {
+      import Dsl._
 
-      type TSys[+E, +A] = ImperativeDsl[TransitSystemOp, E, A]
+      type TSys[+E, +A] = ImperativeDsl[TransitSystemDsl, E, A]
 
       def authorize(card: Card): TSys[AccessDeniedError, Card] =
         ImperativeDsl.eval(Authorize(card))
@@ -67,13 +68,13 @@ object ImperativeDslSpec extends ZIOBaseSpec {
 
     object interpreters {
       import ImperativeDsl.Interpreter
-      import ops._
+      import Dsl._
       type Result[+E, +A] = zio.prelude.fx.ZPure[String, Unit, Unit, Any, E, A]
-      def default(farePriceInCents: Int, initialRiderCount: Int = 0): Interpreter[TransitSystemOp, Result] = {
+      def default(farePriceInCents: Int, initialRiderCount: Int = 0): Interpreter[TransitSystemDsl, Result] = {
         var riderCount = initialRiderCount
-        new Interpreter[TransitSystemOp, Result] {
-          override def interpret[E, A](fa: TransitSystemOp[E, A]): Result[E, A] =
-            fa match {
+        new Interpreter[TransitSystemDsl, Result] {
+          override def interpret[E, A](dsl: TransitSystemDsl[E, A]): Result[E, A] =
+            dsl match {
               case Authorize(card) =>
                 card match {
                   case Card.DebitCard(balance)     =>
