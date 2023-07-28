@@ -2,11 +2,11 @@ package zio.prelude.fx
 
 import zio.prelude._
 import zio.test._
-import ImperativeDslSpec.transitSystem.{Dsl, syntax}
+import ImperativeSpec.transitSystem.{Dsl, syntax}
 import Dsl.Card
 
-object ImperativeDslSpec extends ZIOBaseSpec {
-  def spec: Spec[Environment, Any] = suite("ImperativeDslSpec")(
+object ImperativeSpec extends ZIOBaseSpec {
+  def spec: Spec[Environment, Any] = suite("ImperativeSpec")(
     suite("unsafeInterpret")(
       test("Interpreting a getRiderCount after 2 authorized riders") {
         import syntax._
@@ -54,16 +54,16 @@ object ImperativeDslSpec extends ZIOBaseSpec {
     object syntax {
       import Dsl._
 
-      type TSys[+E, +A] = ImperativeDsl[TransitSystemDsl, E, A]
+      type TSys[+E, +A] = Imperative[TransitSystemDsl, E, A]
 
       def authorize(card: Card): TSys[AccessDeniedError, Card] =
-        ImperativeDsl.eval(Authorize(card))
+        Imperative.eval(Authorize(card))
 
-      def getRiderCount: TSys[Nothing, Int] = ImperativeDsl.eval(GetRiderCount)
+      def getRiderCount: TSys[Nothing, Int] = Imperative.eval(GetRiderCount)
     }
 
     object interpreters {
-      import ImperativeDsl.Interpreter
+      import Imperative.Interpreter
       import Dsl._
       type Result[+E, +A] = zio.prelude.fx.ZPure[String, Unit, Unit, Any, E, A]
       def default(farePriceInCents: Int, initialRiderCount: Int = 0): Interpreter[TransitSystemDsl, Result] = {
