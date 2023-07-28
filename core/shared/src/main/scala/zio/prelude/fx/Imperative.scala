@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package zio.prelude.fx
-
+import zio.prelude.EReader
 import scala.annotation.tailrec
 import Imperative._
 
@@ -22,11 +22,11 @@ import Imperative._
  * An `Imperative[Dsl, E, A]` is a data structure that provides the ability to execute a user provided DSL as a sequence of operations.
  * From a theoretical standpoint `ImperativeDsl` is an implementation of a Free Monad.``
  */
-sealed trait Imperative[Dsl[+_, +_], +E, +A] { self =>
+sealed trait Imperative[Dsl[-_, +_, +_], -R, +E, +A] { self =>
 
-  final def catchAll[E2, A1 >: A](
-    f: E => Imperative[Dsl, E2, A1]
-  ): Imperative[Dsl, E2, A1] = self match {
+  final def catchAll[R1 <: R, E2, A1 >: A](
+    f: E => Imperative[Dsl, R1, E2, A1]
+  ): Imperative[Dsl, R1, E2, A1] = self match {
     case imp @ Sequence(dsl, onSuccess, onFailure) =>
       Sequence(
         dsl,
@@ -34,10 +34,10 @@ sealed trait Imperative[Dsl[+_, +_], +E, +A] { self =>
         (e: imp.InFailure) => onFailure(e).catchAll(f)
       )
     case _                                         =>
-      Sequence[Dsl, E, E2, A, A1](self, Succeed(_), f)
+      Sequence[Dsl, R1, E, E2, A, A1](self, Succeed(_), f)
   }
 
-  final def flatMap[E1 >: E, B](f: A => Imperative[Dsl, E1, B]): Imperative[Dsl, E1, B] = self match {
+  final def flatMap[R1 <: R, E1 >: E, B](f: A => Imperative[Dsl, R1, E1, B]): Imperative[Dsl, R1, E1, B] = self match {
     case imp @ Sequence(dsl, onSuccess, onFailure) =>
       Sequence(
         dsl,
@@ -47,15 +47,15 @@ sealed trait Imperative[Dsl[+_, +_], +E, +A] { self =>
         (e: imp.InFailure) => onFailure(e).flatMap(f)
       )
     case _                                         =>
-      Sequence[Dsl, E, E1, A, B](self, f, Fail(_))
+      Sequence[Dsl, R1, E, E1, A, B](self, f, Fail(_))
   }
 
-  final def flatten[E1 >: E, B](implicit ev: A <:< Imperative[Dsl, E1, B]): Imperative[Dsl, E1, B] =
+  final def flatten[R1 <: R, E1 >: E, B](implicit ev: A <:< Imperative[Dsl, R1, E1, B]): Imperative[Dsl, R1, E1, B] =
     self.flatMap(ev)
 
-  def interpret[Executable[+_, +_]](
+  def interpret[Executable[-_, +_, +_]](
     interpreter: Imperative.Interpreter[Dsl, Executable]
-  )(implicit exe: Imperative.ToExecutable[Executable]): Executable[E, A] = self match {
+  )(implicit exe: Imperative.ToExecutable[Executable]): Executable[R, E, A] = self match {
     case Imperative.Succeed(a)                                => exe.succeed(a)
     case Imperative.Fail(e)                                   => exe.fail(e)
     case Imperative.Eval(fa)                                  => interpreter.interpret(fa)
@@ -67,10 +67,10 @@ sealed trait Imperative[Dsl[+_, +_], +E, +A] { self =>
       )
   }
 
-  final def map[B](f: A => B): Imperative[Dsl, E, B] =
+  final def map[B](f: A => B): Imperative[Dsl, R, E, B] =
     self.flatMap(a => Imperative.Succeed(f(a)))
 
-  final def mapError[E2](f: E => E2): Imperative[Dsl, E2, A] =
+  final def mapError[E2](f: E => E2): Imperative[Dsl, R, E2, A] =
     self.catchAll(e => Imperative.Fail(f(e)))
 
   def unsafeInterpret(
@@ -78,8 +78,8 @@ sealed trait Imperative[Dsl[+_, +_], +E, +A] { self =>
   ): Either[E, A] = {
     @tailrec
     def loop(
-      free: Imperative[Dsl, Any, Any],
-      stack: List[Imperative.Sequence[Dsl, Any, Any, Any, Any]]
+      free: Imperative[Dsl, R, Any, Any],
+      stack: List[Imperative.Sequence[Dsl, R, Any, Any, Any, Any]]
     ): Either[E, A] =
       free match {
         case Imperative.Succeed(a)                =>
@@ -106,90 +106,85 @@ sealed trait Imperative[Dsl[+_, +_], +E, +A] { self =>
               }
           }
         case free @ Imperative.Sequence(fa, _, _) =>
-          loop(fa, (free :: stack).asInstanceOf[List[Imperative.Sequence[Dsl, Any, Any, Any, Any]]])
+          loop(fa, (free :: stack).asInstanceOf[List[Imperative.Sequence[Dsl, R, Any, Any, Any, Any]]])
       }
     loop(self, Nil)
   }
 }
 
 object Imperative {
-  def eval[Dsl[+_, +_], E, A](fa: Dsl[E, A]): Imperative[Dsl, E, A] = Eval(fa)
-  def fail[Dsl[+_, +_], E](e: E): Imperative[Dsl, E, Nothing]       = Fail(e)
-  def succeed[Dsl[+_, +_], A](a: A): Imperative[Dsl, Nothing, A]    = Succeed(a)
+  def eval[Dsl[-_, +_, +_], R, E, A](dsl: Dsl[R, E, A]): Imperative[Dsl, R, E, A] = Eval(dsl)
+  def fail[Dsl[-_, +_, +_], E](error: E): Imperative[Dsl, Any, E, Nothing]        = Fail(error)
+  def succeed[Dsl[-_, +_, +_], A](value: A): Imperative[Dsl, Any, Nothing, A]     = Succeed(value)
 
-  final case class Succeed[Dsl[+_, +_], A](a: A)          extends Imperative[Dsl, Nothing, A]
-  final case class Fail[Dsl[+_, +_], E](a: E)             extends Imperative[Dsl, E, Nothing]
-  final case class Eval[Dsl[+_, +_], E, A](fa: Dsl[E, A]) extends Imperative[Dsl, E, A]
-  final case class Sequence[Dsl[+_, +_], E1, E2, A1, A2] private[Imperative] (
-    dsl: Imperative[Dsl, E1, A1],
-    onSuccess: A1 => Imperative[Dsl, E2, A2],
-    onFailure: E1 => Imperative[Dsl, E2, A2]
-  ) extends Imperative[Dsl, E2, A2] {
+  final case class Succeed[Dsl[-_, +_, +_], A](a: A)                 extends Imperative[Dsl, Any, Nothing, A]
+  final case class Fail[Dsl[-_, +_, +_], E](error: E)                extends Imperative[Dsl, Any, E, Nothing]
+  final case class Eval[Dsl[-_, +_, +_], R, E, A](dsl: Dsl[R, E, A]) extends Imperative[Dsl, R, E, A]
+  final case class Sequence[Dsl[-_, +_, +_], R, E1, E2, A1, A2] private[Imperative] (
+    dsl: Imperative[Dsl, R, E1, A1],
+    onSuccess: A1 => Imperative[Dsl, R, E2, A2],
+    onFailure: E1 => Imperative[Dsl, R, E2, A2]
+  ) extends Imperative[Dsl, R, E2, A2] {
     type InSuccess = A1
     type InFailure = E1
   }
 
   /// Interpreter provides the ability to interpret a DSL into an executable program
-  trait Interpreter[Dsl[+_, +_], Executable[+_, +_]] { self =>
-    def interpret[E, A](dsl: Dsl[E, A]): Executable[E, A]
+  trait Interpreter[Dsl[-_, +_, +_], Executable[-_, +_, +_]] { self =>
+    def interpret[R, E, A](dsl: Dsl[R, E, A]): Executable[R, E, A]
 
-    def combine[Dsl2[+_, +_]](
-      that: Interpreter[Dsl2, Executable]
-    ): Interpreter[({ type lambda[+E, +A] = CompositeDsl[Dsl, Dsl2, E, A] })#lambda, Executable] =
-      new Interpreter[({ type lambda[+E, +A] = CompositeDsl[Dsl, Dsl2, E, A] })#lambda, Executable] {
-        override def interpret[E, A](dsl: CompositeDsl[Dsl, Dsl2, E, A]): Executable[E, A] = dsl.eitherDsl match {
-          case Left(dsl)  => self.interpret(dsl)
-          case Right(dsl) => that.interpret(dsl)
-        }
-      }
+//    def combine[R2, Dsl2[-_, +_, +_]](
+//      that: Interpreter[Dsl2, Executable]
+//    ): Interpreter[({ type lambda[-R, +E, +A] = CompositeDsl[Dsl, Dsl2, R, R2, E, A] })#lambda, Executable] =
+//      new Interpreter[({ type lambda[-R, +E, +A] = CompositeDsl[Dsl, Dsl2, R, R2, E, A] })#lambda, Executable] {
+//        override def interpret[R, E, A](dsl: CompositeDsl[Dsl, Dsl2, R, R2, E, A]): Executable[R with R2, E, A] =
+//          dsl.eitherDsl match {
+//            case Left(dsl)  => self.interpret(dsl)
+//            case Right(dsl) => that.interpret(dsl)
+//          }
+//      }
   }
 
-  trait UnsafeInterpreter[Dsl[+_, +_]] {
-    def interpret[E, A](fa: Dsl[E, A]): Either[E, A]
+  trait UnsafeInterpreter[Dsl[-_, +_, +_]] {
+    def interpret[R, E, A](dsl: Dsl[R, E, A]): Either[E, A]
   }
 
-  trait ToExecutable[Executable[+_, +_]] {
-    def succeed[A](a: A): Executable[Nothing, A]
-    def fail[E](e: E): Executable[E, Nothing]
-    def eval[E, A](fa: Executable[E, A]): Executable[E, A]
-    def sequence[E1, E2, A1, A2](
-      fa: Executable[E1, A1],
-      onSuccess: A1 => Executable[E2, A2],
-      onFailure: E1 => Executable[E2, A2]
-    ): Executable[E2, A2]
+  trait ToExecutable[Executable[-_, +_, +_]] {
+    def succeed[A](a: A): Executable[Any, Nothing, A]
+    def fail[E](e: E): Executable[Any, E, Nothing]
+    def eval[R, E, A](fa: Executable[R, E, A]): Executable[R, E, A]
+    def sequence[R, E1, E2, A1, A2](
+      fa: Executable[R, E1, A1],
+      onSuccess: A1 => Executable[R, E2, A2],
+      onFailure: E1 => Executable[R, E2, A2]
+    ): Executable[R, E2, A2]
   }
 
-  final case class CompositeDsl[+Dsl1[+_, +_], +Dsl2[+_, +_], +E, +A](eitherDsl: Either[Dsl1[E, A], Dsl2[E, A]])
-      extends AnyVal { self =>
-    type InSuccess <: A
-    type InFailure <: E
-  }
+//  final case class CompositeDsl[+Dsl1[-_, +_, +_], +Dsl2[-_, +_, +_], -R1, -R2, +E, +A](
+//    eitherDsl: Either[Dsl1[R1, E, A], Dsl2[R2, E, A]]
+//  ) extends AnyVal { self =>
+//    type InSuccess <: A
+//    type InFailure <: E
+//  }
 
-  // TODO: Consider what can be done to make the type lambda here simpler
-  implicit def ZPureToExecutable[W]
-    : ToExecutable[({ type lambda[+E, +A] = ZPure[W, Unit, Unit, Any, E, A] })#lambda] = {
-    // ({ type lambda[+E, +A] = ZPure[W, Unit, Unit, Any, E, A] })#lambda
-    type Result[+E, +A] = ZPure[W, Unit, Unit, Any, E, A]
-    val Result: zio.prelude.fx.ZPure.type = zio.prelude.fx.ZPure
-    new ToExecutable[Result] {
+  implicit def ZPureToExecutable: ToExecutable[EReader] =
+    new ToExecutable[EReader] {
 
-      override def succeed[A](a: A): Result[Nothing, A] = Result.succeed(a)
+      override def succeed[A](a: A): EReader[Any, Nothing, A] = EReader.succeed(a)
 
-      override def fail[E](e: E): Result[E, Nothing] = Result.fail(e)
+      override def fail[E](e: E): EReader[Any, E, Nothing] = EReader.fail(e)
 
-      override def eval[E, A](fa: Result[E, A]): Result[E, A] = Result.suspend(fa)
+      override def eval[R, E, A](fa: EReader[R, E, A]): EReader[R, E, A] = EReader.suspend(fa)
 
-      override def sequence[E1, E2, A1, A2](
-        fa: Result[E1, A1],
-        onSuccess: A1 => Result[E2, A2],
-        onFailure: E1 => Result[E2, A2]
-      ): Result[E2, A2] = Result.suspend {
-        // TODO: Consider if this can be done with foldM since its pissible E1 or E2 is Nothing
+      override def sequence[R, E1, E2, A1, A2](
+        fa: EReader[R, E1, A1],
+        onSuccess: A1 => EReader[R, E2, A2],
+        onFailure: E1 => EReader[R, E2, A2]
+      ): EReader[R, E2, A2] = EReader.suspend {
         fa.foldM(
           onFailure,
           onSuccess
         )
       }
     }
-  }
 }
