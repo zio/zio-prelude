@@ -104,7 +104,7 @@ object ImperativeDsl {
   def succeed[Op[+_, +_], A](a: A): ImperativeDsl[Op, Nothing, A]   = Succeed(a)
 
   final case class Succeed[Op[+_, +_], A](a: A)         extends ImperativeDsl[Op, Nothing, A]
-  final case class Opail[Op[+_, +_], E](a: E)           extends ImperativeDsl[Op, E, Nothing]
+  final case class Fail[Op[+_, +_], E](a: E)           extends ImperativeDsl[Op, E, Nothing]
   final case class Eval[Op[+_, +_], E, A](fa: Op[E, A]) extends ImperativeDsl[Op, E, A]
   final case class Sequence[Op[+_, +_], E1, E2, A1, A2] private[ImperativeDsl] (
     fa: ImperativeDsl[Op, E1, A1],
