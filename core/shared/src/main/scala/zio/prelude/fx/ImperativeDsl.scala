@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package zio.prelude.fx
 
 import scala.annotation.tailrec
@@ -6,9 +21,6 @@ import ImperativeDsl._
 /**
  * An `ImperativeDsl[Dsl, E, A]` is a data structure that provides the ability to execute a user provided DSL as a sequence of operations.
  * From a theoretical standpoint `ImperativeDsl` is an implementation of a Free Monad.``
- * @tparam Dsl - the user's DSL
- * @tparam E - the error type if any
- * @tparam A - the result type
  */
 sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
 
@@ -33,7 +45,7 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
             .flatMap(f),
         (e: free.InFailure) => onFailure(e).flatMap(f)
       )
-    case _                                         => ImperativeDsl.Sequence[Dsl, E, E1, A, B](self, f, ImperativeDsl.Opail(_))
+    case _                                         => ImperativeDsl.Sequence[Dsl, E, E1, A, B](self, f, ImperativeDsl.Fail(_))
   }
 
   final def flatten[E1 >: E, B](implicit ev: A <:< ImperativeDsl[Dsl, E1, B]): ImperativeDsl[Dsl, E1, B] =
@@ -43,7 +55,7 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
     interpreter: ImperativeDsl.Interpreter[Dsl, Executable]
   )(implicit exe: ImperativeDsl.ToExecutable[Executable]): Executable[E, A] = self match {
     case ImperativeDsl.Succeed(a)                                => exe.succeed(a)
-    case ImperativeDsl.Opail(e)                                  => exe.fail(e)
+    case ImperativeDsl.Fail(e)                                   => exe.fail(e)
     case ImperativeDsl.Eval(fa)                                  => interpreter.interpret(fa)
     case free @ ImperativeDsl.Sequence(fa, onSuccess, onFailure) =>
       exe.sequence(
@@ -57,7 +69,7 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
     self.flatMap(a => ImperativeDsl.Succeed(f(a)))
 
   final def mapError[E2](f: E => E2): ImperativeDsl[Dsl, E2, A] =
-    self.catchAll(e => ImperativeDsl.Opail(f(e)))
+    self.catchAll(e => ImperativeDsl.Fail(f(e)))
 
   def unsafeInterpret(
     unsafeInterpreter: ImperativeDsl.UnsafeInterpreter[Dsl]
@@ -73,7 +85,7 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
             case ImperativeDsl.Sequence(_, onSuccess, _) :: stack => loop(onSuccess(a), stack)
             case Nil                                              => Right(a.asInstanceOf[A])
           }
-        case ImperativeDsl.Opail(e)                  =>
+        case ImperativeDsl.Fail(e)                   =>
           stack match {
             case ImperativeDsl.Sequence(_, _, onFailure) :: stack => loop(onFailure(e), stack)
             case Nil                                              => Left(e.asInstanceOf[E])
@@ -99,18 +111,18 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
 }
 
 object ImperativeDsl {
-  def eval[Op[+_, +_], E, A](fa: Op[E, A]): ImperativeDsl[Op, E, A] = Eval(fa)
-  def fail[Op[+_, +_], E](e: E): ImperativeDsl[Op, E, Nothing]      = Opail(e)
-  def succeed[Op[+_, +_], A](a: A): ImperativeDsl[Op, Nothing, A]   = Succeed(a)
+  def eval[Dsl[+_, +_], E, A](fa: Dsl[E, A]): ImperativeDsl[Dsl, E, A] = Eval(fa)
+  def fail[Dsl[+_, +_], E](e: E): ImperativeDsl[Dsl, E, Nothing]       = Fail(e)
+  def succeed[Dsl[+_, +_], A](a: A): ImperativeDsl[Dsl, Nothing, A]    = Succeed(a)
 
-  final case class Succeed[Op[+_, +_], A](a: A)         extends ImperativeDsl[Op, Nothing, A]
-  final case class Fail[Op[+_, +_], E](a: E)           extends ImperativeDsl[Op, E, Nothing]
-  final case class Eval[Op[+_, +_], E, A](fa: Op[E, A]) extends ImperativeDsl[Op, E, A]
-  final case class Sequence[Op[+_, +_], E1, E2, A1, A2] private[ImperativeDsl] (
-    fa: ImperativeDsl[Op, E1, A1],
-    onSuccess: A1 => ImperativeDsl[Op, E2, A2],
-    onFailure: E1 => ImperativeDsl[Op, E2, A2]
-  ) extends ImperativeDsl[Op, E2, A2] {
+  final case class Succeed[Dsl[+_, +_], A](a: A)          extends ImperativeDsl[Dsl, Nothing, A]
+  final case class Fail[Dsl[+_, +_], E](a: E)             extends ImperativeDsl[Dsl, E, Nothing]
+  final case class Eval[Dsl[+_, +_], E, A](fa: Dsl[E, A]) extends ImperativeDsl[Dsl, E, A]
+  final case class Sequence[Dsl[+_, +_], E1, E2, A1, A2] private[ImperativeDsl] (
+    dsl: ImperativeDsl[Dsl, E1, A1],
+    onSuccess: A1 => ImperativeDsl[Dsl, E2, A2],
+    onFailure: E1 => ImperativeDsl[Dsl, E2, A2]
+  ) extends ImperativeDsl[Dsl, E2, A2] {
     type InSuccess = A1
     type InFailure = E1
   }
