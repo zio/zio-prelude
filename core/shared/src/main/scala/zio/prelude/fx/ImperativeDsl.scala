@@ -5,7 +5,7 @@ import ImperativeDsl._
 
 /**
  * An `ImperativeDsl[Dsl, E, A]` is a data structure that provides the ability to execute a user provided DSL as a sequence of operations.
- * From a theoretical standpoint `ImperativeDsl` is an implementation of a Free Monad.
+ * From a theoretical standpoint `ImperativeDsl` is an implementation of a Free Monad.``
  * @tparam Dsl - the user's DSL
  * @tparam E - the error type if any
  * @tparam A - the result type
@@ -25,15 +25,15 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
   }
 
   final def flatMap[E1 >: E, B](f: A => ImperativeDsl[Dsl, E1, B]): ImperativeDsl[Dsl, E1, B] = self match {
-    case free @ Sequence(fa, onSuccess, onOpailure) =>
+    case free @ Sequence(fa, onSuccess, onFailure) =>
       Sequence(
         fa,
         (a: free.InSuccess) =>
           onSuccess(a)
             .flatMap(f),
-        (e: free.InFailure) => onOpailure(e).flatMap(f)
+        (e: free.InFailure) => onFailure(e).flatMap(f)
       )
-    case _                                          => ImperativeDsl.Sequence[Dsl, E, E1, A, B](self, f, ImperativeDsl.Opail(_))
+    case _                                         => ImperativeDsl.Sequence[Dsl, E, E1, A, B](self, f, ImperativeDsl.Opail(_))
   }
 
   final def flatten[E1 >: E, B](implicit ev: A <:< ImperativeDsl[Dsl, E1, B]): ImperativeDsl[Dsl, E1, B] =
@@ -68,17 +68,17 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
       stack: List[ImperativeDsl.Sequence[Dsl, Any, Any, Any, Any]]
     ): Either[E, A] =
       free match {
-        case ImperativeDsl.Succeed(a)                                 =>
+        case ImperativeDsl.Succeed(a)                =>
           stack match {
             case ImperativeDsl.Sequence(_, onSuccess, _) :: stack => loop(onSuccess(a), stack)
             case Nil                                              => Right(a.asInstanceOf[A])
           }
-        case ImperativeDsl.Opail(e)                                   =>
+        case ImperativeDsl.Opail(e)                  =>
           stack match {
             case ImperativeDsl.Sequence(_, _, onFailure) :: stack => loop(onFailure(e), stack)
             case Nil                                              => Left(e.asInstanceOf[E])
           }
-        case ImperativeDsl.Eval(fa)                                   =>
+        case ImperativeDsl.Eval(fa)                  =>
           unsafeInterpreter.interpret(fa) match {
             case Left(e)  =>
               stack match {
@@ -91,7 +91,7 @@ sealed trait ImperativeDsl[Dsl[+_, +_], +E, +A] { self =>
                 case Nil                                              => Right(a.asInstanceOf[A])
               }
           }
-        case free @ ImperativeDsl.Sequence(fa, onSuccess, onOpailure) =>
+        case free @ ImperativeDsl.Sequence(fa, _, _) =>
           loop(fa, (free :: stack).asInstanceOf[List[ImperativeDsl.Sequence[Dsl, Any, Any, Any, Any]]])
       }
     loop(self, Nil)

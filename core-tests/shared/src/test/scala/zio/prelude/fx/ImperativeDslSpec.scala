@@ -4,7 +4,6 @@ import zio.prelude._
 import zio.test._
 import ImperativeDslSpec.transitSystem.{Dsl, syntax}
 import Dsl.Card
-import scala.language.reflectiveCalls
 
 object ImperativeDslSpec extends ZIOBaseSpec {
   def spec: Spec[Environment, Any] = suite("ImperativeDslSpec")(
@@ -14,9 +13,9 @@ object ImperativeDslSpec extends ZIOBaseSpec {
         case class Customer(name:String, card:Card)
 
         val john = Customer("John", Card.TransitRideCard(2))
-        val jane = Customer("Jane", Card.DebitCard(10_00))
+        val jane = Customer("Jane", Card.DebitCard(1000))
 
-        val interpreter = transitSystem.interpreters.default(farePriceInCents = 2_50)
+        val interpreter = transitSystem.interpreters.default(farePriceInCents = 250)
 
         val program = for {
           _ <- authorize(john.card)
