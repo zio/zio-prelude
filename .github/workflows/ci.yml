@@ -15,7 +15,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
       - name: Checkout current branch
@@ -40,7 +40,7 @@ jobs:
         run: ./sbt check
 
   compile:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -68,7 +68,7 @@ jobs:
         run: free --si -tmws 10 & ./sbt +root${{ matrix.platform }}/Test/compile
 
   publishLocal:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
       - name: Checkout current branch
@@ -91,7 +91,7 @@ jobs:
         run: ./sbt +publishLocal
 
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -132,7 +132,7 @@ jobs:
         run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root3/test
 
   testJvms:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -160,7 +160,7 @@ jobs:
         run: ./sbt root${{ matrix.platform }}/test
 
   testPlatforms:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -188,14 +188,14 @@ jobs:
         run: ./sbt root${{ matrix.platform }}/test
 
   ci:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [lint, compile, publishLocal, test, testJvms, testPlatforms]
     steps:
       - name: Aggregate of lint, and all tests
         run: echo "ci passed"
 
   publish:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     needs: [ci]
     if: github.event_name != 'pull_request'
