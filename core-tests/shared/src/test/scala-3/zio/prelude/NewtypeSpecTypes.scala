@@ -96,4 +96,33 @@ object NewtypeSpecTypes {
   }
 
   Palindrome("racecar")
+
+  // An Assertion.startsWithIgnoreCase Validated Github Header key
+  type GithubHeaderKey = GithubHeaderKey.Type
+  object GithubHeaderKey extends Subtype[String] {
+    override inline def assertion =
+      (Assertion.startsWithIgnoreCase("X-Github"))
+
+    def unsafeWrap(s: String): Type = wrap(s)
+  }
+
+  // These should compile
+  GithubHeaderKey("X-Github-Request-Id")
+  GithubHeaderKey("X-GitHub-Request-Id")
+  GithubHeaderKey("x-github-request-id")
+  GithubHeaderKey("X-GITHUB-REQUEST-ID")
+
+  // An Assertion.endsWithIgnoreCase Validated Gmail email
+  type GmailEmail = GmailEmail.Type
+  object GmailEmail extends Subtype[String] {
+    override inline def assertion =
+      (Assertion.endsWithIgnoreCase("@GMaiL.cOm"))
+
+    def unsafeWrap(s: String): Type = wrap(s)
+  }
+
+  // These should compile
+  GmailEmail("very.cool.person@gmail.com")
+  GmailEmail("very.cool.person@GmaIl.coM")
+  GmailEmail("VERY.COOL.PERSON@GMAIL.COM")
 }

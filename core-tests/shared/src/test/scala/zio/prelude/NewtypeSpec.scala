@@ -1,17 +1,17 @@
 package zio.prelude
 
-import zio.NonEmptyChunk
 import zio.prelude.NewtypeSpecTypes._
 import zio.prelude.laws.{isFailureV, isSuccessV}
 import zio.prelude.newtypes.{And, Or, Sum}
 import zio.test.Assertion._
 import zio.test.{Assertion => TestAssertion, _}
+import zio.{NonEmptyChunk, Scope}
 
 import scala.reflect.ClassTag
 
 object NewtypeSpec extends ZIOBaseSpec {
 
-  def spec =
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("NewtypeSpec")(
       suite("with assertion")(
         test("valid values at compile-time") {
@@ -96,7 +96,61 @@ object NewtypeSpec extends ZIOBaseSpec {
               case _                 => true
             })
           )
-        }
+        },
+        suite("Assertion.startsWithIgnoreCase")(
+          test("valid values at compile-time") {
+            assertTrue(
+              GithubHeaderKey("X-GitHUB-Request-Id") == GithubHeaderKey.unsafeWrap("X-GitHUB-Request-Id"),
+              GithubHeaderKey("X-Github-Request-Id") == GithubHeaderKey.unsafeWrap("X-Github-Request-Id"),
+              GithubHeaderKey("X-GitHub-Request-Id") == GithubHeaderKey.unsafeWrap("X-GitHub-Request-Id"),
+              GithubHeaderKey("x-github-request-id") == GithubHeaderKey.unsafeWrap("x-github-request-id"),
+              GithubHeaderKey("X-GITHUB-REQUEST-ID") == GithubHeaderKey.unsafeWrap("X-GITHUB-REQUEST-ID")
+            )
+          },
+          test("invalid values at compile-time") {
+            assertZIO(typeCheck("""GithubHeaderKey("Toto")"""))(
+              isLeft(
+                containsStringWithoutAnsi("Toto did not satisfy startsWithIgnoreCase(X-Github)")
+              )
+            )
+          } @@ TestAspect.exceptScala3,
+          test("valid values at run-time") {
+            assert(GithubHeaderKey.make("X-GitHUB-Request-Id"))(
+              isSuccessV(equalTo(GithubHeaderKey("X-GitHUB-Request-Id")))
+            )
+          },
+          test("invalid values at run-time") {
+            assert(GithubHeaderKey.make("Toto"))(
+              isFailureV(equalTo(NonEmptyChunk("Toto did not satisfy startsWithIgnoreCase(X-Github)")))
+            )
+          }
+        ),
+        suite("Assertion.endsWithIgnoreCase")(
+          test("valid values at compile-time") {
+            assertTrue(
+              GmailEmail("very.cool.person@gmail.com") == GmailEmail.unsafeWrap("very.cool.person@gmail.com"),
+              GmailEmail("very.cool.person@GmaIl.coM") == GmailEmail.unsafeWrap("very.cool.person@GmaIl.coM"),
+              GmailEmail("VERY.COOL.PERSON@GMAIL.COM") == GmailEmail.unsafeWrap("VERY.COOL.PERSON@GMAIL.COM")
+            )
+          },
+          test("invalid values at compile-time") {
+            assertZIO(typeCheck("""GmailEmail("Toto")"""))(
+              isLeft(
+                containsStringWithoutAnsi("Toto did not satisfy endsWithIgnoreCase(@GMaiL.cOm)")
+              )
+            )
+          } @@ TestAspect.exceptScala3,
+          test("valid values at run-time") {
+            assert(GmailEmail.make("very.cool.person@GmaIl.coM"))(
+              isSuccessV(equalTo(GmailEmail("very.cool.person@GmaIl.coM")))
+            )
+          },
+          test("invalid values at run-time") {
+            assert(GmailEmail.make("Toto"))(
+              isFailureV(equalTo(NonEmptyChunk("Toto did not satisfy endsWithIgnoreCase(@GMaiL.cOm)")))
+            )
+          }
+        )
       ),
       suite("Subtype")(
         test("subtypes values") {

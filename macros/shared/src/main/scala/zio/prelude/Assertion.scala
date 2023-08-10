@@ -60,6 +60,8 @@ object Assertion {
 
   def endsWith(suffix: String): Assertion[String] = EndsWith(suffix)
 
+  def endsWithIgnoreCase(suffix: String): Assertion[String] = EndsWithIgnoreCase(suffix)
+
   def greaterThan[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = GreaterThan(value)
 
   def greaterThanOrEqualTo[A](value: A)(implicit ordering: Ordering[A]): Assertion[A] = !lessThan(value)
@@ -110,7 +112,9 @@ object Assertion {
 
   def startsWith(prefix: String): Assertion[String] = StartsWith(prefix)
 
-  private[prelude] case class And[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
+  def startsWithIgnoreCase(prefix: String): Assertion[String] = StartsWithIgnoreCase(prefix)
+
+  private[prelude] final case class And[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -122,7 +126,7 @@ object Assertion {
       } else (!left || !right).apply(a, negated = false)
   }
 
-  private[prelude] case class Or[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
+  private[prelude] final case class Or[A](left: Assertion[A], right: Assertion[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         (left.apply(a, negated), right.apply(a, negated)) match {
@@ -132,12 +136,12 @@ object Assertion {
       } else (!left && !right).apply(a, negated = false)
   }
 
-  private[prelude] case class Not[A](assertion: Assertion[A]) extends Assertion[A] {
+  private[prelude] final case class Not[A](assertion: Assertion[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       assertion.apply(a, !negated)
   }
 
-  private[prelude] case class DivisibleBy[A](n: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
+  private[prelude] final case class DivisibleBy[A](n: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
       val result = numeric.toDouble(a) % numeric.toDouble(n) == 0
       if (!negated) {
@@ -150,7 +154,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class Contains(string: String) extends Assertion[String] {
+  private[prelude] final case class Contains(string: String) extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val result = a.contains(string)
       if (!negated) {
@@ -163,20 +167,35 @@ object Assertion {
     }
   }
 
-  private[prelude] case class EndsWith(suffix: String) extends Assertion[String] {
+  private[prelude] final case class EndsWith(suffix: String) extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val result = a.endsWith(suffix)
       if (!negated) {
         if (result) Right(())
-        else Left(AssertionError.Failure(s"startsWith($suffix)"))
+        else Left(AssertionError.Failure(s"endsWith($suffix)"))
       } else {
-        if (result) Left(AssertionError.Failure(s"doesNotStartWith($suffix)"))
+        if (result) Left(AssertionError.Failure(s"doesNotEndsWith($suffix)"))
         else Right(())
       }
     }
   }
 
-  private[prelude] case class EqualTo[A](value: A) extends Assertion[A] {
+  private[prelude] final case class EndsWithIgnoreCase(suffix: String) extends Assertion[String] {
+    private val loweredPrefix: String = suffix.toLowerCase
+
+    def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = a.toLowerCase.endsWith(loweredPrefix)
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.Failure(s"endsWithIgnoreCase($suffix)"))
+      } else {
+        if (result) Left(AssertionError.Failure(s"doesNotEndsWithIgnoreCase($suffix)"))
+        else Right(())
+      }
+    }
+  }
+
+  private[prelude] final case class EqualTo[A](value: A) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         if (a == value) Right(())
@@ -187,7 +206,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class Between[A](min: A, max: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+  private[prelude] final case class Between[A](min: A, max: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
       val result = ordering.gteq(a, min) && ordering.lteq(a, max)
       if (!negated) {
@@ -200,7 +219,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+  private[prelude] final case class GreaterThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         if (ordering.gt(a, value)) Right(())
@@ -211,7 +230,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class HasLength[A](lengthAssertion: Assertion[Int]) extends Assertion[String] {
+  private[prelude] final case class HasLength[A](lengthAssertion: Assertion[Int]) extends Assertion[String] {
     def apply(string: String, negated: Boolean): Either[AssertionError, Unit] =
       lengthAssertion(string.length, negated) match {
         case Left(AssertionError.Failure(condition)) => Left(AssertionError.failure(s"hasLength($condition)"))
@@ -219,7 +238,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
+  private[prelude] final case class LessThan[A](value: A)(implicit ordering: Ordering[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] =
       if (!negated) {
         if (ordering.lt(a, value)) Right(())
@@ -230,7 +249,7 @@ object Assertion {
       }
   }
 
-  private[prelude] case class Matches(regexString: String) extends Assertion[String] {
+  private[prelude] final case class Matches(regexString: String) extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val result = a.matches(regexString)
       if (!negated) {
@@ -243,7 +262,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class PowerOf[A](base: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
+  private[prelude] final case class PowerOf[A](base: A)(implicit numeric: Numeric[A]) extends Assertion[A] {
     def apply(a: A, negated: Boolean): Either[AssertionError, Unit] = {
       val result = isPower(numeric.toDouble(base), numeric.toDouble(a))
       if (!negated) {
@@ -263,7 +282,7 @@ object Assertion {
     }
   }
 
-  private[prelude] case class StartsWith(prefix: String) extends Assertion[String] {
+  private[prelude] final case class StartsWith(prefix: String) extends Assertion[String] {
     def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
       val result = a.startsWith(prefix)
       if (!negated) {
@@ -271,6 +290,21 @@ object Assertion {
         else Left(AssertionError.Failure(s"startsWith($prefix)"))
       } else {
         if (result) Left(AssertionError.Failure(s"doesNotStartWith($prefix)"))
+        else Right(())
+      }
+    }
+  }
+
+  private[prelude] final case class StartsWithIgnoreCase(prefix: String) extends Assertion[String] {
+    private val loweredPrefix: String = prefix.toLowerCase
+
+    def apply(a: String, negated: Boolean): Either[AssertionError, Unit] = {
+      val result = a.toLowerCase.startsWith(loweredPrefix)
+      if (!negated) {
+        if (result) Right(())
+        else Left(AssertionError.Failure(s"startsWithIgnoreCase($prefix)"))
+      } else {
+        if (result) Left(AssertionError.Failure(s"doesNotStartWithIgnoreCase($prefix)"))
         else Right(())
       }
     }
