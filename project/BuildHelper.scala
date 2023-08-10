@@ -1,25 +1,26 @@
-import explicitdeps.ExplicitDepsPlugin.autoImport._
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import sbt._
-import sbt.Keys._
-import sbtbuildinfo._
-import sbtbuildinfo.BuildInfoKeys._
-import sbtcrossproject.CrossPlugin.autoImport._
-import scalafix.sbt.ScalafixPlugin.autoImport._
+import explicitdeps.ExplicitDepsPlugin.autoImport.*
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
+import sbt.*
+import sbt.Keys.*
+import sbtbuildinfo.*
+import sbtbuildinfo.BuildInfoKeys.*
+import sbtcrossproject.CrossPlugin.autoImport.*
+import scalafix.sbt.ScalafixPlugin.autoImport.*
 
 object BuildHelper {
   val Scala212: String = "2.12.18"
   val Scala213: String = "2.13.11"
   val Scala3: String   = "3.3.0"
 
-  val SilencerVersion = "1.7.13"
-
   private val stdOptions = Seq(
     "-deprecation",
     "-encoding",
     "UTF-8",
     "-feature",
-    "-unchecked"
+    "-unchecked",
+    // Changes the "@nowarn annotation does not suppress any warnings" warning to an info.
+    // Why? See: https://twitter.com/guizmaii/status/1689622018142957568?s=20
+    "-Wconf:msg=@nowarn annotation does not suppress any warnings:info"
   ) ++ {
     if (sys.env.contains("CI")) {
       Seq("-Xfatal-warnings")
@@ -187,24 +188,18 @@ object BuildHelper {
     ThisBuild / scalaVersion               := Scala213,
     scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
-      if (scalaVersion.value == Scala3)
+      if (scalaVersion.value != Scala3)
         Seq(
-          "com.github.ghik" % s"silencer-lib_$Scala213" % SilencerVersion % Provided
+          compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full)
         )
-      else
-        Seq(
-          "com.github.ghik" % "silencer-lib"            % SilencerVersion % Provided cross CrossVersion.full,
-          compilerPlugin("com.github.ghik" % "silencer-plugin" % SilencerVersion cross CrossVersion.full),
-          compilerPlugin("org.typelevel"  %% "kind-projector"  % "0.13.2" cross CrossVersion.full)
-        )
+      else Seq.empty
     },
     semanticdbEnabled                      := scalaVersion.value != Scala3, // enable SemanticDB
     semanticdbOptions += "-P:semanticdb:synthetics:on",
     semanticdbVersion                      := scalafixSemanticdb.revision,  // use Scalafix compatible version
     ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
     ThisBuild / scalafixDependencies ++= List(
-      "com.github.liancheng" %% "organize-imports" % "0.6.0",
-      "com.github.vovapolu"  %% "scaluzzi"         % "0.1.23"
+      "com.github.vovapolu" %% "scaluzzi" % "0.1.23"
     ),
     Test / parallelExecution               := false,
     incOptions ~= (_.withLogRecompileOnMacro(false)),

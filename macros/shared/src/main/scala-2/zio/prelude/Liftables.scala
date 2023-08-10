@@ -1,12 +1,12 @@
 package zio.prelude
 
-import com.github.ghik.silencer.silent
 import zio.prelude.Assertion.Regex
 
+import scala.annotation.nowarn
 import scala.reflect.macros.whitebox
 
 // Wrongly emits warnings on Scala 2.12.x https://github.com/scala/bug/issues/11918
-@silent("pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
+@nowarn("msg=pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
 trait Liftables {
   val c: whitebox.Context
 
@@ -138,7 +138,7 @@ trait Liftables {
       case q"scala.this.Predef.augmentString(${string: String}).r" => string.r
     }
 
-  @silent("Implicit resolves to enclosing method")
+  @nowarn("msg=Implicit resolves to enclosing method")
   implicit def assertionUnliftable[A]: Unliftable[Assertion[A]] =
     Unliftable[Assertion[A]] {
 

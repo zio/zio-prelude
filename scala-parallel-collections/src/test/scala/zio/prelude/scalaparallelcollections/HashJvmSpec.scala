@@ -1,13 +1,13 @@
 package zio.prelude
 package scalaparallelcollections
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-@silent("Unused import")
+@nowarn("msg=Unused import")
 object HashJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {

@@ -1,9 +1,8 @@
 package zio.prelude
 
-import com.github.ghik.silencer.silent
 import zio.prelude.ConsoleUtils._
 
-import scala.annotation.StaticAnnotation
+import scala.annotation.{StaticAnnotation, nowarn}
 import scala.reflect.macros.whitebox
 
 final case class assertionQuote[A](assertion: Assertion[A])                    extends StaticAnnotation
@@ -15,7 +14,7 @@ trait QuotedAssertion[A] {
 }
 
 // Wrongly emits warnings on Scala 2.12.x https://github.com/scala/bug/issues/11918
-@silent("pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
+@nowarn("msg=pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
 private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
   import c.universe._
 
