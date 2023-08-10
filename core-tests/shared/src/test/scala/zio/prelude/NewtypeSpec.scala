@@ -114,7 +114,7 @@ object NewtypeSpec extends ZIOBaseSpec {
                 containsStringWithoutAnsi("Toto did not satisfy startsWithIgnoreCase(X-Github)")
               )
             )
-          },
+          } @@ TestAspect.exceptScala3,
           test("valid values at run-time") {
             assert(GithubHeaderKey.make("X-GitHUB-Request-Id"))(
               isSuccessV(equalTo(GithubHeaderKey("X-GitHUB-Request-Id")))
@@ -140,7 +140,7 @@ object NewtypeSpec extends ZIOBaseSpec {
                 containsStringWithoutAnsi("Toto did not satisfy endsWithIgnoreCase(@GMaiL.cOm)")
               )
             )
-          },
+          } @@ TestAspect.exceptScala3,
           test("valid values at run-time") {
             assert(GmailEmail.make("very.cool.person@GmaIl.coM"))(
               isSuccessV(equalTo(GmailEmail("very.cool.person@GmaIl.coM")))
