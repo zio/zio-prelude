@@ -18,7 +18,7 @@ package zio.prelude
 
 import zio.Exit.{Failure, Success}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.{Cause, Chunk, Exit, FiberId, NonEmptyChunk, StackTrace, Duration => ZIODuration}
+import zio.{Cause, Chunk, Duration => ZIODuration, Exit, FiberId, NonEmptyChunk, StackTrace}
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.duration.{Duration => ScalaDuration}
