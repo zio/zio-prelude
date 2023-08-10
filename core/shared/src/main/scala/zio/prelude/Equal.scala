@@ -20,7 +20,7 @@ import zio.Exit.{Failure, Success}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
 import zio.{Cause, Chunk, Exit, FiberId, NonEmptyChunk, StackTrace, Duration => ZIODuration}
 
-import scala.annotation.{implicitNotFound, nowarn}
+import scala.annotation.implicitNotFound
 import scala.concurrent.duration.{Duration => ScalaDuration}
 import scala.util.Try
 import scala.{math => sm}
@@ -862,9 +862,8 @@ object Equal extends EqualVersionSpecific {
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Unit` values.
    * Since there is only one `Unit` value all equality comparisons will always be true.
    */
-  @nowarn("msg=dubious usage of method hashCode with unit value")
-  implicit val UnitHashOrd: Hash[Unit] with Ord[Unit] =
-    HashOrd.make(_.hashCode, (_, _) => Ordering.Equals, (_, _) => true)
+  implicit lazy val UnitHashOrd: Hash[Unit] with Ord[Unit] =
+    HashOrd.make(Hash.default.hash, (_, _) => Ordering.Equals, (_, _) => true)
 
   /**
    * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
