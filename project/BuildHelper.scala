@@ -20,7 +20,7 @@ object BuildHelper {
     "-unchecked",
     // Changes the "@nowarn annotation does not suppress any warnings" warning to an info.
     // Why? See: https://twitter.com/guizmaii/status/1689622018142957568?s=20
-    "-Wconf:msg=@nowarn annotation does not suppress any warnings:info"
+    "-Wconf:msg=@nowarn:info"
   ) ++ {
     if (sys.env.contains("CI")) {
       Seq("-Xfatal-warnings")
