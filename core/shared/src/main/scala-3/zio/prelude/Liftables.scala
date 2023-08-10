@@ -37,10 +37,10 @@ trait Liftables {
         case '{ Assertion.Regex.digit }                                                                => Some(Assertion.Regex.digit)
         case '{ Assertion.Regex.nonDigit }                                                             => Some(Assertion.Regex.nonDigit)
         case '{ Assertion.Regex.literal(${Expr(str)}) }                                                => Some(Assertion.Regex.literal(str))
-        case '{ Assertion.Regex.anyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }     => Some(Assertion.Regex.anyCharOf(first, second, Varargs(rest).valueOrError*))
-        case '{ Assertion.Regex.anyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }    => Some(Assertion.Regex.anyRegexOf(first, second, Varargs(rest).valueOrError*))
-        case '{ Assertion.Regex.notAnyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }  => Some(Assertion.Regex.notAnyCharOf(first, second, Varargs(rest).valueOrError*))
-        case '{ Assertion.Regex.notAnyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) } => Some(Assertion.Regex.notAnyRegexOf(first, second, Varargs(rest).valueOrError*))
+        case '{ Assertion.Regex.anyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }     => Some(Assertion.Regex.anyCharOf(first, second, Varargs(rest).valueOrAbort*))
+        case '{ Assertion.Regex.anyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }    => Some(Assertion.Regex.anyRegexOf(first, second, Varargs(rest).valueOrAbort*))
+        case '{ Assertion.Regex.notAnyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }  => Some(Assertion.Regex.notAnyCharOf(first, second, Varargs(rest).valueOrAbort*))
+        case '{ Assertion.Regex.notAnyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) } => Some(Assertion.Regex.notAnyRegexOf(first, second, Varargs(rest).valueOrAbort*))
         case '{ Assertion.Regex.inRange(${Expr(start)}, ${Expr(end)}) }                                => Some(Assertion.Regex.inRange(start, end))
         case '{ Assertion.Regex.notInRange(${Expr(start)}, ${Expr(end)}) }                             => Some(Assertion.Regex.notInRange(start, end))
         case '{ Assertion.Regex.start }                                                                => Some(Assertion.Regex.start)
@@ -130,7 +130,7 @@ trait Liftables {
       case _: Short  => summon[Numeric[Short]].asInstanceOf[Numeric[Any]]
       case _: Byte   => summon[Numeric[Byte]].asInstanceOf[Numeric[Any]]
       case _: Char   => summon[Numeric[Char]].asInstanceOf[Numeric[Any]]
-      case other     => report.throwError(s"NO NUMERIC FOR $other")
+      case other     => report.errorAndAbort(s"NO NUMERIC FOR $other")
     }
   }
 
@@ -146,7 +146,7 @@ trait Liftables {
       case _: Short  => SOrdering.Short.asInstanceOf[SOrdering[Any]]
       case _: Byte   => SOrdering.Byte.asInstanceOf[SOrdering[Any]]
       case _: Char   => SOrdering.Char.asInstanceOf[SOrdering[Any]]
-      case other     => report.throwError(s"NO ORDERING FOR $other")
+      case other     => report.errorAndAbort(s"NO ORDERING FOR $other")
     }
   }
 }
