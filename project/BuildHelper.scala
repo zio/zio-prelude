@@ -1,17 +1,17 @@
 import explicitdeps.ExplicitDepsPlugin.autoImport._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import sbt.Keys._
 import sbt._
-import sbtbuildinfo.BuildInfoKeys._
+import sbt.Keys._
 import sbtbuildinfo._
+import sbtbuildinfo.BuildInfoKeys._
 import sbtcrossproject.CrossPlugin.autoImport._
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
   val Scala211: String = "2.11.12"
-  val Scala212: String = "2.12.17"
-  val Scala213: String = "2.13.10"
-  val Scala3: String   = "3.2.2"
+  val Scala212: String = "2.12.18"
+  val Scala213: String = "2.13.11"
+  val Scala3: String   = "3.3.0"
 
   val SilencerVersion = "1.7.13"
 
