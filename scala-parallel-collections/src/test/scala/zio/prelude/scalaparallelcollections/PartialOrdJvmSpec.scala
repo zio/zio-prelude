@@ -1,12 +1,13 @@
 package zio.prelude
 package scalaparallelcollections
 
-import com.github.ghik.silencer.silent
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-@silent("Unused import")
+import scala.annotation.nowarn
+
+@nowarn("msg=Unused import")
 object PartialOrdJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
