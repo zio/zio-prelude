@@ -5,7 +5,6 @@ import zio.prelude.NewtypeSpecTypes._
 import zio.prelude.laws.{isFailureV, isSuccessV}
 import zio.prelude.newtypes.{And, Or, Sum}
 import zio.test.Assertion._
-import zio.test.TestAspect._
 import zio.test.{Assertion => TestAssertion, _}
 
 import scala.reflect.ClassTag

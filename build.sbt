@@ -214,7 +214,7 @@ lazy val scalaParallelCollections = project
         // Only 2.12 standard library contains Parallel Scala collections
         case BuildHelper.Scala212 =>
           List()
-        case _                                           =>
+        case _                    =>
           List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
       }
     }
