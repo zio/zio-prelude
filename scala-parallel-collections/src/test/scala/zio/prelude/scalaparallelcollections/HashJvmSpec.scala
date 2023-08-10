@@ -1,11 +1,12 @@
 package zio.prelude
 package scalaparallelcollections
 
-import scala.annotation.nowarn
 import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
+
+import scala.annotation.nowarn
 
 @nowarn("msg=Unused import")
 object HashJvmSpec extends ZIOBaseSpec {

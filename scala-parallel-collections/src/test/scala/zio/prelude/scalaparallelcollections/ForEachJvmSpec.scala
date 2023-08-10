@@ -1,12 +1,12 @@
 package zio.prelude
 package scalaparallelcollections
 
-import scala.annotation.nowarn
 import zio.Trace
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
+import scala.annotation.nowarn
 import scala.collection.parallel.{immutable => par}
 
 @nowarn("msg=Unused import")

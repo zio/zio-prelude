@@ -19,7 +19,9 @@ object BuildHelper {
     "-feature",
     "-unchecked",
     // Changes the "@nowarn annotation does not suppress any warnings" warning to an info.
-    // Why? See: https://twitter.com/guizmaii/status/1689622018142957568?s=20
+    // Why? See:
+    // - https://twitter.com/guizmaii/status/1689622018142957568?s=20
+    // - https://users.scala-lang.org/t/scala-improving-the-nowarn-annotation-by-taking-an-additional-optional-parameter-the-scala-version-s-that-must-be-silenced/9454
     "-Wconf:msg=@nowarn:info"
   ) ++ {
     if (sys.env.contains("CI")) {
