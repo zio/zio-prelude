@@ -265,14 +265,14 @@ trait Liftables {
   }
 
   /**
-   * This Ordering instance exists for compatibility between 2.11, 2.12 and 2.13.
+   * This Ordering instance exists for compatibility between 2.12 and 2.13.
    */
   object DoubleOrdering extends Ordering[Double] {
     def compare(x: Double, y: Double): Int = java.lang.Double.compare(x, y)
   }
 
   /**
-   * This Ordering instance exists for compatibility between 2.11, 2.12 and 2.13.
+   * This Ordering instance exists for compatibility between 2.12 and 2.13.
    */
   object FloatOrdering extends Ordering[Float] {
     def compare(x: Float, y: Float): Int = java.lang.Float.compare(x, y)

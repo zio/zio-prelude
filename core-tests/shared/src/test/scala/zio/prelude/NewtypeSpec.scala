@@ -68,7 +68,7 @@ object NewtypeSpec extends ZIOBaseSpec {
         ),
         test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[LuckyNumber]].runtimeClass eq implicitly[ClassTag[Double]].runtimeClass)(isTrue)
-        } @@ exceptScala211,
+        },
         test("allows creating subtypes of newtypes") {
           val compile = typeCheck {
             """import java.util.UUID
@@ -80,7 +80,7 @@ object NewtypeSpec extends ZIOBaseSpec {
                """
           }
           assertZIO(compile)(isRight)
-        } @@ TestAspect.exceptScala211,
+        },
         test("allows creating arrays of newtypes") {
           val data = Array.fill(2)(Natural(0))
           data(1) = Natural(1)
@@ -109,7 +109,7 @@ object NewtypeSpec extends ZIOBaseSpec {
         ),
         test("classtag reports same runtimeclass as underlying primitive") {
           assert(implicitly[ClassTag[Natural]].runtimeClass eq implicitly[ClassTag[Int]].runtimeClass)(isTrue)
-        } @@ exceptScala211,
+        },
         test("pattern matching") {
           val number = Natural(2)
           assertTrue(

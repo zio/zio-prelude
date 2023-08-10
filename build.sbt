@@ -70,12 +70,6 @@ lazy val rootNative = project
   .settings(publish / skip := true)
   .aggregate(projectsCommon.map(_.native: ProjectReference): _*)
 
-lazy val root211 = project
-  .in(file("target/root211"))
-  .settings(publish / skip := true)
-  .aggregate(projectsCommon.map(_.jvm: ProjectReference): _*)
-  .aggregate(scalaParallelCollections)
-
 lazy val root212 = project
   .in(file("target/root212"))
   .settings(publish / skip := true)
@@ -217,8 +211,8 @@ lazy val scalaParallelCollections = project
   .settings(
     libraryDependencies ++= {
       scalaVersion.value match {
-        // Only 2.11 and 2.12 standard library contains Parallel Scala collections
-        case BuildHelper.Scala211 | BuildHelper.Scala212 =>
+        // Only 2.12 standard library contains Parallel Scala collections
+        case BuildHelper.Scala212 =>
           List()
         case _                                           =>
           List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
@@ -233,7 +227,6 @@ lazy val benchmarks = project
   .in(file("benchmarks"))
   .settings(stdSettings("zio-prelude-benchmarks"))
   .settings(
-    crossScalaVersions --= List(BuildHelper.Scala211),
     publish / skip := true,
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
@@ -252,7 +245,6 @@ lazy val docs = project
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
     scalaVersion                               := Scala213,
-    crossScalaVersions -= Scala211,
     projectName                                := "ZIO Prelude",
     mainModuleName                             := (core.jvm / moduleName).value,
     projectStage                               := ProjectStage.ProductionReady,

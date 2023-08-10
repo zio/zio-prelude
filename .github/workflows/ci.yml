@@ -96,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: ['2.11.*', '2.12.*', '2.13.*', '3.*']
+        scala: ['2.12.*', '2.13.*', '3.*']
         java: ['17']
         platform: ['JVM']
     steps:
@@ -118,9 +118,6 @@ jobs:
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
-      - name: tests 2.11
-        if: ${{ startsWith(matrix.scala, '2.11.') }}
-        run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root211/test
       - name: tests 2.12
         if: ${{ startsWith(matrix.scala, '2.12.') }}
         run: free --si -tmws 10 & ./sbt ++${{ matrix.scala }} root212/test

@@ -1,14 +1,13 @@
-import explicitdeps.ExplicitDepsPlugin.autoImport._
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import sbt._
-import sbt.Keys._
-import sbtbuildinfo._
-import sbtbuildinfo.BuildInfoKeys._
-import sbtcrossproject.CrossPlugin.autoImport._
-import scalafix.sbt.ScalafixPlugin.autoImport._
+import explicitdeps.ExplicitDepsPlugin.autoImport.*
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
+import sbt.*
+import sbt.Keys.*
+import sbtbuildinfo.*
+import sbtbuildinfo.BuildInfoKeys.*
+import sbtcrossproject.CrossPlugin.autoImport.*
+import scalafix.sbt.ScalafixPlugin.autoImport.*
 
 object BuildHelper {
-  val Scala211: String = "2.11.12"
   val Scala212: String = "2.12.18"
   val Scala213: String = "2.13.11"
   val Scala3: String   = "3.3.0"
@@ -139,21 +138,6 @@ object BuildHelper {
           "-Xmax-classfile-name",
           "242"
         ) ++ std2xOptions ++ optimizerOptions(optimize)
-      case Some((2, 11)) =>
-        Seq(
-          "-Ypartial-unification",
-          "-Yno-adapted-args",
-          "-Ywarn-inaccessible",
-          "-Ywarn-infer-any",
-          "-Ywarn-nullary-override",
-          "-Ywarn-nullary-unit",
-          "-Xexperimental",
-          "-Ywarn-unused-import",
-          "-Xfuture",
-          "-Xsource:2.13",
-          "-Xmax-classfile-name",
-          "242"
-        ) ++ std2xOptions
       case _             => Seq.empty
     }
 
@@ -166,14 +150,12 @@ object BuildHelper {
 
   def crossPlatformSources(scalaVer: String, platform: String, conf: String, baseDir: File) = {
     val versions = CrossVersion.partialVersion(scalaVer) match {
-      case Some((2, 11)) =>
-        List("2.11+", "2.11-2.12")
       case Some((2, 12)) =>
-        List("2.11+", "2.12+", "2.11-2.12", "2.12-2.13")
+        List("2.12", "2.12+", "2.12-2.13")
       case Some((2, 13)) =>
-        List("2.11+", "2.12+", "2.13+", "2.12-2.13")
+        List("2.12+", "2.13+", "2.12-2.13")
       case Some((3, _))  =>
-        List("2.11+", "2.12+", "2.13+")
+        List("2.12+", "2.13+")
       case _             =>
         List()
     }
@@ -201,7 +183,7 @@ object BuildHelper {
 
   def stdSettings(prjName: String) = Seq(
     name                                   := s"$prjName",
-    crossScalaVersions                     := Seq(Scala211, Scala212, Scala213, Scala3),
+    crossScalaVersions                     := Seq(Scala212, Scala213, Scala3),
     ThisBuild / scalaVersion               := Scala213,
     scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
