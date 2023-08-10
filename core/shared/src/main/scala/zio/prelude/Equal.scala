@@ -862,8 +862,8 @@ object Equal extends EqualVersionSpecific {
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Unit` values.
    * Since there is only one `Unit` value all equality comparisons will always be true.
    */
-  implicit lazy val UnitHashOrd: Hash[Unit] with Ord[Unit] =
-    HashOrd.make(Hash.default.hash, (_, _) => Ordering.Equals, (_, _) => true)
+  implicit val UnitHashOrd: Hash[Unit] with Ord[Unit] =
+    HashOrd.make(_ => 0, (_, _) => Ordering.Equals, (_, _) => true)
 
   /**
    * Derives an `Equal[Vector[A]]` given an `Equal[A]`.
