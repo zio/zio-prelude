@@ -1,11 +1,11 @@
-import explicitdeps.ExplicitDepsPlugin.autoImport.*
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
-import sbt.*
-import sbt.Keys.*
-import sbtbuildinfo.*
-import sbtbuildinfo.BuildInfoKeys.*
-import sbtcrossproject.CrossPlugin.autoImport.*
-import scalafix.sbt.ScalafixPlugin.autoImport.*
+import explicitdeps.ExplicitDepsPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import sbt._
+import sbt.Keys._
+import sbtbuildinfo._
+import sbtbuildinfo.BuildInfoKeys._
+import sbtcrossproject.CrossPlugin.autoImport._
+import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
   val Scala212: String = "2.12.18"
