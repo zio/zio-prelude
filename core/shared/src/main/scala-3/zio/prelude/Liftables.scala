@@ -69,6 +69,7 @@ trait Liftables {
         case '{ Assertion.divisibleBy[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.divisibleBy(value)(numericForValue(value)))
         case '{ Assertion.never }                                                        => Some(Assertion.never)
         case '{ Assertion.endsWith(${Expr(value)}) }                                     => Some(Assertion.endsWith(value).asInstanceOf[Assertion[A]])
+        case '{ Assertion.endsWithIgnoreCase(${Expr(value)}) }                           => Some(Assertion.endsWithIgnoreCase(value).asInstanceOf[Assertion[A]])
         case '{ (${Expr(left)}: Assertion[A]).&&(${Expr(right)}) }                       => Some(Assertion.And(left, right))
         case '{ Assertion.equalTo[Any](${LiteralUnlift[A](value)}) }                     => Some(Assertion.equalTo(value))
         case '{ Assertion.notEqualTo[Any](${LiteralUnlift[A](value)}) }                  => Some(Assertion.notEqualTo(value))
@@ -85,6 +86,7 @@ trait Liftables {
         case '{ (${Expr(left)}: Assertion[A]).||(${Expr(right)}) }                       => Some(Assertion.Or(left, right))
         case '{ Assertion.powerOf[A](${LiteralUnlift(value)})($_) }                      => Some(Assertion.powerOf(value)(numericForValue(value)))
         case '{ Assertion.startsWith(${Expr(value)}) }                                   => Some(Assertion.startsWith(value).asInstanceOf[Assertion[A]])
+        case '{ Assertion.startsWithIgnoreCase(${Expr(value)}) }                         => Some(Assertion.startsWithIgnoreCase(value).asInstanceOf[Assertion[A]])
         case _ => None
       }
     }
