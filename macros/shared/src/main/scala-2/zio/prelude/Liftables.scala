@@ -160,6 +160,9 @@ trait Liftables {
       case q"${A(_)}.endsWith(${value: String})" =>
         Assertion.endsWith(value).asInstanceOf[Assertion[A]]
 
+      case q"${A(_)}.endsWithIgnoreCase(${value: String})" =>
+        Assertion.endsWithIgnoreCase(value).asInstanceOf[Assertion[A]]
+
       case q"${A(_)}.equalTo[$_](${LiteralUnlift(value)})" =>
         Assertion.equalTo(value.asInstanceOf[A])
 
@@ -201,6 +204,9 @@ trait Liftables {
 
       case q"${A(_)}.startsWith(${value: String})" =>
         Assertion.startsWith(value).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.startsWithIgnoreCase(${value: String})" =>
+        Assertion.startsWithIgnoreCase(value).asInstanceOf[Assertion[A]]
 
       case q"!${assertion: Assertion[A]}" =>
         Assertion.Not(assertion)
