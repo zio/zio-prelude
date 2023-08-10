@@ -16,13 +16,12 @@
 
 package zio.prelude.fx
 
-import com.github.ghik.silencer.silent
 import zio.internal.Stack
 import zio.prelude._
 import zio.prelude.coherent.CovariantIdentityBoth
 import zio.{Cause => _, _}
 
-import scala.annotation.switch
+import scala.annotation.{nowarn, switch}
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -1292,7 +1291,7 @@ object ZPure {
       self.refineOrDie { case e: E1 => e }
   }
 
-  @silent("never used")
+  @nowarn("msg=never used")
   private object Tags {
     final val FlatMap     = 0
     final val Succeed     = 1

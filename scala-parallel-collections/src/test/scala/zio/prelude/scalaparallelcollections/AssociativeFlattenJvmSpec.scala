@@ -1,15 +1,15 @@
 package zio.prelude
 package scalaparallelcollections
 
-import com.github.ghik.silencer.silent
 import zio.Trace
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
+import scala.annotation.nowarn
 import scala.collection.parallel.{immutable => par}
 
-@silent("Unused import")
+@nowarn("msg=Unused import")
 object AssociativeFlattenJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {

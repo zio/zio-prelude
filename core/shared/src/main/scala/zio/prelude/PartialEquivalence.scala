@@ -16,9 +16,9 @@
 
 package zio.prelude
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 
-@silent("Unused import")
+@nowarn("msg=Unused import")
 trait PartialEquivalence[A, B, +E1, +E2] { self =>
   import PartialEquivalence._
   import zio._ // for zio.EitherCompat
