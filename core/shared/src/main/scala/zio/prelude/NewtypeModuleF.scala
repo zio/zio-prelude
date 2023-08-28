@@ -159,7 +159,7 @@ private[prelude] sealed trait NewtypeModuleF {
      * Converts an instance of the underlying type to an instance of the
      * newtype.
      */
-    protected def wrap[x](value: A[x]): Type[x] = wrapAll[Id, x](value)
+    def wrap[x](value: A[x]): Type[x] = wrapAll[Id, x](value)
 
     /**
      * Converts an instance of the newtype back to an instance of the
@@ -181,7 +181,7 @@ private[prelude] sealed trait NewtypeModuleF {
      * this could be used to convert a list of instances of the underlying
      * type to a list of instances of the newtype.
      */
-    protected def wrapAll[F[_], x](value: F[A[x]]): F[Type[x]]
+    def wrapAll[F[_], x](value: F[A[x]]): F[Type[x]]
 
     /**
      * Converts an instance of a type parameterized on the newtype back to an

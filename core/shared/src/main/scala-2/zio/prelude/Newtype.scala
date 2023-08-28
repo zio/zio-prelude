@@ -186,7 +186,7 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    * Converts an instance of the underlying type to an instance of the
    * newtype. Ignores the assertion.
    */
-  protected def wrap(value: A): Type = value.asInstanceOf[Type]
+  def wrap(value: A): Type = value.asInstanceOf[Type]
 
   /**
    * Converts an instance of the newtype back to an instance of the
