@@ -185,7 +185,11 @@ trait CovariantIdentityBoth[F[+_]] extends Covariant[F] with IdentityBoth[F] { s
   def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => F[B])(implicit
     bf: BuildFrom[Collection[A], B, Collection[B]]
   ): F[Collection[B]] =
-    in.foldLeft(bf.newBuilder(in).succeed)((bs, a) => bs.zipWith(f(a))(_ += _)).map(_.result())
+    in.foldLeft(List.empty[B].succeed)((fbs, a) => fbs.zipWith(f(a))((bs, b) => b :: bs)).map { bs =>
+      val builder = bf.newBuilder(in)
+      builder ++= bs.reverse
+      builder.result()
+    }
 
   def forEach_[A, B](in: Iterable[A])(f: A => F[Any]): F[Unit] =
     in.foldLeft(identityBoth.any)((bs, a) => bs *> f(a)).unit
