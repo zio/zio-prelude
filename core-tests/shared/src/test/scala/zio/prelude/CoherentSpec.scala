@@ -51,6 +51,10 @@ object CoherentSpec extends ZIOBaseSpec {
         assert(instance.multiplyOption(5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(10)))) &&
         assert(instance.multiplyOption(0)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(0)))) &&
         assert(instance.multiplyOption(-5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(-10))))
+      },
+      test("CovariantIdentityBoth") {
+        val instance = implicitly[CovariantIdentityBoth[List]]
+        assert(instance.forEach(List(List(1, 2), List(3)))(identity))(equalTo(List(List(1, 3), List(2, 3))))
       }
     )
 }
