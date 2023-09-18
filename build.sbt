@@ -256,9 +256,7 @@ lazy val docs = project
       experimentalLaws.jvm,
       laws.jvm,
       scalaParallelCollections
-    ),
-    docsPublishBranch                          := "series/2.x",
-    checkArtifactBuildProcessWorkflowStep      := None
+    )
   )
   .settings(macroDefinitionSettings)
   .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
