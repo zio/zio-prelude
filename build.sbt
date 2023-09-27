@@ -37,7 +37,7 @@ addCommandAlias(
   ";coreTestsNative/test;experimentalTestsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
 )
 
-val zioVersion = "2.0.16"
+val zioVersion = "2.0.18"
 
 val projectsCommon = List(
   core,
