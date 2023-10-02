@@ -68,6 +68,26 @@ class ForEachBenchmarks {
   def zioForEach_ZPure(bh: Blackhole): Unit =
     bh.consume(list.forEach_(ZPure.succeed[Unit, Int](_)).run)
 
+  @Benchmark
+  def catsFilterTraverseOption(bh: Blackhole): Unit =
+    bh.consume(list.traverseFilter(a => Option(a.some)))
+
+  @Benchmark
+  def catsFilterTraverseCIO(bh: Blackhole): Unit =
+    bh.consume(list.traverseFilter(CIO.some))
+
+  @Benchmark
+  def zioForEachCollectSomeOption(bh: Blackhole): Unit =
+    bh.consume(list.forEachCollectSome(a => Option(Some(a))))
+
+  @Benchmark
+  def zioForEachCollectSomeZIO(bh: Blackhole): Unit =
+    bh.consume(unsafeRun(list.forEachCollectSome(a => ZIO.some(a))))
+
+  @Benchmark
+  def zioForEachCollectSomeZPure(bh: Blackhole): Unit =
+    bh.consume(list.forEachCollectSome(a => ZPure.succeed[Unit, Option[Int]](Some(a))).run)
+
   def unsafeRun[E, A](zio: ZIO[Any, E, A]): A =
     Unsafe.unsafe(implicit unsafe => Runtime.default.unsafe.run(zio).getOrThrowFiberFailure())
 }

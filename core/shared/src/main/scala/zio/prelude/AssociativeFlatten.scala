@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio._
+import zio.prelude.coherent.CovariantIdentityBoth
 import zio.stm.ZSTM
 import zio.stream.ZStream
 
@@ -299,5 +300,30 @@ trait AssociativeFlattenSyntax {
       identityEither: IdentityEither[F]
     ): F[A] =
       filter(f)
+  }
+
+  /**
+   * Provides infix syntax for filtering with mapping to covariant types.
+   */
+  implicit class AssociativeFlattenForEachIdentityBothIdentityEitherOps[F[+_], A](fa: F[A]) {
+    def forEachCollectSome[G[+_]: IdentityBoth: Covariant, B](f: A => G[Option[B]])(implicit
+      FE: ForEach[F],
+      IE: IdentityEither[F],
+      IB: IdentityBoth[F],
+      AF: AssociativeFlatten[F]
+    ): G[F[B]] =
+      fa.forEach(f).map(_.collect { case Some(b) => b })
+  }
+
+  /**
+   * Provides infix syntax for filtering with mapping to covariant types for iterables.
+   */
+  implicit class AssociativeFlattenForEachIdentityBothIdentityEitherIterableOps[F[+Element] <: Iterable[Element], A](
+    fa: F[A]
+  ) {
+    def forEachCollectSome[G[+_]: IdentityBoth: Covariant, B](f: A => G[Option[B]])(implicit
+      bf: BuildFrom[F[A], B, F[B]]
+    ): G[F[B]] =
+      CovariantIdentityBoth[G].forEachCollectSome(fa)(f)
   }
 }
