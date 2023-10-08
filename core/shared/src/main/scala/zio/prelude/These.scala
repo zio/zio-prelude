@@ -153,7 +153,7 @@ sealed trait These[+A, +B] extends Product with Serializable { self =>
    */
   final def forEach[F[+_]: IdentityBoth: Covariant, C](f: B => F[C]): F[These[A, C]] =
     self match {
-      case Left(a)    => left(a).succeed
+      case Left(a)    => left(a).succeed[F]
       case Right(b)   => f(b).map(right)
       case Both(a, b) => f(b).map(c => both(a, c))
     }
