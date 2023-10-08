@@ -39,6 +39,36 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
 
   /**
+   * Collects elements of the collection for which the partial function`pf` is
+   * defined.
+   */
+  def collect[A, B](fa: F[A])(pf: PartialFunction[A, B])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[B] = {
+    implicit val covariant: Covariant[F] = self
+    implicit val identity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
+    foldMap(fa) { a =>
+      pf.lift(a) match {
+        case Some(b) => b.succeed[F]
+        case None    => identityEither.none
+      }
+    }
+  }
+
+  /**
+   * Collects elements of the collection for which the effectual partial function
+   * `pf` is defined.
+   */
+  def collectM[G[+_]: IdentityFlatten: Covariant, A, B](fa: F[A])(pf: PartialFunction[A, G[B]])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[B]] = {
+    implicit val covariant: Covariant[F] = self
+    implicit val identity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
+    foldMapM(fa) { a =>
+      pf.lift(a) match {
+        case Some(fb) => fb.map(_.succeed[F])
+        case None     => IdentityFlatten[G].any.as(identityEither.none)
+      }
+    }
+  }
+
+  /**
    * Reduces the collection to a summary value using the associative operation.
    * Alias for `fold`.
    */
@@ -64,6 +94,30 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    */
   def exists[A](fa: F[A])(f: A => Boolean): Boolean =
     foldMap(fa)(a => Or.create(f(a)))
+
+  /**
+   * Filters the collection with the predicate `f`.
+   */
+  def filter[A](fa: F[A])(f: A => Boolean)(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[A] = {
+    implicit val covariant: Covariant[F] = self
+    implicit val identity: Identity[F[A]] = Identity.fromIdentityEitherCovariant
+    foldMap(fa) { a =>
+      if (f(a)) a.succeed[F] else identityEither.none
+    }
+  }
+
+  /**
+   * Filters the collection with the effectual predicate `f`.
+   */
+  def filterM[G[+_]: IdentityFlatten: Covariant, A](fa: F[A])(f: A => G[Boolean])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[A]] = {
+    implicit val covariant: Covariant[F] = self
+    implicit val identity: Identity[F[A]] = Identity.fromIdentityEitherCovariant
+    foldMapM(fa) { a =>
+      f(a).map { b =>
+        if (b) a.succeed[F] else identityEither.none
+      }
+    }
+  }
 
   /**
    * Returns the first element in the collection satisfying the specified
@@ -420,6 +474,18 @@ trait ForEachSyntax {
    * Provides infix syntax for traversing collections.
    */
   implicit class ForEachOps[F[+_], A](private val self: F[A]) {
+    def collect[B](pf: PartialFunction[A, B])(implicit
+      F: ForEach[F],
+      I: IdentityEither[F],
+      B: IdentityBoth[F]
+    ): F[B] =
+      F.collect(self)(pf)
+    def collectM[G[+_]: IdentityFlatten: Covariant, B](pf: PartialFunction[A, G[B]])(implicit
+      F: ForEach[F],
+      I: IdentityEither[F],
+      B: IdentityBoth[F]
+    ): G[F[B]] =
+      F.collectM(self)(pf)
     def concatenate(implicit F: ForEach[F], A: Identity[A]): A                                                  =
       F.concatenate(self)
     def forEach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: ForEach[F]): G[F[B]]               =
@@ -430,6 +496,14 @@ trait ForEachSyntax {
       F.count(self)(f)
     def exists(f: A => Boolean)(implicit F: ForEach[F]): Boolean                                                =
       F.exists(self)(f)
+    def filter(f: A => Boolean)(implicit F: ForEach[F], I: IdentityEither[F], B: IdentityBoth[F]): F[A]         =
+      F.filter(self)(f)
+    def filterM[G[+_]: IdentityFlatten: Covariant](f: A => G[Boolean])(implicit
+      F: ForEach[F],
+      I: IdentityEither[F],
+      B: IdentityBoth[F]
+    ): G[F[A]]                                                                                                  =
+      F.filterM(self)(f)
     def find(f: A => Boolean)(implicit F: ForEach[F]): Option[A]                                                =
       F.find(self)(f)
     def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: ForEach[F]): S                                            =

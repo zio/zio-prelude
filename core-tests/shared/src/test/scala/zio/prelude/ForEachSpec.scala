@@ -75,6 +75,13 @@ object ForEachSpec extends ZIOBaseSpec {
             assert(actual)(equalTo(expected))
           }
         },
+        test("filter") {
+          check(genList, genBooleanFunction) { (as, f) =>
+            val actual   = ForEach[List].filter(as)(f)
+            val expected = as.filter(f)
+            assert(actual)(equalTo(expected))
+          }
+        },
         test("find") {
           check(genList, genBooleanFunction) { (as, f) =>
             val actual   = ForEach[List].find(as)(f)
