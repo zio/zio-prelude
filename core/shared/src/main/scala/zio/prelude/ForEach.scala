@@ -42,8 +42,10 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Collects elements of the collection for which the partial function`pf` is
    * defined.
    */
-  def collect[A, B](fa: F[A])(pf: PartialFunction[A, B])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[B] = {
-    implicit val covariant: Covariant[F] = self
+  def collect[A, B](
+    fa: F[A]
+  )(pf: PartialFunction[A, B])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[B] = {
+    implicit val covariant: Covariant[F]  = self
     implicit val identity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
     foldMap(fa) { a =>
       pf.lift(a) match {
@@ -57,8 +59,10 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * Collects elements of the collection for which the effectual partial function
    * `pf` is defined.
    */
-  def collectM[G[+_]: IdentityFlatten: Covariant, A, B](fa: F[A])(pf: PartialFunction[A, G[B]])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[B]] = {
-    implicit val covariant: Covariant[F] = self
+  def collectM[G[+_]: IdentityFlatten: Covariant, A, B](fa: F[A])(
+    pf: PartialFunction[A, G[B]]
+  )(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[B]] = {
+    implicit val covariant: Covariant[F]  = self
     implicit val identity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
     foldMapM(fa) { a =>
       pf.lift(a) match {
@@ -98,8 +102,10 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   /**
    * Filters the collection with the predicate `f`.
    */
-  def filter[A](fa: F[A])(f: A => Boolean)(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[A] = {
-    implicit val covariant: Covariant[F] = self
+  def filter[A](
+    fa: F[A]
+  )(f: A => Boolean)(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[A] = {
+    implicit val covariant: Covariant[F]  = self
     implicit val identity: Identity[F[A]] = Identity.fromIdentityEitherCovariant
     foldMap(fa) { a =>
       if (f(a)) a.succeed[F] else identityEither.none
@@ -109,8 +115,10 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   /**
    * Filters the collection with the effectual predicate `f`.
    */
-  def filterM[G[+_]: IdentityFlatten: Covariant, A](fa: F[A])(f: A => G[Boolean])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[A]] = {
-    implicit val covariant: Covariant[F] = self
+  def filterM[G[+_]: IdentityFlatten: Covariant, A](
+    fa: F[A]
+  )(f: A => G[Boolean])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[A]] = {
+    implicit val covariant: Covariant[F]  = self
     implicit val identity: Identity[F[A]] = Identity.fromIdentityEitherCovariant
     foldMapM(fa) { a =>
       f(a).map { b =>
@@ -502,7 +510,7 @@ trait ForEachSyntax {
       F: ForEach[F],
       I: IdentityEither[F],
       B: IdentityBoth[F]
-    ): G[F[A]]                                                                                                  =
+    ): G[F[A]] =
       F.filterM(self)(f)
     def find(f: A => Boolean)(implicit F: ForEach[F]): Option[A]                                                =
       F.find(self)(f)
