@@ -570,6 +570,8 @@ trait ForEachSyntax {
       F.sum(self)
     def toChunk(implicit F: ForEach[F]): Chunk[A]                                                               =
       F.toChunk(self)
+    def withFilter(f: A => Boolean)(implicit F: ForEach[F], I: IdentityEither[F], B: IdentityBoth[F]): F[A]     =
+      F.filter(self)(f)
     def zipAll[B](
       that: F[B]
     )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]] =
