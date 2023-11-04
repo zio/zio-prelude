@@ -1,0 +1,14 @@
+object MyTypes {
+  type UUID = java.util.UUID
+
+  object UUIDv1 {
+    type Type = UUID
+    def generate: Type = java.util.UUID.randomUUID()
+  }
+
+  object UserId {
+    type Type = UUIDv1.Type
+    def create: Type = UUIDv1.generate
+  }
+}
+
