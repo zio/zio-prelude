@@ -124,7 +124,7 @@ object DebugSpec extends ZIOBaseSpec {
           )
         ),
         test("testTrait")(check(genTestTrait) { c =>
-          assert(c.debug.render(Renderer.Simple))(equalTo(s"${c.getClass.getSimpleName.init}"))
+          assert(c.debug.render(Renderer.Simple))(equalTo(s"${c.getClass.getSimpleName.replace("$", "")}"))
         })
       ),
       suite("FullRenderer")(
@@ -190,7 +190,7 @@ object DebugSpec extends ZIOBaseSpec {
           )
         ),
         test("testTrait")(check(genTestTrait) { c =>
-          assert(c.debug.render(Renderer.Full))(equalTo(s"DebugSpec.${c.getClass.getSimpleName.init}"))
+          assert(c.debug.render(Renderer.Full))(equalTo(s"DebugSpec.${c.getClass.getSimpleName.replace("$", "")}"))
         })
       ),
       suite("DebugInterpolator")(
