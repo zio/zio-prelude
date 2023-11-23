@@ -87,3 +87,10 @@ object VotingExample extends scala.App {
   // Output: VoteState(Map(zio-http -> 6, uzi-http -> 2, zio-tls-http -> 2))
 }
 ```
+
+## Known Issues
+
+If you encounter errros like `cyclic aliasing or subtyping involving`, you may add `-Yrecursion 1` to your compiler options in order to workaround the issue.
+
+- https://github.com/zio/zio-prelude/issues/1183
+  - https://github.com/scala/bug/issues/12622
