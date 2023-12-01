@@ -319,7 +319,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   final def zipPar[W1 >: W, E1 >: E, B](that: ZValidation[W1, E1, B])(implicit
     zippable: Zippable[A, B]
   ): ZValidation[W1, E1, zippable.Out] =
-    zipWithPar(that)(zippable.zip)
+    zipWithPar(that)(zippable.zip(_, _))
 
   /**
    * Combines this `ZValidation` with the specified `ZValidation`, using the
