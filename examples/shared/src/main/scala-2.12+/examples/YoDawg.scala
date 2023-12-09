@@ -18,6 +18,15 @@ object YoDawg {
 
 }
 
+
+object type {
+ object UUIDv1 extends Newtype[UUID]
+ type UUIDv1 = UUIDv1.Type
+
+ object UserId extends Subtype[UUIDv1]
+ type UserId = UserId.Type
+}
+
 trait GreatTypeclass[-A] {
   def doSomething(a: A): String
 }
