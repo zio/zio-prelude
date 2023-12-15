@@ -204,10 +204,15 @@ object DebugSpec extends ZIOBaseSpec {
         }
       ),
       suite("Duration")(
-        test("ZIO") {
+        test("ZIOMillis") {
           import zio._
           val duration = 3.millis
           assert(duration.debug.render)(equalTo("Duration(amount = 3L, unit = MILLISECONDS)"))
+        },
+        test("ZIOMinutes") {
+          import zio._
+          val duration = 42.minutes
+          assert(duration.debug.render)(equalTo("Duration(amount = 42L, unit = MINUTES)"))
         },
         test("Scala") {
           import scala.concurrent.duration._

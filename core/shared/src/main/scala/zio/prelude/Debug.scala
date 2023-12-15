@@ -467,7 +467,7 @@ object Debug extends DebugVersionSpecific {
         case TimeUnit.MICROSECONDS => "MICROSECONDS"
         case TimeUnit.MILLISECONDS => "MILLISECONDS"
         case TimeUnit.SECONDS      => "SECONDS"
-        case TimeUnit.MINUTES      => "SECONDS"
+        case TimeUnit.MINUTES      => "MINUTES"
         case TimeUnit.HOURS        => "HOURS"
         case TimeUnit.DAYS         => "DAYS"
       }
