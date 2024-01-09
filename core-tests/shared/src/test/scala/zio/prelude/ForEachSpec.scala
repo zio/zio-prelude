@@ -39,6 +39,9 @@ object ForEachSpec extends ZIOBaseSpec {
   val genEitherIntIntFunction: Gen[Any, Int => Either[Int, Int]] =
     Gen.function(Gen.either(genInt, genInt))
 
+  val genIntPartialFunction: Gen[Any, PartialFunction[Int, Int]] =
+    Gen.partialFunction(Gen.int)
+
   implicit val chunkOptionForEach: ForEach[ChunkOption] =
     ForEach[Chunk].compose[Option]
 
@@ -54,6 +57,14 @@ object ForEachSpec extends ZIOBaseSpec {
         test("vector")(checkAllLaws(ForEachLaws)(GenF.vector, Gen.int))
       ),
       suite("combinators")(
+        test("collect") {
+          check(genList, genIntPartialFunction) { (as, pf) =>
+            
+            val actual   = ForEach[List].collect(as)(pf)
+            val expected = as.collect(pf)
+            assert(actual)(equalTo(expected))
+          }
+        },
         test("contains") {
           check(genList, genInt) { (as, a) =>
             val actual   = ForEach[List].contains(as)(a)

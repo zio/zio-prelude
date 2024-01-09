@@ -1234,6 +1234,20 @@ object AssociativeBoth extends AssociativeBothLowPriority {
         fa.zipWithPar(fb)((_, _))
       def map[A, B](f: A => B): ZIO[R, E, A] => ZIO[R, E, B]                                =
         _.map(f)
+      override def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+        f: A => ZIO[R, E, Option[B]]
+      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZIO[R, E, Collection[B]] =
+        ZIO.suspendSucceed {
+          val iterator = in.iterator
+          val builder  = bf.newBuilder(in)
+
+          ZIO
+            .whileLoop(iterator.hasNext)(f(iterator.next())) {
+              case Some(b) => builder += b
+              case None    =>
+            }
+            .as(builder.result())
+        }
       override def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => ZIO[R, E, B])(
         implicit bf: BuildFrom[Collection[A], B, Collection[B]]
       ): ZIO[R, E, Collection[B]] =

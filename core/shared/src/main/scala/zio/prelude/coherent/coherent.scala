@@ -182,6 +182,11 @@ trait CovariantIdentityBoth[F[+_]] extends Covariant[F] with IdentityBoth[F] { s
   private implicit val covariant: Covariant[F]       = self
   private implicit val identityBoth: IdentityBoth[F] = self
 
+  def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => F[Option[B]])(implicit
+    bf: BuildFrom[Collection[A], B, Collection[B]]
+  ): F[Collection[B]] =
+    forEach[A, Option[B], Iterable](in)(f).map(_.flatten).map(bf.fromSpecific(in))
+
   def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => F[B])(implicit
     bf: BuildFrom[Collection[A], B, Collection[B]]
   ): F[Collection[B]] =

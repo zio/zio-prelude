@@ -992,6 +992,29 @@ object ZPure {
     }
 
   /**
+   * Evaluate each computation in the structure from left to right, collecting
+   * the successful values and discarding the empty cases.
+   */
+  def collect[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+    f: A => ZPure[W, S, S, R, E, Option[B]]
+  )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+    ZPure.suspend {
+      val iterator = in.iterator
+      val builder  = bf.newBuilder(in)
+
+      lazy val recurse: Option[B] => ZPure[W, S, S, R, E, Collection[B]] = {
+        case Some(b) => builder += b; loop()
+        case None    => loop()
+      }
+
+      def loop(): ZPure[W, S, S, R, E, Collection[B]] =
+        if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+        else ZPure.succeed(builder.result())
+
+      loop()
+    }
+
+  /**
    * Combines a collection of computations into a single computation that
    * passes the updated state from each computation to the next and collects
    * the results.
@@ -1258,6 +1281,10 @@ object ZPure {
         fa.zip(fb)
       def map[A, B](f: A => B): ZPure[W, S, S, R, E, A] => ZPure[W, S, S, R, E, B]                                 =
         _.map(f)
+      override def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+        f: A => ZPure[W, S, S, R, E, Option[B]]
+      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+        ZPure.collect(in)(f)
       override def forEach[A, B, Collection[+Element] <: Iterable[Element]](
         in: Collection[A]
       )(f: A => ZPure[W, S, S, R, E, B])(implicit
