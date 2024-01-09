@@ -59,7 +59,6 @@ object ForEachSpec extends ZIOBaseSpec {
       suite("combinators")(
         test("collect") {
           check(genList, genIntPartialFunction) { (as, pf) =>
-            
             val actual   = ForEach[List].collect(as)(pf)
             val expected = as.collect(pf)
             assert(actual)(equalTo(expected))
