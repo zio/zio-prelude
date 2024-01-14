@@ -44,30 +44,22 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    */
   def collect[A, B](
     fa: F[A]
-  )(pf: PartialFunction[A, B])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[B] = {
-    implicit val covariant: Covariant[F]  = self
-    implicit val identity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
-    foldMap(fa) { a =>
-      pf.lift(a) match {
-        case Some(b) => b.succeed[F]
-        case None    => identityEither.none
-      }
-    }
-  }
+  )(pf: PartialFunction[A, B])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[B] =
+    Id.unwrap(collectM(fa)(pf.lift.andThen(Id(_))))
 
   /**
    * Collects elements of the collection for which the effectual partial function
    * `pf` is defined.
    */
-  def collectM[G[+_]: IdentityFlatten: Covariant, A, B](fa: F[A])(
-    pf: PartialFunction[A, G[B]]
+  def collectM[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(
+    f: A => G[Option[B]]
   )(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[B]] = {
     implicit val covariant: Covariant[F]  = self
     implicit val identity: Identity[F[B]] = Identity.fromIdentityEitherCovariant
     foldMapM(fa) { a =>
-      pf.lift(a) match {
-        case Some(fb) => fb.map(_.succeed[F])
-        case None     => IdentityFlatten[G].any.as(identityEither.none)
+      f(a).map {
+        case Some(b) => b.succeed[F]
+        case None    => identityEither.none
       }
     }
   }
@@ -104,28 +96,16 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    */
   def filter[A](
     fa: F[A]
-  )(f: A => Boolean)(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[A] = {
-    implicit val covariant: Covariant[F]  = self
-    implicit val identity: Identity[F[A]] = Identity.fromIdentityEitherCovariant
-    foldMap(fa) { a =>
-      if (f(a)) a.succeed[F] else identityEither.none
-    }
-  }
+  )(f: A => Boolean)(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): F[A] =
+    Id.unwrap(filterM(fa)(a => Id(f(a))))
 
   /**
    * Filters the collection with the effectual predicate `f`.
    */
-  def filterM[G[+_]: IdentityFlatten: Covariant, A](
+  def filterM[G[+_]: IdentityBoth: Covariant, A](
     fa: F[A]
-  )(f: A => G[Boolean])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[A]] = {
-    implicit val covariant: Covariant[F]  = self
-    implicit val identity: Identity[F[A]] = Identity.fromIdentityEitherCovariant
-    foldMapM(fa) { a =>
-      f(a).map { b =>
-        if (b) a.succeed[F] else identityEither.none
-      }
-    }
-  }
+  )(f: A => G[Boolean])(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[A]] =
+    collectM(fa)(a => f(a).map(b => if (b) Some(a) else None))
 
   /**
    * Returns the first element in the collection satisfying the specified
@@ -179,8 +159,8 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
    * a single summary using the `combine` operation of `Identity`, or the
    * `identity` element if the collection is empty.
    */
-  def foldMapM[G[+_]: Covariant: IdentityFlatten, A, B: Identity](fa: F[A])(f: A => G[B]): G[B] =
-    foldLeftM[G, B, A](fa)(Identity[B].identity)((accu, a) => f(a).map(aa => accu.combine(aa)))
+  def foldMapM[G[+_]: Covariant: IdentityBoth, A, B: Identity](fa: F[A])(f: A => G[B]): G[B] =
+    forEach(fa)(f).map(fold[B])
 
   /**
    * Folds over the elements of this collection from right to left to produce a
@@ -336,7 +316,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
   /**
    * Partitions the collection based on the specified effectual function.
    */
-  def partitionMapM[G[+_]: IdentityFlatten: Covariant, A, B, C](
+  def partitionMapM[G[+_]: IdentityBoth: Covariant, A, B, C](
     fa: F[A]
   )(f: A => G[Either[B, C]])(implicit both: IdentityBoth[F], either: IdentityEither[F]): G[(F[B], F[C])] = {
     implicit val covariant: Covariant[F]       = self
@@ -344,8 +324,8 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     implicit val rightIdentity: Identity[F[C]] = Identity.fromIdentityEitherCovariant
     foldMapM(fa) { a =>
       f(a).map {
-        case Left(b)  => (b.succeed, either.none)
-        case Right(c) => (either.none, c.succeed)
+        case Left(b)  => (b.succeed[F], either.none)
+        case Right(c) => (either.none, c.succeed[F])
       }
     }
   }
@@ -488,12 +468,12 @@ trait ForEachSyntax {
       B: IdentityBoth[F]
     ): F[B] =
       F.collect(self)(pf)
-    def collectM[G[+_]: IdentityFlatten: Covariant, B](pf: PartialFunction[A, G[B]])(implicit
+    def collectM[G[+_]: IdentityBoth: Covariant, B](f: A => G[Option[B]])(implicit
       F: ForEach[F],
       I: IdentityEither[F],
       B: IdentityBoth[F]
     ): G[F[B]] =
-      F.collectM(self)(pf)
+      F.collectM(self)(f)
     def concatenate(implicit F: ForEach[F], A: Identity[A]): A                                                  =
       F.concatenate(self)
     def forEach[G[+_]: IdentityBoth: Covariant, B](f: A => G[B])(implicit F: ForEach[F]): G[F[B]]               =
@@ -506,7 +486,7 @@ trait ForEachSyntax {
       F.exists(self)(f)
     def filter(f: A => Boolean)(implicit F: ForEach[F], I: IdentityEither[F], B: IdentityBoth[F]): F[A]         =
       F.filter(self)(f)
-    def filterM[G[+_]: IdentityFlatten: Covariant](f: A => G[Boolean])(implicit
+    def filterM[G[+_]: IdentityBoth: Covariant](f: A => G[Boolean])(implicit
       F: ForEach[F],
       I: IdentityEither[F],
       B: IdentityBoth[F]
@@ -520,7 +500,7 @@ trait ForEachSyntax {
       F.foldLeftM(self)(s)(f)
     def foldMap[B: Identity](f: A => B)(implicit F: ForEach[F]): B                                              =
       F.foldMap(self)(f)
-    def foldMapM[G[+_]: Covariant: IdentityFlatten, B: Identity](f: A => G[B])(implicit F: ForEach[F]): G[B]    =
+    def foldMapM[G[+_]: Covariant: IdentityBoth, B: Identity](f: A => G[B])(implicit F: ForEach[F]): G[B]       =
       F.foldMapM(self)(f)
     def foldRight[S](s: S)(f: (A, S) => S)(implicit F: ForEach[F]): S                                           =
       F.foldRight(self)(s)(f)

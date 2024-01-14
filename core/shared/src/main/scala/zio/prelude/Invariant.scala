@@ -78,6 +78,10 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new ForEach[Chunk] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]]      =
         CovariantIdentityBoth[G].forEach(chunk)(f)
+      override def collectM[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(
+        f: A => G[Option[B]]
+      )(implicit identityBoth: IdentityBoth[Chunk], identityEither: IdentityEither[Chunk]): G[Chunk[B]] =
+        CovariantIdentityBoth[G].collectM(chunk)(f)
       override def forEach_[G[+_]: IdentityBoth: Covariant, A](chunk: Chunk[A])(f: A => G[Any]): G[Unit] =
         CovariantIdentityBoth[G].forEach_(chunk)(f)
     }
@@ -679,6 +683,10 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new ForEach[List] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]]     =
         CovariantIdentityBoth[G].forEach(list)(f)
+      override def collectM[G[+_]: IdentityBoth: Covariant, A, B](fa: List[A])(
+        f: A => G[Option[B]]
+      )(implicit identityBoth: IdentityBoth[List], identityEither: IdentityEither[List]): G[List[B]] =
+        CovariantIdentityBoth[G].collectM(fa)(f)
       override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: List[A])(f: A => G[Any]): G[Unit] =
         CovariantIdentityBoth[G].forEach_(fa)(f)
       override def map[A, B](f: A => B): List[A] => List[B]                                          =
@@ -693,6 +701,15 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       def forEach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]]  =
         CovariantIdentityBoth[G]
           .forEach[(K, V), (K, V2), Iterable](map) { case (k, v) => f(v).map(k -> _) }
+          .map(_.toMap)
+      override def collectM[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(
+        f: V => G[Option[V2]]
+      )(implicit
+        identityBoth: IdentityBoth[({ type lambda[+v] = Map[K, v] })#lambda],
+        identityEither: IdentityEither[({ type lambda[+v] = Map[K, v] })#lambda]
+      ): G[Map[K, V2]] =
+        CovariantIdentityBoth[G]
+          .collectM[(K, V), (K, V2), Iterable](map) { case (k, v) => f(v).map(_.map(k -> _)) }
           .map(_.toMap)
       override def forEach_[G[+_]: IdentityBoth: Covariant, V](map: Map[K, V])(f: V => G[Any]): G[Unit] =
         CovariantIdentityBoth[G].forEach_(map) { case (_, v) => f(v) }
@@ -1324,6 +1341,10 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new ForEach[Vector] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]]     =
         CovariantIdentityBoth[G].forEach(vector)(f)
+      override def collectM[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(
+        f: A => G[Option[B]]
+      )(implicit identityBoth: IdentityBoth[Vector], identityEither: IdentityEither[Vector]): G[Vector[B]] =
+        CovariantIdentityBoth[G].collectM(vector)(f)
       override def forEach_[G[+_]: IdentityBoth: Covariant, A](vector: Vector[A])(f: A => G[Any]): G[Unit] =
         CovariantIdentityBoth[G].forEach_(vector)(f)
     }
