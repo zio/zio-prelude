@@ -65,7 +65,7 @@ object ExcludedMiddleEqual {
     }
 }
 
-trait InvolutionEqual[A] extends AbsorptionEqual[A] with Involution[A]
+trait InvolutionEqual[A] extends ExcludedMiddleEqual[A] with NoncontradictionEqual[A] with Involution[A]
 
 object InvolutionEqual {
   implicit def derive[A](implicit involution0: Involution[A], equal0: Equal[A]): InvolutionEqual[A] =
@@ -77,9 +77,9 @@ object InvolutionEqual {
 
       override def and(l: => A, r: => A): A = involution0.and(l, r)
 
-      override def Or: Associative[OrF[A]] = involution0.Or
+      override def Or: Identity[OrF[A]] = involution0.Or
 
-      override def And: Associative[AndF[A]] = involution0.And
+      override def And: Identity[AndF[A]] = involution0.And
 
       protected def checkEqual(l: A, r: A): Boolean = equal0.equal(l, r)
     }
