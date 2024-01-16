@@ -9,9 +9,10 @@ sidebar_label: "Abstraction Diagrams"
 ```mermaid
 classDiagram
   Absorption~A~ <|-- DistributiveAbsorption~A~
-  Absorption~A~ <|-- Involution~A~
   Absorption~A~ <|-- Noncontradiction~A~
   Absorption~A~ <|-- ExcludedMiddle~A~
+  ExcludedMiddle~A~ <|-- Involution~A~
+  Noncontradiction~A~ <|-- Involution~A~
   class Absorption~A~{
     () or(=> A, => A): A
     () and(=> A, => A): A
@@ -20,19 +21,16 @@ classDiagram
     Boolean
     Set[A]
   }
-  class Involution~A~{
-    Boolean
-    () complement(=> A): A
-  }
   class Noncontradiction~A~{
-    Boolean
     () complement(=> A): A
     () bottom: A
   }
   class ExcludedMiddle~A~{
-    Boolean
     () complement(=> A): A
     () top: A
+  }
+  class Involution~A~{
+    Boolean
   }
 ```
 

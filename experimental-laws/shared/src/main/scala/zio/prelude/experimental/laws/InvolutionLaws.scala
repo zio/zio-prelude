@@ -25,6 +25,6 @@ object InvolutionLaws extends Lawful[InvolutionEqual] {
    * The set of all laws that instances of `Involution` must satisfy.
    */
   lazy val laws: Laws[InvolutionEqual] =
-    AbsorptionLaws.laws + involutionLaw
+    ExcludedMiddleLaws.laws + NoncontradictionLaws.laws + involutionLaw
 
 }
