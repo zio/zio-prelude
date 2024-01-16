@@ -1,7 +1,7 @@
 package zio.prelude
 package experimental
 
-trait Involution[A] extends Complement[A]
+trait Involution[A] extends ExcludedMiddle[A] with Noncontradiction[A]
 
 object Involution {
 
