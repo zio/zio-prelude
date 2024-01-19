@@ -6,13 +6,13 @@ const sidebars = {
       collapsed: false,
       link: { type: "doc", id: "index" },
       items: [
-        "abstraction-diagrams",
         {
           type: "category",
           label: "Functional Abstractions",
           link: { type: "doc", id: "functional-abstractions/index" },
           collapsed: false,
           items: [
+            "functional-abstractions/abstraction-diagrams",
             {
               type: "category",
               label: "Concrete Types",
