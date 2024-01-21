@@ -79,6 +79,11 @@ jobs:
           distribution: temurin
           java-version: 8 # ensure it works on 8 because we publish for 8
           check-latest: true
+      - name: Setup NodeJs
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16.x
+          registry-url: https://registry.npmjs.org
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
       - name: Install libuv
@@ -89,6 +94,8 @@ jobs:
           swap-size-gb: 7
       - name: Check that building packages works
         run: ./sbt +publishLocal
+      - name: Check website build process
+        run: sbt docs/clean; sbt docs/buildWebsite
 
   test:
     runs-on: ubuntu-22.04
