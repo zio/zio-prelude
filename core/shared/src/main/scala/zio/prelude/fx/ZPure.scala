@@ -33,7 +33,7 @@ import scala.util.Try
  * context, state, failure, and logging.
  */
 
-sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
+sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
   /**
