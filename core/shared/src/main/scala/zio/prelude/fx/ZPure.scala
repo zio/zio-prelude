@@ -992,21 +992,23 @@ object ZPure {
   def collect[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
     f: A => ZPure[W, S, S, R, E, Option[B]]
   )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
-    ZPure.suspend {
-      val iterator = in.iterator
-      val builder  = bf.newBuilder(in)
+    if (in.isEmpty) ZPure.succeed(bf.fromSpecific(in)(Nil))
+    else
+      ZPure.suspend {
+        val iterator = in.iterator
+        val builder  = bf.newBuilder(in)
 
-      lazy val recurse: Option[B] => ZPure[W, S, S, R, E, Collection[B]] = {
-        case Some(b) => builder += b; loop()
-        case None    => loop()
+        lazy val recurse: Option[B] => ZPure[W, S, S, R, E, Collection[B]] = {
+          case Some(b) => builder += b; loop()
+          case None    => loop()
+        }
+
+        def loop(): ZPure[W, S, S, R, E, Collection[B]] =
+          if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+          else ZPure.succeed(builder.result())
+
+        loop()
       }
-
-      def loop(): ZPure[W, S, S, R, E, Collection[B]] =
-        if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
-        else ZPure.succeed(builder.result())
-
-      loop()
-    }
 
   /**
    * Combines a collection of computations into a single computation that
@@ -1096,21 +1098,23 @@ object ZPure {
   def foreach[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
     f: A => ZPure[W, S, S, R, E, B]
   )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
-    ZPure.suspend {
-      val iterator = in.iterator
-      val builder  = bf.newBuilder(in)
+    if (in.isEmpty) ZPure.succeed(bf.fromSpecific(in)(Nil))
+    else
+      ZPure.suspend {
+        val iterator = in.iterator
+        val builder  = bf.newBuilder(in)
 
-      lazy val recurse: B => ZPure[W, S, S, R, E, Collection[B]] = { b =>
-        builder += b
+        lazy val recurse: B => ZPure[W, S, S, R, E, Collection[B]] = { b =>
+          builder += b
+          loop()
+        }
+
+        def loop(): ZPure[W, S, S, R, E, Collection[B]] =
+          if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+          else ZPure.succeed(builder.result())
+
         loop()
       }
-
-      def loop(): ZPure[W, S, S, R, E, Collection[B]] =
-        if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
-        else ZPure.succeed(builder.result())
-
-      loop()
-    }
 
   /**
    * Maps each element of a collection to a computation and combines them all
@@ -1118,17 +1122,19 @@ object ZPure {
    * computation to the next and discards the results.
    */
   def foreachDiscard[W, S, R, E, A, B](in: Iterable[A])(f: A => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, Unit] =
-    ZPure.suspend {
-      val iterator = in.iterator
+    if (in.isEmpty) unit
+    else
+      ZPure.suspend {
+        val iterator = in.iterator
 
-      lazy val recurse: Any => ZPure[W, S, S, R, E, Unit] = _ => loop()
+        lazy val recurse: Any => ZPure[W, S, S, R, E, Unit] = _ => loop()
 
-      def loop(): ZPure[W, S, S, R, E, Unit] =
-        if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
-        else ZPure.unit
+        def loop(): ZPure[W, S, S, R, E, Unit] =
+          if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+          else ZPure.unit
 
-      loop()
-    }
+        loop()
+      }
 
   /**
    * Constructs a computation that returns the initial state unchanged.
