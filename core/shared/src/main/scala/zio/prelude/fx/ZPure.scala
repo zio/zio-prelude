@@ -21,7 +21,6 @@ import zio.prelude._
 import zio.prelude.coherent.CovariantIdentityBoth
 import zio.{Cause => _, _}
 
-import scala.annotation.{nowarn, switch}
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -34,7 +33,7 @@ import scala.util.Try
  * context, state, failure, and logging.
  */
 
-sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
+sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
   /**
@@ -611,22 +610,20 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
         }
     }
 
-    while (curZPure ne null) {
-      val tag = curZPure.tag
-      (tag: @switch) match {
-        case Tags.FlatMap =>
-          val zPure        = curZPure.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any, Any]]
+    while (curZPure ne null)
+      curZPure match {
+        case flatmap0: ZPure.FlatMap[_, _, _, _, _, _, _, _] =>
+          val zPure        = flatmap0.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any, Any]]
           val nested       = zPure.value
           val continuation = zPure.continue
 
-          nested.tag match {
-            case Tags.Succeed =>
-              val zPure2 = nested.asInstanceOf[Succeed[Any]]
+          nested match {
+            case succeed0: Succeed[_] =>
+              val zPure2 = succeed0.asInstanceOf[Succeed[Any]]
               curZPure = continuation(zPure2.value)
 
-            case Tags.Modify =>
-              val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any]]
-
+            case modify0: Modify[_, _, _] =>
+              val zPure2  = modify0.asInstanceOf[Modify[Any, Any, Any]]
               val updated = zPure2.run0(s0)
               a = updated._1
               s0 = updated._2
@@ -637,13 +634,13 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
               stack.push(continuation)
           }
 
-        case Tags.Succeed =>
-          val zPure     = curZPure.asInstanceOf[Succeed[Any]]
+        case succeed0: Succeed[_] =>
+          val zPure     = succeed0.asInstanceOf[Succeed[Any]]
           a = zPure.value
           val nextInstr = stack.pop()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Fail    =>
-          val zPure     = curZPure.asInstanceOf[Fail[Any]]
+        case fail0: Fail[_]       =>
+          val zPure     = fail0.asInstanceOf[Fail[Any]]
           findNextErrorHandler()
           val nextInstr = stack.pop()
           if (nextInstr eq null) {
@@ -653,8 +650,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           } else
             curZPure = nextInstr(zPure.error)
 
-        case Tags.Fold        =>
-          val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
+        case fold0: Fold[_, _, _, _, _, _, _, _, _]      =>
+          val zPure = fold0.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
           val state = s0
           val fold  =
             ZPure.Fold(
@@ -674,31 +671,31 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           stack.push(fold)
           logs.push(ChunkBuilder.make())
           curZPure = zPure.value
-        case Tags.Environment =>
-          val zPure = curZPure.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
+        case environment0: Environment[_, _, _, _, _, _] =>
+          val zPure = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
           curZPure = zPure.access(environments.peek())
-        case Tags.Provide     =>
-          val zPure = curZPure.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
+        case provide0: Provide[_, _, _, _, _, _]         =>
+          val zPure = provide0.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
           environments.push(zPure.r)
           curZPure = zPure.continue.foldCauseM(
             e => ZPure.succeed(environments.pop()) *> ZPure.failCause(e),
             a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
           )
-        case Tags.Modify      =>
-          val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any]]
+        case modify0: Modify[_, _, _]                    =>
+          val zPure     = modify0.asInstanceOf[Modify[Any, Any, Any]]
           val updated   = zPure.run0(s0)
           a = updated._1
           s0 = updated._2
           val nextInstr = stack.pop()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Log         =>
-          val zPure     = curZPure.asInstanceOf[Log[Any, Any]]
+        case log0: Log[_, _]                             =>
+          val zPure     = log0.asInstanceOf[Log[Any, Any]]
           logs.peek() += zPure.log
           val nextInstr = stack.pop()
           a = ()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Flag        =>
-          val zPure = curZPure.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
+        case flag0: Flag[_, _, _, _, _, _]               =>
+          val zPure = flag0.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
           zPure.flag match {
             case FlagType.ClearLogOnError =>
               val oldValue = clearLogOnError
@@ -713,7 +710,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
               )
           }
       }
-    }
     val log = logs.peek().result().asInstanceOf[Chunk[W]]
     if (failed) (log, Left(a.asInstanceOf[Cause[E]]))
     else (log, Right((s0.asInstanceOf[S2], a.asInstanceOf[A])))
@@ -807,8 +803,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       case Some(value) => ZPure.succeed(value)
       case None        => ZPure.fail(new NoSuchElementException("None.get"))
     })
-
-  protected def tag: Int
 
   /**
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
@@ -1318,62 +1312,32 @@ object ZPure {
       self.refineOrDie { case e: E1 => e }
   }
 
-  @nowarn("msg=never used")
-  private object Tags {
-    final val FlatMap     = 0
-    final val Succeed     = 1
-    final val Fail        = 2
-    final val Fold        = 3
-    final val Environment = 4
-    final val Provide     = 5
-    final val Modify      = 6
-    final val Log         = 7
-    final val Flag        = 8
-  }
-
-  private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A] {
-    override def tag: Int = Tags.Succeed
-  }
-  private final case class Fail[+E](error: Cause[E])                 extends ZPure[Nothing, Any, Nothing, Any, E, Nothing] {
-    override def tag: Int = Tags.Fail
-  }
-  private final case class Modify[-S1, +S2, +A](run0: S1 => (A, S2)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]       {
-    override def tag: Int = Tags.Modify
-  }
+  private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A]
+  private final case class Fail[+E](error: Cause[E])                 extends ZPure[Nothing, Any, Nothing, Any, E, Nothing]
+  private final case class Modify[-S1, +S2, +A](run0: S1 => (A, S2)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]
   private final case class FlatMap[+W, -S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S2, S3, R, E, B]
-  ) extends ZPure[W, S1, S3, R, E, B] {
-    override def tag: Int = Tags.FlatMap
-  }
+  ) extends ZPure[W, S1, S3, R, E, B]
   private final case class Fold[+W, -S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
     failure: Cause[E1] => ZPure[W, S1, S3, R, E2, B],
     success: A => ZPure[W, S2, S3, R, E2, B]
   ) extends ZPure[W, S1, S3, R, E2, B]
       with Function[A, ZPure[W, S2, S3, R, E2, B]] {
-    override def tag: Int                                = Tags.Fold
     override def apply(a: A): ZPure[W, S2, S3, R, E2, B] =
       success(a)
   }
   private final case class Environment[W, S1, S2, R, E, A](access: ZEnvironment[R] => ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, R, E, A] {
-    override def tag: Int = Tags.Environment
-  }
+      extends ZPure[W, S1, S2, R, E, A]
   private final case class Provide[W, S1, S2, R, E, A](r: ZEnvironment[R], continue: ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, Any, E, A] {
-    override def tag: Int = Tags.Provide
-  }
-  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]            {
-    override def tag: Int = Tags.Log
-  }
+      extends ZPure[W, S1, S2, Any, E, A]
+  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]
   private final case class Flag[W, S1, S2, R, E, A](
     flag: FlagType,
     value: Boolean,
     continue: ZPure[W, S1, S2, R, E, A]
-  ) extends ZPure[W, S1, S2, R, E, A] {
-    override def tag: Int = Tags.Flag
-  }
+  ) extends ZPure[W, S1, S2, R, E, A]
 
   sealed trait FlagType
   object FlagType {
