@@ -15,4 +15,4 @@ addSbtPlugin("org.scalameta"                     % "sbt-mdoc"                   
 addSbtPlugin("org.scalameta"                     % "sbt-scalafmt"                  % "2.5.0")
 addSbtPlugin("pl.project13.scala"                % "sbt-jcstress"                  % "0.2.0")
 addSbtPlugin("pl.project13.scala"                % "sbt-jmh"                       % "0.4.7")
-addSbtPlugin("dev.zio"                           % "zio-sbt-website"               % "0.4.0-alpha.22")
+addSbtPlugin("dev.zio"                           % "zio-sbt-website"               % "0.4.0-alpha.24")
