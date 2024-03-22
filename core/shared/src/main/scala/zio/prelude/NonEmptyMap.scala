@@ -17,6 +17,7 @@ package zio.prelude
  */
 
 import zio.NonEmptyChunk
+import zio.prelude.Debug.keyValueDebug
 
 import scala.language.implicitConversions
 
@@ -214,6 +215,11 @@ object NonEmptyMap {
     new NonEmptyMap(asLists)
   }
 
+  /**
+   * Derives a `Debug[NonEmptyMap[K, V]]` given a `Debug[K]` and a `Debug[V]`.
+   */
+  implicit def NonEmptyMapDebug[K: Debug, V: Debug]: Debug[NonEmptyMap[K, V]] =
+    map => Debug.Repr.VConstructor(List("zio", "prelude"), "NonEmptyMap", map.toMap.map(_.debug(keyValueDebug)).toList)
 }
 
 trait NonEmptyMapSyntax {
