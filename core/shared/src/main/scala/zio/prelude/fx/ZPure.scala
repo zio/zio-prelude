@@ -388,7 +388,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def none[B](implicit ev: A <:< Option[B]): ZPure[W, S1, S2, R, Option[E], Unit] =
     self.foldM(
       e => ZPure.fail(Some(e)),
-      a => a.fold[ZPure[W, S2, S2, R, Option[E], Unit]](ZPure.succeed(()))(_ => ZPure.fail(None))
+      a => a.fold[ZPure[W, S2, S2, R, Option[E], Unit]](ZPure.unit)(_ => ZPure.fail(None))
     )
 
   /**
@@ -972,6 +972,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 }
 
 object ZPure {
+  private val succeedUnit: ZPure[Nothing, Any, Nothing, Any, Nothing, Unit]            = Succeed(())
+  private val succeedNone: ZPure[Nothing, Any, Nothing, Any, Nothing, Option[Nothing]] = Succeed(None)
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
@@ -1164,7 +1166,7 @@ object ZPure {
    * Constructs a computation that succeeds with the `None` value.
    */
   def none[S]: ZPure[Nothing, S, S, Any, Nothing, Option[Nothing]] =
-    succeed(None)
+    succeedNone
 
   /**
    * Accesses the specified service in the environment of the computation.
@@ -1209,7 +1211,7 @@ object ZPure {
    * state through unchanged.
    */
   def unit[S]: ZPure[Nothing, S, S, Any, Nothing, Unit] =
-    succeed(())
+    succeedUnit
 
   /**
    * The moral equivalent of `if (!p) exp`
