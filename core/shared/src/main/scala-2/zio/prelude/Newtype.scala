@@ -310,11 +310,11 @@ object Newtype {
     value.asInstanceOf[F[T#Type]]
   }
 
-  private trait ClassTagWrapper[-A] {
+  trait ClassTagWrapper[-A] {
     def classTag: ClassTag[_]
   }
 
-  private object ClassTagWrapper {
+  object ClassTagWrapper {
     def apply[A](implicit ev: ClassTagWrapper[A]): ClassTagWrapper[A] = ev
 
     implicit def classTagWrapperForNewtype[A](implicit underlying: ClassTag[A]): ClassTagWrapper[Newtype[A]] =
