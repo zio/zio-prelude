@@ -2,7 +2,6 @@ name: CI
 
 env:
   JDK_JAVA_OPTIONS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M # JDK_JAVA_OPTIONS is _the_ env. variable to use for modern Java
-  JVM_OPTS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M # for Java 8 only (sadly, it is not modern enough for JDK_JAVA_OPTIONS)
   NODE_OPTIONS: --max_old_space_size=6144
 
 on:
@@ -77,7 +76,7 @@ jobs:
         uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
-          java-version: 8 # ensure it works on 8 because we publish for 8
+          java-version: 11 # ensure it works on 11 because we publish for 11
           check-latest: true
       - name: Setup NodeJs
         uses: actions/setup-node@v4
@@ -141,7 +140,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: ['8', '11']
+        java: ['11', '17', '21']
         platform: ['JVM']
     steps:
       - name: Checkout current branch
@@ -207,7 +206,7 @@ jobs:
         uses: actions/setup-java@v3.12.0
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '17'
           check-latest: true
       - name: Cache Dependencies
         uses: coursier/cache-action@v6
@@ -274,7 +273,7 @@ jobs:
         uses: actions/setup-java@v2.5.1
         with:
           distribution: temurin
-          java-version: 8 # publish for 8
+          java-version: 11 # publish for 11
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
@@ -310,7 +309,7 @@ jobs:
         uses: actions/setup-java@v3.12.0
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '11'
           check-latest: true
       - name: Cache Dependencies
         uses: coursier/cache-action@v6
