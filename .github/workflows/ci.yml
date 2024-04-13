@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.1
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: 17
@@ -50,7 +50,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.2
       - name: Setup Java
-        uses: actions/setup-java@v2.5.1
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: 17
@@ -73,7 +73,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.2
       - name: Setup Java
-        uses: actions/setup-java@v2.5.1
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: 11 # ensure it works on 11 because we publish for 11
@@ -111,7 +111,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.1
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -146,7 +146,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.2
       - name: Setup Java
-        uses: actions/setup-java@v2.5.1
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -174,7 +174,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.2
       - name: Setup Java
-        uses: actions/setup-java@v2.5.1
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -203,7 +203,7 @@ jobs:
       - name: Install libuv
         run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Setup Scala
-        uses: actions/setup-java@v3.12.0
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: '17'
@@ -270,7 +270,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v2.5.1
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: 11 # publish for 11
@@ -306,7 +306,7 @@ jobs:
       - name: Install libuv
         run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Setup Scala
-        uses: actions/setup-java@v3.12.0
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: '11'
