@@ -100,17 +100,17 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
     quotedAssertion match {
       case Some(quotedAssertion) =>
         expr.tree match {
-          case Literal(Constant(value)) =>
+          case Literal(Constant(value0)) =>
             val (assertion, code) = getAssertion[T, A](quotedAssertion)
 
-            assertion.apply(value.asInstanceOf[A]) match {
+            assertion.apply(value0.asInstanceOf[A]) match {
               case Left(error) =>
                 val message =
                   s"""
                      |$assertionErrorHeader
                      |${"\u001b[2m"}assertion = ${Console.RESET + Console.YELLOW}$code${Console.RESET}
                      |
-                     |${error.render(value.toString)}
+                     |${error.render(value0.toString)}
                      |""".stripMargin
 
                 c.abort(c.enclosingPosition, message)
