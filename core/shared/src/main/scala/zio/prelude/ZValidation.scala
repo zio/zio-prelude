@@ -334,6 +334,12 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case (Success(w, _), Failure(w1, e1)) => Failure(w ++ w1, e1)
       case (Success(w, a), Success(w1, b))  => Success(w ++ w1, f(a, b))
     }
+
+  final def tap[W1 >: W, E1 >: E](f: A => ZValidation[W1, E1, Any]): ZValidation[W1, E1, A] =
+    self.flatMap(a => f(a).as(a))
+
+  final def unit: ZValidation[W, E, Unit] =
+    self.as(())
 }
 
 object ZValidation extends LowPriorityValidationImplicits {
