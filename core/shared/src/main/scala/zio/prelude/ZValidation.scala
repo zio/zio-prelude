@@ -227,6 +227,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Applies the provided validation function to the successful value of this `ZValidation` without altering the result.
+   * This method can be used to execute side effects or additional validations that do not transform the primary value
+   * but may modify the log or error. If this `ZValidation` is a failure, it remains unchanged.
+   */
+  final def tap[W1 >: W, E1 >: E](f: A => ZValidation[W1, E1, Any]): ZValidation[W1, E1, A] =
+    self.flatMap(a => f(a).as(a))
+
+  /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
    */
   final def toEither: Either[NonEmptyChunk[E], A] =
@@ -296,6 +304,14 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     )
 
   /**
+   * Transforms the successful output of this `ZValidation` into a `Unit`, effectively discarding the original success value
+   * while preserving any accumulated warnings or errors. This can be useful when the outcome of the validation process is not
+   * needed, but the side effects (e.g., logging or error accumulation) are important.
+   */
+  final def unit: ZValidation[W, E, Unit] =
+    self.as(())
+
+  /**
    * A variant of `zipPar` that keeps only the left success value, but returns
    * a failure with all errors if either this `ZValidation` or the specified
    * `ZValidation` fail.
@@ -334,12 +350,6 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case (Success(w, _), Failure(w1, e1)) => Failure(w ++ w1, e1)
       case (Success(w, a), Success(w1, b))  => Success(w ++ w1, f(a, b))
     }
-
-  final def tap[W1 >: W, E1 >: E](f: A => ZValidation[W1, E1, Any]): ZValidation[W1, E1, A] =
-    self.flatMap(a => f(a).as(a))
-
-  final def unit: ZValidation[W, E, Unit] =
-    self.as(())
 }
 
 object ZValidation extends LowPriorityValidationImplicits {
