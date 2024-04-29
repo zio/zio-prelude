@@ -16,11 +16,11 @@
 
 package zio.prelude.fx
 
-import zio.internal.Stack
 import zio.prelude._
 import zio.prelude.coherent.CovariantIdentityBoth
 import zio.{Cause => _, _}
 
+import scala.annotation.unused
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -585,30 +585,14 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * log and either all the failures that occurred or the updated state and the
    * result.
    */
-  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) = {
-    val _                                                        = ev
+  final def runAll(s: S1)(implicit @unused ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) = {
     val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
     val environments: Stack[ZEnvironment[Any]]                   = Stack()
     val logs: Stack[ChunkBuilder[Any]]                           = Stack(ChunkBuilder.make())
     var clearLogOnError                                          = false
     var s0: Any                                                  = s
     var a: Any                                                   = null
-    var failed                                                   = false
     var curZPure: ZPure[Any, Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
-
-    def findNextErrorHandler(): Unit = {
-      var unwinding = true
-      while (unwinding)
-        stack.pop() match {
-          case value: Fold[_, _, _, _, _, _, _, _, _] =>
-            val continuation = value.failure
-            stack.push(continuation.asInstanceOf[Any => ZPure[Any, Any, Any, Any, Any, Any]])
-            unwinding = false
-          case null                                   =>
-            unwinding = false
-          case _                                      =>
-        }
-    }
 
     while (curZPure ne null)
       curZPure match {
@@ -625,32 +609,29 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
             case modify0: Modify[_, _, _] =>
               val zPure2  = modify0.asInstanceOf[Modify[Any, Any, Any]]
               val updated = zPure2.run0(s0)
-              a = updated._1
               s0 = updated._2
-              curZPure = continuation(a)
+              curZPure = continuation(updated._1)
+
+            case log0: Log[_, _] =>
+              val zPure = log0.asInstanceOf[Log[Any, Any]]
+              logs.peek() += zPure.log
+              curZPure = continuation(())
+
+            case environment0: Environment[_, _, _, _, _, _] =>
+              val zPure = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
+              curZPure = continuation(zPure.access(environments.peek()))
 
             case _ =>
               curZPure = nested
               stack.push(continuation)
           }
-
-        case succeed0: Succeed[_] =>
+        case succeed0: Succeed[_]                            =>
           val zPure     = succeed0.asInstanceOf[Succeed[Any]]
           a = zPure.value
           val nextInstr = stack.pop()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case fail0: Fail[_]       =>
-          val zPure     = fail0.asInstanceOf[Fail[Any]]
-          findNextErrorHandler()
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) {
-            failed = true
-            a = zPure.error
-            curZPure = null
-          } else
-            curZPure = nextInstr(zPure.error)
 
-        case fold0: Fold[_, _, _, _, _, _, _, _, _]      =>
+        case fold0: Fold[_, _, _, _, _, _, _, _, _] =>
           val zPure = fold0.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
           val state = s0
           val fold  =
@@ -671,30 +652,63 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           stack.push(fold)
           logs.push(ChunkBuilder.make())
           curZPure = zPure.value
-        case environment0: Environment[_, _, _, _, _, _] =>
-          val zPure = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
-          curZPure = zPure.access(environments.peek())
-        case provide0: Provide[_, _, _, _, _, _]         =>
+
+        case log0: Log[_, _] =>
+          val zPure     = log0.asInstanceOf[Log[Any, Any]]
+          logs.peek() += zPure.log
+          val nextInstr = stack.pop()
+          a = ()
+          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+        case provide0: Provide[_, _, _, _, _, _] =>
           val zPure = provide0.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
           environments.push(zPure.r)
           curZPure = zPure.continue.foldCauseM(
-            e => ZPure.succeed(environments.pop()) *> ZPure.failCause(e),
-            a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
+            e => {
+              environments.popDiscard()
+              ZPure.failCause(e)
+            },
+            a => {
+              environments.popDiscard()
+              ZPure.succeed(a)
+            }
           )
-        case modify0: Modify[_, _, _]                    =>
+
+        case environment0: Environment[_, _, _, _, _, _] =>
+          val zPure     = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
+          a = zPure.access(environments.peek())
+          val nextInstr = stack.pop()
+          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+        case modify0: Modify[_, _, _] =>
           val zPure     = modify0.asInstanceOf[Modify[Any, Any, Any]]
           val updated   = zPure.run0(s0)
           a = updated._1
           s0 = updated._2
           val nextInstr = stack.pop()
           if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case log0: Log[_, _]                             =>
-          val zPure     = log0.asInstanceOf[Log[Any, Any]]
-          logs.peek() += zPure.log
+
+        case fail0: Fail[_] =>
+          val zPure     = fail0.asInstanceOf[Fail[Any]]
+          var unwinding = true
+          while (unwinding)
+            stack.pop() match {
+              case value: Fold[_, _, _, _, _, _, _, _, _] =>
+                val continuation = value.failure
+                stack.push(continuation.asInstanceOf[Any => ZPure[Any, Any, Any, Any, Any, Any]])
+                unwinding = false
+              case null                                   =>
+                unwinding = false
+              case _                                      =>
+            }
           val nextInstr = stack.pop()
-          a = ()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case flag0: Flag[_, _, _, _, _, _]               =>
+          if (nextInstr eq null) {
+            a = zPure
+            curZPure = null
+          } else
+            curZPure = nextInstr(zPure.error)
+
+        case flag0: Flag[_, _, _, _, _, _] =>
           val zPure = flag0.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
           zPure.flag match {
             case FlagType.ClearLogOnError =>
@@ -710,9 +724,14 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
               )
           }
       }
+
     val log = logs.peek().result().asInstanceOf[Chunk[W]]
-    if (failed) (log, Left(a.asInstanceOf[Cause[E]]))
-    else (log, Right((s0.asInstanceOf[S2], a.asInstanceOf[A])))
+    val out = a match {
+      case f: Fail[_] => Left(f.error.asInstanceOf[Cause[E]])
+      case v          => Right((s0.asInstanceOf[S2], v.asInstanceOf[A]))
+    }
+
+    (log, out)
   }
 
   /**
@@ -1244,17 +1263,17 @@ object ZPure {
 
   final class EnvironmentWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[S, A](f: ZEnvironment[R] => A): ZPure[Nothing, S, S, R, Nothing, A] =
-      environmentWithPure(r => ZPure.succeed(f(r)))
+      Environment(f)
   }
 
   final class EnvironmentWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[W, S1, S2, E, A](f: ZEnvironment[R] => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
-      Environment(f)
+      Environment(f).flatten
   }
 
   final class ServiceWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[S, A](f: R => A)(implicit tag: Tag[R]): ZPure[Nothing, S, S, R, Nothing, A] =
-      serviceWithPure(r => ZPure.succeed(f(r)))
+      environmentWith(env => f(env.get))
   }
 
   final class ServiceWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
@@ -1338,7 +1357,7 @@ object ZPure {
     override def apply(a: A): ZPure[W, S2, S3, R, E2, B] =
       success(a)
   }
-  private final case class Environment[W, S1, S2, R, E, A](access: ZEnvironment[R] => ZPure[W, S1, S2, R, E, A])
+  private final case class Environment[W, S1, S2, R, E, A](access: ZEnvironment[R] => A)
       extends ZPure[W, S1, S2, R, E, A]
   private final case class Provide[W, S1, S2, R, E, A](r: ZEnvironment[R], continue: ZPure[W, S1, S2, R, E, A])
       extends ZPure[W, S1, S2, Any, E, A]
