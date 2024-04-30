@@ -38,7 +38,7 @@ private final class Stack[A <: AnyRef] { self =>
       val used = packed0 & 0xf
       val idx  = used - 1
       var a    = array(idx)
-      if (idx == 0 && packed0 > 0xf) {
+      if (idx == 0 && packed0 != 1) {
         val arr0 = a.asInstanceOf[Array[AnyRef]]
         a = arr0(N)
         array = arr0
@@ -58,7 +58,7 @@ private final class Stack[A <: AnyRef] { self =>
     if (packed0 != 0) {
       val used = packed0 & 0xf
       val idx  = used - 1
-      if (idx == 0 && packed0 > 0xf) {
+      if (idx == 0 && packed0 != 1) {
         val arr0 = array(idx).asInstanceOf[Array[AnyRef]]
         array = arr0
         packed = packed0 - 3
