@@ -586,13 +586,15 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * result.
    */
   final def runAll(s: S1)(implicit @unused ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) = {
-    val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
-    val environments: Stack[ZEnvironment[Any]]                   = Stack()
-    val logs: Stack[ChunkBuilder[Any]]                           = Stack(ChunkBuilder.make())
-    var clearLogOnError                                          = false
-    var s0: Any                                                  = s
-    var a: Any                                                   = null
-    var curZPure: ZPure[Any, Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
+    type Continuation = Any => ZPure[Any, Any, Any, Any, Any, Any]
+
+    val stack: Stack[Continuation]                    = Stack()
+    val environments: Stack[ZEnvironment[Any]]        = Stack()
+    val logs: Stack[ChunkBuilder[Any]]                = Stack(ChunkBuilder.make())
+    var clearLogOnError                               = false
+    var s0: Any                                       = s
+    var a: Any                                        = null
+    var curZPure: ZPure[Any, Any, Any, Any, Any, Any] = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
 
     while (curZPure ne null)
       curZPure match {
@@ -634,23 +636,24 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
         case fold0: Fold[_, _, _, _, _, _, _, _, _] =>
           val zPure = fold0.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
           val state = s0
+          val clear = clearLogOnError
           val fold  =
             ZPure.Fold(
               zPure.value,
-              (cause: Cause[Any]) =>
-                ZPure.suspend(Succeed({
-                  val clear   = clearLogOnError
-                  val builder = logs.pop()
-                  if (!clear) logs.peek() ++= builder.result()
-                })) *> ZPure.set(state) *> zPure.failure(cause),
-              (a: Any) =>
-                ZPure.suspend(Succeed({
+              (cause: Cause[Any]) => {
+                if (clear) logs.popDiscard()
+                ZPure.set(state) *> zPure.failure(cause)
+              },
+              (a: Any) => {
+                if (clear) {
                   val builder = logs.pop()
                   logs.peek() ++= builder.result()
-                })) *> zPure.success(a)
+                }
+                zPure.success(a)
+              }
             )
+          if (clear) logs.push(ChunkBuilder.make())
           stack.push(fold)
-          logs.push(ChunkBuilder.make())
           curZPure = zPure.value
 
         case log0: Log[_, _] =>
@@ -691,17 +694,16 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
         case fail0: Fail[_] =>
           val zPure     = fail0.asInstanceOf[Fail[Any]]
           var unwinding = true
+          var nextInstr = null.asInstanceOf[Continuation]
           while (unwinding)
             stack.pop() match {
               case value: Fold[_, _, _, _, _, _, _, _, _] =>
-                val continuation = value.failure
-                stack.push(continuation.asInstanceOf[Any => ZPure[Any, Any, Any, Any, Any, Any]])
+                nextInstr = value.failure.asInstanceOf[Continuation]
                 unwinding = false
               case null                                   =>
                 unwinding = false
               case _                                      =>
             }
-          val nextInstr = stack.pop()
           if (nextInstr eq null) {
             a = zPure
             curZPure = null
@@ -715,11 +717,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
               val oldValue = clearLogOnError
               clearLogOnError = zPure.value
               curZPure = zPure.continue.bimap(
-                e => {
-                  if (zPure.value) logs.peek().clear()
-                  clearLogOnError = oldValue
-                  e
-                },
+                e => { clearLogOnError = oldValue; e },
                 a => { clearLogOnError = oldValue; a }
               )
           }

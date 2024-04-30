@@ -1,13 +1,9 @@
 package zio.prelude
 
-import cats.effect.unsafe.implicits.global
-import cats.effect.{IO => CIO}
-import cats.instances.list._
-import cats.syntax.all._
 import org.openjdk.jmh.annotations.{State => BenchmarkState, _}
 import org.openjdk.jmh.infra.Blackhole
 import zio.prelude.fx.ZPure
-import zio.{Scope => _, _}
+import zio.{Scope => _}
 
 import java.util.concurrent.TimeUnit
 
@@ -29,18 +25,35 @@ class ZPureFullBenchmark {
     list = (1 to size).toList
 
   @Benchmark
-  def zioPureFullBenchmark(bh: Blackhole): Unit = bh.consume(run0)
+  def fallibleBenchmark(bh: Blackhole): Unit = bh.consume(runFallible)
 
-  private def run0 =
+  @Benchmark
+  def infallibleBenchmark(bh: Blackhole): Unit = bh.consume(runInfallible)
+
+  private def runFallible =
     ZPure
       .foreachDiscard(list)(_ =>
-        for {
+        (for {
           conf <- ZPure.environmentWith[Env](_.get.config)
-          event = Event(s"Env = $conf")
-          _    <- ZPure.log(event)
+          _    <- ZPure.log(Event(s"Env = $conf"))
           add   = 1
+          _    <- if (true) ZPure.unit[State] else ZPure.fail(new Throwable("boom"))
           _    <- ZPure.update[State, State](state => state.copy(value = state.value + add))
-        } yield ()
+        } yield ()).catchAll(e => ZPure.log[State, Event](Event(e.toString)))
+      )
+      .provideService(Env())
+      .run(State())
+
+  private def runInfallible =
+    ZPure
+      .foreachDiscard(list)(_ =>
+        (for {
+          conf <- ZPure.environmentWith[Env](_.get.config)
+          _    <- ZPure.log(Event(s"Env = $conf"))
+          add   = 1
+          _    <- ZPure.unit[State]
+          _    <- ZPure.update[State, State](state => state.copy(value = state.value + add))
+        } yield ()) *> ZPure.unit[State]
       )
       .provideService(Env())
       .run(State())
@@ -48,5 +61,4 @@ class ZPureFullBenchmark {
   private case class Env(config: String = "foo")
   private case class Event(value: String)
   private case class State(value: Int = 0)
-
 }

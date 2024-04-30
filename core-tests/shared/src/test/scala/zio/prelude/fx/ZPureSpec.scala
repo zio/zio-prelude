@@ -898,6 +898,16 @@ object ZPureSpec extends ZIOBaseSpec {
             } yield ()
           assert(zPure.provideState("").runLog)(equalTo((Chunk(1, 2), ())))
         },
+        test("using clearLogOnError and keepLogOnError before the error is handled") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).keepLogOnError.either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).clearLogOnError.either
+            } yield ()
+          assert(zPure.provideState("").runLog)(equalTo((Chunk(1, 2), ())))
+        },
         test("log is not cleared after failure with keepLogOnError when the whole computation fails") {
           def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
           val zPure                                                       = log(1) *> ZPure.fail("baz")
