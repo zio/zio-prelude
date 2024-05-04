@@ -4,10 +4,19 @@ package zio.prelude.fx
  * Lightweight port of zio.internal.Stack, optimized for usage with ZPure
  */
 private final class Stack[A <: AnyRef] { self =>
-  private[this] final val N = 14
+  import Stack._
 
-  private[this] var array  = new Array[AnyRef](N + 1)
+  private[this] var array  = new Array[AnyRef](ArrSize)
   private[this] var packed = 0
+
+  def clear(): Unit = {
+    var i = 0
+    while (i < ArrSize && (array(i) ne null)) {
+      array(i) = null
+      i += 1
+    }
+    packed = 0
+  }
 
   /**
    * Pushes an item onto the stack.
@@ -15,8 +24,8 @@ private final class Stack[A <: AnyRef] { self =>
   def push(a: A): Unit = {
     val packed0 = packed
     val used    = packed0 & 0xf
-    if (used == N + 1) {
-      val newArr = new Array[AnyRef](N + 1)
+    if (used == ArrSize) {
+      val newArr = new Array[AnyRef](ArrSize)
       newArr(0) = array
       newArr(1) = a
       array = newArr
@@ -40,7 +49,7 @@ private final class Stack[A <: AnyRef] { self =>
       var a    = array(idx)
       if (idx == 0 && packed0 != 1) {
         val arr0 = a.asInstanceOf[Array[AnyRef]]
-        a = arr0(N)
+        a = arr0(ArrSize - 1)
         array = arr0
         packed -= 3
       } else {
@@ -49,4 +58,8 @@ private final class Stack[A <: AnyRef] { self =>
       a.asInstanceOf[A]
     }
   }
+}
+
+private object Stack {
+  private final val ArrSize = 15 // Can be made smaller, but not larger
 }

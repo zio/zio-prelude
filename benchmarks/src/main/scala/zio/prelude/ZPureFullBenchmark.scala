@@ -17,7 +17,7 @@ class ZPureFullBenchmark {
 
   var list: List[Int] = _
 
-  @Param(Array("1000"))
+  @Param(Array("1", "1000"))
   var size: Int = _
 
   @Setup(Level.Trial)

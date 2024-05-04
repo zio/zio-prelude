@@ -972,6 +972,34 @@ object ZPureSpec extends ZIOBaseSpec {
           res2 <- ZPure.get
         } yield assert(res1)(isFalse) && assert(res2)(isTrue)
         zPure.runResult(false)
+      },
+      suite("thread local caching") {
+        val computation: ZPure[String, Unit, Unit, Any, Nothing, Int] =
+          for {
+            a <- ZPure.succeed(1 + 1)
+            _ <- ZPure.log("plus")
+            b <- ZPure.succeed(a * 3)
+            _ <- ZPure.log("times")
+          } yield b
+
+        test("reentrant safe") {
+          val outer: ZPure[String, Unit, Unit, Any, Nothing, (Int, (Chunk[String], Int))] = for {
+            a          <- ZPure.succeed(1 + 1)
+            _          <- ZPure.log("outerPlus")
+            innerResult = computation.runLog
+            b          <- ZPure.succeed(a * 3)
+            _          <- ZPure.log("outerTimes")
+          } yield (b, innerResult)
+
+          val expected = (Chunk("outerPlus", "outerTimes"), (6, (Chunk("plus", "times"), 6)))
+          assert(outer.runLog)(equalTo(expected))
+        } +
+          test("runners are cleared after completion") {
+            val first     = computation.runLog
+            val second    = computation.runLog
+            val assertion = equalTo((Chunk("plus", "times"), 6))
+            assert(first)(assertion) && assert(second)(assertion)
+          }
       }
     )
 
