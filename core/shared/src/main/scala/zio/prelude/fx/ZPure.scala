@@ -1402,20 +1402,18 @@ object ZPure {
             }
 
           case fail0: Fail[_] =>
-            val zPure     = fail0.asInstanceOf[Fail[Any]]
-            var unwinding = true
-            var nextInstr = null.asInstanceOf[Continuation]
-            while (unwinding)
+            val zPure = fail0.asInstanceOf[Fail[Any]]
+            curZPure = null
+            while (curZPure eq null)
               stack.pop() match {
                 case null                                   =>
-                  unwinding = false
+                  throw Runner.Err(zPure.error)
                 case value: Fold[_, _, _, _, _, _, _, _, _] =>
-                  nextInstr = value.failure.asInstanceOf[Continuation]
-                  unwinding = false
+                  val cont = value.failure.asInstanceOf[Continuation]
+                  curZPure = cont(zPure.error)
                 case _                                      =>
                   ()
               }
-            if (nextInstr eq null) throw Runner.Err(zPure.error) else curZPure = nextInstr(zPure.error)
         }
 
       (s0.asInstanceOf[S2], a.asInstanceOf[A])
