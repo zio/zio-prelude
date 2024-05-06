@@ -967,13 +967,15 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Maps the value of this computation to unit.
    */
-  final def unit: ZPure[W, S1, S2, R, E, Unit] = as(())
+  final def unit: ZPure[W, S1, S2, R, E, Unit] =
+    self.flatMap(succeedUnitFn)
 
 }
 
 object ZPure {
   private val succeedUnit: ZPure[Nothing, Any, Nothing, Any, Nothing, Unit]            = Succeed(())
   private val succeedNone: ZPure[Nothing, Any, Nothing, Any, Nothing, Option[Nothing]] = Succeed(None)
+  private val succeedUnitFn                                                            = (_: Any) => succeedUnit
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
