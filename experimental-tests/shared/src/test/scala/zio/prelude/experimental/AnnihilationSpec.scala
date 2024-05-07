@@ -9,7 +9,7 @@ import zio.test.laws._
 object AnnihilationSpec extends ZIOBaseSpec {
 
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
-  private implicit val FloatEqual: Equal[Float] = Equal.FloatEqualWithEpsilon()
+  private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
 
   def spec: Spec[Environment, Any] =
     suite("AnnihilationSpec")(
