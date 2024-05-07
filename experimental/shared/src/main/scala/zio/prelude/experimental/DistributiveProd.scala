@@ -17,7 +17,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
    */
   def apply[A](implicit distributiveProd: DistributiveProd[A]): DistributiveProd[A] = distributiveProd
 
-  implicit val IntAnnihilationDistributiveProd: Annihilation[Int] with Subtract[Int] =
+  implicit val IntAnnihilationSubtract: Annihilation[Int] with Subtract[Int] =
     new Annihilation[Int] with Subtract[Int] {
       override def sum(l: => Int, r: => Int): Int                     = l + r
       override def prod(l: => Int, r: => Int): Int                    = l * r
@@ -27,7 +27,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Int]] with PartialInverse[Prod[Int]] = Associative.IntProdCommutativePartialInverse
     }
 
-  implicit val DoubleAnnihilationDistributiveProd
+  implicit val DoubleAnnihilationPartialDivideSubtract
     : Annihilation[Double] with PartialDivide[Double] with Subtract[Double] =
     new Annihilation[Double] with PartialDivide[Double] with Subtract[Double] {
       override def sum(l: => Double, r: => Double): Double                  = l + r
