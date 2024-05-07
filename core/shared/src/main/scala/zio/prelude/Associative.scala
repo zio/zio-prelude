@@ -183,7 +183,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` instance for the product of `BigDecimal` values
+   * The `Commutative`, `PartialInverse` instance for the product of `BigDecimal` values
    */
   implicit val BigDecimalProdCommutativeIdempotent
     : Commutative[Prod[BigDecimal]] with PartialInverse[Prod[BigDecimal]] =
@@ -261,7 +261,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Byte`
+   * The `Commutative` and `PartialInverse` instance for the product of `Byte`
    * values.
    */
   implicit val ByteProdCommutativeIdentity: Commutative[Prod[Byte]] with PartialInverse[Prod[Byte]] =
@@ -299,7 +299,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Char`
+   * The `Commutative` and `PartialInverse` instance for the product of `Char`
    * values.
    */
   implicit val CharProdCommutativeIdentity: Commutative[Prod[Char]] with PartialInverse[Prod[Char]] =
@@ -443,7 +443,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Float`
+   * The `Commutative` and `PartialInverse` instance for the product of `Float`
    * values.
    */
   implicit val FloatProdCommutativeIdentity: Commutative[Prod[Float]] with PartialInverse[Prod[Float]] =
@@ -515,7 +515,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Long`
+   * The `Commutative` and `PartialInverse` instance for the product of `Long`
    * values.
    */
   implicit val LongProdCommutativeIdentity: Commutative[Prod[Long]] with PartialInverse[Prod[Long]] =
@@ -654,7 +654,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Short`
+   * The `Commutative` and `PartialInverse` instance for the product of `Short`
    * values.
    */
   implicit val ShortProdCommutativeIdentity: Commutative[Prod[Short]] with PartialInverse[Prod[Short]] =
