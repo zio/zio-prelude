@@ -898,6 +898,26 @@ object ZPureSpec extends ZIOBaseSpec {
             } yield ()
           assert(zPure.provideState("").runLog)(equalTo((Chunk(1, 2), ())))
         },
+        test("using clearLogOnError and keepLogOnError before the error is handled") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       =
+            for {
+              _ <- (log(1) *> ZPure.fail("baz")).keepLogOnError.either
+              _ <- log(2)
+              _ <- (log(3) *> ZPure.fail("baz")).clearLogOnError.either
+            } yield ()
+          assert(zPure.provideState("").runLog)(equalTo((Chunk(1, 2), ())))
+        },
+        test("nested error handling with keepLogOnError / clearLogOnError") {
+          def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
+          val zPure                                                       =
+            for {
+              _ <- ((log(1) *> ZPure.fail("baz")).either *> log(11)).keepLogOnError
+              _ <- log(2)
+              _ <- ((log(3) *> ZPure.fail("baz")).either *> log(33)).clearLogOnError
+            } yield ()
+          assert(zPure.provideState("").runLog)(equalTo((Chunk(1, 11, 2, 33), ())))
+        },
         test("log is not cleared after failure with keepLogOnError when the whole computation fails") {
           def log(i: Int): ZPure[Int, String, String, Any, Nothing, Unit] = ZPure.log(i)
           val zPure                                                       = log(1) *> ZPure.fail("baz")
@@ -952,6 +972,34 @@ object ZPureSpec extends ZIOBaseSpec {
           res2 <- ZPure.get
         } yield assert(res1)(isFalse) && assert(res2)(isTrue)
         zPure.runResult(false)
+      },
+      suite("thread local caching") {
+        val computation: ZPure[String, Unit, Unit, Any, Nothing, Int] =
+          for {
+            a <- ZPure.succeed(1 + 1)
+            _ <- ZPure.log("plus")
+            b <- ZPure.succeed(a * 3)
+            _ <- ZPure.log("times")
+          } yield b
+
+        test("reentrant safe") {
+          val outer: ZPure[String, Unit, Unit, Any, Nothing, (Int, (Chunk[String], Int))] = for {
+            a          <- ZPure.succeed(1 + 1)
+            _          <- ZPure.log("outerPlus")
+            innerResult = computation.runLog
+            b          <- ZPure.succeed(a * 3)
+            _          <- ZPure.log("outerTimes")
+          } yield (b, innerResult)
+
+          val expected = (Chunk("outerPlus", "outerTimes"), (6, (Chunk("plus", "times"), 6)))
+          assert(outer.runLog)(equalTo(expected))
+        } +
+          test("runners are cleared after completion") {
+            val first     = computation.runLog
+            val second    = computation.runLog
+            val assertion = equalTo((Chunk("plus", "times"), 6))
+            assert(first)(assertion) && assert(second)(assertion)
+          }
       }
     )
 

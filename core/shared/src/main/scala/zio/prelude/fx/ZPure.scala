@@ -16,11 +16,11 @@
 
 package zio.prelude.fx
 
-import zio.internal.Stack
 import zio.prelude._
 import zio.prelude.coherent.CovariantIdentityBoth
 import zio.{Cause => _, _}
 
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -585,135 +585,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * log and either all the failures that occurred or the updated state and the
    * result.
    */
-  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) = {
-    val _                                                        = ev
-    val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
-    val environments: Stack[ZEnvironment[Any]]                   = Stack()
-    val logs: Stack[ChunkBuilder[Any]]                           = Stack(ChunkBuilder.make())
-    var clearLogOnError                                          = false
-    var s0: Any                                                  = s
-    var a: Any                                                   = null
-    var failed                                                   = false
-    var curZPure: ZPure[Any, Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
-
-    def findNextErrorHandler(): Unit = {
-      var unwinding = true
-      while (unwinding)
-        stack.pop() match {
-          case value: Fold[_, _, _, _, _, _, _, _, _] =>
-            val continuation = value.failure
-            stack.push(continuation.asInstanceOf[Any => ZPure[Any, Any, Any, Any, Any, Any]])
-            unwinding = false
-          case null                                   =>
-            unwinding = false
-          case _                                      =>
-        }
-    }
-
-    while (curZPure ne null)
-      curZPure match {
-        case flatmap0: ZPure.FlatMap[_, _, _, _, _, _, _, _] =>
-          val zPure        = flatmap0.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any, Any]]
-          val nested       = zPure.value
-          val continuation = zPure.continue
-
-          nested match {
-            case succeed0: Succeed[_] =>
-              val zPure2 = succeed0.asInstanceOf[Succeed[Any]]
-              curZPure = continuation(zPure2.value)
-
-            case modify0: Modify[_, _, _] =>
-              val zPure2  = modify0.asInstanceOf[Modify[Any, Any, Any]]
-              val updated = zPure2.run0(s0)
-              a = updated._1
-              s0 = updated._2
-              curZPure = continuation(a)
-
-            case _ =>
-              curZPure = nested
-              stack.push(continuation)
-          }
-
-        case succeed0: Succeed[_] =>
-          val zPure     = succeed0.asInstanceOf[Succeed[Any]]
-          a = zPure.value
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case fail0: Fail[_]       =>
-          val zPure     = fail0.asInstanceOf[Fail[Any]]
-          findNextErrorHandler()
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) {
-            failed = true
-            a = zPure.error
-            curZPure = null
-          } else
-            curZPure = nextInstr(zPure.error)
-
-        case fold0: Fold[_, _, _, _, _, _, _, _, _]      =>
-          val zPure = fold0.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
-          val state = s0
-          val fold  =
-            ZPure.Fold(
-              zPure.value,
-              (cause: Cause[Any]) =>
-                ZPure.suspend(Succeed({
-                  val clear   = clearLogOnError
-                  val builder = logs.pop()
-                  if (!clear) logs.peek() ++= builder.result()
-                })) *> ZPure.set(state) *> zPure.failure(cause),
-              (a: Any) =>
-                ZPure.suspend(Succeed({
-                  val builder = logs.pop()
-                  logs.peek() ++= builder.result()
-                })) *> zPure.success(a)
-            )
-          stack.push(fold)
-          logs.push(ChunkBuilder.make())
-          curZPure = zPure.value
-        case environment0: Environment[_, _, _, _, _, _] =>
-          val zPure = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
-          curZPure = zPure.access(environments.peek())
-        case provide0: Provide[_, _, _, _, _, _]         =>
-          val zPure = provide0.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
-          environments.push(zPure.r)
-          curZPure = zPure.continue.foldCauseM(
-            e => ZPure.succeed(environments.pop()) *> ZPure.failCause(e),
-            a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
-          )
-        case modify0: Modify[_, _, _]                    =>
-          val zPure     = modify0.asInstanceOf[Modify[Any, Any, Any]]
-          val updated   = zPure.run0(s0)
-          a = updated._1
-          s0 = updated._2
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case log0: Log[_, _]                             =>
-          val zPure     = log0.asInstanceOf[Log[Any, Any]]
-          logs.peek() += zPure.log
-          val nextInstr = stack.pop()
-          a = ()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case flag0: Flag[_, _, _, _, _, _]               =>
-          val zPure = flag0.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
-          zPure.flag match {
-            case FlagType.ClearLogOnError =>
-              val oldValue = clearLogOnError
-              clearLogOnError = zPure.value
-              curZPure = zPure.continue.bimap(
-                e => {
-                  if (zPure.value) logs.peek().clear()
-                  clearLogOnError = oldValue
-                  e
-                },
-                a => { clearLogOnError = oldValue; a }
-              )
-          }
-      }
-    val log = logs.peek().result().asInstanceOf[Chunk[W]]
-    if (failed) (log, Left(a.asInstanceOf[Cause[E]]))
-    else (log, Right((s0.asInstanceOf[S2], a.asInstanceOf[A])))
-  }
+  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) =
+    Runner(s, self)
 
   /**
    * Runs this computation to produce its result or the first failure to
@@ -1244,17 +1117,17 @@ object ZPure {
 
   final class EnvironmentWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[S, A](f: ZEnvironment[R] => A): ZPure[Nothing, S, S, R, Nothing, A] =
-      environmentWithPure(r => ZPure.succeed(f(r)))
+      Environment(f)
   }
 
   final class EnvironmentWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[W, S1, S2, E, A](f: ZEnvironment[R] => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
-      Environment(f)
+      Environment(f).flatten
   }
 
   final class ServiceWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
     def apply[S, A](f: R => A)(implicit tag: Tag[R]): ZPure[Nothing, S, S, R, Nothing, A] =
-      serviceWithPure(r => ZPure.succeed(f(r)))
+      environmentWith(env => f(env.get))
   }
 
   final class ServiceWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
@@ -1338,7 +1211,7 @@ object ZPure {
     override def apply(a: A): ZPure[W, S2, S3, R, E2, B] =
       success(a)
   }
-  private final case class Environment[W, S1, S2, R, E, A](access: ZEnvironment[R] => ZPure[W, S1, S2, R, E, A])
+  private final case class Environment[W, S1, S2, R, E, A](access: ZEnvironment[R] => A)
       extends ZPure[W, S1, S2, R, E, A]
   private final case class Provide[W, S1, S2, R, E, A](r: ZEnvironment[R], continue: ZPure[W, S1, S2, R, E, A])
       extends ZPure[W, S1, S2, Any, E, A]
@@ -1352,5 +1225,198 @@ object ZPure {
   sealed trait FlagType
   object FlagType {
     case object ClearLogOnError extends FlagType
+  }
+
+  private object Runner {
+    private[this] val pool = new ThreadLocal[(Runner, AtomicBoolean)] {
+      override def initialValue(): (Runner, AtomicBoolean) = (new Runner(), new AtomicBoolean(false))
+    }
+
+    def apply[W, S1, S2, R, E, A](
+      state: S1,
+      zPure: ZPure[W, S1, S2, R, E, A]
+    ): (Chunk[W], Either[Cause[E], (S2, A)]) = {
+      val (runner, running) = pool.get()
+
+      if (running.compareAndSet(false, true)) {
+        try
+          runner.run(state, zPure)
+        finally {
+          runner.clear()
+          running.set(false)
+        }
+      } else {
+        new Runner().run(state, zPure)
+      }
+    }
+
+    final private case class Err(cause: Cause[Any]) extends Exception {
+      override def fillInStackTrace(): Throwable = this
+    }
+  }
+
+  final private class Runner private {
+    private type Continuation = Any => Erased
+    private type Erased       = ZPure[Any, Any, Any, Any, Any, Any]
+
+    private[this] var _environment     = ZEnvironment.empty
+    private[this] var _clearLogOnError = false
+    private[this] var _logs            = ChunkBuilder.make[Any]()
+    private[this] val stack            = new Stack[Continuation]
+
+    private def clear(): Unit = {
+      _environment = ZEnvironment.empty
+      _clearLogOnError = false
+      _logs.clear()
+      stack.clear()
+    }
+
+    private def run[W, S1, S2, R, E, A](
+      state: S1,
+      zPure: ZPure[W, S1, S2, R, E, A]
+    ): (Chunk[W], Either[Cause[E], (S2, A)]) = {
+      val result =
+        try
+          Right(loop(state, zPure.asInstanceOf[Erased]))
+        catch {
+          case Runner.Err(c) => Left(c.asInstanceOf[Cause[E]])
+        }
+
+      (_logs.result().asInstanceOf[Chunk[W]], result)
+    }
+
+    private def loop[S2, A](state: Any, zPure: Erased) = {
+      // NOTE: Be careful not to add these into a lambda to avoid them being moved to the heap
+      var s0: Any  = state
+      var a: Any   = null
+      var curZPure = zPure
+
+      while (curZPure ne null)
+        curZPure match {
+          case flatmap0: ZPure.FlatMap[_, _, _, _, _, _, _, _] =>
+            val zPure        = flatmap0.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any, Any]]
+            val nested       = zPure.value
+            val continuation = zPure.continue
+
+            nested match {
+              case succeed0: Succeed[_] =>
+                val zPure2 = succeed0.asInstanceOf[Succeed[Any]]
+                curZPure = continuation(zPure2.value)
+
+              case modify0: Modify[_, _, _] =>
+                val zPure2  = modify0.asInstanceOf[Modify[Any, Any, Any]]
+                val updated = zPure2.run0(s0)
+                s0 = updated._2
+                curZPure = continuation(updated._1)
+
+              case log0: Log[_, _] =>
+                val zPure = log0.asInstanceOf[Log[Any, Any]]
+                _logs addOne zPure.log
+                curZPure = continuation(())
+
+              case environment0: Environment[_, _, _, _, _, _] =>
+                val zPure = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
+                curZPure = continuation(zPure.access(_environment))
+
+              case _ =>
+                curZPure = nested
+                stack.push(continuation)
+            }
+
+          case succeed0: Succeed[_] =>
+            val zPure     = succeed0.asInstanceOf[Succeed[Any]]
+            a = zPure.value
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case fold0: Fold[_, _, _, _, _, _, _, _, _] =>
+            val zPure = fold0.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
+            val state = s0
+            val clear = _clearLogOnError
+            val fold  = if (clear) {
+              val previousLogs = _logs
+              _logs = ChunkBuilder.make()
+
+              ZPure.Fold(
+                zPure.value,
+                (cause: Cause[Any]) => {
+                  _logs = previousLogs
+                  ZPure.set(state) *> zPure.failure(cause)
+                },
+                (a: Any) => {
+                  val logs0 = _logs.result()
+                  if (logs0.nonEmpty) previousLogs ++= logs0
+                  _logs = previousLogs
+                  zPure.success(a)
+                }
+              )
+            } else {
+              ZPure.Fold(
+                zPure.value,
+                ZPure.set(state) *> zPure.failure(_: Cause[Any]),
+                zPure.success
+              )
+            }
+
+            stack.push(fold)
+            curZPure = zPure.value
+
+          case log0: Log[_, _] =>
+            val zPure     = log0.asInstanceOf[Log[Any, Any]]
+            _logs addOne zPure.log
+            val nextInstr = stack.pop()
+            a = ()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case provide0: Provide[_, _, _, _, _, _] =>
+            val zPure       = provide0.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
+            val previousEnv = _environment
+            _environment = zPure.r
+            curZPure = zPure.continue.foldCauseM(
+              e => { _environment = previousEnv; ZPure.failCause(e) },
+              a => { _environment = previousEnv; ZPure.succeed(a) }
+            )
+
+          case environment0: Environment[_, _, _, _, _, _] =>
+            val zPure     = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
+            a = zPure.access(_environment)
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case modify0: Modify[_, _, _] =>
+            val zPure     = modify0.asInstanceOf[Modify[Any, Any, Any]]
+            val updated   = zPure.run0(s0)
+            a = updated._1
+            s0 = updated._2
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case flag0: Flag[_, _, _, _, _, _] =>
+            val zPure = flag0.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
+            zPure.flag match {
+              case FlagType.ClearLogOnError =>
+                val oldValue = _clearLogOnError
+                _clearLogOnError = zPure.value
+                val resetFn  = (a: Any) => { _clearLogOnError = oldValue; a }
+                curZPure = zPure.continue.bimap(resetFn, resetFn)
+            }
+
+          case fail0: Fail[_] =>
+            val zPure = fail0.asInstanceOf[Fail[Any]]
+            curZPure = null
+            while (curZPure eq null)
+              stack.pop() match {
+                case null                                   =>
+                  throw Runner.Err(zPure.error)
+                case value: Fold[_, _, _, _, _, _, _, _, _] =>
+                  val cont = value.failure.asInstanceOf[Continuation]
+                  curZPure = cont(zPure.error)
+                case _                                      =>
+                  ()
+              }
+        }
+
+      (s0.asInstanceOf[S2], a.asInstanceOf[A])
+    }
   }
 }
