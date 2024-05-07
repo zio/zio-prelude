@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,11 @@
 
 package zio.prelude
 
-import zio.prelude.newtypes.{Failure, FailureIn, FailureOut}
+import zio.prelude.coherent.CovariantIdentityBoth
+import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
-import zio.{
-  Cause,
-  Chunk,
-  ChunkBuilder,
-  Exit,
-  Fiber,
-  NonEmptyChunk,
-  Schedule,
-  ZIO,
-  ZLayer,
-  ZManaged,
-  ZQueue,
-  ZRef,
-  ZRefM
-}
+import zio.{Cause, Chunk, ChunkBuilder, Exit, Fiber, NonEmptyChunk, Schedule, ZIO}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -62,6 +49,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   def apply[F[_]](implicit invariant: Invariant[F]): Invariant[F] =
     invariant
 
+  /**
+   * The `Invariant` instance for `Associative`
+   */
   implicit val AssociativeInvariant: Invariant[Associative] =
     new Invariant[Associative] {
       def invmap[A, B](f: A <=> B): Associative[A] <=> Associative[B] =
@@ -86,10 +76,19 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit val ChunkForEach: ForEach[Chunk] =
     new ForEach[Chunk] {
-      def forEach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]] =
-        chunk.foldLeft(ChunkBuilder.make[B]().succeed)((builder, a) => builder.zipWith(f(a))(_ += _)).map(_.result())
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(f: A => G[B]): G[Chunk[B]]      =
+        CovariantIdentityBoth[G].forEach(chunk)(f)
+      override def collectM[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(
+        f: A => G[Option[B]]
+      )(implicit identityBoth: IdentityBoth[Chunk], identityEither: IdentityEither[Chunk]): G[Chunk[B]] =
+        CovariantIdentityBoth[G].collectM(chunk)(f)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, A](chunk: Chunk[A])(f: A => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(chunk)(f)
     }
 
+  /**
+   * The `Invariant` instance for `Commutative`.
+   */
   implicit val CommutativeInvariant: Invariant[Commutative] =
     new Invariant[Commutative] {
       def invmap[A, B](f: A <=> B): Commutative[A] <=> Commutative[B] =
@@ -135,7 +134,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit def ExitCovariant[E]: Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new Covariant[({ type lambda[+a] = Exit[E, a] })#lambda] {
       override def map[A, B](f: A => B): Exit[E, A] => Exit[E, B] = { exit =>
-        exit.map(f)
+        exit.mapExit(f)
       }
     }
 
@@ -643,6 +642,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       }
     }
 
+  /**
+   * The `Invariant` instance for `Identity`
+   */
   implicit val IdentityInvariant: Invariant[Identity] =
     new Invariant[Identity] {
       def invmap[A, B](f: A <=> B): Identity[A] <=> Identity[B] =
@@ -652,6 +654,9 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         )
     }
 
+  /**
+   * The `Invariant` instance for `Inverse`
+   */
   implicit val InverseInvariant: Invariant[Inverse] =
     new Invariant[Inverse] {
       def invmap[A, B](f: A <=> B): Inverse[A] <=> Inverse[B] =
@@ -676,9 +681,16 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit val ListForEach: ForEach[List] =
     new ForEach[List] {
-      def forEach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]] =
-        list.foldRight[G[List[B]]](Nil.succeed)((a, bs) => f(a).zipWith(bs)(_ :: _))
-      override def map[A, B](f: A => B): List[A] => List[B]                                      = _.map(f)
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](list: List[A])(f: A => G[B]): G[List[B]]     =
+        CovariantIdentityBoth[G].forEach(list)(f)
+      override def collectM[G[+_]: IdentityBoth: Covariant, A, B](fa: List[A])(
+        f: A => G[Option[B]]
+      )(implicit identityBoth: IdentityBoth[List], identityEither: IdentityEither[List]): G[List[B]] =
+        CovariantIdentityBoth[G].collectM(fa)(f)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: List[A])(f: A => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(fa)(f)
+      override def map[A, B](f: A => B): List[A] => List[B]                                          =
+        _.map(f)
     }
 
   /**
@@ -686,10 +698,21 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit def MapForEach[K]: ForEach[({ type lambda[+v] = Map[K, v] })#lambda] =
     new ForEach[({ type lambda[+v] = Map[K, v] })#lambda] {
-      def forEach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]] =
-        map.foldLeft[G[Map[K, V2]]](Map.empty.succeed) { case (map, (k, v)) =>
-          map.zipWith(f(v))((map, v2) => map + (k -> v2))
-        }
+      def forEach[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(f: V => G[V2]): G[Map[K, V2]]  =
+        CovariantIdentityBoth[G]
+          .forEach[(K, V), (K, V2), Iterable](map) { case (k, v) => f(v).map(k -> _) }
+          .map(_.toMap)
+      override def collectM[G[+_]: IdentityBoth: Covariant, V, V2](map: Map[K, V])(
+        f: V => G[Option[V2]]
+      )(implicit
+        identityBoth: IdentityBoth[({ type lambda[+v] = Map[K, v] })#lambda],
+        identityEither: IdentityEither[({ type lambda[+v] = Map[K, v] })#lambda]
+      ): G[Map[K, V2]] =
+        CovariantIdentityBoth[G]
+          .collectM[(K, V), (K, V2), Iterable](map) { case (k, v) => f(v).map(_.map(k -> _)) }
+          .map(_.toMap)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, V](map: Map[K, V])(f: V => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(map) { case (_, v) => f(v) }
     }
 
   /**
@@ -703,6 +726,10 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         nonEmptyChunk
           .reduceMapLeft(f(_).map(ChunkBuilder.make() += _))((bs, a) => bs.zipWith(f(a))(_ += _))
           .map(bs => NonEmptyChunk.nonEmpty(bs.result()))
+      override def forEach1_[F[+_]: AssociativeBoth: Covariant, A](nonEmptyChunk: NonEmptyChunk[A])(
+        f: A => F[Any]
+      ): F[Unit] =
+        nonEmptyChunk.reduceMapLeft(f(_))((bs, a) => bs *> f(a)).unit
     }
 
   /**
@@ -1312,8 +1339,14 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit val VectorForEach: ForEach[Vector] =
     new ForEach[Vector] {
-      def forEach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]] =
-        vector.foldLeft[G[Vector[B]]](Vector.empty.succeed)((bs, a) => bs.zipWith(f(a))(_ :+ _))
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(f: A => G[B]): G[Vector[B]]     =
+        CovariantIdentityBoth[G].forEach(vector)(f)
+      override def collectM[G[+_]: IdentityBoth: Covariant, A, B](vector: Vector[A])(
+        f: A => G[Option[B]]
+      )(implicit identityBoth: IdentityBoth[Vector], identityEither: IdentityEither[Vector]): G[Vector[B]] =
+        CovariantIdentityBoth[G].collectM(vector)(f)
+      override def forEach_[G[+_]: IdentityBoth: Covariant, A](vector: Vector[A])(f: A => G[Any]): G[Unit] =
+        CovariantIdentityBoth[G].forEach_(vector)(f)
     }
 
   /**
@@ -1327,110 +1360,6 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
    */
   implicit def ZIOFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
     Zivariant.ZioZivariant.deriveFailureCovariant
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for `ZLayer`
-   */
-  implicit def ZLayerCovariant[R, E]: Covariant[({ type lambda[+rout] = ZLayer[R, E, rout] })#lambda] =
-    Zivariant.ZLayerZivariant.deriveCovariant
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZLayer`
-   */
-  implicit def ZLayerFailureCovariant[R, Out]: Covariant[({ type lambda[+e] = Failure[ZLayer[R, e, Out]] })#lambda] =
-    Zivariant.ZLayerZivariant.deriveFailureCovariant
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for `ZManaged`
-   */
-  implicit def ZManagedCovariant[R, E]: Covariant[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    Zivariant.ZManagedZivariant.deriveCovariant
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZManaged`
-   */
-  implicit def ZManagedFailureCovariant[R, A]: Covariant[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    Zivariant.ZManagedZivariant.deriveFailureCovariant
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for `ZQueue`
-   */
-  implicit def ZQueueCovariant[RA, RB, EA, EB, A]
-    : Covariant[({ type lambda[+b] = ZQueue[RA, RB, EA, EB, A, b] })#lambda] =
-    new Covariant[({ type lambda[+b] = ZQueue[RA, RB, EA, EB, A, b] })#lambda] {
-      override def map[B, B1](f: B => B1): ZQueue[RA, RB, EA, EB, A, B] => ZQueue[RA, RB, EA, EB, A, B1] = { zqueue =>
-        zqueue.map(f)
-      }
-    }
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for `ZRef`
-   */
-  implicit def ZRefCovariant[EA, EB, A]: Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] =
-    new Covariant[({ type lambda[+b] = ZRef[EA, EB, A, b] })#lambda] {
-      override def map[B, C](f: B => C): ZRef[EA, EB, A, B] => ZRef[EA, EB, A, C] = { zref =>
-        zref.map(f)
-      }
-    }
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZRef` on its input
-   */
-  implicit def ZRefFailureInCovariant[EB, A, B]
-    : Covariant[({ type lambda[+ea] = FailureIn[ZRef[ea, EB, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+ea] = FailureIn[ZRef[ea, EB, A, B]] })#lambda] {
-      override def map[E, E1](f: E => E1): FailureIn[ZRef[E, EB, A, B]] => FailureIn[ZRef[E1, EB, A, B]] = { zref =>
-        FailureIn.wrap(FailureIn.unwrap(zref).dimapError(f, identity))
-      }
-    }
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZRef` on its output
-   */
-  implicit def ZRefFailureOutCovariant[EA, A, B]
-    : Covariant[({ type lambda[+eb] = FailureOut[ZRef[EA, eb, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+eb] = FailureOut[ZRef[EA, eb, A, B]] })#lambda] {
-      override def map[E, E1](f: E => E1): FailureOut[ZRef[EA, E, A, B]] => FailureOut[ZRef[EA, E1, A, B]] = { zref =>
-        FailureOut.wrap(FailureOut.unwrap(zref).dimapError(identity, f))
-      }
-    }
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for `ZRefM`
-   */
-  implicit def ZRefMCovariant[RA, RB, EA, EB, A]
-    : Covariant[({ type lambda[+b] = ZRefM[RA, RB, EA, EB, A, b] })#lambda] =
-    new Covariant[({ type lambda[+b] = ZRefM[RA, RB, EA, EB, A, b] })#lambda] {
-      override def map[B, C](f: B => C): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, A, C] = { zref =>
-        zref.map(f)
-      }
-    }
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZRefM` on its input
-   */
-  implicit def ZRefMFailureInACovariant[RA, RB, EB, A, B]
-    : Covariant[({ type lambda[+ea] = FailureIn[ZRefM[RA, RB, ea, EB, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+ea] = FailureIn[ZRefM[RA, RB, ea, EB, A, B]] })#lambda] {
-      override def map[E, E1](
-        f: E => E1
-      ): FailureIn[ZRefM[RA, RB, E, EB, A, B]] => FailureIn[ZRefM[RA, RB, E1, EB, A, B]] = { zref =>
-        FailureIn.wrap(FailureIn.unwrap(zref).dimapError(f, identity))
-      }
-    }
-
-  /**
-   * The `Covariant` (and thus `Invariant`) for a failed `ZRefM` on its output
-   */
-  implicit def ZRefMFailureOutCovariant[RA, RB, EA, A, B]
-    : Covariant[({ type lambda[+eb] = FailureOut[ZRefM[RA, RB, EA, eb, A, B]] })#lambda] =
-    new Covariant[({ type lambda[+eb] = FailureOut[ZRefM[RA, RB, EA, eb, A, B]] })#lambda] {
-      override def map[E, E1](
-        f: E => E1
-      ): FailureOut[ZRefM[RA, RB, EA, E, A, B]] => FailureOut[ZRefM[RA, RB, EA, E1, A, B]] = { zref =>
-        FailureOut.wrap(FailureOut.unwrap(zref).dimapError(identity, f))
-      }
-    }
 
   /**
    * The `Covariant` (and thus `Invariant`) for `ZStream`
@@ -1731,53 +1660,6 @@ trait LowPriorityInvariantImplicits {
     }
 
   /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZIO`.
-   */
-  implicit def ZIOContravariant[E, A]: Contravariant[({ type lambda[-x] = ZIO[x, E, A] })#lambda] =
-    Zivariant.ZioZivariant.deriveContravariant
-
-  /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZLayer`.
-   */
-  implicit def ZLayerContravariant[E, ROut]: Contravariant[({ type lambda[-x] = ZLayer[x, E, ROut] })#lambda] =
-    Zivariant.ZLayerZivariant.deriveContravariant
-
-  /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZManaged`.
-   */
-  implicit def ZManagedContravariant[E, A]: Contravariant[({ type lambda[-x] = ZManaged[x, E, A] })#lambda] =
-    Zivariant.ZManagedZivariant.deriveContravariant
-
-  /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZQueue`.
-   */
-  implicit def ZQueueContravariant[RA, EA, RB, EB, B]
-    : Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZQueue[RA, EA, RB, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZQueue[RA, EA, RB, EB, A, B] => ZQueue[RA, EA, RB, EB, C, B] =
-        queue => queue.contramap(f)
-    }
-
-  /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZRef`.
-   */
-  implicit def ZRefContravariant[EA, EB, B]: Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZRef[EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRef[EA, EB, A, B] => ZRef[EA, EB, C, B] =
-        ref => ref.contramap(f)
-    }
-
-  /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZRefM`.
-   */
-  implicit def ZRefMContravariant[RA, RB, EA, EB, B]
-    : Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] =
-    new Contravariant[({ type lambda[-x] = ZRefM[RA, RB, EA, EB, x, B] })#lambda] {
-      def contramap[A, C](f: C => A): ZRefM[RA, RB, EA, EB, A, B] => ZRefM[RA, RB, EA, EB, C, B] =
-        ref => ref.contramap(f)
-    }
-
-  /**
    * The `Contravariant` (and thus `Invariant`) instance for `ZSink`.
    */
   implicit def ZSinkContravariant[R, E, L, Z]: Contravariant[({ type lambda[-x] = ZSink[R, E, x, L, Z] })#lambda] =
@@ -1786,17 +1668,6 @@ trait LowPriorityInvariantImplicits {
         sink => sink.contramap(f)
     }
 
-  /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZStream`.
-   */
-  implicit def ZStreamContravariant[E, A]: Contravariant[({ type lambda[-x] = ZStream[x, E, A] })#lambda] =
-    Zivariant.ZStreamZivariant.deriveContravariant
-
-  /**
-   * The `Contravariant` (and thus `Invariant`) instance for `ZSTM`.
-   */
-  implicit def ZSTMZivariantContravariant[E, A]: Contravariant[({ type lambda[-x] = ZSTM[x, E, A] })#lambda] =
-    Zivariant.ZSTMZivariant.deriveContravariant
 }
 
 trait InvariantSyntax {

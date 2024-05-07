@@ -1,16 +1,16 @@
 package zio.prelude
 package scalaparallelcollections
 
-import com.github.ghik.silencer.silent
+import zio.Trace
 import zio.prelude.laws._
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
 
+import scala.annotation.nowarn
 import scala.collection.parallel.{immutable => par}
 
-@silent("Unused import")
-object ForEachJvmSpec extends DefaultRunnableSpec {
+@nowarn("msg=Unused import")
+object ForEachJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters
@@ -23,23 +23,27 @@ object ForEachJvmSpec extends DefaultRunnableSpec {
   }
   import ParallelCollectionCompatibility._
 
-  def genParMap[R <: Random with Sized, K](k: Gen[R, K]): GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
+  def genParMap[R <: Sized, K](
+    k: Gen[R, K]
+  ): GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
     new GenF[R, ({ type lambda[+v] = par.ParMap[K, v] })#lambda] {
-      def apply[R1 <: R, V](v: Gen[R1, V]): Gen[R1, par.ParMap[K, V]] =
+      def apply[R1 <: R, V](v: Gen[R1, V])(implicit trace: Trace): Gen[R1, par.ParMap[K, V]] =
         Gen.mapOf(k, v).map(_.par)
     }
 
-  val genParSeq: GenF[Random with Sized, par.ParSeq] =
-    new GenF[Random with Sized, par.ParSeq] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, par.ParSeq[A]] =
+  val genParSeq: GenF[Sized, par.ParSeq] =
+    new GenF[Sized, par.ParSeq] {
+      def apply[R1 <: Sized, A](gen: Gen[R1, A])(implicit
+        trace: Trace
+      ): Gen[R1, par.ParSeq[A]] =
         Gen.listOf(gen).map(_.par)
     }
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("ForEachJvmSpec")(
       suite("laws")(
-        testM("parMap")(checkAllLaws(ForEachLaws)(genParMap(Gen.anyInt), Gen.anyInt)),
-        testM("parSeq")(checkAllLaws(ForEachLaws)(genParSeq, Gen.anyInt))
+        test("parMap")(checkAllLaws(ForEachLaws)(genParMap(Gen.int), Gen.int)),
+        test("parSeq")(checkAllLaws(ForEachLaws)(genParSeq, Gen.int))
       )
     )
 }

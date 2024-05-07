@@ -1,61 +1,61 @@
 package zio.prelude
 
 import zio.ZIO
-import zio.prelude.Common.anyFiniteDurationScala
+import zio.prelude.Common.finiteDurationScala
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object HashSpec extends DefaultRunnableSpec {
+object HashSpec extends ZIOBaseSpec {
 
   final def scalaHashCodeConsistency[R, A: Hash](gen: Gen[R, A]): ZIO[R with TestConfig, Nothing, TestResult] =
     check(gen)(a => assert(a.hash)(equalTo(a.hashCode)))
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("HashSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(HashLaws)(Gen.boolean)),
-        testM("byte")(checkAllLaws(HashLaws)(Gen.anyByte)),
-        testM("char")(checkAllLaws(HashLaws)(Gen.anyChar)),
-        testM("chunk")(checkAllLaws(HashLaws)(Gen.chunkOf(Gen.anyInt))),
-        testM("double")(checkAllLaws(HashLaws)(Gen.anyDouble)),
-        testM("duration Scala")(checkAllLaws(HashLaws)(anyFiniteDurationScala)),
-        testM("duration ZIO")(checkAllLaws(HashLaws)(Gen.anyFiniteDuration)),
-        testM("either")(checkAllLaws(HashLaws)(Gen.either(Gen.anyInt, Gen.anyInt))),
-        testM("float")(checkAllLaws(HashLaws)(Gen.anyFloat)),
-        testM("int")(checkAllLaws(HashLaws)(Gen.anyInt)),
-        testM("list")(checkAllLaws(HashLaws)(Gen.listOf(Gen.anyInt))),
-        testM("long")(checkAllLaws(HashLaws)(Gen.anyLong)),
-        testM("map")(checkAllLaws(HashLaws)(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
-        testM("option")(checkAllLaws(HashLaws)(Gen.option(Gen.anyInt))),
-        testM("set")(checkAllLaws(HashLaws)(Gen.setOf(Gen.anyInt))),
-        testM("string")(checkAllLaws(HashLaws)(Gen.anyString)),
-        testM("tuple2")(checkAllLaws(HashLaws)(Gen.anyInt.zip(Gen.anyInt))),
-        testM("tuple3")(checkAllLaws(HashLaws)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("unit")(checkAllLaws(HashLaws)(Gen.unit)),
-        testM("vector")(checkAllLaws(HashLaws)(Gen.vectorOf(Gen.anyInt)))
+        test("boolean")(checkAllLaws(HashLaws)(Gen.boolean)),
+        test("byte")(checkAllLaws(HashLaws)(Gen.byte)),
+        test("char")(checkAllLaws(HashLaws)(Gen.char)),
+        test("chunk")(checkAllLaws(HashLaws)(Gen.chunkOf(Gen.int))),
+        test("double")(checkAllLaws(HashLaws)(Gen.double)),
+        test("duration Scala")(checkAllLaws(HashLaws)(finiteDurationScala)),
+        test("duration ZIO")(checkAllLaws(HashLaws)(Gen.finiteDuration)),
+        test("either")(checkAllLaws(HashLaws)(Gen.either(Gen.int, Gen.int))),
+        test("float")(checkAllLaws(HashLaws)(Gen.float)),
+        test("int")(checkAllLaws(HashLaws)(Gen.int)),
+        test("list")(checkAllLaws(HashLaws)(Gen.listOf(Gen.int))),
+        test("long")(checkAllLaws(HashLaws)(Gen.long)),
+        test("map")(checkAllLaws(HashLaws)(Gen.mapOf(Gen.int, Gen.int))),
+        test("option")(checkAllLaws(HashLaws)(Gen.option(Gen.int))),
+        test("set")(checkAllLaws(HashLaws)(Gen.setOf(Gen.int))),
+        test("string")(checkAllLaws(HashLaws)(Gen.string)),
+        test("tuple2")(checkAllLaws(HashLaws)(Gen.int.zip(Gen.int))),
+        test("tuple3")(checkAllLaws(HashLaws)(Gen.int.zip(Gen.int).zip(Gen.int))),
+        test("unit")(checkAllLaws(HashLaws)(Gen.unit)),
+        test("vector")(checkAllLaws(HashLaws)(Gen.vectorOf(Gen.int)))
       ),
       suite("ScalaHashCode consistency")(
-        testM("unit")(scalaHashCodeConsistency(Gen.unit)),
-        testM("boolean")(scalaHashCodeConsistency(Gen.boolean)),
-        testM("byte")(scalaHashCodeConsistency(Gen.anyByte)),
-        testM("char")(scalaHashCodeConsistency(Gen.anyChar)),
-        testM("duration Scala")(scalaHashCodeConsistency(anyFiniteDurationScala)),
-        testM("duration ZIO")(scalaHashCodeConsistency(Gen.anyFiniteDuration)),
-        testM("string")(scalaHashCodeConsistency(Gen.anyString)),
-        testM("int")(scalaHashCodeConsistency(Gen.anyInt)),
-        testM("long")(scalaHashCodeConsistency(Gen.anyLong)),
-        testM("float")(scalaHashCodeConsistency(Gen.anyFloat)),
-        testM("double")(scalaHashCodeConsistency(Gen.anyDouble)),
-        testM("option")(scalaHashCodeConsistency(Gen.option(Gen.anyInt))),
-        testM("tuple2")(scalaHashCodeConsistency(Gen.anyInt.zip(Gen.anyInt))),
-        testM("tuple3")(scalaHashCodeConsistency(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("either")(scalaHashCodeConsistency(Gen.either(Gen.anyInt, Gen.anyInt))),
-        testM("list")(scalaHashCodeConsistency(Gen.listOf(Gen.anyInt))),
-        testM("vector")(scalaHashCodeConsistency(Gen.vectorOf(Gen.anyInt))),
-        testM("set")(scalaHashCodeConsistency(Gen.setOf(Gen.anyInt))),
-        testM("map")(scalaHashCodeConsistency(Gen.mapOf(Gen.anyInt, Gen.anyInt))),
-        testM("chunk")(scalaHashCodeConsistency(Gen.chunkOf(Gen.anyInt)))
+        test("unit")(scalaHashCodeConsistency(Gen.unit)),
+        test("boolean")(scalaHashCodeConsistency(Gen.boolean)),
+        test("byte")(scalaHashCodeConsistency(Gen.byte)),
+        test("char")(scalaHashCodeConsistency(Gen.char)),
+        test("duration Scala")(scalaHashCodeConsistency(finiteDurationScala)),
+        test("duration ZIO")(scalaHashCodeConsistency(Gen.finiteDuration)),
+        test("string")(scalaHashCodeConsistency(Gen.string)),
+        test("int")(scalaHashCodeConsistency(Gen.int)),
+        test("long")(scalaHashCodeConsistency(Gen.long)),
+        test("float")(scalaHashCodeConsistency(Gen.float)),
+        test("double")(scalaHashCodeConsistency(Gen.double)),
+        test("option")(scalaHashCodeConsistency(Gen.option(Gen.int))),
+        test("tuple2")(scalaHashCodeConsistency(Gen.int.zip(Gen.int))),
+        test("tuple3")(scalaHashCodeConsistency(Gen.int.zip(Gen.int).zip(Gen.int))),
+        test("either")(scalaHashCodeConsistency(Gen.either(Gen.int, Gen.int))),
+        test("list")(scalaHashCodeConsistency(Gen.listOf(Gen.int))),
+        test("vector")(scalaHashCodeConsistency(Gen.vectorOf(Gen.int))),
+        test("set")(scalaHashCodeConsistency(Gen.setOf(Gen.int))),
+        test("map")(scalaHashCodeConsistency(Gen.mapOf(Gen.int, Gen.int))),
+        test("chunk")(scalaHashCodeConsistency(Gen.chunkOf(Gen.int)))
       )
     )
 }

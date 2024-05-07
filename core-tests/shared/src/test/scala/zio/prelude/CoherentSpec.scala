@@ -7,9 +7,9 @@ import zio.prelude.newtypes.Sum
 import zio.test.Assertion.{isEmptyString, isTrue}
 import zio.test._
 
-object CoherentSpec extends DefaultRunnableSpec {
+object CoherentSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("CoherentSpec")(
       test("HashOrd") {
         val instance = implicitly[HashOrd[Double]].contramap[Int](_.toDouble)
@@ -51,6 +51,10 @@ object CoherentSpec extends DefaultRunnableSpec {
         assert(instance.multiplyOption(5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(10)))) &&
         assert(instance.multiplyOption(0)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(0)))) &&
         assert(instance.multiplyOption(-5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(-10))))
+      },
+      test("CovariantIdentityBoth") {
+        val instance = implicitly[CovariantIdentityBoth[List]]
+        assert(instance.forEach(List(List(1, 2), List(3)))(identity))(equalTo(List(List(1, 3), List(2, 3))))
       }
     )
 }

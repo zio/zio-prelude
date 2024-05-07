@@ -4,12 +4,12 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object AssociativeFlattenSpec extends DefaultRunnableSpec {
+object AssociativeFlattenSpec extends ZIOSpecDefault {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("AssociativeFlattenSpec")(
       suite("laws")(
-        testM("map")(checkAllLaws(AssociativeFlattenLaws)(GenFs.map(Gen.anyInt), Gen.anyInt))
+        test("map")(checkAllLaws(AssociativeFlattenLaws)(GenFs.map(Gen.int), Gen.int))
       )
     )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import scala.annotation.tailrec
  * The `Inverse` type class describes an associative binary operator for a
  * type `A` that has an identity element and an inverse binary operator.
  * Combining any value with itself with the inverse operator must return the
- * identity element. For example, for integer addition zero is an identty
+ * identity element. For example, for integer addition zero is an identity
  * element and subtraction is an inverse operation, because subtracting any
  * value from itself always returns zero.
  *

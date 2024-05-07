@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package zio.prelude
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 
-@silent("Unused import")
+@nowarn("msg=Unused import")
 trait PartialEquivalence[A, B, +E1, +E2] { self =>
   import PartialEquivalence._
   import zio._ // for zio.EitherCompat

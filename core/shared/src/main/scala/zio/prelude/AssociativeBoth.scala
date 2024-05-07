@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio._
+import zio.prelude.coherent.CovariantIdentityBoth
 import zio.prelude.newtypes.{AndF, Failure, OrF}
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
@@ -38,21 +39,13 @@ trait AssociativeBoth[F[_]] {
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
-object AssociativeBoth {
+object AssociativeBoth extends AssociativeBothLowPriority {
 
   /**
    * Summons an implicit `AssociativeBoth[F]`.
    */
   def apply[F[_]](implicit associativeBoth: AssociativeBoth[F]): AssociativeBoth[F] =
     associativeBoth
-
-  def fromCovariantAssociativeFlatten[F[+_]](implicit
-    covariant: Covariant[F],
-    identityFlatten: AssociativeFlatten[F]
-  ): AssociativeBoth[F] =
-    new AssociativeBoth[F] {
-      override def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = fa.map(a => fb.map(b => (a, b))).flatten
-    }
 
   def compose[F[+_]: AssociativeBoth, G[+_]: AssociativeBoth](implicit
     f: Covariant[F],
@@ -436,9 +429,31 @@ object AssociativeBoth {
   /**
    * Combines 19 `F` values using the provided function `f`.
    */
-  def mapN[F[
-    +_
-  ]: AssociativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, B](
+  def mapN[
+    F[
+      +_
+    ]: AssociativeBoth: Covariant,
+    A0,
+    A1,
+    A2,
+    A3,
+    A4,
+    A5,
+    A6,
+    A7,
+    A8,
+    A9,
+    A10,
+    A11,
+    A12,
+    A13,
+    A14,
+    A15,
+    A16,
+    A17,
+    A18,
+    B
+  ](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],
@@ -1053,7 +1068,7 @@ object AssociativeBoth {
   /**
    * The `IdentityBoth` instance for `Chunk`.
    */
-  implicit val ChunkIdentityeBoth: IdentityBoth[Chunk] =
+  implicit val ChunkIdentityBoth: IdentityBoth[Chunk] =
     new IdentityBoth[Chunk] {
       def any: Chunk[Any]                                             = Chunk.unit
       def both[A, B](fa: => Chunk[A], fb: => Chunk[B]): Chunk[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
@@ -1211,11 +1226,34 @@ object AssociativeBoth {
   /**
    * The `IdentityBoth` instance for `ZIO`.
    */
-  implicit def ZIOIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
-    new IdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
-      val any: ZIO[R, E, Any] = ZIO.unit
+  implicit def ZIOCovariantIdentityBoth[R, E]: CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
+    new CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
+      val any: ZIO[R, E, Any]                                                               =
+        ZIO.unit
+      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)]           =
+        fa.zipWithPar(fb)((_, _))
+      def map[A, B](f: A => B): ZIO[R, E, A] => ZIO[R, E, B]                                =
+        _.map(f)
+      override def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+        f: A => ZIO[R, E, Option[B]]
+      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZIO[R, E, Collection[B]] =
+        ZIO.suspendSucceed {
+          val iterator = in.iterator
+          val builder  = bf.newBuilder(in)
 
-      def both[A, B](fa: => ZIO[R, E, A], fb: => ZIO[R, E, B]): ZIO[R, E, (A, B)] = fa zip fb
+          ZIO
+            .whileLoop(iterator.hasNext)(f(iterator.next())) {
+              case Some(b) => builder += b
+              case None    =>
+            }
+            .as(builder.result())
+        }
+      override def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => ZIO[R, E, B])(
+        implicit bf: BuildFrom[Collection[A], B, Collection[B]]
+      ): ZIO[R, E, Collection[B]] =
+        ZIO.foreach(in)(f)
+      override def forEach_[A, B](in: Iterable[A])(f: A => ZIO[R, E, Any]): ZIO[R, E, Unit] =
+        ZIO.foreachDiscard(in)(f)
     }
 
   /**
@@ -1235,52 +1273,21 @@ object AssociativeBoth {
     }
 
   /**
-   * The `IdentityBoth` instance for `ZLayer`.
-   */
-  implicit def ZLayerIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-    new IdentityBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-      val any: ZLayer[R, E, Any] = ZLayer.succeed(())
-
-      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
-    }
-
-  /**
-   * The `AssociativeBoth` instance for `ZManaged`.
-   */
-  implicit def ZManagedIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new IdentityBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      val any: ZManaged[R, E, Any]                                                               = ZManaged.unit
-      def both[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, (A, B)] = fa zip fb
-    }
-
-  /**
-   * The `IdentityBoth` instance for failed `ZManaged`.
-   */
-  implicit def ZManagedFailureIdentityBoth[R, A]
-    : IdentityBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new IdentityBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      val any: Failure[ZManaged[R, Any, A]] = Failure.wrap(ZManaged.fail(()))
-      def both[EA, EB](
-        fa: => Failure[ZManaged[R, EA, A]],
-        fb: => Failure[ZManaged[R, EB, A]]
-      ): Failure[ZManaged[R, (EA, EB), A]] =
-        Failure.wrap {
-          (Failure.unwrap(fa).flip zip Failure.unwrap(fb).flip).flip
-        }
-    }
-
-  /**
    * The `AssociativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkAssociativeBoth[R, E, I]: AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, I, a] })#lambda] =
-    new AssociativeBoth[({ type lambda[+a] = ZSink[R, E, I, I, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, I, A], fb: => ZSink[R, E, I, I, B]): ZSink[R, E, I, I, (A, B)] = fa zip fb
+  implicit def ZSinkAssociativeBoth[R, E, In, L <: In]
+    : AssociativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] =
+    new AssociativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] {
+      def both[A, B](
+        fa: => ZSink[R, E, In, L, A],
+        fb: => ZSink[R, E, In, L, B]
+      ): ZSink[R, E, In, L, (A, B)] = fa.zip(fb)
     }
 
   /**
    * The `IdentityBoth` instance for `ZSTM`.
    */
-  implicit def ZSTMIdentityBothBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
+  implicit def ZSTMIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
     new IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
       val any: ZSTM[R, E, Any]                                                       = ZSTM.unit
       def both[A, B](fa: => ZSTM[R, E, A], fb: => ZSTM[R, E, B]): ZSTM[R, E, (A, B)] = fa zip fb
@@ -1292,6 +1299,17 @@ object AssociativeBoth {
   implicit def ZStreamAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
       def both[A, B](fa: => ZStream[R, E, A], fb: => ZStream[R, E, B]): ZStream[R, E, (A, B)] = fa cross fb
+    }
+}
+
+trait AssociativeBothLowPriority {
+
+  implicit def fromCovariantAssociativeFlatten[F[+_]](implicit
+    covariant: Covariant[F],
+    identityFlatten: AssociativeFlatten[F]
+  ): AssociativeBoth[F] =
+    new AssociativeBoth[F] {
+      override def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)] = fa.map(a => fb.map(b => (a, b))).flatten
     }
 }
 

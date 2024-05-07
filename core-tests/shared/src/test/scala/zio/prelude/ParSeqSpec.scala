@@ -2,17 +2,16 @@ package zio.prelude
 
 import zio.prelude.ParSeq._
 import zio.prelude.laws._
-import zio.random._
 import zio.test._
 import zio.test.laws._
 
-object ParSeqSpec extends DefaultRunnableSpec {
+object ParSeqSpec extends ZIOBaseSpec {
 
-  val parSeq: Gen[Random with Sized, ParSeq[Unit, Int]] =
-    Gens.parSeq(Gen.unit, Gen.anyInt)
+  val parSeq: Gen[Sized, ParSeq[Unit, Int]] =
+    Gens.parSeq(Gen.unit, Gen.int)
 
-  val equalparSeqs: Gen[Random with Sized, (ParSeq[Unit, Int], ParSeq[Unit, Int])] =
-    (parSeq <*> parSeq <*> parSeq).flatMap { case ((a, b), c) =>
+  val equalparSeqs: Gen[Sized, (ParSeq[Unit, Int], ParSeq[Unit, Int])] =
+    (parSeq <*> parSeq <*> parSeq).flatMap { case (a, b, c) =>
       Gen.elements(
         (a, a),
         (Then(Then(a, b), c), Then(a, Then(b, c))),
@@ -27,63 +26,63 @@ object ParSeqSpec extends DefaultRunnableSpec {
 
   val hash = ParSeq.parSeqHash
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("parSeqSpec")(
       suite("laws")(
-        testM("covariant") {
-          checkAllLaws(CovariantLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+        test("covariant") {
+          checkAllLaws(CovariantLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         },
-        testM("hash") {
-          checkAllLaws(HashLaws)(Gens.parSeq(Gen.unit, Gen.anyInt))
+        test("hash") {
+          checkAllLaws(HashLaws)(Gens.parSeq(Gen.unit, Gen.int))
         },
-        testM("identityBoth") {
-          checkAllLaws(IdentityBothLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+        test("identityBoth") {
+          checkAllLaws(IdentityBothLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         },
-        testM("identityFlatten") {
-          checkAllLaws(IdentityFlattenLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+        test("identityFlatten") {
+          checkAllLaws(IdentityFlattenLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         },
-        testM("forEach") {
-          checkAllLaws(ForEachLaws)(GenFs.parSeq(Gen.unit), Gen.anyInt)
+        test("forEach") {
+          checkAllLaws(ForEachLaws)(GenFs.parSeq(Gen.unit), Gen.int)
         }
       ),
       suite("both")(
-        testM("associative") {
+        test("associative") {
           check(parSeq, parSeq, parSeq) { (a, b, c) =>
             assert((a && b) && c)(equalTo(a && (b && c))) &&
             assert(a && (b && c))(equalTo((a && b) && c))
           }
         },
-        testM("commutative") {
+        test("commutative") {
           check(parSeq, parSeq) { (a, b) =>
             assert(a && b)(equalTo(b && a))
           }
         },
-        testM("identity") {
+        test("identity") {
           check(parSeq) { a =>
             assert(Both(a, empty))(equalTo(a)) &&
             assert(Both(empty, a))(equalTo(a))
           }
         }
       ),
-      testM("hashCode") {
+      test("hashCode") {
         check(equalparSeqs) { case (a, b) =>
           assert(a.hashCode)(equalTo(b.hashCode))
         }
       },
       suite("then")(
-        testM("associative") {
+        test("associative") {
           check(parSeq, parSeq, parSeq) { (a, b, c) =>
             assert((a ++ b) ++ c)(equalTo(a ++ (b ++ c))) &&
             assert(a ++ (b ++ c))(equalTo((a ++ b) ++ c))
           }
         },
-        testM("commutative") {
+        test("commutative") {
           check(parSeq, parSeq, parSeq) { (a, b, c) =>
             assert(a ++ (b && c))(equalTo((a ++ b) && (a ++ c))) &&
             assert((a && b) ++ c)(equalTo((a ++ c) && (b ++ c)))
           }
         },
-        testM("identity") {
+        test("identity") {
           check(parSeq) { a =>
             assert(Then(a, empty))(equalTo(a)) &&
             assert(Then(empty, a))(equalTo(a))

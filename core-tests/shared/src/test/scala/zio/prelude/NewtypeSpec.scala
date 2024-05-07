@@ -1,16 +1,17 @@
 package zio.prelude
 
-import zio.NonEmptyChunk
 import zio.prelude.NewtypeSpecTypes._
-import zio.prelude.laws._
+import zio.prelude.laws.{isFailureV, isSuccessV}
 import zio.prelude.newtypes.{And, Or, Sum}
-import zio.test.Assertion.{equalTo => _, _}
-import zio.test.AssertionM.Render.param
+import zio.test.Assertion._
 import zio.test.{Assertion => TestAssertion, _}
+import zio.{NonEmptyChunk, Scope}
 
-object NewtypeSpec extends DefaultRunnableSpec {
+import scala.reflect.ClassTag
 
-  def spec =
+object NewtypeSpec extends ZIOBaseSpec {
+
+  override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("NewtypeSpec")(
       suite("with assertion")(
         test("valid values at compile-time") {
@@ -42,30 +43,137 @@ object NewtypeSpec extends DefaultRunnableSpec {
             )
           )
         },
-        testM("invalid values at compile-time") {
-          assertM(typeCheck("Natural(-1, -8, 4, -3)"))(
+        test("invalid values at compile-time") {
+          assertZIO(typeCheck("Natural(-1, -8, 4, -3)"))(
             isLeft(
               containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)") &&
                 containsStringWithoutAnsi("-8 did not satisfy greaterThanOrEqualTo(0)") &&
                 containsStringWithoutAnsi("-3 did not satisfy greaterThanOrEqualTo(0)")
             )
           )
-        } @@ TestAspect.exceptDotty,
-        testM("invalid value at run-time") {
-          assertM(typeCheck("Natural(-1)"))(
+        } @@ TestAspect.exceptScala3,
+        test("invalid value at run-time") {
+          assertZIO(typeCheck("Natural(-1)"))(
             isLeft(containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)"))
           )
-        } @@ TestAspect.exceptDotty,
+        } @@ TestAspect.exceptScala3,
         test("invalid values at run-time") {
           assert(Natural.make(-1))(
             isFailureV(equalTo(NonEmptyChunk("-1 did not satisfy greaterThanOrEqualTo(0)")))
           )
-        }
+        },
+        test("implicitly classtag summoning for newtype")(
+          assertZIO(typeCheck("implicitly[ClassTag[LuckyNumber]]"))(isRight)
+        ),
+        test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[LuckyNumber]].runtimeClass eq implicitly[ClassTag[Double]].runtimeClass)(isTrue)
+        },
+        test("allows creating subtypes of newtypes") {
+          val compile = typeCheck {
+            """import java.util.UUID
+               object GenericItemId extends Newtype[UUID]
+               type GenericItemId = GenericItemId.Type
+
+               object SpecificItemId extends Subtype[GenericItemId]
+               type SpecificItemId = SpecificItemId.Type
+               """
+          }
+          assertZIO(compile)(isRight)
+        },
+        test("allows creating arrays of newtypes") {
+          val data = Array.fill(2)(Natural(0))
+          data(1) = Natural(1)
+          assertTrue(data.toList === List(Natural(0): Natural, Natural(1): Natural))
+        },
+        test("pattern matching") {
+          val number = LuckyNumber(10.0)
+          assertTrue(
+            (number match {
+              case LuckyNumber(10.0) => true
+              case _                 => false
+            }) && (number match {
+              case LuckyNumber(20.0) => false
+              case _                 => true
+            })
+          )
+        },
+        suite("Assertion.startsWithIgnoreCase")(
+          test("valid values at compile-time") {
+            assertTrue(
+              GithubHeaderKey("X-GitHUB-Request-Id") == GithubHeaderKey.unsafeWrap("X-GitHUB-Request-Id"),
+              GithubHeaderKey("X-Github-Request-Id") == GithubHeaderKey.unsafeWrap("X-Github-Request-Id"),
+              GithubHeaderKey("X-GitHub-Request-Id") == GithubHeaderKey.unsafeWrap("X-GitHub-Request-Id"),
+              GithubHeaderKey("x-github-request-id") == GithubHeaderKey.unsafeWrap("x-github-request-id"),
+              GithubHeaderKey("X-GITHUB-REQUEST-ID") == GithubHeaderKey.unsafeWrap("X-GITHUB-REQUEST-ID")
+            )
+          },
+          test("invalid values at compile-time") {
+            assertZIO(typeCheck("""GithubHeaderKey("Toto")"""))(
+              isLeft(
+                containsStringWithoutAnsi("Toto did not satisfy startsWithIgnoreCase(X-Github)")
+              )
+            )
+          } @@ TestAspect.exceptScala3,
+          test("valid values at run-time") {
+            assert(GithubHeaderKey.make("X-GitHUB-Request-Id"))(
+              isSuccessV(equalTo(GithubHeaderKey("X-GitHUB-Request-Id")))
+            )
+          },
+          test("invalid values at run-time") {
+            assert(GithubHeaderKey.make("Toto"))(
+              isFailureV(equalTo(NonEmptyChunk("Toto did not satisfy startsWithIgnoreCase(X-Github)")))
+            )
+          }
+        ),
+        suite("Assertion.endsWithIgnoreCase")(
+          test("valid values at compile-time") {
+            assertTrue(
+              GmailEmail("very.cool.person@gmail.com") == GmailEmail.unsafeWrap("very.cool.person@gmail.com"),
+              GmailEmail("very.cool.person@GmaIl.coM") == GmailEmail.unsafeWrap("very.cool.person@GmaIl.coM"),
+              GmailEmail("VERY.COOL.PERSON@GMAIL.COM") == GmailEmail.unsafeWrap("VERY.COOL.PERSON@GMAIL.COM")
+            )
+          },
+          test("invalid values at compile-time") {
+            assertZIO(typeCheck("""GmailEmail("Toto")"""))(
+              isLeft(
+                containsStringWithoutAnsi("Toto did not satisfy endsWithIgnoreCase(@GMaiL.cOm)")
+              )
+            )
+          } @@ TestAspect.exceptScala3,
+          test("valid values at run-time") {
+            assert(GmailEmail.make("very.cool.person@GmaIl.coM"))(
+              isSuccessV(equalTo(GmailEmail("very.cool.person@GmaIl.coM")))
+            )
+          },
+          test("invalid values at run-time") {
+            assert(GmailEmail.make("Toto"))(
+              isFailureV(equalTo(NonEmptyChunk("Toto did not satisfy endsWithIgnoreCase(@GMaiL.cOm)")))
+            )
+          }
+        )
       ),
       suite("Subtype")(
         test("subtypes values") {
           val two = 2
           assertTrue(two + Natural.two == 2 + 2)
+        },
+        test("implicitly classtag summoning for subtype")(
+          assertZIO(typeCheck("implicitly[ClassTag[Natural]]"))(isRight)
+        ),
+        test("classtag reports same runtimeclass as underlying primitive") {
+          assert(implicitly[ClassTag[Natural]].runtimeClass eq implicitly[ClassTag[Int]].runtimeClass)(isTrue)
+        },
+        test("pattern matching") {
+          val number = Natural(2)
+          assertTrue(
+            (number match {
+              case Natural(2) => true
+              case _          => false
+            }) && (number match {
+              case Natural(3) => false
+              case _          => true
+            })
+          )
         }
       ),
       suite("examples from documentation")(
@@ -76,10 +184,10 @@ object NewtypeSpec extends DefaultRunnableSpec {
           assert(Meter.unwrap(z))(equalTo(3.4 + 4.3))
         },
         test("exists") {
-          assert(exists(List(true, false))(identity))(isTrue)
+          assert(exists(List(true, false))(scala.Predef.identity))(isTrue)
         },
         test("forall") {
-          assert(forall(List(true, false))(identity))(isFalse)
+          assert(forall(List(true, false))(scala.Predef.identity))(isFalse)
         },
         test("sumInt") {
           val actual   = sum(List(1, 2, 3))
@@ -149,5 +257,5 @@ object NewtypeSpec extends DefaultRunnableSpec {
   }
 
   private def containsStringWithoutAnsi(element: String): TestAssertion[String] =
-    TestAssertion.assertion("containsStringWithoutAnsi")(param(element))(_.removingAnsiCodes.contains(element))
+    TestAssertion.assertion("containsStringWithoutAnsi")(_.removingAnsiCodes.contains(element))
 }

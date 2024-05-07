@@ -1,16 +1,16 @@
 package zio.prelude
 package scalaparallelcollections
 
-import com.github.ghik.silencer.silent
+import zio.Trace
 import zio.prelude.laws._
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
 
+import scala.annotation.nowarn
 import scala.collection.parallel.{immutable => par}
 
-@silent("Unused import")
-object IdentityFlattenJvmSpec extends DefaultRunnableSpec {
+@nowarn("msg=Unused import")
+object IdentityFlattenJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters
@@ -23,16 +23,18 @@ object IdentityFlattenJvmSpec extends DefaultRunnableSpec {
   }
   import ParallelCollectionCompatibility._
 
-  val genParSeq: GenF[Random with Sized, par.ParSeq] =
-    new GenF[Random with Sized, par.ParSeq] {
-      def apply[R1 <: Random with Sized, A](gen: Gen[R1, A]): Gen[R1, par.ParSeq[A]] =
+  val genParSeq: GenF[Sized, par.ParSeq] =
+    new GenF[Sized, par.ParSeq] {
+      def apply[R1 <: Sized, A](gen: Gen[R1, A])(implicit
+        trace: Trace
+      ): Gen[R1, par.ParSeq[A]] =
         Gen.listOf(gen).map(_.par)
     }
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("IdentityFlattenJvmSpec")(
       suite("laws")(
-        testM("parSeq")(checkAllLaws(IdentityFlattenLaws)(genParSeq, Gen.anyInt))
+        test("parSeq")(checkAllLaws(IdentityFlattenLaws)(genParSeq, Gen.int))
       )
     )
 }

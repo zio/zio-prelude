@@ -4,16 +4,16 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object IdentityFlattenSpec extends DefaultRunnableSpec {
+object IdentityFlattenSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("IdentityFlattenSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(IdentityFlattenLaws)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
-        testM("either")(checkAllLaws(IdentityFlattenLaws)(GenFs.either(Gen.anyInt), Gen.anyInt)),
-        testM("list")(checkAllLaws(IdentityFlattenLaws)(GenF.list, Gen.anyInt)),
-        testM("option")(checkAllLaws(IdentityFlattenLaws)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(IdentityFlattenLaws)(GenF.vector, Gen.anyInt))
+        test("chunk")(checkAllLaws(IdentityFlattenLaws)(GenF.chunk, Gen.chunkOf(Gen.int))),
+        test("either")(checkAllLaws(IdentityFlattenLaws)(GenFs.either(Gen.int), Gen.int)),
+        test("list")(checkAllLaws(IdentityFlattenLaws)(GenF.list, Gen.int)),
+        test("option")(checkAllLaws(IdentityFlattenLaws)(GenF.option, Gen.int)),
+        test("vector")(checkAllLaws(IdentityFlattenLaws)(GenF.vector, Gen.int))
       )
     )
 

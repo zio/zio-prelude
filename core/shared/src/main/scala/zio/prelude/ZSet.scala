@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -394,7 +394,10 @@ trait LowPriorityZSetImplicits {
    */
   implicit def ZSetPartialOrd[A, B: PartialOrd](implicit ev: Identity[Sum[B]]): PartialOrd[ZSet[A, B]] =
     PartialOrd.makeFrom(
-      (l, r) => l.toMap.filterNot(_._2 === ev.identity).compareSoft(r.toMap.filterNot(_._2 === ev.identity)),
+      (
+        l,
+        r
+      ) => PartialOrd.compareSoft(l.toMap.filterNot(_._2 === ev.identity), r.toMap.filterNot(_._2 === ev.identity)),
       ZSet.ZSetEqual
     )
 

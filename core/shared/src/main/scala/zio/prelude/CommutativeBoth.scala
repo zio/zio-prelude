@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,42 +144,15 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `ZLayer`.
-   */
-  implicit def ZLayerCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, (A, B)] = fa zipPar fb
-    }
-
-  /**
-   * The `CommutativeBoth` instance for `ZManaged`.
-   */
-  implicit def ZManagedCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def both[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, (A, B)] = fa zipPar fb
-    }
-
-  /**
-   * The `CommutativeBoth` instance for failed `ZManaged`.
-   */
-  implicit def ZManagedFailureCommutativeBoth[R, A]
-    : CommutativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new CommutativeBoth[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      def both[EA, EB](
-        fa: => Failure[ZManaged[R, EA, A]],
-        fb: => Failure[ZManaged[R, EB, A]]
-      ): Failure[ZManaged[R, (EA, EB), A]] =
-        Failure.wrap {
-          (Failure.unwrap(fa).flip zipPar Failure.unwrap(fb).flip).flip
-        }
-    }
-
-  /**
    * The `CommutativeBoth` instance for `ZSink`.
    */
-  implicit def ZSinkCommutativeBoth[R, E, I, L]: CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] =
-    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, I, L, a] })#lambda] {
-      def both[A, B](fa: => ZSink[R, E, I, L, A], fb: => ZSink[R, E, I, L, B]): ZSink[R, E, I, L, (A, B)] = fa zipPar fb
+  implicit def ZSinkCommutativeBoth[R, E, In, L <: In]
+    : CommutativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] =
+    new CommutativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] {
+      def both[A, B](
+        fa: => ZSink[R, E, In, L, A],
+        fb: => ZSink[R, E, In, L, B]
+      ): ZSink[R, E, In, L, (A, B)] = fa.zipPar(fb)
     }
 
   /**
@@ -565,9 +538,31 @@ object CommutativeBoth {
   /**
    * Combines 19 `F` values using the provided function `f` in parallel.
    */
-  def mapN[F[
-    +_
-  ]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, B](
+  def mapN[
+    F[
+      +_
+    ]: CommutativeBoth: Covariant,
+    A0,
+    A1,
+    A2,
+    A3,
+    A4,
+    A5,
+    A6,
+    A7,
+    A8,
+    A9,
+    A10,
+    A11,
+    A12,
+    A13,
+    A14,
+    A15,
+    A16,
+    A17,
+    A18,
+    B
+  ](
     a0: F[A0],
     a1: F[A1],
     a2: F[A2],

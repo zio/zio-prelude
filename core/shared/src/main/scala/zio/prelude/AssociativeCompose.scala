@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.ZLayer.ZLayerProvideSomeOps
 import zio._
 
 trait AssociativeCompose[=>:[-_, +_]] {
@@ -44,22 +45,19 @@ object AssociativeCompose {
 
   }
 
-  implicit val URIOIdentityCompose: IdentityCompose[URIO] = new IdentityCompose[URIO] {
-    def identity[A]: URIO[A, A] = URIO.environment
+  implicit val URIOIdentityCompose: IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] =
+    new IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] {
+      def identity[A]: URIO[A, ZEnvironment[A]] = ZIO.environment
 
-    def compose[A, B, C](bc: URIO[B, C], ab: URIO[A, B]): URIO[A, C] = ab >>> bc
-  }
+      def compose[A, B, C](bc: URIO[B, ZEnvironment[C]], ab: URIO[A, ZEnvironment[B]]): URIO[A, ZEnvironment[C]] =
+        ab.flatMap(b => bc.provideEnvironment(b))
+    }
 
   implicit val URLayerIdentityCompose: IdentityCompose[URLayer] = new IdentityCompose[URLayer] {
-    def identity[A]: URLayer[A, A] = ZLayer.identity
+    def identity[A]: URLayer[A, A] = ZLayer.environment
 
-    def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] = ab >>> bc
-  }
-
-  implicit val URManagedIdentityCompose: IdentityCompose[URManaged] = new IdentityCompose[URManaged] {
-    def identity[A]: URManaged[A, A] = ZManaged.identity
-
-    def compose[A, B, C](bc: URManaged[B, C], ab: URManaged[A, B]): URManaged[A, C] = ab >>> bc
+    def compose[A, B, C](bc: URLayer[B, C], ab: URLayer[A, B]): URLayer[A, C] =
+      new ZLayerProvideSomeOps[A, Nothing, B](ab) >>> bc
   }
 }
 

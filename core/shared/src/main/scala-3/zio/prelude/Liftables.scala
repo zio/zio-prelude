@@ -37,10 +37,10 @@ trait Liftables {
         case '{ Assertion.Regex.digit }                                                                => Some(Assertion.Regex.digit)
         case '{ Assertion.Regex.nonDigit }                                                             => Some(Assertion.Regex.nonDigit)
         case '{ Assertion.Regex.literal(${Expr(str)}) }                                                => Some(Assertion.Regex.literal(str))
-        case '{ Assertion.Regex.anyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }     => Some(Assertion.Regex.anyCharOf(first, second, Varargs(rest).valueOrError*))
-        case '{ Assertion.Regex.anyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }    => Some(Assertion.Regex.anyRegexOf(first, second, Varargs(rest).valueOrError*))
-        case '{ Assertion.Regex.notAnyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }  => Some(Assertion.Regex.notAnyCharOf(first, second, Varargs(rest).valueOrError*))
-        case '{ Assertion.Regex.notAnyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) } => Some(Assertion.Regex.notAnyRegexOf(first, second, Varargs(rest).valueOrError*))
+        case '{ Assertion.Regex.anyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }     => Some(Assertion.Regex.anyCharOf(first, second, Varargs(rest).valueOrAbort*))
+        case '{ Assertion.Regex.anyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }    => Some(Assertion.Regex.anyRegexOf(first, second, Varargs(rest).valueOrAbort*))
+        case '{ Assertion.Regex.notAnyCharOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) }  => Some(Assertion.Regex.notAnyCharOf(first, second, Varargs(rest).valueOrAbort*))
+        case '{ Assertion.Regex.notAnyRegexOf(${Expr(first)}, ${Expr(second)}, ${Varargs(rest)}: _*) } => Some(Assertion.Regex.notAnyRegexOf(first, second, Varargs(rest).valueOrAbort*))
         case '{ Assertion.Regex.inRange(${Expr(start)}, ${Expr(end)}) }                                => Some(Assertion.Regex.inRange(start, end))
         case '{ Assertion.Regex.notInRange(${Expr(start)}, ${Expr(end)}) }                             => Some(Assertion.Regex.notInRange(start, end))
         case '{ Assertion.Regex.start }                                                                => Some(Assertion.Regex.start)
@@ -57,7 +57,7 @@ trait Liftables {
       }
     }
   }
-  
+
   given [A](using Type[A]): FromExpr[Assertion[A]] with {
     def unapply(assertion: Expr[Assertion[A]])(using Quotes): Option[Assertion[A]] = {
       import quotes.reflect.*
@@ -69,9 +69,10 @@ trait Liftables {
         case '{ Assertion.divisibleBy[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.divisibleBy(value)(numericForValue(value)))
         case '{ Assertion.never }                                                        => Some(Assertion.never)
         case '{ Assertion.endsWith(${Expr(value)}) }                                     => Some(Assertion.endsWith(value).asInstanceOf[Assertion[A]])
+        case '{ Assertion.endsWithIgnoreCase(${Expr(value)}) }                           => Some(Assertion.endsWithIgnoreCase(value).asInstanceOf[Assertion[A]])
         case '{ (${Expr(left)}: Assertion[A]).&&(${Expr(right)}) }                       => Some(Assertion.And(left, right))
-        case '{ Assertion.equalTo[A](${LiteralUnlift(value)}) }                          => Some(Assertion.equalTo(value))
-        case '{ Assertion.notEqualTo[A](${LiteralUnlift(value)}) }                       => Some(Assertion.notEqualTo(value))
+        case '{ Assertion.equalTo[Any](${LiteralUnlift[A](value)}) }                     => Some(Assertion.equalTo(value))
+        case '{ Assertion.notEqualTo[Any](${LiteralUnlift[A](value)}) }                  => Some(Assertion.notEqualTo(value))
         case '{ Assertion.greaterThan[A](${LiteralUnlift(value)})($_) }                  => Some(Assertion.greaterThan(value)(orderingForValue(value)))
         case '{ Assertion.greaterThanOrEqualTo[A](${LiteralUnlift(value)})($_) }         => Some(Assertion.greaterThanOrEqualTo(value)(orderingForValue(value)))
         case '{ Assertion.hasLength(${Expr(assertion)}) }                                => Some(Assertion.hasLength(assertion).asInstanceOf[Assertion[A]])
@@ -85,6 +86,7 @@ trait Liftables {
         case '{ (${Expr(left)}: Assertion[A]).||(${Expr(right)}) }                       => Some(Assertion.Or(left, right))
         case '{ Assertion.powerOf[A](${LiteralUnlift(value)})($_) }                      => Some(Assertion.powerOf(value)(numericForValue(value)))
         case '{ Assertion.startsWith(${Expr(value)}) }                                   => Some(Assertion.startsWith(value).asInstanceOf[Assertion[A]])
+        case '{ Assertion.startsWithIgnoreCase(${Expr(value)}) }                         => Some(Assertion.startsWithIgnoreCase(value).asInstanceOf[Assertion[A]])
         case _ => None
       }
     }
@@ -130,7 +132,7 @@ trait Liftables {
       case _: Short  => summon[Numeric[Short]].asInstanceOf[Numeric[Any]]
       case _: Byte   => summon[Numeric[Byte]].asInstanceOf[Numeric[Any]]
       case _: Char   => summon[Numeric[Char]].asInstanceOf[Numeric[Any]]
-      case other     => report.throwError(s"NO NUMERIC FOR $other")
+      case other     => report.errorAndAbort(s"NO NUMERIC FOR $other")
     }
   }
 
@@ -146,7 +148,7 @@ trait Liftables {
       case _: Short  => SOrdering.Short.asInstanceOf[SOrdering[Any]]
       case _: Byte   => SOrdering.Byte.asInstanceOf[SOrdering[Any]]
       case _: Char   => SOrdering.Char.asInstanceOf[SOrdering[Any]]
-      case other     => report.throwError(s"NO ORDERING FOR $other")
+      case other     => report.errorAndAbort(s"NO ORDERING FOR $other")
     }
   }
 }

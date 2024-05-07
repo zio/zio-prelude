@@ -4,15 +4,15 @@ import zio.prelude.laws.CommutativeBothLaws
 import zio.test._
 import zio.test.laws._
 
-object CommutativeBothSpec extends DefaultRunnableSpec {
+object CommutativeBothSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("CommutativeBothSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(CommutativeBothLaws)(GenF.chunk, Gen.chunkOf(Gen.anyInt))),
-        testM("list")(checkAllLaws(CommutativeBothLaws)(GenF.list, Gen.anyInt)),
-        testM("option")(checkAllLaws(CommutativeBothLaws)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(CommutativeBothLaws)(GenF.vector, Gen.vectorOf(Gen.anyInt)))
+        test("chunk")(checkAllLaws(CommutativeBothLaws)(GenF.chunk, Gen.chunkOf(Gen.int))),
+        test("list")(checkAllLaws(CommutativeBothLaws)(GenF.list, Gen.int)),
+        test("option")(checkAllLaws(CommutativeBothLaws)(GenF.option, Gen.int)),
+        test("vector")(checkAllLaws(CommutativeBothLaws)(GenF.vector, Gen.vectorOf(Gen.int)))
       )
     )
 }

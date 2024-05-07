@@ -2,95 +2,111 @@ package zio.prelude
 
 import zio.prelude.laws._
 import zio.prelude.newtypes._
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
 import zio.{Chunk, NonEmptyChunk, Ref}
 
-object ForEachSpec extends DefaultRunnableSpec {
+object ForEachSpec extends ZIOBaseSpec {
   import Fixtures._
 
-  val genBoolean: Gen[Random, Boolean] =
+  val genBoolean: Gen[Any, Boolean] =
     Gen.boolean
 
-  val genInt: Gen[Random, Int] =
-    Gen.anyInt
+  val genInt: Gen[Any, Int] =
+    Gen.int
 
-  val genChunk: Gen[Random with Sized, Chunk[Int]] =
+  val genChunk: Gen[Sized, Chunk[Int]] =
     Gen.chunkOf(genInt)
 
-  val genList: Gen[Random with Sized, List[Int]] =
+  val genList: Gen[Sized, List[Int]] =
     Gen.listOf(genInt)
 
-  val genBooleanFunction: Gen[Random, Int => Boolean] =
+  val genBooleanFunction: Gen[Any, Int => Boolean] =
     Gen.function(genBoolean)
 
-  val genIntFunction: Gen[Random, Int => Int] =
+  val genIntFunction: Gen[Any, Int => Int] =
     Gen.function(genInt)
 
-  val genIntFunction2: Gen[Random, (Int, Int) => Int] =
+  val genIntFunction2: Gen[Any, (Int, Int) => Int] =
     Gen.function2(genInt)
 
-  val genIntIntFunction2: Gen[Random, (Int, Int) => (Int, Int)] =
+  val genIntIntFunction2: Gen[Any, (Int, Int) => (Int, Int)] =
     Gen.function2(genInt <*> genInt)
 
-  val genTheseFunction: Gen[Random, These[Int, Int] => Int] =
+  val genTheseFunction: Gen[Any, These[Int, Int] => Int] =
     Gen.function(genInt)
 
-  val genEitherIntIntFunction: Gen[Random, Int => Either[Int, Int]] =
+  val genEitherIntIntFunction: Gen[Any, Int => Either[Int, Int]] =
     Gen.function(Gen.either(genInt, genInt))
+
+  val genIntPartialFunction: Gen[Any, PartialFunction[Int, Int]] =
+    Gen.partialFunction(Gen.int)
 
   implicit val chunkOptionForEach: ForEach[ChunkOption] =
     ForEach[Chunk].compose[Option]
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("ForEachSpec")(
       suite("laws")(
-        testM("chunk")(checkAllLaws(ForEachLaws)(GenF.chunk, Gen.anyInt)),
-        testM("chunk . option")(checkAllLaws(ForEachLaws)(chunkOptionGenF, Gen.anyInt)),
-        testM("either")(checkAllLaws(ForEachLaws)(GenFs.either(Gen.anyInt), Gen.anyInt)),
-        testM("list")(checkAllLaws(ForEachLaws)(GenF.list, Gen.anyInt)),
-        testM("map")(checkAllLaws(ForEachLaws)(GenFs.map(Gen.anyInt), Gen.anyInt)),
-        testM("option")(checkAllLaws(ForEachLaws)(GenF.option, Gen.anyInt)),
-        testM("vector")(checkAllLaws(ForEachLaws)(GenF.vector, Gen.anyInt))
+        test("chunk")(checkAllLaws(ForEachLaws)(GenF.chunk, Gen.int)),
+        test("chunk . option")(checkAllLaws(ForEachLaws)(chunkOptionGenF, Gen.int)),
+        test("either")(checkAllLaws(ForEachLaws)(GenFs.either(Gen.int), Gen.int)),
+        test("list")(checkAllLaws(ForEachLaws)(GenF.list, Gen.int)),
+        test("map")(checkAllLaws(ForEachLaws)(GenFs.map(Gen.int), Gen.int)),
+        test("option")(checkAllLaws(ForEachLaws)(GenF.option, Gen.int)),
+        test("vector")(checkAllLaws(ForEachLaws)(GenF.vector, Gen.int))
       ),
       suite("combinators")(
-        testM("contains") {
+        test("collect") {
+          check(genList, genIntPartialFunction) { (as, pf) =>
+            val actual   = ForEach[List].collect(as)(pf)
+            val expected = as.collect(pf)
+            assert(actual)(equalTo(expected))
+          }
+        },
+        test("contains") {
           check(genList, genInt) { (as, a) =>
             val actual   = ForEach[List].contains(as)(a)
             val expected = as.contains(a)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("count") {
+        test("count") {
           check(genList, genBooleanFunction) { (as, f) =>
             val actual   = ForEach[List].count(as)(f)
             val expected = as.count(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("exists") {
+        test("exists") {
           check(genList, genBooleanFunction) { (as, f) =>
             val actual   = ForEach[List].exists(as)(f)
             val expected = as.exists(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("find") {
+        test("filter") {
+          check(genList, genBooleanFunction) { (as, f) =>
+            val actual   = ForEach[List].filter(as)(f)
+            val expected = as.filter(f)
+            assert(actual)(equalTo(expected))
+          }
+        },
+        test("find") {
           check(genList, genBooleanFunction) { (as, f) =>
             val actual   = ForEach[List].find(as)(f)
             val expected = as.find(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("foldLeft") {
+        test("foldLeft") {
           check(genList, genInt, genIntFunction2) { (as, s, f) =>
             val actual   = ForEach[List].foldLeft(as)(s)(f)
             val expected = as.foldLeft(s)(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("foldLeftM") {
+        test("foldLeftM") {
           for {
             ref   <- Ref.make[Chunk[Int]](Chunk.empty)
             in     = List(1, 2, 3, 4, 5)
@@ -99,14 +115,14 @@ object ForEachSpec extends DefaultRunnableSpec {
           } yield assert(s)(equalTo(15)) &&
             assert(value)(equalTo(Chunk(1, 2, 3, 4, 5)))
         },
-        testM("foldRight") {
+        test("foldRight") {
           check(genList, genInt, genIntFunction2) { (as, s, f) =>
             val actual   = ForEach[List].foldRight(as)(s)(f)
             val expected = as.foldRight(s)(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("foldRightM") {
+        test("foldRightM") {
           for {
             ref   <- Ref.make[Chunk[Int]](Chunk.empty)
             in     = List(1, 2, 3, 4, 5)
@@ -115,14 +131,14 @@ object ForEachSpec extends DefaultRunnableSpec {
           } yield assert(s)(equalTo(15)) &&
             assert(value)(equalTo(Chunk(5, 4, 3, 2, 1)))
         },
-        testM("forall") {
+        test("forall") {
           check(genList, genBooleanFunction) { (as, f) =>
             val actual   = ForEach[List].forall(as)(f)
             val expected = as.forall(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("groupByNonEmpty") {
+        test("groupByNonEmpty") {
           check(genList, genIntFunction) { (as, f) =>
             val actual   = ForEach[List].groupByNonEmpty(as)(f)
             val expected = as
@@ -133,7 +149,7 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("groupByNonEmptyM") {
+        test("groupByNonEmptyM") {
           check(genList, genIntFunction) { (as, f) =>
             // Dotty can't infer Function1Covariant: 'Required: zio.prelude.Covariant[[R] =>> Int => R]'
             val actual   = ForEach[List].groupByNonEmptyM(as)(f.map(Option(_))(Invariant.Function1Covariant))
@@ -146,70 +162,70 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("isEmpty") {
+        test("isEmpty") {
           check(genList) { (as) =>
             val actual   = ForEach[List].isEmpty(as)
             val expected = as.isEmpty
             assert(actual)(equalTo(expected))
           }
         },
-        testM("intersperse") {
+        test("intersperse") {
           check(genList, genInt) { (as, s) =>
             val actual   = ForEach[List].intersperse(as.map(Sum.apply), Sum(s))
             val expected = Sum(as.sum + math.max(0, as.size - 1) * s)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("map") {
+        test("map") {
           check(genList, genIntFunction) { (as, f) =>
             val actual   = ForEach[List].map(f)(as)
             val expected = as.map(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("mapAccum") {
+        test("mapAccum") {
           check(genChunk, genInt, genIntIntFunction2) { (as, s, f) =>
             val actual   = ForEach[Chunk].mapAccum(as)(s)(f)
             val expected = as.mapAccum(s)(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("maxOption") {
+        test("maxOption") {
           check(genList) { (as) =>
             val actual   = ForEach[List].maxOption(as)
             val expected = as.maxOption
             assert(actual)(equalTo(expected))
           }
         },
-        testM("maxByOption") {
+        test("maxByOption") {
           check(genList, genIntFunction) { (as, f) =>
             val actual   = ForEach[List].maxByOption(as)(f)
             val expected = as.maxByOption(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("minOption") {
+        test("minOption") {
           check(genList) { (as) =>
             val actual   = ForEach[List].minOption(as)
             val expected = as.minOption
             assert(actual)(equalTo(expected))
           }
         },
-        testM("minByOption") {
+        test("minByOption") {
           check(genList, genIntFunction) { (as, f) =>
             val actual   = ForEach[List].minByOption(as)(f)
             val expected = as.minByOption(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("nonEmpty") {
+        test("nonEmpty") {
           check(genList) { (as) =>
             val actual   = ForEach[List].nonEmpty(as)
             val expected = as.nonEmpty
             assert(actual)(equalTo(expected))
           }
         },
-        testM("partitionMap") {
+        test("partitionMap") {
           check(genList, genEitherIntIntFunction) { (as, f) =>
             def partitionMap[A, B, C](as: List[A])(f: A => Either[B, C]): (List[B], List[C]) =
               as.foldRight((List.empty[B], List.empty[C])) { case (a, (bs, cs)) =>
@@ -224,42 +240,42 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("product") {
+        test("product") {
           check(genList) { (as) =>
             val actual   = ForEach[List].product(as)
             val expected = as.product
             assert(actual)(equalTo(expected))
           }
         },
-        testM("reduceOption") {
+        test("reduceOption") {
           check(genList, genIntFunction2) { (as, f) =>
             val actual   = ForEach[List].reduceOption(as)(f)
             val expected = as.reduceOption(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("reverse") {
+        test("reverse") {
           check(genList) { (as) =>
             val actual   = ForEach[List].reverse(as)
             val expected = as.reverse
             assert(actual)(equalTo(expected))
           }
         },
-        testM("size") {
+        test("size") {
           check(genList) { (as) =>
             val actual   = ForEach[List].size(as)
             val expected = as.size
             assert(actual)(equalTo(expected))
           }
         },
-        testM("sum") {
+        test("sum") {
           check(genList) { (as) =>
             val actual   = ForEach[List].sum(as)
             val expected = as.sum
             assert(actual)(equalTo(expected))
           }
         },
-        testM("zipAllWith") {
+        test("zipAllWith") {
           check(genChunk, genChunk, genTheseFunction) { (as, bs, f) =>
             val actual   = ForEach[Chunk].zipAllWith(as, bs)(f)
             val expected =
@@ -267,7 +283,7 @@ object ForEachSpec extends DefaultRunnableSpec {
             assert(actual)(equalTo(expected))
           }
         },
-        testM("zipWithIndex") {
+        test("zipWithIndex") {
           check(genList) { (as) =>
             val actual   = ForEach[List].zipWithIndex(as)
             val expected = as.zipWithIndex
@@ -281,7 +297,7 @@ object ForEachSpec extends DefaultRunnableSpec {
         val actual   = Invariant.ListForEach.zipWithIndex(as)
         assert(actual)(equalTo(expected))
       },
-      testM("ForEach can be derived from Iterable") {
+      test("ForEach can be derived from Iterable") {
         check(genList, genInt, genIntFunction2) { (as, s, f) =>
           val actual   = ForEach[Seq].foldLeft(as)(s)(f)
           val expected = as.foldLeft(s)(f)

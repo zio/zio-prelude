@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -551,7 +551,7 @@ object Derive {
   /**
    * The `DeriveEqual` instance for `Exit`.
    */
-  implicit def ExitDeriveEqual[E: Equal]: DeriveEqual[({ type lambda[+a] = Exit[E, a] })#lambda] =
+  implicit def ExitDeriveEqual[E]: DeriveEqual[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new DeriveEqual[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def derive[A: Equal]: Equal[Exit[E, A]] =
         Equal.ExitEqual

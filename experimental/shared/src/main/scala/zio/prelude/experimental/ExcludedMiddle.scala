@@ -10,7 +10,7 @@ trait ExcludedMiddle[A] extends Complement[A] {
 object ExcludedMiddle {
 
   /**
-   * Summons an implicit `Complement[A]`.
+   * Summons an implicit `ExcludedMiddle[A]`.
    */
   def apply[A](implicit excludedMiddle: ExcludedMiddle[A]): ExcludedMiddle[A] = excludedMiddle
 }

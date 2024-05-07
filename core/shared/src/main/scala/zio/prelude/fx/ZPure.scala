@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package zio.prelude.fx
 
-import com.github.ghik.silencer.silent
-import zio.internal.{Stack, StackBool}
 import zio.prelude._
-import zio.{CanFail, Chunk, ChunkBuilder, NeedsEnv, NonEmptyChunk}
+import zio.prelude.coherent.CovariantIdentityBoth
+import zio.{Cause => _, _}
 
-import scala.annotation.{implicitNotFound, switch}
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.reflect.ClassTag
 import scala.util.Try
 
@@ -38,21 +37,12 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
   /**
-   * A symbolic alias for `zip`.
+   * A symbolic alias for `zipParRight`.
    */
-  final def &&&[W1 >: W, S3, R1 <: R, E1 >: E, B](
-    that: ZPure[W1, S2, S3, R1, E1, B]
-  ): ZPure[W1, S1, S3, R1, E1, (A, B)] =
-    self zip that
-
-  /**
-   * Splits the environment, providing the first part to this computation and
-   * the second part to that computation.
-   */
-  final def ***[W1 >: W, S3, R1, E1 >: E, B](
-    that: ZPure[W1, S2, S3, R1, E1, B]
-  ): ZPure[W1, S1, S3, (R, R1), E1, (A, B)] =
-    (ZPure.first >>> self) &&& (ZPure.second >>> that)
+  final def &>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, B] =
+    self zipParRight that
 
   /**
    * A symbolic alias for `zipRight`.
@@ -61,14 +51,20 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self zipRight that
 
   /**
-   * Runs this computation if the provided environment is a `Left` or else
-   * runs that computation if the provided environment is a `Right`, returning
-   * the result in an `Either`.
+   * A symbolic alias for `zipParLeft`.
    */
-  final def +++[W1 >: W, S0 <: S1, S3 >: S2, R1, B, E1 >: E](
-    that: ZPure[W1, S0, S3, R1, E1, B]
-  ): ZPure[W1, S0, S3, Either[R, R1], E1, Either[A, B]] =
-    ZPure.accessM(_.fold(self.provide(_).map(Left(_)), that.provide(_).map(Right(_))))
+  final def <&[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, A] =
+    self zipParLeft that
+
+  /**
+   * A symbolic alias for `zipPar`.
+   */
+  final def <&>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZPure[W1, S3, S3, R1, E1, zippable.Out] =
+    self zipPar that
 
   /**
    * A symbolic alias for `zipLeft`.
@@ -79,9 +75,9 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * A symbolic alias for `zip`.
    */
-  final def <*>[W1 >: W, S3, R1 <: R, E1 >: E, B](
-    that: ZPure[W1, S2, S3, R1, E1, B]
-  ): ZPure[W1, S1, S3, R1, E1, (A, B)] =
+  final def <*>[W1 >: W, S3, R1 <: R, E1 >: E, B](that: ZPure[W1, S2, S3, R1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZPure[W1, S1, S3, R1, E1, zippable.Out] =
     self zip that
 
   /**
@@ -91,12 +87,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     that: => ZPure[W1, S0, S3, R1, E1, B]
   )(implicit ev: CanFail[E]): ZPure[W1, S0, S3, R1, E1, Either[A, B]] =
     self orElseEither that
-
-  /**
-   * A symbolic alias for `compose`.
-   */
-  final def <<<[W1 >: W, S0, R0, E1 >: E](that: ZPure[W1, S0, S1, R0, E1, R]): ZPure[W1, S0, S2, R0, E1, A] =
-    self compose that
 
   /**
    * A symbolic alias for `orElse`.
@@ -113,24 +103,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self flatMap f
 
   /**
-   * A symbolic alias for `andThen`.
-   */
-  final def >>>[W1 >: W, S3, E1 >: E, B](that: ZPure[W1, S2, S3, A, E1, B]): ZPure[W1, S1, S3, R, E1, B] =
-    self andThen that
-
-  /**
    * A symbolic alias for `log`.
    */
   final def ??[W1 >: W](w: W1): ZPure[W1, S1, S2, R, E, A] =
     self.log(w)
-
-  /**
-   * A symbolic alias for `join`.
-   */
-  final def |||[W1 >: W, S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
-    that: ZPure[W1, S0, S3, R1, E1, A1]
-  ): ZPure[W1, S0, S3, Either[R, R1], E1, A1] =
-    self join that
 
   /**
    * Submerges the error case of an `Either` into the error type of this
@@ -138,13 +114,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def absolve[E1 >: E, B](implicit ev: A <:< Either[E1, B]): ZPure[W, S1, S2, R, E1, B] =
     flatMap(ev(_).fold(fail, succeed))
-
-  /**
-   * Runs this computation and uses its result to provide the specified
-   * computation with its required environment.
-   */
-  final def andThen[W1 >: W, S3, E1 >: E, B](that: ZPure[W1, S2, S3, A, E1, B]): ZPure[W1, S1, S3, R, E1, B] =
-    self.flatMap(that.provide)
 
   /**
    * Maps the success value of this computation to a constant value.
@@ -219,13 +188,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     flatMap(pf.applyOrElse[A, ZPure[W1, S2, S3, R1, E1, B]](_, _ => fail(e)))
 
   /**
-   * Runs the specified computation and uses its result to provide this
-   * computation with its required environment.
-   */
-  final def compose[W1 >: W, S0, R0, E1 >: E](that: ZPure[W1, S0, S1, R0, E1, R]): ZPure[W1, S0, S2, R0, E1, A] =
-    that andThen self
-
-  /**
    * Transforms the initial state of this computation with the specified
    * function.
    */
@@ -294,7 +256,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Folds over the failed or successful results of this computation to yield
    * a computation that does not fail, but succeeds with the value of the left
-   * or righr function passed to `fold`.
+   * or right function passed to `fold`.
    */
   final def fold[S3 >: S2 <: S1, B](failure: E => B, success: A => B)(implicit
     ev: CanFail[E]
@@ -336,16 +298,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
           case None    => ZPure.fail(None)
         }
     )
-
-  /**
-   * Runs this computation if the provided environment is a `Left` or else
-   * runs that computation if the provided environment is a `Right`, unifying
-   * the result to a common supertype.
-   */
-  final def join[W1 >: W, S0 <: S1, S3 >: S2, R1, B, E1 >: E, A1 >: A](
-    that: ZPure[W1, S0, S3, R1, E1, A1]
-  ): ZPure[W1, S0, S3, Either[R, R1], E1, A1] =
-    ZPure.accessM(_.fold(self.provide, that.provide))
 
   /**
    * Modifies the behavior of the inner computation regarding logs, so that
@@ -415,7 +367,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * preserving the original structure of the `Cause`.
    */
   final def mapErrorCause[E2](f: Cause[E] => Cause[E2]): ZPure[W, S1, S2, R, E2, A] =
-    foldCauseM(cause => ZPure.halt(f(cause)), ZPure.succeed)
+    foldCauseM(cause => ZPure.failCause(f(cause)), ZPure.succeed)
 
   /**
    * Transforms the updated state of this computation with the specified
@@ -436,7 +388,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def none[B](implicit ev: A <:< Option[B]): ZPure[W, S1, S2, R, Option[E], Unit] =
     self.foldM(
       e => ZPure.fail(Some(e)),
-      a => a.fold[ZPure[W, S2, S2, R, Option[E], Unit]](ZPure.succeed(()))(_ => ZPure.fail(None))
+      a => a.fold[ZPure[W, S2, S2, R, Option[E], Unit]](ZPure.unit)(_ => ZPure.fail(None))
     )
 
   /**
@@ -493,15 +445,22 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Provides this computation with its required environment.
    */
-  final def provide(r: R)(implicit ev: NeedsEnv[R]): ZPure[W, S1, S2, Any, E, A] =
+  final def provideEnvironment(r: ZEnvironment[R]): ZPure[W, S1, S2, Any, E, A] =
     ZPure.Provide(r, self)
+
+  /**
+   * Provides this computation with the single service it requires. If the
+   * computation requires multiple services use `provideEnvironment` instead.
+   */
+  final def provideService[Service <: R](service: => Service)(implicit tag: Tag[Service]): ZPure[W, S1, S2, Any, E, A] =
+    provideEnvironment(ZEnvironment(service))
 
   /**
    * Provides this computation with part of its required environment, leaving
    * the remainder.
    */
-  final def provideSome[R0](f: R0 => R): ZPure[W, S1, S2, R0, E, A] =
-    ZPure.accessM(r0 => self.provide(f(r0)))
+  final def provideSomeEnvironment[R0](f: ZEnvironment[R0] => ZEnvironment[R]): ZPure[W, S1, S2, R0, E, A] =
+    ZPure.environmentWithPure(r0 => self.provideEnvironment(f(r0)))
 
   /**
    * Provides this computation with its initial state.
@@ -626,137 +585,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * log and either all the failures that occurred or the updated state and the
    * result.
    */
-  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) = {
-    val _                                                        = ev
-    val stack: Stack[Any => ZPure[Any, Any, Any, Any, Any, Any]] = Stack()
-    val environments: Stack[AnyRef]                              = Stack()
-    val logs: Stack[ChunkBuilder[Any]]                           = Stack(ChunkBuilder.make())
-    val clearLogOnError: StackBool                               = StackBool()
-    var s0: Any                                                  = s
-    var a: Any                                                   = null
-    var failed                                                   = false
-    var curZPure: ZPure[Any, Any, Any, Any, Any, Any]            = self.asInstanceOf[ZPure[Any, Any, Any, Any, Any, Any]]
-
-    def findNextErrorHandler(): Unit = {
-      var unwinding = true
-      while (unwinding)
-        stack.pop() match {
-          case value: Fold[_, _, _, _, _, _, _, _, _] =>
-            val continuation = value.failure
-            stack.push(continuation.asInstanceOf[Any => ZPure[Any, Any, Any, Any, Any, Any]])
-            unwinding = false
-          case null                                   =>
-            unwinding = false
-          case _                                      =>
-        }
-    }
-
-    while (curZPure ne null) {
-      val tag = curZPure.tag
-      (tag: @switch) match {
-        case Tags.FlatMap =>
-          val zPure        = curZPure.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any, Any]]
-          val nested       = zPure.value
-          val continuation = zPure.continue
-
-          nested.tag match {
-            case Tags.Succeed =>
-              val zPure2 = nested.asInstanceOf[Succeed[Any]]
-              curZPure = continuation(zPure2.value)
-
-            case Tags.Modify =>
-              val zPure2 = nested.asInstanceOf[Modify[Any, Any, Any]]
-
-              val updated = zPure2.run0(s0)
-              a = updated._1
-              s0 = updated._2
-              curZPure = continuation(a)
-
-            case _ =>
-              curZPure = nested
-              stack.push(continuation)
-          }
-
-        case Tags.Succeed =>
-          val zPure     = curZPure.asInstanceOf[Succeed[Any]]
-          a = zPure.value
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Fail    =>
-          val zPure     = curZPure.asInstanceOf[Fail[Any]]
-          findNextErrorHandler()
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) {
-            failed = true
-            a = zPure.error
-            curZPure = null
-          } else
-            curZPure = nextInstr(zPure.error)
-
-        case Tags.Fold    =>
-          val zPure = curZPure.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
-          val state = s0
-          val fold  =
-            ZPure.Fold(
-              zPure.value,
-              (cause: Cause[Any]) =>
-                ZPure.suspend(Succeed({
-                  val clear   = clearLogOnError.peekOrElse(false)
-                  val builder = logs.pop()
-                  if (!clear) logs.peek() ++= builder.result()
-                })) *> ZPure.set(state) *> zPure.failure(cause),
-              (a: Any) =>
-                ZPure.suspend(Succeed({
-                  val builder = logs.pop()
-                  logs.peek() ++= builder.result()
-                })) *> zPure.success(a)
-            )
-          stack.push(fold)
-          logs.push(ChunkBuilder.make())
-          curZPure = zPure.value
-        case Tags.Access  =>
-          val zPure = curZPure.asInstanceOf[Access[Any, Any, Any, Any, Any, Any]]
-          curZPure = zPure.access(environments.peek())
-        case Tags.Provide =>
-          val zPure = curZPure.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
-          environments.push(zPure.r.asInstanceOf[AnyRef])
-          curZPure = zPure.continue.foldCauseM(
-            e => ZPure.succeed(environments.pop()) *> ZPure.halt(e),
-            a => ZPure.succeed(environments.pop()) *> ZPure.succeed(a)
-          )
-        case Tags.Modify  =>
-          val zPure     = curZPure.asInstanceOf[Modify[Any, Any, Any]]
-          val updated   = zPure.run0(s0)
-          a = updated._1
-          s0 = updated._2
-          val nextInstr = stack.pop()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Log     =>
-          val zPure     = curZPure.asInstanceOf[Log[Any, Any]]
-          logs.peek() += zPure.log
-          val nextInstr = stack.pop()
-          a = ()
-          if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
-        case Tags.Flag    =>
-          val zPure = curZPure.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
-          zPure.flag match {
-            case FlagType.ClearLogOnError =>
-              clearLogOnError.push(zPure.value)
-              curZPure = zPure.continue.bimap(
-                e => {
-                  if (zPure.value) logs.peek().clear()
-                  clearLogOnError.popOrElse(false)
-                  e
-                },
-                a => { clearLogOnError.popOrElse(false); a }
-              )
-          }
-      }
-    }
-    val log = logs.peek().result().asInstanceOf[Chunk[W]]
-    if (failed) (log, Left(a.asInstanceOf[Cause[E]]))
-    else (log, Right((s0.asInstanceOf[S2], a.asInstanceOf[A])))
-  }
+  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) =
+    Runner(s, self)
 
   /**
    * Runs this computation to produce its result or the first failure to
@@ -847,28 +677,27 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       case None        => ZPure.fail(new NoSuchElementException("None.get"))
     })
 
-  protected def tag: Int
-
   /**
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * The original state is supposed to be `()`.
    */
-  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] = zio.ZIO.accessM[R] { r =>
-    provide(r).runAll(())._2 match {
-      case Left(cause)   => zio.ZIO.halt(cause.toCause)
-      case Right((_, a)) => zio.ZIO.succeedNow(a)
+  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] =
+    ZIO.environmentWithZIO[R] { r =>
+      provideEnvironment(r).runAll(())._2 match {
+        case Left(cause)   => ZIO.failCause(cause.toCause)
+        case Right((_, a)) => ZIO.succeed(a)
+      }
     }
-  }
 
   /**
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    */
   def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
-    zio.ZIO.accessM[R] { r =>
-      val result = provide(r).runAll(s1)
+    ZIO.environmentWithZIO[R] { r =>
+      val result = provideEnvironment(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => zio.ZIO.halt(cause.toCause)
-        case Right((_, a)) => zio.ZIO.succeedNow(a)
+        case Left(cause)   => ZIO.failCause(cause.toCause)
+        case Right((_, a)) => ZIO.succeed(a)
       }
     }
 
@@ -876,23 +705,23 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
    */
   def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
-    zio.ZIO.accessM[R] { r =>
-      val result = provide(r).runAll(s1)
+    ZIO.environmentWithZIO[R] { r =>
+      val result = provideEnvironment(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => zio.ZIO.halt(cause.toCause)
-        case Right(result) => zio.ZIO.succeedNow(result)
+        case Left(cause)   => ZIO.failCause(cause.toCause)
+        case Right(result) => ZIO.succeed(result)
       }
     }
 
   /**
    * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
    */
-  def toZIOWithAll(s1: S1): zio.ZIO[R, E, (Chunk[W], S2, A)] =
-    zio.ZIO.accessM[R] { r =>
-      val (log, result) = provide(r).runAll(s1)
+  def toZIOWithAll(s1: S1): ZIO[R, E, (Chunk[W], S2, A)] =
+    ZIO.environmentWithZIO[R] { r =>
+      val (log, result) = provideEnvironment(r).runAll(s1)
       result match {
-        case Left(cause)    => zio.ZIO.halt(cause.toCause)
-        case Right((s2, a)) => zio.ZIO.succeedNow((log, s2, a))
+        case Left(cause)    => ZIO.failCause(cause.toCause)
+        case Right((s2, a)) => ZIO.succeed((log, s2, a))
       }
     }
 
@@ -900,7 +729,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Submerges the full cause of failures of this computation.
    */
   def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
-    foldM(e => ZPure.halt(ev(e)), a => ZPure.succeed(a))
+    foldM(e => ZPure.failCause(ev(e)), a => ZPure.succeed(a))
 
   /**
    * Combines this computation with the specified computation, passing the
@@ -909,8 +738,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def zip[W1 >: W, S3, R1 <: R, E1 >: E, B](
     that: ZPure[W1, S2, S3, R1, E1, B]
-  ): ZPure[W1, S1, S3, R1, E1, (A, B)] =
-    self.zipWith(that)((_, _))
+  )(implicit zippable: Zippable[A, B]): ZPure[W1, S1, S3, R1, E1, zippable.Out] =
+    self.zipWith(that)(zippable.zip(_, _))
 
   /**
    * Combines this computation with the specified computation, passing the
@@ -930,7 +759,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def zipRight[W1 >: W, S3, R1 <: R, E1 >: E, B](
     that: ZPure[W1, S2, S3, R1, E1, B]
   ): ZPure[W1, S1, S3, R1, E1, B] =
-    self.zipWith(that)((_, b) => b)
+    self.flatMap(_ => that)
 
   /**
    * Combines this computation with the specified computation, passing the
@@ -940,7 +769,34 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def zipWith[W1 >: W, S3, R1 <: R, E1 >: E, B, C](
     that: ZPure[W1, S2, S3, R1, E1, B]
   )(f: (A, B) => C): ZPure[W1, S1, S3, R1, E1, C] =
-    self.flatMap(a => that.flatMap(b => State.succeed(f(a, b))))
+    self.flatMap(a => that.map(b => f(a, b)))
+
+  final def zipWithPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  )(f: (A, B) => C): ZPure[W1, S3, S3, R1, E1, C] =
+    self.foldCauseM(
+      c1 =>
+        that.foldCauseM(
+          c2 => ZPure.failCause(c1 && c2),
+          _ => ZPure.failCause(c1)
+        ),
+      a => that.map(b => f(a, b))
+    )
+
+  final def zipPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZPure[W1, S3, S3, R1, E1, zippable.Out] =
+    self.zipWithPar(that)(zippable.zip(_, _))
+
+  final def zipParLeft[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, A] =
+    self.zipWith(that)((a, _) => a)
+
+  final def zipParRight[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
+    that: ZPure[W1, S3, S3, R1, E1, B]
+  ): ZPure[W1, S3, S3, R1, E1, B] =
+    self.zipWith(that)((_, b) => b)
 
   /**
    * Returns a successful computation if the value is `Right`, or fails with error `None`.
@@ -984,17 +840,15 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Maps the value of this computation to unit.
    */
-  final def unit: ZPure[W, S1, S2, R, E, Unit] = as(())
+  final def unit: ZPure[W, S1, S2, R, E, Unit] =
+    self.flatMap(succeedUnitFn)
 
 }
 
-object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
-
-  def access[R]: AccessPartiallyApplied[R] =
-    new AccessPartiallyApplied
-
-  def accessM[R]: AccessMPartiallyApplied[R] =
-    new AccessMPartiallyApplied
+object ZPure {
+  private val succeedUnit: ZPure[Nothing, Any, Nothing, Any, Nothing, Unit]            = Succeed(())
+  private val succeedNone: ZPure[Nothing, Any, Nothing, Any, Nothing, Option[Nothing]] = Succeed(None)
+  private val succeedUnitFn                                                            = (_: Any) => succeedUnit
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
@@ -1009,6 +863,31 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     }
 
   /**
+   * Evaluate each computation in the structure from left to right, collecting
+   * the successful values and discarding the empty cases.
+   */
+  def collect[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+    f: A => ZPure[W, S, S, R, E, Option[B]]
+  )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+    if (in.isEmpty) ZPure.succeed(bf.fromSpecific(in)(Nil))
+    else
+      ZPure.suspend {
+        val iterator = in.iterator
+        val builder  = bf.newBuilder(in)
+
+        lazy val recurse: Option[B] => ZPure[W, S, S, R, E, Collection[B]] = {
+          case Some(b) => builder += b; loop()
+          case None    => loop()
+        }
+
+        def loop(): ZPure[W, S, S, R, E, Collection[B]] =
+          if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+          else ZPure.succeed(builder.result())
+
+        loop()
+      }
+
+  /**
    * Combines a collection of computations into a single computation that
    * passes the updated state from each computation to the next and collects
    * the results.
@@ -1016,32 +895,36 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def collectAll[F[+_]: ForEach, W, S, R, E, A](fa: F[ZPure[W, S, S, R, E, A]]): ZPure[W, S, S, R, E, F[A]] =
     ForEach[F].flip[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A](fa)
 
-  def environment[S, R]: ZPure[Nothing, S, S, R, Nothing, R] =
-    access(r => r)
-
-  def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
-    halt(Cause(e))
-
-  def halt[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
-    ZPure.Fail(cause)
+  /**
+   * Accesses the whole environment of the computation.
+   */
+  def environment[S, R]: ZPure[Nothing, S, S, R, Nothing, ZEnvironment[R]] =
+    environmentWith(identity)
 
   /**
-   * Constructs a computation that extracts the first element of a tuple.
+   * Accesses the environment of the computation.
    */
-  def first[S, A]: ZPure[Nothing, S, S, (A, Any), Nothing, A] =
-    fromFunction(_._1)
+  def environmentWith[R]: EnvironmentWithPartiallyApplied[R] =
+    new EnvironmentWithPartiallyApplied
+
+  /**
+   * Accesses the environment of the computation in the context of a
+   * computation.
+   */
+  def environmentWithPure[R]: EnvironmentWithPurePartiallyApplied[R] =
+    new EnvironmentWithPurePartiallyApplied
+
+  def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
+    failCause(Cause(e))
+
+  def failCause[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
+    ZPure.Fail(cause)
 
   /**
    * Constructs a computation from an `Either`.
    */
   def fromEither[S, L, R](either: Either[L, R]): ZPure[Nothing, S, S, Any, L, R] =
     either.fold(l => ZPure.fail(l), r => ZPure.succeed(r))
-
-  /**
-   * Constructs a computation from a function.
-   */
-  def fromFunction[S, R, A](f: R => A): ZPure[Nothing, S, S, R, Nothing, A] =
-    access(f)
 
   /**
    * Constructs a computation from an `Option`.
@@ -1085,6 +968,52 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     ForEach[F].forEach[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda, A, B](fa)(f)
 
   /**
+   * Maps each element of a collection to a computation and combines them all
+   * into a single computation that passes the updated state from each
+   * computation to the next and collects the results.
+   */
+  def foreach[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+    f: A => ZPure[W, S, S, R, E, B]
+  )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+    if (in.isEmpty) ZPure.succeed(bf.fromSpecific(in)(Nil))
+    else
+      ZPure.suspend {
+        val iterator = in.iterator
+        val builder  = bf.newBuilder(in)
+
+        lazy val recurse: B => ZPure[W, S, S, R, E, Collection[B]] = { b =>
+          builder += b
+          loop()
+        }
+
+        def loop(): ZPure[W, S, S, R, E, Collection[B]] =
+          if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+          else ZPure.succeed(builder.result())
+
+        loop()
+      }
+
+  /**
+   * Maps each element of a collection to a computation and combines them all
+   * into a single computation that passes the updated state from each
+   * computation to the next and discards the results.
+   */
+  def foreachDiscard[W, S, R, E, A, B](in: Iterable[A])(f: A => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, Unit] =
+    if (in.isEmpty) unit
+    else
+      ZPure.suspend {
+        val iterator = in.iterator
+
+        lazy val recurse: Any => ZPure[W, S, S, R, E, Unit] = _ => loop()
+
+        def loop(): ZPure[W, S, S, R, E, Unit] =
+          if (iterator.hasNext) f(iterator.next()).flatMap(recurse)
+          else ZPure.unit
+
+        loop()
+      }
+
+  /**
    * Constructs a computation that returns the initial state unchanged.
    */
   def get[S]: ZPure[Nothing, S, S, Any, Nothing, S] =
@@ -1092,31 +1021,6 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
 
   def log[S, W](w: W): ZPure[W, S, S, Any, Nothing, Unit] =
     ZPure.Log(w)
-
-  /**
-   * Combines the results of the specified `ZPure` values using the function
-   * `f`, failing with the accumulation of all errors if any fail.
-   */
-  def mapParN[W, S, R, E, A, B, C](left: ZPure[W, S, S, R, E, A], right: ZPure[W, S, S, R, E, B])(
-    f: (A, B) => C
-  ): ZPure[W, S, S, R, E, C] =
-    left.foldCauseM(
-      c1 =>
-        right.foldCauseM(
-          c2 => ZPure.halt(c1 && c2),
-          _ => ZPure.halt(c1)
-        ),
-      a => right.map(b => f(a, b))
-    )
-
-  /**
-   * Combines the results of the specified `ZPure` values using the function
-   * `f`, failing with the first error if any fail.
-   */
-  def mapN[W, S, R, E, A, B, C](left: ZPure[W, S, S, R, E, A], right: ZPure[W, S, S, R, E, B])(
-    f: (A, B) => C
-  ): ZPure[W, S, S, R, E, C] =
-    left.zipWith(right)(f)
 
   /**
    * Constructs a computation from the specified modify function.
@@ -1134,10 +1038,29 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     }
 
   /**
-   * Constructs a computation that extracts the second element of a tuple.
+   * Constructs a computation that succeeds with the `None` value.
    */
-  def second[S, B]: ZPure[Nothing, S, S, (Any, B), Nothing, B] =
-    fromFunction(_._2)
+  def none[S]: ZPure[Nothing, S, S, Any, Nothing, Option[Nothing]] =
+    succeedNone
+
+  /**
+   * Accesses the specified service in the environment of the computation.
+   */
+  def service[S, R: Tag]: ZPure[Nothing, S, S, R, Nothing, R] =
+    serviceWith(identity)
+
+  /**
+   * Accesses the specified service in the environment of the computation.
+   */
+  def serviceWith[R]: ServiceWithPartiallyApplied[R] =
+    new ServiceWithPartiallyApplied
+
+  /**
+   * Accesses the specified service in the environment of the computation in
+   * the context of a computation.
+   */
+  def serviceWithPure[R]: ServiceWithPurePartiallyApplied[R] =
+    new ServiceWithPurePartiallyApplied
 
   /**
    * Constructs a computation that sets the state to the specified value.
@@ -1159,31 +1082,17 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
     ZPure.unit.flatMap(_ => pure)
 
   /**
-   * Combines the results of the specified `ZPure` values into a tuple, failing
-   * with the first error if any fail.
-   */
-  def tupled[W, S, R, E, A, B](
-    left: ZPure[W, S, S, R, E, A],
-    right: ZPure[W, S, S, R, E, B]
-  ): ZPure[W, S, S, R, E, (A, B)] =
-    mapN(left, right)((_, _))
-
-  /**
-   * Combines the results of the specified `ZPure` values into a tuple, failing
-   * with the accumulation of all errors if any fail.
-   */
-  def tupledPar[W, S, R, E, A0, A1](
-    zPure1: ZPure[W, S, S, R, E, A0],
-    zPure2: ZPure[W, S, S, R, E, A1]
-  ): ZPure[W, S, S, R, E, (A0, A1)] =
-    mapParN(zPure1, zPure2)((_, _))
-
-  /**
    * Constructs a computation that always returns the `Unit` value, passing the
    * state through unchanged.
    */
   def unit[S]: ZPure[Nothing, S, S, Any, Nothing, Unit] =
-    succeed(())
+    succeedUnit
+
+  /**
+   * The moral equivalent of `if (!p) exp`
+   */
+  def unless[W, S, R, E, A](p: Boolean)(pure: => ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
+    if (p) none else pure.asSome
 
   /**
    * Constructs a computation from the specified update function.
@@ -1191,28 +1100,41 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   def update[S1, S2](f: S1 => S2): ZPure[Nothing, S1, S2, Any, Nothing, Unit] =
     modify(s => ((), f(s)))
 
-  final class AccessPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
-    def apply[S, A](f: R => A): ZPure[Nothing, S, S, R, Nothing, A] =
-      Access(r => succeed(f(r)))
+  /**
+   * The moral equivalent of `if (p) exp`
+   */
+  def when[W, S, R, E, A](p: Boolean)(pure: => ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
+    if (p) pure.asSome else none
+
+  /**
+   * Runs a computation when the supplied `PartialFunction` matches for the given
+   * value, otherwise does nothing.
+   */
+  def whenCase[W, S, R, E, A, B](a: A)(
+    pf: PartialFunction[A, ZPure[W, S, S, R, E, B]]
+  ): ZPure[W, S, S, R, E, Option[B]] =
+    pf.andThen(_.asSome).applyOrElse(a, (_: A) => none)
+
+  final class EnvironmentWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+    def apply[S, A](f: ZEnvironment[R] => A): ZPure[Nothing, S, S, R, Nothing, A] =
+      Environment(f)
   }
 
-  final class AccessMPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
-    def apply[W, S1, S2, E, A](f: R => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
-      Access(f)
+  final class EnvironmentWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+    def apply[W, S1, S2, E, A](f: ZEnvironment[R] => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
+      Environment(f).flatten
   }
 
-  @implicitNotFound(
-    "Pattern guards are only supported when the error type is a supertype of NoSuchElementException. However, your effect has ${E} for the error type."
-  )
-  abstract class CanFilter[+E] {
-    def apply(t: NoSuchElementException): E
+  final class ServiceWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+    def apply[S, A](f: R => A)(implicit tag: Tag[R]): ZPure[Nothing, S, S, R, Nothing, A] =
+      environmentWith(env => f(env.get))
   }
 
-  object CanFilter {
-    implicit def canFilter[E >: NoSuchElementException]: CanFilter[E] =
-      new CanFilter[E] {
-        def apply(t: NoSuchElementException): E = t
-      }
+  final class ServiceWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+    def apply[W, S1, S2, E, A](
+      f: R => ZPure[W, S1, S2, Any, E, A]
+    )(implicit tag: Tag[R]): ZPure[W, S1, S2, R, E, A] =
+      environmentWithPure(env => f(env.get))
   }
 
   /**
@@ -1227,12 +1149,29 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
   /**
    * The `IdentityBoth` instance for `ZPure`.
    */
-  implicit def ZPureIdentityBoth[W, S, R, E]: IdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
-    new IdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
+  implicit def ZPureCovariantIdentityBoth[W, S, R, E]
+    : CovariantIdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
+    new CovariantIdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
       def any: ZPure[W, S, S, Any, Nothing, Any]                                                                   =
         ZPure.unit
       def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
         fa.zip(fb)
+      def map[A, B](f: A => B): ZPure[W, S, S, R, E, A] => ZPure[W, S, S, R, E, B]                                 =
+        _.map(f)
+      override def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
+        f: A => ZPure[W, S, S, R, E, Option[B]]
+      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+        ZPure.collect(in)(f)
+      override def forEach[A, B, Collection[+Element] <: Iterable[Element]](
+        in: Collection[A]
+      )(f: A => ZPure[W, S, S, R, E, B])(implicit
+        bf: BuildFrom[Collection[A], B, Collection[B]]
+      ): ZPure[W, S, S, R, E, Collection[B]] =
+        ZPure.foreach(in)(f)
+      override def forEach_[A, B](in: Iterable[A])(
+        f: A => ZPure[W, S, S, R, E, Any]
+      ): ZPure[W, S, S, R, E, Unit] =
+        ZPure.foreachDiscard(in)(f)
     }
 
   /**
@@ -1256,97 +1195,228 @@ object ZPure extends ZPureLowPriorityImplicits with ZPureArities {
       self.refineOrDie { case e: E1 => e }
   }
 
-  implicit final class ZPureWithFilterOps[W, S1, S2, R, E, A](private val self: ZPure[W, S1, S2, R, E, A])
-      extends AnyVal {
-
-    /**
-     * Enables to check conditions in the value produced by ZPure
-     * If the condition is not satisfied, it fails with NoSuchElementException
-     * this provide the syntax sugar in for-comprehension:
-     * for {
-     *   (i, j) <- zpure1
-     *   positive <- zpure2 if positive > 0
-     *  } yield ()
-     */
-    def withFilter(predicate: A => Boolean)(implicit ev: CanFilter[E]): ZPure[W, S1, S2, R, E, A] =
-      self.flatMap { a =>
-        if (predicate(a)) ZPure.succeed(a)
-        else ZPure.fail(ev(new NoSuchElementException("The value doesn't satisfy the predicate")))
-      }
-  }
-
-  @silent("never used")
-  private object Tags {
-    final val FlatMap = 0
-    final val Succeed = 1
-    final val Fail    = 2
-    final val Fold    = 3
-    final val Access  = 4
-    final val Provide = 5
-    final val Modify  = 6
-    final val Log     = 7
-    final val Flag    = 8
-  }
-
-  private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A] {
-    override def tag: Int = Tags.Succeed
-  }
-  private final case class Fail[+E](error: Cause[E])                 extends ZPure[Nothing, Any, Nothing, Any, E, Nothing] {
-    override def tag: Int = Tags.Fail
-  }
-  private final case class Modify[-S1, +S2, +A](run0: S1 => (A, S2)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]       {
-    override def tag: Int = Tags.Modify
-  }
+  private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A]
+  private final case class Fail[+E](error: Cause[E])                 extends ZPure[Nothing, Any, Nothing, Any, E, Nothing]
+  private final case class Modify[-S1, +S2, +A](run0: S1 => (A, S2)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]
   private final case class FlatMap[+W, -S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S2, S3, R, E, B]
-  ) extends ZPure[W, S1, S3, R, E, B] {
-    override def tag: Int = Tags.FlatMap
-  }
+  ) extends ZPure[W, S1, S3, R, E, B]
   private final case class Fold[+W, -S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
     failure: Cause[E1] => ZPure[W, S1, S3, R, E2, B],
     success: A => ZPure[W, S2, S3, R, E2, B]
   ) extends ZPure[W, S1, S3, R, E2, B]
       with Function[A, ZPure[W, S2, S3, R, E2, B]] {
-    override def tag: Int                                = Tags.Fold
     override def apply(a: A): ZPure[W, S2, S3, R, E2, B] =
       success(a)
   }
-  private final case class Access[W, S1, S2, R, E, A](access: R => ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, R, E, A] {
-    override def tag: Int = Tags.Access
-  }
-  private final case class Provide[W, S1, S2, R, E, A](r: R, continue: ZPure[W, S1, S2, R, E, A])
-      extends ZPure[W, S1, S2, Any, E, A] {
-    override def tag: Int = Tags.Provide
-  }
-  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]            {
-    override def tag: Int = Tags.Log
-  }
+  private final case class Environment[W, S1, S2, R, E, A](access: ZEnvironment[R] => A)
+      extends ZPure[W, S1, S2, R, E, A]
+  private final case class Provide[W, S1, S2, R, E, A](r: ZEnvironment[R], continue: ZPure[W, S1, S2, R, E, A])
+      extends ZPure[W, S1, S2, Any, E, A]
+  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]
   private final case class Flag[W, S1, S2, R, E, A](
     flag: FlagType,
     value: Boolean,
     continue: ZPure[W, S1, S2, R, E, A]
-  ) extends ZPure[W, S1, S2, R, E, A] {
-    override def tag: Int = Tags.Flag
-  }
+  ) extends ZPure[W, S1, S2, R, E, A]
 
   sealed trait FlagType
   object FlagType {
     case object ClearLogOnError extends FlagType
   }
-}
 
-trait ZPureLowPriorityImplicits {
-
-  /**
-   * The `CommutativeBoth` instance for `ZPure`.
-   */
-  implicit def ZPureCommutativeBoth[W, S, R, E]
-    : CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
-    new CommutativeBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] {
-      def both[A, B](fa: => ZPure[W, S, S, R, E, A], fb: => ZPure[W, S, S, R, E, B]): ZPure[W, S, S, R, E, (A, B)] =
-        ZPure.tupledPar(fa, fb)
+  private object Runner {
+    private[this] val pool = new ThreadLocal[(Runner, AtomicBoolean)] {
+      override def initialValue(): (Runner, AtomicBoolean) = (new Runner(), new AtomicBoolean(false))
     }
+
+    def apply[W, S1, S2, R, E, A](
+      state: S1,
+      zPure: ZPure[W, S1, S2, R, E, A]
+    ): (Chunk[W], Either[Cause[E], (S2, A)]) = {
+      val (runner, running) = pool.get()
+
+      if (running.compareAndSet(false, true)) {
+        try
+          runner.run(state, zPure)
+        finally {
+          runner.clear()
+          running.set(false)
+        }
+      } else {
+        new Runner().run(state, zPure)
+      }
+    }
+
+    final private case class Err(cause: Cause[Any]) extends Exception {
+      override def fillInStackTrace(): Throwable = this
+    }
+  }
+
+  final private class Runner private {
+    private type Continuation = Any => Erased
+    private type Erased       = ZPure[Any, Any, Any, Any, Any, Any]
+
+    private[this] var _environment     = ZEnvironment.empty
+    private[this] var _clearLogOnError = false
+    private[this] var _logs            = ChunkBuilder.make[Any]()
+    private[this] val stack            = new Stack[Continuation]
+
+    private def clear(): Unit = {
+      _environment = ZEnvironment.empty
+      _clearLogOnError = false
+      _logs.clear()
+      stack.clear()
+    }
+
+    private def run[W, S1, S2, R, E, A](
+      state: S1,
+      zPure: ZPure[W, S1, S2, R, E, A]
+    ): (Chunk[W], Either[Cause[E], (S2, A)]) = {
+      val result =
+        try
+          Right(loop(state, zPure.asInstanceOf[Erased]))
+        catch {
+          case Runner.Err(c) => Left(c.asInstanceOf[Cause[E]])
+        }
+
+      (_logs.result().asInstanceOf[Chunk[W]], result)
+    }
+
+    private def loop[S2, A](state: Any, zPure: Erased) = {
+      // NOTE: Be careful not to add these into a lambda to avoid them being moved to the heap
+      var s0: Any  = state
+      var a: Any   = null
+      var curZPure = zPure
+
+      while (curZPure ne null)
+        curZPure match {
+          case flatmap0: ZPure.FlatMap[_, _, _, _, _, _, _, _] =>
+            val zPure        = flatmap0.asInstanceOf[FlatMap[Any, Any, Any, Any, Any, Any, Any, Any]]
+            val nested       = zPure.value
+            val continuation = zPure.continue
+
+            nested match {
+              case succeed0: Succeed[_] =>
+                val zPure2 = succeed0.asInstanceOf[Succeed[Any]]
+                curZPure = continuation(zPure2.value)
+
+              case modify0: Modify[_, _, _] =>
+                val zPure2  = modify0.asInstanceOf[Modify[Any, Any, Any]]
+                val updated = zPure2.run0(s0)
+                s0 = updated._2
+                curZPure = continuation(updated._1)
+
+              case log0: Log[_, _] =>
+                val zPure = log0.asInstanceOf[Log[Any, Any]]
+                _logs addOne zPure.log
+                curZPure = continuation(())
+
+              case environment0: Environment[_, _, _, _, _, _] =>
+                val zPure = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
+                curZPure = continuation(zPure.access(_environment))
+
+              case _ =>
+                curZPure = nested
+                stack.push(continuation)
+            }
+
+          case succeed0: Succeed[_] =>
+            val zPure     = succeed0.asInstanceOf[Succeed[Any]]
+            a = zPure.value
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case fold0: Fold[_, _, _, _, _, _, _, _, _] =>
+            val zPure = fold0.asInstanceOf[Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any]]
+            val state = s0
+            val clear = _clearLogOnError
+            val fold  = if (clear) {
+              val previousLogs = _logs
+              _logs = ChunkBuilder.make()
+
+              ZPure.Fold(
+                zPure.value,
+                (cause: Cause[Any]) => {
+                  _logs = previousLogs
+                  ZPure.set(state) *> zPure.failure(cause)
+                },
+                (a: Any) => {
+                  val logs0 = _logs.result()
+                  if (logs0.nonEmpty) previousLogs ++= logs0
+                  _logs = previousLogs
+                  zPure.success(a)
+                }
+              )
+            } else {
+              ZPure.Fold(
+                zPure.value,
+                ZPure.set(state) *> zPure.failure(_: Cause[Any]),
+                zPure.success
+              )
+            }
+
+            stack.push(fold)
+            curZPure = zPure.value
+
+          case log0: Log[_, _] =>
+            val zPure     = log0.asInstanceOf[Log[Any, Any]]
+            _logs addOne zPure.log
+            val nextInstr = stack.pop()
+            a = ()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case provide0: Provide[_, _, _, _, _, _] =>
+            val zPure       = provide0.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
+            val previousEnv = _environment
+            _environment = zPure.r
+            curZPure = zPure.continue.foldCauseM(
+              e => { _environment = previousEnv; ZPure.failCause(e) },
+              a => { _environment = previousEnv; ZPure.succeed(a) }
+            )
+
+          case environment0: Environment[_, _, _, _, _, _] =>
+            val zPure     = environment0.asInstanceOf[Environment[Any, Any, Any, Any, Any, Any]]
+            a = zPure.access(_environment)
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case modify0: Modify[_, _, _] =>
+            val zPure     = modify0.asInstanceOf[Modify[Any, Any, Any]]
+            val updated   = zPure.run0(s0)
+            a = updated._1
+            s0 = updated._2
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+
+          case flag0: Flag[_, _, _, _, _, _] =>
+            val zPure = flag0.asInstanceOf[Flag[Any, Any, Any, Any, Any, Any]]
+            zPure.flag match {
+              case FlagType.ClearLogOnError =>
+                val oldValue = _clearLogOnError
+                _clearLogOnError = zPure.value
+                val resetFn  = (a: Any) => { _clearLogOnError = oldValue; a }
+                curZPure = zPure.continue.bimap(resetFn, resetFn)
+            }
+
+          case fail0: Fail[_] =>
+            val zPure = fail0.asInstanceOf[Fail[Any]]
+            curZPure = null
+            while (curZPure eq null)
+              stack.pop() match {
+                case null                                   =>
+                  throw Runner.Err(zPure.error)
+                case value: Fold[_, _, _, _, _, _, _, _, _] =>
+                  val cont = value.failure.asInstanceOf[Continuation]
+                  curZPure = cont(zPure.error)
+                case _                                      =>
+                  ()
+              }
+        }
+
+      (s0.asInstanceOf[S2], a.asInstanceOf[A])
+    }
+  }
 }

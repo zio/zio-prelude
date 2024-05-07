@@ -1,11 +1,11 @@
 package zio.prelude
 
 import zio.test.Assertion._
-import zio.test.{DefaultRunnableSpec, ZSpec, assert}
+import zio.test.{Spec, assert}
 
-object AssertionSpec extends DefaultRunnableSpec {
+object AssertionSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] = suite("Assertion")(
+  def spec: Spec[Environment, Any] = suite("Assertion")(
     test("matches must fail when the regex only match a part of the string") {
       assert((Assertion.matches("biking").apply("toto like biking")))(isLeft(anything))
     },

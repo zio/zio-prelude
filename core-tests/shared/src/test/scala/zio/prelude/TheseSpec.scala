@@ -4,17 +4,17 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object TheseSpec extends DefaultRunnableSpec {
+object TheseSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] = suite("TheseSpec")(
+  def spec: Spec[Environment, Any] = suite("TheseSpec")(
     suite("laws")(
-      testM("associative")(checkAllLaws(AssociativeLaws)(Gens.these(Gen.chunkOf(Gen.anyInt), Gen.chunkOf(Gen.anyInt)))),
-      testM("covariant")(checkAllLaws(CovariantLaws)(GenFs.these(Gen.anyInt), Gen.anyInt)),
-      testM("equal")(checkAllLaws(EqualLaws)(Gens.these(Gen.anyInt, Gen.anyInt))),
-      testM("forEach")(checkAllLaws(ForEachLaws)(GenFs.these(Gen.anyInt), Gen.anyInt)),
-      testM("hash")(checkAllLaws(HashLaws)(Gens.these(Gen.anyInt, Gen.anyInt))),
-      testM("identityBoth")(checkAllLaws(IdentityBothLaws)(GenFs.these(Gen.chunkOf(Gen.anyInt)), Gen.anyInt)),
-      testM("identityFlatten")(checkAllLaws(IdentityFlattenLaws)(GenFs.these(Gen.chunkOf(Gen.anyInt)), Gen.anyInt))
+      test("associative")(checkAllLaws(AssociativeLaws)(Gens.these(Gen.chunkOf(Gen.int), Gen.chunkOf(Gen.int)))),
+      test("covariant")(checkAllLaws(CovariantLaws)(GenFs.these(Gen.int), Gen.int)),
+      test("equal")(checkAllLaws(EqualLaws)(Gens.these(Gen.int, Gen.int))),
+      test("forEach")(checkAllLaws(ForEachLaws)(GenFs.these(Gen.int), Gen.int)),
+      test("hash")(checkAllLaws(HashLaws)(Gens.these(Gen.int, Gen.int))),
+      test("identityBoth")(checkAllLaws(IdentityBothLaws)(GenFs.these(Gen.chunkOf(Gen.int)), Gen.int)),
+      test("identityFlatten")(checkAllLaws(IdentityFlattenLaws)(GenFs.these(Gen.chunkOf(Gen.int)), Gen.int))
     )
   )
 }

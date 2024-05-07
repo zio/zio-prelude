@@ -5,18 +5,18 @@ import zio.test.Gen.oneOf
 import zio.test._
 import zio.test.laws._
 
-object EqualSpec extends DefaultRunnableSpec {
+object EqualSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("EqualSpec")(
       suite("laws")(
         {
           implicit val ThrowableEqual: Equal[Throwable] = Equal.ThrowableHash
-          testM("throwable")(checkAllLaws(EqualLaws)(Gen.throwable))
+          test("throwable")(checkAllLaws(EqualLaws)(Gen.throwable))
         },
-        testM("try")(
+        test("try")(
           checkAllLaws(EqualLaws)(
-            oneOf(Gen.throwable.map(scala.util.Failure(_)), Gen.anyInt.map(scala.util.Success(_)))
+            oneOf(Gen.throwable.map(scala.util.Failure(_)), Gen.int.map(scala.util.Success(_)))
           )
         )
       ),

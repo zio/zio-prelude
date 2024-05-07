@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,15 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
 
   /** Removes the `elem` from this `NonEmptySet`. Alias for `-`. */
   def remove(elem: A): Set[A] = set - elem
+
+  /**
+   * removes the elem from  `NonEmptySet`, returning Some(NonEmptySet) if there's anything
+   * left, otherwise None
+   */
+  def removeNonEmpty(elem: A): Option[NonEmptySet[A]] = {
+    val newSet = set - elem
+    if (newSet.nonEmpty) Some(new NonEmptySet(set)) else None
+  }
 
   /**
    * Returns the tail of this `NonEmptySet` if it exists or `None` otherwise.

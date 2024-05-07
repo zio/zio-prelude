@@ -1,14 +1,15 @@
 package zio.prelude
 package scalaparallelcollections
 
-import com.github.ghik.silencer.silent
 import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-@silent("Unused import")
-object HashJvmSpec extends DefaultRunnableSpec {
+import scala.annotation.nowarn
+
+@nowarn("msg=Unused import")
+object HashJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters
@@ -21,17 +22,17 @@ object HashJvmSpec extends DefaultRunnableSpec {
   }
   import ParallelCollectionCompatibility._
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("HashJvmSpec")(
       suite("laws")(
-        testM("parMap")(checkAllLaws(HashLaws)(Gen.mapOf(Gen.anyInt, Gen.anyInt).map(_.par))),
-        testM("parSeq")(checkAllLaws(HashLaws)(Gen.listOf(Gen.anyInt).map(_.par))),
-        testM("parSet")(checkAllLaws(HashLaws)(Gen.setOf(Gen.anyInt).map(_.par)))
+        test("parMap")(checkAllLaws(HashLaws)(Gen.mapOf(Gen.int, Gen.int).map(_.par))),
+        test("parSeq")(checkAllLaws(HashLaws)(Gen.listOf(Gen.int).map(_.par))),
+        test("parSet")(checkAllLaws(HashLaws)(Gen.setOf(Gen.int).map(_.par)))
       ),
       suite("ScalaHashCode consistency")(
-        testM("parMap")(scalaHashCodeConsistency(Gen.mapOf(Gen.anyInt, Gen.anyInt).map(_.par))),
-        testM("parSeq")(scalaHashCodeConsistency(Gen.listOf(Gen.anyInt).map(_.par))),
-        testM("parSet")(scalaHashCodeConsistency(Gen.setOf(Gen.anyInt).map(_.par)))
+        test("parMap")(scalaHashCodeConsistency(Gen.mapOf(Gen.int, Gen.int).map(_.par))),
+        test("parSeq")(scalaHashCodeConsistency(Gen.listOf(Gen.int).map(_.par))),
+        test("parSet")(scalaHashCodeConsistency(Gen.setOf(Gen.int).map(_.par)))
       )
     )
 }

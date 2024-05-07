@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import zio.prelude.These._
  * information regarding all errors while still potentially returning a
  * successful computation.
  */
-sealed trait These[+A, +B] { self =>
+sealed trait These[+A, +B] extends Product with Serializable { self =>
 
   /**
    * A symbolic alias for `zipParRight`.
@@ -138,7 +138,7 @@ sealed trait These[+A, +B] { self =>
     }
 
   /**
-   * Folds each of the possibile cases into a summary value.
+   * Folds each of the possible cases into a summary value.
    */
   final def fold[C](left: A => C, right: B => C)(both: (A, B) => C): C =
     self match {
@@ -148,12 +148,12 @@ sealed trait These[+A, +B] { self =>
     }
 
   /**
-   * Transforms the successful result of this compuation with the specified
+   * Transforms the successful result of this computation with the specified
    * effectual function, leaving any error value unchanged.
    */
   final def forEach[F[+_]: IdentityBoth: Covariant, C](f: B => F[C]): F[These[A, C]] =
     self match {
-      case Left(a)    => left(a).succeed
+      case Left(a)    => left(a).succeed[F]
       case Right(b)   => f(b).map(right)
       case Both(a, b) => f(b).map(c => both(a, c))
     }
@@ -475,7 +475,7 @@ object These {
     }
 
   /**
-   * Constucts a `Both` with an `A` value and a `B` value.
+   * Constructs a `Both` with an `A` value and a `B` value.
    */
   def both[A, B](a: A, b: B): These[A, B] =
     Both(a, b)

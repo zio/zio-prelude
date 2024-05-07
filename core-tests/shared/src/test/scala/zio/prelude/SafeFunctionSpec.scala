@@ -3,7 +3,7 @@ package zio.prelude
 import zio.prelude.laws._
 import zio.test._
 
-object SafeFunctionSpec extends DefaultRunnableSpec {
+object SafeFunctionSpec extends ZIOBaseSpec {
 
   val string: String = "The quick brown fox"
 
@@ -16,7 +16,7 @@ object SafeFunctionSpec extends DefaultRunnableSpec {
   def increment(n: Int): Int =
     n + 1
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("SafeFunctionSpec")(
       test("andThen") {
         val wordCount = SafeFunction(words) andThen SafeFunction(count)

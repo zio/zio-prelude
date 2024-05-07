@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ object AssociativeFlatten {
     new IdentityFlatten[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def any: Exit[E, Any] = Exit.unit
 
-      def flatten[A](ffa: Exit[E, Exit[E, A]]): Exit[E, A] = ffa.flatten
+      def flatten[A](ffa: Exit[E, Exit[E, A]]): Exit[E, A] = ffa.flattenExit
     }
 
   /**
@@ -190,16 +190,6 @@ object AssociativeFlatten {
       def any: ZIO[R, E, Any] = ZIO.unit
 
       def flatten[A](ffa: ZIO[R, E, ZIO[R, E, A]]): ZIO[R, E, A] = ffa.flatten
-    }
-
-  /**
-   * The `AssociativeFlatten` and `IdentityFlatten` instance for `ZManaged`.
-   */
-  implicit def ZManagedIdentityFlatten[R, E]: IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new IdentityFlatten[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def any: ZManaged[R, E, Any] = ZManaged.unit
-
-      def flatten[A](ffa: ZManaged[R, E, ZManaged[R, E, A]]): ZManaged[R, E, A] = ffa.flatten
     }
 
   /**

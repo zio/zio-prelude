@@ -5,12 +5,12 @@ import zio.prelude.experimental.laws._
 import zio.test._
 import zio.test.laws._
 
-object ExcludedMiddleSpec extends DefaultRunnableSpec {
+object ExcludedMiddleSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("ExcludedMiddleSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(ExcludedMiddleLaws)(Gen.boolean))
+        test("boolean")(checkAllLaws(ExcludedMiddleLaws)(Gen.boolean))
       )
     )
 }

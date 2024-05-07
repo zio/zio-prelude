@@ -1,12 +1,12 @@
 package zio.prelude
 
-import com.github.ghik.silencer.silent
 import zio.prelude.Assertion.Regex
 
+import scala.annotation.nowarn
 import scala.reflect.macros.whitebox
 
 // Wrongly emits warnings on Scala 2.12.x https://github.com/scala/bug/issues/11918
-@silent("pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
+@nowarn("msg=pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
 trait Liftables {
   val c: whitebox.Context
 
@@ -28,8 +28,7 @@ trait Liftables {
       case Assertion.Regex.Whitespace(reversed)        => q"$AssertionPrefix.Regex.Whitespace($reversed)"
       case Assertion.Regex.Digit(reversed)             => q"$AssertionPrefix.Regex.Digit($reversed)"
       case Assertion.Regex.Literal(char)               => q"$AssertionPrefix.Regex.Literal($char)"
-      case Assertion.Regex.CharacterSet(set, reversed) =>
-        q"$AssertionPrefix.Regex.CharacterSet(Set(..$set), $reversed)"
+      case Assertion.Regex.CharacterSet(set, reversed) => q"$AssertionPrefix.Regex.CharacterSet(Set(..$set), $reversed)"
       case Assertion.Regex.Range(start, end, reversed) => q"$AssertionPrefix.Regex.Range($start, $end, $reversed)"
       case Assertion.Regex.Start                       => q"$AssertionPrefix.Regex.Start"
       case Assertion.Regex.Repeat(regex, min, max)     => q"$AssertionPrefix.Regex.Repeat($regex, $min, $max)"
@@ -133,14 +132,14 @@ trait Liftables {
       }
   }
 
-  implicit def scalaRegexUnliftable[A: c.WeakTypeTag]: Unliftable[scala.util.matching.Regex] =
+  implicit def scalaRegexUnliftable[A]: Unliftable[scala.util.matching.Regex] =
     Unliftable[scala.util.matching.Regex] {
       case q"scala.Predef.augmentString(${string: String}).r"      => string.r
       case q"scala.this.Predef.augmentString(${string: String}).r" => string.r
     }
 
-  @silent("Implicit resolves to enclosing method")
-  implicit def assertionUnliftable[A: c.WeakTypeTag]: Unliftable[Assertion[A]] =
+  @nowarn("msg=Implicit resolves to enclosing method")
+  implicit def assertionUnliftable[A]: Unliftable[Assertion[A]] =
     Unliftable[Assertion[A]] {
 
       case q"${A(_)}.anything" =>
@@ -160,6 +159,9 @@ trait Liftables {
 
       case q"${A(_)}.endsWith(${value: String})" =>
         Assertion.endsWith(value).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.endsWithIgnoreCase(${value: String})" =>
+        Assertion.endsWithIgnoreCase(value).asInstanceOf[Assertion[A]]
 
       case q"${A(_)}.equalTo[$_](${LiteralUnlift(value)})" =>
         Assertion.equalTo(value.asInstanceOf[A])
@@ -202,6 +204,9 @@ trait Liftables {
 
       case q"${A(_)}.startsWith(${value: String})" =>
         Assertion.startsWith(value).asInstanceOf[Assertion[A]]
+
+      case q"${A(_)}.startsWithIgnoreCase(${value: String})" =>
+        Assertion.startsWithIgnoreCase(value).asInstanceOf[Assertion[A]]
 
       case q"!${assertion: Assertion[A]}" =>
         Assertion.Not(assertion)
@@ -266,14 +271,14 @@ trait Liftables {
   }
 
   /**
-   * This Ordering instance exists for compatibility between 2.11, 2.12 and 2.13.
+   * This Ordering instance exists for compatibility between 2.12 and 2.13.
    */
   object DoubleOrdering extends Ordering[Double] {
     def compare(x: Double, y: Double): Int = java.lang.Double.compare(x, y)
   }
 
   /**
-   * This Ordering instance exists for compatibility between 2.11, 2.12 and 2.13.
+   * This Ordering instance exists for compatibility between 2.12 and 2.13.
    */
   object FloatOrdering extends Ordering[Float] {
     def compare(x: Float, y: Float): Int = java.lang.Float.compare(x, y)

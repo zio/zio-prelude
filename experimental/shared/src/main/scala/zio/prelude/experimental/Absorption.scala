@@ -17,14 +17,8 @@ object Absorption {
    */
   def apply[A](implicit absorption: Absorption[A]): Absorption[A] = absorption
 
-  implicit lazy val BoolInstance: DistributiveAbsorption[Boolean]
-    with ExcludedMiddle[Boolean]
-    with Involution[Boolean]
-    with Noncontradiction[Boolean] =
-    new DistributiveAbsorption[Boolean]
-      with ExcludedMiddle[Boolean]
-      with Involution[Boolean]
-      with Noncontradiction[Boolean] {
+  implicit lazy val BoolInstance: DistributiveAbsorption[Boolean] with Involution[Boolean] =
+    new DistributiveAbsorption[Boolean] with Involution[Boolean] {
       override def complement(a: => Boolean): Boolean         = !a
       override val bottom: Boolean                            = false
       override val top: Boolean                               = true

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package zio.prelude
 
-import com.github.ghik.silencer.silent
-
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, nowarn}
 
 /**
  * A binary operator that combines two values of types `F[A]` and `F[B]` to
@@ -34,7 +32,7 @@ trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
   def any: F[Any]
 }
 
-@silent("Unused import")
+@nowarn("msg=Unused import")
 object IdentityBoth {
   import zio._ // for zio.EitherCompat
 
@@ -47,7 +45,7 @@ object IdentityBoth {
   /**
    * The `IdentityBoth` instance for `Const`.
    */
-  implicit def ConstIdentityeBoth[A: Identity]: IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
+  implicit def ConstIdentityBoth[A: Identity]: IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
     new IdentityBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] {
       val any: Const[A, Any]                                                   = Const(Identity[A].identity)
       def both[B, C](fb: => Const[A, B], fc: => Const[A, C]): Const[A, (B, C)] =

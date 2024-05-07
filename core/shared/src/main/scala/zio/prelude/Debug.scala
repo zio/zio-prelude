@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package zio.prelude
 
-import zio.duration.{Duration => ZIODuration}
-import zio.{Chunk, NonEmptyChunk}
+import zio.{Chunk, Duration => ZIODuration, NonEmptyChunk}
 
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
@@ -126,7 +125,7 @@ object Debug extends DebugVersionSpecific {
 
   /**
    * A `Repr` is a structured representation of a value of that can be rendered
-   * into various human readbale formats.
+   * into various human readable formats.
    */
   sealed trait Repr { self =>
 
@@ -252,7 +251,7 @@ object Debug extends DebugVersionSpecific {
     debug
 
   /**
-   * Constructurs a `Debug` instance for a pair of a key and a value given
+   * Constructs a `Debug` instance for a pair of a key and a value given
    * `Debug` instances for the key and value types.
    */
   def keyValueDebug[A: Debug, B: Debug]: Debug[(A, B)] =
@@ -411,7 +410,7 @@ object Debug extends DebugVersionSpecific {
     map => Repr.VConstructor(List("scala"), "Map", map.map(_.debug(keyValueDebug)).toList)
 
   /**
-   * Derivves a `Debug[NonEmptyChunk[A]]` given a `Debug[A]`.
+   * Derives a `Debug[NonEmptyChunk[A]]` given a `Debug[A]`.
    */
   implicit def NonEmptyChunkDebug[A: Debug]: Debug[NonEmptyChunk[A]] =
     nonEmptyChunk => Repr.VConstructor(List("zio"), "NonEmptyChunk", nonEmptyChunk.map(_.debug).toList)
@@ -424,7 +423,7 @@ object Debug extends DebugVersionSpecific {
     n => n
 
   /**
-   * Dervies a `Debug[Option[A]]` given a `Debug[A]`.
+   * Derives a `Debug[Option[A]]` given a `Debug[A]`.
    */
   implicit def OptionDebug[A: Debug]: Debug[Option[A]] = {
     case None    => Repr.Object(List("scala"), "None")
@@ -468,7 +467,7 @@ object Debug extends DebugVersionSpecific {
         case TimeUnit.MICROSECONDS => "MICROSECONDS"
         case TimeUnit.MILLISECONDS => "MILLISECONDS"
         case TimeUnit.SECONDS      => "SECONDS"
-        case TimeUnit.MINUTES      => "SECONDS"
+        case TimeUnit.MINUTES      => "MINUTES"
         case TimeUnit.HOURS        => "HOURS"
         case TimeUnit.DAYS         => "DAYS"
       }

@@ -1,12 +1,12 @@
 package zio.prelude
 
 import zio.ZIO
-import zio.prelude.Common.anyFiniteDurationScala
+import zio.prelude.Common.finiteDurationScala
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-object OrdSpec extends DefaultRunnableSpec {
+object OrdSpec extends ZIOBaseSpec {
 
   def sign(n: Int): Int =
     if (n > 0) 1 else if (n < 0) -1 else 0
@@ -40,43 +40,43 @@ object OrdSpec extends DefaultRunnableSpec {
       }
     }
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("OrdSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(OrdLaws)(Gen.boolean)),
-        testM("byte")(checkAllLaws(OrdLaws)(Gen.anyByte)),
-        testM("char")(checkAllLaws(OrdLaws)(Gen.anyChar)),
-        testM("chunk")(checkAllLaws(OrdLaws)(Gen.chunkOf(Gen.anyInt))),
-        testM("double")(checkAllLaws(OrdLaws)(Gen.anyDouble)),
-        testM("duration Scala")(checkAllLaws(OrdLaws)(anyFiniteDurationScala)),
-        testM("duration ZIO")(checkAllLaws(OrdLaws)(Gen.anyFiniteDuration)),
-        testM("either")(checkAllLaws(OrdLaws)(Gen.either(Gen.anyInt, Gen.anyInt))),
-        testM("float")(checkAllLaws(OrdLaws)(Gen.anyFloat)),
-        testM("int")(checkAllLaws(OrdLaws)(Gen.anyInt)),
-        testM("list")(checkAllLaws(OrdLaws)(Gen.listOf(Gen.anyInt))),
-        testM("long")(checkAllLaws(OrdLaws)(Gen.anyLong)),
-        testM("option")(checkAllLaws(OrdLaws)(Gen.option(Gen.anyInt))),
-        testM("string")(checkAllLaws(OrdLaws)(Gen.anyString)),
-        testM("tuple2")(checkAllLaws(OrdLaws)(Gen.anyInt.zip(Gen.anyInt))),
-        testM("tuple3")(checkAllLaws(OrdLaws)(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("unit")(checkAllLaws(OrdLaws)(Gen.unit)),
-        testM("vector")(checkAllLaws(OrdLaws)(Gen.vectorOf(Gen.anyInt)))
+        test("boolean")(checkAllLaws(OrdLaws)(Gen.boolean)),
+        test("byte")(checkAllLaws(OrdLaws)(Gen.byte)),
+        test("char")(checkAllLaws(OrdLaws)(Gen.char)),
+        test("chunk")(checkAllLaws(OrdLaws)(Gen.chunkOf(Gen.int))),
+        test("double")(checkAllLaws(OrdLaws)(Gen.double)),
+        test("duration Scala")(checkAllLaws(OrdLaws)(finiteDurationScala)),
+        test("duration ZIO")(checkAllLaws(OrdLaws)(Gen.finiteDuration)),
+        test("either")(checkAllLaws(OrdLaws)(Gen.either(Gen.int, Gen.int))),
+        test("float")(checkAllLaws(OrdLaws)(Gen.float)),
+        test("int")(checkAllLaws(OrdLaws)(Gen.int)),
+        test("list")(checkAllLaws(OrdLaws)(Gen.listOf(Gen.int))),
+        test("long")(checkAllLaws(OrdLaws)(Gen.long)),
+        test("option")(checkAllLaws(OrdLaws)(Gen.option(Gen.int))),
+        test("string")(checkAllLaws(OrdLaws)(Gen.string)),
+        test("tuple2")(checkAllLaws(OrdLaws)(Gen.int.zip(Gen.int))),
+        test("tuple3")(checkAllLaws(OrdLaws)(Gen.int.zip(Gen.int).zip(Gen.int))),
+        test("unit")(checkAllLaws(OrdLaws)(Gen.unit)),
+        test("vector")(checkAllLaws(OrdLaws)(Gen.vectorOf(Gen.int)))
       ),
       suite("ScalaOrdering consistency")(
-        testM("unit")(scalaOrderingConsistency(Gen.unit)),
-        testM("boolean")(scalaOrderingConsistency(Gen.boolean)),
-        testM("byte")(scalaOrderingConsistency(Gen.anyByte)),
-        testM("char")(scalaOrderingConsistency(Gen.anyChar)),
-        testM("duration Scala")(scalaOrderingConsistency(anyFiniteDurationScala)),
-        testM("duration ZIO")(scalaOrderingConsistency(Gen.anyFiniteDuration)),
-        testM("string")(scalaOrderingConsistency(Gen.anyString)),
-        testM("int")(scalaOrderingConsistency(Gen.anyInt)),
-        testM("long")(scalaOrderingConsistency(Gen.anyLong)),
-        testM("option")(scalaOrderingConsistency(Gen.option(Gen.anyInt))),
-        testM("tuple2")(scalaOrderingConsistency(Gen.anyInt.zip(Gen.anyInt))),
-        testM("tuple3")(scalaOrderingConsistency(Gen.anyInt.zip(Gen.anyInt).zip(Gen.anyInt))),
-        testM("list")(scalaOrderingConsistency(Gen.listOf(Gen.anyInt))),
-        testM("vector")(scalaOrderingConsistency(Gen.vectorOf(Gen.anyInt)))
+        test("unit")(scalaOrderingConsistency(Gen.unit)),
+        test("boolean")(scalaOrderingConsistency(Gen.boolean)),
+        test("byte")(scalaOrderingConsistency(Gen.byte)),
+        test("char")(scalaOrderingConsistency(Gen.char)),
+        test("duration Scala")(scalaOrderingConsistency(finiteDurationScala)),
+        test("duration ZIO")(scalaOrderingConsistency(Gen.finiteDuration)),
+        test("string")(scalaOrderingConsistency(Gen.string)),
+        test("int")(scalaOrderingConsistency(Gen.int)),
+        test("long")(scalaOrderingConsistency(Gen.long)),
+        test("option")(scalaOrderingConsistency(Gen.option(Gen.int))),
+        test("tuple2")(scalaOrderingConsistency(Gen.int.zip(Gen.int))),
+        test("tuple3")(scalaOrderingConsistency(Gen.int.zip(Gen.int).zip(Gen.int))),
+        test("list")(scalaOrderingConsistency(Gen.listOf(Gen.int))),
+        test("vector")(scalaOrderingConsistency(Gen.vectorOf(Gen.int)))
       )
     )
 }

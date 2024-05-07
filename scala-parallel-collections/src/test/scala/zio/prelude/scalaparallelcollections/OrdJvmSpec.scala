@@ -1,13 +1,14 @@
 package zio.prelude
 package scalaparallelcollections
 
-import com.github.ghik.silencer.silent
 import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
-@silent("Unused import")
-object OrdJvmSpec extends DefaultRunnableSpec {
+import scala.annotation.nowarn
+
+@nowarn("msg=Unused import")
+object OrdJvmSpec extends ZIOBaseSpec {
   private val ParallelCollectionCompatibility = {
     object Compat {
       object CollectionConverters
@@ -20,10 +21,10 @@ object OrdJvmSpec extends DefaultRunnableSpec {
   }
   import ParallelCollectionCompatibility._
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("OrdJvmSpec")(
       suite("laws")(
-        testM("parSeq")(checkAllLaws(OrdLaws)(Gen.listOf(Gen.anyInt).map(_.par)))
+        test("parSeq")(checkAllLaws(OrdLaws)(Gen.listOf(Gen.int).map(_.par)))
       )
     )
 }

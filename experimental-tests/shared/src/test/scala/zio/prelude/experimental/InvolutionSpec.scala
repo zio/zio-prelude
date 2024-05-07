@@ -5,12 +5,12 @@ import zio.prelude.experimental.laws._
 import zio.test._
 import zio.test.laws._
 
-object InvolutionSpec extends DefaultRunnableSpec {
+object InvolutionSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("InvolutionSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(InvolutionLaws)(Gen.boolean))
+        test("boolean")(checkAllLaws(InvolutionLaws)(Gen.boolean))
       )
     )
 }

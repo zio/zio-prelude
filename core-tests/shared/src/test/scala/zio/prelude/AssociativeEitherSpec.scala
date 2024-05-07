@@ -4,12 +4,12 @@ import zio.prelude.laws.AssociativeEitherLaws
 import zio.test._
 import zio.test.laws._
 
-object AssociativeEitherSpec extends DefaultRunnableSpec {
+object AssociativeEitherSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("AssociativeEitherSpec")(
       suite("laws")(
-        testM("either")(checkAllLaws(AssociativeEitherLaws)(GenF.either(Gen.anyInt), Gen.anyInt))
+        test("either")(checkAllLaws(AssociativeEitherLaws)(GenF.either(Gen.int), Gen.int))
       )
     )
 }

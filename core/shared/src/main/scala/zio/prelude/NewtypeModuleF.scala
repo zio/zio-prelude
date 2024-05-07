@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,8 +207,8 @@ private[prelude] sealed trait NewtypeModuleF {
 private[prelude] object NewtypeModuleF {
   val instance: NewtypeModuleF =
     new NewtypeModuleF {
-      def newtypeF: NewtypeF =
-        new NewtypeF {
+      def newtypeF: this.NewtypeF =
+        new this.NewtypeF {
           type Type[+A] = A
 
           def wrapAll[F[_], A](value: F[A]): F[A] = value
@@ -216,8 +216,8 @@ private[prelude] object NewtypeModuleF {
           def unwrapAll[F[_], A](value: F[A]): F[A] = value
         }
 
-      def subtypeF: SubtypeF =
-        new SubtypeF {
+      def subtypeF: this.SubtypeF =
+        new this.SubtypeF {
           type Type[+A] = A
 
           def wrapAll[F[_], A](value: F[A]): F[A] = value

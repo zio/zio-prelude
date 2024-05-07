@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package zio.prelude
 
-import zio.NonEmptyChunk
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{Max, Min, Prod, Sum}
+import zio.{NonEmptyChunk, ZIO}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
@@ -42,6 +42,18 @@ sealed trait NonEmptyList[+A] { self =>
    */
   final def ++[A1 >: A](that: NonEmptyList[A1]): NonEmptyList[A1] =
     foldRight(that)(cons)
+
+  /**
+   * Concatenates this `NonEmptyList` with the specified `Iterable`.
+   */
+  final def ++[A1 >: A](that: Iterable[A1]): NonEmptyList[A1] =
+    NonEmptyList.fromIterableOption(that).fold[NonEmptyList[A1]](self)(self ++ _)
+
+  /**
+   * Prepends the specified value to this `NonEmptyList`.
+   */
+  final def ::[A1 >: A](a: A1): NonEmptyList[A1] =
+    cons(a, self)
 
   /**
    * Returns whether this `NonEmptyList` contains the specified element.
@@ -234,6 +246,22 @@ sealed trait NonEmptyList[+A] { self =>
     reduceMapRight(a => single(f(a)))((a, bs) => cons(f(a), bs))
 
   /**
+   * Effectfully maps the elements of this `NonEmptyList`.
+   */
+  final def mapZIO[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
+    ZIO
+      .foreach[R, E, A, B, Iterable](self)(f)
+      .map(iterable => NonEmptyList.fromIterable(iterable.head, iterable.tail))
+
+  /**
+   * Effectfully maps the elements of this `NonEmptyList` in parallel.
+   */
+  final def mapZIOPar[R, E, B](f: A => ZIO[R, E, B]): ZIO[R, E, NonEmptyList[B]] =
+    ZIO
+      .foreachPar[R, E, A, B, Iterable](self)(f)
+      .map(iterable => NonEmptyList.fromIterable(iterable.head, iterable.tail))
+
+  /**
    * Returns the maximum element in this `NonEmptyList`.
    */
   final def max(implicit A: Ord[A]): A =
@@ -407,8 +435,11 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Converts this `NonEmptyList` to the `::` case of a `List`.
    */
-  final def toCons[A1 >: A]: ::[A1] =
-    reduceMapRight[::[A1]](::(_, Nil))(::(_, _))
+  final def toCons[A1 >: A]: ::[A1] = {
+    import scala.collection.immutable.{:: => cons}
+
+    reduceMapRight[cons[A1]](cons(_, Nil))(cons(_, _))
+  }
 
   /**
    * Renders this `NonEmptyList` as a `String`.
@@ -539,6 +570,8 @@ object NonEmptyList extends LowPriorityNonEmptyListImplicits {
     new NonEmptyForEach[NonEmptyList] {
       def forEach1[F[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => F[B]): F[NonEmptyList[B]] =
         fa.forEach(f)
+      override def forEach1_[F[+_]: AssociativeBoth: Covariant, A](fa: NonEmptyList[A])(f: A => F[Any]): F[Unit]   =
+        reduceMapLeft(fa)(f(_))((fas, a) => fas *> f(a)).unit
     }
 
   /**

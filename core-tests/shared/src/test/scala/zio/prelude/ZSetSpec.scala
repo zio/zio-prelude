@@ -1,81 +1,82 @@
 package zio.prelude
 
-import zio.Chunk
 import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZSet._
 import zio.prelude.coherent.{CovariantDeriveEqual, DeriveEqualForEach}
 import zio.prelude.laws._
-import zio.prelude.newtypes.{Natural, _}
-import zio.random.Random
+import zio.prelude.newtypes._
 import zio.test.Assertion.{equalTo => _, _}
 import zio.test._
 import zio.test.laws._
+import zio.{Chunk, Trace}
 
-object ZSetSpec extends DefaultRunnableSpec {
+object ZSetSpec extends ZIOBaseSpec {
 
-  def genFZSet[R <: Random with Sized, B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] =
+  def genFZSet[R <: Sized, B](b: Gen[R, B]): GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZSet[x, B] })#lambda] {
-      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, ZSet[A, B]] =
+      def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: Trace): Gen[R1, ZSet[A, B]] =
         genZSet(a, b)
     }
 
-  def genZSet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
+  def genZSet[R <: Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZSet[A, B]] =
     Gen.mapOf(a, b).map(ZSet.fromMap)
 
-  lazy val smallInts: Gen[Random with Sized, Chunk[Int]] =
+  lazy val smallInts: Gen[Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
-  def natural(min: Natural, max: Natural): Gen[Random, Natural] =
+  def natural(min: Natural, max: Natural)(implicit trace: Trace): Gen[Any, Natural] =
     Gen.int(min, max).map(_.asInstanceOf[Natural])
 
-  def naturals: Gen[Random with Sized, Natural] =
+  def naturals: Gen[Sized, Natural] =
     Gen.small(n => natural(0.asInstanceOf[Natural], n.asInstanceOf[Natural]))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
     Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("ZSetSpec")(
       suite("laws")(
-        testM("combine commutative")(
-          checkAllLaws(CommutativeLaws)(genZSet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
+        test("combine commutative")(
+          checkAllLaws(CommutativeLaws)(genZSet(Gen.int, Gen.int).map(_.transform(Sum(_))))
         ),
-        testM("covariant")(
+        test("covariant")(
           checkAllLaws[
             CovariantDeriveEqual,
             Equal,
             TestConfig,
-            Random with Sized with TestConfig,
+            Sized with TestConfig,
             ({ type lambda[+x] = ZSet[x, Int] })#lambda,
             Int
-          ](CovariantLaws)(genFZSet(Gen.anyInt), Gen.anyInt)(
+          ](CovariantLaws)(genFZSet(Gen.int), Gen.int)(
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZSet[x, Int] })#lambda](
               ZSetCovariant(IntSumCommutativeInverse),
               ZSetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
-            IntHashOrd
+            IntHashOrd,
+            implicitly[Trace]
           )
         ),
-        testM("foreach")(
+        test("foreach")(
           checkAllLaws[
             DeriveEqualForEach,
             Equal,
             TestConfig,
-            Random with Sized with TestConfig,
+            Sized with TestConfig,
             MultiSet,
             Int
-          ](ForEachLaws)(genFZSet(naturals), Gen.anyInt)(
+          ](ForEachLaws)(genFZSet(naturals), Gen.int)(
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             DeriveEqualForEach.derive[MultiSet](
               ZSetDeriveEqual(IntHashOrd, Identity[Sum[Natural]]),
               MultiSetForEach
             ),
-            IntHashOrd
+            IntHashOrd,
+            implicitly[Trace]
           )
         ),
-        testM("hash")(checkAllLaws(HashLaws)(genZSet(Gen.anyInt, Gen.anyInt)))
+        test("hash")(checkAllLaws(HashLaws)(genZSet(Gen.int, Gen.int)))
       ),
       suite("methods")(
         test("zipWith") {
@@ -85,29 +86,29 @@ object ZSetSpec extends DefaultRunnableSpec {
         }
       ),
       suite("set")(
-        testM("diff") {
-          check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
+        test("diff") {
+          check(Gen.setOf(Gen.int), Gen.setOf(Gen.int)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) &~ ZSet.fromSet(r)).toSet
             val expected = l &~ r
             assert(actual)(equalTo(expected))
           }
         },
-        testM("flatMap") {
-          check(Gen.setOf(Gen.anyInt), Gen.function(Gen.setOf(Gen.anyInt))) { (as, f) =>
+        test("flatMap") {
+          check(Gen.setOf(Gen.int), Gen.function(Gen.setOf(Gen.int))) { (as, f) =>
             val actual   = ZSet.fromSet(as).flatMap(a => ZSet.fromSet(f(a))).toSet
             val expected = as.flatMap(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("intersect") {
-          check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
+        test("intersect") {
+          check(Gen.setOf(Gen.int), Gen.setOf(Gen.int)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) & ZSet.fromSet(r)).toSet
             val expected = l & r
             assert(actual)(equalTo(expected))
           }
         },
-        testM("union") {
-          check(Gen.setOf(Gen.anyInt), Gen.setOf(Gen.anyInt)) { (l, r) =>
+        test("union") {
+          check(Gen.setOf(Gen.int), Gen.setOf(Gen.int)) { (l, r) =>
             val actual   = (ZSet.fromSet(l) | ZSet.fromSet(r)).toSet
             val expected = l | r
             assert(actual)(equalTo(expected))

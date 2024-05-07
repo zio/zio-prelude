@@ -1,7 +1,7 @@
 package zio.prelude
 
 import zio.prelude.ZValidation._
-import zio.{Chunk, IO, NonEmptyChunk, ZIO}
+import zio.{Cause, Chunk, IO, NonEmptyChunk, ZIO, Zippable}
 
 import scala.util.Try
 
@@ -31,7 +31,9 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * A symbolic alias for `zipPar`.
    */
-  final def <&>[W1 >: W, E1 >: E, B](that: ZValidation[W1, E1, B]): ZValidation[W1, E1, (A, B)] =
+  final def <&>[W1 >: W, E1 >: E, B](that: ZValidation[W1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZValidation[W1, E1, zippable.Out] =
     zipPar(that)
 
   /**
@@ -225,10 +227,27 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
+   * Applies the provided validation function to the successful value of this `ZValidation` without altering the result.
+   * This method can be used to execute side effects or additional validations that do not transform the primary value
+   * but may modify the log or error. If this `ZValidation` is a failure, it remains unchanged.
+   */
+  final def tap[W1 >: W, E1 >: E](f: A => ZValidation[W1, E1, Any]): ZValidation[W1, E1, A] =
+    self.flatMap(a => f(a).as(a))
+
+  /**
    * Transforms this `ZValidation` to an `Either`, discarding the log.
    */
   final def toEither: Either[NonEmptyChunk[E], A] =
     fold(Left(_), Right(_))
+
+  /**
+   * Transforms this `ZValidation` to an `Either`, aggregating errors using provided `Associative` instance, discarding the log.
+   */
+  final def toEitherAssociative[E1 >: E](implicit A: Associative[E1]): Either[E1, A] =
+    self match {
+      case Failure(_, errors) => Left(errors.reduceMap[E1](identity))
+      case Success(_, value)  => Right(value)
+    }
 
   /**
    * Transforms this `ZValidation` to an `Either`, discarding the order in which the errors occurred and discarding the log.
@@ -264,9 +283,33 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def toZIO: IO[E, A] =
     self.fold(
-      nec => ZIO.halt(nec.reduceMapLeft(zio.Cause.fail)((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
-      ZIO.succeedNow
+      nec => ZIO.failCause(nec.reduceMapLeft(e => zio.Cause.fail(e))((c, e) => zio.Cause.Both(c, zio.Cause.fail(e)))),
+      ZIO.succeed(_)
     )
+
+  /**
+   * Converts this `ZValidation` into a `ZIO` effect and exposes all parallel
+   * errors in a single call, discarding the log.
+   */
+  final def toZIOParallelErrors: IO[NonEmptyChunk[E], A] =
+    self.fold(es => ZIO.refailCause(Cause.fail(es)), ZIO.succeed(_))
+
+  /**
+   * Transforms this `ZValidation` to an `ZIO` effect, aggregating errors using provided `Associative` instance, discarding the log.
+   */
+  final def toZIOAssociative[E1 >: E](implicit A: Associative[E1]): IO[E1, A] =
+    self.fold(
+      nec => ZIO.fail(nec.reduceMap[E1](identity)),
+      ZIO.succeed(_)
+    )
+
+  /**
+   * Transforms the successful output of this `ZValidation` into a `Unit`, effectively discarding the original success value
+   * while preserving any accumulated warnings or errors. This can be useful when the outcome of the validation process is not
+   * needed, but the side effects (e.g., logging or error accumulation) are important.
+   */
+  final def unit: ZValidation[W, E, Unit] =
+    self.as(())
 
   /**
    * A variant of `zipPar` that keeps only the left success value, but returns
@@ -289,8 +332,10 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * tuple of their results. Returns either the combined result if both were
    * successes or otherwise returns a failure with all errors.
    */
-  final def zipPar[W1 >: W, E1 >: E, B](that: ZValidation[W1, E1, B]): ZValidation[W1, E1, (A, B)] =
-    zipWithPar(that)((_, _))
+  final def zipPar[W1 >: W, E1 >: E, B](that: ZValidation[W1, E1, B])(implicit
+    zippable: Zippable[A, B]
+  ): ZValidation[W1, E1, zippable.Out] =
+    zipWithPar(that)(zippable.zip(_, _))
 
   /**
    * Combines this `ZValidation` with the specified `ZValidation`, using the
@@ -341,7 +386,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * The `DeriveEqual` instance for `ZValidation`.
    */
-  implicit def ZValidationDeriveEqual[W, E: Equal]: DeriveEqual[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] =
+  implicit def ZValidationDeriveEqual[W, E]: DeriveEqual[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] =
     new DeriveEqual[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] {
       def derive[A: Equal]: Equal[ZValidation[W, E, A]] =
         ZValidationEqual
@@ -360,7 +405,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * The `DeriveEqual` instance for `ZValidation` with respect to its error type.
    */
-  implicit def ZValidationFailureDeriveEqual[W: Equal, A: Equal]
+  implicit def ZValidationFailureDeriveEqual[W, A: Equal]
     : DeriveEqual[({ type lambda[+e] = newtypes.Failure[ZValidation[W, e, A]] })#lambda] =
     new DeriveEqual[({ type lambda[+e] = newtypes.Failure[ZValidation[W, e, A]] })#lambda] {
       def derive[E: Equal]: Equal[newtypes.Failure[ZValidation[W, E, A]]] =
@@ -403,7 +448,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
    */
-  implicit def ZValidationPartialOrd[W, E: PartialOrd, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
+  implicit def ZValidationPartialOrd[W, E, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
     PartialOrd[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 
   /**
@@ -424,6 +469,14 @@ object ZValidation extends LowPriorityValidationImplicits {
    */
   def validateAll[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
     validations.flip
+
+  /**
+   * Combine a set of `ZValidation` values into a single `ZValidation` that
+   * either returns the values of all of them, if they all succeed, or else
+   * fails with all of their errors.
+   */
+  def validateAll[W, E, A](validations: Set[ZValidation[W, E, A]]): ZValidation[W, E, Set[A]] =
+    validateAll[Iterable, W, E, A](validations).map(_.toSet)
 
   /**
    * Constructs a `ZValidation` that fails with the specified error.
@@ -458,7 +511,7 @@ object ZValidation extends LowPriorityValidationImplicits {
     value.fold[Validation[Unit, A]](fail(()))(succeed)
 
   /**
-   * Construts a `Validation` from an `Option`, failing with the error
+   * Constructs a `Validation` from an `Option`, failing with the error
    * provided.
    */
   def fromOptionWith[E, A](error: => E)(value: Option[A]): Validation[E, A] =
@@ -1021,7 +1074,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2).map { case ((a0, a1), a2) => f(a0, a1, a2) }
+    (a0 <&> a1 <&> a2).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1035,7 +1088,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3).map { case (((a0, a1), a2), a3) => f(a0, a1, a2, a3) }
+    (a0 <&> a1 <&> a2 <&> a3).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1050,7 +1103,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4).map { case ((((a0, a1), a2), a3), a4) => f(a0, a1, a2, a3, a4) }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1066,7 +1119,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5).map { case (((((a0, a1), a2), a3), a4), a5) => f(a0, a1, a2, a3, a4, a5) }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1083,9 +1136,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6).map { case ((((((a0, a1), a2), a3), a4), a5), a6) =>
-      f(a0, a1, a2, a3, a4, a5, a6)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1103,9 +1154,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7).map { case (((((((a0, a1), a2), a3), a4), a5), a6), a7) =>
-      f(a0, a1, a2, a3, a4, a5, a6, a7)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1124,9 +1173,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8).map {
-      case ((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8) => f(a0, a1, a2, a3, a4, a5, a6, a7, a8)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1146,9 +1193,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9).map {
-      case (((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9) => f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1169,10 +1214,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10).map {
-      case ((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1194,10 +1236,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11).map {
-      case (((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1220,10 +1259,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12).map {
-      case ((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1247,10 +1283,7 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13).map {
-      case (((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13).map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1275,10 +1308,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14).map {
-      case ((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14)
+      .map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1304,10 +1335,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15).map {
-      case (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15)
+      .map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1334,10 +1363,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16).map {
-      case ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16)
+      .map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1365,13 +1392,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17).map {
-      case (
-            ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-            a17
-          ) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17)
+      .map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1400,16 +1422,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18).map {
-      case (
-            (
-              ((((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15), a16),
-              a17
-            ),
-            a18
-          ) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18)
+      .map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1439,22 +1453,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19).map {
-      case (
-            (
-              (
-                (
-                  (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
-                  a16
-                ),
-                a17
-              ),
-              a18
-            ),
-            a19
-          ) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19)
+      .map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1510,25 +1510,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20).map {
-      case (
-            (
-              (
-                (
-                  (
-                    (((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14), a15),
-                    a16
-                  ),
-                  a17
-                ),
-                a18
-              ),
-              a19
-            ),
-            a20
-          ) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20)
+      .map(f.tupled)
 
   /**
    * Combines the results of the specified `Validation` values using the
@@ -1586,31 +1569,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   )(
     f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, A21) => B
   ): ZValidation[W, E, B] =
-    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20 <&> a21).map {
-      case (
-            (
-              (
-                (
-                  (
-                    (
-                      (
-                        ((((((((((((((a0, a1), a2), a3), a4), a5), a6), a7), a8), a9), a10), a11), a12), a13), a14),
-                        a15
-                      ),
-                      a16
-                    ),
-                    a17
-                  ),
-                  a18
-                ),
-                a19
-              ),
-              a20
-            ),
-            a21
-          ) =>
-        f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21)
-    }
+    (a0 <&> a1 <&> a2 <&> a3 <&> a4 <&> a5 <&> a6 <&> a7 <&> a8 <&> a9 <&> a10 <&> a11 <&> a12 <&> a13 <&> a14 <&> a15 <&> a16 <&> a17 <&> a18 <&> a19 <&> a20 <&> a21)
+      .map(f.tupled)
 }
 
 trait LowPriorityValidationImplicits {

@@ -62,4 +62,24 @@ object SmartTypes extends App {
   }
   type Email = Email.Type
   val email: Email = Email("test@test.com")
+
+  object Palindrome extends NewtypeCustom[String] {
+    protected def validate(value: String) =
+      PalindromeValidator.validate(value)
+
+    protected inline def validateInline(inline value: String) =
+      ${ PalindromeValidator.validateInlineImpl('value) }
+  }
+
+  Palindrome("racecar")
+
+
+  object NonEmptyString extends Subtype[String] {
+    override inline def assertion = !equalTo("")
+  }
+
+  type NonEmptyString = NonEmptyString.Type
+
+  NonEmptyString("toto")
+
 }

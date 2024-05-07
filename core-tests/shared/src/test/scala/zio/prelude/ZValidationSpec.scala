@@ -4,34 +4,32 @@ import zio.prelude.Equal._
 import zio.prelude.HashSpec.scalaHashCodeConsistency
 import zio.prelude.ZValidation._
 import zio.prelude.laws._
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
 
-object ZValidationSpec extends DefaultRunnableSpec {
+object ZValidationSpec extends ZIOBaseSpec {
 
-  val genValidation: Gen[Random with Sized, ZValidation[Int, Int, Int]] =
-    Gens.validation(Gen.anyInt, Gen.anyInt, Gen.anyInt)
+  val genValidation: Gen[Sized, ZValidation[Int, Int, Int]] =
+    Gens.validation(Gen.int, Gen.int, Gen.int)
 
-  val genFValidation: GenF[Random with Sized, ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
-    GenFs.validation(Gen.anyInt, Gen.anyInt)
+  val genFValidation: GenF[Sized, ({ type lambda[+x] = ZValidation[Int, Int, x] })#lambda] =
+    GenFs.validation(Gen.int, Gen.int)
 
-  val genFValidationFailure
-    : GenF[Random with Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
-    GenFs.validationFailure(Gen.anyInt, Gen.anyInt)
+  val genFValidationFailure: GenF[Sized, ({ type lambda[+x] = newtypes.Failure[ZValidation[Int, x, Int]] })#lambda] =
+    GenFs.validationFailure(Gen.int, Gen.int)
 
-  def spec: ZSpec[Environment, Failure] = suite("ZValidationSpec")(
+  def spec: Spec[Environment, Any] = suite("ZValidationSpec")(
     suite("laws")(
-      testM("associativeBoth")(checkAllLaws(AssociativeBothLaws)(genFValidation, Gen.anyInt)),
-      testM("commutativeBoth")(checkAllLaws(CommutativeBothLaws)(genFValidation, Gen.anyInt)),
-      testM("covariant")(checkAllLaws(CovariantLaws)(genFValidation, Gen.anyInt)),
-      testM("equal")(checkAllLaws(EqualLaws)(genValidation)),
-      testM("hash")(checkAllLaws(HashLaws)(genValidation)),
-      testM("identityBoth")(checkAllLaws(IdentityBothLaws)(genFValidation, Gen.anyInt)),
-      testM("partialOrd")(checkAllLaws(PartialOrdLaws)(genValidation))
+      test("associativeBoth")(checkAllLaws(AssociativeBothLaws)(genFValidation, Gen.int)),
+      test("commutativeBoth")(checkAllLaws(CommutativeBothLaws)(genFValidation, Gen.int)),
+      test("covariant")(checkAllLaws(CovariantLaws)(genFValidation, Gen.int)),
+      test("equal")(checkAllLaws(EqualLaws)(genValidation)),
+      test("hash")(checkAllLaws(HashLaws)(genValidation)),
+      test("identityBoth")(checkAllLaws(IdentityBothLaws)(genFValidation, Gen.int)),
+      test("partialOrd")(checkAllLaws(PartialOrdLaws)(genValidation))
     ),
     suite("ScalaHashCode consistency")(
-      testM("ZValidation")(scalaHashCodeConsistency(genValidation))
+      test("ZValidation")(scalaHashCodeConsistency(genValidation))
     ),
     suite("combinators")(
       suite("orElse")(

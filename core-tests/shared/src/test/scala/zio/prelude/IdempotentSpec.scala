@@ -2,17 +2,16 @@ package zio.prelude
 
 import zio.prelude.laws._
 import zio.prelude.newtypes._
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
 
 import scala.math.abs
 
-object IdempotentSpec extends DefaultRunnableSpec {
+object IdempotentSpec extends ZIOBaseSpec {
 
-  val anyMaxInt: Gen[Random, Max[Int]] = Gen.anyInt.map(Max(_))
+  val anyMaxInt: Gen[Any, Max[Int]] = Gen.int.map(Max(_))
 
-  val anyOrdering: Gen[Random, Ordering] = Gen.anyInt.map { n =>
+  val anyOrdering: Gen[Any, Ordering] = Gen.int.map { n =>
     abs(n) % 3 match {
       case 0 => Ordering.LessThan
       case 1 => Ordering.Equals
@@ -20,7 +19,7 @@ object IdempotentSpec extends DefaultRunnableSpec {
     }
   }
 
-  val anyPartialOrdering: Gen[Random, PartialOrdering] = Gen.anyInt.map { n =>
+  val anyPartialOrdering: Gen[Any, PartialOrdering] = Gen.int.map { n =>
     abs(n) % 4 match {
       case 0 => Ordering.LessThan
       case 1 => Ordering.Equals
@@ -32,23 +31,23 @@ object IdempotentSpec extends DefaultRunnableSpec {
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("IdempotentSpec")(
       suite("laws")(
-        testM("boolean conjuction")(checkAllLaws(IdempotentLaws)(Gen.boolean.map(And(_)))),
-        testM("boolean disjunction")(checkAllLaws(IdempotentLaws)(Gen.boolean.map(Or(_)))),
-        testM("double max")(checkAllLaws(IdempotentLaws)(Gen.anyDouble.map(Max(_)))),
-        testM("double min")(checkAllLaws(IdempotentLaws)(Gen.anyDouble.map(Min(_)))),
-        testM("float max")(checkAllLaws(IdempotentLaws)(Gen.anyFloat.map(Max(_)))),
-        testM("float min")(checkAllLaws(IdempotentLaws)(Gen.anyFloat.map(Min(_)))),
-        testM("map")(checkAllLaws(IdempotentLaws)(Gen.mapOf(anyMaxInt, anyMaxInt))),
-        testM("option")(checkAllLaws(IdempotentLaws)(Gen.option(anyMaxInt))),
-        testM("ordering")(checkAllLaws(IdempotentLaws)(anyOrdering)),
-        testM("partial ordering")(checkAllLaws(IdempotentLaws)(anyPartialOrdering)),
-        testM("set")(checkAllLaws(IdempotentLaws)(Gen.setOf(Gen.anyInt).map(OrF(_)))),
-        testM("tuple2")(checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt))),
-        testM("tuple3")(
-          checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt).map { case ((x, y), z) => (x, y, z) })
+        test("boolean conjuction")(checkAllLaws(IdempotentLaws)(Gen.boolean.map(And(_)))),
+        test("boolean disjunction")(checkAllLaws(IdempotentLaws)(Gen.boolean.map(Or(_)))),
+        test("double max")(checkAllLaws(IdempotentLaws)(Gen.double.map(Max(_)))),
+        test("double min")(checkAllLaws(IdempotentLaws)(Gen.double.map(Min(_)))),
+        test("float max")(checkAllLaws(IdempotentLaws)(Gen.float.map(Max(_)))),
+        test("float min")(checkAllLaws(IdempotentLaws)(Gen.float.map(Min(_)))),
+        test("map")(checkAllLaws(IdempotentLaws)(Gen.mapOf(anyMaxInt, anyMaxInt))),
+        test("option")(checkAllLaws(IdempotentLaws)(Gen.option(anyMaxInt))),
+        test("ordering")(checkAllLaws(IdempotentLaws)(anyOrdering)),
+        test("partial ordering")(checkAllLaws(IdempotentLaws)(anyPartialOrdering)),
+        test("set")(checkAllLaws(IdempotentLaws)(Gen.setOf(Gen.int).map(OrF(_)))),
+        test("tuple2")(checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt))),
+        test("tuple3")(
+          checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt))
         )
       ),
       test("Idempotent.reduceIdempotent") {

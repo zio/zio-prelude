@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,8 @@ object AssociativeEither {
   implicit def ExitAssociativeEither[E]: AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new AssociativeEither[({ type lambda[+a] = Exit[E, a] })#lambda] {
       def either[A, B](fa: => Exit[E, A], fb: => Exit[E, B]): Exit[E, Either[A, B]] =
-        fa.map(Left(_)) match {
-          case Exit.Failure(_) => fb.map(Right(_))
+        fa.mapExit(Left(_)) match {
+          case Exit.Failure(_) => fb.mapExit(Right(_))
           case res             => res
         }
     }
@@ -101,7 +101,7 @@ object AssociativeEither {
     new AssociativeEither[({ type lambda[+e] = Failure[Exit[e, A]] })#lambda] {
       def either[EA, EB](fa: => Failure[Exit[EA, A]], fb: => Failure[Exit[EB, A]]): Failure[Exit[Either[EA, EB], A]] =
         Failure.wrap {
-          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
+          Failure.unwrap(fa).mapErrorExit(Left(_)) *> Failure.unwrap(fb).mapErrorExit(Right(_))
         }
     }
 
@@ -207,39 +207,6 @@ object AssociativeEither {
         fa: => Failure[ZIO[R, EA, A]],
         fb: => Failure[ZIO[R, EB, A]]
       ): Failure[ZIO[R, Either[EA, EB], A]] =
-        Failure.wrap {
-          Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
-        }
-    }
-
-  /**
-   * The `AssociativeEither` instance for `ZLayer`.
-   */
-  implicit def ZLayerAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] =
-    new AssociativeEither[({ type lambda[+a] = ZLayer[R, E, a] })#lambda] {
-      def either[A, B](fa: => ZLayer[R, E, A], fb: => ZLayer[R, E, B]): ZLayer[R, E, Either[A, B]] =
-        fa.map(Left(_)) orElse fb.map(Right(_))
-    }
-
-  /**
-   * The `AssociativeEither` instance for `ZManaged`.
-   */
-  implicit def ZManagedAssociativeEither[R, E]: AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] =
-    new AssociativeEither[({ type lambda[+a] = ZManaged[R, E, a] })#lambda] {
-      def either[A, B](fa: => ZManaged[R, E, A], fb: => ZManaged[R, E, B]): ZManaged[R, E, Either[A, B]] =
-        fa.orElseEither(fb)
-    }
-
-  /**
-   * The `AssociativeEither` instance for failed `ZManaged`.
-   */
-  implicit def ZManagedFailureAssociativeEither[R, A]
-    : AssociativeEither[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] =
-    new AssociativeEither[({ type lambda[+e] = Failure[ZManaged[R, e, A]] })#lambda] {
-      def either[EA, EB](
-        fa: => Failure[ZManaged[R, EA, A]],
-        fb: => Failure[ZManaged[R, EB, A]]
-      ): Failure[ZManaged[R, Either[EA, EB], A]] =
         Failure.wrap {
           Failure.unwrap(fa).mapError(Left(_)) *> Failure.unwrap(fb).mapError(Right(_))
         }

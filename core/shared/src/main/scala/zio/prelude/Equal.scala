@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 John A. De Goes and the ZIO Contributors
+ * Copyright 2020-2023 John A. De Goes and the ZIO Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 package zio.prelude
 
 import zio.Exit.{Failure, Success}
-import zio.duration.{Duration => ZIODuration}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.{Cause, Chunk, Exit, Fiber, NonEmptyChunk, ZTrace}
+import zio.{Cause, Chunk, Duration => ZIODuration, Exit, FiberId, NonEmptyChunk, StackTrace}
 
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, nowarn}
 import scala.concurrent.duration.{Duration => ScalaDuration}
 import scala.util.Try
 import scala.{math => sm}
@@ -105,7 +104,7 @@ trait Equal[-A] { self =>
   def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
-object Equal {
+object Equal extends EqualVersionSpecific {
 
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
@@ -301,10 +300,10 @@ object Equal {
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
-   * `Hash` and `Ord` and (and thus also `Equal`) instance for `Fiber.Id` values.
+   * `Hash` and (and thus also `Equal`) instance for `FiberId` values.
    */
-  implicit lazy val FiberIdHashOrd: Hash[Fiber.Id] with Ord[Fiber.Id] =
-    HashOrd.derive[(Long, Long)].contramap[Fiber.Id](fid => (fid.startTimeMillis, fid.seqNumber))
+  implicit lazy val FiberIdHashOrd: Hash[FiberId] =
+    Hash.default
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Int` values.
@@ -331,7 +330,7 @@ object Equal {
   implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] = new PartialOrd[Map[A, B]] {
 
     protected def checkCompare(l: Map[A, B], r: Map[A, B]): PartialOrdering =
-      l.compareStrict(r)
+      PartialOrd.compareStrict(l, r)
 
     override protected def checkEqual(l: Map[A, B], r: Map[A, B]): Boolean =
       l.size == r.size &&
@@ -863,6 +862,7 @@ object Equal {
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Unit` values.
    * Since there is only one `Unit` value all equality comparisons will always be true.
    */
+  @nowarn("msg=dubious usage of method hashCode with unit value")
   implicit val UnitHashOrd: Hash[Unit] with Ord[Unit] =
     HashOrd.make(_.hashCode, (_, _) => Ordering.Equals, (_, _) => true)
 
@@ -883,7 +883,7 @@ object Equal {
   /**
    * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.
    */
-  implicit def ExitEqual[E: Equal, A: Equal]: Equal[Exit[E, A]] =
+  implicit def ExitEqual[E, A: Equal]: Equal[Exit[E, A]] =
     make {
       case (Success(a), Success(b))  => a === b
       case (Failure(c), Failure(c1)) => c === c1
@@ -891,9 +891,9 @@ object Equal {
     }
 
   /**
-   * `Hash` (and thus also `Equal`) instance for `ZTrace` values.
+   * `Hash` (and thus also `Equal`) instance for `StackTrace` values.
    */
-  implicit val ZTraceHash: Hash[ZTrace] =
+  implicit val StackTraceHash: Hash[StackTrace] =
     Hash.default
 
   /**

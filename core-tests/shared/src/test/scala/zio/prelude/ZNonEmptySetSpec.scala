@@ -1,59 +1,59 @@
 package zio.prelude
 
-import zio.Chunk
 import zio.prelude.Associative._
 import zio.prelude.Equal._
 import zio.prelude.ZNonEmptySet._
 import zio.prelude.coherent.CovariantDeriveEqual
 import zio.prelude.laws._
 import zio.prelude.newtypes._
-import zio.random.Random
 import zio.test._
 import zio.test.laws._
+import zio.{Chunk, Trace}
 
-object ZNonEmptySetSpec extends DefaultRunnableSpec {
+object ZNonEmptySetSpec extends ZIOBaseSpec {
 
-  def genFZNonEmptySet[R <: Random with Sized, B](
+  def genFZNonEmptySet[R <: Sized, B](
     b: Gen[R, B]
   ): GenF[R, ({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] =
     new GenF[R, ({ type lambda[+x] = ZNonEmptySet[x, B] })#lambda] {
-      def apply[R1 <: R, A](a: Gen[R1, A]): Gen[R1, ZNonEmptySet[A, B]] =
+      def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: Trace): Gen[R1, ZNonEmptySet[A, B]] =
         genZNonEmptySet(a, b)
     }
 
-  def genZNonEmptySet[R <: Random with Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZNonEmptySet[A, B]] =
+  def genZNonEmptySet[R <: Sized, A, B](a: Gen[R, A], b: Gen[R, B]): Gen[R, ZNonEmptySet[A, B]] =
     Gen.mapOf1(a, b).map(ZNonEmptySet.fromMapOption(_).get)
 
-  val smallInts: Gen[Random with Sized, Chunk[Int]] =
+  val smallInts: Gen[Sized, Chunk[Int]] =
     Gen.chunkOf(Gen.int(-10, 10))
 
   implicit def SumIdentity[A: Identity]: Identity[Sum[A]] =
     Identity[A].invmap(Equivalence(Sum.wrap, Sum.unwrap))
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("ZNonEmptySetSpec")(
       suite("laws")(
-        testM("combine commutative")(
-          checkAllLaws(CommutativeLaws)(genZNonEmptySet(Gen.anyInt, Gen.anyInt).map(_.transform(Sum(_))))
+        test("combine commutative")(
+          checkAllLaws(CommutativeLaws)(genZNonEmptySet(Gen.int, Gen.int).map(_.transform(Sum(_))))
         ),
-        testM("covariant")(
+        test("covariant")(
           checkAllLaws[
             CovariantDeriveEqual,
             Equal,
             TestConfig,
-            Random with Sized with TestConfig,
+            Sized with TestConfig,
             ({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda,
             Int
-          ](CovariantLaws)(genFZNonEmptySet(Gen.anyInt), Gen.anyInt)(
+          ](CovariantLaws)(genFZNonEmptySet(Gen.int), Gen.int)(
             // Scala 2.11 doesn't seem to be able to infer the type parameter for CovariantDeriveEqual.derive
             CovariantDeriveEqual.derive[({ type lambda[+x] = ZNonEmptySet[x, Int] })#lambda](
               ZNonEmptySetCovariant(IntSumCommutativeInverse),
               ZNonEmptySetDeriveEqual(IntHashOrd, Identity[Sum[Int]])
             ),
-            IntHashOrd
+            IntHashOrd,
+            implicitly[Trace]
           )
         ),
-        testM("hash")(checkAllLaws(HashLaws)(genZNonEmptySet(Gen.anyInt, Gen.anyInt)))
+        test("hash")(checkAllLaws(HashLaws)(genZNonEmptySet(Gen.int, Gen.int)))
       ),
       suite("methods")(
         test("zipWith") {
@@ -78,15 +78,15 @@ object ZNonEmptySetSpec extends DefaultRunnableSpec {
         }
       ),
       suite("set")(
-        testM("flatMap") {
-          check(Gen.setOf1(Gen.anyInt), Gen.function(Gen.setOf1(Gen.anyInt))) { (as, f) =>
+        test("flatMap") {
+          check(Gen.setOf1(Gen.int), Gen.function(Gen.setOf1(Gen.int))) { (as, f) =>
             val actual   = ZNonEmptySet.fromSetOption(as).get.flatMap(a => ZNonEmptySet.fromSetOption(f(a)).get).toSet
             val expected = as.flatMap(f)
             assert(actual)(equalTo(expected))
           }
         },
-        testM("union") {
-          check(Gen.setOf1(Gen.anyInt), Gen.setOf1(Gen.anyInt)) { (l, r) =>
+        test("union") {
+          check(Gen.setOf1(Gen.int), Gen.setOf1(Gen.int)) { (l, r) =>
             val actual   = (ZNonEmptySet.fromSetOption(l).get | ZNonEmptySet.fromSetOption(r).get).toSet
             val expected = l | r
             assert(actual)(equalTo(expected))

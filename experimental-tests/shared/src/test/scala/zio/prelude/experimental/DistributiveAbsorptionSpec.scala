@@ -5,13 +5,13 @@ import zio.prelude.experimental.laws._
 import zio.test._
 import zio.test.laws._
 
-object DistributiveAbsorptionSpec extends DefaultRunnableSpec {
+object DistributiveAbsorptionSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("DistributiveAbsorptionSpec")(
       suite("laws")(
-        testM("set")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.setOf(Gen.anyInt))),
-        testM("boolean")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.boolean))
+        test("set")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.setOf(Gen.int))),
+        test("boolean")(checkAllLaws(DistributiveAbsorptionLaws)(Gen.boolean))
       )
     )
 }

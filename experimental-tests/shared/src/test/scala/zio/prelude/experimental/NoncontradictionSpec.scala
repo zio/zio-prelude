@@ -5,12 +5,12 @@ import zio.prelude.experimental.laws._
 import zio.test._
 import zio.test.laws._
 
-object NoncontradictionSpec extends DefaultRunnableSpec {
+object NoncontradictionSpec extends ZIOBaseSpec {
 
-  def spec: ZSpec[Environment, Failure] =
+  def spec: Spec[Environment, Any] =
     suite("NoncontradictionSpec")(
       suite("laws")(
-        testM("boolean")(checkAllLaws(NoncontradictionLaws)(Gen.boolean))
+        test("boolean")(checkAllLaws(NoncontradictionLaws)(Gen.boolean))
       )
     )
 }
