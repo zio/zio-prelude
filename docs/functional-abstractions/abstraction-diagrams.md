@@ -311,14 +311,17 @@ classDiagram
 classDiagram
   DistributiveProd~A~ <|-- Annihilation~A~
   class DistributiveProd~A~{
+    Cause[A]
+    fx.Cause[A]
+    ParSeq[Unit, A]
+    
     () Sum: Associative[Sum[A]]
     () Prod: Associative[Prod[A]]
     () sum(=> A, => A): A
     () prod(=> A, => A): A
   }
   class Annihilation~A~{
-    Double
-    Int
+    Byte/Char/Double/Float/Int/Long/Short
   }
 ```
 
