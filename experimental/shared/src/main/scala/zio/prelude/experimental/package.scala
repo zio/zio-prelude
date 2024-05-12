@@ -21,7 +21,11 @@ package object experimental
     with ApplicationComposeSyntax
     with BothComposeSyntax
     with ComplementSyntax
-    with EitherComposeSyntax {
+    with DistributiveProdSyntax
+    with DivideSyntax
+    with EitherComposeSyntax
+    with PartialDivideSyntax
+    with SubtractSyntax {
 
   object classic {
 

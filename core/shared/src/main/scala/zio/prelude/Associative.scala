@@ -183,19 +183,25 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` instance for the product of `BigDecimal` values
+   * The `Commutative`, `PartialInverse` instance for the product of `BigDecimal` values
    */
-  implicit val BigDecimalProdCommutativeIdempotent: Commutative[Prod[BigDecimal]] with Idempotent[Prod[BigDecimal]] =
-    new Commutative[Prod[BigDecimal]] with Idempotent[Prod[BigDecimal]] {
-      override def combine(l: => Prod[BigDecimal], r: => Prod[BigDecimal]): Prod[BigDecimal] = Prod(l * r)
+  implicit val BigDecimalProdCommutativePartialInverse
+    : Commutative[Prod[BigDecimal]] with PartialInverse[Prod[BigDecimal]] =
+    new Commutative[Prod[BigDecimal]] with PartialInverse[Prod[BigDecimal]] {
+      def combine(l: => Prod[BigDecimal], r: => Prod[BigDecimal]): Prod[BigDecimal]               = Prod(l * r)
+      val identity: Prod[BigDecimal]                                                              = Prod(BigDecimal(1))
+      def inverseOption(l: => Prod[BigDecimal], r: => Prod[BigDecimal]): Option[Prod[BigDecimal]] =
+        if (r != BigDecimal(0)) Some(Prod(l / r)) else None
     }
 
   /**
    * The `Commutative`, `Idempotent` instance for the sum of `BigDecimal` values
    */
-  implicit val BigDecimalSumCommutativeIdempotent: Commutative[Sum[BigDecimal]] with Idempotent[Sum[BigDecimal]] =
-    new Commutative[Sum[BigDecimal]] with Idempotent[Sum[BigDecimal]] {
-      override def combine(l: => Sum[BigDecimal], r: => Sum[BigDecimal]): Sum[BigDecimal] = Sum(l + r)
+  implicit val BigDecimalSumCommutativeInverse: Commutative[Sum[BigDecimal]] with Inverse[Sum[BigDecimal]] =
+    new Commutative[Sum[BigDecimal]] with Inverse[Sum[BigDecimal]] {
+      def combine(l: => Sum[BigDecimal], r: => Sum[BigDecimal]): Sum[BigDecimal] = Sum(l + r)
+      val identity: Sum[BigDecimal]                                              = Sum(BigDecimal(0))
+      def inverse(l: => Sum[BigDecimal], r: => Sum[BigDecimal]): Sum[BigDecimal] = Sum(l - r)
     }
 
   /**
@@ -255,13 +261,15 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Byte`
+   * The `Commutative` and `PartialInverse` instance for the product of `Byte`
    * values.
    */
-  implicit val ByteProdCommutativeIdentity: Commutative[Prod[Byte]] with Identity[Prod[Byte]] =
-    new Commutative[Prod[Byte]] with Identity[Prod[Byte]] {
-      def combine(l: => Prod[Byte], r: => Prod[Byte]): Prod[Byte] = Prod((l * r).toByte)
-      val identity: Prod[Byte]                                    = Prod(1)
+  implicit val ByteProdCommutativePartialInverse: Commutative[Prod[Byte]] with PartialInverse[Prod[Byte]] =
+    new Commutative[Prod[Byte]] with PartialInverse[Prod[Byte]] {
+      def combine(l: => Prod[Byte], r: => Prod[Byte]): Prod[Byte]               = Prod((l * r).toByte)
+      val identity: Prod[Byte]                                                  = Prod(1)
+      def inverseOption(l: => Prod[Byte], r: => Prod[Byte]): Option[Prod[Byte]] =
+        if (r != 0) Some(Prod((l / r).toByte)) else None
     }
 
   /**
@@ -291,13 +299,15 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Char`
+   * The `Commutative` and `PartialInverse` instance for the product of `Char`
    * values.
    */
-  implicit val CharProdCommutativeIdentity: Commutative[Prod[Char]] with Identity[Prod[Char]] =
-    new Commutative[Prod[Char]] with Identity[Prod[Char]] {
-      def combine(l: => Prod[Char], r: => Prod[Char]): Prod[Char] = Prod((l * r).toChar)
-      val identity: Prod[Char]                                    = Prod(1)
+  implicit val CharProdCommutativePartialInverse: Commutative[Prod[Char]] with PartialInverse[Prod[Char]] =
+    new Commutative[Prod[Char]] with PartialInverse[Prod[Char]] {
+      def combine(l: => Prod[Char], r: => Prod[Char]): Prod[Char]                        = Prod((l * r).toChar)
+      val identity: Prod[Char]                                                           = Prod(1)
+      override def inverseOption(l: => Prod[Char], r: => Prod[Char]): Option[Prod[Char]] =
+        if (r != 0) Some(Prod((l / r).toChar)) else None
     }
 
   /**
@@ -369,13 +379,15 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Double`
+   * The `Commutative` and `PartialInverse` instance for the product of `Double`
    * values.
    */
-  implicit val DoubleProdCommutativeIdentity: Commutative[Prod[Double]] with Identity[Prod[Double]] =
-    new Commutative[Prod[Double]] with Identity[Prod[Double]] {
-      def combine(l: => Prod[Double], r: => Prod[Double]): Prod[Double] = Prod(l * r)
-      val identity: Prod[Double]                                        = Prod(1)
+  implicit val DoubleProdCommutativePartialInverse: Commutative[Prod[Double]] with PartialInverse[Prod[Double]] =
+    new Commutative[Prod[Double]] with PartialInverse[Prod[Double]] {
+      def combine(l: => Prod[Double], r: => Prod[Double]): Prod[Double]               = Prod(l * r)
+      val identity: Prod[Double]                                                      = Prod(1)
+      def inverseOption(l: => Prod[Double], r: => Prod[Double]): Option[Prod[Double]] =
+        if (r != 0) Some(Prod(l / r)) else None
     }
 
   /**
@@ -431,13 +443,15 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Float`
+   * The `Commutative` and `PartialInverse` instance for the product of `Float`
    * values.
    */
-  implicit val FloatProdCommutativeIdentity: Commutative[Prod[Float]] with Identity[Prod[Float]] =
-    new Commutative[Prod[Float]] with Identity[Prod[Float]] {
-      def combine(l: => Prod[Float], r: => Prod[Float]): Prod[Float] = Prod(l * r)
-      val identity: Prod[Float]                                      = Prod(1)
+  implicit val FloatProdCommutativePartialInverse: Commutative[Prod[Float]] with PartialInverse[Prod[Float]] =
+    new Commutative[Prod[Float]] with PartialInverse[Prod[Float]] {
+      def combine(l: => Prod[Float], r: => Prod[Float]): Prod[Float]               = Prod(l * r)
+      val identity: Prod[Float]                                                    = Prod(1)
+      def inverseOption(l: => Prod[Float], r: => Prod[Float]): Option[Prod[Float]] =
+        if (r != 0) Some(Prod(l / r)) else None
     }
 
   /**
@@ -501,13 +515,15 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Long`
+   * The `Commutative` and `PartialInverse` instance for the product of `Long`
    * values.
    */
-  implicit val LongProdCommutativeIdentity: Commutative[Prod[Long]] with Identity[Prod[Long]] =
-    new Commutative[Prod[Long]] with Identity[Prod[Long]] {
-      def combine(l: => Prod[Long], r: => Prod[Long]): Prod[Long] = Prod(l * r)
-      val identity: Prod[Long]                                    = Prod(1)
+  implicit val LongProdCommutativePartialInverse: Commutative[Prod[Long]] with PartialInverse[Prod[Long]] =
+    new Commutative[Prod[Long]] with PartialInverse[Prod[Long]] {
+      def combine(l: => Prod[Long], r: => Prod[Long]): Prod[Long]               = Prod(l * r)
+      val identity: Prod[Long]                                                  = Prod(1)
+      def inverseOption(l: => Prod[Long], r: => Prod[Long]): Option[Prod[Long]] =
+        if (r != 0) Some(Prod(l / r)) else None
     }
 
   /**
@@ -587,6 +603,21 @@ object Associative extends AssociativeLowPriority {
       }
     )
 
+  implicit def ParSeqProdIdentity[A]: Identity[Prod[ParSeq[Unit, A]]] = new Identity[Prod[ParSeq[Unit, A]]] {
+    def identity: Prod[ParSeq[Unit, A]]                                                          =
+      Prod(ParSeq.empty)
+    def combine(l: => Prod[ParSeq[Unit, A]], r: => Prod[ParSeq[Unit, A]]): Prod[ParSeq[Unit, A]] =
+      Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
+  }
+
+  implicit def ParSeqSumCommutativeIdentity[A]: Commutative[Sum[ParSeq[Unit, A]]] with Identity[Sum[ParSeq[Unit, A]]] =
+    new Commutative[Sum[ParSeq[Unit, A]]] with Identity[Sum[ParSeq[Unit, A]]] {
+      def identity: Sum[ParSeq[Unit, A]]                                                        =
+        Sum(ParSeq.empty)
+      def combine(l: => Sum[ParSeq[Unit, A]], r: => Sum[ParSeq[Unit, A]]): Sum[ParSeq[Unit, A]] =
+        Sum(Sum.unwrap(l) && Sum.unwrap(r))
+    }
+
   /**
    * The `Commutative` and `Idempotent` instance for the intersection of `Set[A]` values.
    */
@@ -623,19 +654,21 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Short`
+   * The `Commutative` and `PartialInverse` instance for the product of `Short`
    * values.
    */
-  implicit val ShortProdCommutativeIdentity: Commutative[Prod[Short]] with Identity[Prod[Short]] =
-    new Commutative[Prod[Short]] with Identity[Prod[Short]] {
-      def combine(l: => Prod[Short], r: => Prod[Short]): Prod[Short] = Prod((l * r).toShort)
-      val identity: Prod[Short]                                      = Prod(1)
+  implicit val ShortProdCommutativePartialInverse: Commutative[Prod[Short]] with PartialInverse[Prod[Short]] =
+    new Commutative[Prod[Short]] with PartialInverse[Prod[Short]] {
+      def combine(l: => Prod[Short], r: => Prod[Short]): Prod[Short]               = Prod((l * r).toShort)
+      val identity: Prod[Short]                                                    = Prod(1)
+      def inverseOption(l: => Prod[Short], r: => Prod[Short]): Option[Prod[Short]] =
+        if (r != 0) Some(Prod((l / r).toShort)) else None
     }
 
   /**
-   * The `Commutative` and `Identity` instance for the sum of `Short` values.
+   * The `Commutative` and `Inverse` instance for the sum of `Short` values.
    */
-  implicit val ShortSumCommutativeIdentity: Commutative[Sum[Short]] with Inverse[Sum[Short]] =
+  implicit val ShortSumCommutativeInverse: Commutative[Sum[Short]] with Inverse[Sum[Short]] =
     new Commutative[Sum[Short]] with Inverse[Sum[Short]] {
       def combine(l: => Sum[Short], r: => Sum[Short]): Sum[Short] = Sum((l + r).toShort)
       val identity: Sum[Short]                                    = Sum(0)
@@ -1388,17 +1421,44 @@ object Associative extends AssociativeLowPriority {
    */
   implicit def VectorIdentity[A]: Identity[Vector[A]] =
     Identity.make(Vector.empty, _ ++ _)
+
+  implicit def zioCauseProdIdentity[A]: Identity[Prod[zio.Cause[A]]] = new Identity[Prod[zio.Cause[A]]] {
+    def identity: Prod[zio.Cause[A]]                                                    =
+      Prod(zio.Cause.empty)
+    def combine(l: => Prod[zio.Cause[A]], r: => Prod[zio.Cause[A]]): Prod[zio.Cause[A]] =
+      Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
+  }
+
+  implicit def zioCauseSumCommutativeIdentity[A]: Commutative[Sum[zio.Cause[A]]] with Identity[Sum[zio.Cause[A]]] =
+    new Commutative[Sum[zio.Cause[A]]] with Identity[Sum[zio.Cause[A]]] {
+      def identity: Sum[zio.Cause[A]]                                                  =
+        Sum(zio.Cause.empty)
+      def combine(l: => Sum[zio.Cause[A]], r: => Sum[zio.Cause[A]]): Sum[zio.Cause[A]] =
+        Sum(Sum.unwrap(l) && Sum.unwrap(r))
+    }
 }
 
 trait AssociativeLowPriority {
 
+  implicit def FxCauseProdAssociative[A]: Associative[Prod[fx.Cause[A]]] = new Associative[Prod[fx.Cause[A]]] {
+    def combine(l: => Prod[fx.Cause[A]], r: => Prod[fx.Cause[A]]): Prod[fx.Cause[A]] =
+      Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
+  }
+
+  implicit def FxCauseSumCommutative[A]: Commutative[Sum[fx.Cause[A]]] = new Commutative[Sum[fx.Cause[A]]] {
+    def combine(l: => Sum[fx.Cause[A]], r: => Sum[fx.Cause[A]]): Sum[fx.Cause[A]] =
+      Sum(Sum.unwrap(l) && Sum.unwrap(r))
+  }
+
   /**
-   * The `Commutative` and `Identity` instance for the product of `Int` values.
+   * The `Commutative` and `PartialInverse` instance for the product of `Int` values.
    */
-  implicit val IntProdCommutativeIdentity: Commutative[Prod[Int]] with Identity[Prod[Int]] =
-    new Commutative[Prod[Int]] with Identity[Prod[Int]] {
-      def combine(l: => Prod[Int], r: => Prod[Int]): Prod[Int] = Prod(l * r)
-      val identity: Prod[Int]                                  = Prod(1)
+  implicit val IntProdCommutativePartialInverse: Commutative[Prod[Int]] with PartialInverse[Prod[Int]] =
+    new Commutative[Prod[Int]] with PartialInverse[Prod[Int]] {
+      def combine(l: => Prod[Int], r: => Prod[Int]): Prod[Int]               = Prod(l * r)
+      val identity: Prod[Int]                                                = Prod(1)
+      def inverseOption(l: => Prod[Int], r: => Prod[Int]): Option[Prod[Int]] =
+        if (r != 0) Some(Prod(l / r)) else None
     }
 
   /**

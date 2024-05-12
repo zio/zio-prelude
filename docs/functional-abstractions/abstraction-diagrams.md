@@ -42,7 +42,8 @@ classDiagram
   Associative~A~ <|-- Commutative~A~
   Associative~A~ <|-- Idempotent~A~
   Associative~A~ <|-- Identity~A~
-  Identity~A~ <|-- Inverse~A~
+  Identity~A~ <|-- PartialInverse~A~
+  PartialInverse~A~ <|-- Inverse~A~
   class Associative~A~{
     Either[E, A: Associative]
     F[A: Associative]: Derive[_, Associative]
@@ -118,7 +119,6 @@ classDiagram
     Min[Boolean]
     Min[Byte/Char/Double/Float/Int/Long/Short]
     Option[A: Associative]
-    Prod[Byte/Char/Double/Float/Int/Long/Short]
     String
     ❨T1: Identity, ..., T22: Identity❩
     Validation[E, A: Identity]
@@ -126,6 +126,12 @@ classDiagram
     ZSet[A, B: Associative]
 
     () identity: A
+  }
+  class PartialInverse~A~{
+    F[A: PartialInverse]: Derive[_, PartialInverse]
+    Prod[Byte/Char/Double/Float/Int/Long/Short]
+    ❨T1: PartialInverse, ..., T22: PartialInverse❩
+    () inverseOption(=> A, => A): Option[A]
   }
   class Inverse~A~{
     And
@@ -295,6 +301,27 @@ classDiagram
     ZStream[R, E, +*]
 
     () any: F[Any]
+  }
+```
+
+
+# DistributiveProd
+
+```mermaid
+classDiagram
+  DistributiveProd~A~ <|-- Annihilation~A~
+  class DistributiveProd~A~{
+    Cause[A]
+    fx.Cause[A]
+    ParSeq[Unit, A]
+    
+    () Sum: Associative[Sum[A]]
+    () Prod: Associative[Prod[A]]
+    () sum(=> A, => A): A
+    () prod(=> A, => A): A
+  }
+  class Annihilation~A~{
+    Byte/Char/Double/Float/Int/Long/Short
   }
 ```
 

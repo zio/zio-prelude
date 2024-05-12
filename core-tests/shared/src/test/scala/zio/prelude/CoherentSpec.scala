@@ -45,9 +45,9 @@ object CoherentSpec extends ZIOBaseSpec {
       test("EqualInverse") {
         val instance = implicitly[EqualInverse[Sum[Int]]]
         assert(Sum(42).inverse(Sum(20)))(equalTo(Sum(22))) &&
-        assert(Sum(2).multiply(5))(equalTo(Sum(10))) &&
-        assert(Sum(2).multiply(0))(equalTo(Sum(0))) &&
-        assert(Sum(2).multiply(-5))(equalTo(Sum(-10))) &&
+        assert(Sum(2).multiplyBy(5))(equalTo(Sum(10))) &&
+        assert(Sum(2).multiplyBy(0))(equalTo(Sum(0))) &&
+        assert(Sum(2).multiplyBy(-5))(equalTo(Sum(-10))) &&
         assert(instance.multiplyOption(5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(10)))) &&
         assert(instance.multiplyOption(0)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(0)))) &&
         assert(instance.multiplyOption(-5)(Sum(2)))(equalTo[Option[Sum[Int]]](Some(Sum(-10))))

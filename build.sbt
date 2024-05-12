@@ -1,6 +1,7 @@
 import BuildHelper._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
+Global / concurrentRestrictions += Tags.limit(NativeTags.Link, 1)
 
 inThisBuild(
   List(
