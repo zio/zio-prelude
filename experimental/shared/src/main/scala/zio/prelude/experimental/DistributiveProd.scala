@@ -17,7 +17,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
    */
   def apply[A](implicit distributiveProd: DistributiveProd[A]): DistributiveProd[A] = distributiveProd
 
-  implicit val BigDecimalAnnihilationPartialDivideSubtract
+  implicit lazy val BigDecimalAnnihilationPartialDivideSubtract
     : Annihilation[BigDecimal] with PartialDivide[BigDecimal] with Subtract[BigDecimal] =
     new Annihilation[BigDecimal] with PartialDivide[BigDecimal] with Subtract[BigDecimal] {
       override def sum(l: => BigDecimal, r: => BigDecimal): BigDecimal                  = l + r
@@ -31,7 +31,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
         Associative.BigDecimalProdCommutativePartialInverse
     }
 
-  implicit val ByteAnnihilationSubtract: Annihilation[Byte] with Subtract[Byte] =
+  implicit lazy val ByteAnnihilationSubtract: Annihilation[Byte] with Subtract[Byte] =
     new Annihilation[Byte] with Subtract[Byte] {
       override def sum(l: => Byte, r: => Byte): Byte                    = (l + r).toByte
       override def prod(l: => Byte, r: => Byte): Byte                   = (l * r).toByte
@@ -41,7 +41,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Byte]] with PartialInverse[Prod[Byte]] = Associative.ByteProdCommutativePartialInverse
     }
 
-  implicit val CharAnnihilationSubtract: Annihilation[Char] with Subtract[Char] =
+  implicit lazy val CharAnnihilationSubtract: Annihilation[Char] with Subtract[Char] =
     new Annihilation[Char] with Subtract[Char] {
       override def sum(l: => Char, r: => Char): Char                    = (l + r).toChar
       override def prod(l: => Char, r: => Char): Char                   = (l * r).toChar
@@ -51,7 +51,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Char]] with PartialInverse[Prod[Char]] = Associative.CharProdCommutativePartialInverse
     }
 
-  implicit val DoubleAnnihilationPartialDivideSubtract
+  implicit lazy val DoubleAnnihilationPartialDivideSubtract
     : Annihilation[Double] with PartialDivide[Double] with Subtract[Double] =
     new Annihilation[Double] with PartialDivide[Double] with Subtract[Double] {
       override def sum(l: => Double, r: => Double): Double                  = l + r
@@ -64,7 +64,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
         Associative.DoubleProdCommutativePartialInverse
     }
 
-  implicit val FloatAnnihilationPartialDivideSubtract
+  implicit lazy val FloatAnnihilationPartialDivideSubtract
     : Annihilation[Float] with PartialDivide[Float] with Subtract[Float] =
     new Annihilation[Float] with PartialDivide[Float] with Subtract[Float] {
       override def sum(l: => Float, r: => Float): Float                   = l + r
@@ -77,7 +77,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
         Associative.FloatProdCommutativePartialInverse
     }
 
-  implicit val IntAnnihilationSubtract: Annihilation[Int] with Subtract[Int] =
+  implicit lazy val IntAnnihilationSubtract: Annihilation[Int] with Subtract[Int] =
     new Annihilation[Int] with Subtract[Int] {
       override def sum(l: => Int, r: => Int): Int                     = l + r
       override def prod(l: => Int, r: => Int): Int                    = l * r
@@ -87,7 +87,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Int]] with PartialInverse[Prod[Int]] = Associative.IntProdCommutativePartialInverse
     }
 
-  implicit val LongAnnihilationSubtract: Annihilation[Long] with Subtract[Long] =
+  implicit lazy val LongAnnihilationSubtract: Annihilation[Long] with Subtract[Long] =
     new Annihilation[Long] with Subtract[Long] {
       override def sum(l: => Long, r: => Long): Long                    = l + r
       override def prod(l: => Long, r: => Long): Long                   = l * r
@@ -103,7 +103,7 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Associative[Prod[ParSeq[Unit, A]]] = Associative.ParSeqProdIdentity
     }
 
-  implicit val ShortAnnihilationSubtract: Annihilation[Short] with Subtract[Short] =
+  implicit lazy val ShortAnnihilationSubtract: Annihilation[Short] with Subtract[Short] =
     new Annihilation[Short] with Subtract[Short] {
       override def sum(l: => Short, r: => Short): Short                   = (l + r).toShort
       override def prod(l: => Short, r: => Short): Short                  = (l * r).toShort
