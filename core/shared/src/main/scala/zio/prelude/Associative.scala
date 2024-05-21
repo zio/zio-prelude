@@ -1416,6 +1416,13 @@ object Associative extends AssociativeLowPriority {
         )
     }
 
+  implicit val UnitCommutativeInverse: Commutative[Unit] with Idempotent[Unit] with Inverse[Unit] =
+    new Commutative[Unit] with Idempotent[Unit] with Inverse[Unit] {
+      def combine(l: => Unit, r: => Unit): Unit = ()
+      val identity: Unit                        = ()
+      def inverse(l: => Unit, r: => Unit): Unit = ()
+    }
+
   /**
    * The `Identity` instance for the concatenation of `Vector[A]` values.
    */

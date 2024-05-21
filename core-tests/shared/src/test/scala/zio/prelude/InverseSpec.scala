@@ -24,7 +24,8 @@ object InverseSpec extends ZIOBaseSpec {
         test("tuple2")(checkAllLaws(InverseLaws)(Gen.int.map(Sum(_)).zip(Gen.int.map(Sum(_))))),
         test("tuple3")(
           checkAllLaws(InverseLaws)(Gen.int.map(Sum(_)).zip(Gen.int.map(Sum(_))).zip(Gen.int.map(Sum(_))))
-        )
+        ),
+        test("unit")(checkAllLaws(InverseLaws)(Gen.unit))
       )
     )
 }

@@ -43,7 +43,8 @@ object CommutativeSpec extends ZIOBaseSpec {
         test("tuple2")(checkAllLaws(CommutativeLaws)(anySumInt.zip(anySumInt))),
         test("tuple3")(
           checkAllLaws(CommutativeLaws)(anySumInt.zip(anySumInt).zip(anySumInt))
-        )
+        ),
+        test("unit")(checkAllLaws(CommutativeLaws)(Gen.unit))
       )
     )
 }
