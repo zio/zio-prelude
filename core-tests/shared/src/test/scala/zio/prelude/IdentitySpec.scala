@@ -29,6 +29,7 @@ object IdentitySpec extends ZIOBaseSpec {
         test("option")(checkAllLaws(IdentityLaws)(Gen.option(Gen.int.map(Sum(_))))),
         test("short multiplication")(checkAllLaws(IdentityLaws)(Gen.short.map(Prod(_)))),
         test("string")(checkAllLaws(IdentityLaws)(Gen.string)),
+        test("unit")(checkAllLaws(IdentityLaws)(Gen.unit)),
         test("vector")(checkAllLaws(IdentityLaws)(Gen.vectorOf(Gen.int)))
       )
     )

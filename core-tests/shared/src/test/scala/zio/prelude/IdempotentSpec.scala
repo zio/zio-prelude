@@ -48,7 +48,8 @@ object IdempotentSpec extends ZIOBaseSpec {
         test("tuple2")(checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt))),
         test("tuple3")(
           checkAllLaws(IdempotentLaws)(anyMaxInt.zip(anyMaxInt).zip(anyMaxInt))
-        )
+        ),
+        test("unit")(checkAllLaws(IdempotentLaws)(Gen.unit))
       ),
       test("Idempotent.reduceIdempotent") {
 
