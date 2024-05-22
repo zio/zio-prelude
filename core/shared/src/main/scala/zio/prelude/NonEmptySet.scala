@@ -101,7 +101,7 @@ final class NonEmptySet[A] private (private val set: Set[A]) { self =>
    */
   def removeNonEmpty(elem: A): Option[NonEmptySet[A]] = {
     val newSet = set - elem
-    if (newSet.nonEmpty) Some(new NonEmptySet(set)) else None
+    if (newSet.nonEmpty) Some(new NonEmptySet(newSet)) else None
   }
 
   /**
