@@ -85,6 +85,15 @@ object NonEmptySetSpec extends DefaultRunnableSpec {
             val expected = as.map(f).flatten
             actual <-> expected
           }
+        },
+        testM("removeNonEmpty") {
+          check(genSet) { as =>
+            val toRemove = as.head
+            val actual   = NonEmptySet.fromSetOption(as).get.removeNonEmpty(toRemove).map(_.toSet)
+            val modified = as - toRemove
+            val expected = Option(modified).filter(_.nonEmpty)
+            actual <-> expected
+          }
         }
       ),
       suite("constructors")(
