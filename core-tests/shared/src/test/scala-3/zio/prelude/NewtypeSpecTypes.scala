@@ -112,7 +112,7 @@ object NewtypeSpecTypes {
       NonEmptyStringValidator.validate(value)
 
     override protected inline def validateInline(inline value: String) =
-    ${ NonEmptyStringValidator.validateInlineImpl('value) }
+      ${ NonEmptyStringValidator.validateInlineImpl('value) }
   }
 
   // These should compile
