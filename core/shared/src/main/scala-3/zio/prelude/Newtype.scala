@@ -127,7 +127,7 @@ abstract class NewtypeCustom[A] {
 }
 
 abstract class SubtypeCustom[A] extends NewtypeCustom[A] {
-  type Base <: A
+  override type Type <: A
 }
 
 abstract class Newtype[A] extends NewtypeCustom[A] {

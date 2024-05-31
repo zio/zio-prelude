@@ -88,10 +88,10 @@ object NewtypeSpecTypes {
   Pin(1000, 1001, 9998, 9999)
 
   object Palindrome extends NewtypeCustom[String] {
-    protected def validate(value: String) =
+    override protected def validate(value: String) =
       PalindromeValidator.validate(value)
 
-    protected inline def validateInline(inline value: String) =
+    override protected inline def validateInline(inline value: String) =
       ${ PalindromeValidator.validateInlineImpl('value) }
   }
 
@@ -104,6 +104,15 @@ object NewtypeSpecTypes {
       (Assertion.startsWithIgnoreCase("X-Github"))
 
     def unsafeWrap(s: String): Type = wrap(s)
+  }
+
+  type NonEmptyString = NonEmptyString.Type
+  object NonEmptyString extends SubtypeCustom[String] {
+    override protected def validate(value: String) =
+      NonEmptyStringValidator.validate(value)
+
+    override protected inline def validateInline(inline value: String) =
+      ${ NonEmptyStringValidator.validateInlineImpl('value) }
   }
 
   // These should compile
@@ -125,4 +134,9 @@ object NewtypeSpecTypes {
   GmailEmail("very.cool.person@gmail.com")
   GmailEmail("very.cool.person@GmaIl.coM")
   GmailEmail("VERY.COOL.PERSON@GMAIL.COM")
+
+  def takeString(s: String): Unit = ()
+  // These should compile
+  takeString(GithubHeaderKey("X-Github-Request-Id"))
+  takeString(NonEmptyString("Hello"))
 }
