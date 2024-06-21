@@ -115,7 +115,7 @@ val value: Int =
 
 ## Working With Errors
 
-Since `ZIO` also has an error type the operators for working with errors are quite similar to the ones on `ZIO`.
+Since `ZPure` also has an error type the operators for working with errors are quite similar to the ones on `ZIO`.
 
 We can create a computation that fails with an error using the `fail` operator.
 
