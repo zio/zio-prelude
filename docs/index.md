@@ -4,7 +4,7 @@ title: "Introduction to ZIO Prelude"
 sidebar_label: "ZIO Prelude"
 ---
 
-[ZIO Prelude](https://github.com/zio/zio-prelude) is a lightweight, distinctly Scala takes on **functional abstractions**, with tight ZIO integration.
+[ZIO Prelude](https://github.com/zio/zio-prelude) is a lightweight, distinctly Scala take on **functional abstractions**, with tight ZIO integration.
 
 @PROJECT_BADGES@
 
