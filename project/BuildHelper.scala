@@ -185,9 +185,9 @@ object BuildHelper {
   )
 
   def stdSettings(prjName: String) = Seq(
-    name                                   := s"$prjName",
-    crossScalaVersions                     := Seq(Scala212, Scala213, Scala3),
-    ThisBuild / scalaVersion               := Scala213,
+    name                     := s"$prjName",
+    crossScalaVersions       := Seq(Scala212, Scala213, Scala3),
+    ThisBuild / scalaVersion := Scala213,
     scalacOptions ++= stdOptions ++ extraOptions(scalaVersion.value, optimize = !isSnapshot.value),
     libraryDependencies ++= {
       if (scalaVersion.value != Scala3)
@@ -196,16 +196,15 @@ object BuildHelper {
         )
       else Seq.empty
     },
-    semanticdbEnabled                      := scalaVersion.value != Scala3, // enable SemanticDB
+    semanticdbEnabled        := scalaVersion.value != Scala3, // enable SemanticDB
     semanticdbOptions += "-P:semanticdb:synthetics:on",
-    semanticdbVersion                      := scalafixSemanticdb.revision,  // use Scalafix compatible version
-    ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+    semanticdbVersion        := scalafixSemanticdb.revision,  // use Scalafix compatible version
     ThisBuild / scalafixDependencies ++= List(
       "com.github.vovapolu" %% "scaluzzi" % "0.1.23"
     ),
-    Test / parallelExecution               := false,
+    Test / parallelExecution := false,
     incOptions ~= (_.withLogRecompileOnMacro(false)),
-    autoAPIMappings                        := true,
+    autoAPIMappings          := true,
     unusedCompileDependenciesFilter -= moduleFilter("org.scala-js", "scalajs-library")
   )
 
