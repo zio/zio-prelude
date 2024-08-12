@@ -75,8 +75,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def flatMap[W1 >: W, E1 >: E, B](f: A => ZValidation[W1, E1, B]): ZValidation[W1, E1, B] =
     self match {
-      case Failure(w, e) => Failure(w, e)
-      case Success(w, a) =>
+      case failure @ Failure(_, _) => failure
+      case Success(w, a)           =>
         f(a) match {
           case Failure(w1, e) => Failure(w ++ w1, e)
           case Success(w1, b) => Success(w ++ w1, b)
@@ -97,8 +97,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def forEach[F[+_]: IdentityBoth: Covariant, B](f: A => F[B]): F[ZValidation[W, E, B]] =
     self match {
-      case Failure(w, e) => Failure(w, e).succeed[F]
-      case Success(w, a) => f(a).map(Success(w, _))
+      case failure @ Failure(_, _) => failure.succeed[F]
+      case Success(w, a)           => f(a).map(Success(w, _))
     }
 
   /**
@@ -157,8 +157,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def map[B](f: A => B): ZValidation[W, E, B] =
     self match {
-      case Failure(w, e) => Failure(w, e)
-      case Success(w, a) => Success(w, f(a))
+      case failure @ Failure(_, _) => failure
+      case Success(w, a)           => Success(w, f(a))
     }
 
   /**
@@ -167,8 +167,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def mapError[E2](f: E => E2): ZValidation[W, E2, A] =
     self match {
-      case Failure(w, e) => Failure(w, e.map(f))
-      case Success(w, a) => Success(w, a)
+      case Failure(w, e)           => Failure(w, e.map(f))
+      case success @ Success(_, _) => success
     }
 
   /**
@@ -177,8 +177,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    */
   final def mapErrorAll[E2](f: NonEmptyChunk[E] => NonEmptyChunk[E2]): ZValidation[W, E2, A] =
     self match {
-      case Failure(w, e) => Failure(w, f(e))
-      case Success(w, a) => Success(w, a)
+      case Failure(w, e)           => Failure(w, f(e))
+      case success @ Success(_, _) => success
     }
 
   /**
@@ -214,16 +214,16 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 
   final def orElse[W1 >: W, E1, A1 >: A](that: ZValidation[W1, E1, A1]): ZValidation[W1, E1, A1] =
     self match {
-      case Failure(log, _)     => that.mapLogAll(log ++ _)
-      case Success(log, value) => Success(log, value)
+      case Failure(log, _)         => that.mapLogAll(log ++ _)
+      case success @ Success(_, _) => success
     }
 
   final def orElseLog[W1 >: W, E1, A1 >: A](
     that: ZValidation[W1, E1, A1]
   )(implicit ev: E <:< W1): ZValidation[W1, E1, A1] =
     self match {
-      case Failure(log, errors) => that.mapLogAll(log ++ errors.map(ev) ++ _)
-      case Success(log, value)  => Success(log, value)
+      case Failure(log, errors)    => that.mapLogAll(log ++ errors.map(ev) ++ _)
+      case success @ Success(_, _) => success
     }
 
   /**
@@ -335,7 +335,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   final def zipPar[W1 >: W, E1 >: E, B](that: ZValidation[W1, E1, B])(implicit
     zippable: Zippable[A, B]
   ): ZValidation[W1, E1, zippable.Out] =
-    zipWithPar(that)(zippable.zip(_, _))
+    zipWithPar(that)(zippable.zip)
 
   /**
    * Combines this `ZValidation` with the specified `ZValidation`, using the
