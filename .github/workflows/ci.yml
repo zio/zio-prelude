@@ -253,11 +253,14 @@ jobs:
           PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
   
   ci:
+    if: always()
     runs-on: ubuntu-22.04
     needs: [lint, compile, publishLocal, test, testJvms, testPlatforms]
     steps:
       - name: Aggregate of lint, and all tests
-        run: echo "ci passed"
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
 
   publish:
     runs-on: ubuntu-22.04
