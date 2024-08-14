@@ -257,7 +257,6 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [lint, compile, publishLocal, test, testJvms, testPlatforms]
     steps:
-      - name: Aggregate of lint, and all tests
       - uses: re-actors/alls-green@release/v1
         with:
           jobs: ${{ toJSON(needs) }}
