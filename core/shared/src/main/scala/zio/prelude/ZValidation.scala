@@ -372,7 +372,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 object ZValidation extends LowPriorityValidationImplicits {
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
-    lazy val errorsUnordered: NonEmptyMultiSet[E]                          = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
+    lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
+    
     def toException(implicit ev: E <:< Throwable): ZValidationException[W, E] = ZValidationException(this)
   }
 
