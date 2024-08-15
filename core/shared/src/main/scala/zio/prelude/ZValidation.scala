@@ -252,7 +252,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception` with the first error as `cause`.
    */
-  final def toEitherException(implicit ev: E <:< Throwable): Either[Failure.Exception[W, E], A] = self match {
+  final def toEitherException(implicit ev: E <:< Throwable): Either[ZValidationException[W, E], A] = self match {
     case Success(_, value)      => Right(value)
     case failure: Failure[W, E] => Left(failure.toException)
   }
@@ -373,14 +373,12 @@ object ZValidation extends LowPriorityValidationImplicits {
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
     lazy val errorsUnordered: NonEmptyMultiSet[E]                          = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
-    def toException(implicit ev: E <:< Throwable): Failure.Exception[W, E] = Failure.Exception(this)
+    def toException(implicit ev: E <:< Throwable): ZValidationException[W, E] = ZValidationException(this)
   }
 
-  object Failure {
-    final case class ZValidationException[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
-        extends RuntimeException(ev(failure.errors.head)) {
-      failure.errors.tail.foreach(addSuppressed(_))
-    }
+  final case class ZValidationException[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
+      extends RuntimeException(ev(failure.errors.head)) {
+    failure.errors.tail.foreach(addSuppressed(_))
   }
 
   final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
