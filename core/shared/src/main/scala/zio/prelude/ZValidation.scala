@@ -377,8 +377,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   }
 
   object Failure {
-    final case class Exception[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
-        extends scala.Exception(ev(failure.errors.head)) {
+    final case class ZValidationException[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
+        extends RuntimeException(ev(failure.errors.head)) {
       failure.errors.tail.foreach(addSuppressed(_))
     }
   }
