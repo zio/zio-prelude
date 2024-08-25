@@ -1,4 +1,4 @@
 -J-Xmx4G
 -J-Xms512M
--J-Xss8M
+-J-Xss4M
 -J-XX:+UseG1GC
