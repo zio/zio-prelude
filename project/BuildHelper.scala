@@ -7,7 +7,8 @@ import sbtbuildinfo.BuildInfoKeys.*
 import sbtcrossproject.CrossPlugin.autoImport.*
 import scalafix.sbt.ScalafixPlugin.autoImport.*
 
-import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport._
+import scala.scalanative.build.Mode
+import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport.*
 
 object BuildHelper {
   val Scala212: String = "2.12.19"
@@ -243,6 +244,12 @@ object BuildHelper {
   )
 
   def nativeSettings = Seq(
+    nativeConfig ~= { cfg =>
+      val os = System.getProperty("os.name").toLowerCase
+      // See https://github.com/zio/zio/releases/tag/v2.1.8
+      if (os.contains("mac")) cfg.withMode(Mode.releaseFast)
+      else cfg
+    },
     Test / fork := crossProjectPlatform.value == JVMPlatform // set fork to `true` on JVM to improve log readability, JS and Native need `false`
   )
 
