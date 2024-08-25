@@ -3,8 +3,8 @@ package experimental
 
 import zio.prelude.experimental.laws._
 import zio.prelude.laws._
-import zio.test._
 import zio.test.TestAspect._
+import zio.test._
 import zio.test.laws._
 
 object DistributiveProdSpec extends ZIOBaseSpec {

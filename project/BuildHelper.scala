@@ -250,7 +250,8 @@ object BuildHelper {
       if (os.contains("mac")) cfg.withMode(Mode.releaseFast)
       else cfg
     },
-    Test / fork := crossProjectPlatform.value == JVMPlatform // set fork to `true` on JVM to improve log readability, JS and Native need `false`
+    Test / parallelExecution := false,
+    Test / fork              := crossProjectPlatform.value == JVMPlatform // set fork to `true` on JVM to improve log readability, JS and Native need `false`
   )
 
   val scalaReflectTestSettings: List[Setting[_]] = List(
