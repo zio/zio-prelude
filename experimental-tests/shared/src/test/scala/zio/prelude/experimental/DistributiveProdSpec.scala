@@ -4,6 +4,7 @@ package experimental
 import zio.prelude.experimental.laws._
 import zio.prelude.laws._
 import zio.test._
+import zio.test.TestAspect._
 import zio.test.laws._
 
 object DistributiveProdSpec extends ZIOBaseSpec {
@@ -15,5 +16,5 @@ object DistributiveProdSpec extends ZIOBaseSpec {
         test("ParSeq distributive multiply")(checkAllLaws(DistributiveProdLaws)(Gens.parSeq(Gen.unit, Gen.int))),
         test("fx.Cause distributive multiply")(checkAllLaws(DistributiveProdLaws)(Gens.parSeq(Gen.empty, Gen.int)))
       )
-    )
+    ) @@ exceptJVM(sequential)
 }
