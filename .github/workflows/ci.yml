@@ -186,7 +186,7 @@ jobs:
         with:
           swap-size-gb: 7
       - name: Test on different Scala target platforms
-        run: ./sbt test{{ matrix.platform }}
+        run: ./sbt test${{ matrix.platform }}
 
   update-readme:
     name: Update README
