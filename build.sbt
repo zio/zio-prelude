@@ -1,7 +1,7 @@
-import BuildHelper._
+import BuildHelper.*
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
-Global / concurrentRestrictions += Tags.limit(NativeTags.Link, 1)
+Global / concurrentRestrictions += Tags.limit(NativeTags.Link, java.lang.Runtime.getRuntime.availableProcessors())
 
 inThisBuild(
   List(
@@ -35,7 +35,7 @@ addCommandAlias(
 )
 addCommandAlias(
   "testNative",
-  ";coreTestsNative/test;experimentalTestsNative/test" // `test` currently executes only compilation, see `nativeSettings` in `BuildHelper`
+  ";coreTestsNative/test;experimentalTestsNative/test"
 )
 
 val zioVersion = "2.1.8"

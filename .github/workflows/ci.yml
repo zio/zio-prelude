@@ -181,14 +181,12 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
       - name: Test on different Scala target platforms
-        run: ./sbt root${{ matrix.platform }}/test
+        run: ./sbt test{{ matrix.platform }}
 
   update-readme:
     name: Update README
