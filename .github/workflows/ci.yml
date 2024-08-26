@@ -1,7 +1,8 @@
 name: CI
 
 env:
-  JDK_JAVA_OPTIONS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M # JDK_JAVA_OPTIONS is _the_ env. variable to use for modern Java
+  JDK_JAVA_OPTIONS: -XX:+PrintCommandLineFlags -Xms6G -Xmx6G # JDK_JAVA_OPTIONS is _the_ env. variable to use for modern Java
+  SBT_OPTS: -XX:+PrintCommandLineFlags -Xms6G -Xmx6G # Needed for sbt
   NODE_OPTIONS: --max_old_space_size=6144
 
 on:
@@ -22,15 +23,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: 17
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -50,15 +49,13 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.7
       - name: Setup Java
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: 17
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -73,7 +70,7 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.7
       - name: Setup Java
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: 11 # ensure it works on 11 because we publish for 11
@@ -81,12 +78,10 @@ jobs:
       - name: Setup NodeJs
         uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 20.x
           registry-url: https://registry.npmjs.org
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -111,15 +106,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -146,15 +139,13 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.7
       - name: Setup Java
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -174,21 +165,19 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v4.1.7
       - name: Setup Java
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
       - name: Test on different Scala target platforms
-        run: ./sbt root${{ matrix.platform }}/test
+        run: ./sbt test${{ matrix.platform }}
 
   update-readme:
     name: Update README
@@ -200,10 +189,8 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: '0'
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Setup Scala
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: '17'
@@ -253,11 +240,13 @@ jobs:
           PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
   
   ci:
+    if: always()
     runs-on: ubuntu-22.04
     needs: [lint, compile, publishLocal, test, testJvms, testPlatforms]
     steps:
-      - name: Aggregate of lint, and all tests
-        run: echo "ci passed"
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
 
   publish:
     runs-on: ubuntu-22.04
@@ -270,15 +259,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Java
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: 11 # publish for 11
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -303,10 +290,8 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: '0'
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Setup Scala
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.2.2
         with:
           distribution: temurin
           java-version: '11'
@@ -316,7 +301,7 @@ jobs:
       - name: Setup NodeJs
         uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 20.x
           registry-url: https://registry.npmjs.org
       - name: Publish Docs to NPM Registry
         run: sbt docs/publishToNpm
