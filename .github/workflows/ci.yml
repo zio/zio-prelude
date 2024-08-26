@@ -1,7 +1,8 @@
 name: CI
 
 env:
-  JDK_JAVA_OPTIONS: -XX:+PrintCommandLineFlags -XX:MaxMetaspaceSize=4G -Xmx4G -Xss8M # JDK_JAVA_OPTIONS is _the_ env. variable to use for modern Java
+  JDK_JAVA_OPTIONS: -XX:+PrintCommandLineFlags -Xms6G -Xmx6G # JDK_JAVA_OPTIONS is _the_ env. variable to use for modern Java
+  SBT_OPTS: -XX:+PrintCommandLineFlags -Xms6G -Xmx6G # Needed for sbt
   NODE_OPTIONS: --max_old_space_size=6144
 
 on:
@@ -29,8 +30,6 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -57,8 +56,6 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -85,8 +82,6 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -118,8 +113,6 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -153,8 +146,6 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -181,14 +172,12 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 7
       - name: Test on different Scala target platforms
-        run: ./sbt root${{ matrix.platform }}/test
+        run: ./sbt test${{ matrix.platform }}
 
   update-readme:
     name: Update README
@@ -200,8 +189,6 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: '0'
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Setup Scala
         uses: actions/setup-java@v4.2.1
         with:
@@ -279,8 +266,6 @@ jobs:
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v6
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -305,8 +290,6 @@ jobs:
         uses: actions/checkout@v4.1.7
         with:
           fetch-depth: '0'
-      - name: Install libuv
-        run: sudo apt-get update && sudo apt-get install -y libuv1-dev
       - name: Setup Scala
         uses: actions/setup-java@v4.2.1
         with:
