@@ -69,6 +69,10 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 
   override final def hashCode(): Int = toEitherMultiSet.hashCode()
 
+  final def isSuccess: Boolean = self.isInstanceOf[Success[?, ?]]
+
+  final def isFailure: Boolean = !isSuccess
+
   /**
    * Transforms the value of this `ZValidation` with the specified validation
    * function if it is a success or returns the value unchanged otherwise.
