@@ -278,7 +278,7 @@ classDiagram
 
 ```mermaid
 classDiagram
-  AssociativeFlatten~F<+_>~ <|-- IdentityFlatten~F<_>~
+  AssociativeFlatten~F<+_>~ <|-- IdentityFlatten~F<+_>~
   class AssociativeFlatten~F<+_>~{
     Map[K, +*]
     
