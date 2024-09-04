@@ -48,7 +48,9 @@ val projectsCommon = List(
   experimentalLaws,
   experimentalTests,
   laws,
-  macros
+  macros,
+  magnolia,
+  magnoliaTests
 )
 
 val projectsJvmOnly = List[ProjectReference](
@@ -157,6 +159,37 @@ lazy val macros = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(buildInfoSettings("zio.prelude.macros"))
   .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
   .settings(dottySettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
+  .enablePlugins(BuildInfoPlugin)
+
+lazy val magnolia = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("magnolia"))
+  .dependsOn(core)
+  .settings(stdSettings("zio-prelude-magnolia"))
+  .settings(crossProjectSettings)
+  .settings(macroDefinitionSettings)
+  .settings(Compile / console / scalacOptions ~= { _.filterNot(Set("-Xfatal-warnings")) })
+  .settings(buildInfoSettings("zio.prelude.magnolia"))
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(magnoliaSettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
+  .jsSettings(jsSettings)
+  .nativeSettings(nativeSettings)
+  .enablePlugins(BuildInfoPlugin)
+
+lazy val magnoliaTests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("magnolia-tests"))
+  .dependsOn(magnolia)
+  .settings(stdSettings("zio-prelude-magnolia-tests"))
+  .settings(crossProjectSettings)
+  .settings(buildInfoSettings("zio.prelude.magnolia.tests"))
+  .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
+  .settings(dottySettings)
+  .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
+  .jvmSettings(scalaReflectTestSettings)
   .jsSettings(jsSettings)
   .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
