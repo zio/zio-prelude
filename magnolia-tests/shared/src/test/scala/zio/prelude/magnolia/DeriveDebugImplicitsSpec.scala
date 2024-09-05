@@ -1,37 +1,36 @@
-package zio.debug.magnolia
+package zio.prelude.magnolia
 
 import zio.Scope
 import zio.prelude._
 import zio.test.Assertion._
 import zio.test.{ZIOSpecDefault, _}
 
-case class Lair(name: String, animal: Animal)
+object DeriveDebugImplictsSpec extends ZIOSpecDefault {
 
-object Lair {
-  implicit val debug: Debug[Lair] = DeriveDebug.derived[Lair]
-}
+  case class Lair(name: String, animal: Animal)
+  object Lair {
+    implicit val debug: Debug[Lair] = DeriveDebug.derived[Lair]
+  }
 
-case class Animal(name: String, age: Int)
+  case class Animal(name: String, age: Int)
 
-object Animal {
-  implicit val debug: Debug[Animal] = DeriveDebug.derived[Animal]
-}
+  object Animal {
+    implicit val debug: Debug[Animal] = DeriveDebug.derived[Animal]
+  }
 
-case class Adult(name: String, age: Int, chidren: List[Child])
-case class Child(name: String, age: Int)
+  case class Adult(name: String, age: Int, chidren: List[Child])
+  case class Child(name: String, age: Int)
 
-object Adult {
-  implicit val debug: Debug[Adult] = DeriveDebug.derived[Adult]
-}
+  object Adult {
+    implicit val debug: Debug[Adult] = DeriveDebug.derived[Adult]
+  }
 
-object Child {
-  implicit val debug: Debug[Child] = DeriveDebug.derived[Child]
-}
-
-object Test extends ZIOSpecDefault {
+  object Child {
+    implicit val debug: Debug[Child] = DeriveDebug.derived[Child]
+  }
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("DeriveDebug")(
+    suite("DeriveDebug with implicits")(
       test("should derive Debug for case class") {
         val animal = Animal("tiger", 10)
 

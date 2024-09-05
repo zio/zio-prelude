@@ -1,4 +1,4 @@
-package zio.debug.magnolia
+package zio.prelude.magnolia
 
 import magnolia1._
 import zio.prelude.Debug

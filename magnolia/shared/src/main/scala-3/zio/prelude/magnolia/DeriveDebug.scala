@@ -1,4 +1,4 @@
-package zio.debug.magnolia
+package zio.prelude.magnolia
 
 import magnolia1._
 
@@ -6,7 +6,11 @@ import scala.collection.immutable.ListMap
 import scala.language.experimental.macros
 import zio.prelude.Debug
 import zio.prelude.Debug.Repr
+import scala.deriving.Mirror
 
+extension ($: Debug.type) {
+  inline def derived[T](using Mirror.Of[T]): Debug[T] = DeriveDebug.derived[T]
+}
 object DeriveDebug extends AutoDerivation[Debug] {
 
   type Typeclass[T] = Debug[T]

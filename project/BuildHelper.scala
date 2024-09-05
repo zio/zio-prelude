@@ -83,7 +83,6 @@ object BuildHelper {
           "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.7"
         case _      =>
           "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.10"
-//        libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.full)
       }
     }
 
