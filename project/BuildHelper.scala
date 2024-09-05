@@ -76,6 +76,16 @@ object BuildHelper {
     Test / parallelExecution := false
   )
 
+  val magnoliaSettings =
+    libraryDependencies += {
+      scalaVersion.value match {
+        case Scala3 =>
+          "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.7"
+        case _      =>
+          "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.10"
+      }
+    }
+
   // Keep this consistent with the version in .core-tests/shared/src/test/scala/REPLSpec.scala
   val replSettings = makeReplSettings {
     """|import zio._
