@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           fetch-depth: 0
       - name: Setup Java
@@ -47,7 +47,7 @@ jobs:
         platform: ['JVM', 'JS', 'Native']
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
       - name: Setup Java
         uses: actions/setup-java@v4.2.2
         with:
@@ -68,7 +68,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
       - name: Setup Java
         uses: actions/setup-java@v4.2.2
         with:
@@ -102,7 +102,7 @@ jobs:
         platform: ['JVM']
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           fetch-depth: 0
       - name: Setup Java
@@ -137,7 +137,7 @@ jobs:
         platform: ['JVM']
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
       - name: Setup Java
         uses: actions/setup-java@v4.2.2
         with:
@@ -163,7 +163,7 @@ jobs:
         platform: ['JS', 'Native']
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
       - name: Setup Java
         uses: actions/setup-java@v4.2.2
         with:
@@ -186,7 +186,7 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           fetch-depth: '0'
       - name: Setup Scala
@@ -255,7 +255,7 @@ jobs:
     if: github.event_name != 'pull_request'
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           fetch-depth: 0
       - name: Setup Java
@@ -287,7 +287,7 @@ jobs:
     if: ${{ ((github.event_name == 'release') && (github.event.action == 'published')) || (github.event_name == 'workflow_dispatch') }}
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           fetch-depth: '0'
       - name: Setup Scala
@@ -317,7 +317,7 @@ jobs:
     if: ${{ (github.event_name == 'release') && (github.event.action == 'published') }}
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           fetch-depth: '0'
       - name: notify the main repo about the new release of docs package
