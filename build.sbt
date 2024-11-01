@@ -38,7 +38,7 @@ addCommandAlias(
   ";coreTestsNative/test;experimentalTestsNative/test"
 )
 
-val zioVersion = "2.1.9"
+val zioVersion = "2.1.11"
 
 val projectsCommon = List(
   core,
@@ -268,7 +268,7 @@ lazy val benchmarks = project
     scalacOptions -= "-Xfatal-warnings",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core"   % "2.12.0",
-      "org.typelevel" %% "cats-effect" % "3.5.4"
+      "org.typelevel" %% "cats-effect" % "3.5.5"
     )
   )
   .dependsOn(core.jvm)
