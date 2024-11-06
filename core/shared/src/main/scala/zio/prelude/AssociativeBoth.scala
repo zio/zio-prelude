@@ -1075,6 +1075,15 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
+   * The `IdentityBoth` instance for `Config`.
+   */
+  implicit val ConfigIdentityBoth: IdentityBoth[Config] =
+    new IdentityBoth[Config] {
+      val any: Config[Any]                                               = Config.succeed(())
+      def both[A, B](fa: => Config[A], fb: => Config[B]): Config[(A, B)] = fa ++ fb
+    }
+
+  /**
    * The `AssociativeBoth` instance for `Const`.
    */
   implicit def ConstAssociativeBoth[A: Associative]: AssociativeBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =

@@ -58,6 +58,15 @@ object AssociativeEither {
     }
 
   /**
+   * The `AssociativeEither` instance for `Config`.
+   */
+  implicit val ConfigAssociativeEither: AssociativeEither[Config] =
+    new AssociativeEither[Config] {
+      def either[A, B](fa: => Config[A], fb: => Config[B]): Config[Either[A, B]] =
+        fa.map(Left(_)).orElse(fb.map(Right(_)))
+    }
+
+  /**
    * The `AssociativeEither` instance for `Either`.
    */
   implicit def EitherAssociativeEither[L]: AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] =
