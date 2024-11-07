@@ -99,6 +99,13 @@ object ForEachSpec extends ZIOBaseSpec {
             assert(actual)(equalTo(expected))
           }
         },
+        test("fold") {
+          check(genList) { as =>
+            val actual   = ForEach[List].fold(as.map(newtypes.Sum(_)))
+            val expected = as.sum
+            assert(actual)(equalTo(expected))
+          }
+        },
         test("foldLeft") {
           check(genList, genInt, genIntFunction2) { (as, s, f) =>
             val actual   = ForEach[List].foldLeft(as)(s)(f)
