@@ -16,11 +16,11 @@
 
 package zio.prelude
 
+import zio._
 import zio.prelude.coherent.CovariantIdentityBoth
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
-import zio.{Cause, Chunk, ChunkBuilder, Exit, Fiber, NonEmptyChunk, Schedule, ZIO}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -96,6 +96,16 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
           (a: Commutative[A]) => Commutative.make[B]((l, r) => f.to(a.combine(f.from(l), f.from(r)))),
           (b: Commutative[B]) => Commutative.make[A]((l, r) => f.from(b.combine(f.to(l), f.to(r))))
         )
+    }
+
+  /**
+   * The `Covariant` instance for `Config`.
+   */
+  implicit def ConfigCovariant[A]: Covariant[Config] =
+    new Covariant[Config] {
+      override def map[A, B](f: A => B): Config[A] => Config[B] = { config =>
+        config.map(f)
+      }
     }
 
   /**

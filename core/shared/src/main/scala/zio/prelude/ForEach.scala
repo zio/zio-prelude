@@ -494,6 +494,8 @@ trait ForEachSyntax {
       F.filterM(self)(f)
     def find(f: A => Boolean)(implicit F: ForEach[F]): Option[A]                                                =
       F.find(self)(f)
+    def fold(implicit F: ForEach[F], I: Identity[A]): A                                                         =
+      F.fold(self)
     def foldLeft[S](s: S)(f: (S, A) => S)(implicit F: ForEach[F]): S                                            =
       F.foldLeft(self)(s)(f)
     def foldLeftM[G[+_]: IdentityFlatten: Covariant, S](s: S)(f: (S, A) => G[S])(implicit F: ForEach[F]): G[S]  =

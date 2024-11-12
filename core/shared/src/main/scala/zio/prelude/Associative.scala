@@ -17,7 +17,7 @@
 package zio.prelude
 
 import zio.prelude.newtypes.{And, AndF, AndThen, Both, First, Last, Max, Min, Natural, Or, OrF, Prod, Sum}
-import zio.{Cause, Chunk, Duration => ZIODuration, NonEmptyChunk}
+import zio.{Cause, Chunk, ConfigProvider, Duration => ZIODuration, NonEmptyChunk}
 
 import scala.annotation.tailrec
 
@@ -351,6 +351,12 @@ object Associative extends AssociativeLowPriority {
    */
   implicit def ChunkIdentity[A]: Identity[Chunk[A]] =
     Identity.make(Chunk.empty, _ ++ _)
+
+  /**
+   * The `Associative` instance for `ConfigProvider`.
+   */
+  implicit val ConfigProviderAssociative: Associative[ConfigProvider] =
+    Associative.make(_.orElse(_))
 
   /**
    * Derives an `Associative[F[A]]` given a `Derive[F, Associative]` and an
