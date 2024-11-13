@@ -1186,9 +1186,13 @@ object AssociativeBoth extends AssociativeBothLowPriority {
         Some(())
 
       def both[A, B](fa: => Option[A], fb: => Option[B]): Option[(A, B)] =
-        (fa, fb) match {
-          case (Some(a), Some(b)) => Some((a, b))
-          case _                  => None
+        fa match {
+          case Some(a) =>
+            fb match {
+              case Some(b) => Some((a, b))
+              case None    => None
+            }
+          case None    => None
         }
     }
 
