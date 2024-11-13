@@ -96,7 +96,7 @@ object CommutativeBoth {
     }
 
   /**
-   * The [[CommutativeBoth]] instance for [[Optional]].
+   * The [[CommutativeBoth]] instance for [[zio.prelude.data.Optional]].
    */
   implicit val OptionalCommutativeBoth: CommutativeBoth[Optional] =
     new CommutativeBoth[Optional] {

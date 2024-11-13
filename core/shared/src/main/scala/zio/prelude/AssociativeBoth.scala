@@ -1197,7 +1197,7 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The [[IdentityBoth]] (with [[AssociativeBoth]]) instance for [[Optional]].
+   * The [[IdentityBoth]] (with [[AssociativeBoth]]) instance for [[zio.prelude.data.Optional]].
    */
   implicit val OptionalIdentityBoth: IdentityBoth[Optional] =
     new IdentityBoth[Optional] {

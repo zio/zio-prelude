@@ -164,7 +164,7 @@ object AssociativeFlatten {
     }
 
   /**
-   * The [[AssociativeFlatten]] and [[IdentityFlatten]] instance for [[Optional]].
+   * The [[AssociativeFlatten]] and [[IdentityFlatten]] instance for [[zio.prelude.data.Optional]].
    */
   implicit val OptionalIdentityFlatten: IdentityFlatten[Optional] =
     new IdentityFlatten[Optional] {

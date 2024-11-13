@@ -102,7 +102,7 @@ object Derive {
     }
 
   /**
-   * The [[DeriveEqual]] instance for [[Optional]].
+   * The [[DeriveEqual]] instance for [[zio.prelude.data.Optional]].
    */
   implicit val OptionalDeriveEqual: DeriveEqual[Optional] =
     new DeriveEqual[Optional] {

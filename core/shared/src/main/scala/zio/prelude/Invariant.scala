@@ -753,7 +753,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     }
 
   /**
-   * The [[ForEach]] (and thus [[Covariant]] and [[Invariant]]) instance for [[Optional]].
+   * The [[ForEach]] (and thus [[Covariant]] and [[Invariant]]) instance for [[zio.prelude.data.Optional]].
    */
   implicit val OptionalForEach: ForEach[Optional] =
     new ForEach[Optional] {

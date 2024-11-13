@@ -159,7 +159,7 @@ object AssociativeEither {
     }
 
   /**
-   * The [[IdentityEither]] (and [[AssociativeEither]]) instance for [[Optional]].
+   * The [[IdentityEither]] (and [[AssociativeEither]]) instance for [[zio.prelude.data.Optional]].
    */
   implicit val OptionalIdentityEither: IdentityEither[Optional] =
     new IdentityEither[Optional] {
