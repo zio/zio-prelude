@@ -119,11 +119,8 @@ sealed trait Optional[+A] { self =>
       case Optional.Absent       => Optional.Absent
     }
 
-  final def orElse[B >: A](other: => Optional[B]): Optional[B] =
-    self match {
-      case Optional.Present(_) => self
-      case Optional.Absent     => other
-    }
+  final def orElse[B >: A](alternative: => Optional[B]): Optional[B] =
+    if (isEmpty) alternative else this
 
   final def iterator: Iterator[A] =
     self match {
