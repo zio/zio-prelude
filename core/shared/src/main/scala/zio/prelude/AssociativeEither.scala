@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio._
+import zio.prelude.data.Optional
 import zio.prelude.newtypes.Failure
 import zio.stream.ZStream
 
@@ -155,6 +156,17 @@ object AssociativeEither {
 
       val none: Option[Nothing] =
         None
+    }
+
+  /**
+   * The [[IdentityEither]] (and [[AssociativeEither]]) instance for [[Optional]].
+   */
+  implicit val OptionalIdentityEither: IdentityEither[Optional] =
+    new IdentityEither[Optional] {
+      def either[A, B](fa: => Optional[A], fb: => Optional[B]): Optional[Either[A, B]] =
+        fa.map(Left(_)) orElse fb.map(Right(_))
+
+      val none: Optional[Nothing] = Optional.Absent
     }
 
   /**
