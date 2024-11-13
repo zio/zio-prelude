@@ -18,7 +18,8 @@ package zio.prelude
 
 import zio.Exit.{Failure, Success}
 import zio.prelude.coherent.{HashOrd, HashPartialOrd}
-import zio.{Cause, Chunk, Duration => ZIODuration, Exit, FiberId, NonEmptyChunk, StackTrace}
+import zio.prelude.data.Optional
+import zio.{Cause, Chunk, Exit, FiberId, NonEmptyChunk, StackTrace, Duration => ZIODuration}
 
 import scala.annotation.{implicitNotFound, nowarn}
 import scala.concurrent.duration.{Duration => ScalaDuration}
@@ -351,6 +352,16 @@ object Equal extends EqualVersionSpecific {
       case (None, None)         => true
       case (Some(a1), Some(a2)) => a1 === a2
       case _                    => false
+    }
+
+  /**
+   * Derives an `Equal[Optional[A]]` given an `Equal[A]`.
+   */
+  implicit def OptionalEqual[A: Equal]: Equal[Optional[A]] =
+    make {
+      case (Optional.Absent, Optional.Absent)           => true
+      case (Optional.Present(a1), Optional.Present(a2)) => a1 === a2
+      case _                                            => false
     }
 
   /**

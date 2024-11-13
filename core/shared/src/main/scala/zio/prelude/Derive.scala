@@ -16,6 +16,7 @@
 
 package zio.prelude
 
+import zio.prelude.data.Optional
 import zio.{Cause, Chunk, Exit, NonEmptyChunk}
 
 import scala.util.Try
@@ -98,6 +99,15 @@ object Derive {
     new DeriveEqual[Option] {
       def derive[A: Equal]: Equal[Option[A]] =
         Equal.OptionEqual
+    }
+
+  /**
+   * The [[DeriveEqual]] instance for [[Optional]].
+   */
+  implicit val OptionalDeriveEqual: DeriveEqual[Optional] =
+    new DeriveEqual[Optional] {
+      def derive[A: Equal]: Equal[Optional[A]] =
+        Equal.OptionalEqual
     }
 
   /**
