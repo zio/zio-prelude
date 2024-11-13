@@ -17,6 +17,7 @@
 package zio.prelude
 
 import zio._
+import zio.prelude.data.Optional
 import zio.stm.ZSTM
 import zio.stream.ZStream
 
@@ -160,6 +161,16 @@ object AssociativeFlatten {
       def any: Option[Any] = Some(())
 
       def flatten[A](ffa: Option[Option[A]]): Option[A] = ffa.flatten
+    }
+
+  /**
+   * The [[AssociativeFlatten]] and [[IdentityFlatten]] instance for [[Optional]].
+   */
+  implicit val OptionalIdentityFlatten: IdentityFlatten[Optional] =
+    new IdentityFlatten[Optional] {
+      def any: Optional[Any] = Optional.Present(())
+
+      def flatten[A](ffa: Optional[Optional[A]]): Optional[A] = ffa.flatten
     }
 
   /**
