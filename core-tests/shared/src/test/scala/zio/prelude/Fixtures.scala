@@ -1,5 +1,6 @@
 package zio.prelude
 
+import zio.prelude.data.Optional
 import zio.test.laws.GenF
 import zio.test.{Gen, Sized}
 import zio.{Chunk, Trace}
@@ -22,4 +23,13 @@ object Fixtures {
 
   implicit val chunkOptionInvariant: Invariant[ChunkOption] =
     Invariant[Chunk].compose[Option]
+
+  def anyOptional[R, A](gen: Gen[R, A])(implicit trace: Trace): Gen[R, Optional[A]] = Gen.option(gen).map(Optional.OptionIsNullable)
+
+  val optionalGenF: GenF[Any, Optional] =
+    new GenF[Any, Optional] {
+      def apply[R1, A](gen: Gen[R1, A])(implicit trace: Trace): Gen[R1, Optional[A]] =
+        anyOptional(gen)
+    }
+
 }

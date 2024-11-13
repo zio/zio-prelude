@@ -4,7 +4,6 @@ import zio.prelude.laws._
 import zio.prelude.newtypes._
 import zio.test._
 import zio.test.laws._
-import zio.prelude.data.Optional
 
 import scala.math.abs
 
@@ -32,8 +31,6 @@ object IdempotentSpec extends ZIOBaseSpec {
   private implicit val DoubleEqual: Equal[Double] = Equal.DoubleEqualWithEpsilon()
   private implicit val FloatEqual: Equal[Float]   = Equal.FloatEqualWithEpsilon()
 
-  def anyOptional[A](gen: Gen[Any, A]): Gen[Any, Optional[A]] = Gen.option(gen)
-
   def spec: Spec[Environment, Any] =
     suite("IdempotentSpec")(
       suite("laws")(
@@ -45,7 +42,6 @@ object IdempotentSpec extends ZIOBaseSpec {
         test("float min")(checkAllLaws(IdempotentLaws)(Gen.float.map(Min(_)))),
         test("map")(checkAllLaws(IdempotentLaws)(Gen.mapOf(anyMaxInt, anyMaxInt))),
         test("option")(checkAllLaws(IdempotentLaws)(Gen.option(anyMaxInt))),
-        test("optional")(checkAllLaws(IdempotentLaws)(anyOptional(anyMaxInt))),
         test("ordering")(checkAllLaws(IdempotentLaws)(anyOrdering)),
         test("partial ordering")(checkAllLaws(IdempotentLaws)(anyPartialOrdering)),
         test("set")(checkAllLaws(IdempotentLaws)(Gen.setOf(Gen.int).map(OrF(_)))),

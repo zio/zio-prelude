@@ -54,6 +54,7 @@ object ForEachSpec extends ZIOBaseSpec {
         test("list")(checkAllLaws(ForEachLaws)(GenF.list, Gen.int)),
         test("map")(checkAllLaws(ForEachLaws)(GenFs.map(Gen.int), Gen.int)),
         test("option")(checkAllLaws(ForEachLaws)(GenF.option, Gen.int)),
+        test("optional")(checkAllLaws(ForEachLaws)(optionalGenF, Gen.int)),
         test("vector")(checkAllLaws(ForEachLaws)(GenF.vector, Gen.int))
       ),
       suite("combinators")(
