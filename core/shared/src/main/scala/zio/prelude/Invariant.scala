@@ -18,6 +18,7 @@ package zio.prelude
 
 import zio._
 import zio.prelude.coherent.CovariantIdentityBoth
+import zio.prelude.data.Optional
 import zio.prelude.newtypes.Failure
 import zio.stm.ZSTM
 import zio.stream.{ZSink, ZStream}
@@ -749,6 +750,15 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new ForEach[Option] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
         option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
+    }
+
+  /**
+   * The [[ForEach]] (and thus [[Covariant]] and [[Invariant]]) instance for [[Optional]].
+   */
+  implicit val OptionalForEach: ForEach[Optional] =
+    new ForEach[Optional] {
+      def forEach[G[+_]: IdentityBoth: Covariant, A, B](option: Optional[A])(f: A => G[B]): G[Optional[B]] =
+        option.fold[G[Optional[B]]](Optional.Absent.succeed)(a => f(a).map(Optional.Present(_)))
     }
 
   /**
