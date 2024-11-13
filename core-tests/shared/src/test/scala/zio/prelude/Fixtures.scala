@@ -24,7 +24,8 @@ object Fixtures {
   implicit val chunkOptionInvariant: Invariant[ChunkOption] =
     Invariant[Chunk].compose[Option]
 
-  def anyOptional[R, A](gen: Gen[R, A])(implicit trace: Trace): Gen[R, Optional[A]] = Gen.option(gen).map(Optional.OptionIsNullable)
+  def anyOptional[R, A](gen: Gen[R, A])(implicit trace: Trace): Gen[R, Optional[A]] =
+    Gen.option(gen).map(Optional.OptionIsNullable)
 
   val optionalGenF: GenF[Any, Optional] =
     new GenF[Any, Optional] {
