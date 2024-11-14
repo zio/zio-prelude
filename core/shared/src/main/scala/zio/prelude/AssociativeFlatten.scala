@@ -249,6 +249,6 @@ trait AssociativeFlattenSyntax {
      * resulting `F[F[B]]`.
      */
     def flatMap[B](f: A => F[B])(implicit flatten: AssociativeFlatten[F], covariant: Covariant[F]): F[B] =
-      flatten.flatten(covariant.map(f)(fa))
+      fa.map(f).flatten
   }
 }
