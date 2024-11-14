@@ -1,7 +1,7 @@
 package zio.prelude.data
 
 import zio.Chunk
-import scala.IterableOnce
+import scala.collection.IterableOnce
 
 import scala.language.implicitConversions
 
