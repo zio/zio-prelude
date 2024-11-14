@@ -11,11 +11,11 @@ object OptionalSpec extends ZIOBaseSpec {
     suite("Optional")(
       test("is an IterableOnce") {
         def get(a: Int): Optional[Long] = Optional.Present(a.toLong)
-        val list: List[Int] = List(1, 2, 3)
-        val result: List[Long] = list.flatMap(get)
+        val list: List[Int]             = List(1, 2, 3)
+        val result: List[Long]          = list.flatMap(get)
 
         assertTrue(result == List(1L, 2L, 3L))
-      },
+      }
     )
 
 }
