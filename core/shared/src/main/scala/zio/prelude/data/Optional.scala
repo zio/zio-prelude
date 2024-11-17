@@ -1,6 +1,7 @@
 package zio.prelude.data
 
 import zio.Chunk
+import zio.prelude.IterableOnceCompat
 
 import scala.language.implicitConversions
 
@@ -13,7 +14,7 @@ import scala.language.implicitConversions
  * The only difference between this type and [[scala.Option]] is that there is an implicit
  * conversion defined from `A`` to `Optional[A]`, and from `Option[A]`` to `Optional[A]`.
  */
-sealed trait Optional[+A] { self =>
+sealed trait Optional[+A] extends IterableOnceCompat[A] { self =>
   val isEmpty: Boolean
   val isDefined: Boolean
   val nonEmpty: Boolean
@@ -122,7 +123,7 @@ sealed trait Optional[+A] { self =>
   final def orElse[B >: A](alternative: => Optional[B]): Optional[B] =
     if (isEmpty) alternative else this
 
-  final def iterator: Iterator[A] =
+  override final def iterator: Iterator[A] =
     self match {
       case Optional.Present(get) => Iterator.single(get)
       case Optional.Absent       => Iterator.empty
@@ -145,6 +146,12 @@ sealed trait Optional[+A] { self =>
       case Optional.Present(get) => Vector(get)
       case Optional.Absent       => Vector.empty
     }
+
+  /**
+   * Copied from `Option.knownSize`
+   */
+  override final def knownSize: Int = if (isEmpty) 0 else 1
+
 }
 
 object Optional {
