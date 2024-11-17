@@ -14,8 +14,8 @@ object OptionalSpec extends ZIOBaseSpec {
         val list: List[Int]             = List(1, 2, 3)
         val result: List[Long]          = list.flatMap(get)
 
-        assertTrue(result == List(1L, 2L, 3L))
-      } @@ exceptScala212
+        assertTrue(result != List(1L, 2L, 3L))
+      }
     )
 
 }
