@@ -148,7 +148,7 @@ sealed trait Optional[+A] extends IterableOnceCompat[A] { self =>
     }
 
   /**
-   * Copied from [[Option.knownSize]]
+   * Copied from `Option.knownSize`
    */
   override final def knownSize: Int = if (isEmpty) 0 else 1
 
