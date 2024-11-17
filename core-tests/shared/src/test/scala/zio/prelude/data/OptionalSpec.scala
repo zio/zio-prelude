@@ -2,7 +2,6 @@ package zio.prelude.data
 
 import zio.Scope
 import zio.prelude.ZIOBaseSpec
-import zio.prelude.data.Optional
 import zio.test.TestAspect.exceptScala212
 import zio.test.{Spec, TestEnvironment, assertTrue}
 
@@ -16,7 +15,7 @@ object OptionalSpec extends ZIOBaseSpec {
         val result: List[Long]          = list.flatMap(get)
 
         assertTrue(result == List(1L, 2L, 3L))
-      }
-    ) @@ exceptScala212
+      } @@ exceptScala212
+    )
 
 }
