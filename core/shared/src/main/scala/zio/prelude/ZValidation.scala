@@ -374,6 +374,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 }
 
 object ZValidation extends LowPriorityValidationImplicits {
+  private val unitFailure: Validation[Unit, Nothing] = fail(())
 
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
@@ -511,7 +512,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Constructs a `ZValidation` that fails with the specified error.
    */
   def fail[E](error: E): Validation[E, Nothing] =
-    Failure(Chunk.empty, NonEmptyChunk(error))
+    Failure(Chunk.empty, NonEmptyChunk.single(error))
 
   /**
    * Constructs a `ZValidation` that fails with the specified `NonEmptyChunk`
@@ -537,7 +538,7 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Constructs a `ZValidation` from an `Option`.
    */
   def fromOption[A](value: Option[A]): Validation[Unit, A] =
-    value.fold[Validation[Unit, A]](fail(()))(succeed)
+    value.fold[Validation[Unit, A]](unitFailure)(succeed)
 
   /**
    * Constructs a `Validation` from an `Option`, failing with the error
