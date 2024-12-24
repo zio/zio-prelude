@@ -38,7 +38,7 @@ addCommandAlias(
   ";coreTestsNative/test;experimentalTestsNative/test"
 )
 
-val zioVersion = "2.1.13"
+val zioVersion = "2.1.14"
 
 val projectsCommon = List(
   core,
@@ -251,7 +251,7 @@ lazy val scalaParallelCollections = project
         case BuildHelper.Scala212 =>
           List()
         case _                    =>
-          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4")
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.1.0")
       }
     }
   )
