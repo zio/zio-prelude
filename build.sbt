@@ -55,14 +55,14 @@ val projectsCommon = List(
 
 val projectsJvmOnly = List[ProjectReference](
   benchmarks,
-  docs,
-  scalaParallelCollections
+  docs
 )
 
 lazy val rootJVM = project
   .in(file("target/rootJVM"))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.map(_.jvm: ProjectReference): _*)
+  .aggregate(scalaParallelCollections.jvm)
   .aggregate(projectsJvmOnly: _*)
 
 lazy val rootJS = project
@@ -74,17 +74,19 @@ lazy val rootNative = project
   .in(file("target/rootNative"))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.map(_.native: ProjectReference): _*)
+  .aggregate(scalaParallelCollections.native)
 
 lazy val root212 = project
   .in(file("target/root212"))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.map(_.jvm: ProjectReference): _*)
-  .aggregate(benchmarks, scalaParallelCollections)
+  .aggregate(benchmarks, scalaParallelCollections.jvm)
 
 lazy val root213 = project
   .in(file("target/root213"))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.map(_.jvm: ProjectReference): _*)
+  .aggregate(scalaParallelCollections.jvm)
   .aggregate(projectsJvmOnly: _*)
 
 lazy val root3 = project
@@ -96,6 +98,7 @@ lazy val root = project
   .in(file("."))
   .settings(publish / skip := true)
   .aggregate(projectsCommon.flatMap(p => List[ProjectReference](p.jvm, p.js, p.native)): _*)
+  .aggregate(scalaParallelCollections.jvm, scalaParallelCollections.native)
   .aggregate(projectsJvmOnly: _*)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -237,9 +240,9 @@ lazy val experimentalTests = crossProject(JSPlatform, JVMPlatform, NativePlatfor
   .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
 
-lazy val scalaParallelCollections = project
+lazy val scalaParallelCollections = crossProject(JVMPlatform, NativePlatform)
   .in(file("scala-parallel-collections"))
-  .dependsOn(core.jvm, coreTests.jvm % "test->test")
+  .dependsOn(core, coreTests % "test->test")
   .settings(stdSettings("zio-prelude-scala-parallel-collections"))
   .settings(buildInfoSettings("zio.prelude.scalaparallelcollections"))
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
@@ -256,7 +259,8 @@ lazy val scalaParallelCollections = project
     }
   )
   .settings(libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test)
-  .settings(scalaReflectTestSettings)
+  .jvmSettings(scalaReflectTestSettings)
+  .nativeSettings(nativeSettings)
   .enablePlugins(BuildInfoPlugin)
 
 lazy val benchmarks = project
