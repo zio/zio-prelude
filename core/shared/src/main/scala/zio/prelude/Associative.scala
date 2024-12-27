@@ -1453,15 +1453,17 @@ object Associative extends AssociativeLowPriority {
 
 trait AssociativeLowPriority {
 
-  implicit def FxCauseProdAssociative[A]: Associative[Prod[fx.Cause[A]]] = new Associative[Prod[fx.Cause[A]]] {
-    def combine(l: => Prod[fx.Cause[A]], r: => Prod[fx.Cause[A]]): Prod[fx.Cause[A]] =
-      Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
-  }
+  implicit def parSeqProdAssociative[A]: Associative[Prod[ParSeq[Unit, A]]] =
+    new Associative[Prod[ParSeq[Unit, A]]] {
+      def combine(l: => Prod[ParSeq[Unit, A]], r: => Prod[ParSeq[Unit, A]]): Prod[ParSeq[Unit, A]] =
+        Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
+    }
 
-  implicit def FxCauseSumCommutative[A]: Commutative[Sum[fx.Cause[A]]] = new Commutative[Sum[fx.Cause[A]]] {
-    def combine(l: => Sum[fx.Cause[A]], r: => Sum[fx.Cause[A]]): Sum[fx.Cause[A]] =
-      Sum(Sum.unwrap(l) && Sum.unwrap(r))
-  }
+  implicit def parSeqSumCommutative[A]: Commutative[Sum[ParSeq[Unit, A]]] =
+    new Commutative[Sum[ParSeq[Unit, A]]] {
+      def combine(l: => Sum[ParSeq[Unit, A]], r: => Sum[ParSeq[Unit, A]]): Sum[ParSeq[Unit, A]] =
+        Sum(Sum.unwrap(l) && Sum.unwrap(r))
+    }
 
   /**
    * The `Commutative` and `PartialInverse` instance for the product of `Int` values.

@@ -72,9 +72,9 @@ object ZPureSpec extends ZIOBaseSpec {
           },
           test("providing environment should preserve errors") {
             val zPure: ZPure[Nothing, Unit, Unit, (Int, Int), Int, Int] =
-              ZPure.fail(1).zipPar(ZPure.fail(2)).as(0)
+              ZPure.fail(1).as(0)
             val actual                                                  = zPure.provideEnvironment(ZEnvironment((1, 2))).runValidation
-            val expected                                                = Validation.Failure(Chunk.empty, NonEmptyChunk(1, 2))
+            val expected                                                = Validation.Failure(Chunk.empty, NonEmptyChunk(1))
             assert(actual)(equalTo(expected))
           },
           test("provideSome") {
@@ -821,20 +821,6 @@ object ZPureSpec extends ZIOBaseSpec {
             }
           )
         ),
-        test("parallel errors example") {
-          def validateName(s: String): ZPure[Nothing, Unit, Unit, Any, String, String]               =
-            if (s == "John Doe") ZPure.succeed(s) else ZPure.fail("Wrong name!")
-          def validateAge(age: Int): ZPure[Nothing, Unit, Unit, Any, String, Int]                    =
-            if (age >= 18) ZPure.succeed(age) else ZPure.fail("Under age")
-          def validateAuthorized(authorized: Boolean): ZPure[Nothing, Unit, Unit, Any, String, Unit] =
-            if (authorized) ZPure.unit else ZPure.fail("Not authorized")
-          val validation                                                                             =
-            validateName("Jane Doe") zipPar validateAge(17) zipPar validateAuthorized(false)
-          val result                                                                                 = validation.sandbox.either.run
-          assert(result)(
-            isLeft(equalTo(Cause("Wrong name!") && Cause("Under age") && Cause("Not authorized")))
-          )
-        },
         test("state is restored after failure") {
           val foo: ZPure[Nothing, String, Int, Any, Nothing, Unit] = ZPure.set(3)
           val bar: ZPure[Nothing, Int, String, Any, Nothing, Unit] = ZPure.set("bar")

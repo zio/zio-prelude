@@ -18,7 +18,6 @@ package zio.prelude.laws
 
 import zio.Trace
 import zio.prelude._
-import zio.prelude.fx.Cause
 import zio.prelude.newtypes.Natural
 import zio.test._
 
@@ -41,15 +40,15 @@ object Gens {
     Gen.int(min, max).map(Natural.unsafeMake)
 
   def parSeq[R <: Sized, Z <: Unit, A](z: Gen[R, Z], a: Gen[R, A]): Gen[R, ParSeq[Z, A]] = {
-    val failure = a.map(Cause.single)
-    val empty   = z.map(_ => Cause.empty.asInstanceOf[ParSeq[Nothing, Nothing]])
+    val failure = a.map(ParSeq.single)
+    val empty   = z.map(_ => ParSeq.empty.asInstanceOf[ParSeq[Nothing, Nothing]])
 
     def sequential(n: Int) = Gen.suspend {
       for {
         i <- Gen.int(1, n - 1)
         l <- parSeqN(i)
         r <- parSeqN(n - i)
-      } yield Cause.Then(l, r)
+      } yield ParSeq.Then(l, r)
     }
 
     def parallel(n: Int) = Gen.suspend {
@@ -57,7 +56,7 @@ object Gens {
         i <- Gen.int(1, n - 1)
         l <- parSeqN(i)
         r <- parSeqN(n - i)
-      } yield Cause.Both(l, r)
+      } yield ParSeq.Both(l, r)
     }
 
     def parSeqN(n: Int): Gen[R, ParSeq[Z, A]] = Gen.suspend {
