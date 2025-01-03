@@ -293,7 +293,7 @@ lazy val docs = project
       experimental.jvm,
       experimentalLaws.jvm,
       laws.jvm,
-      scalaParallelCollections
+      scalaParallelCollections.jvm
     )
   )
   .settings(macroDefinitionSettings)
