@@ -297,7 +297,7 @@ lazy val docs = project
     )
   )
   .settings(macroDefinitionSettings)
-  .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections)
+  .dependsOn(core.jvm, experimental.jvm, experimentalLaws.jvm, laws.jvm, scalaParallelCollections.jvm)
   .enablePlugins(WebsitePlugin)
 
 lazy val examples =
