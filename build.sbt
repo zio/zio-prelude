@@ -251,7 +251,7 @@ lazy val scalaParallelCollections = project
         case BuildHelper.Scala212 =>
           List()
         case _                    =>
-          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.1.0")
+          List("org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0")
       }
     }
   )
