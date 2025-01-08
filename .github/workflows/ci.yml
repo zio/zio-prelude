@@ -198,7 +198,7 @@ jobs:
       - name: Cache Dependencies
         uses: coursier/cache-action@v6
       - name: Generate Readme
-        run: sbt docs/generateReadme
+        run: ./sbt docs/generateReadme
       - name: Commit Changes
         run: |
           git config --local user.email "zio-assistant[bot]@users.noreply.github.com"
