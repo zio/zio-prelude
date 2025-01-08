@@ -124,10 +124,10 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
 
 trait DistributiveProdLowPriorityImplicits {
 
-  implicit def FxCauseDistributiveProd[A]: DistributiveProd[fx.Cause[A]] =
-    new DistributiveProd[fx.Cause[A]] {
-      val Sum: Associative[Sum[fx.Cause[A]]]   = Associative.FxCauseSumCommutative
-      val Prod: Associative[Prod[fx.Cause[A]]] = Associative.FxCauseProdAssociative
+  implicit def parSeqDistributiveProd[A]: DistributiveProd[ParSeq[Unit, A]] =
+    new DistributiveProd[ParSeq[Unit, A]] {
+      val Sum: Associative[Sum[ParSeq[Unit, A]]]   = Associative.parSeqSumCommutative
+      val Prod: Associative[Prod[ParSeq[Unit, A]]] = Associative.parSeqProdAssociative
     }
 
 }

@@ -312,7 +312,6 @@ classDiagram
   DistributiveProd~A~ <|-- Annihilation~A~
   class DistributiveProd~A~{
     Cause[A]
-    fx.Cause[A]
     ParSeq[Unit, A]
     
     () Sum: Associative[Sum[A]]

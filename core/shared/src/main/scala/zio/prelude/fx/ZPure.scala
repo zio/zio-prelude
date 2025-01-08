@@ -16,9 +16,9 @@
 
 package zio.prelude.fx
 
+import zio._
 import zio.prelude._
 import zio.prelude.coherent.CovariantIdentityBoth
-import zio.{Cause => _, _}
 
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.reflect.ClassTag
@@ -37,34 +37,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
   /**
-   * A symbolic alias for `zipParRight`.
-   */
-  final def &>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
-    that: ZPure[W1, S3, S3, R1, E1, B]
-  ): ZPure[W1, S3, S3, R1, E1, B] =
-    self zipParRight that
-
-  /**
    * A symbolic alias for `zipRight`.
    */
   final def *>[W1 >: W, S3, R1 <: R, E1 >: E, B](that: ZPure[W1, S2, S3, R1, E1, B]): ZPure[W1, S1, S3, R1, E1, B] =
     self zipRight that
-
-  /**
-   * A symbolic alias for `zipParLeft`.
-   */
-  final def <&[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
-    that: ZPure[W1, S3, S3, R1, E1, B]
-  ): ZPure[W1, S3, S3, R1, E1, A] =
-    self zipParLeft that
-
-  /**
-   * A symbolic alias for `zipPar`.
-   */
-  final def <&>[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(implicit
-    zippable: Zippable[A, B]
-  ): ZPure[W1, S3, S3, R1, E1, zippable.Out] =
-    self zipPar that
 
   /**
    * A symbolic alias for `zipLeft`.
@@ -263,12 +239,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   ): ZPure[W, S3, S3, R, Nothing, B] =
     self.foldM(e => ZPure.succeed(failure(e)), a => ZPure.succeed(success(a)))
 
-  final def foldCauseM[W1 >: W, S0 <: S1, S3, R1 <: R, E1, B](
-    failure: Cause[E] => ZPure[W1, S0, S3, R1, E1, B],
-    success: A => ZPure[W1, S2, S3, R1, E1, B]
-  )(implicit ev: CanFail[E]): ZPure[W1, S0, S3, R1, E1, B] =
-    Fold(self, failure, success)
-
   /**
    * Recovers from errors by accepting one computation to execute for the case
    * of an error, and one computation to execute for the case of success.
@@ -277,7 +247,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     failure: E => ZPure[W1, S0, S3, R1, E1, B],
     success: A => ZPure[W1, S2, S3, R1, E1, B]
   )(implicit ev: CanFail[E]): ZPure[W1, S0, S3, R1, E1, B] =
-    foldCauseM((cause: Cause[E]) => failure(cause.first), success)
+    Fold(self, failure, success)
 
   /**
    * Exposes the output state into the value channel.
@@ -360,14 +330,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def mapError[E1](f: E => E1)(implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
     catchAll(e => fail(f(e)))
-
-  /**
-   * Returns a computation with its full cause of failure mapped using the
-   * specified function. This can be users to transform errors while
-   * preserving the original structure of the `Cause`.
-   */
-  final def mapErrorCause[E2](f: Cause[E] => Cause[E2]): ZPure[W, S1, S2, R, E2, A] =
-    foldCauseM(cause => ZPure.failCause(f(cause)), ZPure.succeed)
 
   /**
    * Transforms the updated state of this computation with the specified
@@ -578,14 +540,14 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * the updated state and the result.
    */
   final def run(s: S1)(implicit ev1: Any <:< R, ev2: E <:< Nothing): (S2, A) =
-    runAll(s)._2.fold(cause => ev2(cause.first), identity)
+    runAll(s)._2.fold(ev2, identity)
 
   /**
    * Runs this computation with the specified initial state, returning both the
    * log and either all the failures that occurred or the updated state and the
    * result.
    */
-  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[Cause[E], (S2, A)]) =
+  final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[E, (S2, A)]) =
     Runner(s, self)
 
   /**
@@ -593,14 +555,14 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * occur.
    */
   final def runEither(implicit ev1: Unit <:< S1, ev2: Any <:< R): Either[E, A] =
-    runAll(())._2.fold(cause => Left(cause.first), { case (_, a) => Right(a) })
+    runAll(())._2.fold(error => Left(error), { case (_, a) => Right(a) })
 
   /**
    * Runs this computation to produce its result and the log.
    */
   final def runLog(implicit ev1: Unit <:< S1, ev2: Any <:< R, ev3: E <:< Nothing): (Chunk[W], A) = {
     val (log, either) = runAll(())
-    (log, either.fold(cause => ev3(cause.first), { case (_, a) => a }))
+    (log, either.fold(error => ev3(error), { case (_, a) => a }))
   }
 
   /**
@@ -622,15 +584,9 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    */
   final def runValidation(implicit ev1: Unit <:< S1, ev2: Any <:< R): ZValidation[W, E, A] =
     runAll(()) match {
-      case (log, Left(cause))   => ZValidation.Failure(log, NonEmptyChunk.fromChunk(cause.toChunk).get)
+      case (log, Left(error))   => ZValidation.Failure(log, NonEmptyChunk.single(error))
       case (log, Right((_, a))) => ZValidation.Success(log, a)
     }
-
-  /**
-   * Exposes the full cause of failures of this computation.
-   */
-  final def sandbox: ZPure[W, S1, S2, R, Cause[E], A] =
-    foldCauseM(ZPure.fail, ZPure.succeed)
 
   /**
    * Converts an option on values into an option on errors leaving the state unchanged.
@@ -684,7 +640,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] =
     ZIO.environmentWithZIO[R] { r =>
       provideEnvironment(r).runAll(())._2 match {
-        case Left(cause)   => ZIO.failCause(cause.toCause)
+        case Left(error)   => ZIO.fail(error)
         case Right((_, a)) => ZIO.succeed(a)
       }
     }
@@ -696,7 +652,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZIO.environmentWithZIO[R] { r =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => ZIO.failCause(cause.toCause)
+        case Left(error)   => ZIO.fail(error)
         case Right((_, a)) => ZIO.succeed(a)
       }
     }
@@ -708,7 +664,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZIO.environmentWithZIO[R] { r =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
-        case Left(cause)   => ZIO.failCause(cause.toCause)
+        case Left(error)   => ZIO.fail(error)
         case Right(result) => ZIO.succeed(result)
       }
     }
@@ -720,16 +676,10 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     ZIO.environmentWithZIO[R] { r =>
       val (log, result) = provideEnvironment(r).runAll(s1)
       result match {
-        case Left(cause)    => ZIO.failCause(cause.toCause)
+        case Left(error)    => ZIO.fail(error)
         case Right((s2, a)) => ZIO.succeed((log, s2, a))
       }
     }
-
-  /**
-   * Submerges the full cause of failures of this computation.
-   */
-  def unsandbox[E1](implicit ev: E <:< Cause[E1]): ZPure[W, S1, S2, R, E1, A] =
-    foldM(e => ZPure.failCause(ev(e)), a => ZPure.succeed(a))
 
   /**
    * Combines this computation with the specified computation, passing the
@@ -770,33 +720,6 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     that: ZPure[W1, S2, S3, R1, E1, B]
   )(f: (A, B) => C): ZPure[W1, S1, S3, R1, E1, C] =
     self.flatMap(a => that.map(b => f(a, b)))
-
-  final def zipWithPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
-    that: ZPure[W1, S3, S3, R1, E1, B]
-  )(f: (A, B) => C): ZPure[W1, S3, S3, R1, E1, C] =
-    self.foldCauseM(
-      c1 =>
-        that.foldCauseM(
-          c2 => ZPure.failCause(c1 && c2),
-          _ => ZPure.failCause(c1)
-        ),
-      a => that.map(b => f(a, b))
-    )
-
-  final def zipPar[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](that: ZPure[W1, S3, S3, R1, E1, B])(implicit
-    zippable: Zippable[A, B]
-  ): ZPure[W1, S3, S3, R1, E1, zippable.Out] =
-    self.zipWithPar(that)(zippable.zip(_, _))
-
-  final def zipParLeft[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
-    that: ZPure[W1, S3, S3, R1, E1, B]
-  ): ZPure[W1, S3, S3, R1, E1, A] =
-    self.zipWithPar(that)((a, _) => a)
-
-  final def zipParRight[W1 >: W, S3 >: S2 <: S1, R1 <: R, E1 >: E, B, C](
-    that: ZPure[W1, S3, S3, R1, E1, B]
-  ): ZPure[W1, S3, S3, R1, E1, B] =
-    self.zipWithPar(that)((_, b) => b)
 
   /**
    * Returns a successful computation if the value is `Right`, or fails with error `None`.
@@ -915,10 +838,7 @@ object ZPure {
     new EnvironmentWithPurePartiallyApplied
 
   def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
-    failCause(Cause(e))
-
-  def failCause[E](cause: Cause[E]): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
-    ZPure.Fail(cause)
+    ZPure.Fail(e)
 
   /**
    * Constructs a computation from an `Either`.
@@ -1183,7 +1103,7 @@ object ZPure {
   }
 
   private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A]
-  private final case class Fail[+E](error: Cause[E])                 extends ZPure[Nothing, Any, Nothing, Any, E, Nothing]
+  private final case class Fail[+E](error: E)                        extends ZPure[Nothing, Any, Nothing, Any, E, Nothing]
   private final case class Modify[-S1, +S2, +A](run0: S1 => (A, S2)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]
   private final case class FlatMap[+W, -S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[W, S1, S2, R, E, A],
@@ -1191,7 +1111,7 @@ object ZPure {
   ) extends ZPure[W, S1, S3, R, E, B]
   private final case class Fold[+W, -S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
-    failure: Cause[E1] => ZPure[W, S1, S3, R, E2, B],
+    failure: E1 => ZPure[W, S1, S3, R, E2, B],
     success: A => ZPure[W, S2, S3, R, E2, B]
   ) extends ZPure[W, S1, S3, R, E2, B]
       with Function[A, ZPure[W, S2, S3, R, E2, B]] {
@@ -1222,7 +1142,7 @@ object ZPure {
     def apply[W, S1, S2, R, E, A](
       state: S1,
       zPure: ZPure[W, S1, S2, R, E, A]
-    ): (Chunk[W], Either[Cause[E], (S2, A)]) = {
+    ): (Chunk[W], Either[E, (S2, A)]) = {
       val (runner, running) = pool.get()
 
       if (running.compareAndSet(false, true)) {
@@ -1237,7 +1157,7 @@ object ZPure {
       }
     }
 
-    final private case class Err(cause: Cause[Any]) extends Exception {
+    final private case class Err(cause: Any) extends Exception {
       override def fillInStackTrace(): Throwable = this
     }
   }
@@ -1261,12 +1181,12 @@ object ZPure {
     private def run[W, S1, S2, R, E, A](
       state: S1,
       zPure: ZPure[W, S1, S2, R, E, A]
-    ): (Chunk[W], Either[Cause[E], (S2, A)]) = {
+    ): (Chunk[W], Either[E, (S2, A)]) = {
       val result =
         try
           Right(loop(state, zPure.asInstanceOf[Erased]))
         catch {
-          case Runner.Err(c) => Left(c.asInstanceOf[Cause[E]])
+          case Runner.Err(c) => Left(c.asInstanceOf[E])
         }
 
       (_logs.result().asInstanceOf[Chunk[W]], result)
@@ -1326,9 +1246,9 @@ object ZPure {
 
               ZPure.Fold(
                 zPure.value,
-                (cause: Cause[Any]) => {
+                (error: Any) => {
                   _logs = previousLogs
-                  ZPure.set(state) *> zPure.failure(cause)
+                  ZPure.set(state) *> zPure.failure(error)
                 },
                 (a: Any) => {
                   val logs0 = _logs.result()
@@ -1340,7 +1260,7 @@ object ZPure {
             } else {
               ZPure.Fold(
                 zPure.value,
-                ZPure.set(state) *> zPure.failure(_: Cause[Any]),
+                ZPure.set(state) *> zPure.failure(_: Any),
                 zPure.success
               )
             }
@@ -1359,8 +1279,8 @@ object ZPure {
             val zPure       = provide0.asInstanceOf[Provide[Any, Any, Any, Any, Any, Any]]
             val previousEnv = _environment
             _environment = zPure.r
-            curZPure = zPure.continue.foldCauseM(
-              e => { _environment = previousEnv; ZPure.failCause(e) },
+            curZPure = zPure.continue.foldM(
+              e => { _environment = previousEnv; ZPure.fail(e) },
               a => { _environment = previousEnv; ZPure.succeed(a) }
             )
 

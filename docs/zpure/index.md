@@ -153,46 +153,6 @@ There are many other error handling operators defined on `ZPure`. The `catchSome
 
 The `fold` and `foldM` operators allow us to handle both the failure and success cases at the same time. And the `orElse` operator allows us to specify a fallback computation that will be run if the original computation fails.
 
-One other concept from `ZIO` that carries over to `ZPure` is the ability to accumulate multiple errors.
-
-Normally when we use operators like `zip` or `flatMap` if an error occurs we will not go on to evaluate further parts of the computation until we get to an error handler that can potentially recover from it. This is typically what we want because if we have already failed there is no point in doing more work.
-
-However, `ZPure` also allows us to accumulate errors when we use the `zipWithPar` operator . This operator does not do actual parallelism, but is "parallel" in the sense that it will run both computations even if the first one fails and return any failures that occurred.
-
-You can use this to obtain behavior similar to the `Validation` data type in ZIO Prelude. All of the errors will be captured in a `Cause` data structure similar to the one from `ZIO`.
-
-For example, we could model validating some data using `ZPure` like this.
-
-```scala mdoc
-case class Person(name: String, age: Int)
-
-def validateName(name: String): ZPure[Nothing, Unit, Unit, Any, String, String] =
-  if (name.isEmpty) ZPure.fail("name was empty")
-  else ZPure.succeed(name)
-
-def validateAge(age: Int): ZPure[Nothing, Unit, Unit, Any, String, Int] =
-  if (age < 0) ZPure.fail(s"Age $age was less than zero")
-  else ZPure.succeed(age)
-
-def validatePerson(name: String, age: Int): ZPure[Nothing, Unit, Unit, Any, String, Person] =
-  validateName(name).zipWithPar(validateAge(age))(Person)
-```
-
-To expose the full cause of failure we can use the `sandbox` operator.
-
-```scala mdoc
-import zio.prelude.fx.Cause
-
-def validatePersonCause(name: String, age: Int): ZPure[Nothing, Unit, Unit, Any, Cause[String], Person] =
-  validatePerson(name, age).sandbox
-```
-
-We can now see all the failures that occurred and handle them using our normal error handling operators. If we want to submerge the full cause again and just see the error type we can undo this with the `unsandbox` operator.
-
-Once again, a variety of other operators for dealing with the full cause of failure are available on `ZPure` analogous to the ones on `ZIO` but we will not cover them all here. With `sandbox` and `unsandbox` you should be able to handle any problems involving working with the full cause of failure and you can always look up more specialized operators later.
-
-Of course, if all we want to do is validate data the `Validation` type is more specialized than this and is what we should use. But it is very nice to be able to accumulate errors when you need to when we are already working in the context of a `ZPure` computation.
-
 ## Working With Context
 
 The environment type `R` is also analogous to the environment type of ZIO.
