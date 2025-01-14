@@ -179,22 +179,20 @@ object BuildHelper {
   }
 
   lazy val crossProjectSettings = Seq(
-    Compile / unmanagedSourceDirectories ++= {
+    Compile / unmanagedSourceDirectories ++=
       crossPlatformSources(
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "main",
         baseDirectory.value
-      )
-    },
-    Test / unmanagedSourceDirectories ++= {
+      ),
+    Test / unmanagedSourceDirectories ++=
       crossPlatformSources(
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "test",
         baseDirectory.value
       )
-    }
   )
 
   def stdSettings(prjName: String) = Seq(
