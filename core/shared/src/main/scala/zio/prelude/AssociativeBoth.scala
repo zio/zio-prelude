@@ -1389,10 +1389,11 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `AssociativeBoth` instance for `Vector`.
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Vector`.
    */
-  implicit val VectorAssociativeBoth: AssociativeBoth[Vector] =
-    new AssociativeBoth[Vector] {
+  implicit val VectorIdentityBoth: IdentityBoth[Vector] =
+    new IdentityBoth[Vector] {
+      def any: Vector[Any]                                               = Vector(())
       def both[A, B](fa: => Vector[A], fb: => Vector[B]): Vector[(A, B)] = fa.flatMap(a => fb.map(b => (a, b)))
     }
 
