@@ -80,7 +80,7 @@ object BuildHelper {
     libraryDependencies += {
       scalaVersion.value match {
         case Scala3 =>
-          "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.8"
+          "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.9"
         case _      =>
           "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.10"
       }
@@ -179,22 +179,20 @@ object BuildHelper {
   }
 
   lazy val crossProjectSettings = Seq(
-    Compile / unmanagedSourceDirectories ++= {
+    Compile / unmanagedSourceDirectories ++=
       crossPlatformSources(
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "main",
         baseDirectory.value
-      )
-    },
-    Test / unmanagedSourceDirectories ++= {
+      ),
+    Test / unmanagedSourceDirectories ++=
       crossPlatformSources(
         scalaVersion.value,
         crossProjectPlatform.value.identifier,
         "test",
         baseDirectory.value
       )
-    }
   )
 
   def stdSettings(prjName: String) = Seq(
