@@ -43,3 +43,17 @@ object IdentityFlatten {
     identityFlatten
 
 }
+
+trait IdentityFlattenSyntax {
+
+  /**
+   * Provides infix syntax for identity operations for covariant types.
+   */
+  implicit class IdentityFlattenCovariantOps[F[+_], A](fa: F[A]) {
+    def unless(b: => Boolean)(implicit identity: IdentityFlatten[F], covariant: Covariant[F]): F[Option[A]] =
+      if (b) identity.any.as(None) else fa.map(Some(_))
+
+    def when(b: => Boolean)(implicit identity: IdentityFlatten[F], covariant: Covariant[F]): F[Option[A]] =
+      if (b) fa.map(Some(_)) else identity.any.as(None)
+  }
+}

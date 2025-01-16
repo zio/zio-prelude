@@ -38,6 +38,7 @@ package object prelude
     with IdExports
     with IdentityBothSyntax
     with IdentityEitherSyntax
+    with IdentityFlattenSyntax
     with IdentitySyntax
     with InvariantSyntax
     with InverseSyntax
