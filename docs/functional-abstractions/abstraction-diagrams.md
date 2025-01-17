@@ -155,8 +155,11 @@ classDiagram
   AssociativeBoth~F<_>~ <|-- CommutativeBoth~F<_>~
   AssociativeBoth~F<_>~ <|-- IdentityBoth~F<_>~
   class AssociativeBoth~F<_>~{
+    Exit[E, +*]
     Fiber[E, +*]
-    STM[R, E, +*]
+    NonEmptyChunk[+*]
+    ZSink[R, E, I, L, +*]
+    ZStream[R, E, +*]
 
     () both[A,B](=> F[A], => F[B]): F[(A,B)]
   }
@@ -175,18 +178,23 @@ classDiagram
     ZLayer[R, E, +*]
     ZManaged[R, E, +*]
     Failure[ZManaged[R, E, +*]]
-    ZSink[R, E, I, I, +*]
+    ZSink[R, E, I, L, +*]
     ZStream[R, E, +*]
   }
   class IdentityBoth~F<_>~{
+    Chunk[+*]
+    Config[+*]
     Either[L, +*]
     Failure[Either[+*, R]]
     Option[+*]
+    Optional[+*]
     Future[+*]
     Id[+*]
     List[+*]
+    STM[R, E, +*]
     Try[+*]
- 
+    Vector[+*]
+
     () any: F[Any]
   }
 ```

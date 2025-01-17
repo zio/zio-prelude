@@ -14,7 +14,8 @@ object IdentityBothSpec extends ZIOBaseSpec {
         test("list")(checkAllLaws(IdentityBothLaws)(GenF.list, Gen.int)),
         test("option")(checkAllLaws(IdentityBothLaws)(GenF.option, Gen.int)),
         test("optional")(checkAllLaws(IdentityBothLaws)(optionalGenF, Gen.int)),
-        test("try")(checkAllLaws(IdentityBothLaws)(GenFs.tryScala, Gen.int))
+        test("try")(checkAllLaws(IdentityBothLaws)(GenFs.tryScala, Gen.int)),
+        test("vector")(checkAllLaws(IdentityBothLaws)(GenF.vector, Gen.int))
       )
     )
 }
