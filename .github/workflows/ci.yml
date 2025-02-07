@@ -89,7 +89,7 @@ jobs:
       - name: Check that building packages works
         run: ./sbt +publishLocal
       - name: Check website build process
-        run: sbt docs/clean; sbt docs/buildWebsite
+        run: ./sbt docs/clean; ./sbt docs/buildWebsite
 
   test:
     runs-on: ubuntu-22.04
@@ -198,7 +198,7 @@ jobs:
       - name: Cache Dependencies
         uses: coursier/cache-action@v6
       - name: Generate Readme
-        run: sbt docs/generateReadme
+        run: ./sbt docs/generateReadme
       - name: Commit Changes
         run: |
           git config --local user.email "zio-assistant[bot]@users.noreply.github.com"
@@ -304,7 +304,7 @@ jobs:
           node-version: 20.x
           registry-url: https://registry.npmjs.org
       - name: Publish Docs to NPM Registry
-        run: sbt docs/publishToNpm
+        run: ./sbt docs/publishToNpm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
