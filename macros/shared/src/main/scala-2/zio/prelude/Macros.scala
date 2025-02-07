@@ -198,12 +198,12 @@ new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
     val (_, _, codeString) = text(f)
     q"""
 new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
-  @_root_.zio.prelude.assertionLambdaQuote($f)
+  @_root_.zio.prelude.assertionLambdaQuote(${c.untypecheck(f)})
   @_root_.zio.prelude.assertionString($codeString)
   def magic = 42
 
   def run(value: ${c.weakTypeOf[A]}): _root_.scala.util.Either[_root_.zio.prelude.AssertionError, _root_.scala.Unit] =
-    $f(value)
+    ${c.untypecheck(f)}(value)
 }
        """
   }

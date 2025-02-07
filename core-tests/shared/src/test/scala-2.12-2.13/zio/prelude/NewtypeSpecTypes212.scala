@@ -4,7 +4,7 @@ package zio.prelude
 object NewtypeSpecTypes212 {
 
   object Palindrome extends Newtype[String] {
-    override def assertion = assertCustom { str =>
+    override def assertion = assertCustom { (str: String) =>
       if (str.reverse == str) Right(()) else Left(AssertionError.Failure("isPalindrome"))
     }
   }
