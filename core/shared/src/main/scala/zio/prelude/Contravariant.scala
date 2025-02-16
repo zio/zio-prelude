@@ -16,7 +16,7 @@
 
 package zio.prelude
 
-trait ContravariantSubset[F[-_], Subset[_]] {
+trait ContravariantSubset[F[_], Subset[_]] {
   def contramapSubset[A, B: Subset](f: B => A): F[A] => F[B]
 }
 
@@ -43,7 +43,7 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * compares strings by computing their lengths with the provided function and
  * comparing those.
  */
-trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F] { self =>
+trait Contravariant[F[_]] extends ContravariantSubset[F, AnyType] with Invariant[F] { self =>
   final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] =
     contramap(f)
 
@@ -58,16 +58,16 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
   /**
    * Compose two contravariant functors.
    */
-  final def compose[G[-_]](implicit g: Contravariant[G]): Covariant[({ type lambda[+A] = F[G[A]] })#lambda] =
-    new Covariant[({ type lambda[+A] = F[G[A]] })#lambda] {
+  final def compose[G[-_]](implicit g: Contravariant[G]): Covariant[({ type lambda[A] = F[G[A]] })#lambda] =
+    new Covariant[({ type lambda[A] = F[G[A]] })#lambda] {
       def map[A, B](f: A => B): F[G[A]] => F[G[B]] = self.contramap(g.contramap(f))
     }
 
   /**
    * Compose contravariant and covariant functors.
    */
-  final def compose[G[+_]](implicit g: Covariant[G]): Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] =
-    new Contravariant[({ type lambda[-A] = F[G[A]] })#lambda] {
+  final def compose[G[+_]](implicit g: Covariant[G]): Contravariant[({ type lambda[A] = F[G[A]] })#lambda] =
+    new Contravariant[({ type lambda[A] = F[G[A]] })#lambda] {
       def contramap[A, B](f: B => A): F[G[A]] => F[G[B]] = self.contramap(g.map(f))
     }
 }
