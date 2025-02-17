@@ -268,7 +268,7 @@ object Debug extends DebugVersionSpecific {
    * Derives a `Debug[Array[A]]` given a `Debug[A]`.
    */
   implicit def ArrayDebug[A: Debug]: Debug[Array[A]] =
-    array => Repr.VConstructor(List("scala"), "Array", array.map(_.debug).toList)
+    array => Repr.VConstructor(List("scala"), "Array", genericArrayOps(array).map(_.debug).toList)
 
   /**
    * The `Debug` instance for `BigDecimal`.
