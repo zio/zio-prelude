@@ -131,7 +131,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
     new ForEach[({ type lambda[+a] = Either[E, a] })#lambda] with Bicovariant[Either] {
 
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](either: Either[E, A])(f: A => G[B]): G[Either[E, B]] =
-        either.fold(Left(_).succeed, f(_).map(Right(_)))
+        either.fold(Left(_).succeed[G], f(_).map(Right(_)))
 
       override def bimap[A, B, AA, BB](f: A => AA, g: B => BB): Either[A, B] => Either[AA, BB] = {
         case Right(a) => Right(g(a))
@@ -758,7 +758,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit val OptionalForEach: ForEach[Optional] =
     new ForEach[Optional] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](option: Optional[A])(f: A => G[B]): G[Optional[B]] =
-        option.fold[G[Optional[B]]](Optional.Absent.succeed)(a => f(a).map(Optional.Present(_)))
+        option.fold[G[Optional[B]]](Optional.Absent.succeed[G])(a => f(a).map(Optional.Present(_)))
     }
 
   /**

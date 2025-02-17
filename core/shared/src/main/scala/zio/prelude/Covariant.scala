@@ -21,7 +21,7 @@ trait CovariantSubset[F[_], Subset[_]] {
 }
 
 /**
- * `Covariant[F]` provides implicit evidence that `F[+_]` is a covariant
+ * `Covariant[F]` provides implicit evidence that `F[_]` is a covariant
  * endofunctor in the category of Scala objects.
  *
  * Covariant instances of type `F[A]` "produce" values of type `A` in some
@@ -79,7 +79,7 @@ object Covariant {
   /**
    * Summons an implicit `Covariant[F]`.
    */
-  def apply[F[+_]](implicit covariant: Covariant[F]): Covariant[F] =
+  def apply[F[_]](implicit covariant: Covariant[F]): Covariant[F] =
     covariant
 
 }
@@ -89,7 +89,7 @@ trait CovariantSyntax {
   /**
    * Provides infix syntax for mapping over covariant values.
    */
-  implicit class CovariantOps[F[+_], A](private val self: F[A]) {
+  implicit class CovariantOps[F[_], A](private val self: F[A]) {
     def as[B](b: => B)(implicit F: Covariant[F]): F[B] = map(_ => b)
 
     def map[B](f: A => B)(implicit F: Covariant[F]): F[B] =

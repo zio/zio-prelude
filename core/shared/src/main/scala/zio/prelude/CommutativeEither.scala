@@ -102,7 +102,7 @@ trait CommutativeEitherSyntax {
   /**
    * Provides infix syntax for commutative operations for covariant types.
    */
-  implicit class CommutativeEitherCovariantOps[F[+_], A](fa: => F[A]) {
+  implicit class CommutativeEitherCovariantOps[F[_], A](fa: => F[A]) {
 
     /**
      * Combines two values of types `F[A]` and `F[A]` to produce an
@@ -115,7 +115,7 @@ trait CommutativeEitherSyntax {
   /**
    * Provides infix syntax for commutative operations for contravariant types.
    */
-  implicit class CommutativeEitherContravariantOps[F[-_], A](fa: => F[A]) {
+  implicit class CommutativeEitherContravariantOps[F[_], A](fa: => F[A]) {
 
     /**
      * Combines two values of types `F[A]` and `F[B]` to produce an

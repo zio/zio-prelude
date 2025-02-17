@@ -282,7 +282,7 @@ trait AssociativeEitherSyntax {
   /**
    * Provides infix syntax for associative operations for covariant types.
    */
-  implicit class AssociativeEitherCovariantOps[F[+_], A](fa: => F[A]) {
+  implicit class AssociativeEitherCovariantOps[F[_], A](fa: => F[A]) {
 
     /**
      * Combines an `F[A]` value with itself using `orElse` until it eventually

@@ -131,7 +131,7 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
    * events.
    */
   final def forEach[F[+_]: IdentityBoth: Covariant, B](f: A => F[B]): F[ParSeq[Z, B]] =
-    fold[F[ParSeq[Unit, B]]](ParSeq.empty.succeed, a => f(a).map(ParSeq.single))(
+    fold[F[ParSeq[Unit, B]]](ParSeq.empty.succeed[F], a => f(a).map(ParSeq.single))(
       _.zipWith(_)(_ ++ _),
       _.zipWith(_)(_ && _)
     ).asInstanceOf[F[ParSeq[Z, B]]]

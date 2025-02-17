@@ -67,7 +67,7 @@ object IdentityBoth {
 trait IdentityBothSyntax {
 
   implicit class IdentityBothAnyOps[A](a: => A) {
-    def succeed[F[+_]](implicit both: IdentityBoth[F], covariant: Covariant[F]): F[A] =
+    def succeed[F[_]](implicit both: IdentityBoth[F], covariant: Covariant[F]): F[A] =
       both.any.map(_ => a)
   }
 

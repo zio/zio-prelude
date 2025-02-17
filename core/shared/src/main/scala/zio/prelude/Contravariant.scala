@@ -87,7 +87,7 @@ trait ContravariantSyntax {
   /**
    * Provides infix syntax for mapping over covariant values.
    */
-  implicit class ContravariantOps[F[-_], A](private val self: F[A]) {
+  implicit class ContravariantOps[F[_], A](private val self: F[A]) {
     def contramap[B](f: B => A)(implicit contravariant: Contravariant[F]): F[B] =
       contravariant.contramap(f)(self)
   }
