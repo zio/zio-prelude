@@ -115,7 +115,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit def ConstForEach[A]: ForEach[({ type ConstA[+B] = Const[A, B] })#ConstA] =
     new ForEach[({ type ConstA[+B] = Const[A, B] })#ConstA] {
       def forEach[G[+_]: IdentityBoth: Covariant, B, C](fa: Const[A, B])(f: B => G[C]): G[Const[A, C]] =
-        Const.wrap(Const.unwrap(fa)).succeed
+        Const.wrap(Const.unwrap(fa)).succeed[G]
     }
 
   /**
@@ -749,7 +749,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
   implicit val OptionForEach: ForEach[Option] =
     new ForEach[Option] {
       def forEach[G[+_]: IdentityBoth: Covariant, A, B](option: Option[A])(f: A => G[B]): G[Option[B]] =
-        option.fold[G[Option[B]]](Option.empty.succeed)(a => f(a).map(Some(_)))
+        option.fold[G[Option[B]]](Option.empty.succeed[G])(a => f(a).map(Some(_)))
     }
 
   /**

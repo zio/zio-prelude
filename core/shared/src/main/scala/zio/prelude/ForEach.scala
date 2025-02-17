@@ -205,7 +205,7 @@ trait ForEach[F[+_]] extends Covariant[F] { self =>
     }
 
   def groupByNonEmptyM[G[+_]: IdentityBoth: Covariant, V, K](fa: F[V])(f: V => G[K]): G[Map[K, NonEmptyChunk[V]]] =
-    foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]].succeed) { (m, v) =>
+    foldLeft(fa)(Map.empty[K, NonEmptyChunk[V]].succeed[G]) { (m, v) =>
       val k = f(v)
       AssociativeBoth.mapN(m, k) { (m, k) =>
         m.get(k) match {

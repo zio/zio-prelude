@@ -130,7 +130,7 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
       }
 
     map
-      .foldLeft[G[HashMap[C, Natural]]](HashMap.empty.succeed) { case (g, (a, b)) => loop(g, a, ev(b)) }
+      .foldLeft[G[HashMap[C, Natural]]](HashMap.empty[C, Natural].succeed[G]) { case (g, (a, b)) => loop(g, a, ev(b)) }
       .map(new ZSet(_))
   }
 
