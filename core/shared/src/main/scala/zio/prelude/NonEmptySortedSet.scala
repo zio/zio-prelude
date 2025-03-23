@@ -219,7 +219,7 @@ object NonEmptySortedSet {
    * Provides an implicit conversion from `NonEmptySortedSet` to the `Set`
    * for interoperability with Scala's collection library.
    */
-  implicit def toSet[A](nonEmptySet: NonEmptySortedSet[A]): Set[A] =
+  implicit def toSet[A](nonEmptySet: NonEmptySortedSet[A]): SortedSet[A] =
     nonEmptySet.toSet
 
   private val NonEmptySortedSetSeed: Int = 1247120194
