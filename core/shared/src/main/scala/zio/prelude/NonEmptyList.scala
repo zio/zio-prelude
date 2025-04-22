@@ -16,12 +16,13 @@
 
 package zio.prelude
 
+import zio._
 import zio.prelude.NonEmptyList._
 import zio.prelude.newtypes.{Max, Min, Prod, Sum}
-import zio.{NonEmptyChunk, ZIO}
 
 import scala.annotation.tailrec
 import scala.language.implicitConversions
+import scala.reflect.ClassTag
 import scala.util.hashing.MurmurHash3
 
 /**
@@ -35,7 +36,7 @@ import scala.util.hashing.MurmurHash3
  * cannot preserve the guarantee that the resulting collection must have at
  * least one element will return a `List` instead.
  */
-sealed trait NonEmptyList[+A] { self =>
+sealed trait NonEmptyList[+A] extends NonEmptySeq[A, NonEmptyList, List] { self =>
 
   /**
    * Concatenates this `NonEmptyList` with the specified `NonEmptyList`.
@@ -54,6 +55,24 @@ sealed trait NonEmptyList[+A] { self =>
    */
   final def ::[A1 >: A](a: A1): NonEmptyList[A1] =
     cons(a, self)
+
+  /**
+   * Prepends the specified value to this `NonEmptyList`.
+   */
+  override def appended[B >: A](elem: B): NonEmptyList[B] =
+    foldRight(single(elem))(cons)
+
+  /**
+   * Selects the first element of this `NonEmptyList` that matches the specified partial function.
+   */
+  override def collectFirst[B](pf: PartialFunction[A, B]): Option[B] =
+    find(pf.isDefinedAt).map(pf)
+
+  /**
+   * Collects all elements of this `NonEmptyList` that match the specified partial function.
+   */
+  override def collect[B](pf: PartialFunction[A, B]): List[B] =
+    foldRight(Nil: List[B])((a, bs) => if (pf.isDefinedAt(a)) pf(a) :: bs else bs)
 
   /**
    * Returns whether this `NonEmptyList` contains the specified element.
@@ -157,6 +176,18 @@ sealed trait NonEmptyList[+A] { self =>
     }
 
   /**
+   * Filters elements of this `NonEmptyList` that satisfy the specified predicate.
+   */
+  override def filter(p: A => Boolean): List[A] =
+    foldRight(Nil: List[A])((a, as) => if (p(a)) a :: as else as)
+
+  /**
+   * Filters elements of this `NonEmptyList` that satisfy the specified predicate.
+   */
+  override def filterNot(p: A => Boolean): List[A] =
+    filter(!p(_))
+
+  /**
    * Returns the first element in this `NonEmptyList` satisfying the
    * specified predicate or `None` otherwise.
    */
@@ -218,6 +249,15 @@ sealed trait NonEmptyList[+A] { self =>
     reduceMapRight(f(_).map(single))((a, fas) => f(a).zipWith(fas)(cons))
 
   /**
+   * Groups elements of this `NonEmptyList` into an `Iterator` of `NonEmptyList`s of the specified size.
+   * The last group may be smaller than the specified size.
+   */
+  override def grouped(size: Int): Iterator[NonEmptyList[A]] =
+    self.toList
+      .grouped(size)
+      .map(l => NonEmptyList.fromIterable(l.head, l.tail))
+
+  /**
    * Returns the hashCode of this `NonEmptyList`.
    */
   override final def hashCode: Int = {
@@ -231,6 +271,39 @@ sealed trait NonEmptyList[+A] { self =>
    * Returns the head of this `NonEmptyList`.
    */
   def head: A
+
+  override def init: List[A] =
+    dropRight(1)
+
+  /**
+   * Iterates over the elements of this `NonEmptyList`.
+   */
+  override def iterator: Iterator[A] =
+    new Iterator[A] {
+      private var current: NonEmptyList[A] = self
+
+      def hasNext: Boolean = current match {
+        case Cons(_, _) => true
+        case Single(_)  => true
+        case null       => false
+      }
+
+      def next(): A =
+        current match {
+          case Cons(h, t) =>
+            current = t
+            h
+          case Single(h)  =>
+            current = null
+            h
+        }
+    }
+
+  /**
+   * Returns the last element in this `NonEmptyList`.
+   */
+  override def last: A =
+    foldLeft(head)((_, a) => a)
 
   /**
    * Returns the length of this `NonEmptyList`.
@@ -314,6 +387,12 @@ sealed trait NonEmptyList[+A] { self =>
     start + reduceMapLeft(_.toString)((b, a) => b + sep + a.toString) + end
 
   /**
+   * Prepends the specified value to this `NonEmptyList`.
+   */
+  override def prepended[B >: A](elem: B): NonEmptyList[B] =
+    elem :: self
+
+  /**
    * Returns the product of the elements of this `NonEmptyList`.
    */
   final def product[A1 >: A](implicit A: Associative[Prod[A1]]): A1 =
@@ -325,6 +404,13 @@ sealed trait NonEmptyList[+A] { self =>
    */
   final def reduce[A1 >: A](implicit A: Associative[A1]): A1 =
     reduceMap[A1](identity)
+
+  /**
+   * Reduces the elements of this `NonEmptyList` from left to right using the
+   * specified function.
+   */
+  override def reduce[B >: A](op: (B, B) => B): B =
+    foldLeft[B](head)(op)
 
   /**
    * Reduces the elements of this `NonEmptyList` from left to right using the
@@ -373,11 +459,24 @@ sealed trait NonEmptyList[+A] { self =>
   final def reverse: NonEmptyList[A] =
     reduceMapLeft(single)((b, a) => cons(a, b))
 
+  override def sortBy[B](f: A => B)(implicit ord: scala.Ordering[B]): NonEmptyList[A] = {
+    val sorted = self.toList.sortBy(f)
+    NonEmptyList.fromIterable(sorted.head, sorted.tail)
+  }
+
+  override def sorted[B >: A](implicit ord: scala.Ordering[B]): NonEmptyList[B] = {
+    val sorted = self.toList.sorted(ord)
+    NonEmptyList.fromIterable(sorted.head, sorted.tail)
+  }
+
   /**
    * Returns the sum of the elements of this `NonEmptyList`.
    */
   final def sum[A1 >: A](implicit A: Associative[Sum[A1]]): A1 =
     reduceMap(Sum[A1])
+
+  override def tail: List[A] =
+    drop(1)
 
   /**
    * Returns the tail of this `NonEmptyList` if it exists or `None` otherwise.
@@ -432,6 +531,16 @@ sealed trait NonEmptyList[+A] { self =>
     loop(self, Nil).reverse
   }
 
+  override def toArray[B >: A: ClassTag]: Array[B] = {
+    val array = new Array[B](length)
+    var i     = 0
+    self.foreach { a =>
+      array(i) = a
+      i += 1
+    }
+    array
+  }
+
   /**
    * Converts this `NonEmptyList` to the `::` case of a `List`.
    */
@@ -440,6 +549,12 @@ sealed trait NonEmptyList[+A] { self =>
 
     reduceMapRight[cons[A1]](cons(_, Nil))(cons(_, _))
   }
+
+  override def toIterable: Iterable[A] =
+    toList
+
+  override def toList: List[A] =
+    foldRight(Nil: List[A])(_ :: _)
 
   /**
    * Renders this `NonEmptyList` as a `String`.
@@ -458,8 +573,8 @@ sealed trait NonEmptyList[+A] { self =>
    * returning a new `NonEmptyList` with a length equal to the minimum of the
    * two and elements combined pairwise.
    */
-  final def zip[B](that: NonEmptyList[B]): NonEmptyList[(A, B)] =
-    zipWith(that)((_, _))
+  override def zip[B](that: NonEmptyList[B])(implicit zippable: Zippable[A, B]): NonEmptyList[zippable.Out] =
+    zipWith(that)(zippable.zip(_, _))
 
   /**
    * Zips this `NonEmptyList` together with the specified `NonEmptyList`,
@@ -477,7 +592,7 @@ sealed trait NonEmptyList[+A] { self =>
   /**
    * Annotates each element of this `NonEmptyList` with its index.
    */
-  final def zipWithIndex: NonEmptyList[(A, Int)] =
+  final override def zipWithIndex: NonEmptyList[(A, Int)] =
     unfold((self, 0)) { case (as, n) =>
       (as.head, n)
     } {
@@ -488,8 +603,8 @@ sealed trait NonEmptyList[+A] { self =>
 
 object NonEmptyList extends LowPriorityNonEmptyListImplicits {
 
-  final case class Cons[+A](head: A, tail: NonEmptyList[A]) extends NonEmptyList[A]
-  final case class Single[+A](head: A)                      extends NonEmptyList[A]
+  final case class Cons[+A](head: A, tail0: NonEmptyList[A]) extends NonEmptyList[A]
+  final case class Single[+A](head: A)                       extends NonEmptyList[A]
 
   /**
    * The `Associative` instance for `NonEmptyList`.
