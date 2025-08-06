@@ -1,4 +1,4 @@
-addSbtPlugin("ch.epfl.scala"                     % "sbt-bloop"                     % "2.0.12")
+addSbtPlugin("ch.epfl.scala"                     % "sbt-bloop"                     % "2.0.13")
 addSbtPlugin("ch.epfl.scala"                     % "sbt-scalafix"                  % "0.14.3")
 addSbtPlugin("com.eed3si9n"                      % "sbt-buildinfo"                 % "0.13.1")
 addSbtPlugin("com.github.sbt"                    % "sbt-unidoc"                    % "0.5.0")
