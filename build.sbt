@@ -38,7 +38,7 @@ addCommandAlias(
   ";coreTestsNative/test;experimentalTestsNative/test"
 )
 
-val zioVersion = "2.1.20"
+val zioVersion = "2.1.21"
 
 val projectsCommon = List(
   core,
