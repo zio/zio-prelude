@@ -76,7 +76,7 @@ jobs:
           java-version: 11 # ensure it works on 11 because we publish for 11
           check-latest: true
       - name: Setup NodeJs
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20.x
           registry-url: https://registry.npmjs.org
@@ -299,7 +299,7 @@ jobs:
       - name: Cache Dependencies
         uses: coursier/cache-action@v6
       - name: Setup NodeJs
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20.x
           registry-url: https://registry.npmjs.org
