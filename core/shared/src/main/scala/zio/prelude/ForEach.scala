@@ -516,6 +516,12 @@ trait ForEachSyntax {
       f: A => G[F[B]]
     )(implicit F: ForEach[F], AF: AssociativeFlatten[F]): G[F[B]] =
       F.forEachFlatten(self)(f)
+    def groupByNonEmpty[K](f: A => K)(implicit F: ForEach[F]): Map[K, NonEmptyChunk[A]]                         =
+      F.groupByNonEmpty(self)(f)
+    def groupByNonEmptyM[G[+_]: IdentityBoth: Covariant, K](f: A => G[K])(implicit
+      F: ForEach[F]
+    ): G[Map[K, NonEmptyChunk[A]]] =
+      F.groupByNonEmptyM(self)(f)
     def isEmpty(implicit F: ForEach[F]): Boolean                                                                =
       F.isEmpty(self)
     def intersperse[A1 >: A](middle: A1)(implicit F: ForEach[F], I: Identity[A1]): A1                           =
