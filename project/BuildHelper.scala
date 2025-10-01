@@ -203,7 +203,7 @@ object BuildHelper {
     libraryDependencies ++= {
       if (scalaVersion.value != Scala3)
         Seq(
-          compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.full)
+          compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.4" cross CrossVersion.full)
         )
       else Seq.empty
     },
