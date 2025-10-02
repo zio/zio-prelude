@@ -516,6 +516,12 @@ trait ForEachSyntax {
       f: A => G[F[B]]
     )(implicit F: ForEach[F], AF: AssociativeFlatten[F]): G[F[B]] =
       F.forEachFlatten(self)(f)
+    def groupByNonEmpty[K](f: A => K)(implicit F: ForEach[F]): Map[K, NonEmptyChunk[A]]                         =
+      F.groupByNonEmpty(self)(f)
+    def groupByNonEmptyM[G[+_]: IdentityBoth: Covariant, K](f: A => G[K])(implicit
+      F: ForEach[F]
+    ): G[Map[K, NonEmptyChunk[A]]] =
+      F.groupByNonEmptyM(self)(f)
     def isEmpty(implicit F: ForEach[F]): Boolean                                                                =
       F.isEmpty(self)
     def intersperse[A1 >: A](middle: A1)(implicit F: ForEach[F], I: Identity[A1]): A1                           =
@@ -538,6 +544,18 @@ trait ForEachSyntax {
       F.reduceIdempotent(self)
     def reduceIdentity(implicit F: ForEach[F], A: Identity[A]): A                                               =
       F.reduceIdentity(self)
+    def partitionMap[B, C](
+      f: A => Either[B, C]
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): (F[B], F[C]) =
+      F.partitionMap(self)(f)
+    def partitionMapV[W, E, B](
+      f: A => ZValidation[W, E, B]
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): (F[E], F[B]) =
+      F.partitionMapV(self)(f)
+    def partitionMapM[G[+_]: IdentityBoth: Covariant, B, C](
+      f: A => G[Either[B, C]]
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): G[(F[B], F[C])] =
+      F.partitionMapM(self)(f)
     def product(implicit A: Identity[Prod[A]], F: ForEach[F]): A                                                =
       F.product(self)
     def reduceMapOption[B: Associative](f: A => B)(implicit F: ForEach[F]): Option[B]                           =

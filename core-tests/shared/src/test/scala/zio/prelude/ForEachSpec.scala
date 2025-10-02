@@ -39,6 +39,12 @@ object ForEachSpec extends ZIOBaseSpec {
   val genEitherIntIntFunction: Gen[Any, Int => Either[Int, Int]] =
     Gen.function(Gen.either(genInt, genInt))
 
+  val genOptionEitherIntIntFunction: Gen[Sized, Int => Option[Either[Int, Int]]] =
+    Gen.function(Gen.option(Gen.either(genInt, genInt)))
+
+  val genZValidationIntIntFunction: Gen[Sized, Int => ZValidation[Int, Int, Int]] =
+    Gen.function(Gens.validation(genInt, genInt, genInt))
+
   val genIntPartialFunction: Gen[Any, PartialFunction[Int, Int]] =
     Gen.partialFunction(Gen.int)
 
@@ -148,7 +154,7 @@ object ForEachSpec extends ZIOBaseSpec {
         },
         test("groupByNonEmpty") {
           check(genList, genIntFunction) { (as, f) =>
-            val actual   = ForEach[List].groupByNonEmpty(as)(f)
+            val actual   = as.groupByNonEmpty(f)
             val expected = as
               .groupBy(f)
               .toList
@@ -160,7 +166,7 @@ object ForEachSpec extends ZIOBaseSpec {
         test("groupByNonEmptyM") {
           check(genList, genIntFunction) { (as, f) =>
             // Dotty can't infer Function1Covariant: 'Required: zio.prelude.Covariant[[R] =>> Int => R]'
-            val actual   = ForEach[List].groupByNonEmptyM(as)(f.map(Option(_))(Invariant.Function1Covariant))
+            val actual   = as.groupByNonEmptyM(f.map(Option(_))(Invariant.Function1Covariant))
             val expected = Option(
               as.groupBy(f)
                 .toList
@@ -245,6 +251,40 @@ object ForEachSpec extends ZIOBaseSpec {
 
             val actual   = ForEach[List].partitionMap(as)(f)
             val expected = partitionMap(as)(f)
+            assert(actual)(equalTo(expected))
+          }
+        },
+        test("partitionMapV") {
+          check(genList, genZValidationIntIntFunction) { (as, f) =>
+            def partitionMapV[A, W, E, B](as: List[A])(f: A => ZValidation[W, E, B]): (List[E], List[B]) =
+              as.foldRight((List.empty[E], List.empty[B])) { case (a, (errs, bs)) =>
+                f(a).fold(
+                  err => (err.toList ::: errs, bs),
+                  b => (errs, b :: bs)
+                )
+              }
+
+            val actual   = as.partitionMapV(f)
+            val expected = partitionMapV(as)(f)
+            assert(actual)(equalTo(expected))
+          }
+        },
+        test("partitionMapM") {
+          check(genList, genOptionEitherIntIntFunction) { (as, f) =>
+            def partitionMapM[A, B, C](as: List[A])(f: A => Option[Either[B, C]]): Option[(List[B], List[C])] =
+              as.foldRight(Some((List.empty[B], List.empty[C])): Option[(List[B], List[C])]) { case (a, opt) =>
+                opt.flatMap { case (bs, cs) =>
+                  f(a).map { either =>
+                    either.fold(
+                      b => (b :: bs, cs),
+                      c => (bs, c :: cs)
+                    )
+                  }
+                }
+              }
+
+            val actual   = as.partitionMapM(f)
+            val expected = partitionMapM(as)(f)
             assert(actual)(equalTo(expected))
           }
         },
