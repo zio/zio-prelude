@@ -466,13 +466,13 @@ trait ForEachSyntax {
       F: ForEach[F],
       I: IdentityEither[F],
       B: IdentityBoth[F]
-    ): F[B] =
+    ): F[B]                                                                                                     =
       F.collect(self)(pf)
     def collectM[G[+_]: IdentityBoth: Covariant, B](f: A => G[Option[B]])(implicit
       F: ForEach[F],
       I: IdentityEither[F],
       B: IdentityBoth[F]
-    ): G[F[B]] =
+    ): G[F[B]]                                                                                                  =
       F.collectM(self)(f)
     def concatenate(implicit F: ForEach[F], A: Identity[A]): A                                                  =
       F.concatenate(self)
@@ -490,7 +490,7 @@ trait ForEachSyntax {
       F: ForEach[F],
       I: IdentityEither[F],
       B: IdentityBoth[F]
-    ): G[F[A]] =
+    ): G[F[A]]                                                                                                  =
       F.filterM(self)(f)
     def find(f: A => Boolean)(implicit F: ForEach[F]): Option[A]                                                =
       F.find(self)(f)
@@ -514,13 +514,13 @@ trait ForEachSyntax {
       F.forEach_(self)(f)
     def forEachFlatten[G[+_]: IdentityBoth: Covariant, B](
       f: A => G[F[B]]
-    )(implicit F: ForEach[F], AF: AssociativeFlatten[F]): G[F[B]] =
+    )(implicit F: ForEach[F], AF: AssociativeFlatten[F]): G[F[B]]                                               =
       F.forEachFlatten(self)(f)
     def groupByNonEmpty[K](f: A => K)(implicit F: ForEach[F]): Map[K, NonEmptyChunk[A]]                         =
       F.groupByNonEmpty(self)(f)
     def groupByNonEmptyM[G[+_]: IdentityBoth: Covariant, K](f: A => G[K])(implicit
       F: ForEach[F]
-    ): G[Map[K, NonEmptyChunk[A]]] =
+    ): G[Map[K, NonEmptyChunk[A]]]                                                                              =
       F.groupByNonEmptyM(self)(f)
     def isEmpty(implicit F: ForEach[F]): Boolean                                                                =
       F.isEmpty(self)
@@ -546,15 +546,15 @@ trait ForEachSyntax {
       F.reduceIdentity(self)
     def partitionMap[B, C](
       f: A => Either[B, C]
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): (F[B], F[C]) =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): (F[B], F[C])                   =
       F.partitionMap(self)(f)
     def partitionMapV[W, E, B](
       f: A => ZValidation[W, E, B]
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): (F[E], F[B]) =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): (F[E], F[B])                   =
       F.partitionMapV(self)(f)
     def partitionMapM[G[+_]: IdentityBoth: Covariant, B, C](
       f: A => G[Either[B, C]]
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): G[(F[B], F[C])] =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): G[(F[B], F[C])]                =
       F.partitionMapM(self)(f)
     def product(implicit A: Identity[Prod[A]], F: ForEach[F]): A                                                =
       F.product(self)
@@ -574,11 +574,11 @@ trait ForEachSyntax {
       F.filter(self)(f)
     def zipAll[B](
       that: F[B]
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]] =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[These[A, B]]                 =
       F.zipAll(self, that)
     def zipAllWith[B, C](that: F[B])(
       f: These[A, B] => C
-    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C] =
+    )(implicit F: ForEach[F], both: IdentityBoth[F], either: IdentityEither[F]): F[C]                           =
       F.zipAllWith(self, that)(f)
     def zipWithIndex(implicit F: ForEach[F]): F[(A, Int)]                                                       =
       F.zipWithIndex(self)

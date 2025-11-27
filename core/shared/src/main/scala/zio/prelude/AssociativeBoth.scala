@@ -1410,7 +1410,7 @@ object AssociativeBoth extends AssociativeBothLowPriority {
         _.map(f)
       override def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
         f: A => ZIO[R, E, Option[B]]
-      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZIO[R, E, Collection[B]] =
+      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZIO[R, E, Collection[B]]  =
         ZIO.suspendSucceed {
           val iterator = in.iterator
           val builder  = bf.newBuilder(in)
@@ -1424,7 +1424,7 @@ object AssociativeBoth extends AssociativeBothLowPriority {
         }
       override def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => ZIO[R, E, B])(
         implicit bf: BuildFrom[Collection[A], B, Collection[B]]
-      ): ZIO[R, E, Collection[B]] =
+      ): ZIO[R, E, Collection[B]]                                                           =
         ZIO.foreach(in)(f)
       override def forEach_[A, B](in: Iterable[A])(f: A => ZIO[R, E, Any]): ZIO[R, E, Unit] =
         ZIO.foreachDiscard(in)(f)

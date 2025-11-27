@@ -31,7 +31,7 @@ trait InvariantVersionSpecific {
         CovariantIdentityBoth[G].forEach(fa)(f)(derive.derive)
       override def collectM[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(
         f: A => G[Option[B]]
-      )(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[B]] =
+      )(implicit identityBoth: IdentityBoth[F], identityEither: IdentityEither[F]): G[F[B]]       =
         CovariantIdentityBoth[G].collectM(fa)(f)(derive.derive)
       override def forEach_[G[+_]: IdentityBoth: Covariant, A](fa: F[A])(f: A => G[Any]): G[Unit] =
         CovariantIdentityBoth[G].forEach_(fa)(f)
