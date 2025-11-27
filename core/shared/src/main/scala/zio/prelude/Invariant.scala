@@ -81,7 +81,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
         CovariantIdentityBoth[G].forEach(chunk)(f)
       override def collectM[G[+_]: IdentityBoth: Covariant, A, B](chunk: Chunk[A])(
         f: A => G[Option[B]]
-      )(implicit identityBoth: IdentityBoth[Chunk], identityEither: IdentityEither[Chunk]): G[Chunk[B]] =
+      )(implicit identityBoth: IdentityBoth[Chunk], identityEither: IdentityEither[Chunk]): G[Chunk[B]]  =
         CovariantIdentityBoth[G].collectM(chunk)(f)
       override def forEach_[G[+_]: IdentityBoth: Covariant, A](chunk: Chunk[A])(f: A => G[Any]): G[Unit] =
         CovariantIdentityBoth[G].forEach_(chunk)(f)
@@ -718,7 +718,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
       )(implicit
         identityBoth: IdentityBoth[({ type lambda[+v] = Map[K, v] })#lambda],
         identityEither: IdentityEither[({ type lambda[+v] = Map[K, v] })#lambda]
-      ): G[Map[K, V2]] =
+      ): G[Map[K, V2]]                                                                                  =
         CovariantIdentityBoth[G]
           .collectM[(K, V), (K, V2), Iterable](map) { case (k, v) => f(v).map(_.map(k -> _)) }
           .map(_.toMap)
@@ -739,7 +739,7 @@ object Invariant extends LowPriorityInvariantImplicits with InvariantVersionSpec
           .map(bs => NonEmptyChunk.nonEmpty(bs.result()))
       override def forEach1_[F[+_]: AssociativeBoth: Covariant, A](nonEmptyChunk: NonEmptyChunk[A])(
         f: A => F[Any]
-      ): F[Unit] =
+      ): F[Unit]                           =
         nonEmptyChunk.reduceMapLeft(f(_))((bs, a) => bs *> f(a)).unit
     }
 
