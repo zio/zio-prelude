@@ -1068,17 +1068,17 @@ object ZPure {
         _.map(f)
       override def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
         f: A => ZPure[W, S, S, R, E, Option[B]]
-      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]] =
+      )(implicit bf: BuildFrom[Collection[A], B, Collection[B]]): ZPure[W, S, S, R, E, Collection[B]]              =
         ZPure.collect(in)(f)
       override def forEach[A, B, Collection[+Element] <: Iterable[Element]](
         in: Collection[A]
       )(f: A => ZPure[W, S, S, R, E, B])(implicit
         bf: BuildFrom[Collection[A], B, Collection[B]]
-      ): ZPure[W, S, S, R, E, Collection[B]] =
+      ): ZPure[W, S, S, R, E, Collection[B]]                                                                       =
         ZPure.foreach(in)(f)
       override def forEach_[A, B](in: Iterable[A])(
         f: A => ZPure[W, S, S, R, E, Any]
-      ): ZPure[W, S, S, R, E, Unit] =
+      ): ZPure[W, S, S, R, E, Unit]                                                                                =
         ZPure.foreachDiscard(in)(f)
     }
 
