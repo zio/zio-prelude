@@ -323,7 +323,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms the result of this computation with the specified function.
    */
   final def map[B](f: A => B): ZPure[W, S1, S2, R, E, B] =
-    flatMap(a => succeed(f(a)))
+    FMap(self, f)
 
   /**
    * Transforms the error type of this computation with the specified
@@ -774,6 +774,10 @@ object ZPure {
   private val succeedNone: ZPure[Nothing, Any, Nothing, Any, Nothing, Option[Nothing]] = Succeed(None)
   private val succeedUnitFn                                                            = (_: Any) => succeedUnit
 
+  private final val TagFlatMap: Byte = 6
+  private final val TagMap: Byte = 7
+  private final val TagNull: Byte = 0
+
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
    */
@@ -1116,6 +1120,10 @@ object ZPure {
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S2, S3, R, E, B]
   ) extends ZPure[W, S1, S3, R, E, B]
+  private final case class FMap[+W, -S1, S2, -R, +E, A, +B](
+    value: ZPure[W, S1, S2, R, E, A],
+    run0: A => B
+  ) extends ZPure[W, S1, S2, R, E, B]
   private final case class Fold[+W, -S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
     failure: E1 => ZPure[W, S1, S3, R, E2, B],
@@ -1167,7 +1175,7 @@ object ZPure {
     private[this] var _environment     = ZEnvironment.empty
     private[this] var _clearLogOnError = false
     private[this] var _logs            = ChunkBuilder.make[Any]()
-    private[this] val stack            = new Stack[Continuation]
+    private[this] val stack            = new TagStack[AnyRef]
 
     private def clear(): Unit = {
       _environment = ZEnvironment.empty
@@ -1216,15 +1224,34 @@ object ZPure {
               case environment0: Environment[Any, Any, Any, Any, Any, Any] =>
                 curZPure = continuation(environment0.access(_environment))
 
+              case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                curZPure = fmap0.value
+                stack.push(TagFlatMap, continuation)
+                stack.push(TagMap, fmap0.run0)
+
               case _ =>
                 curZPure = nested
-                stack.push(continuation)
+                stack.push(TagFlatMap, continuation)
             }
 
           case succeed0: Succeed[Any] =>
             a = succeed0.value
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var nextTag = stack.peek
+            while (nextTag == TagMap) {
+              val nextInstr = stack.pop()
+              a = nextInstr.asInstanceOf[Any => Any](a)
+              nextTag = stack.peek
+            }
+            if (nextTag == TagNull) {
+              curZPure = null
+            } else {
+              val nextInstr = stack.pop()
+              curZPure = nextInstr.asInstanceOf[Continuation](a)
+            }
+
+          case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+            curZPure = fmap0.value
+            stack.push(TagMap, fmap0.run0)
 
           case fold0: Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any] =>
             val state = s0
@@ -1254,15 +1281,24 @@ object ZPure {
               )
             }
 
-            stack.push(fold)
+            stack.push(TagFlatMap, fold)
             curZPure = fold0.value
 
           case log0: Log[Any, Any] =>
             _logs addOne log0.log
-            val nextInstr = stack.pop()
             a = ()
-            if (nextInstr eq null) curZPure = null
-            else curZPure = nextInstr(())
+            var nextTag = stack.peek
+            while (nextTag == TagMap) {
+              val nextInstr = stack.pop()
+              a = nextInstr.asInstanceOf[Any => Any](a)
+              nextTag = stack.peek
+            }
+            if (nextTag == TagNull) {
+              curZPure = null
+            } else {
+              val nextInstr = stack.pop()
+              curZPure = nextInstr.asInstanceOf[Continuation](a)
+            }
 
           case provide0: Provide[Any, Any, Any, Any, Any, Any] =>
             val previousEnv = _environment
@@ -1274,19 +1310,49 @@ object ZPure {
 
           case environment0: Environment[Any, Any, Any, Any, Any, Any] =>
             a = environment0.access(_environment)
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var nextTag = stack.peek
+            while (nextTag == TagMap) {
+              val nextInstr = stack.pop()
+              a = nextInstr.asInstanceOf[Any => Any](a)
+              nextTag = stack.peek
+            }
+            if (nextTag == TagNull) {
+              curZPure = null
+            } else {
+              val nextInstr = stack.pop()
+              curZPure = nextInstr.asInstanceOf[Continuation](a)
+            }
 
           case inspect0: Inspect[Any, Any] =>
             a = inspect0.run0(s0)
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var nextTag = stack.peek
+            while (nextTag == TagMap) {
+              val nextInstr = stack.pop()
+              a = nextInstr.asInstanceOf[Any => Any](a)
+              nextTag = stack.peek
+            }
+            if (nextTag == TagNull) {
+              curZPure = null
+            } else {
+              val nextInstr = stack.pop()
+              curZPure = nextInstr.asInstanceOf[Continuation](a)
+            }
 
           case modify0: Update[Any, Any] =>
             s0 = modify0.run0(s0)
             a = ()
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(())
+            var nextTag = stack.peek
+            while (nextTag == TagMap) {
+              val nextInstr = stack.pop()
+              a = nextInstr.asInstanceOf[Any => Any](a)
+              nextTag = stack.peek
+            }
+            if (nextTag == TagNull) {
+              curZPure = null
+            } else {
+              val nextInstr = stack.pop()
+              curZPure = nextInstr.asInstanceOf[Continuation](a)
+            }
 
           case flag0: ClearLogOnError[Any, Any, Any, Any, Any, Any] =>
             val oldValue = _clearLogOnError
