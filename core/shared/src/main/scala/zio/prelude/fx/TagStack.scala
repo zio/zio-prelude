@@ -8,7 +8,9 @@ private final class TagStack[A <: AnyRef] { self =>
 
   private[this] var array  = new Array[AnyRef](ArrSize + 1)
   private[this] var packed = 0
-  array(ArrSize) = new Array[Byte](ArrSize)
+  private[this] var tags   = 0 // Keep tags as bits in this Int
+
+  array(ArrSize) = new Array[Int](1) // When allocating new array, current tags will be saved here
 
   def clear(): Unit = {
     var i = 0
@@ -22,21 +24,26 @@ private final class TagStack[A <: AnyRef] { self =>
   /**
    * Pushes an item onto the stack.
    */
-  def push(tag: Byte, a: A): Unit = {
+  def push(tag: Boolean, a: A): Unit = {
     val packed0 = packed
     val used    = packed0 & 0xf
+    val array0  = array
     if (used == ArrSize) {
-      val newArr    = new Array[AnyRef](ArrSize + 1)
-      val newTagArr = new Array[Byte](ArrSize)
-      newArr(ArrSize) = newTagArr
-      newArr(0) = array
+      val newArr = new Array[AnyRef](ArrSize + 1)
+      (array0(ArrSize).asInstanceOf[Array[Int]])(0) = tags
+      newArr(0) = array0
       newArr(1) = a
-      newTagArr(1) = tag
+      newArr(ArrSize) = new Array[Int](1)
+      tags = if (tag) 2 else 0 // First item will go to array(1), so set the second bit
       array = newArr
       packed += 3
     } else {
-      array(used) = a
-      (array(ArrSize).asInstanceOf[Array[Byte]])(used) = tag
+      array0(used) = a
+      if (tag) {
+        tags |= 1 << used
+      } else {
+        tags &= ~(1 << used)
+      }
       packed += 1
     }
   }
@@ -56,6 +63,7 @@ private final class TagStack[A <: AnyRef] { self =>
         val arr0 = a.asInstanceOf[Array[AnyRef]]
         a = arr0(ArrSize - 1)
         array = arr0
+        tags = arr0(ArrSize).asInstanceOf[Array[Int]](0)
         packed -= 3
       } else {
         packed -= 1
@@ -64,18 +72,21 @@ private final class TagStack[A <: AnyRef] { self =>
     }
   }
 
-  def peek: Byte = {
+  /**
+   *  Returns `true` if tag is set for the item at the top. Returns `false` if the stack is empty.
+   */
+  def tagged: Boolean = {
     val packed0 = packed
     if (packed0 == 0) {
-      0
+      false
     } else {
       val used = packed0 & 0xf
       val idx  = used - 1
       if (idx == 0 && packed0 != 1) {
-        val tagArray = (array(idx).asInstanceOf[Array[AnyRef]])(ArrSize).asInstanceOf[Array[Byte]]
-        tagArray(ArrSize - 1)
+        val tags0 = (array(idx).asInstanceOf[Array[AnyRef]])(ArrSize).asInstanceOf[Array[Int]](0)
+        (tags0 >> (ArrSize - 1) & 1) == 1
       } else {
-        (array(ArrSize).asInstanceOf[Array[Byte]])(idx)
+        (tags >> idx & 1) == 1
       }
     }
   }

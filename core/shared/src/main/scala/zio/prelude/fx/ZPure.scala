@@ -774,9 +774,8 @@ object ZPure {
   private val succeedNone: ZPure[Nothing, Any, Nothing, Any, Nothing, Option[Nothing]] = Succeed(None)
   private val succeedUnitFn                                                            = (_: Any) => succeedUnit
 
-  private final val TagFlatMap: Byte = 6
-  private final val TagMap: Byte = 7
-  private final val TagNull: Byte = 0
+  private final val TagNotSet = false
+  private final val TagFMap   = true
 
   /**
    * Constructs a computation, catching any `Throwable` that is thrown.
@@ -1226,32 +1225,28 @@ object ZPure {
 
               case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
                 curZPure = fmap0.value
-                stack.push(TagFlatMap, continuation)
-                stack.push(TagMap, fmap0.run0)
+                stack.push(TagNotSet, continuation)
+                stack.push(TagFMap, fmap0.run0)
 
               case _ =>
                 curZPure = nested
-                stack.push(TagFlatMap, continuation)
+                stack.push(TagNotSet, continuation)
             }
 
           case succeed0: Succeed[Any] =>
             a = succeed0.value
-            var nextTag = stack.peek
-            while (nextTag == TagMap) {
-              val nextInstr = stack.pop()
-              a = nextInstr.asInstanceOf[Any => Any](a)
-              nextTag = stack.peek
-            }
-            if (nextTag == TagNull) {
+            while (stack.tagged)
+              a = stack.pop().asInstanceOf[Any => Any](a)
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) {
               curZPure = null
             } else {
-              val nextInstr = stack.pop()
               curZPure = nextInstr.asInstanceOf[Continuation](a)
             }
 
           case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
             curZPure = fmap0.value
-            stack.push(TagMap, fmap0.run0)
+            stack.push(TagFMap, fmap0.run0)
 
           case fold0: Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any] =>
             val state = s0
@@ -1281,22 +1276,18 @@ object ZPure {
               )
             }
 
-            stack.push(TagFlatMap, fold)
+            stack.push(TagNotSet, fold)
             curZPure = fold0.value
 
           case log0: Log[Any, Any] =>
             _logs addOne log0.log
             a = ()
-            var nextTag = stack.peek
-            while (nextTag == TagMap) {
-              val nextInstr = stack.pop()
-              a = nextInstr.asInstanceOf[Any => Any](a)
-              nextTag = stack.peek
-            }
-            if (nextTag == TagNull) {
+            while (stack.tagged)
+              a = stack.pop().asInstanceOf[Any => Any](a)
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) {
               curZPure = null
             } else {
-              val nextInstr = stack.pop()
               curZPure = nextInstr.asInstanceOf[Continuation](a)
             }
 
@@ -1310,47 +1301,35 @@ object ZPure {
 
           case environment0: Environment[Any, Any, Any, Any, Any, Any] =>
             a = environment0.access(_environment)
-            var nextTag = stack.peek
-            while (nextTag == TagMap) {
-              val nextInstr = stack.pop()
-              a = nextInstr.asInstanceOf[Any => Any](a)
-              nextTag = stack.peek
-            }
-            if (nextTag == TagNull) {
+            while (stack.tagged)
+              a = stack.pop().asInstanceOf[Any => Any](a)
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) {
               curZPure = null
             } else {
-              val nextInstr = stack.pop()
               curZPure = nextInstr.asInstanceOf[Continuation](a)
             }
 
           case inspect0: Inspect[Any, Any] =>
             a = inspect0.run0(s0)
-            var nextTag = stack.peek
-            while (nextTag == TagMap) {
-              val nextInstr = stack.pop()
-              a = nextInstr.asInstanceOf[Any => Any](a)
-              nextTag = stack.peek
-            }
-            if (nextTag == TagNull) {
+            while (stack.tagged)
+              a = stack.pop().asInstanceOf[Any => Any](a)
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) {
               curZPure = null
             } else {
-              val nextInstr = stack.pop()
               curZPure = nextInstr.asInstanceOf[Continuation](a)
             }
 
           case modify0: Update[Any, Any] =>
             s0 = modify0.run0(s0)
             a = ()
-            var nextTag = stack.peek
-            while (nextTag == TagMap) {
-              val nextInstr = stack.pop()
-              a = nextInstr.asInstanceOf[Any => Any](a)
-              nextTag = stack.peek
-            }
-            if (nextTag == TagNull) {
+            while (stack.tagged)
+              a = stack.pop().asInstanceOf[Any => Any](a)
+            val nextInstr = stack.pop()
+            if (nextInstr eq null) {
               curZPure = null
             } else {
-              val nextInstr = stack.pop()
               curZPure = nextInstr.asInstanceOf[Continuation](a)
             }
 
