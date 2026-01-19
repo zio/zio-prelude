@@ -1174,7 +1174,7 @@ object ZPure {
     private[this] var _environment     = ZEnvironment.empty
     private[this] var _clearLogOnError = false
     private[this] var _logs            = ChunkBuilder.make[Any]()
-    private[this] val stack            = new TagStack[AnyRef]
+    private[this] val stack            = new Stack[AnyRef]
 
     private def clear(): Unit = {
       _environment = ZEnvironment.empty

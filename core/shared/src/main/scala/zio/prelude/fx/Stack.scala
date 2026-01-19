@@ -3,8 +3,8 @@ package zio.prelude.fx
 /**
  * Lightweight port of zio.internal.Stack, optimized for usage with ZPure
  */
-private final class TagStack[A <: AnyRef] { self =>
-  import TagStack._
+private final class Stack[A <: AnyRef] { self =>
+  import Stack._
 
   private[this] var array  = new Array[AnyRef](ArrSize + 1)
   private[this] var packed = 0
@@ -92,6 +92,6 @@ private final class TagStack[A <: AnyRef] { self =>
   }
 }
 
-private object TagStack {
+private object Stack {
   private final val ArrSize = 15 // Can be made smaller, but not larger
 }
