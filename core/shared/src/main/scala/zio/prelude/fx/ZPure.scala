@@ -323,7 +323,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms the result of this computation with the specified function.
    */
   final def map[B](f: A => B): ZPure[W, S1, S2, R, E, B] =
-    flatMap(a => succeed(f(a)))
+    FMap(self, f)
 
   /**
    * Transforms the error type of this computation with the specified
@@ -1116,6 +1116,10 @@ object ZPure {
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S2, S3, R, E, B]
   ) extends ZPure[W, S1, S3, R, E, B]
+  private final case class FMap[+W, -S1, S2, -R, +E, A, +B](
+    value: ZPure[W, S1, S2, R, E, A],
+    run0: A => B
+  ) extends ZPure[W, S1, S2, R, E, B]
   private final case class Fold[+W, -S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
     failure: E1 => ZPure[W, S1, S3, R, E2, B],
@@ -1161,13 +1165,12 @@ object ZPure {
   }
 
   final private class Runner private {
-    private type Continuation = Any => Erased
-    private type Erased       = ZPure[Any, Any, Any, Any, Any, Any]
+    private type Erased = ZPure[Any, Any, Any, Any, Any, Any]
 
     private[this] var _environment     = ZEnvironment.empty
     private[this] var _clearLogOnError = false
     private[this] var _logs            = ChunkBuilder.make[Any]()
-    private[this] val stack            = new Stack[Continuation]
+    private[this] val stack            = new Stack
 
     private def clear(): Unit = {
       _environment = ZEnvironment.empty
@@ -1216,15 +1219,32 @@ object ZPure {
               case environment0: Environment[Any, Any, Any, Any, Any, Any] =>
                 curZPure = continuation(environment0.access(_environment))
 
-              case _ =>
+              case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                curZPure = fmap0.value
+                stack.push2(continuation, fmap0)
+
+              case nested =>
                 curZPure = nested
                 stack.push(continuation)
             }
 
-          case succeed0: Succeed[Any] =>
+          case succeed0: Succeed[Any]                         =>
             a = succeed0.value
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
+          case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+            curZPure = fmap0.value
+            stack.push(fmap0)
 
           case fold0: Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any] =>
             val state = s0
@@ -1259,10 +1279,19 @@ object ZPure {
 
           case log0: Log[Any, Any] =>
             _logs addOne log0.log
-            val nextInstr = stack.pop()
             a = ()
-            if (nextInstr eq null) curZPure = null
-            else curZPure = nextInstr(())
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
 
           case provide0: Provide[Any, Any, Any, Any, Any, Any] =>
             val previousEnv = _environment
@@ -1274,19 +1303,49 @@ object ZPure {
 
           case environment0: Environment[Any, Any, Any, Any, Any, Any] =>
             a = environment0.access(_environment)
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
 
           case inspect0: Inspect[Any, Any] =>
             a = inspect0.run0(s0)
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
 
           case modify0: Update[Any, Any] =>
             s0 = modify0.run0(s0)
             a = ()
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(())
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
 
           case flag0: ClearLogOnError[Any, Any, Any, Any, Any, Any] =>
             val oldValue = _clearLogOnError

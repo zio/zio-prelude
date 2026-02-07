@@ -3,14 +3,15 @@ package zio.prelude.fx
 /**
  * Lightweight port of zio.internal.Stack, optimized for usage with ZPure
  */
-private final class Stack[A <: AnyRef] { self =>
+private final class Stack { self =>
   import Stack._
 
   private[this] var array  = new Array[AnyRef](ArrSize)
   private[this] var packed = 0
 
   def clear(): Unit = {
-    var i = 0
+    var i     = 0
+    val array = this.array
     while (i < ArrSize && (array(i) ne null)) {
       array(i) = null
       i += 1
@@ -21,7 +22,7 @@ private final class Stack[A <: AnyRef] { self =>
   /**
    * Pushes an item onto the stack.
    */
-  def push(a: A): Unit = {
+  def push(a: AnyRef): Unit = {
     val packed0 = packed
     val used    = packed0 & 0xf
     if (used == ArrSize) {
@@ -29,20 +30,34 @@ private final class Stack[A <: AnyRef] { self =>
       newArr(0) = array
       newArr(1) = a
       array = newArr
-      packed += 3
+      packed = packed0 + 3
     } else {
       array(used) = a
-      packed += 1
+      packed = packed0 + 1
+    }
+  }
+
+  def push2(a: AnyRef, b: AnyRef): Unit = {
+    val packed0 = packed
+    val used    = packed0 & 0xf
+    if (used >= ArrSize - 1) {
+      push(a)
+      push(b)
+    } else {
+      val array = this.array
+      array(used) = a
+      array(used + 1) = b
+      packed = packed0 + 2
     }
   }
 
   /**
    * Pops an item off the stack, or returns `null` if the stack is empty.
    */
-  def pop(): A = {
+  def pop(): AnyRef = {
     val packed0 = packed
     if (packed0 == 0) {
-      null.asInstanceOf[A]
+      null
     } else {
       val used = packed0 & 0xf
       val idx  = used - 1
@@ -51,11 +66,11 @@ private final class Stack[A <: AnyRef] { self =>
         val arr0 = a.asInstanceOf[Array[AnyRef]]
         a = arr0(ArrSize - 1)
         array = arr0
-        packed -= 3
+        packed = packed0 - 3
       } else {
-        packed -= 1
+        packed = packed0 - 1
       }
-      a.asInstanceOf[A]
+      a
     }
   }
 }
