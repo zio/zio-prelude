@@ -221,7 +221,7 @@ classDiagram
   class BothCompose~=>:[-_, +_]~{
     URIO[-*, +*] [ :*: = Tuple2 ]
   
-    (type) :*:[+_, +_]
+    + (type) :*:[+_, +_]
     + fromFirst[A]: (A :*: Any) =>: A
     + fromSecond[B]: (Any :*: B) =>: B
     + toBoth[A, B, C](A =>: B)(A =>: C): A =>: (B :*: C)
@@ -229,7 +229,7 @@ classDiagram
   class ApplicationCompose~=>:[-_, +_]~{
     Function[-*, +*] [ :*: = Tuple2 ; -->: = Function ]
     
-    (type) -->:[-_, +_]
+    + (type) -->:[-_, +_]
     + application[A, B]: ((A -->: B) :*: A) =>: B
     + curry[A, B, C]((A :*: B) =>: C): A =>: (B -->: C)
     + uncurry[A, B, C](A =>: (B -->: C)): (A :*: B) =>: C
@@ -238,7 +238,7 @@ classDiagram
     Function[-*, +*] [ :+: = Either ]
     URIO[-*, +*] [ :+: = Either ]
     
-    (type) :+:[+_, +_]
+    + (type) :+:[+_, +_]
     + toLeft[A]: A =>: (A :+: Nothing)
     + toRight[B]: B =>: (Nothing :+: B)
     + fromEither[A, B, C](=> A =>: C)(=> B =>: C): (A :+: B) =>: C
@@ -313,7 +313,7 @@ classDiagram
 ```
 
 
-# DistributiveProd
+## DistributiveProd
 
 ```mermaid
 classDiagram
