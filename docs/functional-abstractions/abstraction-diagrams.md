@@ -14,20 +14,20 @@ classDiagram
   ExcludedMiddle~A~ <|-- Involution~A~
   Noncontradiction~A~ <|-- Involution~A~
   class Absorption~A~{
-    () or(=> A, => A): A
-    () and(=> A, => A): A
+    + or(=> A, => A): A
+    + and(=> A, => A): A
   }
   class DistributiveAbsorption~A~{
     Boolean
     Set[A]
   }
   class Noncontradiction~A~{
-    () complement(=> A): A
-    () bottom: A
+    + complement(=> A): A
+    + bottom: A
   }
   class ExcludedMiddle~A~{
-    () complement(=> A): A
-    () top: A
+    + complement(=> A): A
+    + top: A
   }
   class Involution~A~{
     Boolean
@@ -56,7 +56,7 @@ classDiagram
     Validation[E, A: Associative]
     ZNonEmptySet[A, B: Associative]
 
-    () combine(=> A, => A): A
+    + combine(=> A, => A): A
   }
   class Commutative~A~{
     And
@@ -83,7 +83,7 @@ classDiagram
     ZSet[A, B: Commutative]
     ZNonEmptySet[A, B: Commutative]
 
-    () commute: Commutative[A]
+    + commute: Commutative[A]
   }
   class Idempotent~A~{
     And
@@ -105,8 +105,8 @@ classDiagram
     ZSet[A, B: Idempotent]
     ZNonEmptySet[A, B: Idempotent]
 
-    () combineIdempotent(=> A, => A)(Equal[A]): A
-    () idempotent(Equal[A]): Idempotent[A]
+    + combineIdempotent(=> A, => A)(Equal[A]): A
+    + idempotent(Equal[A]): Idempotent[A]
   }
   class Identity~A~{
     F[A: Identity]: Derive[_, Identity]
@@ -125,13 +125,13 @@ classDiagram
     Vector[A]
     ZSet[A, B: Associative]
 
-    () identity: A
+    + identity: A
   }
   class PartialInverse~A~{
     F[A: PartialInverse]: Derive[_, PartialInverse]
     Prod[Byte/Char/Double/Float/Int/Long/Short]
     ❨T1: PartialInverse, ..., T22: PartialInverse❩
-    () inverseOption(=> A, => A): Option[A]
+    + inverseOption(=> A, => A): Option[A]
   }
   class Inverse~A~{
     And
@@ -143,7 +143,7 @@ classDiagram
     Sum[Byte/Char/Double/Float/Int/Long/Short]
     ❨T1: Inverse, ..., T22: Inverse❩
 
-    () inverse(=> A, => A): A
+    + inverse(=> A, => A): A
   }
 ```
 
@@ -161,7 +161,7 @@ classDiagram
     ZSink[R, E, I, L, +*]
     ZStream[R, E, +*]
 
-    () both[A,B](=> F[A], => F[B]): F[(A,B)]
+    + both[A,B](=> F[A], => F[B]): F[(A,B)]
   }
   class CommutativeBoth~F<_>~{
     Chunk[+*]
@@ -195,7 +195,7 @@ classDiagram
     Try[+*]
     Vector[+*]
 
-    () any: F[Any]
+    + any: F[Any]
   }
 ```
 
@@ -210,38 +210,38 @@ classDiagram
   AssociativeCompose~=>:[-_, +_]~ <|-- EitherCompose~=>:[-_, +_]~
   BothCompose <|-- ApplicationCompose~=>:[-_, +_]~
   class AssociativeCompose~=>:[-_, +_]~{
-    () compose[A, B, C](B =>: C, A =>: B): A =>: C
+    + compose[A, B, C](B =>: C, A =>: B): A =>: C
   }
   class IdentityCompose~=>:[-_, +_]~{
     Function[-*, +*]
     URIO[-*, +*]
 
-    () identity[A]: A =>: A
+    + identity[A]: A =>: A
   }
   class BothCompose~=>:[-_, +_]~{
     URIO[-*, +*] [ :*: = Tuple2 ]
   
     (type) :*:[+_, +_]
-    () fromFirst[A]: (A :*: Any) =>: A
-    () fromSecond[B]: (Any :*: B) =>: B
-    () toBoth[A, B, C](A =>: B)(A =>: C): A =>: (B :*: C)
+    + fromFirst[A]: (A :*: Any) =>: A
+    + fromSecond[B]: (Any :*: B) =>: B
+    + toBoth[A, B, C](A =>: B)(A =>: C): A =>: (B :*: C)
   }
   class ApplicationCompose~=>:[-_, +_]~{
     Function[-*, +*] [ :*: = Tuple2 ; -->: = Function ]
     
     (type) -->:[-_, +_]
-    () application[A, B]: ((A -->: B) :*: A) =>: B
-    () curry[A, B, C]((A :*: B) =>: C): A =>: (B -->: C)
-    () uncurry[A, B, C](A =>: (B -->: C)): (A :*: B) =>: C
+    + application[A, B]: ((A -->: B) :*: A) =>: B
+    + curry[A, B, C]((A :*: B) =>: C): A =>: (B -->: C)
+    + uncurry[A, B, C](A =>: (B -->: C)): (A :*: B) =>: C
   }
   class EitherCompose~=>:[-_, +_]~{
     Function[-*, +*] [ :+: = Either ]
     URIO[-*, +*] [ :+: = Either ]
     
     (type) :+:[+_, +_]
-    () toLeft[A]: A =>: (A :+: Nothing)
-    () toRight[B]: B =>: (Nothing :+: B)
-    () fromEither[A, B, C](=> A =>: C)(=> B =>: C): (A :+: B) =>: C
+    + toLeft[A]: A =>: (A :+: Nothing)
+    + toRight[B]: B =>: (Nothing :+: B)
+    + fromEither[A, B, C](=> A =>: C)(=> B =>: C): (A :+: B) =>: C
   }
 ```
 
@@ -261,7 +261,7 @@ classDiagram
     ZLayer[R, E, +*]
     ZManaged[R, E, +*]
     
-    () either[A, B](=> F[A], => F[B]): F[Either[A, B]]
+    + either[A, B](=> F[A], => F[B]): F[Either[A, B]]
   }
   class CommutativeEither~F<_>~{
     Future[+*]
@@ -276,7 +276,7 @@ classDiagram
     Hash[-*]
     Ord[-*]
 
-    () none: F[Nothing]
+    + none: F[Nothing]
   }
 ```
 
@@ -290,7 +290,7 @@ classDiagram
   class AssociativeFlatten~F<+_>~{
     Map[K, +*]
     
-    () flatten[A](F[F[A]]): F[A]
+    + flatten[A](F[F[A]]): F[A]
   }
   class IdentityFlatten~F<+_>~{
     Cause[+*]
@@ -308,7 +308,7 @@ classDiagram
     ZManaged[R, E, +*]
     ZStream[R, E, +*]
 
-    () any: F[Any]
+    + any: F[Any]
   }
 ```
 
@@ -322,10 +322,10 @@ classDiagram
     Cause[A]
     ParSeq[Unit, A]
     
-    () Sum: Associative[Sum[A]]
-    () Prod: Associative[Prod[A]]
-    () sum(=> A, => A): A
-    () prod(=> A, => A): A
+    + Sum: Associative[Sum[A]]
+    + Prod: Associative[Prod[A]]
+    + sum(=> A, => A): A
+    + prod(=> A, => A): A
   }
   class Annihilation~A~{
     Byte/Char/Double/Float/Int/Long/Short
@@ -358,14 +358,14 @@ classDiagram
     ZNonEmptySet[A, B: Equal]
     ZSet[A, B: Equal]
 
-    () both[B](=> Equal[B]): Equal[(A, B)]
-    () bothWith[B, C](=> Equal[B])(C => (A, B)): Equal[C]
-    () contramap[B](B => A): Equal[B]
-    () either[B](=> Equal[B]): Equal[Either[A, B]]
-    () eitherWith[B, C](=> Equal[B])(C => Either[A, B]): Equal[C]
-    () equal(A, A): Boolean
-    () notEqual(A, A): Boolean
-    () toScala[A1 <: A]: scala.math.Equiv[A1]
+    + both[B](=> Equal[B]): Equal[(A, B)]
+    + bothWith[B, C](=> Equal[B])(C => (A, B)): Equal[C]
+    + contramap[B](B => A): Equal[B]
+    + either[B](=> Equal[B]): Equal[Either[A, B]]
+    + eitherWith[B, C](=> Equal[B])(C => Either[A, B]): Equal[C]
+    + equal(A, A): Boolean
+    + notEqual(A, A): Boolean
+    + toScala[A1 <: A]: scala.math.Equiv[A1]
   }
   class Hash~-A~ {
     Boolean
@@ -405,12 +405,12 @@ classDiagram
     ZSet[A, B: Hash]
     ZTrace
 
-    () both[B](Hash[B]): Hash[(A, B)]
-    () bothWith[B, C](Hash[B])(C => (A, B)): Hash[C]
-    () contramap[B](B => A): Hash[B]
-    () either[B](Hash[B]): Hash[Either[A, B]]
-    () eitherWith[B, C](Hash[B])(C => Either[A, B]): Hash[C]
-    () hash(A): Int
+    + both[B](Hash[B]): Hash[(A, B)]
+    + bothWith[B, C](Hash[B])(C => (A, B)): Hash[C]
+    + contramap[B](B => A): Hash[B]
+    + either[B](Hash[B]): Hash[Either[A, B]]
+    + eitherWith[B, C](Hash[B])(C => Either[A, B]): Hash[C]
+    + hash(A): Int
   }
   class PartialOrd~-A~ {
     Chunk[A: PartialOrd]
@@ -432,13 +432,13 @@ classDiagram
     ZNonEmptySet[A, B: PartialOrd]
     ZSet[A, B: PartialOrd]
 
-    () both[B](=> PartialOrd[B]): PartialOrd[(A, B)]
-    () bothWith[B, C](=> PartialOrd[B])(C => (A, B)): PartialOrd[C]
-    () compare(A, A): PartialOrdering
-    () contramap[B](B => A): PartialOrd[B]
-    () either[B](=> PartialOrd[B]): PartialOrd[Either[A, B]]
-    () eitherWith[B, C](=> PartialOrd[B])(C => Either[A, B]): PartialOrd[C]
-    () mapPartialOrdering(PartialOrdering => PartialOrdering): PartialOrd[A]
+    + both[B](=> PartialOrd[B]): PartialOrd[(A, B)]
+    + bothWith[B, C](=> PartialOrd[B])(C => (A, B)): PartialOrd[C]
+    + compare(A, A): PartialOrdering
+    + contramap[B](B => A): PartialOrd[B]
+    + either[B](=> PartialOrd[B]): PartialOrd[Either[A, B]]
+    + eitherWith[B, C](=> PartialOrd[B])(C => Either[A, B]): PartialOrd[C]
+    + mapPartialOrdering(PartialOrdering => PartialOrdering): PartialOrd[A]
 
   }
   class Ord~-A~ {
@@ -466,14 +466,14 @@ classDiagram
     Unit
     Vector[A: Ord]
 
-    () both[B](=> Ord[B]): Ord[(A, B)]
-    () bothWith[B, C](=> Ord[B])(C => (A, B)): Ord[C]
-    () compare(A, A): Ordering
-    () contramap[B](B => A): Ord[B]
-    () either[B](=> Ord[B]): Ord[Either[A, B]]
-    () eitherWith[B, C](=> Ord[B])(C => Either[A, B]): Ord[C]
-    () mapOrdering(Ordering => Ordering): Ord[A]
-    () reverse: Ord[A]
-    () toScala[A1 <: A]: scala.math.Ordering[A1]
+    + both[B](=> Ord[B]): Ord[(A, B)]
+    + bothWith[B, C](=> Ord[B])(C => (A, B)): Ord[C]
+    + compare(A, A): Ordering
+    + contramap[B](B => A): Ord[B]
+    + either[B](=> Ord[B]): Ord[Either[A, B]]
+    + eitherWith[B, C](=> Ord[B])(C => Either[A, B]): Ord[C]
+    + mapOrdering(Ordering => Ordering): Ord[A]
+    + reverse: Ord[A]
+    + toScala[A1 <: A]: scala.math.Ordering[A1]
   }
 ```
