@@ -73,7 +73,7 @@ jobs:
         uses: actions/setup-java@v5.2.0
         with:
           distribution: temurin
-          java-version: 11 # ensure it works on 11 because we publish for 11
+          java-version: 17
           check-latest: true
       - name: Setup NodeJs
         uses: actions/setup-node@v6
@@ -133,7 +133,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: ['11', '17', '21']
+        java: ['17', '21', '25']
         platform: ['JVM']
     steps:
       - name: Checkout current branch
@@ -262,7 +262,7 @@ jobs:
         uses: actions/setup-java@v5.2.0
         with:
           distribution: temurin
-          java-version: 11 # publish for 11
+          java-version: 17
           check-latest: true
       - name: Cache scala dependencies
         uses: coursier/cache-action@v8
@@ -294,7 +294,7 @@ jobs:
         uses: actions/setup-java@v5.2.0
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '17'
           check-latest: true
       - name: Cache Dependencies
         uses: coursier/cache-action@v8
