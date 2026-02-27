@@ -82,7 +82,7 @@ object BuildHelper {
         case Scala3 =>
           "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.18"
         case _      =>
-          "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.10"
+          "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.12"
       }
     }
 
