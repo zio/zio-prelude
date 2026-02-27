@@ -34,7 +34,7 @@ import scala.util.Try
  * context, state, failure, and logging.
  */
 
-sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
+sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
   /**
@@ -254,7 +254,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Exposes the output state into the value channel.
    */
   final def getState: ZPure[W, S1, S2, R, E, (S2, A)] =
-    flatMap(a => get.map(s => (s, a)))
+    flatMap(a => getWith(s => (s, a)))
 
   /**
    * Returns a successful computation with the head of the list if the list is
@@ -323,7 +323,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms the result of this computation with the specified function.
    */
   final def map[B](f: A => B): ZPure[W, S1, S2, R, E, B] =
-    flatMap(a => succeed(f(a)))
+    FMap(self, f)
 
   /**
    * Transforms the error type of this computation with the specified
@@ -403,7 +403,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3)(implicit
     ev: CanFail[E]
   ): ZPure[W, S1, S3, R, Nothing, A1] =
-    orElse(succeed(a1).mapState(_ => s3))
+    orElse(set(s3).map(_ => a1))
 
   /**
    * Provides this computation with its required environment.
@@ -497,8 +497,8 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * (or until the first failure) passing the updated state to each successive repetition.
    */
   final def repeatUntilState(f: S2 => Boolean)(implicit ev: S2 <:< S1): ZPure[W, S1, S2, R, E, A] =
-    self.zip(ZPure.get).flatMap { case (a, s) =>
-      if (f(s)) ZPure.succeed(a)
+    self.zip(ZPure.getWith(f)).flatMap { case (a, b) =>
+      if (b) ZPure.succeed(a)
       else repeatUntilState(f).contramapState(ev)
     }
 
@@ -638,7 +638,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    * The original state is supposed to be `()`.
    */
-  def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] =
+  final def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] =
     ZIO.environmentWithZIO[R] { r =>
       provideEnvironment(r).runAll(())._2 match {
         case Left(error)   => ZIO.fail(error)
@@ -649,7 +649,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
    */
-  def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
+  final def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
     ZIO.environmentWithZIO[R] { r =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
@@ -661,7 +661,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
    */
-  def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
+  final def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
     ZIO.environmentWithZIO[R] { r =>
       val result = provideEnvironment(r).runAll(s1)
       result._2 match {
@@ -673,7 +673,7 @@ sealed trait ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
    */
-  def toZIOWithAll(s1: S1): ZIO[R, E, (Chunk[W], S2, A)] =
+  final def toZIOWithAll(s1: S1): ZIO[R, E, (Chunk[W], S2, A)] =
     ZIO.environmentWithZIO[R] { r =>
       val (log, result) = provideEnvironment(r).runAll(s1)
       result match {
@@ -925,7 +925,13 @@ object ZPure {
    * Constructs a computation that returns the initial state unchanged.
    */
   def get[S]: ZPure[Nothing, S, S, Any, Nothing, S] =
-    modify(s => (s, s))
+    getWith(identity)
+
+  /**
+   * Constructs a computation that applies the provided function to the initial state and returns the result
+   */
+  def getWith[S, A](f: S => A): ZPure[Nothing, S, S, Any, Nothing, A] =
+    Inspect(f)
 
   def log[S, W](w: W): ZPure[W, S, S, Any, Nothing, Unit] =
     ZPure.Log(w)
@@ -934,15 +940,15 @@ object ZPure {
    * Constructs a computation from the specified modify function.
    */
   def modify[S1, S2, A](f: S1 => (A, S2)): ZPure[Nothing, S1, S2, Any, Nothing, A] =
-    Modify(f)
+    getWith(f).flatMap { case (a, s2) => set(s2).map(_ => a) }
 
   /**
    * Constructs a computation that may fail from the specified modify function.
    */
   def modifyEither[S1, S2, E, A](f: S1 => Either[E, (A, S2)]): ZPure[Nothing, S1, S2, Any, E, A] =
-    get.map(f).flatMap {
+    getWith(f).flatMap {
+      case Right((a, s2)) => set(s2).map(_ => a)
       case Left(e)        => ZPure.fail(e)
-      case Right((a, s2)) => ZPure.succeed(a).asState(s2)
     }
 
   /**
@@ -974,7 +980,7 @@ object ZPure {
    * Constructs a computation that sets the state to the specified value.
    */
   def set[S](s: S): ZPure[Nothing, Any, S, Any, Nothing, Unit] =
-    modify(_ => ((), s))
+    update(_ => s)
 
   /**
    * Constructs a computation that always succeeds with the specified value,
@@ -1006,7 +1012,7 @@ object ZPure {
    * Constructs a computation from the specified update function.
    */
   def update[S1, S2](f: S1 => S2): ZPure[Nothing, S1, S2, Any, Nothing, Unit] =
-    modify(s => ((), f(s)))
+    Update(f)
 
   /**
    * The moral equivalent of `if (p) exp`
@@ -1103,13 +1109,17 @@ object ZPure {
       self.refineOrDie { case e: E1 => e }
   }
 
-  private final case class Succeed[+A](value: A)                     extends ZPure[Nothing, Any, Nothing, Any, Nothing, A]
-  private final case class Fail[+E](error: E)                        extends ZPure[Nothing, Any, Nothing, Any, E, Nothing]
-  private final case class Modify[-S1, +S2, +A](run0: S1 => (A, S2)) extends ZPure[Nothing, S1, S2, Any, Nothing, A]
+  private final case class Succeed[+A](value: A)            extends ZPure[Nothing, Any, Nothing, Any, Nothing, A]
+  private final case class Fail[+E](error: E)               extends ZPure[Nothing, Any, Nothing, Any, E, Nothing]
+  private final case class Update[-S1, +S2](run0: S1 => S2) extends ZPure[Nothing, S1, S2, Any, Nothing, Unit]
   private final case class FlatMap[+W, -S1, S2, +S3, -R, +E, A, +B](
     value: ZPure[W, S1, S2, R, E, A],
     continue: A => ZPure[W, S2, S3, R, E, B]
   ) extends ZPure[W, S1, S3, R, E, B]
+  private final case class FMap[+W, -S1, S2, -R, +E, A, +B](
+    value: ZPure[W, S1, S2, R, E, A],
+    run0: A => B
+  ) extends ZPure[W, S1, S2, R, E, B]
   private final case class Fold[+W, -S1, S2, +S3, -R, E1, +E2, A, +B](
     value: ZPure[W, S1, S2, R, E1, A],
     failure: E1 => ZPure[W, S1, S3, R, E2, B],
@@ -1123,11 +1133,12 @@ object ZPure {
       extends ZPure[W, S1, S2, R, E, A]
   private final case class Provide[W, S1, S2, R, E, A](r: ZEnvironment[R], continue: ZPure[W, S1, S2, R, E, A])
       extends ZPure[W, S1, S2, Any, E, A]
-  private final case class Log[S, +W](log: W)                        extends ZPure[W, S, S, Any, Nothing, Unit]
+  private final case class Log[S, +W](log: W)               extends ZPure[W, S, S, Any, Nothing, Unit]
   private final case class ClearLogOnError[W, S1, S2, R, E, A](
     value: Boolean,
     continue: ZPure[W, S1, S2, R, E, A]
   ) extends ZPure[W, S1, S2, R, E, A]
+  private final case class Inspect[S, +A](run0: S => A)     extends ZPure[Nothing, S, S, Any, Nothing, A]
 
   private object Runner {
     private[this] val pool = new ThreadLocal[(Runner, AtomicBoolean)] {
@@ -1154,13 +1165,12 @@ object ZPure {
   }
 
   final private class Runner private {
-    private type Continuation = Any => Erased
-    private type Erased       = ZPure[Any, Any, Any, Any, Any, Any]
+    private type Erased = ZPure[Any, Any, Any, Any, Any, Any]
 
     private[this] var _environment     = ZEnvironment.empty
     private[this] var _clearLogOnError = false
     private[this] var _logs            = ChunkBuilder.make[Any]()
-    private[this] val stack            = new Stack[Continuation]
+    private[this] val stack            = new Stack
 
     private def clear(): Unit = {
       _environment = ZEnvironment.empty
@@ -1195,10 +1205,12 @@ object ZPure {
               case succeed0: Succeed[Any] =>
                 curZPure = continuation(succeed0.value)
 
-              case modify0: Modify[Any, Any, Any] =>
-                val updated = modify0.run0(s0)
-                s0 = updated._2
-                curZPure = continuation(updated._1)
+              case inspect0: Inspect[Any, Any] =>
+                curZPure = continuation(inspect0.run0(s0))
+
+              case update0: Update[Any, Any] =>
+                s0 = update0.run0(s0)
+                curZPure = continuation(())
 
               case log0: Log[Any, Any] =>
                 _logs addOne log0.log
@@ -1207,15 +1219,32 @@ object ZPure {
               case environment0: Environment[Any, Any, Any, Any, Any, Any] =>
                 curZPure = continuation(environment0.access(_environment))
 
-              case _ =>
+              case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                curZPure = fmap0.value
+                stack.push2(continuation, fmap0)
+
+              case nested =>
                 curZPure = nested
                 stack.push(continuation)
             }
 
-          case succeed0: Succeed[Any] =>
+          case succeed0: Succeed[Any]                         =>
             a = succeed0.value
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
+          case fmap0: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+            curZPure = fmap0.value
+            stack.push(fmap0)
 
           case fold0: Fold[Any, Any, Any, Any, Any, Any, Any, Any, Any] =>
             val state = s0
@@ -1250,9 +1279,19 @@ object ZPure {
 
           case log0: Log[Any, Any] =>
             _logs addOne log0.log
-            val nextInstr = stack.pop()
             a = ()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(())
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
 
           case provide0: Provide[Any, Any, Any, Any, Any, Any] =>
             val previousEnv = _environment
@@ -1264,15 +1303,49 @@ object ZPure {
 
           case environment0: Environment[Any, Any, Any, Any, Any, Any] =>
             a = environment0.access(_environment)
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
 
-          case modify0: Modify[Any, Any, Any] =>
-            val updated   = modify0.run0(s0)
-            a = updated._1
-            s0 = updated._2
-            val nextInstr = stack.pop()
-            if (nextInstr eq null) curZPure = null else curZPure = nextInstr(a)
+          case inspect0: Inspect[Any, Any] =>
+            a = inspect0.run0(s0)
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
+
+          case modify0: Update[Any, Any] =>
+            s0 = modify0.run0(s0)
+            a = ()
+            var loop = true
+            while (loop)
+              stack.pop() match {
+                case null                                          =>
+                  loop = false
+                  curZPure = null
+                case fmap: FMap[Any, Any, Any, Any, Any, Any, Any] =>
+                  a = fmap.run0(a)
+                case other                                         =>
+                  loop = false
+                  curZPure = other.asInstanceOf[Any => Erased](a)
+              }
 
           case flag0: ClearLogOnError[Any, Any, Any, Any, Any, Any] =>
             val oldValue = _clearLogOnError
