@@ -365,11 +365,17 @@ sealed trait ZValidation[+W, +E, +A] { self =>
    * errors.
    */
   final def zipWithPar[W1 >: W, E1 >: E, B, C](that: ZValidation[W1, E1, B])(f: (A, B) => C): ZValidation[W1, E1, C] =
-    (self, that) match {
-      case (Failure(w, e), Failure(w1, e1)) => Failure(w ++ w1, e ++ e1)
-      case (Failure(w, e), Success(w1, _))  => Failure(w ++ w1, e)
-      case (Success(w, _), Failure(w1, e1)) => Failure(w ++ w1, e1)
-      case (Success(w, a), Success(w1, b))  => Success(w ++ w1, f(a, b))
+    self match {
+      case Failure(w, e) =>
+        that match {
+          case Failure(w1, e1) => Failure(w ++ w1, e ++ e1)
+          case Success(w1, _)  => Failure(w ++ w1, e)
+        }
+      case Success(w, a) =>
+        that match {
+          case Failure(w1, e1) => Failure(w ++ w1, e1)
+          case Success(w1, b)  => Success(w ++ w1, f(a, b))
+        }
     }
 }
 
