@@ -1,10 +1,10 @@
 pull_request_rules:
-  - name: assign and label scala-steward's PRs
+  - name: request review and label scala-steward's PRs
     conditions:
       - author=scala-steward
     actions:
-      assign:
-        users: ["@zio/zio-prelude"]
+      request_reviews:
+        teams: ["zio-prelude"]
       label:
         add: ["type: dependencies"]
   - name: label scala-steward's breaking PRs
