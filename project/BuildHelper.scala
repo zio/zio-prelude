@@ -13,7 +13,7 @@ import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport.*
 object BuildHelper {
   val Scala212: String = "2.12.21"
   val Scala213: String = "2.13.16"
-  val Scala3: String   = "3.3.7"
+  val Scala3: String   = "3.3.8"
 
   private val stdOptions = Seq(
     "-deprecation",
@@ -80,7 +80,7 @@ object BuildHelper {
     libraryDependencies += {
       scalaVersion.value match {
         case Scala3 =>
-          "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.18"
+          "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.23"
         case _      =>
           "com.softwaremill.magnolia1_2" %% "magnolia" % "1.1.14"
       }
