@@ -15,9 +15,9 @@ import scala.language.implicitConversions
  * conversion defined from `A`` to `Optional[A]`, and from `Option[A]`` to `Optional[A]`.
  */
 sealed trait Optional[+A] extends IterableOnceCompat[A] { self =>
-  val isEmpty: Boolean
-  val isDefined: Boolean
-  val nonEmpty: Boolean
+  def isEmpty: Boolean
+  def isDefined: Boolean
+  def nonEmpty: Boolean
 
   /**
    * Converts this optional value to standard [[scala.Option]]
@@ -164,18 +164,18 @@ object Optional {
    *   type of the value
    */
   final case class Present[+A](get: A) extends Optional[A] {
-    override val isEmpty: Boolean   = false
-    override val isDefined: Boolean = true
-    override val nonEmpty: Boolean  = true
+    override def isEmpty: Boolean   = false
+    override def isDefined: Boolean = true
+    override def nonEmpty: Boolean  = true
   }
 
   /**
    * Optional value that is absent
    */
   case object Absent extends Optional[Nothing] {
-    override val isEmpty: Boolean   = true
-    override val isDefined: Boolean = false
-    override val nonEmpty: Boolean  = false
+    override def isEmpty: Boolean   = true
+    override def isDefined: Boolean = false
+    override def nonEmpty: Boolean  = false
   }
 
   implicit def AllValuesAreNullable[A](value: A): Optional[A]     = Present(value)
