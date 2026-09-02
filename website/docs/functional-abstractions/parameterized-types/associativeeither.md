@@ -84,7 +84,7 @@ implicit val ChunkAssociativeEither: AssociativeEither[Chunk] =
     def either[A, B](as: => Chunk[A], bs: => Chunk[B]): Chunk[Either[A, B]] =
       as.map(Left(_)) ++ bs.map(Right(_))
   }
-// ChunkAssociativeEither: AssociativeEither[Chunk] = repl.MdocSession$MdocApp0$$anon$1@31b42d70
+// ChunkAssociativeEither: AssociativeEither[Chunk] = repl.MdocSession$MdocApp0$$anon$1@58ec07e4
 ```
 
 Here we are concatenating the two `Chunk` values, putting the elements from the left `Chunk` in a `Left` and the elements from the right `Chunk` in a `Right`. We can think of this as running the left `Chunk` until it fails by running out of elements and then running the right `Chunk`.
