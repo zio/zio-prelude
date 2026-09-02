@@ -67,14 +67,14 @@ implicit val ListForEach: ForEach[List] =
         zipWith(f(a), gbs)(_ :: _)
       }
   }
-// ListForEach: ForEach[List] = repl.MdocSession$MdocApp$$anon$1@6fda8d32
+// ListForEach: ForEach[List] = repl.MdocSession$MdocApp$$anon$1@2ec13783
 
 implicit val NonEmptyListNonEmptyForEach: ForEach[NonEmptyList] =
   new NonEmptyForEach[NonEmptyList] {
     def forEach1[G[+_]: AssociativeBoth: Covariant, A, B](fa: NonEmptyList[A])(f: A => G[B]): G[NonEmptyList[B]] =
       fa.reduceMapRight(a => map(f(a))(NonEmptyList.single))((a, gbs) => zipWith(f(a), gbs)(NonEmptyList.cons))
   }
-// NonEmptyListNonEmptyForEach: ForEach[NonEmptyList] = repl.MdocSession$MdocApp$$anon$2@34fddacd
+// NonEmptyListNonEmptyForEach: ForEach[NonEmptyList] = repl.MdocSession$MdocApp$$anon$2@69348746
 ```
 
 In our implementation of `ForEach` for `List` we needed to use the `succeed` operator to handle the case where the collection was empty, because in that case we had to be able to lift an empty collection into the context of `G`. The `succeed` operator requires an `IdentityBoth` instance because we have to be able to construct a neutral value of type `G` that we can then fill with the value we are lifting using the `map` operator.

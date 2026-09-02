@@ -31,7 +31,7 @@ implicit val IntAssociative: Associative[Int] =
     def combine(left: => Int, right: => Int): Int =
       left + right
   }
-// IntAssociative: Associative[Int] = repl.MdocSession$MdocApp$$anon$1@2a16a389
+// IntAssociative: Associative[Int] = repl.MdocSession$MdocApp$$anon$1@9a0527d
 ```
 
 In contrast, the `AssociativeBoth` abstraction describes a way of associatively combining two parameterized types.
@@ -52,7 +52,7 @@ implicit val ListAssociativeBoth: AssociativeBoth[List] =
     def both[A, B](left: => List[A], right: => List[B]): List[(A, B)] =
       left.flatMap(a => right.map(b => (a, b)))
   }
-// ListAssociativeBoth: AssociativeBoth[List] = repl.MdocSession$MdocApp$$anon$2@552cb701
+// ListAssociativeBoth: AssociativeBoth[List] = repl.MdocSession$MdocApp$$anon$2@62b738a3
 ```
 
 Notice how the `AssociativeBoth` instance is parameterized on `List` rather than a list of any specific type. This is important because it says the `ListAssociativeBoth` instance knows how to combine any two lists in an associative way, not just two lists of some specific type.
