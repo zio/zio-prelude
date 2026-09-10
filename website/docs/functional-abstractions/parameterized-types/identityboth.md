@@ -43,9 +43,9 @@ val helloUnit: ZIO[Console, IOException, Unit] =
 //   trace = "repl.MdocSession.MdocApp0.helloUnit(identityboth.md:31)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp0.helloUnit(identityboth.md:31)",
-//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17760/0x00007fb482cf0e20@64ef2ce1
+//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17840/0x00007f7e0ad9a838@156ccab2
 //   ),
-//   successK = zio.ZIO$$Lambda$17762/0x00007fb482cf2d18@2ca80ef8
+//   successK = zio.ZIO$$Lambda$17842/0x00007f7e0ad9c730@46cc5c02
 // )
 
 val unitHello: ZIO[Console, IOException, Unit] =
@@ -54,9 +54,9 @@ val unitHello: ZIO[Console, IOException, Unit] =
 //   trace = "repl.MdocSession.MdocApp0.unitHello(identityboth.md:35)",
 //   first = Sync(
 //     trace = "",
-//     eval = zio.ZIO$$$Lambda$17741/0x00007fb482cda8a0@7dd06cc1
+//     eval = zio.ZIO$$$Lambda$17821/0x00007f7e0ad81000@175e529e
 //   ),
-//   successK = zio.ZIO$$Lambda$17762/0x00007fb482cf2d18@60c5dfbe
+//   successK = zio.ZIO$$Lambda$17842/0x00007f7e0ad9c730@6494339d
 // )
 ```
 

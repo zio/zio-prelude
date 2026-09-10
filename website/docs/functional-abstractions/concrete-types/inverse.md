@@ -54,7 +54,7 @@ implicit val NaturalInverse: Inverse[Natural] =
     def inverse(left: => Natural, right: => Natural): Natural =
       Natural.minus(left, right)
   }
-// NaturalInverse: Inverse[Natural] = repl.MdocSession$MdocApp0$$anon$1@399166b8
+// NaturalInverse: Inverse[Natural] = repl.MdocSession$MdocApp0$$anon$1@38ee5dd0
 ```
 
 This also lets us define `Inverse` instances for other data types that we would not otherwise be able to. For example, what is the inverse of `Set(1, 2, 3)`?

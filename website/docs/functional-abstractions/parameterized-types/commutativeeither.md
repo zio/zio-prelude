@@ -42,10 +42,10 @@ val helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] =
 //   trace = "repl.MdocSession.MdocApp.helloZIO(commutativeeither.md:15)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp.helloZIO(commutativeeither.md:15)",
-//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17760/0x00007fb482cf0e20@29245b43
+//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17840/0x00007f7e0ad9a838@2066702c
 //   ),
-//   successK = zio.ZIO$$$Lambda$17748/0x00007fb482ce0d38@590b0ab9,
-//   failureK = zio.ZIO$$Lambda$17844/0x00007fb482d3fbc8@21e43a56
+//   successK = zio.ZIO$$$Lambda$17828/0x00007f7e0ad8a538@234a4ec7,
+//   failureK = zio.ZIO$$Lambda$17924/0x00007f7e0ade5358@60f1c7fd
 // )
 
 val zioHello: ZIO[Console, IOException, Either[Unit, Unit]] =
@@ -54,10 +54,10 @@ val zioHello: ZIO[Console, IOException, Either[Unit, Unit]] =
 //   trace = "repl.MdocSession.MdocApp.zioHello(commutativeeither.md:19)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp.zioHello(commutativeeither.md:19)",
-//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17760/0x00007fb482cf0e20@6af852de
+//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17840/0x00007f7e0ad9a838@47f72ec0
 //   ),
-//   successK = zio.ZIO$$$Lambda$17748/0x00007fb482ce0d38@590b0ab9,
-//   failureK = zio.ZIO$$Lambda$17844/0x00007fb482d3fbc8@6a4ee35d
+//   successK = zio.ZIO$$$Lambda$17828/0x00007f7e0ad8a538@234a4ec7,
+//   failureK = zio.ZIO$$Lambda$17924/0x00007f7e0ade5358@29d7c7ec
 // )
 ```
 
@@ -80,14 +80,14 @@ val helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] =
   Console.printLine("Hello").raceEither(Console.printLine("ZIO"))
 // helloZIO: ZIO[Console, IOException, Either[Unit, Unit]] = Stateful(
 //   trace = "repl.MdocSession.MdocApp.<local MdocApp>.helloZIO(commutativeeither.md:33)",
-//   onState = zio.ZIO$$Lambda$17849/0x00007fb482d54d30@39fec2a2
+//   onState = zio.ZIO$$Lambda$17929/0x00007f7e0ade7370@3e8e29da
 // )
 
 val zioHello: ZIO[Console, IOException, Either[Unit, Unit]] =
   Console.printLine("ZIO").raceEither(Console.printLine("Hello"))
 // zioHello: ZIO[Console, IOException, Either[Unit, Unit]] = Stateful(
 //   trace = "repl.MdocSession.MdocApp.<local MdocApp>.zioHello(commutativeeither.md:37)",
-//   onState = zio.ZIO$$Lambda$17849/0x00007fb482d54d30@620e20a2
+//   onState = zio.ZIO$$Lambda$17929/0x00007f7e0ade7370@2d3d1c48
 // )
 ```
 
@@ -122,7 +122,7 @@ implicit val SetCommutativeEither: CommutativeEither[Set] =
     def either[A, B](left: => Set[A], right: => Set[B]): Set[Either[A, B]] =
       left.map(Left(_)) ++ right.map(Right(_))
   }
-// SetCommutativeEither: CommutativeEither[Set] = repl.MdocSession$MdocApp$$anon$1@4a13c7c1
+// SetCommutativeEither: CommutativeEither[Set] = repl.MdocSession$MdocApp$$anon$1@75c2045f
 ```
 
 In this case there is no actual concurrency going on but we are combining the left `Set` and right `Set`, wrapping their values in `Left` and `Right` respectively.
