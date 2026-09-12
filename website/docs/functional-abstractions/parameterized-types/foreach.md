@@ -121,7 +121,7 @@ implicit val ListForEach: ForEach[List] =
         zipWith(f(a), gbs)(_ :: _)
       }
   }
-// ListForEach: ForEach[List] = repl.MdocSession$MdocApp$$anon$1@6e9e24fd
+// ListForEach: ForEach[List] = repl.MdocSession$MdocApp$$anon$1@647d5cf1
 ```
 
 Notice how similar our implementation of the `ForEach` abstraction looks to our initial implementation of the `foreach` operator on `ZIO`. Other than using operators defined on `Covariant` and `IdentityBoth` instead of operators on `ZIO` they are identical.
