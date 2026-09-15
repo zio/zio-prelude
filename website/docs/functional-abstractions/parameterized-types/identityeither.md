@@ -47,7 +47,7 @@ implicit val OptionIdentityEither: IdentityEither[Option] =
     val none: Option[Nothing] =
       None
   }
-// OptionIdentityEither: IdentityEither[Option] = repl.MdocSession$MdocApp0$$anon$1@56af3136
+// OptionIdentityEither: IdentityEither[Option] = repl.MdocSession$MdocApp0$$anon$1@17c63dba
 ```
 
 If we think of an `Option[A]` as representing either a success with a value of type `A` or a failure with no useful information, then the implementation of `none` is `None`. Combining any `Option[A]` with `None` with `orElseEither` won't change its result.
@@ -93,7 +93,7 @@ implicit val ChunkIdentityEither: IdentityEither[Chunk] =
     val none: Chunk[Nothing] =
       Chunk.empty
   }
-// ChunkIdentityEither: IdentityEither[Chunk] = repl.MdocSession$MdocApp0$$anon$2@673327bb
+// ChunkIdentityEither: IdentityEither[Chunk] = repl.MdocSession$MdocApp0$$anon$2@261b0b52
 ```
 
 Here the identity element is just the empty chunk. If we think of running a collection as producing a set of values and then failing when the collection is empty, `none` is the collection that doesn't produce any values and fails immediately.

@@ -48,9 +48,9 @@ val helloIdentity: ZIO[Console, IOException, Unit] =
 //     trace = "repl.MdocSession.MdocApp0.helloIdentity(identityflatten.md:31)",
 //     first = Sync(
 //       trace = "",
-//       eval = zio.ZIO$$$Lambda$17794/0x00007f21ded8a570@19545d4a
+//       eval = zio.ZIO$$$Lambda$17804/0x00007f152ed1a200@344bce50
 //     ),
-//     successK = zio.ZIO$$Lambda$17868/0x00007f21dedd4d48@52d55186
+//     successK = zio.ZIO$$Lambda$17878/0x00007f152ed666d8@239aff7c
 //   ),
 //   successK = <function1>
 // )
