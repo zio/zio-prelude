@@ -38,7 +38,7 @@ val IntAssociative: Associative[Int] =
     def combine(left: => Int, right: => Int): Int =
       left + right
   }
-// IntAssociative: Associative[Int] = repl.MdocSession$MdocApp$$anon$1@3836b834
+// IntAssociative: Associative[Int] = repl.MdocSession$MdocApp$$anon$1@31914370
 ```
 
 Note however that the signature of the trait is not sufficient to define the abstraction.
@@ -53,7 +53,7 @@ val IntNotAssociative: Associative[Int] =
     def combine(left: => Int, right: => Int): Int =
       left - right // don't do this
   }
-// IntNotAssociative: Associative[Int] = repl.MdocSession$MdocApp$$anon$2@9c441bc
+// IntNotAssociative: Associative[Int] = repl.MdocSession$MdocApp$$anon$2@6a14a5
 ```
 
 This shows that abstractions are not meaningful without laws. Abstractions describe some common structure that is shared between different data types but without laws we don't know what this structure is supposed to be.
