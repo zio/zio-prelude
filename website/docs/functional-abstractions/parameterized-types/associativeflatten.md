@@ -50,9 +50,9 @@ val greet: ZIO[Random, Nothing, ZIO[Console, IOException, Unit]] =
 //   trace = "repl.MdocSession.MdocApp.greet(associativeflatten.md:23)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp.greet(associativeflatten.md:23)",
-//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17760/0x00007fb482cf0e20@23b91d38
+//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17813/0x00007f21deda0d88@3642039d
 //   ),
-//   successK = zio.ZIO$$Lambda$17815/0x00007fb482d1f118@73778780
+//   successK = zio.ZIO$$Lambda$17868/0x00007f21dedd4d48@b553555
 // )
 ```
 
@@ -85,9 +85,9 @@ val greet: ZIO[Random with Console, IOException, Unit] =
 //     trace = "repl.MdocSession.MdocApp.<local MdocApp>.greet(associativeflatten.md:33)",
 //     first = Stateful(
 //       trace = "repl.MdocSession.MdocApp.<local MdocApp>.greet(associativeflatten.md:33)",
-//       onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17760/0x00007fb482cf0e20@15abb0c6
+//       onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17813/0x00007f21deda0d88@252b9b9e
 //     ),
-//     successK = zio.ZIO$$Lambda$17815/0x00007fb482d1f118@1193bd46
+//     successK = zio.ZIO$$Lambda$17868/0x00007f21dedd4d48@791bb255
 //   ),
 //   successK = <function1>
 // )
@@ -106,7 +106,7 @@ val greet: ZIO[Random with Console, IOException, Unit] =
 //   trace = "repl.MdocSession.MdocApp.<local MdocApp>.greet(associativeflatten.md:43)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp.<local MdocApp>.greet(associativeflatten.md:43)",
-//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17760/0x00007fb482cf0e20@178ccaaa
+//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17813/0x00007f21deda0d88@4577c82c
 //   ),
 //   successK = <function1>
 // )
