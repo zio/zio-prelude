@@ -100,7 +100,7 @@ val three: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] =
   one.zipWith(two)(_ + _)
 // three: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] = FlatMap(
 //   value = Succeed(value = 1),
-//   continue = zio.prelude.fx.ZPure$$Lambda$18125/0x00007f51daee6420@77652218
+//   continue = zio.prelude.fx.ZPure$$Lambda$18167/0x00007f0462ef6538@2cb05487
 // )
 ```
 
@@ -192,7 +192,7 @@ We access a service in the environment using the `service` operator, so if we wa
 val accountEnvironment: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, AccountEnvironment] =
   ZPure.service
 // accountEnvironment: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, AccountEnvironment] = Environment(
-//   access = zio.prelude.fx.ZPure$ServiceWithPartiallyApplied$$$Lambda$18306/0x00007f51daf66250@474cb734
+//   access = zio.prelude.fx.ZPure$ServiceWithPartiallyApplied$$$Lambda$18348/0x00007f0462f76250@4cecec79
 // )
 ```
 
@@ -204,7 +204,7 @@ If we just want to do one thing with the environment like get the interest rate 
 val interestRate: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] =
   ZPure.serviceWith(_.interestRate)
 // interestRate: ZPure[Nothing, Unit, Unit, AccountEnvironment, Nothing, Double] = Environment(
-//   access = zio.prelude.fx.ZPure$ServiceWithPartiallyApplied$$$Lambda$18306/0x00007f51daf66250@7203be87
+//   access = zio.prelude.fx.ZPure$ServiceWithPartiallyApplied$$$Lambda$18348/0x00007f0462f76250@12a10d1
 // )
 ```
 
@@ -229,7 +229,7 @@ val interestComputation: ZPure[Nothing, Unit, Unit, Any, Nothing, Double] =
 //   r = ZEnvironment(MdocSession::MdocApp0::AccountEnvironment -> AccountEnvironment(0.05)),
 //   continue = FlatMap(
 //     value = Environment(
-//       access = zio.prelude.fx.ZPure$ServiceWithPurePartiallyApplied$$$Lambda$18307/0x00007f51daf66a40@254790d0
+//       access = zio.prelude.fx.ZPure$ServiceWithPurePartiallyApplied$$$Lambda$18349/0x00007f0462f76a40@675f50ed
 //     ),
 //     continue = generalized constraint
 //   )
@@ -303,9 +303,9 @@ val withdrawalComputation: ZPure[Nothing, Any, AccountState, Any, AccountError, 
   withdraw(10).provideState(AccountState(100, true))
 // withdrawalComputation: ZPure[Nothing, Any, AccountState, Any, AccountError, Unit] = FlatMap(
 //   value = Update(
-//     run0 = zio.prelude.fx.ZPure$$$Lambda$18314/0x00007f51daf70b68@40c5bb02
+//     run0 = zio.prelude.fx.ZPure$$$Lambda$18356/0x00007f0462f80b68@4ddda6b8
 //   ),
-//   continue = zio.prelude.fx.ZPure$$Lambda$18315/0x00007f51daf70f38@4417e6bb
+//   continue = zio.prelude.fx.ZPure$$Lambda$18357/0x00007f0462f80f38@75891a7a
 // )
 ```
 
@@ -346,11 +346,11 @@ val withdrawalComputationLog: ZPure[String, AccountState, AccountState, Any, Acc
 // withdrawalComputationLog: ZPure[String, AccountState, AccountState, Any, AccountError, Unit] = FlatMap(
 //   value = FlatMap(
 //     value = Inspect(
-//       run0 = zio.prelude.fx.ZPure$$$Lambda$18313/0x00007f51daf707a0@195a78b
+//       run0 = zio.prelude.fx.ZPure$$$Lambda$18355/0x00007f0462f807a0@584ef5b8
 //     ),
 //     continue = <function1>
 //   ),
-//   continue = zio.prelude.fx.ZPure$$Lambda$18316/0x00007f51daf71308@6c650110
+//   continue = zio.prelude.fx.ZPure$$Lambda$18358/0x00007f0462f81308@7806706f
 // )
 
 val log: Chunk[String] =

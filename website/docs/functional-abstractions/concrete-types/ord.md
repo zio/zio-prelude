@@ -39,11 +39,11 @@ import zio.prelude.Ord
 
 val toScala: scala.math.Ordering[Int] =
   Ord[Int].toScala
-// toScala: Ordering[Int] = zio.prelude.Ord$$anonfun$toScala$2@73bc02f8
+// toScala: Ordering[Int] = zio.prelude.Ord$$anonfun$toScala$2@6b5e3fd9
 
 val fromScala: Ord[Int] =
   Ord.fromScala(scala.math.Ordering[Int])
-// fromScala: Ord[Int] = zio.prelude.Ord$$anonfun$fromScala$2@28afea24
+// fromScala: Ord[Int] = zio.prelude.Ord$$anonfun$fromScala$2@56ce1809
 ```
 
 The main advantages that the `Ord` abstraction provides over the `Ordering` in the Scala standard library is improved type inference due to use of variance and integration with the other functional abstractions in ZIO Prelude.
@@ -75,7 +75,7 @@ implicit val CustomerAccountOrd: Ord[CustomerAccount] =
     case (ConsumerAccount(_), BusinessAccount(_))     => Ordering.GreaterThan
     case (ConsumerAccount(id1), ConsumerAccount(id2)) => id1 =?= id2
   }
-// CustomerAccountOrd: Ord[CustomerAccount] = zio.prelude.Ord$$anon$4@c4a19bd
+// CustomerAccountOrd: Ord[CustomerAccount] = zio.prelude.Ord$$anon$4@238032
 ```
 
 Basically this says that we are ordering all business accounts before all consumer accounts and then within each account type we are ordering by the identifier. Note that we are using the `=?=` operator which is available on any type for which an `Ord` is defined to return the result of comparing two values of that type.
@@ -128,7 +128,7 @@ implicit val CustomerAccountScalaOrdering: scala.math.Ordering[CustomerAccount] 
         case (ConsumerAccount(id1), ConsumerAccount(id2)) => id1 compare id2
       }
 }
-// CustomerAccountScalaOrdering: Ordering[CustomerAccount] = repl.MdocSession$MdocApp2$$anon$1@66e9fb5c
+// CustomerAccountScalaOrdering: Ordering[CustomerAccount] = repl.MdocSession$MdocApp2$$anon$1@175beeb3
 ```
 
 Besides the lack of specific types in modeling the result of the compare operator this works fine for comparing two customer accounts.
@@ -173,7 +173,7 @@ ZIO Prelude is also very good at automatically deriving `Ord` instances for more
 import zio.prelude._
 
 Ord[(Double, Double)]
-// res5: Ord[(Double, Double)] = zio.prelude.Ord$$anon$5@9724442
+// res5: Ord[(Double, Double)] = zio.prelude.Ord$$anon$5@7d8afe49
 ```
 
 The default instance for tuples will order values by the first field and then if the first field is the same by the second field and so on.
