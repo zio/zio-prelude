@@ -14,12 +14,5 @@ pull_request_rules:
     actions:
       label:
         add: ["type: breaking"]
-  - name: merge Scala Steward's PRs
-    conditions:
-      - author=scala-steward
-      - "body~=(labels: library-update, early-semver-minor)|(labels: library-update, early-semver-patch)|(labels: sbt-plugin-update, early-semver-minor)|(labels: sbt-plugin-update, early-semver-patch)|(labels: scalafix-rule-update)|(labels: test-library-update)"
-      - "status-success=license/cla"
-      - "status-success=ci"
-    actions:
-      merge:
-        method: squash
+  # Auto-approving and auto-merging scala-steward's (and Dependabot's) PRs is now handled by the
+  # zio-sbt-ci-generated auto-approve.yml/auto-merge.yml workflows.
