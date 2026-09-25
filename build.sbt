@@ -34,6 +34,13 @@ inThisBuild(
       Map("JDK_JAVA_OPTIONS" -> flags, "SBT_OPTS" -> flags, "NODE_OPTIONS" -> ciNodeOptions.value.mkString(" "))
     },
     ciSwapSizeGB            := 7,
+    // Pin the runner image the old workflow used everywhere. The plugin's own `ubuntu-latest`
+    // default now resolves to Ubuntu 24.04, whose glibc trips a heap-corruption abort in Scala
+    // Native's allocator (a `malloc.c` assertion failure) that never fired under 22.04 - see the
+    // "Test Platforms (Native)" failure on the CI-migration PR's own merge run.
+    ciLintJobs              := ciLintJobs.value.map(onUbuntu22),
+    ciUpdateReadmeJobs      := ciUpdateReadmeJobs.value.map(onUbuntu22),
+    ciPostReleaseJobs       := ciPostReleaseJobs.value.map(onUbuntu22),
     ciDependencyUpdateBots  := Seq(DependencyBot.Dependabot, DependencyBot.Custom("scala-steward")),
     // The old workflow's cross-Scala `test` job only ever exercised the JVM platform; JS/Native
     // were tested separately, and only for core/experimental, via the testJS/testNative aliases
@@ -46,7 +53,7 @@ inThisBuild(
     // covered by the grouped `test` job above, so it's left out here.
     // `testPlatforms` mirrors the old job of the same name: JS/Native, default Scala only, via the
     // testJS/testNative command aliases (core/experimental only, not every module).
-    ciTestJobs              := ciTestJobs.value ++ Seq(
+    ciTestJobs              := (ciTestJobs.value ++ Seq(
       Job(
         id = "testJvms",
         name = "Test JVMs",
@@ -77,11 +84,11 @@ inThisBuild(
           )
         )
       )
-    ),
+    )).map(onUbuntu22),
     // The build (compile + publishLocal + website) and release jobs must run on JDK 11: published
     // artifacts target JDK 11, which is only actually exercised by compiling under it.
-    ciBuildJobs             := ciBuildJobs.value.map(onJava11),
-    ciReleaseJobs           := ciReleaseJobs.value.map(onJava11)
+    ciBuildJobs             := ciBuildJobs.value.map(onJava11).map(onUbuntu22),
+    ciReleaseJobs           := ciReleaseJobs.value.map(onJava11).map(onUbuntu22)
   )
 )
 
@@ -90,6 +97,8 @@ def onJava11(job: Job): Job =
     case s: Step.SingleStep if s.name == "Setup Scala" => SetupJava("11")
     case other                                         => other
   })
+
+def onUbuntu22(job: Job): Job = job.copy(runsOn = "ubuntu-22.04")
 
 addCommandAlias("fix", "; all compile:scalafix test:scalafix; all scalafmtSbt scalafmtAll")
 addCommandAlias(

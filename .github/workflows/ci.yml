@@ -26,7 +26,7 @@ concurrency:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     steps:
     - name: Set Swap Space
@@ -57,7 +57,7 @@ jobs:
       run: sbt --no-colors docs/clean; sbt --no-colors docs/buildWebsite
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     steps:
     - name: Set Swap Space
@@ -86,7 +86,7 @@ jobs:
       run: sbt --no-colors lint
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     strategy:
       fail-fast: false
@@ -133,7 +133,7 @@ jobs:
       run: sbt --no-colors ++${{ matrix.scala }} docs/test
   testJvms:
     name: Test JVMs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     strategy:
       fail-fast: false
@@ -164,7 +164,7 @@ jobs:
       run: sbt --no-colors coreJVM/test coreTestsJVM/test examplesJVM/test experimentalJVM/test experimentalLawsJVM/test experimentalTestsJVM/test lawsJVM/test macrosJVM/test magnoliaJVM/test magnoliaTestsJVM/test scalaParallelCollectionsJVM/test benchmarks/test docs/test
   testPlatforms:
     name: Test Platforms
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     strategy:
       fail-fast: false
@@ -195,7 +195,7 @@ jobs:
       run: sbt --no-colors test${{ matrix.platform }}
   update-readme:
     name: Update README
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     permissions:
       contents: read
@@ -284,7 +284,7 @@ jobs:
       run: echo "ci passed"
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     needs:
     - ci
@@ -319,7 +319,7 @@ jobs:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
   release-docs:
     name: Release Docs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     needs:
     - release
@@ -354,7 +354,7 @@ jobs:
       run: sbt --no-colors docs/publishToNpm
   notify-docs-release:
     name: Notify Docs Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: false
     needs:
     - release-docs
