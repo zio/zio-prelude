@@ -148,7 +148,7 @@ object Assertion {
         if (result) Right(())
         else Left(AssertionError.Failure(s"divisibleBy($n)"))
       } else {
-        if (!result) Left(AssertionError.Failure(s"notDivisibleBy($n)"))
+        if (result) Left(AssertionError.Failure(s"notDivisibleBy($n)"))
         else Right(())
       }
     }
