@@ -41,7 +41,11 @@ inThisBuild(
     ciLintJobs              := ciLintJobs.value.map(onUbuntu22),
     ciUpdateReadmeJobs      := ciUpdateReadmeJobs.value.map(onUbuntu22),
     ciPostReleaseJobs       := ciPostReleaseJobs.value.map(onUbuntu22),
-    ciDependencyUpdateBots  := Seq(DependencyBot.Dependabot, DependencyBot.Custom("scala-steward")),
+    // `scala-steward`'s old plain-user login never matched real PRs here - zio-prelude's Scala
+    // Steward runs as the "zio-scala-steward" GitHub App, whose PR author login is
+    // "zio-scala-steward[bot]" - so both auto-approve and auto-merge silently skipped every
+    // Scala Steward PR (e.g. #1714) while CI stayed green and the PR just sat blocked on review.
+    ciDependencyUpdateBots  := Seq(DependencyBot.Dependabot, DependencyBot.ScalaSteward("zio-scala-steward")),
     // The old workflow's cross-Scala `test` job only ever exercised the JVM platform; JS/Native
     // were tested separately, and only for core/experimental, via the testJS/testNative aliases
     // below (kept as the dedicated `testPlatforms` job).
