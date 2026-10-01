@@ -14,6 +14,7 @@ env: {}
 permissions:
   contents: write
   pull-requests: write
+  checks: read
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.run_id || github.ref }}
   cancel-in-progress: true
@@ -21,6 +22,7 @@ jobs:
   auto-merge:
     name: auto-merge
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     continue-on-error: false
     if: ${{ ((github.event_name == 'workflow_dispatch') || (github.event.pull_request.user.login == 'dependabot[bot]')) || (github.event.pull_request.user.login == 'zio-scala-steward[bot]') }}
     steps:
@@ -41,12 +43,33 @@ jobs:
       with:
         app_id: ${{ secrets.APP_ID }}
         app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
-    - name: Enable auto-merge for bot PR
+    - name: Merge bot PR once CI passes
       if: ${{ github.event_name == 'pull_request_target' }}
-      run: gh pr merge --auto --squash ${{ github.event.number }}
+      run: |
+        set -euo pipefail
+        while true; do
+          checks=$(gh pr checks "$PR" --json name,bucket \
+            --jq '[.[] | select(.name != "auto-merge" and .name != "auto-approve-bot-prs")]' 2>/dev/null || true)
+          checks=${checks:-[]}
+          total=$(jq length <<< "$checks")
+          pending=$(jq '[.[] | select(.bucket == "pending")] | length' <<< "$checks")
+          failed=$(jq '[.[] | select(.bucket == "fail" or .bucket == "cancel")] | length' <<< "$checks")
+          if [ "$failed" -gt 0 ]; then
+            echo "CI failed, not merging:"
+            jq -r '.[] | select(.bucket == "fail" or .bucket == "cancel") | .name' <<< "$checks"
+            exit 1
+          fi
+          if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then
+            break
+          fi
+          echo "Waiting for CI ($total checks, $pending pending)..."
+          sleep 30
+        done
+        gh pr merge --squash "$PR"
       env:
         GH_TOKEN: ${{ steps.generate-token.outputs.token || secrets.GITHUB_TOKEN }}
         GH_REPO: ${{ github.repository }}
+        PR: ${{ github.event.number }}
     - name: Backfill auto-merge for existing bot PRs
       if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |
