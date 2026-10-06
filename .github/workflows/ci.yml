@@ -55,6 +55,8 @@ jobs:
       run: sbt --no-colors +publishLocal
     - name: Check website build process
       run: sbt --no-colors docs/clean; sbt --no-colors docs/buildWebsite
+    - name: Check docs build on a fresh ZIO website
+      run: sbt --no-colors docs/checkDocsOnFreshWebsite
   lint:
     name: Lint
     runs-on: ubuntu-22.04
