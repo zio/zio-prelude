@@ -40,7 +40,7 @@ jobs:
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: '11'
@@ -73,7 +73,7 @@ jobs:
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: '17'
@@ -108,7 +108,7 @@ jobs:
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: ${{ matrix.java }}
@@ -153,7 +153,7 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: ${{ matrix.java }}
@@ -184,7 +184,7 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: '17'
@@ -215,7 +215,7 @@ jobs:
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: '17'
@@ -297,7 +297,7 @@ jobs:
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: '11'
@@ -332,7 +332,7 @@ jobs:
     - name: Install libuv
       run: sudo apt-get update && sudo apt-get install -y libuv1-dev
     - name: Setup Scala
-      uses: actions/setup-java@v6.1.0
+      uses: actions/setup-java@v6.0.1
       with:
         distribution: corretto
         java-version: '17'
