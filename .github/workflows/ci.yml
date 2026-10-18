@@ -131,7 +131,7 @@ jobs:
       if: ${{ matrix.scala == '3.3.8' }}
       run: sbt --no-colors ++${{ matrix.scala }} benchmarks/test magnoliaTestsJVM/test magnoliaJVM/test macrosJVM/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test scalaParallelCollectionsJVM/test
     - name: Test
-      if: ${{ matrix.scala == '2.13.18' }}
+      if: ${{ matrix.scala == '3.10.0' }}
       run: sbt --no-colors ++${{ matrix.scala }} docs/test
   testJvms:
     name: Test JVMs
