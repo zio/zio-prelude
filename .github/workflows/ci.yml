@@ -48,7 +48,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Check all code compiles
       run: sbt --no-colors +Test/compile
     - name: Check artifacts build process
@@ -81,7 +81,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Check if the site workflow is up to date
       run: sbt --no-colors ciCheckGithubWorkflow
     - name: Lint
@@ -116,7 +116,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Git Checkout
       uses: actions/checkout@v7.0.1
       with:
@@ -161,7 +161,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Test
       run: sbt --no-colors coreJVM/test coreTestsJVM/test examplesJVM/test experimentalJVM/test experimentalLawsJVM/test experimentalTestsJVM/test lawsJVM/test macrosJVM/test magnoliaJVM/test magnoliaTestsJVM/test scalaParallelCollectionsJVM/test benchmarks/test docs/test
   testPlatforms:
@@ -192,7 +192,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Test on different Scala target platforms
       run: sbt --no-colors test${{ matrix.platform }}
   update-readme:
@@ -223,7 +223,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Generate Readme
       run: sbt --no-colors docs/generateReadme
     - name: Generate Token
@@ -305,7 +305,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Release
       run: sbt --no-colors ci-release
       env:
@@ -340,7 +340,7 @@ jobs:
     - name: Setup SBT
       uses: sbt/setup-sbt@v1.5.7
     - name: Cache Dependencies
-      uses: coursier/cache-action@v8.1.1
+      uses: coursier/cache-action@v8.2.0
     - name: Setup NodeJs
       uses: actions/setup-node@v7.0.0
       with:
