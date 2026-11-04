@@ -26,9 +26,11 @@ object Macros extends Liftables {
       case None =>
         assertionExpr.asTerm.underlying match {
           // The user forgot to use the `inline` keyword
-          case Select(ident @ Ident(name), _) if ident.symbol.declarations.find(_.name == "assertion").exists { expr =>
-              expr.flags.is(Flags.Override)
-            } =>
+          case select @ Select(ident @ Ident(name), _)
+              if select.symbol.flags.is(Flags.Override) || ident.symbol.declarations.find(_.name == "assertion").exists {
+                expr =>
+                  expr.flags.is(Flags.Override)
+              } =>
 
             val message = s"""$refinementErrorHeader
 

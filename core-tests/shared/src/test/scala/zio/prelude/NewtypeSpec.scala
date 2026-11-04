@@ -150,6 +150,43 @@ object NewtypeSpec extends ZIOBaseSpec {
               isFailureV(equalTo(NonEmptyChunk("Toto did not satisfy endsWithIgnoreCase(@GMaiL.cOm)")))
             )
           }
+        ),
+        suite("assertion defined in supertype")(
+          test("valid values at compile-time") {
+            assertTrue(PrefixedId("prefix_123") == PrefixedId.unsafeWrap("prefix_123"))
+          },
+          test("invalid values at compile-time") {
+            assertZIO(typeCheck("""PrefixedId("123")"""))(
+              isLeft(containsStringWithoutAnsi("123 did not satisfy startsWith(prefix_)"))
+            )
+          } @@ TestAspect.exceptScala3,
+          test("valid and invalid values at run-time") {
+            assert(PrefixedId.make("prefix_123"))(isSuccessV(equalTo(PrefixedId("prefix_123")))) &&
+            assert(PrefixedId.make("123"))(
+              isFailureV(equalTo(NonEmptyChunk("123 did not satisfy startsWith(prefix_)")))
+            ) &&
+            assert(PrefixedId.makeAll(NonEmptyChunk("prefix_123", "123")))(
+              isFailureV(equalTo(NonEmptyChunk("123 did not satisfy startsWith(prefix_)")))
+            )
+          },
+          test("parameterized assertion in supertype fails at compile-time") {
+            val code =
+              """import zio.prelude._
+                 import zio.prelude.Assertion._
+                 abstract class Prefixed(prefix: String) extends Newtype[String] {
+                   override def assertion = assert(startsWith(prefix))
+                 }
+                 object Refined extends Prefixed("$")
+                 Refined("42")
+              """
+            assertZIO(typeCheck(code))(
+              isLeft(
+                containsStringWithoutAnsi(
+                  "You have defined your Assertion in a way that cannot be read at compile-time."
+                )
+              )
+            )
+          } @@ TestAspect.exceptScala3
         )
       ),
       suite("Subtype")(

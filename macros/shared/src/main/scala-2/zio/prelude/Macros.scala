@@ -23,8 +23,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
   def wrapAll_impl[F[_], A, T](value: c.Expr[F[A]]): c.Expr[F[T]] = {
     val expr = value
 
-    val quotedAssertion = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
+    val quotedAssertion = findQuotedAssertion
 
     quotedAssertion match {
       case Some(_) =>
@@ -44,8 +43,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
     value: c.Expr[A],
     values: c.Expr[A]*
   ): c.Tree = {
-    val quotedAssertion = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
+    val quotedAssertion = findQuotedAssertion
 
     val allValues = value +: values
 
@@ -94,8 +92,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
   def wrap_impl[A, T](value: c.Expr[A]): c.Expr[T] = {
     val expr = value
 
-    val quotedAssertion = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
+    val quotedAssertion = findQuotedAssertion
 
     quotedAssertion match {
       case Some(quotedAssertion) =>
@@ -157,8 +154,7 @@ _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
     val expr = value
     val _    = forall
 
-    val quotedAssertion = c.prefix.actualType.decls
-      .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
+    val quotedAssertion = findQuotedAssertion
 
     quotedAssertion match {
       case Some(quotedAssertion) =>
@@ -166,7 +162,7 @@ _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
         q"""
 $forall.forEach($value) { value =>
   _root_.zio.prelude.Validation.fromEitherNonEmptyChunk {
-    $quotedAssertion.run(value)
+    ${c.prefix}.assertion.run(value)
       .left.map(e => _root_.zio.NonEmptyChunk.fromCons(e.toNel(value.toString)))
   }
 }.as($result)
@@ -206,6 +202,12 @@ new _root_.zio.prelude.QuotedAssertion[${c.weakTypeOf[A]}] {
     ${c.untypecheck(f)}(value)
 }
        """
+  }
+
+  private def findQuotedAssertion: Option[c.universe.Symbol] = {
+    val defaultOwner = c.weakTypeOf[Newtype[_]].typeSymbol
+    c.prefix.actualType.members
+      .find(m => m.owner != defaultOwner && m.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
   }
 
   private def getAssertion[T, A](

@@ -139,5 +139,14 @@ object NewtypeSpecTypes {
   GmailEmail("very.cool.person@GmaIl.coM")
   GmailEmail("VERY.COOL.PERSON@GMAIL.COM")
 
+  abstract class PrefixedString extends Subtype[String] {
+    override def assertion = assert(Assertion.startsWith("prefix_"))
+  }
+
+  type PrefixedId = PrefixedId.Type
+  object PrefixedId extends PrefixedString {
+    def unsafeWrap(s: String): Type = wrap(s)
+  }
+
 }
 // scalafix:on

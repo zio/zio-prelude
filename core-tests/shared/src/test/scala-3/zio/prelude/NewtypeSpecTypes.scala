@@ -139,4 +139,13 @@ object NewtypeSpecTypes {
   // These should compile
   takeString(GithubHeaderKey("X-Github-Request-Id"))
   takeString(NonEmptyString("Hello"))
+
+  abstract class PrefixedString extends Subtype[String] {
+    override inline def assertion = Assertion.startsWith("prefix_")
+  }
+
+  type PrefixedId = PrefixedId.Type
+  object PrefixedId extends PrefixedString {
+    def unsafeWrap(s: String): Type = wrap(s)
+  }
 }
