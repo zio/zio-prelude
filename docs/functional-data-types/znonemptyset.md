@@ -32,7 +32,7 @@ ZNonEmptySet.fromIterableOption(List.empty[String])
 
 ## Reading the Counts
 
-`apply` on a set returns the weight of an element, so `letters("a")` is the number of times `"a"` occurs. For an element that is not in the set, the weight is zero:
+`ZNonEmptySet#apply` returns the weight of an element, so `letters("a")` is the number of times `"a"` occurs. For an element that is not in the set, the weight is zero:
 
 ```scala mdoc
 letters("a")

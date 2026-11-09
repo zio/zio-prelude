@@ -3,7 +3,7 @@ id: predefined-newtypes
 title: "Predefined Newtypes"
 ---
 
-ZIO Prelude ships with a set of new types in the `zio.prelude.newtypes` package. Each one wraps a common type and gives it a meaning that matters for a particular operation, such as summing values or keeping the first one. Because these new types already have their instances defined, we can use them to combine values without writing any instances ourselves.
+ZIO Prelude ships with a set of new types in the `zio.prelude.newtypes` package. Each one wraps a common type and gives it a meaning that matters for a particular operation, such as summing values or keeping the first one. Because these new types come with their instances, we can use them to combine values without writing any instances ourselves.
 
 To use them, we import the package:
 
@@ -72,7 +72,7 @@ Associative[And].combine(And(true), And(false))
 
 ## Natural Numbers
 
-`Natural` is a smart newtype over `Int` whose values must be zero or more. Its assertion is checked the same way as in [Smart Newtypes](./smart-newtypes.md): a literal is checked at compile time, and a run-time value is checked with `make`.
+`Natural` is a smart newtype over `Int` whose values must be zero or more. Its assertion is checked the same way as in [Smart Newtypes](./smart-newtypes.md): a literal is checked at compile time, and a run-time value is checked with `Natural.make`.
 
 To construct a natural number from a literal:
 
@@ -90,7 +90,7 @@ Natural.make(negative)
 
 ## Failure Newtypes
 
-`Failure`, `FailureIn`, and `FailureOut` are marker new types for values that describe a failure. The source gives each one a short description, and they are used when a type needs to say whether an error belongs to its failed state, its input, or its output:
+`Failure`, `FailureIn`, and `FailureOut` are marker new types for values that describe a failure. The source gives each one a short description, and each one marks whether an error belongs to a failed state, an input, or an output:
 
 | Type         | Meaning in the source                              |
 | ------------ | -------------------------------------------------- |

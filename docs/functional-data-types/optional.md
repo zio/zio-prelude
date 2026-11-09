@@ -5,7 +5,7 @@ title: "Optional"
 
 `Optional[A]` describes a value that may be absent. It plays the same role as the standard `Option` type, and it has the same two cases: a value that is present and a value that is absent.
 
-The difference is in what the type can be used with. `Optional` is a data type from ZIO Prelude, so it has instances for the functional abstractions in the library. Code that is written against those abstractions can work with an optional value without special cases.
+The difference lies in what the type works with. `Optional` is a data type from ZIO Prelude, so it has instances for the functional abstractions in the library. Code written against those abstractions handles an optional value without special cases.
 
 We import `Optional` from the `zio.prelude.data` package:
 
@@ -25,7 +25,7 @@ val absent: Optional[Int] =
   Optional.Absent
 ```
 
-Scala converts values to `Optional` implicitly, so a plain value can be used where an `Optional` is expected. A value becomes `Present`, and an `Option` becomes `Present` when it holds a value and `Absent` when it is `None`:
+Scala converts values to `Optional` implicitly, so a plain value works where an `Optional` is required. A value becomes `Present`, and an `Option` becomes `Present` when it holds a value and `Absent` when it is `None`:
 
 ```scala mdoc
 val fromValue: Optional[String] =

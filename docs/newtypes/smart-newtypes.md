@@ -17,6 +17,8 @@ We create a smart newtype by extending `Newtype` or `Subtype` and defining an `a
 <Tabs groupId="scala-version" defaultValue="scala2">
   <TabItem value="scala2" label="Scala 2">
 
+In Scala 2, the assertion is written as a `def` that calls `assert`:
+
 ```scala mdoc:compile-only
 import zio.prelude.{Subtype, Validation}
 import zio.prelude.Assertion._
@@ -31,6 +33,8 @@ type SequenceNumber = SequenceNumber.Type
 
   </TabItem>
   <TabItem value="scala3" label="Scala 3">
+
+In Scala 3, the assertion is an `inline def` that returns an `Assertion`:
 
 ```scala
 import zio.prelude.{Subtype, Validation}
@@ -62,7 +66,7 @@ type SequenceNumber = SequenceNumber.Type
 
 ## Validating Literals at Compile Time
 
-When we construct a value with `apply` from a literal, the assertion is checked at compile time:
+When we construct a value with `SequenceNumber.apply` from a literal, the assertion is checked at compile time:
 
 ```scala mdoc
 val valid: SequenceNumber = SequenceNumber(42)
@@ -74,11 +78,11 @@ If the literal does not satisfy the assertion, the program does not compile and 
 val oops: SequenceNumber = SequenceNumber(-10)
 ```
 
-Compile-time validation only works for literals. In Scala 2, passing a variable or a run-time value to `apply` is a compilation error as well, because the compiler cannot check it. For those values we use `make` instead.
+Compile-time validation only works for literals. In Scala 2, passing a variable or a run-time value to `SequenceNumber.apply` is a compilation error as well, because the compiler cannot check it. For those values we use `SequenceNumber.make` instead.
 
 ## Validating Run-Time Values
 
-The `make` and `makeAll` constructors check the assertion at run time. They return a `Validation` that is either a success with a valid value or a failure with an error message explaining why the value was rejected.
+The `SequenceNumber.make` and `SequenceNumber.makeAll` constructors check the assertion at run time. They return a `Validation` that is either a success with a valid value or a failure with an error message explaining why the value was rejected.
 
 To validate a value that is only known at run time:
 
@@ -89,7 +93,7 @@ val validatedSequenceNumber: Validation[String, SequenceNumber] =
   SequenceNumber.make(a)
 ```
 
-To validate a whole collection of run-time values, we use `makeAll`. It applies the same assertion to each element and returns a single `Validation` over the collection, so either every element is valid or the result is a failure.
+To validate a whole collection of run-time values, we use `SequenceNumber.makeAll`. It applies the same assertion to each element and returns a single `Validation` over the collection, so either every element is valid or the result is a failure.
 
 ## Using a More Complex Assertion
 
@@ -107,6 +111,8 @@ object EmailAddress extends Subtype[String] {
 type EmailAddress = EmailAddress.Type
 ```
 
+Next, we validate two strings against the email assertion:
+
 ```scala mdoc
 EmailAddress.make("reader@example.com")
 
@@ -115,7 +121,7 @@ EmailAddress.make("not an email")
 
 ## Bypassing the Check Inside the Object
 
-The `wrap` operator converts a value to the new type without checking the assertion. In Scala 2 it is `protected`, so only code inside the new type object can call it. This lets the object's own operators create values that they know are valid, even when the compiler cannot prove it.
+The `SequenceNumber.wrap` operator converts a value to the new type without checking the assertion. In Scala 2 it is `protected`, so only code inside the new type object can call it. This lets the object's own operators create values that they know are valid, even when the compiler cannot prove it.
 
 For example, the `next` operator on a sequence number cannot produce a negative value when the input is valid, so it can skip the check:
 
@@ -153,8 +159,8 @@ object SequenceNumber extends Subtype[Int] {
 type SequenceNumber = SequenceNumber.Type
 ```
 
-The `unsafeMake` name signals that no check runs. Use it only when the value has already been validated, for example when it comes from a trusted source or when performance matters.
+The `SequenceNumber.unsafeMake` name signals that no check runs. Use it only when the value is already valid, for example when it comes from a trusted source or when performance matters.
 
 ## Combining the Pieces
 
-A smart newtype can offer several constructors, each with its own trade-off. Compile-time `apply` gives the strongest guarantee for literals, `make` and `makeAll` handle run-time values safely, and `unsafeMake` skips the check when the caller already knows the value is valid. Together they give us full control over how a new type is created, without changing the underlying type.
+A smart newtype can offer several constructors, each with its own trade-off. Compile-time `SequenceNumber.apply` gives the strongest guarantee for literals, `SequenceNumber.make` and `SequenceNumber.makeAll` handle run-time values safely, and `SequenceNumber.unsafeMake` skips the check when the caller can vouch that the value is valid. Together they give us full control over how we build a new type, without changing the underlying type.

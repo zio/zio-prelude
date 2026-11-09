@@ -26,7 +26,7 @@ The empty collection is `ParSeq.empty`, which contains no events.
 
 ## Sequential and Parallel Events
 
-Two operators combine collections of events. `++` makes the second collection happen after the first, and `&&` makes the two happen in parallel.
+Two operators combine collections of events. `++` makes the second collection happen after the first, and `&&` makes the two happen in parallel. We define a second event and combine it with the first using both operators:
 
 ```scala mdoc:silent
 val fetchOrders: ParSeq[Nothing, String] =
@@ -67,13 +67,13 @@ describe(sequential.map(_.toUpperCase))
 
 `flatMap` replaces each event with a new collection of events. The sequential and parallel structure of the original collection is kept, and each replaced event is expanded in place.
 
-`zipWith` pairs each event of the first collection with each event of the second and combines every pair with a function. Here both collections contain a single event, so the result is a single combined event:
+`ParSeq#zipWith` pairs each event of the first collection with each event of the second and combines every pair with a function. Here both collections contain a single event, so the result is a single combined event:
 
 ```scala mdoc
 describe(fetchUser.zipWith(fetchOrders)(_ + " and " + _))
 ```
 
-`zip` is `zipWith` that builds a tuple from each pair.
+`ParSeq#zip` is `ParSeq#zipWith` that builds a tuple from each pair.
 
 ## The Z Type Parameter
 

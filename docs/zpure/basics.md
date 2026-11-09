@@ -64,12 +64,14 @@ When we only use one or two capabilities, the full six-parameter type is noisy. 
 
 Each of these has an `E` variant (`EState`, `EReader`, and `EWriter`) that adds an error type `E`. Using these aliases makes the type signatures shorter, and they often help type inference.
 
-A `State` computation takes a state and returns an updated state together with a value. The `modify` operator here returns the old state as its value and increments the state:
+A `State` computation takes a state and returns an updated state together with a value. The `ZPure.modify` operator here returns the old state as its value and increments the state:
 
 ```scala mdoc:silent
 val increment: State[Int, Int] =
   ZPure.modify[Int, Int, Int](s => (s, s + 1))
 ```
+
+Next, we run `increment` from the state `10`:
 
 ```scala mdoc
 increment.run(10)
@@ -77,7 +79,7 @@ increment.run(10)
 
 The result is `(11, 10)`: the new state is `11`, and the value is the old state, `10`.
 
-A `Reader` computation reads from its environment. Here, `serviceWith` reads a `String` from the environment and builds a greeting from it:
+A `Reader` computation reads from its environment. Here, `ZPure.serviceWith` reads a `String` from the environment and builds a greeting from it:
 
 ```scala mdoc:silent
 val greeting: Reader[String, String] =

@@ -19,6 +19,8 @@ import zio.prelude._
 val transform = implicitly[Bicovariant[Either]].bimap((s: String) => s.length, (i: Int) => i * 2)
 ```
 
+Next, we apply the mapped function to each side of an `Either`:
+
 ```scala mdoc
 transform(Left("hello"))
 

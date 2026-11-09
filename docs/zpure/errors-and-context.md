@@ -16,6 +16,8 @@ import zio.prelude._
 import zio.prelude.fx.ZPure
 ```
 
+We define a computation that fails with a `String` error:
+
 ```scala mdoc:silent
 val fail: ZPure[Nothing, Unit, Unit, Any, String, Nothing] =
   ZPure.fail("fail")
@@ -30,7 +32,7 @@ def parseIntThrowable(s: String): ZPure[Nothing, Unit, Unit, Any, Throwable, Int
   ZPure.attempt(s.toInt)
 ```
 
-`mapError` transforms the error type. We use it to map a low-level error into the error type used elsewhere in our code:
+`ZPure#mapError` transforms the error type. We use it to map a low-level error into the error type that the rest of our code uses:
 
 ```scala mdoc
 def parseInt(s: String): ZPure[Nothing, Unit, Unit, Any, String, Int] =
@@ -50,7 +52,7 @@ def parseIntOrDefault(s: String): ZPure[Nothing, Unit, Unit, Any, Nothing, Int] 
 
 The environment type `R` is the capability a computation uses to read values that are supplied from outside. It works like the environment of `ZIO`, but there are two differences in practice.
 
-First, `ZPure` is usually used to describe one particular piece of logic in an application, not the whole application. So the environment often holds plain data, and services are less common.
+First, `ZPure` usually describes one particular piece of logic in an application, not the whole application. So the environment often holds plain data, and services are less common.
 
 Second, `ZPure` has no layers. Layers are effectful, and `ZPure` does not allow arbitrary effects, so the environment is built outside the computation.
 

@@ -17,6 +17,8 @@ The library uses `Derive` internally. It gives `List`, `Chunk`, `Option`, and ot
 import zio.prelude._
 ```
 
+Next, we compare two lists of integers, first with equal contents and then with different contents:
+
 ```scala mdoc
 Derive[List, Equal].derive[Int].equal(List(1, 2), List(1, 2))
 

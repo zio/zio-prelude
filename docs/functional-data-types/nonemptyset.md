@@ -85,4 +85,4 @@ roles.map(_.length).toSet
 
 ## Instances
 
-`NonEmptySet` has the instances needed for it to be used with the functional abstractions in ZIO Prelude. For example, `NonEmptySet` has an `Invariant` instance, so it can be mapped in the same way as other data types that implement `Invariant`. Its `DeriveEqual` instance means that two sets are equal when they contain the same elements.
+`NonEmptySet` provides the instances that the functional abstractions in ZIO Prelude require. For example, `NonEmptySet` has an `Invariant` instance, so it can be mapped in the same way as other data types that implement `Invariant`. Its `DeriveEqual` instance makes two sets equal when they contain the same elements.

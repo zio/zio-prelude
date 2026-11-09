@@ -55,7 +55,7 @@ expression.fold[Int] {
 }
 ```
 
-A `Folder` packages the same function so that it can be reused and passed around as a value. `Folder[ExprF, Int]` takes a layer of `Int` results and returns an `Int`:
+A `Folder` wraps the same function as a value that can be reused. `Folder[ExprF, Int]` takes a layer of `Int` results and returns an `Int`:
 
 ```scala mdoc
 val evaluate: Folder[ExprF, Int] =
@@ -67,4 +67,4 @@ val evaluate: Folder[ExprF, Int] =
 expression.fold(evaluate.apply)
 ```
 
-`Unfolder` is the reverse. It takes a seed value and produces one layer, whose sub-expressions are seeds for the next step. It is used to build recursive structures from simpler data.
+`Unfolder` is the reverse. It takes a seed value and produces one layer, whose sub-expressions are seeds for the next step. Use it to build recursive structures from simpler data.

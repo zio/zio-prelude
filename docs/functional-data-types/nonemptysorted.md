@@ -44,7 +44,7 @@ tags.removeNonEmpty("zio").map(_.toSet)
 
 ## NonEmptySortedMap
 
-`NonEmptySortedMap` works like `NonEmptyMap`, but its keys are kept in sorted order and its constructors need an implicit `Ordering` for the key type.
+`NonEmptySortedMap` works like `NonEmptyMap`, but its keys are kept in sorted order and its constructors need an implicit `Ordering` for the key type. For example, a map of scores looks like this:
 
 ```scala mdoc
 val scores: NonEmptySortedMap[String, Int] =

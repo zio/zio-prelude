@@ -25,24 +25,26 @@ val three: ZPure[Nothing, Unit, Unit, Any, Nothing, Int] =
 
 ## Running for the Result
 
-The simplest operator is `run` with no arguments. It is available when the state is `Unit`, the environment is provided, and the error type is `Nothing`, and it returns the value the computation produces:
+The simplest operator is `ZPure#run` with no arguments. It is available when the state is `Unit`, the environment is provided, and the error type is `Nothing`, and it returns the value the computation produces:
 
 ```scala mdoc
 three.run
 ```
 
-When the computation starts with a state, we pass the initial state to `run`. The result is a pair of the final state and the value:
+When the computation starts with a state, we pass the initial state to `ZPure#run`. The result is a pair of the final state and the value:
 
 ```scala mdoc:silent
 val withState: ZPure[Nothing, Int, Int, Any, Nothing, String] =
   ZPure.modify[Int, Int, String](s => (s.toString, s + 1))
 ```
 
+Next, we run the computation from the initial state `41`:
+
 ```scala mdoc
 withState.run(41)
 ```
 
-`runState` returns only the final state, and `runResult` returns only the value:
+`ZPure#runState` returns only the final state, and `ZPure#runResult` returns only the value:
 
 ```scala mdoc
 withState.runState(41)
@@ -52,12 +54,14 @@ withState.runResult(41)
 
 ## Running When Computations Can Fail
 
-Computations with an error type can fail, so their results must include the error. `runEither` returns an `Either` with the error on the left and the value on the right. It requires an initial state of `Unit`:
+Computations with an error type can fail, so their results must include the error. `ZPure#runEither` returns an `Either` with the error on the left and the value on the right. It requires an initial state of `Unit`:
 
 ```scala mdoc:silent
 val failing: ZPure[Nothing, Unit, Unit, Any, String, Int] =
   ZPure.fail("boom")
 ```
+
+Next, we run the failing computation with `ZPure#runEither`:
 
 ```scala mdoc
 failing.runEither
@@ -73,12 +77,14 @@ failing.runAll(())
 
 ## Running for the Log
 
-When the computation can not fail, `runLog` returns the log and the value:
+When the computation can not fail, `ZPure#runLog` returns the log and the value:
 
 ```scala mdoc:silent
 val logged: ZPure[String, Unit, Unit, Any, Nothing, Int] =
   ZPure.log("starting") *> ZPure.succeed(42)
 ```
+
+Next, we run the logging computation with `ZPure#runLog`:
 
 ```scala mdoc
 logged.runLog
@@ -86,30 +92,30 @@ logged.runLog
 
 ## Converting to ZIO
 
-To use a `ZPure` computation inside an effectful `ZIO` program, we convert it with one of the `toZIO` operators. Each conversion returns a `ZIO` value that reads the environment from the `ZIO` environment, runs the `ZPure` computation, and succeeds or fails with the result. The conversion does not run the computation, so the examples below only show the types of the results.
+To use a `ZPure` computation inside an effectful `ZIO` program, we convert it with one of the `ZPure#toZIO` operators. Each conversion returns a `ZIO` value that reads the environment from the `ZIO` environment, runs the `ZPure` computation, and succeeds or fails with the result. The conversion does not run the computation, so the examples below only show the types of the results.
 
-`toZIO` converts a computation whose initial state is `Unit`. The resulting `ZIO` succeeds with the value or fails with the error:
+`ZPure#toZIO` converts a computation whose initial state is `Unit`. The resulting `ZIO` succeeds with the value or fails with the error:
 
 ```scala mdoc:compile-only
 val asZIO: zio.ZIO[Any, Nothing, Int] =
   three.toZIO
 ```
 
-`toZIOWith` takes the initial state. It has the same result type as `toZIO`:
+`ZPure#toZIOWith` takes the initial state. It has the same result type as `ZPure#toZIO`:
 
 ```scala mdoc:compile-only
 val withStateZIO: zio.ZIO[Any, Nothing, String] =
   withState.toZIOWith(41)
 ```
 
-`toZIOWithState` also returns the final state along with the value:
+`ZPure#toZIOWithState` also returns the final state along with the value:
 
 ```scala mdoc:compile-only
 val withStateAndResultZIO: zio.ZIO[Any, Nothing, (Int, String)] =
   withState.toZIOWithState(41)
 ```
 
-`toZIOWithAll` returns the log, the final state, and the value, so nothing that the computation produced is lost in the conversion:
+`ZPure#toZIOWithAll` gives the log, the final state, and the value, so the conversion keeps everything the computation produces:
 
 ```scala mdoc:compile-only
 val everythingZIO: zio.ZIO[Any, Nothing, (zio.Chunk[String], Int, String)] =
@@ -128,4 +134,4 @@ def countDown(n: Int): ZPure[Nothing, Unit, Unit, Any, Nothing, Int] =
 countDown(100000).run
 ```
 
-The result shows that the computation finished, even though each step nested inside the previous one.
+The result shows that the computation finishes, even though each step nests inside the previous one.

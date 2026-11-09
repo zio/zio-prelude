@@ -20,6 +20,8 @@ import zio.prelude._
 import zio.prelude.newtypes._
 ```
 
+Next, we combine two values with the operator:
+
 ```scala mdoc
 Idempotent[Max[Int]].combine(Max(3), Max(3))
 ```

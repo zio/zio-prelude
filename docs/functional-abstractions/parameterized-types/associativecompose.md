@@ -9,7 +9,7 @@ The type constructor is parameterized over a binary type constructor `=>:`, whic
 
 ## Composing Functions
 
-`compose` takes the function to apply second and the function to apply first. For functions, it returns a function that applies the first one and then the second. The function applied first takes a `String` and returns an `Int`, and the function applied second takes that `Int` and returns a new `Int`:
+`compose` takes the function to apply second and the function to apply first. For functions, it returns a function that applies the first one, then the second. The function that runs first takes a `String` and gives an `Int`, and the function that runs second takes that `Int` and gives a new `Int`:
 
 ```scala mdoc:silent:reset
 import zio.prelude._
@@ -17,6 +17,8 @@ import zio.prelude._
 val lengthThenDouble: String => Int =
   implicitly[AssociativeCompose[Function1]].compose((n: Int) => n * 2, (s: String) => s.length)
 ```
+
+Next, we apply the composed function to a string:
 
 ```scala mdoc
 lengthThenDouble("hello")

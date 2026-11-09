@@ -15,6 +15,8 @@ The identity arrow is what makes the operation a monoid-like structure, the same
 import zio.prelude._
 ```
 
+We first look at the identity arrow on a number:
+
 ```scala mdoc
 implicitly[IdentityCompose[Function1]].identity[Int].apply(5)
 ```
@@ -33,8 +35,10 @@ val unchanged: String => Int =
 
 ```
 
+Next, we compose a function with the identity and apply the result to a string:
+
 ```scala mdoc
 unchanged("hello")
 ```
 
-The result matches `lengthThenDouble` applied directly to `"hello"`, which is ten.
+The result equals `lengthThenDouble` on `"hello"`, which is ten.

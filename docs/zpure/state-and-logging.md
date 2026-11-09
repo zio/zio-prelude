@@ -24,7 +24,7 @@ sealed trait AccountError
 case object InsufficientFunds extends AccountError
 ```
 
-The most basic operators for state are `ZPure.get` and `ZPure.set`. `get` returns the current state unchanged, and `set` replaces the state with a new value. This computation withdraws money from an account:
+The most basic operators for state are `ZPure.get` and `ZPure.set`. `ZPure.get` returns the current state unchanged, and `ZPure.set` replaces the state with a new value. This computation withdraws money from an account:
 
 ```scala mdoc
 def withdraw(amount: Int): ZPure[Nothing, AccountState, AccountState, Any, AccountError, Unit] =
@@ -37,7 +37,7 @@ def withdraw(amount: Int): ZPure[Nothing, AccountState, AccountState, Any, Accou
 
 This example uses both the state and the error type. If the account has insufficient funds, the computation fails right away. Otherwise it writes the new state.
 
-`ZPure` computations are never concurrent, so we do not need to protect the state against conflicting updates. In `ZIO`, the same logic would have to read and write the state in one atomic `modify` step, because another fiber could change the state between the `get` and the `set`. In `ZPure`, the `get` and the `set` cannot interleave, so the code is simpler.
+`ZPure` computations are never concurrent, so we do not need to protect the state against conflicting updates. In `ZIO`, the same logic would have to read and write the state in one atomic `Ref#modify` step, because another fiber could change the state between the `ZIO` read and write. In `ZPure`, the `ZPure.get` and the `ZPure.set` cannot interleave, so the code is simpler.
 
 To change the state based on its current value, `ZPure.update` takes a function from the old state to the new state. We can use it to move the balance update out of `withdraw`:
 
@@ -55,7 +55,7 @@ val withdrawalComputation: ZPure[Nothing, Any, AccountState, Any, AccountError, 
   withdraw(10).provideState(AccountState(100, true))
 ```
 
-Running the computation returns the final value and state, as described in [Running and Converting](./running-and-converting.md). Here we use `get` to read the final state and `runEither` to run the computation, which returns either the first error or the result:
+Running the computation returns the final value and state, as described in [Running and Converting](./running-and-converting.md). Here we use `ZPure.get` to read the final state and `ZPure#runEither` to run the computation, which returns either the first error or the result:
 
 ```scala mdoc
 val updatedAccountState: Either[AccountError, AccountState] =
@@ -73,14 +73,14 @@ def withdrawLog(amount: Int): ZPure[String, AccountState, AccountState, Any, Acc
   ZPure.log("Attempting to withdraw") *> withdraw(amount) <* ZPure.log(s"Withdrew $amount")
 ```
 
-We can also add an entry immediately after a computation succeeds, using the `log` operator on a computation:
+We can also add an entry immediately after a computation succeeds, using the `ZPure#log` operator on a computation:
 
 ```scala mdoc:nest
 def withdrawLog(amount: Int): ZPure[String, AccountState, AccountState, Any, AccountError, Unit] =
   withdraw(amount).log(s"Withdrew $amount")
 ```
 
-The log is kept until the computation finishes. To read it, we run the computation with `runAll`, which returns the log and the result. The sections on running explain the variants in more detail:
+The log is kept until the computation finishes. To read it, we run the computation with `ZPure#runAll`, which returns the log and the result. The sections on running explain the variants in more detail:
 
 ```scala mdoc:silent
 import zio.Chunk

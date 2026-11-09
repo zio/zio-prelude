@@ -16,13 +16,15 @@ object SequenceNumber extends Newtype[Int]
 type SequenceNumber = SequenceNumber.Type
 ```
 
+Attempting the comparison now fails to compile:
+
 ```scala mdoc:fail
 SequenceNumber(2) > SequenceNumber(1)
 ```
 
-The `>` operator is defined on `Int`, and the compiler sees `SequenceNumber` and `Int` as unrelated types. We could unwrap each value or define our own `>` on sequence numbers, but in both cases we are not using the fact that every `SequenceNumber` is an `Int`.
+The `>` operator exists on `Int`, and the compiler sees `SequenceNumber` and `Int` as unrelated types. We could unwrap each value or define our own `>` on sequence numbers, but in both cases we are not using the fact that every `SequenceNumber` is an `Int`.
 
-We get that fact by extending `Subtype` instead of `Newtype` when we create the new type:
+We keep that fact by extending `Subtype` instead of `Newtype`:
 
 ```scala mdoc:silent:reset
 import zio.prelude.Subtype
@@ -37,7 +39,7 @@ Now the comparison compiles and returns the result of `Int` comparison:
 SequenceNumber(2) > SequenceNumber(1)
 ```
 
-`SequenceNumber` is still a different type from `Int`, but it is a subtype of `Int`. Because of that, a `SequenceNumber` can be used anywhere an `Int` is expected, and every operator defined on `Int` works on `SequenceNumber` directly:
+`SequenceNumber` is still a different type from `Int`, but it is a subtype of `Int`. Because of that, a `SequenceNumber` works anywhere an `Int` is required, and every operator on `Int` works on `SequenceNumber` directly:
 
 ```scala mdoc
 val asInt: Int =
@@ -46,6 +48,6 @@ val asInt: Int =
 asInt + 1
 ```
 
-We keep the type safety of the new type. An `Int` or an `AccountNumber` still cannot be passed where a `SequenceNumber` is expected.
+We keep the type safety of the new type. An `Int` or an `AccountNumber` still cannot stand in for a `SequenceNumber`.
 
-Use `Subtype` when the underlying operators are the ones we want to keep. Use `Newtype` when the underlying operators would leak meaning we do not want to expose, such as allowing arithmetic on an account number.
+Use `Subtype` when we want to keep the underlying operators. Use `Newtype` when those operators would leak meaning we do not want, such as arithmetic on an account number.

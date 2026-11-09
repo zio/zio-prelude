@@ -5,7 +5,7 @@ title: "Divariant"
 
 `Divariant` describes a binary type constructor, such as a function arrow, where the first parameter is contravariant and the second is covariant. The first parameter flips direction, so changing it requires a function in the opposite direction.
 
-The standard example is a function `A => B`. We can change its input by mapping the new input type back to the old one, and we can change its output by mapping the old output to the new one. The combined operation is called `dimap`, and it is the function-arrow version of `Bicovariant`'s `bimap`, except that the input side is mapped backwards.
+The standard example is a function `A => B`. We change its input by converting the new input type back to the old one, and we change its output by converting the old output to the new one. The combined operation, `dimap`, is the function-arrow version of `Bicovariant`'s `bimap`, except that the input side runs backwards.
 
 ## Changing Input and Output
 
@@ -23,6 +23,8 @@ val doubleLength = implicitly[Divariant[Function1]].dimap(
 
 val transform: Int => Int = (i: Int) => i * 2
 ```
+
+Next, we apply the transformed function to a string:
 
 ```scala mdoc
 doubleLength(transform)("hello")

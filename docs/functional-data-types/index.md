@@ -8,7 +8,7 @@ ZIO Prelude includes several data types to help us model our domains more accura
 
 - **[Equivalence](equivalence.md)** - A description of an equivalence relationship between two data types.
 - **[NonEmptyList](nonemptylist.md)** - A list that is guaranteed to be non-empty to more accurately model situations where we know a collection has at least one element.
-- **[Id and Const](id-and-const.md)** - Two newtypes that give effect-free meaning to a type constructor's parameters, used with operators such as `ForEach`.
+- **[Id and Const](id-and-const.md)** - Two newtypes that give effect-free meaning to a type constructor's parameters, for use with operators such as `ForEach`.
 - **[NonEmptyMap](nonemptymap.md)** - A map that is guaranteed to contain at least one entry.
 - **[NonEmptySet](nonemptyset.md)** - A set that is guaranteed to contain at least one element.
 - **[NonEmptySortedMap and NonEmptySortedSet](nonemptysorted.md)** - Sorted versions of `NonEmptyMap` and `NonEmptySet`, keeping their keys or elements in `Ordering` order.

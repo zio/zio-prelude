@@ -16,6 +16,8 @@ import zio._
 import zio.prelude._
 ```
 
+Next, we map the success value of an effect:
+
 ```scala mdoc:compile-only
 val succeeded: ZIO[Any, String, Int] = ZIO.succeed(20)
 

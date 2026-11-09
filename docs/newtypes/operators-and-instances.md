@@ -6,7 +6,7 @@ title: "Operators and Instances for New Types"
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-A new type on its own only lets us wrap and unwrap values. Most of the time we also want operators on the new type and instances of functional abstractions such as `Equal` or `Ord`. This guide shows where to define them so that they are available wherever the new type is used, without an import. For constructing and unwrapping values, see [Constructing and Unwrapping](./constructing.md).
+A new type on its own only lets us wrap and unwrap values. Most of the time we also want operators on the new type and instances of functional abstractions such as `Equal` or `Ord`. This guide shows where to define them so they work wherever the new type appears, without an import. For constructing and unwrapping values, see [Constructing and Unwrapping](./constructing.md).
 
 ## Extension Methods
 
@@ -39,7 +39,7 @@ val nextSequenceNumber: SequenceNumber =
 
 ## Companion Operators
 
-Some operators work on a collection of values rather than on a single value. For these, we define a plain method on the new type object. For example, a `continuous` operator returns whether a collection of sequence numbers has no gaps:
+Some operators work on a collection of values rather than on a single value. For these, we define a plain method on the new type object. For example, a `SequenceNumber.continuous` operator returns whether a collection of sequence numbers has no gaps:
 
 ```scala mdoc:nest
 object SequenceNumber extends Newtype[Int] {
@@ -92,12 +92,14 @@ This matters because at runtime an `AccountNumber` and an `Int` are the same val
 
 ## Deriving Instances
 
-When the underlying type already has an instance, we can reuse it for the new type with `derive`. The type class is passed as a type constructor, and the new type object looks up the underlying instance for us.
+When the underlying type already has an instance, we reuse it for the new type through `Age.derive`. The type class takes a type constructor, and the new type object looks up the underlying instance for us.
 
-The `derive` operator is `protected` in Scala 2, so only code inside the object can call it. In Scala 3 it is public.
+The `Age.derive` operator is `protected` in Scala 2, so only code inside the object can call it. In Scala 3 it is public.
 
 <Tabs groupId="scala-version" defaultValue="scala2">
   <TabItem value="scala2" label="Scala 2">
+
+In Scala 2, the object derives the instance inside its body:
 
 ```scala mdoc:compile-only
 import zio.prelude._
@@ -112,6 +114,8 @@ type Age = Age.Type
   </TabItem>
   <TabItem value="scala3" label="Scala 3">
 
+In Scala 3, the same instance is derived from outside the object:
+
 ```scala
 import zio.prelude._
 
@@ -125,4 +129,4 @@ implicit val ageOrd: Ord[Age] =
   </TabItem>
 </Tabs>
 
-The derived instance is only correct when the underlying ordering matches what we want for the new type. The caller is responsible for that choice, which is why `derive` is not public in Scala 2.
+The derived instance is only correct when the underlying ordering matches what we want for the new type. The caller is responsible for that choice, which is why `Age.derive` is not public in Scala 2.

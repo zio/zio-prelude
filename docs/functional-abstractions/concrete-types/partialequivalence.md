@@ -7,7 +7,7 @@ title: "PartialEquivalence"
 
 For example, a string such as `"42"` can be parsed into an `Int`, but a string such as `"forty-two"` cannot. Parsing can fail, and converting an `Int` back into a string always succeeds. A `PartialEquivalence` describes that situation directly.
 
-The type has two functions. `toPartial` converts an `A` into an `Either[E1, B]`, and `fromPartial` converts a `B` into an `Either[E2, A]`.
+The type has two functions. `PartialEquivalence#toPartial` converts an `A` into an `Either[E1, B]`, and `PartialEquivalence#fromPartial` converts a `B` into an `Either[E2, A]`.
 
 ## Defining a PartialEquivalence
 
@@ -39,7 +39,7 @@ intFromString.fromPartial(42)
 
 ## Reversing and Chaining
 
-`flip` swaps the two directions, so the result converts from `B` to `A`. The operator `>>>` chains two partial equivalences, so the output of the first becomes the input of the second. A chain fails as soon as one of its steps fails:
+`PartialEquivalence#flip` swaps the two directions, so the result converts from `B` to `A`. The operator `>>>` chains two partial equivalences, so the output of the first becomes the input of the second. A chain fails as soon as one of its steps fails:
 
 ```scala mdoc:silent
 val stringFromInt: PartialEquivalence[Int, String, String, String] =
@@ -52,6 +52,8 @@ val doubled: PartialEquivalence[Int, Int, String, Nothing] =
   )
 
 ```
+
+Next, we chain the two conversions and run a valid string through them:
 
 ```scala mdoc
 (intFromString >>> doubled).toPartial("21")
