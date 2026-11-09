@@ -63,28 +63,28 @@ final class NonEmptySortedMap[K, V] private (private val map: SortedMap[K, V])(i
   }
 
   /**
-   * Creates a new `NonEmptySortedMap` with an additional element, unless the element is
-   *  already present.
+   * Creates a new `NonEmptySortedMap` with an additional key-value pair. If the key is
+   *  already present, its value is replaced by the new one.
    *
-   *  @param elem the element to be added
-   *  @return a new map that contains all elements of this map and that also
+   *  @param elem the key-value pair to be added
+   *  @return a new map that contains all entries of this map and that also
    *          contains `elem`.
    */
   def +(elem: (K, V)): NonEmptySortedMap[K, V] = newMap(map + elem)
 
   /**
-   * Creates a new `NonEmptySortedMap` by adding all elements contained in another collection to this `NonEmptySortedMap`, omitting duplicates.
+   * Creates a new `NonEmptySortedMap` by adding all key-value pairs contained in another collection to this `NonEmptySortedMap`.
    *
-   * This method takes a collection of elements and adds all elements, omitting duplicates, into `NonEmptySortedMap`.
+   * If a key is already present, the value from `elems` replaces the existing value (the later pair wins).
    *
    * Example:
    *  {{{
-   *    scala> val a = NonEmptySortedMap(1, 2) ++ NonEmptySortedMap(2, "a")
-   *    a: zio.prelude.NonEmptySortedMap[Any] = NonEmptySortedMap(1, 2, a)
+   *    scala> val a = NonEmptySortedMap(1 -> "a", 2 -> "b") ++ List(2 -> "c", 3 -> "d")
+   *    a: zio.prelude.NonEmptySortedMap[Int,String] = NonEmptyTreeMap(1 -> a, 2 -> c, 3 -> d)
    *  }}}
    *
-   *  @param elems     the collection containing the elements to add.
-   *  @return a new `NonEmptySortedMap` with the given elements added, omitting duplicates.
+   *  @param elems     the collection containing the key-value pairs to add.
+   *  @return a new `NonEmptySortedMap` with the given key-value pairs added, replacing values of existing keys.
    */
   def ++(elems: Iterable[(K, V)]): NonEmptySortedMap[K, V] = newMap(map ++ elems)
 

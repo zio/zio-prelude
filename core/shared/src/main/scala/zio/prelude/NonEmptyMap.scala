@@ -60,28 +60,28 @@ final class NonEmptyMap[K, V] private (private val map: Map[K, V]) { self =>
   }
 
   /**
-   * Creates a new `NonEmptyMap` with an additional element, unless the element is
-   *  already present.
+   * Creates a new `NonEmptyMap` with an additional key-value pair. If the key is
+   *  already present, its value is replaced by the new one.
    *
-   *  @param elem the element to be added
-   *  @return a new map that contains all elements of this map and that also
+   *  @param elem the key-value pair to be added
+   *  @return a new map that contains all entries of this map and that also
    *          contains `elem`.
    */
   def +(elem: (K, V)): NonEmptyMap[K, V] = newMap(map + elem)
 
   /**
-   * Creates a new `NonEmptyMap` by adding all elements contained in another collection to this `NonEmptyMap`, omitting duplicates.
+   * Creates a new `NonEmptyMap` by adding all key-value pairs contained in another collection to this `NonEmptyMap`.
    *
-   * This method takes a collection of elements and adds all elements, omitting duplicates, into `NonEmptyMap`.
+   * If a key is already present, the value from `elems` replaces the existing value (the later pair wins).
    *
    * Example:
    *  {{{
-   *    scala> val a = NonEmptyMap(1, 2) ++ NonEmptyMap(2, "a")
-   *    a: zio.prelude.NonEmptyMap[Any] = NonEmptyMap(1, 2, a)
+   *    scala> val a = NonEmptyMap(1 -> "a", 2 -> "b") ++ List(2 -> "c", 3 -> "d")
+   *    a: zio.prelude.NonEmptyMap[Int,String] = NonEmptyMap(2 -> c, 1 -> a, 3 -> d)
    *  }}}
    *
-   *  @param elems     the collection containing the elements to add.
-   *  @return a new `NonEmptyMap` with the given elements added, omitting duplicates.
+   *  @param elems     the collection containing the key-value pairs to add.
+   *  @return a new `NonEmptyMap` with the given key-value pairs added, replacing values of existing keys.
    */
   def ++(elems: Iterable[(K, V)]): NonEmptyMap[K, V] = newMap(map ++ elems)
 

@@ -47,7 +47,8 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
     val quotedAssertion = c.prefix.actualType.decls
       .find(_.typeSignature.resultType.widen <:< c.weakTypeOf[QuotedAssertion[_]])
 
-    val allValues = value +: values
+    val allValues      = value +: values
+    val renderedValues = allValues.map(_.tree).mkString(", ")
 
     quotedAssertion match {
       case Some(quotedAssertion) =>
@@ -65,7 +66,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
                 s"""
                    |$assertionErrorHeader
                    |Could not validate Assertion at compile-time.
-                   |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrapAll(List($value, ..$values))"${Console.RESET}
+                   |Either use a literal or call ${Console.BLUE}"Newtype.unsafeWrapAll(${c.prefix.tree}, List($renderedValues))"${Console.RESET}
                    |""".stripMargin
 
               c.abort(c.enclosingPosition, message)
@@ -124,7 +125,7 @@ private[prelude] class Macros(val c: whitebox.Context) extends Liftables {
               s"""
                  |$assertionErrorHeader
                  |Could not validate Assertion at compile-time.
-                 |Either use a literal or call ${Console.BLUE}"${c.prefix.tree}.unsafeWrap($expr)"${Console.RESET}
+                 |Either use a literal or call ${Console.BLUE}"Newtype.unsafeWrap(${c.prefix.tree})(${expr.tree})"${Console.RESET}
                  |""".stripMargin
 
             c.abort(c.enclosingPosition, message)

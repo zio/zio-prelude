@@ -52,6 +52,27 @@ object NewtypeSpec extends ZIOBaseSpec {
             )
           )
         } @@ TestAspect.exceptScala3,
+        test("non-literal value at compile-time suggests a Newtype.unsafeWrap call") {
+          assertZIO(typeCheck("{ val n = 1; Natural(n) }"))(
+            isLeft(containsStringWithoutAnsi("Newtype.unsafeWrap(zio.prelude.NewtypeSpecTypes.Natural)(n)"))
+          )
+        } @@ TestAspect.exceptScala3,
+        test("non-literal values at compile-time suggest a Newtype.unsafeWrapAll call") {
+          assertZIO(typeCheck("{ val n = 1; Natural(n, 2) }"))(
+            isLeft(containsStringWithoutAnsi("Newtype.unsafeWrapAll(zio.prelude.NewtypeSpecTypes.Natural, List(n, 2))"))
+          )
+        } @@ TestAspect.exceptScala3,
+        test("non-literal value of a Newtype (not Subtype) suggests a Newtype.unsafeWrap call") {
+          assertZIO(typeCheck("{ val s = \"a@b.com\"; Email(s) }"))(
+            isLeft(containsStringWithoutAnsi("Newtype.unsafeWrap(zio.prelude.NewtypeSpecTypes.Email)(s)"))
+          )
+        } @@ TestAspect.exceptScala3,
+        test("suggested Newtype.unsafeWrap call type-checks") {
+          assertZIO(typeCheck("{ val n = 1; Newtype.unsafeWrap(Natural)(n) }"))(isRight)
+        } @@ TestAspect.exceptScala3,
+        test("suggested Newtype.unsafeWrapAll call type-checks") {
+          assertZIO(typeCheck("{ val n = 1; Newtype.unsafeWrapAll(Natural, List(n, 2)) }"))(isRight)
+        } @@ TestAspect.exceptScala3,
         test("invalid value at run-time") {
           assertZIO(typeCheck("Natural(-1)"))(
             isLeft(containsStringWithoutAnsi("-1 did not satisfy greaterThanOrEqualTo(0)"))
