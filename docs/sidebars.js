@@ -79,7 +79,18 @@ const sidebars = {
             "newtypes/predefined-newtypes"
           ]
         },
-        "zpure/index",
+        {
+          type: "category",
+          label: "ZPure",
+          link: { type: "doc", id: "zpure/index" },
+          collapsed: false,
+          items: [
+            "zpure/basics",
+            "zpure/errors-and-context",
+            "zpure/state-and-logging",
+            "zpure/running-and-converting"
+          ]
+        },
         "resources"
       ]
     }
