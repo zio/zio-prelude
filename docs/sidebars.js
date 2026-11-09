@@ -66,7 +66,19 @@ const sidebars = {
             "functional-data-types/zvalidation"
           ]
         },
-        "newtypes/index",
+        {
+          type: "category",
+          label: "New Types",
+          link: { type: "doc", id: "newtypes/index" },
+          collapsed: false,
+          items: [
+            "newtypes/constructing",
+            "newtypes/operators-and-instances",
+            "newtypes/subtypes",
+            "newtypes/smart-newtypes",
+            "newtypes/predefined-newtypes"
+          ]
+        },
         "zpure/index",
         "resources"
       ]
