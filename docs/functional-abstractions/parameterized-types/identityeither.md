@@ -76,7 +76,7 @@ Having this `none` value can be useful in certain situations. For example, it ca
 
 However, supporting a `none` value requires allowing the possibility of that a value can fail without containing any errors, which is unattractive in many cases.
 
-For example, `ZIO` and most effect types such as `ZManaged` and `ZStream` do not have an `IdentityEither` instance defined for them because is they fail they always fail with a failure `E`. Otherwise when we used an error handling operator we would have to deal with the error as well as the possibility that there is a failure but no error at all.
+For example, `ZIO` and most effect types such as `ZStream` do not have an `IdentityEither` instance defined for them because if they fail they always fail with a failure `E`. Otherwise when we used an error handling operator we would have to deal with the error as well as the possibility that there is a failure but no error at all.
 
 Note that in the case of `ZIO` a workflow can also die with a cause that can potentially be `Cause.empty`, but since the associative operator `orElseEither` does not recover from `Die` failures that doesn't help us with our problem here.
 
