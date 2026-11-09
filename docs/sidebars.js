@@ -59,9 +59,17 @@ const sidebars = {
           collapsed: false,
           items: [
             "functional-data-types/equivalence",
+            "functional-data-types/id-and-const",
             "functional-data-types/nonemptylist",
+            "functional-data-types/nonemptymap",
+            "functional-data-types/nonemptyset",
+            "functional-data-types/nonemptysorted",
+            "functional-data-types/optional",
+            "functional-data-types/parseq",
+            "functional-data-types/recursive",
             "functional-data-types/these",
             "functional-data-types/validation",
+            "functional-data-types/znonemptyset",
             "functional-data-types/zset",
             "functional-data-types/zvalidation"
           ]
