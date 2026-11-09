@@ -129,17 +129,20 @@ The `flatten` operator is so powerful because it allows the next value to be pro
 
 To see this, consider the following two `ZIO` workflows.
 
-```scala
-val helloAssociativeBoth: ZIO[Console, IOException, Unit] =
-  console.putStrLn("What's your name?") *>
-    console.readLine *>
-    console.putStrLn(s"Hello! Welcome to ZIO!")
+```scala mdoc:compile-only
+import zio._
+import java.io.IOException
 
-val helloAssociativeFlatten: ZIO[Console, IOException, Unit] =
+val helloAssociativeBoth: ZIO[Any, IOException, Unit] =
+  Console.printLine("What's your name?") *>
+    Console.readLine *>
+    Console.printLine("Hello! Welcome to ZIO!")
+
+val helloAssociativeFlatten: ZIO[Any, IOException, Unit] =
   for {
-    _    <- console.putStrLn("What's your name?") *>
-    name <- console.readLine *>
-    _    <- console.putStrLn(s"Hello $name! Welcome to ZIO!")
+    _    <- Console.printLine("What's your name?")
+    name <- Console.readLine
+    _    <- Console.printLine(s"Hello $name! Welcome to ZIO!")
   } yield ()
 ```
 
