@@ -4,7 +4,7 @@ One solid Z with its base bar in the accent colour. The base bar leads from the
 left: it is the first thing, the prelude, and everything above it builds on it.
 
 In the full logo the mark is the Z of "ZIO". It stands at the cap height of the
-wordmark, on the baseline, followed by "IO" in Regular and "Prelude" in Bold.
+wordmark, on the baseline, followed by "IO Prelude" in Bold.
 
 ## Files
 
@@ -38,10 +38,10 @@ over "ZIO Prelude" would say Z twice. For square spaces use `zio-prelude-mark.sv
 | Espresso | `#2B1D1A` | Mark body and text on light; the tile |
 | Terracotta | `#C8553D` | The base bar on light (4.4:1 on white: bar, rules and large text only) |
 | Terracotta light | `#E57A5F` | The base bar on dark |
-| Umber | `#5E4F49` | "IO" and secondary text on light |
+| Umber | `#5E4F49` | secondary text on light |
 | Paper | `#F6F1EC` | Panels and backgrounds on light; the mark on dark |
 | Night | `#1F1512` | Page background on dark |
-| Warm muted | `#B7A59C` | "IO" and secondary text on dark |
+| Warm muted | `#B7A59C` | Secondary text on dark |
 
 ## Construction
 
@@ -85,5 +85,5 @@ if the tagline changes. The headline carries no end punctuation.
 
 ## Typeface
 
-Space Grotesk — Bold for "Prelude", Regular for "IO". SIL Open Font License, so it
+Space Grotesk Bold for "IO Prelude". SIL Open Font License, so it
 also works for docs and site headings. Code uses JetBrains Mono.
