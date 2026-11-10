@@ -98,7 +98,7 @@ jobs:
         scala:
         - 2.12.21
         - 2.13.16
-        - 3.3.8
+        - 3.3.9
         - 2.13.18
     steps:
     - name: Set Swap Space
@@ -128,7 +128,7 @@ jobs:
       if: ${{ matrix.scala == '2.13.16' }}
       run: sbt --no-colors ++${{ matrix.scala }} benchmarks/test magnoliaTestsJVM/test magnoliaJVM/test macrosJVM/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test scalaParallelCollectionsJVM/test
     - name: Test
-      if: ${{ matrix.scala == '3.3.8' }}
+      if: ${{ matrix.scala == '3.3.9' }}
       run: sbt --no-colors ++${{ matrix.scala }} benchmarks/test magnoliaTestsJVM/test magnoliaJVM/test macrosJVM/test coreTestsJVM/test coreJVM/test experimentalTestsJVM/test examplesJVM/test experimentalLawsJVM/test lawsJVM/test experimentalJVM/test scalaParallelCollectionsJVM/test
     - name: Test
       if: ${{ matrix.scala == '2.13.18' }}
