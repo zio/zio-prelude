@@ -73,7 +73,7 @@ the mark alone.
 ## Social preview
 
 Light and dark cards share one layout: lockup at the top left, the headline,
-the description, the address, and the base bar along the bottom edge from the left.
+the description, the address at the bottom right, and the base bar along the bottom edge from the left.
 The Z is enlarged and bleeds off the right edge at low contrast.
 
 Upload the PNG. GitHub's **Settings → General → Social preview** field does not
