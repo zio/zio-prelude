@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="ZIO Prelude symbol">
+<defs><mask id="z" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512"><rect width="512" height="512" fill="#fff"/><g transform="translate(97.28 97.28) scale(2.65)"><polygon points="12,14 108,14 108,32 39,88 108,88 108,106 12,106 12,88 81,32 12,32" fill="#000" stroke="#000" stroke-width="4" stroke-linejoin="round"/><rect x="12" y="88" width="96" height="18" fill="#000" stroke="#000" stroke-width="4" stroke-linejoin="round"/></g></mask></defs>
+<rect width="512" height="512" rx="112.64" fill="#2B1D1A" mask="url(#z)"/>
+</svg>
