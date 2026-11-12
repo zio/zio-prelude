@@ -2,7 +2,10 @@
 [//]: # (So please do not edit it manually. Instead, change "docs/index.md" file or sbt setting keys)
 [//]: # (e.g. "readmeDocumentation" and "readmeSupport".)
 
-# ZIO Prelude
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/zio/zio-prelude/series/2.x/brand/zio-prelude-logo-on-dark.svg">
+  <img alt="ZIO Prelude" src="https://raw.githubusercontent.com/zio/zio-prelude/series/2.x/brand/zio-prelude-logo.svg" width="520">
+</picture>
 
 [ZIO Prelude](https://github.com/zio/zio-prelude) is a lightweight, distinctly Scala take on **functional abstractions**, with tight ZIO integration.
 

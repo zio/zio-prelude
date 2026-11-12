@@ -351,6 +351,30 @@ lazy val docs = project
     scalaVersion                               := "2.13.18",
     crossScalaVersions                         := Seq("2.13.18"),
     projectName                                := "ZIO Prelude",
+    readmeBanner                               := {
+      val logoBase = "https://raw.githubusercontent.com/zio/zio-prelude/series/2.x/brand"
+      // <picture> lets GitHub swap the lockup per theme: the light logo's dark ink would be
+      // invisible on GitHub's dark canvas without the on-dark variant.
+      s"""|
+          |<picture>
+          |  <source media="(prefers-color-scheme: dark)" srcset="$logoBase/zio-prelude-logo-on-dark.svg">
+          |  <img alt="ZIO Prelude" src="$logoBase/zio-prelude-logo.svg" width="520">
+          |</picture>
+          |""".stripMargin
+    },
+    // The banner logo already carries the name, so the plugin's "# ZIO Prelude" heading under it
+    // would show the name twice. Run the plugin's generator, then drop that one heading; the
+    // image's alt text gives the page its accessible name.
+    // TODO: remove this override once zio-sbt skips the heading when a banner is set
+    // (https://github.com/zio/zio-sbt/issues/868) and the plugin is bumped.
+    generateReadme                             := {
+      generateReadme.value
+      val readme  = (ThisBuild / baseDirectory).value / "README.md"
+      val heading = s"\n# ${projectName.value}\n"
+      val text    = IO.read(readme)
+      val at      = text.indexOf(heading)
+      if (at >= 0) IO.write(readme, text.substring(0, at) + text.substring(at + heading.length))
+    },
     mainModuleName                             := (core.jvm / moduleName).value,
     projectStage                               := ProjectStage.ProductionReady,
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
