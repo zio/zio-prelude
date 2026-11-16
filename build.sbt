@@ -362,19 +362,6 @@ lazy val docs = project
           |</picture>
           |""".stripMargin
     },
-    // The banner logo already carries the name, so the plugin's "# ZIO Prelude" heading under it
-    // would show the name twice. Run the plugin's generator, then drop that one heading; the
-    // image's alt text gives the page its accessible name.
-    // TODO: remove this override once zio-sbt skips the heading when a banner is set
-    // (https://github.com/zio/zio-sbt/issues/868) and the plugin is bumped.
-    generateReadme                             := {
-      generateReadme.value
-      val readme  = (ThisBuild / baseDirectory).value / "README.md"
-      val heading = s"\n# ${projectName.value}\n"
-      val text    = IO.read(readme)
-      val at      = text.indexOf(heading)
-      if (at >= 0) IO.write(readme, text.substring(0, at) + text.substring(at + heading.length))
-    },
     mainModuleName                             := (core.jvm / moduleName).value,
     projectStage                               := ProjectStage.ProductionReady,
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
