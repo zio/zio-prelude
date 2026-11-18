@@ -9,9 +9,11 @@ keywords:
   - "zio-laws-laws"
 ---
 
-The Laws module gives us ready-made property-based tests for the algebraic laws that every ZIO Prelude abstraction must satisfy. An `Associative` instance is only correct if its operator is really associative, and a `Covariant` instance is only correct if `map` preserves identity and composition. The compiler cannot check either fact, so the module encodes each one as a ZIO Test law that we run over randomly generated values.
+The Laws module gives us ready-made property-based tests for the algebraic laws that every ZIO Prelude abstraction must satisfy. An `Associative` instance is only correct if its operator is really associative, and a `Covariant` instance is only correct if `map` preserves identity and composition. The compiler cannot check either fact, so the module encodes each one as a ZIO Test law that we run over random values.
 
 The module is published as `zio-laws-laws`, and it contains four kinds of building blocks: one `*Laws` object per abstraction (for example `AssociativeLaws` and `CovariantLaws`), the generators `Gens` and `GenFs`, the assertions in `TestAssertions`, and the `<->` family of comparison operators that make the laws read like the equations in the documentation.
+
+The following declarations show the shape of the three kinds of building blocks:
 
 ```scala
 // One Laws object per abstraction, each a Lawful from ZIO Test
@@ -66,11 +68,11 @@ object MoneySpec extends ZIOSpecDefault {
 }
 ```
 
-The `Lawful` instance is what ties a `Laws` object to `checkAllLaws`. It checks the whole `laws` set of the object. If one law fails, ZIO Test reports the failing law by name together with the input that broke it, shrunk to a small counterexample, so we see which equation our instance violates.
+The `Lawful` instance is what ties a `Laws` object to `checkAllLaws`. It checks the whole set of laws of the object. If one law fails, ZIO Test reports the failing law by name together with the input that broke it, shrunk to a small counterexample, so we see which equation our instance violates.
 
 ## Laws Objects
 
-Each `*Laws` object exposes every law of its abstraction as a `lazy val` or `val` and combines them in `laws`. The combined set includes the laws of the abstractions it extends, so `IdentityLaws.laws` also runs `AssociativeLaws.laws`, and `InverseLaws.laws` runs `PartialInverseLaws.laws`, which runs `IdentityLaws.laws`. We pick the object that matches the strongest abstraction our instance claims.
+Each `*Laws` object exposes every law of its abstraction as a `lazy val` or `val` and combines them all in one set. The combined set includes the laws of the abstractions it extends, so `IdentityLaws` also runs the laws of `AssociativeLaws`, and `InverseLaws` runs those of `PartialInverseLaws`, which runs those of `IdentityLaws`. We pick the object that matches the strongest abstraction our instance claims.
 
 The objects for abstractions over a type `A` take one generator of `A`:
 
@@ -137,7 +139,7 @@ The module ships generators for ZIO Prelude data types that ZIO Test does not kn
 | `these(a, b)`                      | `These` values                                         |
 | `validation(w, e, a)`              | `ZValidation` values with logs, failures and successes |
 
-The `GenFs` members are `cause`, `either`, `exit`, `future`, `map`, `nonEmptyChunk`, `nonEmptyList`, `nonEmptySet`, `parSeq`, `these`, `tryScala`, `tuple2`, `tuple3`, `validation` and `validationFailure`. Each one wraps the matching `Gens` generator or ZIO Test generator in a `GenF`, fixing the other type parameters it takes, such as the error generator in `GenFs.either(e)`.
+The `GenFs` members are `cause`, `either`, `exit`, `future`, `map`, `nonEmptyChunk`, `nonEmptyList`, `nonEmptySet`, `parSeq`, `these`, `tryScala`, `tuple2`, `tuple3`, `validation` and `validationFailure`. Each one wraps the matching `Gens` generator or ZIO Test generator in a `GenF`, fixing the other type parameters it takes, such as the generator of errors.
 
 To use a generator directly outside a law, we pass it to `check` like any other ZIO Test generator:
 
