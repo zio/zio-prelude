@@ -176,6 +176,8 @@ classDiagram
     ZIO[R, E, +*]
     Failure[ZIO[R, E, +*]]
     ZLayer[R, E, +*]
+    ZManaged[R, E, +*]
+    Failure[ZManaged[R, E, +*]]
     ZSink[R, E, I, L, +*]
     ZStream[R, E, +*]
   }
@@ -257,6 +259,7 @@ classDiagram
     Schedule[R, E, +*]
     Try[+*]
     ZLayer[R, E, +*]
+    ZManaged[R, E, +*]
     
     + either[A, B](=> F[A], => F[B]): F[Either[A, B]]
   }
@@ -302,6 +305,7 @@ classDiagram
     Try[+*]
     Vector[+*]
     ZIO[R, E, +*]
+    ZManaged[R, E, +*]
     ZStream[R, E, +*]
 
     + any: F[Any]
