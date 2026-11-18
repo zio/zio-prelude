@@ -137,11 +137,12 @@ Notice that `&&` reports the first failing assertion only: `"ab"` is reported fo
 
 For a collection of input values, `makeAll` validates every element and accumulates the errors of all invalid elements:
 
-```scala mdoc
-Age.makeAll(List(20, 30))
-
-Age.makeAll(List(20, 17, 200))
+```scala mdoc:compile-only
+val allValid   = Age.makeAll(List(20, 30))
+val someFailed = Age.makeAll(List(20, 17, 200))
 ```
+
+The first call succeeds with all the values. The second fails, and its error describes every element that broke the assertion, not only the first.
 
 `makeAll` is the only bulk constructor available when a newtype has an assertion. The `wrapAll` method is rejected at compile time for smart newtypes, because it would skip the check.
 

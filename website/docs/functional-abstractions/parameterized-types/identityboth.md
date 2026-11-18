@@ -43,20 +43,17 @@ val helloUnit: ZIO[Console, IOException, Unit] =
 //   trace = "repl.MdocSession.MdocApp0.helloUnit(identityboth.md:31)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp0.helloUnit(identityboth.md:31)",
-//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda$17797/0x00007f51dad78a90@3ec3d6b6
+//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda/0x000076f4b2e34358@2344978
 //   ),
-//   successK = zio.ZIO$$Lambda$17799/0x00007f51dad7a988@232ccc64
+//   successK = zio.ZIO$$Lambda/0x000076f4b2e36250@58a0d9f0
 // )
 
 val unitHello: ZIO[Console, IOException, Unit] =
   ZIO.unit <*> Console.printLine("Hello")
 // unitHello: ZIO[Console, IOException, Unit] = FlatMap(
 //   trace = "repl.MdocSession.MdocApp0.unitHello(identityboth.md:35)",
-//   first = Sync(
-//     trace = "",
-//     eval = zio.ZIO$$$Lambda$17778/0x00007f51dad62370@72db2201
-//   ),
-//   successK = zio.ZIO$$Lambda$17799/0x00007f51dad7a988@520d3c8a
+//   first = Sync(trace = "", eval = zio.ZIO$$$Lambda/0x000076f4b2e20e38@9acab64),
+//   successK = zio.ZIO$$Lambda/0x000076f4b2e36250@29734ca0
 // )
 ```
 

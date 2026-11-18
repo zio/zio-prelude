@@ -25,7 +25,7 @@ The `Equal` abstraction allows us to define what it means for two instances of a
 
 ### Ord
 
-The `Ord` abstraction builds on the `Equal` abstraction and describes a type that has a total ordering. Its fundamental representation is as a function `(A, A) => Ordering`, where `Ordering` can either be `LessThan`, `EqualTo` or `GreaterThan`.
+The `Ord` abstraction builds on the `Equal` abstraction and describes a type that has a total ordering. Its fundamental representation is as a function `(A, A) => Ordering`, where `Ordering` can either be `LessThan`, `Equals` or `GreaterThan`.
 
 The `Ord` abstraction serves much the same purpose as the `Ordering` type class from the Scala standard library, but it has improved type inference due to its use of variance. It also integrates with the other functional abstractions in ZIO Prelude, so for example defining an ordering for a type also defines a way of comparing instances of that type for equality that is by definition consistent with the ordering.
 
