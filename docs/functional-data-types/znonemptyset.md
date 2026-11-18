@@ -52,7 +52,7 @@ letters("z")
 letters.toMap
 ```
 
-`toNonEmptySet` discards the weights, dropping any element whose weight equals the zero of the weight type, and returns a [NonEmptySet](./nonemptyset.md) of the elements. The result is still non-empty, because an element that occurs at least once is still present:
+`toNonEmptySet` discards the weights, dropping any element, other than the first, whose weight equals the zero of the weight type, and returns a [NonEmptySet](./nonemptyset.md) of the elements. The result is always non-empty, because the first element is always kept:
 
 ```scala mdoc
 letters.toNonEmptySet.toSet

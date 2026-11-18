@@ -15,7 +15,7 @@ object These {
 }
 ```
 
-The three cases live in the companion object, so we refer to them as `These.Left`, `These.Right` and `These.Both`. The smart constructors `These.left`, `These.right` and `These.both` return the common type `These[A, B]` and are usually the better choice because they help type inference.
+The three cases live in the companion object, so we refer to them as `These.Left`, `These.Right` and `These.Both`. The smart constructors `These.left`, `These.right` and `These.both` return the widened types `These[A, Nothing]`, `These[Nothing, B]` and `These[A, B]`, and are usually the better choice because they help type inference.
 
 You can think of `These` as like `Either` except that it has one additional case. Whereas an `Either` contains either an `A` or a `B` but never both, a `These` can contain both an `A` and a `B`.
 
