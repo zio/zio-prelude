@@ -8,10 +8,10 @@ const darkCodeTheme = prismThemes.dracula;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'zio-prelude-docs-website',
+  title: 'ZIO Prelude',
   // Docusaurus 3 rejects a `url` carrying a sub-path; the path belongs in `baseUrl`.
   url: 'https://zio.dev',
-  baseUrl: '/zio-prelude-docs-website/',
+  baseUrl: '/zio-prelude/',
   onBrokenLinks: 'throw',
   markdown: {
     // `.md` is parsed as CommonMark, `.mdx` as MDX.
@@ -29,7 +29,7 @@ const config = {
   favicon: 'img/favicon.png',
 
   organizationName: 'zio', 
-  projectName: 'zio-prelude-docs-website',
+  projectName: 'zio-prelude',
 
   i18n: {
     defaultLocale: 'en',
@@ -57,7 +57,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'zio-prelude-docs-website',
+        title: 'ZIO Prelude',
       },
       prism: {
         theme: lightCodeTheme,
