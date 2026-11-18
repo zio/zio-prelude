@@ -18,4 +18,4 @@ ZIO Prelude is published for Scala 2.12, 2.13 and 3. The abstractions and data t
 | Deriving `Equal` | No `derived` method. Define the instance with `Equal.default` or `Equal.make`. | `Equal.derived` builds an instance for case classes and sealed traits from the standard `Mirror`. |
 | `Debug` for arrays | Not applicable. | A `Debug[IArray[A]]` instance is provided. |
 
-Scala 2.12 lacks some standard library APIs that 2.13 has, such as parallel collections in the standard library. See [Scala Parallel Collections](../scala-parallel-collections/index.md) for how that module handles it.
+Scala 2.12 has parallel collections in its standard library, while Scala 2.13 and 3 need the separate `scala-parallel-collections` library. See [Scala Parallel Collections](../scala-parallel-collections/index.md) for how that module handles it.

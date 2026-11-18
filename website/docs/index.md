@@ -118,7 +118,7 @@ In this example, we are going to create a simple voting application. We will use
 1. To become more type safety we are going to use _New Types_ and introducing `Topic` and `Votes` data types.
 2. Providing instance of `Associative` type class for `Votes` data type which helps us to combine `Votes` values.
 
-```scala mdoc:compile-only
+```scala
 import zio.prelude._
 
 object VotingExample extends scala.App {

@@ -34,7 +34,7 @@ The traditional answer is a monad transformer stack, such as an `EitherT` on top
 
 A small computation shows the capabilities working together. The following computation reads the current counter from the state, writes a log entry that records it, and stores the incremented counter. The state type does not change, so `S1` and `S2` are both `Int`:
 
-```scala mdoc:silent:reset
+```scala
 import zio.prelude._
 import zio.prelude.fx.ZPure
 
@@ -48,8 +48,12 @@ val tick: ZPure[String, Int, Int, Any, Nothing, Int] =
 
 Next, we run the computation with an initial state of `1`. `ZPure#runAll` returns the log and either the error or the final state and value:
 
-```scala mdoc
+```scala
 tick.runAll(1)
+// res1: (zio.Chunk[String], Either[Nothing, (Int, Int)]) = (
+//   IndexedSeq("counter was 1"),
+//   Right(value = (2, 1))
+// )
 ```
 
 ## Type Aliases

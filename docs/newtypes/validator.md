@@ -48,7 +48,7 @@ object Palindrome extends SubtypeCustom[String] {
 }
 ```
 
-The two members must agree. `Newtype` and `Subtype` are themselves subclasses of `NewtypeCustom` and `SubtypeCustom` that fill these members in from an `Assertion`.
+The two members must agree. `Newtype` is itself a subclass of `NewtypeCustom` that fills these members in from an `Assertion`, and `Subtype` extends `Newtype`. `SubtypeCustom` is the `NewtypeCustom` variant whose `Type` is a subtype of `A`.
 
 ## Constructing Values
 

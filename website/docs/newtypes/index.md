@@ -7,7 +7,7 @@ ZIO Prelude provides zero overhead new types. They make your application more ty
 
 A common situation in domain modeling is that several types in our business domain share the same underlying representation in Scala. For example:
 
-```scala mdoc
+```scala
 type AccountNumber  = Int
 type SequenceNumber = Int
 ```
@@ -18,7 +18,7 @@ The Scala compiler will not help us avoid these bugs because from its perspectiv
 
 To avoid this, we might be tempted to create a separate case class for each of these types:
 
-```scala mdoc:nest
+```scala
 final case class AccountNumber(value: Int)
 final case class SequenceNumber(value: Int)
 ```
@@ -35,7 +35,7 @@ A new type in ZIO Prelude is a type with the same underlying representation as a
 
 We create a new type by defining an object that extends `Newtype` and specifying the type it wraps. We then export the type by defining a type alias that refers to the `Type` member of that object:
 
-```scala mdoc:nest
+```scala
 import zio.prelude.Newtype
 
 object AccountNumber extends Newtype[Int]
@@ -47,12 +47,14 @@ type SequenceNumber = SequenceNumber.Type
 
 `AccountNumber` and `SequenceNumber` are now distinct from `Int` at compile time, even though they are all `Int` values at runtime. Here we define a function that accepts both:
 
-```scala mdoc:nest
+```scala
 val accountNumber: AccountNumber =
   AccountNumber(1)
+// accountNumber: AccountNumber = 1
 
 val sequenceNumber: SequenceNumber =
   SequenceNumber(2)
+// sequenceNumber: SequenceNumber = 2
 
 def lookup(accountNumber: AccountNumber, sequenceNumber: SequenceNumber) =
   ???
@@ -60,8 +62,20 @@ def lookup(accountNumber: AccountNumber, sequenceNumber: SequenceNumber) =
 
 Passing the arguments in the wrong order is now a compilation error:
 
-```scala mdoc:fail
+```scala
 lookup(sequenceNumber, accountNumber)
+// error: type mismatch;
+//  found   : SequenceNumber
+//     (which expands to)  SequenceNumber.Type
+//  required: AccountNumber
+//     (which expands to)  AccountNumber.Type
+// error: type mismatch;
+//  found   : AccountNumber
+//     (which expands to)  AccountNumber.Type
+//  required: SequenceNumber
+//     (which expands to)  SequenceNumber.Type
+// lookup(sequenceNumber, accountNumber)
+//                        ^^^^^^^^^^^^^
 ```
 
 ## Guides in This Section

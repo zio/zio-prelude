@@ -90,7 +90,7 @@ We can always check if an instance of a type class exists for a given data type 
 
 ```scala
 Equal[List[Either[String, Int]]]
-// res3: Equal[List[Either[String, Int]]] = zio.prelude.Equal$$anonfun$make$2@2131d467
+// res3: Equal[List[Either[String, Int]]] = zio.prelude.Equal$$anonfun$make$2@525b7201
 ```
 
 ```scala

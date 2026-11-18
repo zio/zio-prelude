@@ -133,7 +133,7 @@ Username.make("ab")
 Username.make("Ada Lovelace")
 ```
 
-Notice that `&&` reports the first failing assertion only: `"ab"` is reported for its length, and `"Ada Lovelace"` for its characters. Two failing fields of one form are both reported when we combine several `make` results, which [How to Accumulate Validation Errors](./accumulate-validation-errors.md) explains.
+Notice that `&&` keeps the failures of both sides when both fail. Here `"ab"` fails only the length check and `"Ada Lovelace"` fails only the character check, so each result holds one message. Two failing fields of one form are both reported when we combine several `make` results, which [How to Accumulate Validation Errors](./accumulate-validation-errors.md) explains.
 
 For a collection of input values, `makeAll` validates every element and accumulates the errors of all invalid elements:
 
@@ -144,7 +144,7 @@ val someFailed = Age.makeAll(List(20, 17, 200))
 
 The first call succeeds with all the values. The second fails, and its error describes every element that broke the assertion, not only the first.
 
-`makeAll` is the only bulk constructor available when a newtype has an assertion. The `wrapAll` method is rejected at compile time for smart newtypes, because it would skip the check.
+`makeAll` is the bulk constructor that checks every element at run time. On Scala 2, the `wrapAll` method is rejected at compile time for smart newtypes, because it would skip the check. On Scala 3, `wrapAll` compiles but skips the check, so do not use it on values that need validation.
 
 ## Using the New Types
 
