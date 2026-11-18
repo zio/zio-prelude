@@ -87,7 +87,7 @@ m1.compareSoft(m3)
 
 ## Traversing and Flattening
 
-`ParSeq` and `ParMap` have `ForEach` instances, so we can traverse them with an effect type that has `IdentityBoth` and `Covariant`. The traversal aggregates in parallel and keeps the original order. To double every element and fail if any step fails:
+`ParSeq` and `ParMap` have `ForEach` instances, so we can traverse them with an effect type that has `IdentityBoth` and `Covariant`. To double every element and fail if any step fails:
 
 ```scala
 ForEach[ParSeq].forEach(a)((i: Int) => Option(i * 2))
