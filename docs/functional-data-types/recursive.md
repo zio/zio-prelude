@@ -19,19 +19,20 @@ final case class Lit(value: Int) extends ExprF[Nothing]
 final case class Add[A](left: A, right: A) extends ExprF[A]
 ```
 
-`Recursive` needs a `Covariant` instance for the layer type. This tells it how to transform the sub-expressions while keeping the layer's shape:
+`Recursive` needs to know how to visit the sub-expressions of a layer. The operations that only rebuild or collapse the structure (`Recursive#fold`, `Recursive#transformUp`, `Recursive.unfold` and similar) require a `Covariant` instance for the layer type, and the operations that traverse it effectfully or in a fixed order (`Recursive#foldDown`, `Recursive#foldM` and similar) require a `ForEach` instance. `ForEach` extends `Covariant`, so a single `ForEach` instance for the layer type serves both:
 
 ```scala mdoc:silent
-implicit val exprCovariant: Covariant[ExprF] =
-  new Covariant[ExprF] {
-    def map[A, B](f: A => B): ExprF[A] => ExprF[B] = {
-      case Lit(value)       => Lit(value)
-      case Add(left, right) => Add(f(left), f(right))
-    }
+implicit val exprForEach: ForEach[ExprF] =
+  new ForEach[ExprF] {
+    def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: ExprF[A])(f: A => G[B]): G[ExprF[B]] =
+      fa match {
+        case Lit(value)       => (Lit(value): ExprF[B]).succeed[G]
+        case Add(left, right) => f(left).zipWith(f(right))(Add(_, _))
+      }
   }
 ```
 
-We build an expression tree by wrapping each layer in `Recursive`. The annotations here are empty, so we use an empty `ZEnvironment`:
+We build an expression tree by wrapping each layer in `Recursive`. The second type parameter of `Recursive` holds annotations, which are values stored in a `ZEnvironment` next to each layer. We do not need any here, so the annotations type is `Any` and we use an empty `ZEnvironment`:
 
 ```scala mdoc:silent
 def lit(value: Int): Recursive[ExprF, Any] =
@@ -67,4 +68,62 @@ val evaluate: Folder[ExprF, Int] =
 expression.fold(evaluate.apply)
 ```
 
-`Unfolder` is the reverse. It takes a seed value and produces one layer, whose sub-expressions are seeds for the next step. Use it to build recursive structures from simpler data.
+`Folder` has a `Folder#zip` method that runs two folders in one pass and returns both results as a pair, and an `Invariant` instance so that `Folder#invmap` can change the result type through an equivalence.
+
+### Folding Effectfully
+
+When producing a result for a layer can fail or needs an effect, `Recursive#foldM` threads an effect through the fold. The effect type needs `AssociativeFlatten`, `Covariant` and `IdentityBoth` instances, and the layer type needs `ForEach`. To fail the evaluation when a literal is negative, we fold into `Option`:
+
+```scala mdoc
+expression.foldM[Option, Int] {
+  case Lit(value) => if (value < 0) None else Some(value)
+  case Add(left, right) => Some(left + right)
+}
+
+add(lit(-1), lit(2)).foldM[Option, Int] {
+  case Lit(value) => if (value < 0) None else Some(value)
+  case Add(left, right) => Some(left + right)
+}
+```
+
+The same pattern is available specialised to common effect types as `Recursive#foldZIO`, `Recursive#foldSTM`, `Recursive#foldPure` and `Recursive#foldValidation`.
+
+### Other Folds
+
+`Recursive#foldRecursive` is like `fold`, but each sub-result is paired with the sub-expression it came from. `Recursive#foldDown` visits every node from the root downwards and threads an accumulator through. To count the nodes of the expression:
+
+```scala mdoc
+expression.foldDown(0)((count, _) => count + 1)
+```
+
+`Recursive#foldUp` threads an accumulator in a similar way, and `Recursive#foldDownSome` and `Recursive#foldUpSome` accept a partial function and leave the accumulator unchanged where it is not defined.
+
+## Transforming a Recursive Structure
+
+`Recursive#transformUp` and `Recursive#transformDown` rebuild the structure by applying a function to every node, bottom up or top down. The function receives a whole `Recursive` value and returns one, and `Recursive#transformUpSome` and `Recursive#transformDownSome` take a partial function. To negate every literal and then evaluate the result:
+
+```scala mdoc
+expression
+  .transformUp[Any] { node =>
+    node.caseValue match {
+      case Lit(value) => lit(-value)
+      case _          => node
+    }
+  }
+  .fold(evaluate.apply)
+```
+
+## Unfolding
+
+`Unfolder` is the reverse of `Folder`. It takes a seed value and produces one layer, whose sub-expressions are seeds for the next step. `Recursive.unfold` repeats that step until the unfolder produces a layer with no sub-expressions. To build an expression tree whose shape follows the Fibonacci recursion, we define an unfolder and unfold from the seed `4`:
+
+```scala mdoc
+val fibonacci: Unfolder[ExprF, Int] =
+  Unfolder[ExprF, Int](n => if (n <= 1) Lit(1) else Add(n - 1, n - 2))
+
+val tree = Recursive.unfold[ExprF, Int](4)(fibonacci)
+
+tree.fold(evaluate.apply)
+```
+
+`Unfolder#zip` combines two unfolders into one over pairs of seeds and requires an `AssociativeBoth` instance for the layer type, and like `Folder` it has an `Invariant` instance. `Recursive.unfoldRecursive` is a variant in which the step can also return an existing `Recursive` value in place of a seed, which is then reused as is.
