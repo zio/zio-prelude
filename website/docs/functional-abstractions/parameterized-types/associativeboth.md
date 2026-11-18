@@ -40,9 +40,9 @@ val helloZIO: ZIO[Console, IOException, Unit] =
 //   trace = "repl.MdocSession.MdocApp0.helloZIO(associativeboth.md:26)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp0.helloZIO(associativeboth.md:26)",
-//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda/0x000076f4b2e34358@4d193ab0
+//     onState = zio.FiberRef$unsafe$PatchFiber$$Lambda/0x00007d723632c358@211d7660
 //   ),
-//   successK = zio.ZIO$$Lambda/0x000076f4b2e36250@18de687e
+//   successK = zio.ZIO$$Lambda/0x00007d723632e250@50681008
 // )
 ```
 
@@ -57,9 +57,9 @@ val failZIO: ZIO[Console, IOException, Unit] =
 //   trace = "repl.MdocSession.MdocApp0.failZIO(associativeboth.md:33)",
 //   first = Stateful(
 //     trace = "repl.MdocSession.MdocApp0.failZIO(associativeboth.md:33)",
-//     onState = zio.ZIO$$$Lambda/0x000076f4b2e37578@5b0dfd1c
+//     onState = zio.ZIO$$$Lambda/0x00007d723632f578@170371ac
 //   ),
-//   successK = zio.ZIO$$Lambda/0x000076f4b2e36250@5532c0d6
+//   successK = zio.ZIO$$Lambda/0x00007d723632e250@7b314f00
 // )
 ```
 
@@ -195,11 +195,11 @@ val helloFromAssociativeBoth: ZIO[Console, IOException, Unit] =
 //     trace = "repl.MdocSession.MdocApp0.<local MdocApp0>.helloFromAssociativeBoth(associativeboth.md:144)",
 //     first = Stateful(
 //       trace = "repl.MdocSession.MdocApp0.<local MdocApp0>.helloFromAssociativeBoth(associativeboth.md:144)",
-//       onState = zio.FiberRef$unsafe$PatchFiber$$Lambda/0x000076f4b2e34358@1b906bce
+//       onState = zio.FiberRef$unsafe$PatchFiber$$Lambda/0x00007d723632c358@72b41f0f
 //     ),
-//     successK = zio.ZIO$$Lambda/0x000076f4b2e37b28@59854608
+//     successK = zio.ZIO$$Lambda/0x00007d723632fb28@7e9ebf8a
 //   ),
-//   successK = zio.ZIO$$Lambda/0x000076f4b2e37b28@20b445ff
+//   successK = zio.ZIO$$Lambda/0x00007d723632fb28@6afd9d31
 // )
 ```
 
@@ -225,20 +225,20 @@ val noSuspiciousWords: Predicate[List[String]] =
     def run(words: List[String]): Boolean =
       !words.exists(_.contains("get rich"))
   }
-// noSuspiciousWords: Predicate[List[String]] = repl.MdocSession$MdocApp0$$anon$5@4b04bff3
+// noSuspiciousWords: Predicate[List[String]] = repl.MdocSession$MdocApp0$$anon$5@16707309
 
 val noSuspiciousSender: Predicate[String] =
   new Predicate[String] {
     def run(sender: String): Boolean =
       !sender.contains("unclaimedfunds")
   }
-// noSuspiciousSender: Predicate[String] = repl.MdocSession$MdocApp0$$anon$6@4f5e868a
+// noSuspiciousSender: Predicate[String] = repl.MdocSession$MdocApp0$$anon$6@616e68df
 
 val spamFilter: Predicate[Email] =
   noSuspiciousWords.bothWith(noSuspiciousSender) { 
     case Email(lines, sender) => (lines, sender)
   }
-// spamFilter: Predicate[Email] = repl.MdocSession$MdocApp0$Predicate$1$$anon$1@1df1eef
+// spamFilter: Predicate[Email] = repl.MdocSession$MdocApp0$Predicate$1$$anon$1@5a577ebb
 ```
 
 The composed predicate will extract the lines and the sender, sending the lines to the `nonSuspiciousWords` predicate and then if it passes sending the sender to the `nonSuspiciousSender` predicate.

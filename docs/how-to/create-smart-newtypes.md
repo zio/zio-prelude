@@ -137,7 +137,7 @@ Notice that `&&` reports the first failing assertion only: `"ab"` is reported fo
 
 For a collection of input values, `makeAll` validates every element and accumulates the errors of all invalid elements:
 
-```scala mdoc:compile-only
+```scala
 val allValid   = Age.makeAll(List(20, 30))
 val someFailed = Age.makeAll(List(20, 17, 200))
 ```
