@@ -20,8 +20,8 @@ trait IdentityBoth[F[_]] extends AssociativeBoth[F] {
 The `any` value must be an identity element with respect to the `both` operator, so that after removing unnecessary tuples the following property holds:
 
 ```scala
-fa <*> identity === fa
-identity <*> fa === fa
+fa <*> any === fa
+any <*> fa === fa
 ```
 
 This is the same as the laws for the `Identity` functional abstraction for concrete types except lifted into the context of parameterized types.
