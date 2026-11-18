@@ -4,7 +4,17 @@ title: "Functional Data Types in ZIO Prelude"
 sidebar_label: "Functional Data Types"
 ---
 
-ZIO Prelude includes several data types to help us model our domains more accurately and solve common problems.
+ZIO Prelude includes several data types to help us model our domains more accurately and solve common problems. Most of them take a fact about the data, such as "this collection is never empty", "these errors accumulate" or "this value has no effect", and move it into the type so that the compiler enforces it and callers do not need to handle cases that cannot happen.
+
+The data types fall into a few groups:
+
+- **Non-empty collections** (`NonEmptyList`, `NonEmptyMap`, `NonEmptySet`, `NonEmptySortedMap`, `NonEmptySortedSet`, `ZNonEmptySet`) guarantee at least one element, so operations such as `head` are total.
+- **Sets with weights** (`ZSet`, `ZNonEmptySet`) generalize a set to count how many times, or how much, an element is present.
+- **Results with several outcomes** (`Validation`, `ZValidation`, `These`) model computations that can fail with many errors, succeed with warnings, or have both a value and an error.
+- **Descriptions of structure** (`ParSeq`, `Recursive`, `Equivalence`) describe events, recursive data and conversions between types.
+- **Helpers for abstractions** (`Id and Const`, `Optional`) give simple meaning to type constructors or wrap optional fields of external models.
+
+Each page below explains what the type models and how to use it, and links to the related abstractions in [Functional Abstractions](../functional-abstractions/index.md).
 
 - **[Equivalence](equivalence.md)** - A description of an equivalence relationship between two data types.
 - **[NonEmptyList](nonemptylist.md)** - A list that is guaranteed to be non-empty to more accurately model situations where we know a collection has at least one element.
