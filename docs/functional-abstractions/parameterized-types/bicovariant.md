@@ -7,7 +7,13 @@ title: "Bicovariant"
 
 `Either` is the standard example. An `Either[A, B]` holds either an `A` on the left or a `B` on the right, and we can transform either side independently.
 
-`Bicovariant` extends `RightCovariant`, which lets the second parameter be mapped on its own. Because of that, the same instance also gives a `Covariant` for the second parameter.
+`Bicovariant` extends `RightCovariant`, which lets the second parameter be mapped on its own. Because of that, the same instance also gives a [Covariant](./covariant.md) for the second parameter through `deriveCovariant`. It also gives a `Covariant` for the first parameter, wrapped in the `Failure` newtype, through `deriveFailureCovariant`.
+
+## Motivation
+
+Code that works with results of the shape `F[Error, Value]` often needs to adapt both sides: convert a low-level error into a domain error, and convert the value at the same time. Writing that for each concrete type duplicates the logic, and `Covariant` cannot help because it only maps one type parameter. `Bicovariant` abstracts over any binary type constructor that can be mapped on both sides, so a helper written once works for `Either`, for a pair, and for `Exit`.
+
+Use `Bicovariant` when both parameters are covariant. If the first parameter is an input, as in a function, use [Divariant](./divariant.md). If there are three parameters and an environment, use [Zivariant](./zivariant.md).
 
 ## Mapping Both Sides
 
@@ -38,3 +44,40 @@ implicitly[Bicovariant[Either]].rightMap((i: Int) => i + 1).apply(Right(41))
 ```
 
 `Tuple2` and `Exit` also have `Bicovariant` instances, so the same operators apply to pairs and to ZIO `Exit` values.
+
+## Writing Generic Code
+
+The syntax `bimap`, `leftMap` and `rightMap` is available on any `F[A, B]` that has a `Bicovariant[F]`. A helper can therefore be written once and used for every such type:
+
+```scala mdoc:silent
+def render[F[+_, +_]: Bicovariant](result: F[Int, String]): F[String, Int] =
+  result.bimap(code => s"E$code", text => text.length)
+```
+
+Next, the same helper is applied to an `Either` and to a tuple:
+
+```scala mdoc
+render[Either](Left(404))
+
+render[Either](Right("hello"))
+
+render[Tuple2]((500, "ok"))
+```
+
+## Laws
+
+Every `Bicovariant` instance must satisfy these laws, each checked by a method on the type class:
+
+| Law                | Method                           | Statement                                                    |
+| ------------------ | -------------------------------- | ------------------------------------------------------------ |
+| Identity           | `Bicovariant#bimapIdentity`      | `bimap(identity, identity)` leaves a value unchanged         |
+| Composition        | `Bicovariant#bimapCompose`       | `bimap(g compose f, h compose i)` equals `bimap(g, h)` after `bimap(f, i)` |
+| Coherence          | `Bicovariant#bimapCoherence`     | `bimap(f, g)` equals `rightMap(g)` followed by `leftMap(f)`  |
+| Left identity      | `Bicovariant#leftMapIdentity`    | `leftMap(identity)` leaves a value unchanged                 |
+| Left composition   | `Bicovariant#leftMapCompose`     | `leftMap(g compose f)` equals `leftMap(g)` after `leftMap(f)` |
+| Right identity     | `RightCovariant#rightMapIdentity`| `rightMap(identity)` leaves a value unchanged                |
+| Right composition  | `RightCovariant#rightMapCompose` | `rightMap(g compose f)` equals `rightMap(g)` after `rightMap(f)` |
+
+## Related Abstractions
+
+[Covariant](./covariant.md) maps the single parameter of a one-parameter container, and `Bicovariant` is its two-parameter version. [Divariant](./divariant.md) differs in that its first parameter is contravariant, and [Zivariant](./zivariant.md) extends the idea to three parameters.
