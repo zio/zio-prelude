@@ -36,7 +36,7 @@ ZIO Prelude gives us:
 - **[New Types](newtypes/index.md)**— that allow to _increase type safety_ in domain modeling. Wrapping existing type adding no runtime overhead. These refined newtypes allow us to increase the type safety of our code base with zero overhead and minimal boilerplate.
 - **[ZPure](zpure/index.md)**— A description of a computation that supports logging, context, state, and errors, providing all the functionality traditionally offered by monad transformers with dramatically better performance and ergonomics.
 
-The library has a small research-stage package (`zio.prelude.fx`) that provides abstraction over expressive effect types like ZIO and `ZPure`.
+The `zio.prelude.fx` package holds `ZPure`, the data type for pure computations with state, logging, an environment and errors.
 
 ## Installation
 

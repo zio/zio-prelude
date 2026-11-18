@@ -9,24 +9,26 @@ sidebar_label: "Abstraction Diagrams"
 ```mermaid
 classDiagram
   Absorption~A~ <|-- DistributiveAbsorption~A~
-  Absorption~A~ <|-- Noncontradiction~A~
-  Absorption~A~ <|-- ExcludedMiddle~A~
+  Absorption~A~ <|-- Complement~A~
+  Complement~A~ <|-- Noncontradiction~A~
+  Complement~A~ <|-- ExcludedMiddle~A~
   ExcludedMiddle~A~ <|-- Involution~A~
   Noncontradiction~A~ <|-- Involution~A~
   class Absorption~A~{
     + or(=> A, => A): A
     + and(=> A, => A): A
   }
+  class Complement~A~{
+    + complement(=> A): A
+  }
   class DistributiveAbsorption~A~{
     Boolean
     Set[A]
   }
   class Noncontradiction~A~{
-    + complement(=> A): A
     + bottom: A
   }
   class ExcludedMiddle~A~{
-    + complement(=> A): A
     + top: A
   }
   class Involution~A~{
@@ -74,7 +76,8 @@ classDiagram
     Option[A: Commutative]
     Prod[Boolean]
     Prod[Byte/Char/Double/Float/Int/Long/Short]
-    Set[A]
+    AndF[Set[A]]
+    OrF[Set[A]]
     Sum[Boolean]
     Sum[Byte/Char/Double/Float/Int/Long/Short]
     These[A: Commutative, B: Commutative]
@@ -97,7 +100,8 @@ classDiagram
     NonEmptySet[A]
     Option[A: Idempotent]
     Prod[Boolean]
-    Set[A]
+    AndF[Set[A]]
+    OrF[Set[A]]
     Sum[Boolean]
     These[A: Idempotent, B: Idempotent]
     ❨T1: Idempotent, ..., T22: Idempotent❩
@@ -114,10 +118,6 @@ classDiagram
     Either[E, A: Identity]
     List[A]
     Map[K, V: Associative]
-    Max[Boolean]
-    Max[Byte/Char/Double/Float/Int/Long/Short]
-    Min[Boolean]
-    Min[Byte/Char/Double/Float/Int/Long/Short]
     Option[A: Associative]
     String
     ❨T1: Identity, ..., T22: Identity❩
@@ -138,7 +138,7 @@ classDiagram
     F[A: Inverse]: Derive[_, Inverse]
     Or
     Prod[Boolean]
-    Set[A]
+    OrF[Set[A]]
     Sum[Boolean]
     Sum[Byte/Char/Double/Float/Int/Long/Short]
     ❨T1: Inverse, ..., T22: Inverse❩
@@ -175,7 +175,6 @@ classDiagram
     Vector[+*]
     ZIO[R, E, +*]
     Failure[ZIO[R, E, +*]]
-    ZLayer[R, E, +*]
     ZSink[R, E, I, L, +*]
     ZStream[R, E, +*]
   }
@@ -217,7 +216,6 @@ classDiagram
     + identity[A]: A =>: A
   }
   class BothCompose~=>:[-_, +_]~{
-    URIO[-*, +*] [ :*: = Tuple2 ]
   
     + (type) :*:[+_, +_]
     + fromFirst[A]: (A :*: Any) =>: A
@@ -234,7 +232,6 @@ classDiagram
   }
   class EitherCompose~=>:[-_, +_]~{
     Function[-*, +*] [ :+: = Either ]
-    URIO[-*, +*] [ :+: = Either ]
     
     + (type) :+:[+_, +_]
     + toLeft[A]: A =>: (A :+: Nothing)
@@ -256,7 +253,6 @@ classDiagram
     Fiber[E, +*]
     Schedule[R, E, +*]
     Try[+*]
-    ZLayer[R, E, +*]
     
     + either[A, B](=> F[A], => F[B]): F[Either[A, B]]
   }
@@ -270,7 +266,6 @@ classDiagram
   class IdentityEither~F<_>~{
     Option[+*]
     Equal[-*]
-    Hash[-*]
     Ord[-*]
 
     + none: F[Nothing]
@@ -401,11 +396,7 @@ classDiagram
     ZSet[A, B: Hash]
     ZTrace
 
-    + both[B](Hash[B]): Hash[(A, B)]
-    + bothWith[B, C](Hash[B])(C => (A, B)): Hash[C]
     + contramap[B](B => A): Hash[B]
-    + either[B](Hash[B]): Hash[Either[A, B]]
-    + eitherWith[B, C](Hash[B])(C => Either[A, B]): Hash[C]
     + hash(A): Int
   }
   class PartialOrd~-A~ {

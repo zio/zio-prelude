@@ -54,7 +54,7 @@ The following table lists the operators and methods that each syntax trait adds.
 | [ForEach](./functional-abstractions/parameterized-types/foreach.md)                 | `forEach`, `forEach_`, `forEachFlatten`, `collect`, `collectM`, `filter`, `filterM`, `fold`, `foldLeft`, `foldRight`, `foldMap`, `find`, `exists`, `forall`, `count`, `size`, `isEmpty`, `nonEmpty`, `contains`, `sum`, `product`, `reverse`, `intersperse`, `zipWithIndex`, `zipAll`, `partitionMap`, `groupByNonEmpty`, `maxOption`, `minOption`, `toChunk`, `flip`, and more |
 | [NonEmptyForEach](./functional-abstractions/parameterized-types/nonemptyforeach.md) | `forEach1`, `forEach1_`, `reduce1`, `reduceAll`, `reduceMap`, `reduceMapLeft`, `reduceMapRight`, `toNonEmptyChunk`, `toNonEmptyList`, `flip1`      |
 
-The syntax is also available for specific data types: `toNonEmptyList` and `toNonEmptySet` on iterables, `toMultiSet` and `head`, `peel` and `tail` on `ZSet` values, and `toNonEmptyMultiSetOption`, `head`, `peel`, `peelNonEmpty`, `tail` and `tailNonEmpty` on `ZNonEmptySet` values.
+The syntax is also available for specific data types: `toNonEmptyList` on `List` values, `toNonEmptySet` on iterables, `toMultiSet` on a `Map[A, Natural]`, `head`, `peel` and `tail` on `MultiSet` values, `toNonEmptyMultiSetOption` on a `Map[A, Natural]`, and `head`, `peel`, `peelNonEmpty`, `tail` and `tailNonEmpty` on `NonEmptyMultiSet` values.
 
 ### Type Aliases and Values
 

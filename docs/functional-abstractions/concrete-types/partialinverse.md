@@ -60,7 +60,7 @@ Prod(12) ~?~ Prod(4)
 Prod(12) ~?~ Prod(0)
 ```
 
-Tuples of `PartialInverse` values also have an instance, which returns `Some` only when every component has an inverse. Because `PartialInverse` extends `Identity`, it also inherits `Associative#multiplyOption`, which uses the inverse to repeat a value a negative number of times and returns `None` when an intermediate step fails.
+Tuples of `PartialInverse` values also have an instance, which returns `Some` only when every component has an inverse. Because `PartialInverse` extends `Identity`, it also has `multiplyOption`. `PartialInverse` overrides it to use the inverse to repeat a value a negative number of times, and it returns `None` when an intermediate step fails.
 
 ## Laws
 
