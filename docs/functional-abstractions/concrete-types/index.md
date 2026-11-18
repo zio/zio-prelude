@@ -37,7 +37,7 @@ The `Hash` abstraction allows us to define our own way of hashing data types ins
 
 ### Debug
 
-The `Debug` abstraction describes a type that can be rendered for debugging purposes. Its fundamental representation is as a function `A => Repr`, where `A` is a structured representation of the value that supports rendering in various formats.
+The `Debug` abstraction describes a type that can be rendered for debugging purposes. Its fundamental representation is as a function `A => Repr`, where `Repr` is a structured representation of the value that supports rendering in various formats.
 
 The `Debug` abstraction allows us to define how a data type should be rendered, for example rendering an `Array` to display its values rather than just its memory location. The more structured representation also allows rendering in different formats, for example including fully qualified names in the rendering of the data type so the rendering is itself valid Scala code.
 
@@ -102,7 +102,7 @@ An identity element gives us a "starting point" for combining values that we kno
 
 ### Inverse
 
-The `Inverse` abstraction further builds on the `Identity` abstraction with the concept of an inverse to the combining operation.
+The `Inverse` abstraction further builds on the `Identity` abstraction, through `PartialInverse`, with the concept of an inverse to the combining operation.
 
 ```scala
 inverse(a, a) === identity

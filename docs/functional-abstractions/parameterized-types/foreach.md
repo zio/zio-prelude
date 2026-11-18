@@ -14,7 +14,7 @@ trait Covariant[F[+_]] {
 
 trait ForEach[F[+_]] extends Covariant[F] {
   def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
-  final def map[A, B](f: A => B): F[A] => F[B] =
+  def map[A, B](f: A => B): F[A] => F[B] =
     ???
 }
 
@@ -205,7 +205,7 @@ The `foldLeft` operator simply accumulates the fold state and discards the colle
 
 This is very powerful because it means that we can implement almost every collection operator in terms of `ForEach`.
 
-This includes any collection operator that reduces a collection to some other value, like `count`, `exists`, `find`, `foldLeft`, `foldRight`, `forall`, `groupBy`, `isEmpty`, `product`, `size`, `sum`, and `toList`.
+This includes any collection operator that reduces a collection to some other value, like `count`, `exists`, `find`, `foldLeft`, `foldRight`, `forall`, `groupByNonEmpty`, `isEmpty`, `product`, `size`, `sum`, and `toList`.
 
 It also includes any operator that modifies the values of a collection while maintaining the "shape" of the collection such as `zipWithIndex`.
 

@@ -28,7 +28,33 @@ Each capability could be modeled by its own data type. `Either` models failure, 
 
 The traditional answer is a monad transformer stack, such as an `EitherT` on top of a `StateT`. Transformer stacks have three problems. Each layer is a separate data structure, so evaluating one step means unpacking and rebuilding every layer. Their type inference is weak, so the order of the layers is easy to get wrong. And each layer only knows about itself, so an operator that needs two capabilities at once is hard to write.
 
-`ZPure` puts all four capabilities into one data type. It uses the same technique as `ZIO` to keep evaluation fast and stack safe, and it lets operators see every capability at once.
+`ZPure` puts all four capabilities into one data type. It evaluates computations with an explicit stack instead of the call stack, so long chains of steps do not overflow it, and it lets operators see every capability at once.
+
+## A First Example
+
+A small computation shows the capabilities working together. The following computation reads the current counter from the state, writes a log entry that records it, and stores the incremented counter. The state type does not change, so `S1` and `S2` are both `Int`:
+
+```scala mdoc:silent:reset
+import zio.prelude._
+import zio.prelude.fx.ZPure
+
+val tick: ZPure[String, Int, Int, Any, Nothing, Int] =
+  for {
+    n <- ZPure.get[Int]
+    _ <- ZPure.log[Int, String](s"counter was $n")
+    _ <- ZPure.set(n + 1)
+  } yield n
+```
+
+Next, we run the computation with an initial state of `1`. `ZPure#runAll` returns the log and either the error or the final state and value:
+
+```scala mdoc
+tick.runAll(1)
+```
+
+## Type Aliases
+
+Most computations use only some of the capabilities. The `zio.prelude` package defines aliases that fix the unused parameters, so the type of a computation says what it needs: `State[S, A]` for state, `Reader[R, A]` for an environment, `Writer[W, A]` for a log, and `EState`, `EReader` and `EWriter` for the same with an error type `E`. Each alias also has a value of the same name that is the `ZPure` companion object, so `State.get` and `ZPure.get` are the same operator. The `tick` computation above fits the shape `ZPure[String, Int, Int, Any, Nothing, Int]`, which is a state and a log without an environment or an error.
 
 ## When to Use ZPure
 

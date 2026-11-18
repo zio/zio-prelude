@@ -9,7 +9,7 @@ Its signature is:
 
 ```scala
 trait AssociativeEither[F[_]] {
-  def either(fa: => F[A], fb: => F[B]): F[Either[A, B]]
+  def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
 }
 
 trait CommutativeEither[F[_]] extends AssociativeEither[F]
@@ -144,14 +144,14 @@ This is quite useful and typically has more domain specific names. For example t
 There is also an additional operator we can use for contravariant types called `eitherWithPar`.
 
 ```scala mdoc
-def orElseEitherWithPar[F[-_]: CommutativeEither : Contravariant, A, B, C](
+def eitherWithPar[F[-_]: CommutativeEither : Contravariant, A, B, C](
   left: => F[A],
   right: => F[B]
 )(f: C => Either[A, B]): F[C] =
   left.orElseEitherPar(right).contramap(f)
 ```
 
-This is like the `orElseEitherWith` defined on data types that have an `AssociativeEither` and `Contravariant` instance except it guarantees that the `F[A]` and `F[B]` values will be combined in a way that is commutative in addition to being associative.
+This is like the `eitherWith` defined on data types that have an `AssociativeEither` and `Contravariant` instance except it guarantees that the `F[A]` and `F[B]` values will be combined in a way that is commutative in addition to being associative.
 
 The `CommutativeEither` functional abstraction, along with the `CommutativeBoth` abstraction, describe the two fundamental ways of combining values in parallel. We can either run both values and return both their results, as in the `zipPar` operator on `ZIO`, or we can run both values and return either of their results, as in the `raceEither` operator on `ZIO`.
 

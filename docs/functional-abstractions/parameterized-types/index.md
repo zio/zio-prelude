@@ -113,7 +113,7 @@ The `ForEach` abstraction is one of the most practically useful functional abstr
 
 The `NonEmptyForEach` abstraction further builds on `ForEach` to describe a parameterized type that contains one or more existing `A` values. For example, a `NonEmptyChunk` is guaranteed to contain at least one `A` value.
 
-Because a data type with a `NonEmptyForEach` instance must always contain at least one existing `A` value we can define certain operators for it that would not be safe to define for a data type that might not contain any `A` values. For example, we can define a `reduce` operator that reduces the collection to a summary value with an associative operator whereas with a `ForEach` instance we can only define a `fold` operator that also requires an identity value to handle the empty case.
+Because a data type with a `NonEmptyForEach` instance must always contain at least one existing `A` value we can define certain operators for it that would not be safe to define for a data type that might not contain any `A` values. For example, we can define a `reduce1` operator that reduces the collection to a summary value with an associative operator whereas with a `ForEach` instance we can only define a `fold` operator that also requires an identity value to handle the empty case.
 
 ## Combining Parameterized Types
 

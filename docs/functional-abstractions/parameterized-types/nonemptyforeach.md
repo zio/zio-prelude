@@ -3,7 +3,7 @@ id: nonemptyforeach
 title: "NonEmptyForEach"
 ---
 
-`NomEmptyForEach[F]` describes a parameterized type `F[A]` that contains one or more values of type `A`.
+`NonEmptyForEach[F]` describes a parameterized type `F[A]` that contains one or more values of type `A`.
 
 Its signature is:
 
@@ -15,7 +15,7 @@ trait ForEach[F[+_]] {
 
 trait NonEmptyForEach[F[+_]] extends ForEach[F] {
   def forEach1[G[+_]: AssociativeBoth : Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]]
-  final def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
+  override def forEach[G[+_]: IdentityBoth: Covariant, A, B](fa: F[A])(f: A => G[B]): G[F[B]] =
     forEach1(fa)(f)
 }
 

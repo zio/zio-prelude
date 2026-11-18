@@ -16,7 +16,11 @@ trait Identity[A] extends Associative[A] {
   def identity: A
 }
 
-trait Inverse[A] extends Identity[A] {
+trait PartialInverse[A] extends Identity[A] {
+  def inverseOption(left: => A, right: => A): Option[A]
+}
+
+trait Inverse[A] extends PartialInverse[A] {
   def inverse(left: => A, right: => A): A
 }
 ```
