@@ -25,7 +25,7 @@ const sidebars = {
               type: "category",
               label: "Concrete Types",
               link: { type: "doc", id: "functional-abstractions/concrete-types/index" },
-              collapsed: false,
+              collapsed: true,
               items: [
                 "functional-abstractions/concrete-types/associative",
                 "functional-abstractions/concrete-types/commutative",
@@ -45,7 +45,7 @@ const sidebars = {
               type: "category",
               label: "Parameterized Types",
               link: { type: "doc", id: "functional-abstractions/parameterized-types/index" },
-              collapsed: false,
+              collapsed: true,
               items: [
                 "functional-abstractions/parameterized-types/associativeboth",
                 "functional-abstractions/parameterized-types/associativecompose",
@@ -72,7 +72,7 @@ const sidebars = {
               type: "category",
               label: "Experimental Abstractions",
               link: { type: "doc", id: "experimental/index" },
-              collapsed: false,
+              collapsed: true,
               items: [
                 "experimental/lattice-and-boolean-algebra",
                 "experimental/arithmetic",
@@ -85,7 +85,7 @@ const sidebars = {
           type: "category",
           label: "Functional Data Types",
           link: { type: "doc", id: "functional-data-types/index" },
-          collapsed: false,
+          collapsed: true,
           items: [
             "functional-data-types/equivalence",
             "functional-data-types/id-and-const",
@@ -107,7 +107,7 @@ const sidebars = {
           type: "category",
           label: "New Types",
           link: { type: "doc", id: "newtypes/index" },
-          collapsed: false,
+          collapsed: true,
           items: [
             "newtypes/constructing",
             "newtypes/operators-and-instances",
@@ -122,7 +122,7 @@ const sidebars = {
           type: "category",
           label: "ZPure",
           link: { type: "doc", id: "zpure/index" },
-          collapsed: false,
+          collapsed: true,
           items: [
             "zpure/basics",
             "zpure/errors-and-context",
