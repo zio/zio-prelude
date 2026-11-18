@@ -264,7 +264,7 @@ The most basic way to do this is with the `fold` operator, which lets us provide
 
 ```scala mdoc:nest
 trait Validation[+E, +A] {
-  def fold[B](failure: NonEmptyChunk[E] => B, success: A => B): B
+  def fold[B](failure: zio.NonEmptyChunk[E] => B, success: A => B): B
 }
 ```
 
