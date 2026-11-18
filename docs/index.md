@@ -106,7 +106,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-See [Scala Parallel Collections](scala-parallel-collections/index.md).
+See [Scala Parallel Collections](scala-parallel-collections/index.md), and note that the published artifact is empty from `1.0.0-RC37` to `1.0.0-RC48`.
 
 ### Internal Modules
 

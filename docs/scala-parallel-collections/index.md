@@ -9,6 +9,10 @@ keywords:
   - "zio-prelude-scala-parallel-collections"
 ---
 
+:::caution
+The published `zio-prelude-scala-parallel-collections` artifact contains no instances from `1.0.0-RC37` to `1.0.0-RC48`: the jars hold only a `BuildInfo` class, because the build does not compile this module's sources. The examples on this page describe the code in the repository, not those published releases.
+:::
+
 The Scala Parallel Collections module provides ZIO Prelude type class instances for the immutable parallel collections `ParSeq`, `ParMap` and `ParSet` from `scala.collection.parallel.immutable`, together with syntax for comparing maps. The core module has instances for the standard sequential collections only, and the parallel collections have been a separate library since Scala 2.13, so their instances live in a separate module that depends on it.
 
 The module is one package object, `zio.prelude.scalaparallelcollections`. Importing its members brings every instance and the syntax into implicit scope:

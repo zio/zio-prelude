@@ -1,10 +1,18 @@
 const sidebars = {
   sidebar: [
+    "index",
+    "getting-started",
     {
       type: "category",
-      label: "ZIO Prelude",
+      label: "Concepts",
+      link: { type: "doc", id: "explanation/index" },
       collapsed: false,
-      link: { type: "doc", id: "index" },
+      items: ["explanation/design-principles", "explanation/scala-versions-and-platforms"]
+    },
+    {
+      type: "category",
+      label: "Reference",
+      collapsed: false,
       items: [
         {
           type: "category",
@@ -60,6 +68,17 @@ const sidebars = {
                 "functional-abstractions/parameterized-types/zivariant"
               ]
             },
+            {
+              type: "category",
+              label: "Experimental Abstractions",
+              link: { type: "doc", id: "experimental/index" },
+              collapsed: false,
+              items: [
+                "experimental/lattice-and-boolean-algebra",
+                "experimental/arithmetic",
+                "experimental/compose"
+              ]
+            }
           ]
         },
         {
@@ -94,6 +113,8 @@ const sidebars = {
             "newtypes/operators-and-instances",
             "newtypes/subtypes",
             "newtypes/smart-newtypes",
+            "newtypes/assertions",
+            "newtypes/validator",
             "newtypes/predefined-newtypes"
           ]
         },
@@ -109,9 +130,30 @@ const sidebars = {
             "zpure/running-and-converting"
           ]
         },
-        "resources"
+        "syntax-and-instances",
+        "laws/index",
+        "magnolia/index",
+        "scala-parallel-collections/index"
       ]
-    }
+    },
+    "tutorial/validate-an-order",
+    {
+      type: "category",
+      label: "How-to Guides",
+      collapsed: true,
+      items: [
+        "how-to/define-equal-ord-hash-debug-instances",
+        "how-to/create-smart-newtypes",
+        "how-to/accumulate-validation-errors",
+        "how-to/combine-values-with-associative-and-identity",
+        "how-to/traverse-with-foreach",
+        "how-to/use-zpure-for-state-and-errors",
+        "how-to/test-instances-with-laws",
+        "how-to/derive-debug-with-magnolia",
+        "how-to/migrate-from-cats-or-scalaz"
+      ]
+    },
+    "resources"
   ]
 };
 

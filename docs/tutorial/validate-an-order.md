@@ -1,5 +1,5 @@
 ---
-id: tutorial/validate-an-order
+id: validate-an-order
 title: "Tutorial: Validate an Order"
 description: "Build an order validator step by step with smart newtypes, Validation, Identity, ForEach and ZPure."
 keywords:
