@@ -7,6 +7,12 @@ title: "NonEmptySortedMap and NonEmptySortedSet"
 
 Use these types when the non-empty guarantee and a stable sorted order are both part of what the code relies on. For example, the lowest priority in a queue is always the first element of a sorted set, and that element always exists.
 
+## Motivation
+
+Code that needs "the smallest" or "the largest" entry usually calls `head` or `min` on a `SortedSet` or `SortedMap`, and has to handle the empty case that may never happen. These types move that fact into the type: if a value of type `NonEmptySortedSet[A]` exists, `peel` returns the first element and the rest without an `Option`. Typical places are a priority queue whose caller guarantees at least one task, a leaderboard that always has an entry, and an ordered timeline of events. The order is stable and comes from the `Ordering` given at construction, so output such as logs and snapshots is deterministic.
+
+Use [NonEmptySet](./nonemptyset.md) and [NonEmptyMap](./nonemptymap.md) when the iteration order does not matter and the element type has no `Ordering`, and the sorted variants when it does.
+
 We import both types from the `zio.prelude` package:
 
 ```scala mdoc:silent:reset
@@ -42,6 +48,20 @@ tags.head
 tags.removeNonEmpty("zio").map(_.toSet)
 ```
 
+`peelNonEmpty` returns the first element together with `Some` of the remaining set, or `None` when that element was the last. This makes it simple to process a set in order until it is exhausted:
+
+```scala mdoc
+def drain(tasks: NonEmptySortedSet[Int]): List[Int] =
+  tasks.peelNonEmpty match {
+    case (first, Some(rest)) => first :: drain(rest)
+    case (first, None)       => List(first)
+  }
+
+drain(NonEmptySortedSet(3, 1, 2))
+```
+
+`NonEmptySortedSet#map` needs an `Ordering` for the result type, and `NonEmptySortedSet#union` takes a `SortedSet` as its argument, so a non-empty set absorbs any other set and stays non-empty. A `NonEmptySortedSet` is converted implicitly to a `SortedSet` when one is expected, which is why operators such as `head` are available on it.
+
 ## NonEmptySortedMap
 
 `NonEmptySortedMap` works like `NonEmptyMap`, but its keys are kept in sorted order and its constructors need an implicit `Ordering` for the key type. For example, a map of scores looks like this:
@@ -65,4 +85,21 @@ scores.keySet.toSet
 scores.peel
 ```
 
+`values` returns the values in key order as a `NonEmptyChunk`, and `mapValues` transforms them while keeping the keys. `peelNonEmpty` and `tailNonEmpty` work as they do for the set. A leaderboard keeps its entries ordered by player name, and the first one is always available:
+
+```scala mdoc
+scores.values
+
+scores.mapValues(_ * 10).peel._1
+```
+
 Updates behave as they do for `NonEmptyMap`. `+` and `++` return a `NonEmptySortedMap`, while `remove` returns a plain `SortedMap`, because removing an entry can make the map empty.
+
+
+## Instances
+
+`NonEmptySortedSet` has `Equal`, `Hash`, `PartialOrd` and `Debug` instances, and a `Commutative` and `Idempotent` instance that combines two sets by union. Both types convert implicitly to the standard `SortedSet` and `SortedMap`, and the extension methods `toNonEmptySortedSet` and `toNonEmptyMap` turn a possibly empty standard collection into an `Option` of the non-empty type.
+
+## Related Abstractions
+
+[NonEmptySet](./nonemptyset.md) and [NonEmptyMap](./nonemptymap.md) are the unsorted versions, and [NonEmptyList](./nonemptylist.md) is the sequence version of the non-empty guarantee. [ZNonEmptySet](./znonemptyset.md) adds weights to the elements of a non-empty set.
