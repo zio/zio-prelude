@@ -15,6 +15,7 @@ ZIO Prelude is published for Scala 2.12, 2.13 and 3. The abstractions and data t
 |------|---------|---------|
 | Newtypes | Defined in `Newtype` and `Subtype`. `wrap` and `derive` are `protected`, so only code inside the newtype object can call them. | The same API with `wrap` and `derive` public. See [Constructing Newtypes](../newtypes/constructing.md). |
 | Smart newtype validation | Checked by macros from `zio-prelude-macros`. | Checked by inline macros, and you can add a custom [Validator](../newtypes/validator.md). |
-| `Debug` and `Equal` derivation helpers | Scala 2 macros. | Scala 3 inline derivation. |
+| Deriving `Equal` | No `derived` method. Define the instance with `Equal.default` or `Equal.make`. | `Equal.derived` builds an instance for case classes and sealed traits from the standard `Mirror`. |
+| `Debug` for arrays | Not applicable. | A `Debug[IArray[A]]` instance is provided. |
 
 Scala 2.12 lacks some standard library APIs that 2.13 has, such as parallel collections in the standard library. See [Scala Parallel Collections](../scala-parallel-collections/index.md) for how that module handles it.
