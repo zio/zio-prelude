@@ -46,7 +46,7 @@ The `zio.prelude.fx` package holds `ZPure`, the data type for pure computations 
 ZIO Prelude is published for Scala 2.12, 2.13 and 3. Add the core module to your `build.sbt` file:
 
 ```scala
-libraryDependencies += "dev.zio" %% "zio-prelude" % "1.0.0-RC48"
+libraryDependencies += "dev.zio" %% "zio-prelude" % "1.0.0-RC49"
 ```
 
 On Scala.js and Scala Native use `%%%` instead of `%%`.
@@ -60,7 +60,7 @@ The core module contains everything most programs need. The other modules are op
 ```scala
 libraryDependencies ++= Seq(
   // Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude" % "1.0.0-RC48"
+  "dev.zio" %% "zio-prelude" % "1.0.0-RC49"
 )
 ```
 
@@ -69,7 +69,7 @@ libraryDependencies ++= Seq(
 ```scala
 libraryDependencies ++= Seq(
   // Laws and generators for testing your own instances with ZIO Test. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-laws-laws" % "1.0.0-RC48" % Test
+  "dev.zio" %% "zio-laws-laws" % "1.0.0-RC49" % Test
 )
 ```
 
@@ -80,7 +80,7 @@ See [Laws](docs/laws/index.md).
 ```scala
 libraryDependencies ++= Seq(
   // Automatic Debug derivation based on Magnolia. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude-magnolia" % "1.0.0-RC48"
+  "dev.zio" %% "zio-prelude-magnolia" % "1.0.0-RC49"
 )
 ```
 
@@ -91,10 +91,10 @@ See [Magnolia Derivation](docs/magnolia/index.md).
 ```scala
 libraryDependencies ++= Seq(
   // Experimental abstractions such as Absorption, Subtract and Divide. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude-experimental" % "1.0.0-RC48",
+  "dev.zio" %% "zio-prelude-experimental" % "1.0.0-RC49",
 
   // Laws for the experimental abstractions. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude-experimental-laws" % "1.0.0-RC48" % Test
+  "dev.zio" %% "zio-prelude-experimental-laws" % "1.0.0-RC49" % Test
 )
 ```
 
@@ -105,7 +105,7 @@ See [Experimental Abstractions](docs/experimental/index.md).
 ```scala
 libraryDependencies ++= Seq(
   // Instances and syntax for Scala parallel collections. JVM and Native only.
-  "dev.zio" %% "zio-prelude-scala-parallel-collections" % "1.0.0-RC48"
+  "dev.zio" %% "zio-prelude-scala-parallel-collections" % "1.0.0-RC49"
 )
 ```
 
