@@ -13,6 +13,6 @@ addSbtPlugin("org.scala-native"                  % "sbt-scala-native"           
 addSbtPlugin("org.scalameta"                     % "sbt-mdoc"                      % "2.9.2")
 addSbtPlugin("org.scalameta"                     % "sbt-scalafmt"                  % "2.6.2")
 addSbtPlugin("pl.project13.scala"                % "sbt-jcstress"                  % "0.2.0")
-addSbtPlugin("pl.project13.scala"                % "sbt-jmh"                       % "0.4.8")
+addSbtPlugin("com.github.sbt"                    % "sbt-jmh"                       % "0.4.9")
 addSbtPlugin("dev.zio"                           % "zio-sbt-website"               % "0.8.10")
 addSbtPlugin("dev.zio"                           % "zio-sbt-ci"                    % "0.8.10")
