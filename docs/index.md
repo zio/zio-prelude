@@ -99,9 +99,18 @@ libraryDependencies += "dev.zio" %% "zio-prelude-scala-parallel-collections" % "
 
 See [Scala Parallel Collections](scala-parallel-collections/index.md), and note that the published artifact is empty from `1.0.0-RC37` to `1.0.0-RC48`.
 
+### Macros
+
+```scala
+// Macros behind smart newtypes and assertions. Only needed to use assertions on their own; zio-prelude already includes it. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-macros" % "@VERSION@"
+```
+
+See [Assertions](newtypes/assertions.md).
+
 ### Internal Modules
 
-`zio-prelude-macros` holds the macros behind smart newtypes. It comes with the core module, so you never add it yourself.
+`zio-prelude-macros` holds the macros behind smart newtypes. It comes with the core module. Add it directly only to use assertions without the rest of the library, as described in [Assertions](newtypes/assertions.md).
 
 ## Example
 
