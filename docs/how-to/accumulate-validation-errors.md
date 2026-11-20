@@ -47,6 +47,7 @@ In this guide, we replace `Either` with `Validation`, which keeps the errors of 
 We need the `zio-prelude` dependency:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 

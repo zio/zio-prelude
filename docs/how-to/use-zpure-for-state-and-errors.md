@@ -43,6 +43,7 @@ In this guide, we make the state, the errors and the log part of the type with `
 We need the `zio-prelude` dependency:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 

@@ -53,6 +53,7 @@ In this guide, we derive the instance from the shape of the class, so it always 
 We add the module to `build.sbt`. It provides the derivation for Scala 2 and Scala 3:
 
 ```scala
+// Automatic Debug derivation based on Magnolia. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude-magnolia" % "@VERSION@"
 ```
 

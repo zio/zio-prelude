@@ -44,6 +44,7 @@ In this guide, we write that rule once as an `Identity` instance, and get foldin
 We need the `zio-prelude` dependency:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 
