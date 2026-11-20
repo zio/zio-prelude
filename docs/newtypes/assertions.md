@@ -12,6 +12,7 @@ This page documents the `Assertion` and `AssertionError` types themselves: the p
 To use assertions on their own, or to depend on the macros module without the rest of the library, add it to the build:
 
 ```scala
+// Macros behind smart newtypes and assertions. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude-macros" % "@VERSION@"
 ```
 
