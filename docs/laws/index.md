@@ -30,6 +30,7 @@ object GenFs  { def either[R <: Sized, E](e: Gen[R, E]): GenF[R, ({ type lambda[
 To use the laws in our tests, we add the module to the `Test` configuration. It depends on ZIO Prelude and ZIO Test, and it is available for the JVM, Scala.js and Scala Native:
 
 ```scala
+// Laws and generators for testing your own instances with ZIO Test. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-laws-laws" % "@VERSION@" % Test
 ```
 
