@@ -11,6 +11,7 @@ This page installs ZIO Prelude and walks through a first program that uses three
 Add the core module to your `build.sbt` file. The [Introduction](index.md#installation) lists the Scala versions, and the optional modules for testing, derivation and more:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 
