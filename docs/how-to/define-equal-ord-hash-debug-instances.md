@@ -40,6 +40,7 @@ In this guide, we solve this by building the instances from smaller ones with `c
 We need the `zio-prelude` dependency:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 

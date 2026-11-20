@@ -42,8 +42,11 @@ In this guide, we let the laws module state each law once and check it against m
 The laws module has its own artifact, `zio-laws-laws`, and it builds on ZIO Test. We add it to the test scope, and register the ZIO Test framework with sbt:
 
 ```scala
+// Laws and generators for testing your own instances with ZIO Test. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-laws-laws" % "@VERSION@" % Test
-libraryDependencies += "dev.zio" %% "zio-test-sbt"  % "ZIO_VERSION" % Test
+
+// ZIO Test framework for sbt. Use the same version of ZIO as your project.
+libraryDependencies += "dev.zio" %% "zio-test-sbt" % "ZIO_VERSION" % Test
 
 testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 ```

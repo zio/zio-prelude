@@ -27,10 +27,11 @@ trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] { type :*:[+_, +_
 The abstractions live in `zio-prelude-experimental`, and their laws live in a separate module, `zio-prelude-experimental-laws`, that we add to the `Test` configuration. Both are available for the JVM, Scala.js and Scala Native:
 
 ```scala
-libraryDependencies ++= Seq(
-  "dev.zio" %% "zio-prelude-experimental"      % "@VERSION@",
-  "dev.zio" %% "zio-prelude-experimental-laws" % "@VERSION@" % Test
-)
+// Experimental abstractions such as Absorption, Subtract and Divide. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-experimental" % "@VERSION@"
+
+// Laws for the experimental abstractions. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-experimental-laws" % "@VERSION@" % Test
 ```
 
 The infix syntax for every abstraction comes from the package object, so a single import brings it into scope:

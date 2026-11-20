@@ -27,10 +27,11 @@ object DeriveDebug {
 We add the module next to the core library. It is available for the JVM, Scala.js and Scala Native, and for Scala 2.12, 2.13 and 3. On Scala 2 it uses Magnolia 1 and a macro, and on Scala 3 it uses Magnolia 1.3 with the `derives` clause:
 
 ```scala
-libraryDependencies ++= Seq(
-  "dev.zio" %% "zio-prelude"          % "@VERSION@",
-  "dev.zio" %% "zio-prelude-magnolia" % "@VERSION@"
-)
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
+
+// Automatic Debug derivation based on Magnolia. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-magnolia" % "@VERSION@"
 ```
 
 ## Deriving an Instance

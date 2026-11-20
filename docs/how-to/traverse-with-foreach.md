@@ -37,6 +37,7 @@ In this guide, we replace it with `forEach`, which works for any collection that
 We need the `zio-prelude` dependency:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 

@@ -28,10 +28,11 @@ package object scalaparallelcollections
 We add the module next to the core library. It is available for the JVM and Scala Native only, because the parallel collections do not exist on Scala.js:
 
 ```scala
-libraryDependencies ++= Seq(
-  "dev.zio" %% "zio-prelude"                          % "@VERSION@",
-  "dev.zio" %% "zio-prelude-scala-parallel-collections" % "@VERSION@"
-)
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
+
+// Instances and syntax for Scala parallel collections. JVM and Native only.
+libraryDependencies += "dev.zio" %% "zio-prelude-scala-parallel-collections" % "@VERSION@"
 ```
 
 On Scala 2.13 and Scala 3 the module brings in `org.scala-lang.modules::scala-parallel-collections` 1.2.0 as a dependency, and we need `import scala.collection.parallel.CollectionConverters._` to call `.par` on a sequential collection. On Scala 2.12 the build adds no extra dependency, because the 2.12 standard library already contains the parallel collections, and `.par` needs no import.

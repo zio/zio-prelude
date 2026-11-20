@@ -48,6 +48,7 @@ An order has an id, a customer email, and a list of lines. Each line has a produ
 To use the project, add the dependency to `build.sbt`:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 

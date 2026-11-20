@@ -43,6 +43,7 @@ The `zio.prelude.fx` package holds `ZPure`, the data type for pure computations 
 ZIO Prelude is published for Scala 2.12, 2.13 and 3. Add the core module to your `build.sbt` file:
 
 ```scala
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
 libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 
@@ -55,19 +56,15 @@ The core module contains everything most programs need. The other modules are op
 ### Core
 
 ```scala
-libraryDependencies ++= Seq(
-  // Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude" % "@VERSION@"
-)
+// Type classes, data types, newtypes and ZPure. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude" % "@VERSION@"
 ```
 
 ### Testing
 
 ```scala
-libraryDependencies ++= Seq(
-  // Laws and generators for testing your own instances with ZIO Test. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-laws-laws" % "@VERSION@" % Test
-)
+// Laws and generators for testing your own instances with ZIO Test. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-laws-laws" % "@VERSION@" % Test
 ```
 
 See [Laws](laws/index.md).
@@ -75,10 +72,8 @@ See [Laws](laws/index.md).
 ### Derivation
 
 ```scala
-libraryDependencies ++= Seq(
-  // Automatic Debug derivation based on Magnolia. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude-magnolia" % "@VERSION@"
-)
+// Automatic Debug derivation based on Magnolia. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-magnolia" % "@VERSION@"
 ```
 
 See [Magnolia Derivation](magnolia/index.md).
@@ -86,13 +81,11 @@ See [Magnolia Derivation](magnolia/index.md).
 ### Experimental
 
 ```scala
-libraryDependencies ++= Seq(
-  // Experimental abstractions such as Absorption, Subtract and Divide. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude-experimental" % "@VERSION@",
+// Experimental abstractions such as Absorption, Subtract and Divide. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-experimental" % "@VERSION@"
 
-  // Laws for the experimental abstractions. JVM, Scala.js, Native.
-  "dev.zio" %% "zio-prelude-experimental-laws" % "@VERSION@" % Test
-)
+// Laws for the experimental abstractions. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-experimental-laws" % "@VERSION@" % Test
 ```
 
 See [Experimental Abstractions](experimental/index.md).
@@ -100,17 +93,24 @@ See [Experimental Abstractions](experimental/index.md).
 ### Collections
 
 ```scala
-libraryDependencies ++= Seq(
-  // Instances and syntax for Scala parallel collections. JVM and Native only.
-  "dev.zio" %% "zio-prelude-scala-parallel-collections" % "@VERSION@"
-)
+// Instances and syntax for Scala parallel collections. JVM and Native only.
+libraryDependencies += "dev.zio" %% "zio-prelude-scala-parallel-collections" % "@VERSION@"
 ```
 
 See [Scala Parallel Collections](scala-parallel-collections/index.md), and note that the published artifact is empty from `1.0.0-RC37` to `1.0.0-RC48`.
 
+### Macros
+
+```scala
+// Macros behind smart newtypes and assertions. Only needed to use assertions on their own; zio-prelude already includes it. JVM, Scala.js, Native.
+libraryDependencies += "dev.zio" %% "zio-prelude-macros" % "@VERSION@"
+```
+
+See [Assertions](newtypes/assertions.md).
+
 ### Internal Modules
 
-`zio-prelude-macros` holds the macros behind smart newtypes. It comes with the core module, so you never add it yourself.
+`zio-prelude-macros` holds the macros behind smart newtypes. It comes with the core module. Add it directly only to use assertions without the rest of the library, as described in [Assertions](newtypes/assertions.md).
 
 ## Example
 
