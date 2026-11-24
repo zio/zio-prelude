@@ -47,7 +47,7 @@ object EqualLaws extends Lawful[Equal] {
 
   /**
    * For all values `a1`, `a2`, and `a3`, if `a1` is equal to `a2` and `a2` is
-   * equal `a3`, then `a1` is equal to `a3`.
+   * equal to `a3`, then `a1` is equal to `a3`.
    */
   lazy val transitivityLaw: Laws.Law3[Equal] =
     new Laws.Law3[Equal]("transitivityLaw") {

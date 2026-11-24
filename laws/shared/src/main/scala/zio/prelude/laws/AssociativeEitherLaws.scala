@@ -46,8 +46,7 @@ object AssociativeEitherLaws extends LawfulF.Invariant[AssociativeEitherDeriveEq
     }
 
   /**
-   * The set of laws that instances of `AssociativeEither` must
-   * satisfy.
+   * The set of laws that instances of `AssociativeEither` must satisfy.
    */
   lazy val laws: LawsF.Invariant[AssociativeEitherDeriveEqualInvariant, Equal] =
     associativityLaw

@@ -27,7 +27,8 @@ import zio.test.laws._
 object CovariantLaws extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
 
   /**
-   * Mapping with the identity function must be an identity function.
+   * Mapping with the identity function must return a value equal to the
+   * original, compared with `Equal`.
    */
   lazy val identityLaw: LawsF.Covariant[CovariantDeriveEqual, Equal] =
     new LawsF.Covariant.Law1[CovariantDeriveEqual, Equal]("identityLaw") {
