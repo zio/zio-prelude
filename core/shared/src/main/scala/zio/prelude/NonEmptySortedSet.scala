@@ -44,7 +44,8 @@ final class NonEmptySortedSet[A] private (private val set: SortedSet[A]) { self 
   def toSet: SortedSet[A] = set
 
   /**
-   * Returns the smallest element of this `NonEmptySortedSet` and the remainder, which is a (possibly empty) `SortedSet`.
+   * Returns the smallest element of this `NonEmptySortedSet` and the remainder, which is a (possibly empty)
+   * `SortedSet`.
    */
   @inline
   def peel: (A, SortedSet[A]) = (set.head, set.tail)
@@ -270,9 +271,9 @@ object NonEmptySortedSet {
     }
 
   /**
-   * Derives a `Hash[NonEmptySortedSet[A]]` and `PartialOrd[NonEmptySortedSet[A]]` (and thus `Equal[NonEmptySortedSet[A]]`) instance.
-   * It needs no instance for `A`: elements are compared with `==` and hashed
-   * with `hashCode`. The partial order is set inclusion.
+   * Derives a `Hash[NonEmptySortedSet[A]]` and `PartialOrd[NonEmptySortedSet[A]]` (and thus
+   * `Equal[NonEmptySortedSet[A]]`) instance. It needs no instance for `A`: membership is checked with each set's
+   * `scala.math.Ordering`, and elements are hashed with `hashCode`. The partial order is set inclusion.
    */
   implicit def NonEmptySortedSetHashPartialOrd[A]: Hash[NonEmptySortedSet[A]] with PartialOrd[NonEmptySortedSet[A]] =
     HashPartialOrd.derive[Set[A]].contramap(_.toSet)

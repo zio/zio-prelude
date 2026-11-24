@@ -47,7 +47,8 @@ final class NonEmptySortedMap[K, V] private (private val map: SortedMap[K, V])(i
   def toMap: SortedMap[K, V] = map
 
   /**
-   * Returns the pair with the smallest key in this `NonEmptySortedMap` and the remainder, which is a (possibly empty) `SortedMap`.
+   * Returns the pair with the smallest key in this `NonEmptySortedMap` and the remainder, which is a (possibly
+   * empty) `SortedMap`.
    */
   @inline
   def peel: ((K, V), SortedMap[K, V]) = (map.head, map.tail)
