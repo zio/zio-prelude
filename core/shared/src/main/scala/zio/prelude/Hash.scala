@@ -22,6 +22,23 @@ import scala.annotation.implicitNotFound
 
 /**
  * `Hash[A]` provides implicit evidence that a value of type `A` can be hashed.
+ *
+ * A `Hash` is also an `Equal`, and the two must agree: values that are equal
+ * must have the same hash. Importing `zio.prelude._` adds the `hash` method to
+ * every value of a type with a `Hash` instance.
+ *
+ * {{{
+ * final case class UserId(value: String)
+ *
+ * implicit val userIdHash: Hash[UserId] = Hash[String].contramap(_.value)
+ *
+ * val sameHash: Boolean = UserId("alice").hash == UserId("alice").hash
+ * // true
+ * val same: Boolean = UserId("alice") === UserId("alice")
+ * // true
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/concrete-types/hash/ Hash]]
  */
 @implicitNotFound("No implicit Hash defined for ${A}.")
 trait Hash[-A] extends Equal[A] { self =>
@@ -45,6 +62,11 @@ trait Hash[-A] extends Equal[A] { self =>
     )
 }
 
+/**
+ * Constructors and instances of `Hash`. The `Hash` instances for primitive
+ * types, `String` and some other standard library and ZIO types are in the
+ * `Equal` companion object.
+ */
 object Hash {
 
   /**
@@ -63,7 +85,17 @@ object Hash {
     hash
 
   /**
-   * Constructs an instance from a function.
+   * Constructs an instance from a hash function and an equality function.
+   * `make` does not check that equal values get the same hash;
+   * `zio.prelude.laws.HashLaws` can test it.
+   *
+   * {{{
+   * val caseInsensitive: Hash[String] =
+   *   Hash.make(_.toLowerCase.hashCode, _.equalsIgnoreCase(_))
+   *
+   * val sameHash: Boolean = caseInsensitive.hash("ZIO") == caseInsensitive.hash("zio")
+   * // true
+   * }}}
    */
   def make[A](hash0: A => Int, equal0: (A, A) => Boolean): Hash[A] =
     new Hash[A] {
@@ -79,7 +111,9 @@ object Hash {
 
   /**
    * Constructs a `Hash[A]` that uses the default notion of hashing embodied in
-   * the implementation of `hashCode` for values of type `A`.
+   * the implementation of `hashCode` for values of type `A`. It hashes with
+   * `##`, which is `hashCode` except for numeric types, where equal numbers
+   * of different types get the same hash, and it compares with `==`.
    */
   def default[A]: Hash[A] =
     DefaultHash
@@ -141,21 +175,21 @@ object Hash {
     makeFrom({ case (a, b) => (a.hash, b.hash).hashCode }, Equal.Tuple2Equal)
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple3Hash[A: Hash, B: Hash, C: Hash]: Hash[(A, B, C)] =
     makeFrom({ case (a, b, c) => (a.hash, b.hash, c.hash).hashCode }, Equal.Tuple3Equal)
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple4Hash[A: Hash, B: Hash, C: Hash, D: Hash]: Hash[(A, B, C, D)] =
     makeFrom({ case (a, b, c, d) => (a.hash, b.hash, c.hash, d.hash).hashCode }, Equal.Tuple4Equal)
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple5Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash]: Hash[(A, B, C, D, E)] =
@@ -165,7 +199,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple6Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash]: Hash[(A, B, C, D, E, F)] =
@@ -175,7 +209,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple7Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash, G: Hash]: Hash[(A, B, C, D, E, F, G)] =
@@ -185,7 +219,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple8Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash, G: Hash, H: Hash]
@@ -196,7 +230,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple9Hash[A: Hash, B: Hash, C: Hash, D: Hash, E: Hash, F: Hash, G: Hash, H: Hash, I: Hash]
@@ -209,7 +243,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple10Hash[
@@ -232,7 +266,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple11Hash[
@@ -256,7 +290,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple12Hash[
@@ -281,7 +315,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple13Hash[
@@ -321,7 +355,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple14Hash[
@@ -363,7 +397,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple15Hash[
@@ -407,7 +441,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple16Hash[
@@ -453,7 +487,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple17Hash[
@@ -501,7 +535,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple18Hash[
@@ -551,7 +585,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple19Hash[
@@ -603,7 +637,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple20Hash[
@@ -657,7 +691,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple21Hash[
@@ -713,7 +747,7 @@ object Hash {
     )
 
   /**
-   * Derives an `Hash` for a product type given an `Hash` for each element of
+   * Derives a `Hash` for a product type given a `Hash` for each element of
    * the product type.
    */
   implicit def Tuple22Hash[
@@ -784,6 +818,9 @@ object Hash {
     Hash.make(_.##, _ == _)
 }
 
+/**
+ * Syntax for `Hash`, available with `import zio.prelude._`.
+ */
 trait HashSyntax {
 
   /**
@@ -798,7 +835,10 @@ trait HashSyntax {
       hash.hash(a)
 
     /**
-     * A symbolic alias for `hash`.
+     * A symbolic alias for `hash`. Writing `a.##` calls Scala's built-in
+     * `Any.##` instead, because a member of `Any` takes precedence over an
+     * extension method; this method runs only when called on a `HashOps`
+     * value explicitly.
      */
     def ##(implicit hash: Hash[A]): Int =
       hash.hash(a)
