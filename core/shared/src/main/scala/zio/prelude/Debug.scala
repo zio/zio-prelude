@@ -40,6 +40,27 @@ import scala.language.implicitConversions
  * types and even implement your own `Renderer`, for example to render
  * representations to JSON, though in most cases the built in renderers will
  * be all that you need.
+ *
+ * Importing `zio.prelude._` adds `debug` and `render` to every value of a type
+ * with a `Debug` instance, and the `d` string interpolator.
+ *
+ * {{{
+ * import zio.prelude.Debug.{Renderer, Repr}
+ *
+ * final case class User(name: String, age: Int)
+ *
+ * implicit val userDebug: Debug[User] =
+ *   user => Repr.Constructor(List("app"), "User", "name" -> user.name.debug, "age" -> user.age.debug)
+ *
+ * val simple: String = User("Ann", 30).render
+ * // User(name = "Ann", age = 30)
+ * val full: String = User("Ann", 30).debug.render(Renderer.Full)
+ * // app.User(name = "Ann", age = 30)
+ * val interpolated: String = d"user: \${User("Ann", 30)}"
+ * // user: User(name = "Ann", age = 30)
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/concrete-types/debug/ Debug]]
  */
 trait Debug[-A] {
 
@@ -56,6 +77,10 @@ trait Debug[-A] {
     debug(a).render
 }
 
+/**
+ * Constructors and instances of `Debug`, together with the `Repr` data type
+ * and the built-in `Renderer`s.
+ */
 object Debug extends DebugVersionSpecific {
 
   /**
@@ -63,11 +88,16 @@ object Debug extends DebugVersionSpecific {
    */
   type Renderer = Repr => String
 
+  /**
+   * The built-in renderers: `Simple`, `Full` and `Scala`.
+   */
   object Renderer {
 
     /**
      * A renderer that renders the `Repr` as a string containing the full
-     * information in the `Repr`.
+     * information in the `Repr`: the namespaces of objects and constructors,
+     * field names, and `key:` and `value:` labels for key value pairs. Other
+     * values are rendered as with `Simple`.
      */
     val Full: Renderer = {
       case Repr.KeyValue(k, v)             => s"key: ${k.render(Full)} -> value: ${v.render(Full)}"
@@ -80,8 +110,10 @@ object Debug extends DebugVersionSpecific {
     }
 
     /**
-     * A `Renderer` that renders the `Repr` as valid Scala code that could be
-     * copy and pasted into an IDE or REPL.
+     * A `Renderer` that renders the `Repr` as Scala-like code: constructors
+     * without namespaces or field names, and tuples in parentheses. Strings
+     * and characters are rendered without quotes and `Float` values without
+     * the `f` suffix, so output that contains them is not valid Scala code.
      */
     val Scala: Renderer = {
       case Repr.Float(v)                                                               => v.toString
@@ -101,7 +133,10 @@ object Debug extends DebugVersionSpecific {
     }
 
     /**
-     * A renderer that renders the `Repr` as a simple string.
+     * A renderer that renders the `Repr` as a simple string: constructors
+     * with field names and without namespaces, strings in double quotes,
+     * characters in single quotes, `Long` values with an `L` suffix and `Float`
+     * values with an `f` suffix. `render` uses this renderer.
      */
     val Simple: Renderer = {
       case Repr.Int(v)                                                            => v.toString
@@ -124,7 +159,7 @@ object Debug extends DebugVersionSpecific {
   }
 
   /**
-   * A `Repr` is a structured representation of a value of that can be rendered
+   * A `Repr` is a structured representation of a value that can be rendered
    * into various human readable formats.
    */
   sealed trait Repr { self =>
@@ -144,6 +179,10 @@ object Debug extends DebugVersionSpecific {
       render(Renderer.Simple)
   }
 
+  /**
+   * The cases of `Repr`, one for each primitive type and one for each shape
+   * of composite value.
+   */
   object Repr {
     import java.lang.{String => SString}
     import scala.{
@@ -178,6 +217,9 @@ object Debug extends DebugVersionSpecific {
      */
     final case class Constructor(namespace: List[SString], name: SString, reprs: ListMap[SString, Repr]) extends Repr
 
+    /**
+     * Constructors for `Constructor` that take the fields as pairs.
+     */
     object Constructor {
 
       /**
@@ -320,7 +362,9 @@ object Debug extends DebugVersionSpecific {
     Repr.Double(_)
 
   /**
-   * The `Debug` instance for `scala.concurrent.Duration`.
+   * The `Debug` instance for `scala.concurrent.duration.Duration`. A finite
+   * duration is represented with the largest time unit that divides it
+   * exactly, such as 2 `HOURS` for 120 minutes.
    */
   implicit val DurationScalaDebug: Debug[ScalaDuration] = {
     val namespace            = List("scala", "concurrent", "duration")
@@ -344,7 +388,9 @@ object Debug extends DebugVersionSpecific {
   }
 
   /**
-   * The `Debug` instance for `zio.duration.Duration`.
+   * The `Debug` instance for ZIO's `zio.Duration`. A finite duration is
+   * represented with the largest time unit that divides it exactly, such as
+   * 90 `SECONDS` for a minute and a half.
    */
   implicit val DurationZIODebug: Debug[ZIODuration] = {
     val namespace            = List("zio", "duration")
@@ -416,7 +462,7 @@ object Debug extends DebugVersionSpecific {
     nonEmptyChunk => Repr.VConstructor(List("zio"), "NonEmptyChunk", nonEmptyChunk.map(_.debug).toList)
 
   /**
-   * The `Debug`instance for `Nothing`. Note that since there are no values of
+   * The `Debug` instance for `Nothing`. Note that since there are no values of
    * type `Nothing` this `Debug` instance can never be called.
    */
   implicit val NothingDebug: Debug[Nothing] =
@@ -474,21 +520,21 @@ object Debug extends DebugVersionSpecific {
     )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple2Debug[A: Debug, B: Debug]: Debug[(A, B)] =
     tup2 => Repr.VConstructor(List("scala"), "Tuple2", List(tup2._1.debug, tup2._2.debug))
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple3Debug[A: Debug, B: Debug, C: Debug]: Debug[(A, B, C)] =
     tuple => Repr.VConstructor(List("scala"), "Tuple3", List(tuple._1.debug, tuple._2.debug, tuple._3.debug))
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple4Debug[A: Debug, B: Debug, C: Debug, D: Debug]: Debug[(A, B, C, D)] =
@@ -496,7 +542,7 @@ object Debug extends DebugVersionSpecific {
       Repr.VConstructor(List("scala"), "Tuple4", List(tuple._1.debug, tuple._2.debug, tuple._3.debug, tuple._4.debug))
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple5Debug[A: Debug, B: Debug, C: Debug, D: Debug, E: Debug]: Debug[(A, B, C, D, E)] =
@@ -508,7 +554,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple6Debug[A: Debug, B: Debug, C: Debug, D: Debug, E: Debug, F: Debug]: Debug[(A, B, C, D, E, F)] =
@@ -520,7 +566,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple7Debug[A: Debug, B: Debug, C: Debug, D: Debug, E: Debug, F: Debug, G: Debug]
@@ -541,7 +587,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple8Debug[A: Debug, B: Debug, C: Debug, D: Debug, E: Debug, F: Debug, G: Debug, H: Debug]
@@ -563,7 +609,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple9Debug[A: Debug, B: Debug, C: Debug, D: Debug, E: Debug, F: Debug, G: Debug, H: Debug, I: Debug]
@@ -586,7 +632,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple10Debug[
@@ -620,7 +666,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple11Debug[
@@ -656,7 +702,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple12Debug[
@@ -694,7 +740,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple13Debug[
@@ -734,7 +780,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple14Debug[
@@ -776,7 +822,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple15Debug[
@@ -820,7 +866,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple16Debug[
@@ -866,7 +912,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple17Debug[
@@ -914,7 +960,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple18Debug[
@@ -964,7 +1010,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple19Debug[
@@ -1016,7 +1062,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple20Debug[
@@ -1070,7 +1116,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple21Debug[
@@ -1126,7 +1172,7 @@ object Debug extends DebugVersionSpecific {
       )
 
   /**
-   * Derives an `Debug` for a product type given an `Debug` for each element of
+   * Derives a `Debug` for a product type given a `Debug` for each element of
    * the product type.
    */
   implicit def Tuple22Debug[
@@ -1215,13 +1261,42 @@ object Debug extends DebugVersionSpecific {
   }
 }
 
+/**
+ * Syntax for `Debug`, available with `import zio.prelude._`.
+ */
 trait DebugSyntax {
+
+  /**
+   * Provides syntax to get the representation of a value.
+   */
   implicit class DebugOps[A](self: A) {
+
+    /**
+     * Returns the structured representation of this value.
+     */
     def debug(implicit debug: Debug[A]): Debug.Repr = debug.debug(self)
-    def render(implicit debug: Debug[A]): String    = debug.render(self)
+
+    /**
+     * Renders this value to a `String` with the `Simple` renderer.
+     */
+    def render(implicit debug: Debug[A]): String = debug.render(self)
   }
 
+  /**
+   * Provides the `d` string interpolator.
+   */
   implicit final class DebugInterpolator(_sc: StringContext) {
+
+    /**
+     * Interpolates values into a string, rendering each one with its `Debug`
+     * instance and the `Simple` renderer. It does not compile when an
+     * argument's type has no `Debug` instance.
+     *
+     * {{{
+     * val message: String = d"ids: \${List(1, 2)}, name: \${"zio"}"
+     * // ids: List(1, 2), name: "zio"
+     * }}}
+     */
     def d(args: Debug.Repr*): String = _sc.s(args.map(_.render): _*)
   }
 }
