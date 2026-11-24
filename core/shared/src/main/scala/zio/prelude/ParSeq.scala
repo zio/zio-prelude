@@ -24,10 +24,26 @@ import scala.annotation.tailrec
  * `ParSeq` is a data type that represents some notion of "events" that can
  * take place in parallel or in sequence. For example, a `ParSeq`
  * parameterized on some error type could be used to model the potentially
- * multiple ways that an application can fail. On the other hand, a ParSeq`
+ * multiple ways that an application can fail. On the other hand, a `ParSeq`
  * parameterized on some request type could be used to model a collection of
  * requests to external data sources, some of which could be executed in
  * parallel and some of which must be executed sequentially.
+ *
+ * The type parameter `Z` says whether the collection may be empty: a
+ * `ParSeq[Unit, A]` may be `ParSeq.Empty`, while a `ParSeq[Nothing, A]` holds
+ * at least one event, which methods such as `first` and
+ * `toNonEmptyMultiSet` require.
+ *
+ * {{{
+ * val requests: ParSeq[Nothing, String] =
+ *   (ParSeq.single("user") && ParSeq.single("orders")) ++ ParSeq.single("report")
+ *
+ * requests.first
+ * // user
+ *
+ * requests == ((ParSeq.single("orders") && ParSeq.single("user")) ++ ParSeq.single("report"))
+ * // true
+ * }}}
  */
 sealed trait ParSeq[+Z <: Unit, +A] { self =>
 
@@ -75,7 +91,8 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
   /**
    * Returns the first event in this collection of events. If multiple events
    * occur in parallel and before any other events then any of these events
-   * may be returned.
+   * may be returned; this implementation returns the one in the left branch
+   * of each `&&`.
    */
   @tailrec
   final def first(implicit ev: Z <:< Nothing): A =
@@ -136,6 +153,11 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
       _.zipWith(_)(_ && _)
     ).asInstanceOf[F[ParSeq[Z, B]]]
 
+  /**
+   * Converts this collection of events to a ZIO `Cause`: each event becomes a
+   * `Cause.fail`, `&&` becomes `Cause.Both`, `++` becomes `Cause.Then`, and
+   * `Empty` becomes `Cause.empty`.
+   */
   final def toCause: zio.Cause[A] = this match {
     case ParSeq.Both(left, right) => zio.Cause.Both(left.toCause, right.toCause)
     case _: ParSeq.Empty.type     => zio.Cause.empty
@@ -152,7 +174,8 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
 
   /**
    * Converts this collection of events to a `NonEmptyMultiSet` of events,
-   * discarding information about the sequential structure of events.
+   * keeping how many times each event occurs and discarding information
+   * about the parallel and sequential structure of events.
    */
   final def toNonEmptyMultiSet(implicit ev: Z <:< Nothing): NonEmptyMultiSet[A] =
     NonEmptyMultiSet.fromIterableOption(fold(Chunk.empty, Chunk.single)(_ ++ _, _ ++ _)).get
@@ -189,8 +212,20 @@ sealed trait ParSeq[+Z <: Unit, +A] { self =>
     self.flatMap(a => that.map(b => f(a, b)))
 }
 
+/**
+ * The cases of [[ParSeq]], its constructors and its type class instances.
+ */
 object ParSeq {
 
+  /**
+   * Two collections of events that take place in parallel, built with `&&`.
+   *
+   * When a `Both` is the left operand of `==`, equality is associative and
+   * commutative, `&&` distributes over `++`, and `Empty` is an identity on
+   * either side. With a `Single` or `Empty` as the left operand, `==` is
+   * structural, so `ParSeq.single(1) == (ParSeq.single(1) && ParSeq.empty)`
+   * is `false` while the reverse order is `true`.
+   */
   final case class Both[+Z <: Unit, +A](left: ParSeq[Z, A], right: ParSeq[Z, A]) extends ParSeq[Z, A] { self =>
     override def equals(that: Any): Boolean                                     =
       that match {
@@ -236,12 +271,22 @@ object ParSeq {
       }
   }
 
+  /** The empty collection of events. */
   case object Empty extends ParSeq[Unit, Nothing]
 
+  /** A collection that contains exactly one event. */
   final case class Single[+A](value: A) extends ParSeq[Nothing, A] {
     override def hashCode = value.hashCode
   }
 
+  /**
+   * Two collections of events where `left` takes place before `right`, built
+   * with `++`.
+   *
+   * When a `Then` is the left operand of `==`, equality is associative, `&&`
+   * distributes over `++`, and `Empty` is an identity on either side. `++` is
+   * not commutative.
+   */
   final case class Then[+Z <: Unit, +A](left: ParSeq[Z, A], right: ParSeq[Z, A]) extends ParSeq[Z, A] { self =>
     override def equals(that: Any): Boolean                                     = that match {
       case that: ParSeq[Unit, Any] =>
@@ -278,6 +323,7 @@ object ParSeq {
   def apply[A](a: A): ParSeq[Nothing, A] =
     single(a)
 
+  /** The empty collection of events. */
   val empty: ParSeq[Unit, Nothing] =
     ParSeq.Empty
 
@@ -303,7 +349,7 @@ object ParSeq {
     }
 
   /**
-   * Derives a `Debug[ParSeq[A]]` given a `Debug[A]`.
+   * Derives a `Debug[ParSeq[Z, A]]` given a `Debug[A]`.
    */
   implicit def parSeqDebug[Z <: Unit, A: Debug]: Debug[ParSeq[Z, A]] =
     _.fold(
@@ -337,7 +383,7 @@ object ParSeq {
     }
 
   /**
-   * The `NonEmptyForEach` instance for `ParSeq.
+   * The `ForEach` instance for `ParSeq`.
    */
   implicit def parSeqForEach[Z <: Unit]: ForEach[({ type lambda[+a] = ParSeq[Z, a] })#lambda] =
     new ForEach[({ type lambda[+a] = ParSeq[Z, a] })#lambda] {
