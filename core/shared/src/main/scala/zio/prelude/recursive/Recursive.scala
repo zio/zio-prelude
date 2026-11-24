@@ -35,7 +35,6 @@ import zio.stm._
  * @tparam Annotations the type of the services held in each layer's `annotations`
  * @param caseValue the outermost layer, whose sub-structures are `Recursive` values
  * @param annotations the annotations of the outermost layer
- * @see [[https://zio.dev/zio-prelude/functional-data-types/recursive/ Recursive]]
  */
 final case class Recursive[Case[+_], +Annotations](
   caseValue: Case[Recursive[Case, Annotations]],
