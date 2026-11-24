@@ -6,13 +6,27 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
+/**
+ * Laws that `Absorption` instances must satisfy, checked with `vvv`, `^^^` and
+ * `Equal`. They belong to the experimental module, so they can change between
+ * releases.
+ *
+ * {{{
+ * import zio.test._
+ * import zio.test.laws._
+ *
+ * val check = checkAllLaws(AbsorptionLaws)(Gen.setOf(Gen.int))
+ * // succeeds with a passing TestResult
+ * }}}
+ */
 object AbsorptionLaws extends Lawful[AbsorptionEqual] {
 
   /**
-   * The join absorption law states that for the join operator `vvv`, the meet operator `^^^`,
-   * and for any value `a`, the following must hold:
+   * The join absorption law states that for the join operator `vvv`, the meet
+   * operator `^^^`, and for all values `a1` and `a2`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a1 vvv (a1 ^^^ a2) === a1
    * }}}
    */
@@ -23,10 +37,11 @@ object AbsorptionLaws extends Lawful[AbsorptionEqual] {
     }
 
   /**
-   * The meet absorption law states that for the join operator `vvv`, the meet operator `^^^`,
-   * and for any value `a`, the following must hold:
+   * The meet absorption law states that for the join operator `vvv`, the meet
+   * operator `^^^`, and for all values `a1` and `a2`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a1 ^^^ (a1 vvv a2) === a1
    * }}}
    */
