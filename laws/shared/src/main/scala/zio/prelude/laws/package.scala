@@ -18,6 +18,10 @@ package zio.prelude
 
 import zio.test.{TestResult, assert}
 
+/**
+ * Provides assertions that compare values with `Equal` and `PartialOrd`, for
+ * writing the laws of _ZIO Prelude_ type classes.
+ */
 package object laws extends TestAssertions {
 
   /**

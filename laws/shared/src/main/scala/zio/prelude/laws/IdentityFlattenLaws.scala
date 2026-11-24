@@ -28,8 +28,8 @@ import zio.test.laws._
 object IdentityFlattenLaws extends LawfulF.Covariant[CovariantDeriveEqualIdentityFlatten, Equal] {
 
   /**
-   * Adding a layer by mapping a value and mapping it into the identity
-   * element and then flattening is an identity.
+   * For all `fa`, mapping each value `a` of `fa` to `any.map(_ => a)` and then
+   * flattening returns `fa`.
    */
   val rightIdentityLaw: LawsF.Covariant[CovariantDeriveEqualIdentityFlatten, Equal] =
     new LawsF.Covariant.Law1[CovariantDeriveEqualIdentityFlatten, Equal]("rightIdentityLaw") {
@@ -38,8 +38,8 @@ object IdentityFlattenLaws extends LawfulF.Covariant[CovariantDeriveEqualIdentit
     }
 
   /**
-   * Adding a layer by mapping a value into the identity element and then
-   * flattening is an identity.
+   * For all `fa`, mapping the identity element `any` to `fa` and then
+   * flattening returns `fa`.
    */
   val leftIdentityLaw: LawsF.Covariant[CovariantDeriveEqualIdentityFlatten, Equal] =
     new LawsF.Covariant.Law1[CovariantDeriveEqualIdentityFlatten, Equal]("leftIdentityLaw") {

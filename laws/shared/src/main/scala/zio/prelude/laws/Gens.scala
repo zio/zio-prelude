@@ -27,14 +27,15 @@ import zio.test._
 object Gens {
 
   /**
-   * A generator of natural numbers. Shrinks toward '0'.
+   * A generator of natural numbers from `0` to `Int.MaxValue`. Shrinks toward
+   * `0`.
    */
   val anyNatural: Gen[Any, Natural] =
     natural(Natural.zero, Natural.unsafeMake(Int.MaxValue))
 
   /**
-   * A generator of natural numbers inside the specified range: [start, end].
-   * The shrinker will shrink toward the lower end of the range ("smallest").
+   * A generator of natural numbers from `min` to `max`, both inclusive. Shrinks
+   * toward `min`.
    */
   def natural(min: Natural, max: Natural)(implicit trace: Trace): Gen[Any, Natural] =
     Gen.int(min, max).map(Natural.unsafeMake)
@@ -79,7 +80,8 @@ object Gens {
     Gen.listOf1(a).map(NonEmptyList.fromCons)
 
   /**
-   * A generator of `NonEmptyMultiSet` values.
+   * A generator of `NonEmptyMultiSet` values. Every element gets the same
+   * count: the current `Sized` size (at size 0 the count is 0).
    */
   def nonEmptyMultiSetOf[R <: Sized, A](a: Gen[R, A]): Gen[R, NonEmptyMultiSet[A]] =
     Gen.mapOf1(a, Gen.size.map(Natural.unsafeMake)).map(NonEmptyMultiSet.fromMapOption(_).get)

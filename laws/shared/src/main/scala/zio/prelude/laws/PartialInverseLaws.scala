@@ -11,17 +11,9 @@ import zio.test.{TestResult, assertCompletes}
 object PartialInverseLaws extends Lawful[EqualPartialInverse] {
 
   /**
-   * The partial inverse law states that for some binary operator `*`,
-   * for all values `a`, if the operation is defined, the following must hold:
-   *
-   * {{{
-   * // no-check: algebraic notation, not Scala code
-   * a * a === identity
-   * }}}
-   */
-  /**
-   * When `inverseOption(a, a)` returns `Some(x)`, `x` must equal the identity.
-   * When it returns `None`, the law only checks that the call completes.
+   * The partial inverse law states that for all values `a`, when
+   * `inverseOption(a, a)` returns `Some(x)`, `x` must equal the identity. When
+   * it returns `None`, the law only checks that the call completes.
    */
   lazy val partialInverseLaw: Laws[EqualPartialInverse] =
     new Laws.Law1[EqualPartialInverse]("rightPartialInverseLaw") {
