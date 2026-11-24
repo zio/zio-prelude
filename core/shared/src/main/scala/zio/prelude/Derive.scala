@@ -37,6 +37,7 @@ import scala.util.Try
  * types given typeclass instances for the type they are parameterized on.
  */
 trait Derive[F[_], Typeclass[_]] {
+
   /**
    * Derives a `Typeclass` instance for `F[A]` from the instance for `A`.
    */

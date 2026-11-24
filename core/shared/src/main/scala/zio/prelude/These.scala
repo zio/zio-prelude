@@ -407,10 +407,10 @@ sealed trait These[+A, +B] extends Product with Serializable { self =>
 object These {
 
   /** A `These` that contains only an `A` value. */
-  final case class Left[+A](value: A)              extends These[A, Nothing]
+  final case class Left[+A](value: A) extends These[A, Nothing]
 
   /** A `These` that contains only a `B` value. */
-  final case class Right[+B](value: B)             extends These[Nothing, B]
+  final case class Right[+B](value: B) extends These[Nothing, B]
 
   /** A `These` that contains both an `A` value and a `B` value. */
   final case class Both[+A, +B](left: A, right: B) extends These[A, B]

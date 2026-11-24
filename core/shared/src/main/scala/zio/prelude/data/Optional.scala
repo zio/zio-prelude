@@ -122,14 +122,18 @@ sealed trait Optional[+A] extends IterableOnceCompat[A] { self =>
 
   /** A view of an `Optional` filtered by `p`, used by `if` guards in `for` comprehensions. */
   class WithFilter(p: A => Boolean) {
+
     /** Filters the underlying value with `p`, then maps it with `f`. */
-    def map[B](f: A => B): Optional[B]               = self filter p map f
+    def map[B](f: A => B): Optional[B] = self filter p map f
+
     /** Filters the underlying value with `p`, then flat maps it with `f`. */
     def flatMap[B](f: A => Optional[B]): Optional[B] = self filter p flatMap f
+
     /** Filters the underlying value with `p`, then runs `f` on it if it remains. */
-    def foreach[U](f: A => U): Unit                  = self filter p foreach f
+    def foreach[U](f: A => U): Unit = self filter p foreach f
+
     /** Returns a view filtered by both `p` and `q`. */
-    def withFilter(q: A => Boolean): WithFilter      = new WithFilter(x => p(x) && q(x))
+    def withFilter(q: A => Boolean): WithFilter = new WithFilter(x => p(x) && q(x))
   }
 
   /** Returns `true` if this value is present and equal to `elem` according to `==`. */
@@ -240,7 +244,7 @@ object Optional {
    * Converts a plain value to `Present(value)` where an `Optional` is expected. A `null` value
    * also becomes `Present(null)`.
    */
-  implicit def AllValuesAreNullable[A](value: A): Optional[A]     = Present(value)
+  implicit def AllValuesAreNullable[A](value: A): Optional[A] = Present(value)
 
   /**
    * Converts an `Option` to an `Optional` where an `Optional` is expected: `Some(a)` becomes
