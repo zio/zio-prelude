@@ -19,9 +19,21 @@ package zio.prelude.coherent
 import zio._
 import zio.prelude._
 
+/**
+ * An instance that is `AssociativeBoth`, `DeriveEqual` and `Invariant` at the same time, so that one implicit value can
+ * supply all of them.
+ */
 trait AssociativeBothDeriveEqualInvariant[F[_]] extends AssociativeBoth[F] with DeriveEqual[F] with Invariant[F]
 
+/**
+ * Derives [[AssociativeBothDeriveEqualInvariant]] instances from separate instances.
+ */
 object AssociativeBothDeriveEqualInvariant {
+
+  /**
+   * Combines the implicit `AssociativeBoth`, `DeriveEqual` and `Invariant` instances into one
+   * [[AssociativeBothDeriveEqualInvariant]] that delegates to them.
+   */
   implicit def derive[F[_]](implicit
     associativeBoth0: AssociativeBoth[F],
     deriveEqual0: DeriveEqual[F],
@@ -34,9 +46,21 @@ object AssociativeBothDeriveEqualInvariant {
     }
 }
 
+/**
+ * An instance that is `AssociativeEither`, `DeriveEqual` and `Invariant` at the same time, so that one implicit value
+ * can supply all of them.
+ */
 trait AssociativeEitherDeriveEqualInvariant[F[_]] extends AssociativeEither[F] with DeriveEqual[F] with Invariant[F]
 
+/**
+ * Derives [[AssociativeEitherDeriveEqualInvariant]] instances from separate instances.
+ */
 object AssociativeEitherDeriveEqualInvariant {
+
+  /**
+   * Combines the implicit `AssociativeEither`, `DeriveEqual` and `Invariant` instances into one
+   * [[AssociativeEitherDeriveEqualInvariant]] that delegates to them.
+   */
   implicit def derive[F[_]](implicit
     associativeEither0: AssociativeEither[F],
     deriveEqual0: DeriveEqual[F],
@@ -49,9 +73,19 @@ object AssociativeEitherDeriveEqualInvariant {
     }
 }
 
+/**
+ * An instance that is `Associative` and `Equal` at the same time, so that one implicit value can supply all of them.
+ */
 trait AssociativeEqual[A] extends Associative[A] with Equal[A]
 
+/**
+ * Derives [[AssociativeEqual]] instances from separate instances.
+ */
 object AssociativeEqual {
+
+  /**
+   * Combines the implicit `Associative` and `Equal` instances into one [[AssociativeEqual]] that delegates to them.
+   */
   implicit def derive[A](implicit associative0: Associative[A], equal0: Equal[A]): AssociativeEqual[A] =
     new AssociativeEqual[A] {
       def combine(l: => A, r: => A): A              = associative0.combine(l, r)
@@ -59,9 +93,21 @@ object AssociativeEqual {
     }
 }
 
+/**
+ * An instance that is `AssociativeFlatten`, `Covariant` and `DeriveEqual` at the same time, so that one implicit value
+ * can supply all of them.
+ */
 trait AssociativeFlattenCovariantDeriveEqual[F[+_]] extends AssociativeFlatten[F] with Covariant[F] with DeriveEqual[F]
 
+/**
+ * Derives [[AssociativeFlattenCovariantDeriveEqual]] instances from separate instances.
+ */
 object AssociativeFlattenCovariantDeriveEqual {
+
+  /**
+   * Combines the implicit `AssociativeFlatten`, `Covariant` and `DeriveEqual` instances into one
+   * [[AssociativeFlattenCovariantDeriveEqual]] that delegates to them.
+   */
   implicit def derive[F[+_]](implicit
     associativeFlatten0: AssociativeFlatten[F],
     covariant0: Covariant[F],
@@ -77,9 +123,21 @@ object AssociativeFlattenCovariantDeriveEqual {
     }
 }
 
+/**
+ * An instance that is `CommutativeBoth`, `DeriveEqual` and `Invariant` at the same time, so that one implicit value can
+ * supply all of them.
+ */
 trait CommutativeBothDeriveEqualInvariant[F[_]] extends AssociativeBothDeriveEqualInvariant[F] with CommutativeBoth[F]
 
+/**
+ * Derives [[CommutativeBothDeriveEqualInvariant]] instances from separate instances.
+ */
 object CommutativeBothDeriveEqualInvariant {
+
+  /**
+   * Combines the implicit `CommutativeBoth`, `DeriveEqual` and `Invariant` instances into one
+   * [[CommutativeBothDeriveEqualInvariant]] that delegates to them.
+   */
   implicit def derive[F[_]](implicit
     commutativeBoth0: CommutativeBoth[F],
     deriveEqual0: DeriveEqual[F],
@@ -92,11 +150,23 @@ object CommutativeBothDeriveEqualInvariant {
     }
 }
 
+/**
+ * An instance that is `CommutativeEither`, `DeriveEqual` and `Invariant` at the same time, so that one implicit value
+ * can supply all of them.
+ */
 trait CommutativeEitherDeriveEqualInvariant[F[_]]
     extends AssociativeEitherDeriveEqualInvariant[F]
     with CommutativeEither[F]
 
+/**
+ * Derives [[CommutativeEitherDeriveEqualInvariant]] instances from separate instances.
+ */
 object CommutativeEitherDeriveEqualInvariant {
+
+  /**
+   * Combines the implicit `CommutativeEither`, `DeriveEqual` and `Invariant` instances into one
+   * [[CommutativeEitherDeriveEqualInvariant]] that delegates to them.
+   */
   implicit def derive[F[_]](implicit
     commutativeEither0: CommutativeEither[F],
     deriveEqual0: DeriveEqual[F],
@@ -109,9 +179,19 @@ object CommutativeEitherDeriveEqualInvariant {
     }
 }
 
+/**
+ * An instance that is `Commutative` and `Equal` at the same time, so that one implicit value can supply all of them.
+ */
 trait CommutativeEqual[A] extends AssociativeEqual[A] with Commutative[A]
 
+/**
+ * Derives [[CommutativeEqual]] instances from separate instances.
+ */
 object CommutativeEqual {
+
+  /**
+   * Combines the implicit `Commutative` and `Equal` instances into one [[CommutativeEqual]] that delegates to them.
+   */
   implicit def derive[A](implicit commutative0: Commutative[A], equal0: Equal[A]): CommutativeEqual[A] =
     new CommutativeEqual[A] {
       def combine(l: => A, r: => A): A              = commutative0.combine(l, r)
@@ -119,9 +199,20 @@ object CommutativeEqual {
     }
 }
 
+/**
+ * An instance that is `Commutative` and `Identity` at the same time, so that one implicit value can supply all of them.
+ */
 trait CommutativeIdentity[A] extends Commutative[A] with Identity[A]
 
+/**
+ * Derives [[CommutativeIdentity]] instances from separate instances.
+ */
 object CommutativeIdentity {
+
+  /**
+   * Combines the implicit `Commutative` and `Identity` instances into one [[CommutativeIdentity]] that delegates to
+   * them.
+   */
   implicit def derive[A](implicit commutative0: Commutative[A], identity0: Identity[A]): CommutativeIdentity[A] =
     new CommutativeIdentity[A] {
       def combine(l: => A, r: => A): A = commutative0.combine(l, r)
@@ -129,9 +220,21 @@ object CommutativeIdentity {
     }
 }
 
+/**
+ * An instance that is `Covariant` and `DeriveEqual` at the same time, so that one implicit value can supply all of
+ * them.
+ */
 trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 
+/**
+ * Derives [[CovariantDeriveEqual]] instances from separate instances.
+ */
 object CovariantDeriveEqual {
+
+  /**
+   * Combines the implicit `Covariant` and `DeriveEqual` instances into one [[CovariantDeriveEqual]] that delegates to
+   * them.
+   */
   implicit def derive[F[+_]](implicit covariant0: Covariant[F], deriveEqual0: DeriveEqual[F]): CovariantDeriveEqual[F] =
     new CovariantDeriveEqual[F] {
       def derive[A: Equal]: Equal[F[A]]      =
@@ -141,9 +244,21 @@ object CovariantDeriveEqual {
     }
 }
 
+/**
+ * An instance that is `Contravariant` and `DeriveEqual` at the same time, so that one implicit value can supply all of
+ * them.
+ */
 trait ContravariantDeriveEqual[F[-_]] extends Contravariant[F] with DeriveEqual[F]
 
+/**
+ * Derives [[ContravariantDeriveEqual]] instances from separate instances.
+ */
 object ContravariantDeriveEqual {
+
+  /**
+   * Combines the implicit `Contravariant` and `DeriveEqual` instances into one [[ContravariantDeriveEqual]] that
+   * delegates to them.
+   */
   implicit def derive[F[-_]](implicit
     contravariant0: Contravariant[F],
     deriveEqual0: DeriveEqual[F]
@@ -156,11 +271,23 @@ object ContravariantDeriveEqual {
     }
 }
 
+/**
+ * An instance that is `Covariant`, `DeriveEqual` and `IdentityFlatten` at the same time, so that one implicit value can
+ * supply all of them.
+ */
 trait CovariantDeriveEqualIdentityFlatten[F[+_]]
     extends IdentityFlatten[F]
     with AssociativeFlattenCovariantDeriveEqual[F]
 
+/**
+ * Derives [[CovariantDeriveEqualIdentityFlatten]] instances from separate instances.
+ */
 object CovariantDeriveEqualIdentityFlatten {
+
+  /**
+   * Combines the implicit `Covariant`, `DeriveEqual` and `IdentityFlatten` instances into one
+   * [[CovariantDeriveEqualIdentityFlatten]] that delegates to them.
+   */
   implicit def derive[F[+_]](implicit
     covariant0: Covariant[F],
     deriveEqual0: DeriveEqual[F],
@@ -178,15 +305,40 @@ object CovariantDeriveEqualIdentityFlatten {
     }
 }
 
+/**
+ * An instance that is `Covariant` and `IdentityBoth` at the same time, so that one context bound can ask for both. It
+ * adds `forEach`, `forEach_` and `collectM`, which run one `F` value for each element of a collection and combine them
+ * with `both`.
+ *
+ * {{{
+ * import zio.prelude._
+ *
+ * val all: Option[List[Int]] =
+ *   CovariantIdentityBoth[Option].forEach(List(1, 2, 3))(n => Some(n * 10))
+ * // Some(List(10, 20, 30))
+ *
+ * val failed: Option[List[Int]] =
+ *   CovariantIdentityBoth[Option].forEach(List(1, 2, 3))(n => if (n == 2) None else Some(n))
+ * // None
+ * }}}
+ */
 trait CovariantIdentityBoth[F[+_]] extends Covariant[F] with IdentityBoth[F] { self =>
   private implicit val covariant: Covariant[F]       = self
   private implicit val identityBoth: IdentityBoth[F] = self
 
+  /**
+   * Applies `f` to each element of `in`, combines the results with `both`, and keeps the values that are `Some`, in a
+   * collection of the same type as `in`.
+   */
   def collectM[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => F[Option[B]])(implicit
     bf: BuildFrom[Collection[A], B, Collection[B]]
   ): F[Collection[B]] =
     forEach[A, Option[B], Iterable](in)(f).map(_.flatten).map(bf.fromSpecific(in))
 
+  /**
+   * Applies `f` to each element of `in`, from first to last, and combines the results with `both` into one `F` of a
+   * collection of the same type as `in`.
+   */
   def forEach[A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(f: A => F[B])(implicit
     bf: BuildFrom[Collection[A], B, Collection[B]]
   ): F[Collection[B]] =
@@ -196,15 +348,28 @@ trait CovariantIdentityBoth[F[+_]] extends Covariant[F] with IdentityBoth[F] { s
       builder.result()
     }
 
+  /**
+   * Applies `f` to each element of `in`, from first to last, combines the results with `both`, and discards the values.
+   */
   def forEach_[A, B](in: Iterable[A])(f: A => F[Any]): F[Unit] =
     in.foldLeft(identityBoth.any)((bs, a) => bs *> f(a)).unit
 }
 
+/**
+ * Summons and derives [[CovariantIdentityBoth]] instances.
+ */
 object CovariantIdentityBoth {
 
+  /**
+   * Summons the implicit `CovariantIdentityBoth` instance for `F`.
+   */
   def apply[F[+_]](implicit covariantIdentityBoth: CovariantIdentityBoth[F]): CovariantIdentityBoth[F] =
     covariantIdentityBoth
 
+  /**
+   * Returns the implicit `IdentityBoth` instance itself when it is already a `CovariantIdentityBoth`, and otherwise
+   * combines the implicit `Covariant` and `IdentityBoth` instances into one that delegates to them.
+   */
   implicit def derive[F[+_]](implicit
     covariant: Covariant[F],
     identityBoth: IdentityBoth[F]
@@ -228,9 +393,21 @@ object CovariantIdentityBoth {
     }
 }
 
+/**
+ * An instance that is `DeriveEqual`, `IdentityBoth` and `Invariant` at the same time, so that one implicit value can
+ * supply all of them.
+ */
 trait DeriveEqualIdentityBothInvariant[F[_]] extends AssociativeBothDeriveEqualInvariant[F] with IdentityBoth[F]
 
+/**
+ * Derives [[DeriveEqualIdentityBothInvariant]] instances from separate instances.
+ */
 object DeriveEqualIdentityBothInvariant {
+
+  /**
+   * Combines the implicit `DeriveEqual`, `IdentityBoth` and `Invariant` instances into one
+   * [[DeriveEqualIdentityBothInvariant]] that delegates to them.
+   */
   implicit def derive[F[_]](implicit
     deriveEqual0: DeriveEqual[F],
     identityBoth0: IdentityBoth[F],
@@ -244,9 +421,21 @@ object DeriveEqualIdentityBothInvariant {
     }
 }
 
+/**
+ * An instance that is `DeriveEqual`, `IdentityEither` and `Invariant` at the same time, so that one implicit value can
+ * supply all of them.
+ */
 trait DeriveEqualIdentityEitherInvariant[F[_]] extends AssociativeEitherDeriveEqualInvariant[F] with IdentityEither[F]
 
+/**
+ * Derives [[DeriveEqualIdentityEitherInvariant]] instances from separate instances.
+ */
 object DeriveEqualIdentityEitherInvariant {
+
+  /**
+   * Combines the implicit `DeriveEqual`, `IdentityEither` and `Invariant` instances into one
+   * [[DeriveEqualIdentityEitherInvariant]] that delegates to them.
+   */
   implicit def derive[F[_]](implicit
     deriveEqual0: DeriveEqual[F],
     identityEither0: IdentityEither[F],
@@ -260,9 +449,21 @@ object DeriveEqualIdentityEitherInvariant {
     }
 }
 
+/**
+ * An instance that is `DeriveEqual` and `NonEmptyForEach` at the same time, so that one implicit value can supply all
+ * of them.
+ */
 trait DeriveEqualNonEmptyForEach[F[+_]] extends DeriveEqualForEach[F] with NonEmptyForEach[F]
 
+/**
+ * Derives [[DeriveEqualNonEmptyForEach]] instances from separate instances.
+ */
 object DeriveEqualNonEmptyForEach {
+
+  /**
+   * Combines the implicit `DeriveEqual` and `NonEmptyForEach` instances into one [[DeriveEqualNonEmptyForEach]] that
+   * delegates to them.
+   */
   implicit def derive[F[+_]](implicit
     deriveEqual0: DeriveEqual[F],
     nonEmptyForEach0: NonEmptyForEach[F]
@@ -275,9 +476,19 @@ object DeriveEqualNonEmptyForEach {
     }
 }
 
+/**
+ * An instance that is `DeriveEqual` and `ForEach` at the same time, so that one implicit value can supply all of them.
+ */
 trait DeriveEqualForEach[F[+_]] extends CovariantDeriveEqual[F] with ForEach[F]
 
+/**
+ * Derives [[DeriveEqualForEach]] instances from separate instances.
+ */
 object DeriveEqualForEach {
+
+  /**
+   * Combines the implicit `DeriveEqual` and `ForEach` instances into one [[DeriveEqualForEach]] that delegates to them.
+   */
   implicit def derive[F[+_]](implicit
     deriveEqual0: DeriveEqual[F],
     forEach0: ForEach[F]
@@ -290,9 +501,19 @@ object DeriveEqualForEach {
     }
 }
 
+/**
+ * An instance that is `Equal` and `Identity` at the same time, so that one implicit value can supply all of them.
+ */
 trait EqualIdentity[A] extends AssociativeEqual[A] with Identity[A]
 
+/**
+ * Derives [[EqualIdentity]] instances from separate instances.
+ */
 object EqualIdentity {
+
+  /**
+   * Combines the implicit `Equal` and `Identity` instances into one [[EqualIdentity]] that delegates to them.
+   */
   implicit def derive[A](implicit identity0: Identity[A], equal0: Equal[A]): EqualIdentity[A] =
     new EqualIdentity[A] {
       def combine(l: => A, r: => A): A              = identity0.combine(l, r)
@@ -301,9 +522,19 @@ object EqualIdentity {
     }
 }
 
+/**
+ * An instance that is `Equal` and `Idempotent` at the same time, so that one implicit value can supply all of them.
+ */
 trait EqualIdempotent[A] extends AssociativeEqual[A] with Idempotent[A]
 
+/**
+ * Derives [[EqualIdempotent]] instances from separate instances.
+ */
 object EqualIdempotent {
+
+  /**
+   * Combines the implicit `Equal` and `Idempotent` instances into one [[EqualIdempotent]] that delegates to them.
+   */
   implicit def derive[A](implicit idempotent0: Idempotent[A], equal0: Equal[A]): EqualIdempotent[A] =
     new EqualIdempotent[A] {
       def combine(l: => A, r: => A): A              = idempotent0.combine(l, r)
@@ -311,9 +542,19 @@ object EqualIdempotent {
     }
 }
 
+/**
+ * An instance that is `Equal` and `Inverse` at the same time, so that one implicit value can supply all of them.
+ */
 trait EqualInverse[A] extends EqualPartialInverse[A] with Inverse[A]
 
+/**
+ * Derives [[EqualInverse]] instances from separate instances.
+ */
 object EqualInverse {
+
+  /**
+   * Combines the implicit `Equal` and `Inverse` instances into one [[EqualInverse]] that delegates to them.
+   */
   implicit def derive[A](implicit equal0: Equal[A], inverse0: Inverse[A]): EqualInverse[A] =
     new EqualInverse[A] {
       def combine(l: => A, r: => A): A                       = inverse0.combine(l, r)
@@ -323,9 +564,20 @@ object EqualInverse {
     }
 }
 
+/**
+ * An instance that is `Equal` and `PartialInverse` at the same time, so that one implicit value can supply all of them.
+ */
 trait EqualPartialInverse[A] extends EqualIdentity[A] with PartialInverse[A]
 
+/**
+ * Derives [[EqualPartialInverse]] instances from separate instances.
+ */
 object EqualPartialInverse {
+
+  /**
+   * Combines the implicit `Equal` and `PartialInverse` instances into one [[EqualPartialInverse]] that delegates to
+   * them.
+   */
   implicit def derive[A](implicit equal0: Equal[A], inverse0: PartialInverse[A]): EqualPartialInverse[A] =
     new EqualPartialInverse[A] {
       def combine(l: => A, r: => A): A                       = inverse0.combine(l, r)
@@ -335,7 +587,15 @@ object EqualPartialInverse {
     }
 }
 
+/**
+ * An instance that is `Hash` and `PartialOrd` at the same time.
+ */
 trait HashPartialOrd[-A] extends Hash[A] with PartialOrd[A] { self =>
+
+  /**
+   * Returns an instance for `B` that hashes, compares and checks equality of `B` values by applying `f` and using this
+   * instance on the results.
+   */
   override def contramap[B](f: B => A): Hash[B] with PartialOrd[B] =
     new HashPartialOrd[B] {
       def hash(b: B): Int                                     = self.hash(f(b))
@@ -344,7 +604,15 @@ trait HashPartialOrd[-A] extends Hash[A] with PartialOrd[A] { self =>
     }
 }
 
+/**
+ * Derives and constructs [[HashPartialOrd]] instances.
+ */
 object HashPartialOrd {
+
+  /**
+   * Combines the implicit `Hash` and `PartialOrd` instances into one [[HashPartialOrd]]. It hashes with the `Hash`
+   * instance, and compares and checks equality with the `PartialOrd` instance.
+   */
   implicit def derive[A](implicit hash0: Hash[A], ord0: PartialOrd[A]): HashPartialOrd[A] =
     new HashPartialOrd[A] {
       def hash(a: A): Int                                     = hash0.hash(a)
@@ -353,8 +621,8 @@ object HashPartialOrd {
     }
 
   /**
-   * Constructs an instance from a `hash0` function, an `ord`` function and a `equal0` function.
-   * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
+   * Constructs an instance from a `hash0` function, an `ord` function and an `equal0` function.
+   * Equality checks call `equal0` instead of `ord`, so `equal0` can be cheaper than computing the ordering.
    */
   def make[A](hash0: A => Int, ord: (A, A) => PartialOrdering, equal0: (A, A) => Boolean): Hash[A] with PartialOrd[A] =
     new HashPartialOrd[A] {
@@ -364,8 +632,8 @@ object HashPartialOrd {
     }
 
   /**
-   * Constructs an instance from a hash function, equal function and ord function.
-   * Checking equality is delegated to `ord`, so short-circuiting the equality check (failing fast) is not possible.
+   * Constructs an instance from a `hash0` function and an `ord` function.
+   * Two values are equal when `ord` returns `Ordering.Equals` for them, so every equality check calls `ord`.
    */
   def make[A](hash0: A => Int, ord: (A, A) => PartialOrdering): Hash[A] with PartialOrd[A] =
     new HashPartialOrd[A] {
@@ -379,7 +647,15 @@ object HashPartialOrd {
 
 }
 
+/**
+ * An instance that is `Hash` and `Ord` at the same time.
+ */
 trait HashOrd[-A] extends HashPartialOrd[A] with Ord[A] { self =>
+
+  /**
+   * Returns an instance for `B` that hashes, compares and checks equality of `B` values by applying `f` and using this
+   * instance on the results.
+   */
   final override def contramap[B](f: B => A): Hash[B] with Ord[B] =
     new HashOrd[B] {
       def hash(b: B): Int                                    = self.hash(f(b))
@@ -388,7 +664,15 @@ trait HashOrd[-A] extends HashPartialOrd[A] with Ord[A] { self =>
     }
 }
 
+/**
+ * Derives and constructs [[HashOrd]] instances.
+ */
 object HashOrd {
+
+  /**
+   * Combines the implicit `Hash` and `Ord` instances into one [[HashOrd]]. It hashes with the `Hash` instance, and
+   * compares and checks equality with the `Ord` instance.
+   */
   implicit def derive[A](implicit hash0: Hash[A], ord0: Ord[A]): HashOrd[A] =
     new HashOrd[A] {
       def hash(a: A): Int                                    = hash0.hash(a)
@@ -397,8 +681,8 @@ object HashOrd {
     }
 
   /**
-   * Constructs an instance from a `hash0` function, an `ord`` function and a `equal0` function.
-   * Since this takes a separate `equal0`, short-circuiting the equality check (failing fast) is possible.
+   * Constructs an instance from a `hash0` function, an `ord` function and an `equal0` function.
+   * Equality checks call `equal0` instead of `ord`, so `equal0` can be cheaper than computing the ordering.
    */
   def make[A](hash0: A => Int, ord: (A, A) => Ordering, equal0: (A, A) => Boolean): Hash[A] with Ord[A] =
     new HashOrd[A] {
@@ -408,8 +692,8 @@ object HashOrd {
     }
 
   /**
-   * Constructs an instance from a hash function, equal function and ord function.
-   * Checking equality is delegated to `ord`, so short-circuiting the equality check (failing fast) is not possible.
+   * Constructs an instance from a `hash0` function and an `ord` function.
+   * Two values are equal when `ord` returns `Ordering.Equals` for them, so every equality check calls `ord`.
    */
   def make[A](hash0: A => Int, ord: (A, A) => Ordering): Hash[A] with Ord[A] =
     new HashOrd[A] {
@@ -419,8 +703,8 @@ object HashOrd {
     }
 
   /**
-   * Constructs a `Hash[A] with Ord[A]` that uses the default notion of hashing embodied in
-   * the implementation of `hashCode` for values of type `A` and ordering from [[scala.math.Ordering]].
+   * Constructs a `Hash[A] with Ord[A]` that hashes with `##` (which is `hashCode` except for numeric types, where it
+   * agrees with `==`), checks equality with `==`, and orders with the implicit [[scala.math.Ordering]].
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Hash[A] with Ord[A] =
     make(_.##, (l, r) => Ordering.fromCompare(ord.compare(l, r)), _ == _)
