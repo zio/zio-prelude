@@ -21,8 +21,8 @@ import zio.test._
 import zio.test.{Assertion => TestAssertion, ErrorMessage => M}
 
 /**
- * Provides versions of assertions from _ZIO Test_ that use `Equal`, `PartialOrd`, and
- * `Validation`.
+ * Provides versions of assertions from _ZIO Test_ that use `Equal`,
+ * `PartialOrd`, and `Validation`.
  */
 trait TestAssertions {
 
