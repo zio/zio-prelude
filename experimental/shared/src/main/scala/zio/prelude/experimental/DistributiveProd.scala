@@ -3,13 +3,58 @@ package experimental
 
 import zio.prelude.newtypes.{Prod, Sum}
 
+/**
+ * An experimental type class for a type with an addition (`sum`) and a
+ * multiplication (`prod`) that distributes over it on both sides:
+ * `a1 *** (a2 +++ a3)` equals `(a1 *** a2) +++ (a1 *** a3)`, and
+ * `(a1 +++ a2) *** a3` equals `(a1 *** a3) +++ (a2 *** a3)`. Both operations
+ * are given as `Associative` instances over the `Sum` and `Prod` newtypes. It
+ * lives in the experimental module, so its name and shape can change between
+ * releases.
+ *
+ * The built-in instances are for `Byte`, `Char`, `Short`, `Int`, `Long`,
+ * `Float`, `Double` and `BigDecimal` (all of them [[Annihilation]] and
+ * [[Subtract]] instances too), and for `ParSeq[Unit, A]` and `zio.Cause[A]`,
+ * where `sum` is parallel composition and `prod` is sequential composition.
+ * The infix syntax (`+++`, `sum`, `***`, `prod`) comes from the
+ * `zio.prelude.experimental` package object, and `DistributiveProdLaws` in
+ * zio-prelude-experimental-laws checks the two laws.
+ *
+ * {{{
+ * val total: Int   = 3 +++ 4
+ * // 7
+ * val product: Int = 3 *** 4
+ * // 12
+ * }}}
+ */
 trait DistributiveProd[A] {
+
+  /**
+   * The `Associative` instance for addition, over the `Sum` newtype.
+   */
   def Sum: Associative[Sum[A]]
+
+  /**
+   * The `Associative` instance for multiplication, over the `Prod` newtype.
+   */
   def Prod: Associative[Prod[A]]
-  def sum(l: => A, r: => A): A  = Sum.combine(newtypes.Sum(l), newtypes.Sum(r))
+
+  /**
+   * Adds `l` and `r`. By default it combines them with the `Sum` instance.
+   */
+  def sum(l: => A, r: => A): A = Sum.combine(newtypes.Sum(l), newtypes.Sum(r))
+
+  /**
+   * Multiplies `l` and `r`. By default it combines them with the `Prod`
+   * instance.
+   */
   def prod(l: => A, r: => A): A = Prod.combine(newtypes.Prod(l), newtypes.Prod(r))
 }
 
+/**
+ * Companion of [[DistributiveProd]], with the summoner and the built-in
+ * instances.
+ */
 object DistributiveProd extends DistributiveProdLowPriorityImplicits {
 
   /**
@@ -17,6 +62,10 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
    */
   def apply[A](implicit distributiveProd: DistributiveProd[A]): DistributiveProd[A] = distributiveProd
 
+  /**
+   * The instance for `BigDecimal`, with `+`, `*`, `-` and `/`.
+   * `divideOption` returns `None` when the divisor equals zero.
+   */
   implicit lazy val BigDecimalAnnihilationPartialDivideSubtract
     : Annihilation[BigDecimal] with PartialDivide[BigDecimal] with Subtract[BigDecimal] =
     new Annihilation[BigDecimal] with PartialDivide[BigDecimal] with Subtract[BigDecimal] {
@@ -31,6 +80,11 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
         Associative.BigDecimalProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `Byte`. `sum`, `prod` and `subtract` compute on `Int`
+   * and convert back with `toByte`, so results outside the `Byte` range wrap
+   * around: `(120: Byte) +++ (10: Byte)` is `-126`.
+   */
   implicit lazy val ByteAnnihilationSubtract: Annihilation[Byte] with Subtract[Byte] =
     new Annihilation[Byte] with Subtract[Byte] {
       override def sum(l: => Byte, r: => Byte): Byte                    = (l + r).toByte
@@ -41,6 +95,12 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Byte]] with PartialInverse[Prod[Byte]] = Associative.ByteProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `Char`, using its numeric code. `sum`, `prod` and
+   * `subtract` compute on `Int` and convert back with `toChar`, so results
+   * outside the `Char` range wrap around: `'a' --- 'b'` is the `Char` with
+   * code 65535.
+   */
   implicit lazy val CharAnnihilationSubtract: Annihilation[Char] with Subtract[Char] =
     new Annihilation[Char] with Subtract[Char] {
       override def sum(l: => Char, r: => Char): Char                    = (l + r).toChar
@@ -51,6 +111,11 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Char]] with PartialInverse[Prod[Char]] = Associative.CharProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `Double`, with `+`, `*`, `-` and `/`. `divideOption`
+   * returns `None` when the divisor is `0.0` or `-0.0`. Because of rounding,
+   * the distributive laws hold for `Double` only approximately.
+   */
   implicit lazy val DoubleAnnihilationPartialDivideSubtract
     : Annihilation[Double] with PartialDivide[Double] with Subtract[Double] =
     new Annihilation[Double] with PartialDivide[Double] with Subtract[Double] {
@@ -64,6 +129,11 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
         Associative.DoubleProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `Float`, with `+`, `*`, `-` and `/`. `divideOption`
+   * returns `None` when the divisor is `0.0f` or `-0.0f`. Because of rounding,
+   * the distributive laws hold for `Float` only approximately.
+   */
   implicit lazy val FloatAnnihilationPartialDivideSubtract
     : Annihilation[Float] with PartialDivide[Float] with Subtract[Float] =
     new Annihilation[Float] with PartialDivide[Float] with Subtract[Float] {
@@ -77,6 +147,10 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
         Associative.FloatProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `Int`, with `+`, `*` and `-`, which overflow as `Int`
+   * arithmetic does. There is no `PartialDivide` instance for `Int`.
+   */
   implicit lazy val IntAnnihilationSubtract: Annihilation[Int] with Subtract[Int] =
     new Annihilation[Int] with Subtract[Int] {
       override def sum(l: => Int, r: => Int): Int                     = l + r
@@ -87,6 +161,10 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Int]] with PartialInverse[Prod[Int]] = Associative.IntProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `Long`, with `+`, `*` and `-`, which overflow as `Long`
+   * arithmetic does. There is no `PartialDivide` instance for `Long`.
+   */
   implicit lazy val LongAnnihilationSubtract: Annihilation[Long] with Subtract[Long] =
     new Annihilation[Long] with Subtract[Long] {
       override def sum(l: => Long, r: => Long): Long                    = l + r
@@ -97,12 +175,25 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
       val Prod: Commutative[Prod[Long]] with PartialInverse[Prod[Long]] = Associative.LongProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `ParSeq[Unit, A]`, where `sum` is parallel composition
+   * (`&&`, giving `Both`) and `prod` is sequential composition (`++`, giving
+   * `Then`). `Sum` and `Prod` are typed as `Associative`; the values behind
+   * them are `Identity` instances whose identity is the empty `ParSeq`. The
+   * operands have to be typed as `ParSeq[Unit, A]`: `ParSeq.single(1)` alone
+   * is inferred as `ParSeq[Nothing, Int]`, which has no instance.
+   */
   implicit def ParSeqDistributiveProd[A]: DistributiveProd[ParSeq[Unit, A]] =
     new DistributiveProd[ParSeq[Unit, A]] {
       val Sum: Associative[Sum[ParSeq[Unit, A]]]   = Associative.ParSeqSumCommutativeIdentity
       val Prod: Associative[Prod[ParSeq[Unit, A]]] = Associative.ParSeqProdIdentity
     }
 
+  /**
+   * The instance for `Short`. `sum`, `prod` and `subtract` compute on `Int`
+   * and convert back with `toShort`, so results outside the `Short` range
+   * wrap around.
+   */
   implicit lazy val ShortAnnihilationSubtract: Annihilation[Short] with Subtract[Short] =
     new Annihilation[Short] with Subtract[Short] {
       override def sum(l: => Short, r: => Short): Short                   = (l + r).toShort
@@ -114,6 +205,12 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
         Associative.ShortProdCommutativePartialInverse
     }
 
+  /**
+   * The instance for `zio.Cause[A]`, where `sum` is parallel composition
+   * (`&&`, giving `Both`) and `prod` is sequential composition (`++`, giving
+   * `Then`). `Sum` and `Prod` are typed as `Associative`; the values behind
+   * them are `Identity` instances whose identity is `Cause.empty`.
+   */
   implicit def ZioCauseDistributiveProd[A]: DistributiveProd[zio.Cause[A]] =
     new DistributiveProd[zio.Cause[A]] {
       val Sum: Associative[Sum[zio.Cause[A]]]   = Associative.zioCauseSumCommutativeIdentity
@@ -122,8 +219,19 @@ object DistributiveProd extends DistributiveProdLowPriorityImplicits {
 
 }
 
+/**
+ * Lower-priority `DistributiveProd` instances, inherited by the
+ * `DistributiveProd` companion.
+ */
 trait DistributiveProdLowPriorityImplicits {
 
+  /**
+   * An instance for `ParSeq[Unit, A]` built from instances without an
+   * identity (`Associative.parSeqSumCommutative` and
+   * `Associative.parSeqProdAssociative`). It has the same type as
+   * `ParSeqDistributiveProd` in the `DistributiveProd` companion, which takes
+   * priority, so implicit search selects `ParSeqDistributiveProd`.
+   */
   implicit def parSeqDistributiveProd[A]: DistributiveProd[ParSeq[Unit, A]] =
     new DistributiveProd[ParSeq[Unit, A]] {
       val Sum: Associative[Sum[ParSeq[Unit, A]]]   = Associative.parSeqSumCommutative
@@ -132,6 +240,10 @@ trait DistributiveProdLowPriorityImplicits {
 
 }
 
+/**
+ * Infix syntax for [[DistributiveProd]], mixed into the
+ * `zio.prelude.experimental` package object.
+ */
 trait DistributiveProdSyntax {
 
   /**
@@ -146,7 +258,8 @@ trait DistributiveProdSyntax {
       distributiveProd.sum(l, r)
 
     /**
-     * Add two values.
+     * Adds this value and `r`, using the `sum` of the `DistributiveProd`
+     * instance.
      */
     def sum(r: => A)(implicit distributiveProd: DistributiveProd[A]): A =
       distributiveProd.sum(l, r)
@@ -158,7 +271,8 @@ trait DistributiveProdSyntax {
       distributiveProd.prod(l, r)
 
     /**
-     * Multiply two values.
+     * Multiplies this value by `r`, using the `prod` of the `DistributiveProd`
+     * instance.
      */
     def prod(r: => A)(implicit distributiveProd: DistributiveProd[A]): A =
       distributiveProd.prod(l, r)
