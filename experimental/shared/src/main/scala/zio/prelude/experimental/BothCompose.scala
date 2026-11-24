@@ -17,14 +17,59 @@
 package zio.prelude
 package experimental
 
+/**
+ * An experimental type class for an arrow type `=>:` with products: a product
+ * type `:*:`, its two projections `fromFirst` and `fromSecond`, and `toBoth`,
+ * which pairs the outputs of two arrows that read the same input. It extends
+ * `AssociativeCompose`, which provides `compose`. It lives in the
+ * experimental module, so its name and shape can change between releases.
+ *
+ * The built-in instance is `BothCompose.FunctionApplicationCompose`, for
+ * `Function` with `Tuple2` as the product. Its type is
+ * `ApplicationCompose[Function]`, so `:*:` is abstract from outside: a result
+ * typed `B :*: C` is a `Tuple2` at runtime but is not known to be one by the
+ * compiler.
+ *
+ * {{{
+ * val compose = BothCompose.FunctionApplicationCompose
+ * val length: String => Int   = _.length
+ * val shout: String => String = _.toUpperCase
+ * val both  = compose.toBoth(length)(shout)
+ * val first = compose.compose(compose.fromFirst[Int], both)
+ * val result: Int = first("zio")
+ * // 3
+ * }}}
+ */
 trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
 
+  /**
+   * The product type of this arrow type.
+   */
   type :*:[+_, +_]
 
+  /**
+   * The arrow that projects a product to its first component.
+   */
   def fromFirst[A]: (A :*: Any) =>: A
+
+  /**
+   * The arrow that projects a product to its second component.
+   */
   def fromSecond[B]: (Any :*: B) =>: B
+
+  /**
+   * Combines `a2b` and `a2c`, which read the same input, into one arrow that
+   * returns the product of their outputs.
+   */
   def toBoth[A, B, C](a2b: A =>: B)(a2c: A =>: C): A =>: (B :*: C)
 
+  /**
+   * Checks the product laws for the given arrows and returns `true` when all
+   * three hold: `fromFirst` after `toBoth(a2b)(a2c)` equals `a2b`,
+   * `fromSecond` after `toBoth(a2b)(a2c)` equals `a2c`, and `toBoth` of the
+   * two projections of `a2bc` equals `a2bc`. Equality of arrows comes from the
+   * implicit `Equal` instances.
+   */
   def bothCompose[A, B, C](
     a2b: A =>: B,
     a2c: A =>: C,
@@ -38,12 +83,27 @@ trait BothCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
   }
 }
 
+/**
+ * Companion of [[BothCompose]], with the `Aux` alias and the `Function`
+ * instance.
+ */
 object BothCompose {
 
+  /**
+   * A `BothCompose[=>:]` whose product type `:*:` is known to be `Product`.
+   */
   type Aux[=>:[-_, +_], Product[+_, +_]] = BothCompose[=>:] {
     type :*:[+f, +s] = Product[f, s]
   }
 
+  /**
+   * The instance for `Function`, with `Tuple2` as the product and `Function`
+   * as the exponential. It is the `BothCompose[Function]` and the
+   * `ApplicationCompose[Function]` found by implicit search. Its declared type
+   * is `ApplicationCompose[Function]`, so the product and exponential types
+   * are abstract from outside, and implicit search does not find it as a
+   * `BothCompose.Aux[Function, Tuple2]`.
+   */
   implicit val FunctionApplicationCompose: ApplicationCompose[Function] = new ApplicationCompose[Function] {
 
     type :*:[+f, +s]  = Tuple2[f, s]
@@ -76,14 +136,30 @@ object BothCompose {
 
 }
 
+/**
+ * Infix syntax for [[BothCompose]], mixed into the `zio.prelude.experimental`
+ * package object.
+ */
 trait BothComposeSyntax {
+
+  /**
+   * Provides `&&&` and `toBoth` on an arrow `A =>: B`. They need an implicit
+   * `BothCompose.Aux[=>:, :*:]`, which the built-in `Function` instance does
+   * not provide.
+   */
   implicit class BothComposeOps[A, B, =>:[-_, +_]](private val a2b: A =>: B) {
 
-    /** A symbolic alias for `toBoth`. Composes `A -> B` with `A -> C` to form `A -> (B, C)`. */
+    /**
+     * A symbolic alias for `toBoth`. Returns a function that takes an arrow
+     * `A =>: C` and pairs it with this arrow into `A =>: (B :*: C)`.
+     */
     def &&&[C, :*:[+_, +_]](implicit both: BothCompose.Aux[=>:, :*:]): (A =>: C) => (A =>: (B :*: C)) =
       both.toBoth(a2b)
 
-    /** Composes `A -> B` with `A -> C` to form `A -> (B, C)`. */
+    /**
+     * Returns a function that takes an arrow `A =>: C` and pairs it with this
+     * arrow into `A =>: (B :*: C)`, using the `toBoth` of the instance.
+     */
     def toBoth[C, :*:[+_, +_]](implicit both: BothCompose.Aux[=>:, :*:]): (A =>: C) => (A =>: (B :*: C)) =
       both.toBoth(a2b)
   }
