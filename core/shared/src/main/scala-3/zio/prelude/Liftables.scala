@@ -3,7 +3,15 @@ package zio.prelude
 import scala.quoted.*
 import scala.math.{Ordering => SOrdering}
 
+/**
+ * Conversions between [[Assertion]] values and the code that builds them,
+ * used by the Scala 3 newtype macros to read an assertion at compile time.
+ */
 trait Liftables {
+
+  /**
+   * Turns an `Assertion.Regex` into code that rebuilds it.
+   */
   given ToExpr[Assertion.Regex] with {
     def apply(regex: Assertion.Regex)(using Quotes): Expr[Assertion.Regex] =
       regex match {
@@ -23,6 +31,10 @@ trait Liftables {
       }
   }
 
+  /**
+   * Reads an `Assertion.Regex` from code built with the constructors and
+   * operators of `Assertion.Regex`.
+   */
   given FromExpr[Assertion.Regex] with {
     def unapply(assertion: Expr[Assertion.Regex])(using Quotes): Option[Assertion.Regex] = {
       import quotes.reflect.*
@@ -58,6 +70,11 @@ trait Liftables {
     }
   }
 
+  /**
+   * Reads an [[Assertion]] from code built with the constructors of
+   * `Assertion`, with literal arguments, and the `&&`, `||` and `!`
+   * operators. Other code gives `None`.
+   */
   given [A](using Type[A]): FromExpr[Assertion[A]] with {
     def unapply(assertion: Expr[Assertion[A]])(using Quotes): Option[Assertion[A]] = {
       import quotes.reflect.*
@@ -92,7 +109,15 @@ trait Liftables {
     }
   }
 
+  /**
+   * Turns a value of a primitive type or `String` into code.
+   */
   object LiteralLift {
+
+    /**
+     * Returns code for an `Int`, `String`, `Double`, `Float`, `Long`, `Short`
+     * or `Byte` value, and `None` for any other value.
+     */
     def unapply(any: Any)(using Quotes): Option[Expr[Any]] = any match {
       case int: Int       => Some(Expr(int))
       case string: String => Some(Expr(string))
@@ -105,7 +130,16 @@ trait Liftables {
     }
   }
 
+  /**
+   * Reads a constant value from code.
+   */
   object LiteralUnlift {
+
+    /**
+     * Returns the value of a constant of type `Int`, `String`, `Double`,
+     * `Float`, `Long`, `Short`, `Byte` or `Char`, or of `Int.MaxValue` or
+     * `Int.MinValue`, and `None` for other code.
+     */
     def unapply[A: Type](expr: Expr[A])(using Quotes): Option[A] = expr match {
       case '{ ${Expr(int)}: Int }       => Some(int)
       case '{ Int.MaxValue }            => Some(Int.MaxValue.asInstanceOf[A])

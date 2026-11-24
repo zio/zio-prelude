@@ -5,165 +5,88 @@ import zio.NonEmptyChunk
 import scala.reflect.ClassTag
 
 /**
- * The `Newtype` module provides functionality for creating zero overhead
- * newtypes. Newtypes wrap an existing type and have the same representation as
- * the underlying type at runtime but are treated as distinct types by the
- * Scala compiler. Newtypes can be used to increase type safety in modeling a
- * domain, for example by creating separate types for `Meter` and `Foot`.
- * Additionally, Smart Newtypes allow for compile-time validation of values,
- * e.g., ensuring an Int is 4 digits long (a PIN) or that a String matches a
- * particular Regex (an Email).
+ * The base class for newtypes. A newtype wraps an existing type and is
+ * represented by the same value at runtime, but the Scala compiler treats it
+ * as a distinct type. Newtypes increase type safety when modeling a domain,
+ * for example by giving `Meter` and `Foot` separate types. They also give a
+ * type that has more than one lawful instance of a type class one newtype per
+ * instance, as the predefined `And` and `Or` newtypes do for `Boolean`.
  *
- * Newtypes can also be used to provide coherent instances for types that can
- * support more than one version of a typeclass. For example, the `And` and
- * `Or` types can be used to distinguish boolean conjunction and disjunction.
- *
- * To create a newtype, simply implement an object which extends `Newtype[A]`,
- * where `A` is the underlying type you are wrapping. Then implement a type
- * alias for `Type` in the object you create.
+ * To create a newtype, define an object that extends `Newtype[A]`, where `A`
+ * is the underlying type, and a type alias for its `Type`:
  *
  * {{{
  * object Meter extends Newtype[Double]
  * type Meter = Meter.Type
+ *
+ * val distance: Meter = Meter(3.4)
+ * val meters: Double  = Meter.unwrap(distance) // 3.4
  * }}}
  *
- * This creates a newtype `Meter` that wraps an underlying `Double` value.
+ * `apply` and `wrapAll` convert values of the underlying type to the newtype,
+ * and `unwrap`, `unwrapAll` and pattern matching with `unapply` convert them
+ * back. These conversions are casts and don't allocate a wrapper object.
+ * Because `Type` is an abstract type, a newtype over a primitive type such as
+ * `Double` is stored boxed, like a value of a generic type.
  *
- * We can convert the underlying type to the newtype using the `wrap` method on
- * the object we created, or convert a collection of values of the underlying
- * type using `wrapAll`. Similarly we can convert a newtype back to the
- * underlying value using `unwrap` and `unwrapAll`. We can also wrap a value in
- * a newtype using the `apply` method of the object we created or pattern match
- * to recover the underlying value using its `unapply` method. None of these
- * methods incur any runtime overhead in doing these conversions.
+ * Apart from these conversions, `Meter` and `Double` are unrelated types: a
+ * `Meter` can't be passed where a `Double` is expected, and it has none of the
+ * methods of `Double`. Extend [[Subtype]] instead to keep them.
  *
- * {{{
- * implicit class MeterSyntax(private val self: Meter) extends AnyVal {
- *   def +(that: Meter): Meter =
- *     Meter.wrap(Meter.unwrap(self) + Meter.unwrap(that))
- * }
- *
- * val x = Meter(3.4)
- * val y = Meter(4.3)
- * val z = x + y
- * }}}
- *
- * In the example above, `Meter` is completely independent of `Double`. Outside
- * of the methods we create to convert between them, the two types are
- * completely unrelated from the perspective of the Scala compiler. This can be
- * valuable because it fully hides the underlying type. For example, we cannot
- * accidentally add a `Meter` and a `Foot`. On the other hand `Meter` also does
- * not have any of the methods defined on it that are defined for `Double`
- * values so we have to re-implement them ourselves or wrap and unwrap each
- * time.
- *
- * It is also possible to create newtypes that are subtypes of existing types.
- * To do this, just implement your newtype the same we as described above but
- * extends `Subtype[A]`, where `A` is the underlying value you are wrapping.
+ * A smart newtype also defines an `assertion` that the underlying value must
+ * satisfy. `apply` checks literal arguments at compile time and does not
+ * compile for an argument the compiler can't evaluate, such as a variable.
+ * `make` checks any value at run time and returns a [[Validation]]. The
+ * definition of `assertion` differs between Scala 2 and Scala 3:
  *
  * {{{
- * object And extends Subtype[Boolean]
- * type And = And.Type
+ * // scala-2-only
+ * import zio.prelude.Assertion._
  *
- * object Or extends Subtype[Boolean]
- * type Or = Or.Type
- *
- * implicit object AndInstance extends Associative[And] with Identity[And] {
- *   def combine(l: => And, r: => And): And =
- *     And(l && r)
- *   val identity: And =
- *     And(true)
- * }
- *
- * implicit object OrInstance extends Associative[Or] with Identity[Or] {
- *   def combine(l: => Or, r: => Or): Or =
- *     Or(l || r)
- *   val identity: Or =
- *     Or(false)
- * }
- *
- * def foldMap[A, B](as: List[A])(f: A => B)(implicit B: Associative[B] with Identity[B]) =
- *   as.foldLeft(B.identity)((b, a) => B.combine(b, f(a)))
- *
- * def exists[A](as: List[A])(f: A => Boolean): Boolean =
- *   Or.unwrap(foldMap(as)(a => Or(f(a))))
- *
- * def forall[A](as: List[A])(f: A => Boolean): Boolean =
- *   And.unwrap(foldMap(as)(a => And(f(a))))
- * }}}
- *
- * Notice how `And` and `Or` are distinct types that each can have their own
- * coherent typeclass instances, but operations on `Boolean` such as `&&` and
- * `||` are still available on them. These methods can still return the
- * underlying type, so this technique is most useful for creating coherent
- * typeclasses instances rather than type safe domain specific languages.
- *
- * Finally, it is possible to create Smart Newtypes that can be validated at
- * compile-time when constructed with a literal value, or at run-time with a
- * dynamic value, returning a [[Validation]]. In this case we must define an
- * additional `def assertion` method on the Object, indicating how to validate
- * an instance of the underlying type. For example, let's create a newtype for
- * natural numbers, which must be equal to or greater than zero. (Note that the
- * syntax differs between Scala 2 and 3 due to changes in the macro API).
- *
- * {{{
- * import zio.prelude.Assertion.greaterThanOrEqualTo
- *
- * type Natural = Natural.Type
  * object Natural extends Newtype[Int] {
- *   // Scala 2 — be sure you DO NOT give a type annotation to `assertion`
- *   def assertion = assert {
- *     greaterThanOrEqualTo(0)
- *   }
- *
- *   // Scala 3
- *   override inline def assertion: Assertion[Int] =
- *     greaterThanOrEqualTo(0)
+ *   // do not annotate the type of `assertion`
+ *   override def assertion = assert(greaterThanOrEqualTo(0))
  * }
- * }}}
+ * type Natural = Natural.Type
  *
- * In this case, attempting to convert an integer to a natural number will
- * return a `Natural` that will either return a`Natural` if the integer was
- * equal to or greater than zero or a fail to compile with a descriptive error
- * message if the condition was not satisfied.
+ * val ten: Natural = Natural(10)
+ * // Natural(-99) does not compile: -99 did not satisfy greaterThanOrEqualTo(0)
+ *
+ * val parsed: Validation[String, Natural] = Natural.make(-1)
+ * // Failure(Chunk(),NonEmptyChunk(-1 did not satisfy greaterThanOrEqualTo(0)))
+ * }}}
  *
  * {{{
- *   val compiles = Natural(10)
- *   val fails    = Natural(-99) // -99 does not satisfy greaterThanOrEqualTo(0)
+ * // scala-3-only
+ * import zio.prelude.Assertion._
+ *
+ * object Natural extends Newtype[Int] {
+ *   override inline def assertion = greaterThanOrEqualTo(0)
+ * }
+ * type Natural = Natural.Type
+ *
+ * val ten: Natural = Natural(10)
+ * // Natural(-99) does not compile: -99 did not satisfy greaterThanOrEqualTo(0)
+ *
+ * val parsed: Validation[String, Natural] = Natural.make(-1)
+ * // Failure(Chunk(),NonEmptyChunk(-1 did not satisfy greaterThanOrEqualTo(0)))
  * }}}
  *
- * If you need to supply a variable or other run-time validation to a Smart
- * Newtype, use the `make` method instead, which will return a [[Validation]].
- *
- * {{{
- *   val result: Validation[String, Natural] = Natural.make(10)
- * }}}
- */
-
-/**
- * The class of objects corresponding to subtypes. Users should implement an
- * object that extends this class to create their own subtypes, specifying
- * `A` as the underlying type to wrap.
- *
- * {{{
- * object And extends Subtype[Boolean]
- * type And = And.Type
- * }}}
- */
-
-/**
- * The class of objects corresponding to newtypes. Users should implement an
- * object that extends this class to create their own newtypes, specifying
- * `A` as the underlying type to wrap.
- *
- * {{{
- * object Meter extends Newtype[Double]
- * type Meter = Meter.Type
- * }}}
+ * @see [[https://zio.dev/zio-prelude/newtypes/ New Types]]
  */
 abstract class Newtype[A] extends NewtypeVersionSpecific {
+
+  /**
+   * The underlying type `A`.
+   */
   type Wrapped = A
 
+  /**
+   * The assertion that values of the newtype must satisfy. The default
+   * accepts every value. A smart newtype overrides it: on Scala 2 with
+   * `override def assertion = assert(...)` and no type annotation, on Scala 3
+   * with `override inline def assertion = ...`.
+   */
   def assertion: QuotedAssertion[A] = new QuotedAssertion[A] {
     def run(value: A): Either[AssertionError, Unit] = Assertion.anything(value)
   }
@@ -200,75 +123,104 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    * this could be used to convert a list of instances of the newtype back
    * to a list of instances of the underlying type.
    */
-
   def unwrapAll[F[_]](value: F[Type]): F[A] = value.asInstanceOf[F[A]]
 
   /**
-   * Converts an instance of the underlying type to an instance of the newtype.
-   *
-   * If there is a `def assertion` (see [[assert]]), the value will be checked
-   * at compile-time.
+   * Converts an instance of the underlying type to an instance of the
+   * newtype. When the newtype defines an `assertion`, the argument must be a
+   * literal: it is checked at compile time, and a value that fails the check,
+   * or an argument the compiler can't evaluate, such as a variable, does not
+   * compile. Use `make` to check a value at run time.
    */
   def apply(value: A): Type = macro zio.prelude.Macros.wrap_impl[A, Type]
 
   /**
-   * Converts multiple instances of the underlying type to [[NonEmptyChunk]] of
-   * instances of the newtype.
-   *
-   * If there is a `def assertion` (see [[assert]]), each value will be checked
-   * at compile-time.
+   * Converts several instances of the underlying type to a `NonEmptyChunk` of
+   * instances of the newtype. When the newtype defines an `assertion`, every
+   * argument must be a literal and is checked at compile time. On Scala 2 this
+   * method takes any number of values, and the error lists every argument that
+   * fails the check. On Scala 3 there are overloads for two to six values, and
+   * the error names the first argument that fails.
    */
   def apply(value: A, values: A*): NonEmptyChunk[Type] = macro zio.prelude.Macros.applyMany_impl[A, Type]
 
+  /**
+   * Checks `value` against the assertion at run time. Returns the value as
+   * the newtype in a successful [[Validation]], or a failed one with a message
+   * such as `-1 did not satisfy greaterThanOrEqualTo(0)` for each condition
+   * that the value fails. Without an `assertion`, every value succeeds.
+   */
   def make(value: A): Validation[String, Type] = macro zio.prelude.Macros.make_impl[A, Type]
 
+  /**
+   * Checks every element of `value` against the assertion at run time. Returns
+   * the whole collection as a collection of the newtype when every element
+   * passes, or a failed [[Validation]] with the messages of all the elements
+   * that fail.
+   */
   def makeAll[F[+_]: ForEach](value: F[A]): Validation[String, F[Type]] =
     macro zio.prelude.Macros.makeAll_impl[F, A, Type]
 
   /**
-   * This method is used to generate Newtype that can be validated at
-   * compile-time. This must wrap a Assertion and be assigned to
-   * `def assertion`.
+   * Turns an `Assertion` into the value of `def assertion` on Scala 2, so
+   * that `apply` can check literal arguments at compile time and `make` can
+   * check values at run time.
    *
-   * For example, here is a refined Newtype for Natural numbers. Natural
-   * numbers are whole numbers greater than or equal to 0.
+   * For example, a smart newtype for natural numbers, the whole numbers
+   * greater than or equal to 0:
    *
    * {{{
-   * import zio.prelude.Subtype
    * import zio.prelude.Assertion._
    *
-   * type Natural = Natural.Type
    * object Natural extends Subtype[Int] {
-   *   def assertion = assert(greaterThanOrEqualTo(0))
+   *   override def assertion = assert(greaterThanOrEqualTo(0))
    * }
+   * type Natural = Natural.Type
+   *
+   * val two: Natural = Natural(2)
    * }}}
    *
-   * With this `assertion` defined, `Natural.apply` will check literal values
-   * at compile-time, failing with an error message if the Assertion is not
-   * satisfied.
+   * `Natural(-10)` does not compile, and the error contains
+   * `-10 did not satisfy greaterThanOrEqualTo(0)`.
    *
-   * `Natural(-10)` would render "`-10 failed to satisfy greaterThanOrEqualTo(10)`"
+   * The assertion must be written inside the `assert` call, built from the
+   * constructors of `Assertion` with literal arguments. An assertion stored
+   * in another `val` can't be read at compile time, and `apply` then fails
+   * with "You have defined your Assertion in a way that cannot be read at
+   * compile-time."
    *
-   * IMPORTANT: Due to the macro machinery powering this feature, you must be
-   * sure to NOT ANNOTATE `def assertion` with a type (`QuotedAssertion`). If
-   * you do so, the macro will not be able to run the provided assertion at
-   * compile-time and will fail with a message containing this very same
-   * information.
+   * Do not annotate `def assertion` with a type (`QuotedAssertion`). With the
+   * annotation, `apply` fails to compile with a message that asks you to
+   * remove it.
    */
   def assert(assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.assert_impl[A]
 
   /**
-   * This method is used as an escape hatch for `assert` to allow Newtypes to use custom functions.
-   * If at all possible, you should use [[assert]] instead.
+   * Turns a custom check into the value of `def assertion` on Scala 2, for
+   * conditions that the constructors of `Assertion` can't express. Prefer
+   * `assert` when an `Assertion` fits.
    *
-   * This will use whitebox.Context.eval under the hood, so all limitations of that function apply here.
-   * See here for details: https://github.com/scala/scala/blob/2.13.x/src/reflect/scala/reflect/macros/Evals.scala#L69
+   * {{{
+   * // scala-2-only
+   * object Palindrome extends Newtype[String] {
+   *   override def assertion = assertCustom { (s: String) =>
+   *     if (s.reverse == s) Right(()) else Left(AssertionError.failure("isPalindrome"))
+   *   }
+   * }
    *
-   * IMPORTANT: Due to the macro machinery powering this feature, you must be
-   * sure to NOT ANNOTATE `def assertion` with a type (`QuotedAssertion`). If
-   * you do so, the macro will not be able to run the provided assertion at
-   * compile-time and will fail with a message containing this very same
-   * information.
+   * val result = Palindrome.make("abc")
+   * // Failure(Chunk(),NonEmptyChunk(abc did not satisfy isPalindrome))
+   * }}}
+   *
+   * The function is compiled and run inside the compiler with
+   * `whitebox.Context.eval`, so it can call only code that is already
+   * compiled, such as the standard library and zio-prelude. Calling an object
+   * from the same compilation run fails the macro expansion with a
+   * `java.lang.ClassNotFoundException`.
+   *
+   * Do not annotate `def assertion` with a type (`QuotedAssertion`). With the
+   * annotation, `apply` fails to compile with a message that asks you to
+   * remove it.
    */
   def assertCustom(f: A => Either[AssertionError, Unit]): QuotedAssertion[A] =
     macro zio.prelude.Macros.assertCustom_impl[A]
@@ -279,15 +231,32 @@ abstract class Newtype[A] extends NewtypeVersionSpecific {
    * this could be used to convert a list of instances of the underlying
    * type to a list of instances of the newtype.
    *
-   * Due to macro limitations, this method cannot with refined newtype and
-   * will thus issue a compiler error if you attempt to do so.
+   * It does not check the assertion. On Scala 2, calling it on a newtype that
+   * defines an `assertion` does not compile; on Scala 3 it compiles and skips
+   * the check. Use `makeAll` to check the elements.
    */
   def wrapAll[F[_]](value: F[A]): F[Type] = macro zio.prelude.Macros.wrapAll_impl[F, A, Type]
 
+  /**
+   * The `ClassTag` of the newtype, which is the `ClassTag` of the underlying
+   * type. For example, an `Array` of a newtype over `Double` is created as an
+   * `Array[Double]`.
+   */
   implicit def classTag(implicit underlying: ClassTag[A]): ClassTag[Type] = underlying.asInstanceOf[ClassTag[Type]]
 }
 
+/**
+ * Operations on newtypes that skip the assertion. The compile-time error of a
+ * smart newtype's `apply` suggests `unsafeWrap` and `unsafeWrapAll` for
+ * arguments that are not literals.
+ */
 object Newtype {
+
+  /**
+   * Turns an `Assertion` into a `QuotedAssertion`, like the `assert` method
+   * of a newtype object. The result can be assigned to `def assertion`, which
+   * must not have a type annotation.
+   */
   def assert[A](assertion: Assertion[A]): QuotedAssertion[A] = macro zio.prelude.Macros.assert_impl[A]
 
   /**
@@ -310,19 +279,42 @@ object Newtype {
     value.asInstanceOf[F[T#Type]]
   }
 
+  /**
+   * Holds the `ClassTag` of the underlying type of the newtype object type
+   * `A`. `Newtype.classTag` uses it to build a `ClassTag` for `N#Type`.
+   */
   trait ClassTagWrapper[-A] {
+
+    /**
+     * The `ClassTag` of the underlying type.
+     */
     def classTag: ClassTag[_]
   }
 
+  /**
+   * Instances of [[Newtype.ClassTagWrapper]].
+   */
   object ClassTagWrapper {
+
+    /**
+     * Summons the implicit `ClassTagWrapper` for `A`.
+     */
     def apply[A](implicit ev: ClassTagWrapper[A]): ClassTagWrapper[A] = ev
 
+    /**
+     * A `ClassTagWrapper` for a newtype over `A`, built from the `ClassTag`
+     * of `A`.
+     */
     implicit def classTagWrapperForNewtype[A](implicit underlying: ClassTag[A]): ClassTagWrapper[Newtype[A]] =
       new ClassTagWrapper[Newtype[A]] {
         def classTag: ClassTag[_] = underlying
       }
   }
 
+  /**
+   * The `ClassTag` of the type `N#Type` of a newtype object type `N`, which
+   * is the `ClassTag` of its underlying type.
+   */
   implicit def classTag[N <: Newtype[_]: ClassTagWrapper]: ClassTag[N#Type] =
     ClassTagWrapper[N].classTag.asInstanceOf[ClassTag[N#Type]]
 }

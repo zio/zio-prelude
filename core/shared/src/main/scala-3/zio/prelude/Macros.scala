@@ -3,8 +3,19 @@ package zio.prelude
 import scala.quoted.*
 import zio.prelude.ConsoleUtils.*
 
+/**
+ * The macro behind the compile-time checks of Scala 3 smart newtypes.
+ */
 object Macros extends Liftables {
 
+  /**
+   * Checks the argument `a` of a newtype's `apply` against the newtype's
+   * inline `assertion` at compile time. Compilation stops with the rendered
+   * error when the literal fails the assertion, with "Must use literal value
+   * for macro." when `a` is not a literal, and with a message that asks for
+   * the `inline` keyword when `assertion` is overridden without it. A newtype
+   * that keeps the default `assertion` is not checked.
+   */
   def validateInlineImpl[A: Type](assertionExpr: Expr[Assertion[A]], a: Expr[A])(using Quotes): Expr[Unit] = {
     import quotes.reflect.*
 
