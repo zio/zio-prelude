@@ -305,8 +305,10 @@ object Equal extends EqualVersionSpecific {
    * `Equal` instance for `Double` for imprecise equality with configurable tolerance.
    * Two values are equal when the absolute value of their difference is less
    * than `epsilon`, which is `2^-40` by default. This relation is not
-   * transitive, so the instance does not satisfy the `Equal` laws, and
-   * `Double.NaN` is not equal to itself. It is not implicit.
+   * transitive, so the instance does not satisfy the `Equal` laws. On the
+   * JVM `Double.NaN` is not equal to itself; on Scala.js
+   * `equal(Double.NaN, Double.NaN)` returns `true`, because `equal` first
+   * checks reference equality. It is not implicit.
    */
   def DoubleEqualWithEpsilon(epsilon: Double = 1 / (1024d * 1024 * 1024 * 1024)): Equal[Double] = {
     (l: Double, r: Double) =>
@@ -347,8 +349,10 @@ object Equal extends EqualVersionSpecific {
    * `Equal` instance for `Float` for imprecise equality with configurable tolerance.
    * Two values are equal when the absolute value of their difference is less
    * than `epsilon`, which is `2^-20` by default. This relation is not
-   * transitive, so the instance does not satisfy the `Equal` laws, and
-   * `Float.NaN` is not equal to itself. It is not implicit.
+   * transitive, so the instance does not satisfy the `Equal` laws. On the
+   * JVM `Float.NaN` is not equal to itself; on Scala.js
+   * `equal(Float.NaN, Float.NaN)` returns `true`, because `equal` first
+   * checks reference equality. It is not implicit.
    */
   def FloatEqualWithEpsilon(epsilon: Float = 1 / (1024f * 1024)): Equal[Float] = { (l: Float, r: Float) =>
     (l - r).abs < epsilon

@@ -13,8 +13,9 @@ import scala.language.implicitConversions
  *
  * Its operators mirror those of [[scala.Option]]. The main difference is that there is an implicit
  * conversion from `A` to `Optional[A]`, and from `Option[A]` to `Optional[A]`, so a field of type
- * `Optional[A]` accepts a plain value, an `Option`, or `Optional.Absent`. A plain `null` converts to
- * `Present(null)`, not to `Absent`.
+ * `Optional[A]` accepts a plain value, an `Option`, or `Optional.Absent`. A `null` value of type `A`,
+ * such as a `String` variable that holds `null`, converts to `Present(null)`, not to `Absent`. A `null`
+ * literal is not converted: it is already a value of type `Optional[A]`, so the field holds `null`.
  *
  * On Scala 2.13 and Scala 3 an `Optional` is also an `IterableOnce`, so it can be returned from the
  * function passed to a collection's `flatMap`.
@@ -241,8 +242,8 @@ object Optional {
   }
 
   /**
-   * Converts a plain value to `Present(value)` where an `Optional` is expected. A `null` value
-   * also becomes `Present(null)`.
+   * Converts a plain value to `Present(value)` where an `Optional` is expected. A value of type `A` that is
+   * `null` also becomes `Present(null)`; a `null` literal is not converted, because it is already an `Optional`.
    */
   implicit def AllValuesAreNullable[A](value: A): Optional[A] = Present(value)
 
