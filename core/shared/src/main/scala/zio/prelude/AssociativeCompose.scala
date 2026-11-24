@@ -19,9 +19,31 @@ package zio.prelude
 import zio.ZLayer.ZLayerProvideSomeOps
 import zio._
 
+/**
+ * `AssociativeCompose[=>:]` describes how to compose values of a type
+ * `A =>: B` that behave like functions from `A` to `B`, such as `Function1`
+ * or `URLayer`. Composition must be associative: composing `ab`, `bc` and
+ * `cd` gives the same result whichever pair is composed first.
+ */
 trait AssociativeCompose[=>:[-_, +_]] {
+
+  /**
+   * Composes `ab` with `bc`: the result goes from `A` to `C` through `B`.
+   *
+   * {{{
+   * val compose = AssociativeCompose.FunctionIdentityCompose
+   *
+   * val plusOneThenDouble: Int => Int = compose.compose((_: Int) * 2, (_: Int) + 1)
+   * val result: Int = plusOneThenDouble(3)
+   * // 8
+   * }}}
+   */
   def compose[A, B, C](bc: B =>: C, ab: A =>: B): A =>: C
 
+  /**
+   * Returns whether composing `ab`, `bc` and `cd` in either grouping gives
+   * equal results, which the associativity law requires.
+   */
   def associativeCompose[A, B, C, D](
     ab: A =>: B,
     bc: B =>: C,
@@ -34,8 +56,15 @@ trait AssociativeCompose[=>:[-_, +_]] {
   }
 }
 
+/**
+ * Instances of `AssociativeCompose` and `IdentityCompose`.
+ */
 object AssociativeCompose {
 
+  /**
+   * The `IdentityCompose` instance for functions: `compose` is function
+   * composition and `identity` is the identity function.
+   */
   implicit val FunctionIdentityCompose: IdentityCompose[Function] = new IdentityCompose[Function] {
 
     def identity[A]: A => A = scala.Predef.identity
@@ -45,6 +74,12 @@ object AssociativeCompose {
 
   }
 
+  /**
+   * The `IdentityCompose` instance for effects of type
+   * `URIO[A, ZEnvironment[B]]`. Composing runs the first effect and provides
+   * its result as the environment of the second, and `identity` is
+   * `ZIO.environment`.
+   */
   implicit val URIOIdentityCompose: IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] =
     new IdentityCompose[({ type lambda[-r, +a] = URIO[r, ZEnvironment[a]] })#lambda] {
       def identity[A]: URIO[A, ZEnvironment[A]] = ZIO.environment
@@ -53,6 +88,11 @@ object AssociativeCompose {
         ab.flatMap(b => bc.provideEnvironment(b))
     }
 
+  /**
+   * The `IdentityCompose` instance for `URLayer`. Composing feeds the output
+   * of the first layer to the second with `>>>`, and `identity` is
+   * `ZLayer.environment`.
+   */
   implicit val URLayerIdentityCompose: IdentityCompose[URLayer] = new IdentityCompose[URLayer] {
     def identity[A]: URLayer[A, A] = ZLayer.environment
 
@@ -61,7 +101,20 @@ object AssociativeCompose {
   }
 }
 
+/**
+ * Syntax for `AssociativeCompose`, available with `import zio.prelude._`.
+ */
 trait AssociativeComposeSyntax {
+
+  /**
+   * Provides syntax to compose a value of type `A =>: B` with another one.
+   *
+   * Each method takes only the implicit `AssociativeCompose` and returns a
+   * function that takes the other value, so `ab >>> bc` does not compile:
+   * `bc` is taken as the implicit argument. Call the returned function
+   * instead, as in `ab.>>>[C].apply(bc)`. A type's own method with the same
+   * name, such as `Function1#andThen`, takes precedence.
+   */
   implicit class AssociativeComposeOps[A, B, =>:[-_, +_]](private val ab: A =>: B) {
 
     /** A symbolic alias for `andThen`. Composes `A -> B` with `B -> C` to form `A -> C`. */
