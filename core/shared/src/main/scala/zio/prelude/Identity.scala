@@ -27,20 +27,64 @@ package zio.prelude
  * Operators with an identity element are useful because the identity element
  * provides a sensible default value when combining values of a type and no
  * values exist.
+ *
+ * {{{
+ * import zio.prelude.newtypes.Sum
+ *
+ * def combineAll[A](as: List[A])(implicit identity: Identity[A]): A =
+ *   as.foldLeft(identity.identity)(identity.combine(_, _))
+ *
+ * val words: String = combineAll(List("a", "b", "c"))
+ * // "abc"
+ * val empty: String = combineAll(List.empty[String])
+ * // ""
+ * val total: Sum[Int] = combineAll(List(Sum(1), Sum(2), Sum(3)))
+ * // 6
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/concrete-types/identity/ Identity]]
  */
 trait Identity[A] extends Associative[A] {
 
   /**
-   * The identity element.
+   * The identity element: combining it with any value on either side returns
+   * that value.
+   *
+   * {{{
+   * import zio.prelude.newtypes.Prod
+   *
+   * val emptyString: String = Identity[String].identity
+   * // ""
+   * val one: Prod[Int] = Identity[Prod[Int]].identity
+   * // 1
+   * }}}
    */
   def identity: A
 
+  /**
+   * Combines `n` copies of `a`. Returns `Some(identity)` when `n` is 0 and
+   * `None` when `n` is negative.
+   *
+   * {{{
+   * val twice: Option[String] = Identity[String].multiplyOption(2)("ab")
+   * // Some(abab)
+   * val zero: Option[String] = Identity[String].multiplyOption(0)("ab")
+   * // Some()
+   * val negative: Option[String] = Identity[String].multiplyOption(-1)("ab")
+   * // None
+   * }}}
+   */
   override def multiplyOption(n: Int)(a: A): Option[A] =
     if (n < 0) None
     else if (n == 0) Some(identity)
     else super.multiplyOption(n)(a)
 }
 
+/**
+ * Constructors and instances of `Identity`. Most `Identity` instances for
+ * standard library, ZIO and ZIO Prelude types are in the `Associative`
+ * companion object.
+ */
 object Identity {
 
   /**
@@ -49,8 +93,9 @@ object Identity {
   def apply[A](implicit Identity: Identity[A]): Identity[A] = Identity
 
   /**
-   * Constructs an `Identity` instance from an `IdentityEither` instance and a
-   * `Covariant` instance.
+   * Constructs an `Identity[F[A]]` from an `IdentityEither[F]` and a
+   * `Covariant[F]`. The identity is `IdentityEither[F].none`, and combining
+   * `l` with `r` returns `l orElse r`.
    */
   def fromIdentityEitherCovariant[F[+_]: IdentityEither: Covariant, A]: Identity[F[A]] =
     new Identity[F[A]] {
@@ -62,7 +107,18 @@ object Identity {
 
   /**
    * Constructs an `Identity` instance from an associative binary operator and
-   * an identity element.
+   * an identity element. `make` does not check the laws;
+   * `zio.prelude.laws.IdentityLaws` can test them.
+   *
+   * {{{
+   * final case class Tally(count: Int)
+   *
+   * implicit val tallyIdentity: Identity[Tally] =
+   *   Identity.make(Tally(0), (l, r) => Tally(l.count + r.count))
+   *
+   * val total: Tally = List(Tally(2), Tally(3)).foldLeft(tallyIdentity.identity)(_ <> _)
+   * // Tally(5)
+   * }}}
    */
   def make[A](identity0: A, op: (A, A) => A): Identity[A] =
     new Identity[A] {
@@ -85,7 +141,9 @@ object Identity {
     derive.derive(identity)
 
   /**
-   * Derives an `Identity[Either[E, A]]` given an `Identity[A]`.
+   * Derives an `Identity[Either[E, A]]` given an `Identity[A]`. The identity
+   * is `Right(Identity[A].identity)`; two `Right` values combine their
+   * contents, otherwise the result is the first `Left`.
    */
   implicit def EitherIdentity[E, A: Identity]: Identity[Either[E, A]] =
     makeFrom(
@@ -123,6 +181,10 @@ object Identity {
       Associative.Tuple4Associative
     )
 
+  /**
+   * Derives an `Identity` for a product type given an `Identity` for each
+   * element of the product type.
+   */
   implicit def Tuple5Identity[A: Identity, B: Identity, C: Identity, D: Identity, E: Identity]
     : Identity[(A, B, C, D, E)] =
     makeFrom(
@@ -798,16 +860,19 @@ object Identity {
     )
 }
 
+/**
+ * Syntax for `Identity`, available with `import zio.prelude._`.
+ */
 trait IdentitySyntax {
 
   /**
-   * Provides infix syntax for combining two values with an associative
-   * operation.
+   * Provides syntax to get the identity element of a value's type.
    */
   implicit class IdentityOps[A](l: A) {
 
     /**
-     * Returns the identity element associated with values of this type.
+     * Returns the identity element associated with values of this type. The
+     * value itself is not used.
      */
     def identity(implicit id: Identity[A]): A =
       id.identity
