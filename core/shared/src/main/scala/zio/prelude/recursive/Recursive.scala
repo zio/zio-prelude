@@ -127,9 +127,8 @@ final case class Recursive[Case[+_], +Annotations](
   /**
    * Threads the accumulator `z` through `f` over every node, visiting this node last.
    *
-   * This is a known bug: the nodes under this one are visited in the order of `foldDown` (pre-order), not in
-   * post-order, because the sub-structures are folded with `foldDown`. Only this node itself is visited after its
-   * sub-structures. For the tree in this example, a post-order traversal would give `List(0, 1, 0, 2)`:
+   * The nodes under this one are visited in pre-order, not post-order, because the sub-structures are folded with
+   * `foldDown`. Only this node itself is visited after its sub-structures. For the tree in this example, a post-order traversal would give `List(0, 1, 0, 2)`:
    *
    * {{{
    * import zio._
@@ -194,8 +193,8 @@ final case class Recursive[Case[+_], +Annotations](
    * // 2: the root keeps its inner child, which then loses its own leaf
    * }}}
    *
-   * This is a known bug: every node of the result gets the annotations of this (the root) node. `f` receives each node
-   * with its own annotations, but the annotations of the node that `f` returns are replaced by the root's, so even
+   * Every node of the result gets the annotations of this (the root) node. `f` receives each node with its own
+   * annotations, but the annotations of the node that `f` returns are replaced by the root's, so
    * `transformDown(identity)` replaces the annotations of every node under the root.
    */
   def transformDown[Annotations0 >: Annotations](
@@ -237,9 +236,9 @@ final case class Recursive[Case[+_], +Annotations](
    * // 1: the inner child becomes a leaf first, so the root drops it too
    * }}}
    *
-   * This is a known bug: each node is rebuilt with the annotations of this (the root) node before `f` sees it, so `f`
-   * never sees the annotations of the nodes under the root, and `transformUp(identity)` replaces the annotations of
-   * every node under the root. The annotations of the node that `f` returns are kept.
+   * Each node is rebuilt with the annotations of this (the root) node before `f` sees it, so `f` never sees the
+   * annotations of the nodes under the root, and `transformUp(identity)` replaces the annotations of every node under
+   * the root. The annotations of the node that `f` returns are kept.
    */
   def transformUp[Annotations0 >: Annotations](
     f: Recursive[Case, Annotations0] => Recursive[Case, Annotations0]
