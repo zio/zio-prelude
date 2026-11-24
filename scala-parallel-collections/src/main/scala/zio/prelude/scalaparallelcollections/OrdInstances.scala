@@ -6,10 +6,13 @@ import zio.prelude.Ord.makeFrom
 import scala.annotation.tailrec
 import scala.collection.parallel.{immutable => par}
 
+/** The `Ord` instance for `ParSeq`. */
 trait OrdInstances {
 
   /**
-   * Derives an `Ord[ParSeq[A]]` given an `Ord[A]`.
+   * Derives an `Ord[ParSeq[A]]` given an `Ord[A]`. Sequences compare element by
+   * element; when one sequence is a prefix of the other, the shorter one is
+   * `LessThan`.
    */
   implicit def ParSeqOrd[A: Ord]: Ord[par.ParSeq[A]] =
     makeFrom(

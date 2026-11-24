@@ -3,10 +3,12 @@ package scalaparallelcollections
 
 import scala.collection.parallel.{immutable => par}
 
+/** `ForEach` and `Invariant` instances for `ParMap`, `ParSeq` and `ParSet`. */
 trait InvariantInstances {
 
   /**
    * The `ForEach` (and thus `Covariant` and `Invariant`) instance for `ParMap`.
+   * It traverses the values and keeps the keys.
    */
   implicit def ParMapForEach[K]: ForEach[({ type lambda[+v] = par.ParMap[K, v] })#lambda] =
     new ForEach[({ type lambda[+v] = par.ParMap[K, v] })#lambda] {

@@ -3,6 +3,7 @@ package scalaparallelcollections
 
 import scala.collection.parallel.{immutable => par}
 
+/** `DeriveEqual` instances for `ParMap`, `ParSeq` and `ParSet`. */
 trait SPCDerive {
 
   /**
@@ -14,10 +15,10 @@ trait SPCDerive {
         ParMapPartialOrd
     }
 
+  // to avoid conflict with `zio.prelude.ParSeq`
   /**
    * The `DeriveEqual` instance for `ParSeq`.
    */
-  // to avoid conflict with `zio.prelude.ParSeq`
   implicit lazy val parParSeqDeriveEqual: Derive[par.ParSeq, Equal] =
     new Derive[par.ParSeq, Equal] {
       def derive[A: Equal]: Equal[par.ParSeq[A]] =
@@ -25,7 +26,9 @@ trait SPCDerive {
     }
 
   /**
-   * The `DeriveEqual` instance for `ParSet`.
+   * The `DeriveEqual` instance for `ParSet[A]`, seen as a type constructor that
+   * ignores its parameter. `derive` returns the `ParSet` instance that uses
+   * object equality on the elements; it does not use the given `Equal`.
    */
   implicit def ParSetDeriveEqual[A]: DeriveEqual[({ type lambda[x] = par.ParSet[A] })#lambda] =
     new DeriveEqual[({ type lambda[x] = par.ParSet[A] })#lambda] {

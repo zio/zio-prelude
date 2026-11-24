@@ -6,10 +6,14 @@ import zio.prelude.PartialOrd.makeFrom
 import scala.annotation.tailrec
 import scala.collection.parallel.{immutable => par}
 
+/** The `PartialOrd` instance for `ParSeq`. */
 trait PartialOrdInstances {
 
   /**
-   * Derives an `PartialOrd[ParSeq[A]]` given an `PartialOrd[A]`.
+   * Derives a `PartialOrd[ParSeq[A]]` given a `PartialOrd[A]`. Sequences
+   * compare element by element and the first pair of elements that are not
+   * equal decides the result, `Incomparable` included; when one sequence is a
+   * prefix of the other, the shorter one is `LessThan`.
    */
   implicit def ParSeqPartialOrd[A: PartialOrd]: PartialOrd[par.ParSeq[A]] =
     makeFrom(
