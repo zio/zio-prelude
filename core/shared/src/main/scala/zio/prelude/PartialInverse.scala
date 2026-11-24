@@ -9,7 +9,7 @@ import scala.annotation.tailrec
  * identity element. There may be an exception, where the result is not defined.
  * For example, for multiplication of reals, one is an identity
  * element and division is an inverse operation, because dividing any
- * value by itself always returns one.
+ * nonzero value by itself returns one, and dividing by zero is not defined.
  *
  * Because `PartialInverse` defines a binary rather than a unary operator it can be
  * used to describe inverse operations for types that do not have inverse
@@ -21,8 +21,30 @@ import scala.annotation.tailrec
  */
 trait PartialInverse[A] extends Identity[A] {
 
+  /**
+   * Applies the inverse operator to `l` and `r`, or returns `None` when the
+   * result is not defined. When `inverseOption(a, a)` is a `Some`, it must
+   * contain `identity`.
+   *
+   * {{{
+   * import zio.prelude.newtypes.Prod
+   *
+   * val quotient: Option[Prod[Double]] =
+   *   PartialInverse[Prod[Double]].inverseOption(Prod(3.0), Prod(2.0))
+   * // Some(1.5)
+   * val byZero: Option[Prod[Double]] =
+   *   PartialInverse[Prod[Double]].inverseOption(Prod(3.0), Prod(0.0))
+   * // None
+   * }}}
+   */
   def inverseOption(l: => A, r: => A): Option[A]
 
+  /**
+   * Combines `n` copies of `a`, starting from `identity`. Returns
+   * `Some(identity)` when `n` is 0. For a negative `n` it applies
+   * `inverseOption` `-n` times, starting from `identity`, and returns `None`
+   * as soon as one of them returns `None`.
+   */
   override def multiplyOption(n: Int)(a: A): Option[A] = {
     @tailrec
     def multiplyHelper(res: Option[A], n: Int): Option[A] = res match {
@@ -37,6 +59,11 @@ trait PartialInverse[A] extends Identity[A] {
   }
 }
 
+/**
+ * Constructors and instances of `PartialInverse`. The `PartialInverse`
+ * instances for numeric newtypes such as `Prod[Double]` are in the
+ * `Associative` companion object.
+ */
 object PartialInverse {
 
   /**
@@ -45,8 +72,10 @@ object PartialInverse {
   def apply[A](implicit PartialInverse: PartialInverse[A]): PartialInverse[A] = PartialInverse
 
   /**
-   * Constructs an `PartialInverse` instance from an associative binary operator, an
-   * identity element, and an inverse binary operator.
+   * Constructs a `PartialInverse` instance from an associative binary
+   * operator, an identity element, and an inverse binary operator that returns
+   * `None` when the result is not defined. `make` does not check the laws;
+   * `zio.prelude.laws.PartialInverseLaws` can test them.
    */
   def make[A](identity0: A, op: (A, A) => A, inv: (A, A) => Option[A]): PartialInverse[A] =
     new PartialInverse[A] {
@@ -56,14 +85,14 @@ object PartialInverse {
     }
 
   /**
-   * Constructs an `PartialInverse` instance from an identity instance and
+   * Constructs a `PartialInverse` instance from an identity instance and
    * an inverse function.
    */
   def makeFrom[A](identity: Identity[A], inverse: (A, A) => Option[A]): PartialInverse[A] =
     make(identity.identity, (l, r) => identity.combine(l, r), inverse)
 
   /**
-   * Derives an `PartialInverse[F[A]]` given a `Derive[F, PartialInverse]` and an
+   * Derives a `PartialInverse[F[A]]` given a `Derive[F, PartialInverse]` and a
    * `PartialInverse[A]`.
    */
   implicit def DerivePartialInverse[F[_], A](implicit
@@ -73,8 +102,9 @@ object PartialInverse {
     derive.derive(inverse)
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple2PartialInverse[A: PartialInverse, B: PartialInverse]: PartialInverse[(A, B)] =
     makeFrom(
@@ -85,8 +115,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple3PartialInverse[A: PartialInverse, B: PartialInverse, C: PartialInverse]
     : PartialInverse[(A, B, C)] =
@@ -98,8 +129,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple4PartialInverse[A: PartialInverse, B: PartialInverse, C: PartialInverse, D: PartialInverse]
     : PartialInverse[(A, B, C, D)] =
@@ -111,8 +143,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple5PartialInverse[
     A: PartialInverse,
@@ -129,8 +162,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple6PartialInverse[
     A: PartialInverse,
@@ -152,8 +186,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple7PartialInverse[
     A: PartialInverse,
@@ -176,8 +211,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple8PartialInverse[
     A: PartialInverse,
@@ -201,8 +237,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple9PartialInverse[
     A: PartialInverse,
@@ -227,8 +264,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple10PartialInverse[
     A: PartialInverse,
@@ -265,8 +303,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple11PartialInverse[
     A: PartialInverse,
@@ -305,8 +344,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple12PartialInverse[
     A: PartialInverse,
@@ -347,8 +387,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple13PartialInverse[
     A: PartialInverse,
@@ -391,8 +432,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple14PartialInverse[
     A: PartialInverse,
@@ -437,8 +479,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple15PartialInverse[
     A: PartialInverse,
@@ -485,8 +528,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple16PartialInverse[
     A: PartialInverse,
@@ -535,8 +579,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple17PartialInverse[
     A: PartialInverse,
@@ -587,8 +632,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple18PartialInverse[
     A: PartialInverse,
@@ -641,8 +687,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple19PartialInverse[
     A: PartialInverse,
@@ -697,8 +744,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple20PartialInverse[
     A: PartialInverse,
@@ -755,8 +803,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple21PartialInverse[
     A: PartialInverse,
@@ -815,8 +864,9 @@ object PartialInverse {
     )
 
   /**
-   * Derives an `PartialInverse` for a product type given an `PartialInverse` for
-   * each element of the product type.
+   * Derives a `PartialInverse` for a tuple given a `PartialInverse` for each
+   * element type. The inverse is `None` when the inverse of any element is
+   * `None`.
    */
   implicit def Tuple22PartialInverse[
     A: PartialInverse,
@@ -878,22 +928,26 @@ object PartialInverse {
 
 }
 
+/**
+ * Syntax for `PartialInverse`, available with `import zio.prelude._`.
+ */
 trait PartialInverseSyntax {
 
   /**
-   * Provides infix syntax for combining two values with an inverse
+   * Provides infix syntax for combining two values with a partial inverse
    * operation.
    */
   implicit class PartialInverseOps[A](l: A) {
 
     /**
-     * A symbolic alias for `inverse`.
+     * A symbolic alias for `inverseOption`.
      */
     def ~?~(r: => A)(implicit inverse: PartialInverse[A]): Option[A] =
       inverse.inverseOption(l, r)
 
     /**
-     * PartialInverses this value with the specified value
+     * Applies the inverse operator to this value and `r`, or returns `None`
+     * when the result is not defined.
      */
     def inverseOption(r: => A)(implicit inverse: PartialInverse[A]): Option[A] =
       inverse.inverseOption(l, r)

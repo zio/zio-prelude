@@ -33,13 +33,46 @@ import scala.annotation.tailrec
  * define a subtraction operation that is the inverse of addition for the
  * natural numbers, since subtracting a number from itself always returns
  * zero.
+ *
+ * {{{
+ * import zio.prelude.newtypes.Sum
+ *
+ * val difference: Sum[Int] = Sum(10) ~~ Sum(4)
+ * // 6
+ * val selfInverse: Sum[Int] = Sum(10) ~~ Sum(10)
+ * // 0
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/concrete-types/inverse/ Inverse]]
  */
 trait Inverse[A] extends PartialInverse[A] {
 
+  /**
+   * Applies the inverse operator to `l` and `r`, for example subtraction for
+   * `Sum`. `inverse(a, a)` must equal `identity` for every `a`.
+   */
   def inverse(l: => A, r: => A): A
 
+  /**
+   * Returns `Some(inverse(l, r))`: an `Inverse` is defined for every pair of
+   * values.
+   */
   final override def inverseOption(l: => A, r: => A): Some[A] = Some(inverse(l, r))
 
+  /**
+   * Combines `n` copies of `a`, starting from `identity`. Returns `identity`
+   * when `n` is 0, and for a negative `n` applies the inverse operator `-n`
+   * times, starting from `identity`.
+   *
+   * {{{
+   * import zio.prelude.newtypes.Sum
+   *
+   * val tripled: Sum[Int] = Inverse[Sum[Int]].multiplyBy(3)(Sum(5))
+   * // 15
+   * val negated: Sum[Int] = Inverse[Sum[Int]].multiplyBy(-2)(Sum(5))
+   * // -10
+   * }}}
+   */
   def multiplyBy(n: Int)(a: A): A = {
     @tailrec
     def multiplyHelper(res: A, n: Int): A =
@@ -49,10 +82,19 @@ trait Inverse[A] extends PartialInverse[A] {
     multiplyHelper(identity, n)
   }
 
+  /**
+   * Returns `Some(multiplyBy(n)(a))`, which is defined for every `n`,
+   * including 0 and negative counts.
+   */
   final override def multiplyOption(n: Int)(a: A): Some[A] =
     Some(multiplyBy(n)(a))
 }
 
+/**
+ * Constructors and instances of `Inverse`. The `Inverse` instances for
+ * numeric newtypes such as `Sum[Int]` are in the `Associative` companion
+ * object.
+ */
 object Inverse {
 
   /**
@@ -62,7 +104,8 @@ object Inverse {
 
   /**
    * Constructs an `Inverse` instance from an associative binary operator, an
-   * identity element, and an inverse binary operator.
+   * identity element, and an inverse binary operator. `make` does not check
+   * the laws; `zio.prelude.laws.InverseLaws` can test them.
    */
   def make[A](identity0: A, op: (A, A) => A, inv: (A, A) => A): Inverse[A] =
     new Inverse[A] {
@@ -883,6 +926,9 @@ object Inverse {
 
 }
 
+/**
+ * Syntax for `Inverse`, available with `import zio.prelude._`.
+ */
 trait InverseSyntax {
 
   /**
@@ -898,13 +944,15 @@ trait InverseSyntax {
       inverse.inverse(l, r)
 
     /**
-     * Inverses this value with the specified value
+     * Applies the inverse operator to this value and `r`, for example
+     * subtracting `r` for `Sum`.
      */
     def inverse[A1 >: A](r: => A1)(implicit inverse: Inverse[A1]): A1 =
       inverse.inverse(l, r)
 
     /**
-     * Multiplies value 'n' times
+     * Combines `n` copies of this value. See `Inverse#multiplyBy` for 0 and
+     * negative counts.
      */
     def multiplyBy(n: Int)(implicit inverse: Inverse[A]): A =
       inverse.multiplyBy(n)(l)
