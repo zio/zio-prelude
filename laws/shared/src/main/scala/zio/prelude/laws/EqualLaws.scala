@@ -20,6 +20,10 @@ import zio.prelude._
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Equal` must satisfy: reflexivity, symmetry and
+ * transitivity.
+ */
 object EqualLaws extends Lawful[Equal] {
 
   /**

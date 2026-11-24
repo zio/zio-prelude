@@ -21,6 +21,10 @@ import zio.prelude.coherent.CommutativeEqual
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that commutative operators must satisfy, checked with `<>` and `Equal`.
+ * They include the `AssociativeLaws`.
+ */
 object CommutativeLaws extends Lawful[CommutativeEqual] {
 
   /**
@@ -28,6 +32,7 @@ object CommutativeLaws extends Lawful[CommutativeEqual] {
    * values `a1` and `a2`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a1 * a2 === a2 * a1
    * }}}
    */

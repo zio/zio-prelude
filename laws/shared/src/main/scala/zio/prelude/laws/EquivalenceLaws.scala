@@ -20,20 +20,33 @@ import zio.prelude._
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Equivalence` must satisfy. They state that converting
+ * a value to the other type and back gives the same value, in both directions.
+ */
 object EquivalenceLaws extends Lawful2[Equivalence, Equal, Equal] {
 
+  /**
+   * For all `a`, converting `a` with `to` and then back with `from` gives `a`.
+   */
   lazy val leftIdentity: Laws2[Equivalence, Equal, AnyF] =
     new Laws2.Law1Left[Equivalence, Equal, AnyF]("leftIdentity") {
       def apply[A: Equal, B: AnyF](a: A)(implicit equivalence: Equivalence[A, B]): TestResult =
         equivalence.from(equivalence.to(a)) <-> a
     }
 
+  /**
+   * For all `b`, converting `b` with `from` and then back with `to` gives `b`.
+   */
   lazy val rightIdentity: Laws2[Equivalence, AnyF, Equal] =
     new Laws2.Law1Right[Equivalence, AnyF, Equal]("rightIdentity") {
       def apply[A: AnyF, B: Equal](b: B)(implicit equivalence: Equivalence[A, B]): TestResult =
         equivalence.to(equivalence.from(b)) <-> b
     }
 
+  /**
+   * The set of all laws that instances of `Equivalence` must satisfy.
+   */
   lazy val laws: Laws2[Equivalence, Equal, Equal] =
     leftIdentity + rightIdentity
 }

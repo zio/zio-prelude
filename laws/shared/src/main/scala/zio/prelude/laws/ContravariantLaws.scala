@@ -21,6 +21,9 @@ import zio.prelude.coherent.ContravariantDeriveEqual
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Contravariant` must satisfy, compared with `Equal`.
+ */
 object ContravariantLaws extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
 
   /**

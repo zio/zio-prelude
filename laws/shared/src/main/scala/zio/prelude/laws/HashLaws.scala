@@ -20,6 +20,9 @@ import zio.prelude._
 import zio.test.TestResult
 import zio.test.laws.{Lawful, Laws}
 
+/**
+ * Laws that instances of `Hash` must satisfy. They include the `Equal` laws.
+ */
 object HashLaws extends Lawful[Hash] {
 
   /**

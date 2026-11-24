@@ -20,6 +20,10 @@ import zio.prelude.coherent.EqualInverse
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Inverse` must satisfy: combining a value with its
+ * inverse gives the identity. They include the `PartialInverse` laws.
+ */
 object InverseLaws extends Lawful[EqualInverse] {
 
   /**
@@ -27,6 +31,7 @@ object InverseLaws extends Lawful[EqualInverse] {
    * values `a`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a * a === identity
    * }}}
    */

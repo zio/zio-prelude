@@ -20,6 +20,10 @@ import zio.prelude._
 import zio.prelude.coherent.DeriveEqualNonEmptyForEach
 import zio.test.laws._
 
+/**
+ * Laws that instances of `NonEmptyForEach` must satisfy. They are the `ForEach`
+ * laws.
+ */
 object NonEmptyForEachLaws extends LawfulF.Covariant[DeriveEqualNonEmptyForEach, Equal] {
 
   /**

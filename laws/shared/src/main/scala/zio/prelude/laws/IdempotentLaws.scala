@@ -21,6 +21,10 @@ import zio.prelude.coherent.EqualIdempotent
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that idempotent operators must satisfy, checked with `<>` and `Equal`.
+ * They include the `AssociativeLaws`.
+ */
 object IdempotentLaws extends Lawful[EqualIdempotent] {
 
   /**
@@ -28,6 +32,7 @@ object IdempotentLaws extends Lawful[EqualIdempotent] {
    * values `a`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a * a === a
    * }}}
    */

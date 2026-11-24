@@ -20,6 +20,9 @@ import zio.prelude._
 import zio.prelude.coherent.DeriveEqualForEach
 import zio.test.laws._
 
+/**
+ * Laws that instances of `ForEach` must satisfy. They are the `Covariant` laws.
+ */
 object ForEachLaws extends LawfulF.Covariant[DeriveEqualForEach, Equal] {
 
   /**

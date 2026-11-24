@@ -21,6 +21,9 @@ import zio.prelude.coherent.CovariantDeriveEqual
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Covariant` must satisfy, compared with `Equal`.
+ */
 object CovariantLaws extends LawfulF.Covariant[CovariantDeriveEqual, Equal] {
 
   /**

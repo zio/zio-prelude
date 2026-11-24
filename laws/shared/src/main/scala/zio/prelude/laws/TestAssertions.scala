@@ -71,7 +71,7 @@ trait TestAssertions {
     TestAssertion.assertion("isLessThanEqualTo")(_ <= reference)
 
   /**
-   * Makes a new assertion that requires a validation failure satisfying a
+   * Makes a new assertion that requires a validation success satisfying a
    * specified assertion.
    */
   def isSuccessV[A](assertion: TestAssertion[A]): TestAssertion[ZValidation[Any, Any, A]] =
@@ -80,6 +80,11 @@ trait TestAssertions {
       case _                         => None
     }
 
+  /**
+   * Makes an assertion that applies `get` to the value. When `get` returns
+   * `Some(b)`, the assertion checks `b` with `assertion`. When `get` returns
+   * `None`, the assertion fails.
+   */
   def assertionRec[A, B](name: String)(assertion: TestAssertion[B])(get: (=> A) => Option[B]): TestAssertion[A] =
     TestAssertion(
       TestArrow

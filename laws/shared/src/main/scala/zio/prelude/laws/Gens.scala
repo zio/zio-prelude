@@ -39,6 +39,11 @@ object Gens {
   def natural(min: Natural, max: Natural)(implicit trace: Trace): Gen[Any, Natural] =
     Gen.int(min, max).map(Natural.unsafeMake)
 
+  /**
+   * A generator of `ParSeq` values. Leaves hold a value from `a` or an empty
+   * leaf from `z`, and inner nodes combine their parts sequentially or in
+   * parallel.
+   */
   def parSeq[R <: Sized, Z <: Unit, A](z: Gen[R, Z], a: Gen[R, A]): Gen[R, ParSeq[Z, A]] = {
     val failure = a.map(ParSeq.single)
     val empty   = z.map(_ => ParSeq.empty.asInstanceOf[ParSeq[Nothing, Nothing]])
