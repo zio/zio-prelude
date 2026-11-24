@@ -439,9 +439,12 @@ sealed trait NonEmptyList[+A] extends NonEmptySeq[A, NonEmptyList, List] { self 
    * Reduces the elements of this `NonEmptyList` from left to right using the
    * specified function. The fold starts from the head and then visits every
    * element, the head included, so the head is combined twice:
-   * `NonEmptyList(1, 2, 3).reduce(_ + _)` returns `7`, and
-   * `NonEmptyList(5).reduce(_ + _)` returns `10`. `reduceLeft` combines each
-   * element once.
+   * `NonEmptyList(1, 2, 3).reduce((a: Int, b: Int) => a + b)` returns `7`,
+   * and `NonEmptyList(5).reduce((a: Int, b: Int) => a + b)` returns `10`.
+   * `reduceLeft` combines each element once. On Scala 3, a lambda without
+   * parameter types, such as `reduce(_ + _)`, is converted to an
+   * `Associative` and calls the other `reduce` overload, which returns `6`
+   * for `NonEmptyList(1, 2, 3)`; on Scala 2 it does not compile.
    */
   override def reduce[B >: A](op: (B, B) => B): B =
     foldLeft[B](head)(op)
