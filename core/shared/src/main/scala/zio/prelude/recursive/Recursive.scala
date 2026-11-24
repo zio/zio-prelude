@@ -128,7 +128,8 @@ final case class Recursive[Case[+_], +Annotations](
    * Threads the accumulator `z` through `f` over every node, visiting this node last.
    *
    * The nodes under this one are visited in pre-order, not post-order, because the sub-structures are folded with
-   * `foldDown`. Only this node itself is visited after its sub-structures. For the tree in this example, a post-order traversal would give `List(0, 1, 0, 2)`:
+   * `foldDown`. Only this node itself is visited after its sub-structures. For the tree in this example, a post-order
+   * traversal would give `List(0, 1, 0, 2)`:
    *
    * {{{
    * import zio._

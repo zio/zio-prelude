@@ -30,8 +30,9 @@ import scala.{math => sm}
  * Comparing two values returns an `Ordering`: `Ordering.LessThan`,
  * `Ordering.Equals` or `Ordering.GreaterThan`. An `Ord` is also a
  * `PartialOrd` and an `Equal`, and two values must compare as
- * `Ordering.Equals` exactly when they are equal. Importing `zio.prelude._` adds `=?=`, `<`, `<=`, `>`,
- * `>=`, `max` and `min` to every value of a type with an `Ord` instance.
+ * `Ordering.Equals` exactly when they are equal. Importing `zio.prelude._`
+ * adds `=?=`, `<`, `<=`, `>`, `>=`, `max` and `min` to every value of a
+ * type with an `Ord` instance.
  *
  * {{{
  * final case class Version(major: Int, minor: Int)

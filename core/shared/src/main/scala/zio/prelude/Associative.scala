@@ -680,7 +680,8 @@ object Associative extends AssociativeLowPriority {
     Commutative.make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
 
   /**
-   * The `Commutative` and `Identity` instance for the product of `Natural` values.
+   * The `Commutative` and `Identity` instance for the product of `Natural` values, computed with
+   * `Natural.times`: a product that overflows `Int` is `Int.MaxValue`, and so is a product whose left value is 0.
    */
   implicit val NaturalProdCommutativeIdentity: Commutative[Prod[Natural]] with Identity[Prod[Natural]] =
     new Commutative[Prod[Natural]] with Identity[Prod[Natural]] {
