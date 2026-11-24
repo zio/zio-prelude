@@ -21,6 +21,9 @@ import zio.prelude.coherent.AssociativeEqual
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that associative operators must satisfy, checked with `<>` and `Equal`.
+ */
 object AssociativeLaws extends Lawful[AssociativeEqual] {
 
   /**
@@ -28,6 +31,7 @@ object AssociativeLaws extends Lawful[AssociativeEqual] {
    * values `a1`, `a2`, and `a3`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * (a1 * a2) * a3 === a1 * (a2 * a3)
    * }}}
    */

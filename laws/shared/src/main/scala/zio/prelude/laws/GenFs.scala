@@ -32,7 +32,8 @@ import scala.util.Try
 object GenFs {
 
   /**
-   * A generator of failed `Cause` values.
+   * A generator of `Cause` values: failures, defects, interruptions, combined
+   * causes, stackless causes and the empty cause.
    */
   val cause: GenF[Sized, Cause] =
     new GenF[Sized, Cause] {
@@ -42,6 +43,9 @@ object GenFs {
         Gen.causes(gen, Gen.throwable)
     }
 
+  /**
+   * A generator of `Either` values whose left side comes from `e`.
+   */
   def either[R <: Sized, E](e: Gen[R, E]): GenF[R, ({ type lambda[+a] = Either[E, a] })#lambda] =
     new GenF[R, ({ type lambda[+a] = Either[E, a] })#lambda] {
       def apply[R1 <: R, A](a: Gen[R1, A])(implicit trace: Trace): Gen[R1, Either[E, A]] =
@@ -73,6 +77,9 @@ object GenFs {
         oneOf(Gen.throwable.map(Future.failed), gen.map(Future.successful))
     }
 
+  /**
+   * A generator of `Map` values whose keys come from `k`.
+   */
   def map[R <: Sized, K](k: Gen[R, K]): GenF[R, ({ type lambda[+v] = Map[K, v] })#lambda] =
     new GenF[R, ({ type lambda[+v] = Map[K, v] })#lambda] {
       def apply[R1 <: R, V](v: Gen[R1, V])(implicit trace: Trace): Gen[R1, Map[K, V]] =
@@ -90,6 +97,9 @@ object GenFs {
         Gen.chunkOf1(gen)
     }
 
+  /**
+   * A generator of `NonEmptyList` values.
+   */
   def nonEmptyList: GenF[Sized, NonEmptyList] =
     new GenF[Sized, NonEmptyList] {
       def apply[R1 <: Sized, A](gen: Gen[R1, A])(implicit
@@ -98,6 +108,9 @@ object GenFs {
         Gens.nonEmptyListOf(gen)
     }
 
+  /**
+   * A generator of `NonEmptySet` values.
+   */
   def nonEmptySet: GenF[Sized, NonEmptySet] =
     new GenF[Sized, NonEmptySet] {
       def apply[R1 <: Sized, A](gen: Gen[R1, A])(implicit
@@ -117,6 +130,10 @@ object GenFs {
         Gens.parSeq(z, a)
     }
 
+  /**
+   * A generator of `These` values whose left side comes from `a`. Each value is
+   * a left, a right, or both.
+   */
   def these[R <: Sized, A](a: Gen[R, A]): GenF[R, ({ type lambda[+b] = These[A, b] })#lambda] =
     new GenF[R, ({ type lambda[+b] = These[A, b] })#lambda] {
       def apply[R1 <: R, B](b: Gen[R1, B])(implicit trace: Trace): Gen[R1, These[A, B]] =
@@ -132,12 +149,18 @@ object GenFs {
         oneOf(Gen.throwable.map(scala.util.Failure(_)), gen.map(scala.util.Success(_)))
     }
 
+  /**
+   * A generator of pairs whose first element comes from `a`.
+   */
   def tuple2[R <: Sized, A](a: Gen[R, A]): GenF[R, ({ type lambda[+x] = (A, x) })#lambda] =
     new GenF[R, ({ type lambda[+x] = (A, x) })#lambda] {
       def apply[R1 <: R, B](b: Gen[R1, B])(implicit trace: Trace): Gen[R1, (A, B)] =
         a.zip(b)
     }
 
+  /**
+   * A generator of triples whose first two elements come from `a` and `b`.
+   */
   def tuple3[R <: Sized, A, B](
     a: Gen[R, A],
     b: Gen[R, B]
@@ -147,6 +170,11 @@ object GenFs {
         a.zip(b).zip(c)
     }
 
+  /**
+   * A generator of `ZValidation` values. Warnings are a chunk, possibly empty,
+   * of values from `w`. Failures are a non-empty chunk of values from `e`.
+   * Successes come from the generator passed to `apply`.
+   */
   def validation[R <: Sized, W, E](
     w: Gen[R, W],
     e: Gen[R, E]
@@ -156,6 +184,12 @@ object GenFs {
         Gens.validation(w, e, a)
     }
 
+  /**
+   * A generator of `ZValidation` values wrapped in the
+   * `zio.prelude.newtypes.Failure` newtype. Both successes and failures are
+   * generated. Warnings come from `w`, errors from the generator passed to
+   * `apply`, and successes from `a`.
+   */
   def validationFailure[R <: Sized, W, A](
     w: Gen[R, W],
     a: Gen[R, A]

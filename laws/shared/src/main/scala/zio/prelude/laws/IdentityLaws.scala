@@ -21,6 +21,10 @@ import zio.prelude.coherent.EqualIdentity
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that identity elements must satisfy, checked with `<>` and `Equal`. They
+ * include the `AssociativeLaws`.
+ */
 object IdentityLaws extends Lawful[EqualIdentity] {
 
   /**
@@ -28,6 +32,7 @@ object IdentityLaws extends Lawful[EqualIdentity] {
    * values `a`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * identity * a === a
    * }}}
    */
@@ -38,10 +43,11 @@ object IdentityLaws extends Lawful[EqualIdentity] {
     }
 
   /**
-   * The left identity law states that for some binary operator `*`, for all
+   * The right identity law states that for some binary operator `*`, for all
    * values `a`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a * identity === a
    * }}}
    */

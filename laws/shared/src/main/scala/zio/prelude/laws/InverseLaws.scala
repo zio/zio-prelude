@@ -20,15 +20,15 @@ import zio.prelude.coherent.EqualInverse
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Inverse` must satisfy: `inverse(a, a)` equals the
+ * identity. They include the `PartialInverse` laws.
+ */
 object InverseLaws extends Lawful[EqualInverse] {
 
   /**
-   * The inverse law states that for some binary operator `*`, for all
-   * values `a`, the following must hold:
-   *
-   * {{{
-   * a * a === identity
-   * }}}
+   * The inverse law states that for all values `a`, the inverse operator
+   * applied to `a` and `a` returns the identity.
    */
   lazy val inverseLaw: Laws[EqualInverse] =
     new Laws.Law1[EqualInverse]("rightInverseLaw") {

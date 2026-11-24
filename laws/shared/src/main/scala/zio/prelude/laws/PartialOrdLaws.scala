@@ -20,6 +20,11 @@ import zio.prelude._
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `PartialOrd` must satisfy: transitivity of `less` and
+ * `greater`, antisymmetry of `lessOrEqual` and `greaterOrEqual`, and
+ * consistency of `=??=` with `===`. They include the `Equal` laws.
+ */
 object PartialOrdLaws extends Lawful[PartialOrd] {
 
   /**
@@ -63,7 +68,8 @@ object PartialOrdLaws extends Lawful[PartialOrd] {
     }
 
   /**
-   * For all values `a1` and `a2`, iff `a1 =??= a2` is `Ordering.Equals` then `a1 === a2`.
+   * For all values `a1` and `a2`, `a1 =??= a2` is `Ordering.Equals` if and only
+   * if `a1 === a2` is `true`.
    */
   lazy val eqConsistencyLaw: Laws[PartialOrd] =
     new Laws.Law2[PartialOrd]("eqConsistencyLaw") {

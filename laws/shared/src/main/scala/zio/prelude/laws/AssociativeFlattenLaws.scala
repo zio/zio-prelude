@@ -21,6 +21,10 @@ import zio.prelude.coherent.AssociativeFlattenCovariantDeriveEqual
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `AssociativeFlatten` must satisfy, compared with
+ * `Equal`.
+ */
 object AssociativeFlattenLaws extends LawfulF.Covariant[AssociativeFlattenCovariantDeriveEqual, Equal] {
 
   /**

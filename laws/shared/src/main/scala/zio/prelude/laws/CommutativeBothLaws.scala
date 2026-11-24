@@ -21,6 +21,10 @@ import zio.prelude.coherent.CommutativeBothDeriveEqualInvariant
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `CommutativeBoth` must satisfy, compared with `Equal`.
+ * They include the `AssociativeBoth` laws.
+ */
 object CommutativeBothLaws extends LawfulF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] {
 
   /**
@@ -37,7 +41,7 @@ object CommutativeBothLaws extends LawfulF.Invariant[CommutativeBothDeriveEqualI
     }
 
   /**
-   * The set of law laws that instances of `CommutativeBoth` must satisfy.
+   * The set of laws that instances of `CommutativeBoth` must satisfy.
    */
   lazy val laws: LawsF.Invariant[CommutativeBothDeriveEqualInvariant, Equal] =
     commutativeLaw + AssociativeBothLaws.laws

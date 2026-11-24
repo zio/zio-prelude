@@ -21,6 +21,10 @@ import zio.prelude.coherent.CommutativeEitherDeriveEqualInvariant
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `CommutativeEither` must satisfy, compared with
+ * `Equal`. They include the `AssociativeEither` laws.
+ */
 object CommutativeEitherLaws extends LawfulF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] {
 
   /**
@@ -37,7 +41,7 @@ object CommutativeEitherLaws extends LawfulF.Invariant[CommutativeEitherDeriveEq
     }
 
   /**
-   * The set of law laws that instances of `CommutativeEither` must satisfy.
+   * The set of laws that instances of `CommutativeEither` must satisfy.
    */
   lazy val laws: LawsF.Invariant[CommutativeEitherDeriveEqualInvariant, Equal] =
     commutativeLaw + AssociativeEitherLaws.laws

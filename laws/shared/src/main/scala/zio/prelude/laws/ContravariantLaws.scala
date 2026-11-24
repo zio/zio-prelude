@@ -21,6 +21,9 @@ import zio.prelude.coherent.ContravariantDeriveEqual
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Contravariant` must satisfy, compared with `Equal`.
+ */
 object ContravariantLaws extends LawfulF.Contravariant[ContravariantDeriveEqual, Equal] {
 
   /**
@@ -34,7 +37,7 @@ object ContravariantLaws extends LawfulF.Contravariant[ContravariantDeriveEqual,
 
   /**
    * Contramapping by `f` followed by `g` must be the same as contramapping
-   * with the composition of `f` and `g`.
+   * with `f compose g`.
    */
   lazy val compositionLaw: LawsF.Contravariant[ContravariantDeriveEqual, Equal] =
     new LawsF.Contravariant.ComposeLaw[ContravariantDeriveEqual, Equal]("compositionLaw") {

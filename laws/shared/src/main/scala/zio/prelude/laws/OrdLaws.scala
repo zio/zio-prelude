@@ -20,6 +20,11 @@ import zio.prelude._
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `Ord` must satisfy: any two values are comparable in
+ * at least one direction, `lessOrEqual` and `greaterOrEqual` agree, and the
+ * `PartialOrd` laws hold.
+ */
 object OrdLaws extends Lawful[Ord] {
 
   /**

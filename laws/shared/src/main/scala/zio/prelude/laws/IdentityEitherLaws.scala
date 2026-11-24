@@ -21,6 +21,10 @@ import zio.prelude.coherent.DeriveEqualIdentityEitherInvariant
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `IdentityEither` must satisfy, compared with `Equal`.
+ * They include the `AssociativeEither` laws.
+ */
 object IdentityEitherlaws extends LawfulF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] {
 
   /**
@@ -50,7 +54,7 @@ object IdentityEitherlaws extends LawfulF.Invariant[DeriveEqualIdentityEitherInv
     }
 
   /**
-   * The set of law laws that instances of `IdentityEither` must satisfy.
+   * The set of laws that instances of `IdentityEither` must satisfy.
    */
   val laws: LawsF.Invariant[DeriveEqualIdentityEitherInvariant, Equal] =
     leftIdentityLaw + rightIdentityLaw + AssociativeEitherLaws.laws

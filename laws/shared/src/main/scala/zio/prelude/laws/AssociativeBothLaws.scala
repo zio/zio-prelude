@@ -21,6 +21,9 @@ import zio.prelude.coherent.AssociativeBothDeriveEqualInvariant
 import zio.test.TestResult
 import zio.test.laws._
 
+/**
+ * Laws that instances of `AssociativeBoth` must satisfy, compared with `Equal`.
+ */
 object AssociativeBothLaws extends LawfulF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] {
 
   /**
@@ -42,7 +45,7 @@ object AssociativeBothLaws extends LawfulF.Invariant[AssociativeBothDeriveEqualI
     }
 
   /**
-   * The set of law laws that instances of `AssociativeBoth` must satisfy.
+   * The set of laws that instances of `AssociativeBoth` must satisfy.
    */
   lazy val laws: LawsF.Invariant[AssociativeBothDeriveEqualInvariant, Equal] =
     associativityLaw
