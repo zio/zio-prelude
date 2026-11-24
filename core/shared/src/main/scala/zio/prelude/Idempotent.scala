@@ -47,6 +47,9 @@ trait Idempotent[A] extends Associative[A] { self =>
 
 }
 
+/**
+ * Summoning and constructors for `Idempotent` instances.
+ */
 object Idempotent {
 
   /**

@@ -40,6 +40,9 @@ trait Commutative[A] extends Associative[A] { self =>
   final def commute: Commutative[A] = Commutative((l, r) => self.combine(r, l))
 }
 
+/**
+ * Summoning and constructors for `Commutative` instances.
+ */
 object Commutative {
 
   /**

@@ -29,6 +29,9 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 @implicitNotFound("No implicit CommutativeEither defined for ${F}.")
 trait CommutativeEither[F[_]] extends AssociativeEither[F]
 
+/**
+ * Instances of `CommutativeEither`, such as the one for `Future`.
+ */
 object CommutativeEither {
 
   /**
@@ -78,6 +81,9 @@ object CommutativeEither {
     commutativeEither
 }
 
+/**
+ * Infix syntax for `CommutativeEither` operations.
+ */
 trait CommutativeEitherSyntax {
 
   /**
