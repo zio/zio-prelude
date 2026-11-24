@@ -16,7 +16,17 @@
 
 package zio.prelude
 
+/**
+ * Describes a type `F[-_]` that can be contramapped with a function whose
+ * input type has an instance of `Subset`. A [[Contravariant]] is a
+ * `ContravariantSubset` for every input type.
+ */
 trait ContravariantSubset[F[-_], Subset[_]] {
+
+  /**
+   * Lifts a function from `B` to `A` to a function from `F[A]` to `F[B]`,
+   * given a `Subset[B]`.
+   */
   def contramapSubset[A, B: Subset](f: B => A): F[A] => F[B]
 }
 
@@ -31,9 +41,9 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * with the result of comparing them and `Hash` takes an `A` value and returns
  * an `Int`.
  *
- * Common examples of contravariant instances in ZIO include effects with
- * regard to their environment types, sinks with regard to their input type,
- * and polymorphic queues and references regarding their input types.
+ * Common examples of contravariant instances in ZIO Prelude include functions
+ * with regard to their input types, `ZSink` with regard to its input type and
+ * `Schedule` with regard to its input type.
  *
  * `Contravariant` instances support a `contramap` operation, which allows
  * transforming the input type given a function from the new input type to the
@@ -42,8 +52,23 @@ trait ContravariantSubset[F[-_], Subset[_]] {
  * the length of a string, then we can construct an `Ord[String]` that
  * compares strings by computing their lengths with the provided function and
  * comparing those.
+ *
+ * {{{
+ * val byLength: Equal[String] =
+ *   Contravariant[Equal].contramap((s: String) => s.length)(Equal[Int])
+ *
+ * val sameLength: Boolean = byLength.equal("ab", "cd")
+ * // true
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/parameterized-types/contravariant/ Contravariant]]
  */
 trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invariant[F] { self =>
+
+  /**
+   * Returns `contramap(f)`: a `Contravariant` can contramap from every input
+   * type.
+   */
   final def contramapSubset[A, B: AnyType](f: B => A): F[A] => F[B] =
     contramap(f)
 
@@ -52,6 +77,10 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
    */
   def contramap[A, B](f: B => A): F[A] => F[B]
 
+  /**
+   * Lifts an equivalence between `A` and `B` to an equivalence between `F[A]`
+   * and `F[B]`, by contramapping with `from` and with `to`.
+   */
   final def invmap[A, B](f: A <=> B): F[A] <=> F[B] =
     Equivalence((fa: F[A]) => contramap(f.from)(fa), (fb: F[B]) => contramap(f.to)(fb))
 
@@ -72,6 +101,11 @@ trait Contravariant[F[-_]] extends ContravariantSubset[F, AnyType] with Invarian
     }
 }
 
+/**
+ * Summoner for `Contravariant`. `Contravariant` instances are defined in the
+ * companion objects of types such as `Equal`, `Ord` and `Hash`, and, for
+ * functions and ZIO types, in the `Invariant` companion object.
+ */
 object Contravariant {
 
   /**
@@ -82,12 +116,20 @@ object Contravariant {
 
 }
 
+/**
+ * Syntax for `Contravariant`, available with `import zio.prelude._`.
+ */
 trait ContravariantSyntax {
 
   /**
-   * Provides infix syntax for mapping over covariant values.
+   * Provides infix syntax for mapping over contravariant values.
    */
   implicit class ContravariantOps[F[-_], A](private val self: F[A]) {
+
+    /**
+     * Transforms the input type of this `F` with `f`, which converts the new
+     * input type `B` to the old input type `A`.
+     */
     def contramap[B](f: B => A)(implicit contravariant: Contravariant[F]): F[B] =
       contravariant.contramap(f)(self)
   }
