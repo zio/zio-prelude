@@ -21,17 +21,24 @@ import scala.annotation.implicitNotFound
 /**
  * A binary operator that combines two values of types `F[A]` and `F[B]` to
  * produce an `F[Either[A, B]]` with an identity value.
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/parameterized-types/identityeither/ IdentityEither]]
  */
 @implicitNotFound("No implicit IdentityEither defined for ${F}.")
 trait IdentityEither[F[_]] extends AssociativeEither[F] {
 
   /**
    * The identity for combining two values of types `F[A]` and `F[B]` to
-   * produce an `F[Either[A, B]]`.
+   * produce an `F[Either[A, B]]`, such as `None` for `Option` or the empty
+   * list for `List`.
    */
   def none: F[Nothing]
 }
 
+/**
+ * Summoner for `IdentityEither`. The instances for standard library and ZIO
+ * types are in the `AssociativeEither` companion object.
+ */
 object IdentityEither {
 
   /**
@@ -41,11 +48,20 @@ object IdentityEither {
     identityEither
 }
 
+/**
+ * Syntax for `IdentityEither`, available with `import zio.prelude._`.
+ */
 trait IdentityEitherSyntax {
 
+  /**
+   * Provides syntax to get the identity of an `IdentityEither` from any value.
+   */
   implicit class IdentityEitherAnyOps(a: Any) {
 
-    /** Ignores its argument and returns a "failed" `F` */
+    /**
+     * Ignores its argument and returns a "failed" `F`: `IdentityEither[F].none`,
+     * such as `None` for `Option`.
+     */
     def fail[F[_]](implicit either: IdentityEither[F]): F[Nothing] =
       either.none
   }

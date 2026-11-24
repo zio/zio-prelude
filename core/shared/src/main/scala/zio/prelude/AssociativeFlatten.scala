@@ -32,6 +32,16 @@ import scala.util.{Success, Try}
  * resulting lists, or flattening the two outer lists and then flattening that
  * resulting list. Because the operation is associative, the resulting list is
  * the same either way.
+ *
+ * Importing `zio.prelude._` adds `flatten` and, for covariant types,
+ * `flatMap`.
+ *
+ * {{{
+ * val flat: List[Int] = AssociativeFlatten[List].flatten(List(List(1), List(2, 3)))
+ * // List(1, 2, 3)
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/parameterized-types/associativeflatten/ AssociativeFlatten]]
  */
 @implicitNotFound("No implicit AssociativeFlatten defined for ${F}.")
 trait AssociativeFlatten[F[+_]] {
@@ -42,6 +52,10 @@ trait AssociativeFlatten[F[+_]] {
   def flatten[A](ffa: F[F[A]]): F[A]
 }
 
+/**
+ * Instances of `AssociativeFlatten` and `IdentityFlatten` for standard
+ * library and ZIO types.
+ */
 object AssociativeFlatten {
 
   /**
@@ -51,7 +65,8 @@ object AssociativeFlatten {
     associativeFlatten
 
   /**
-   * The `AssociativeFlatten` and `IdentityFlatten` instance for `Cause`.
+   * The `AssociativeFlatten` and `IdentityFlatten` instance for `Cause`. The
+   * identity is `Cause.fail(())`.
    */
   implicit val CauseIdentityFlatten: IdentityFlatten[Cause] =
     new IdentityFlatten[Cause] {
@@ -71,7 +86,8 @@ object AssociativeFlatten {
     }
 
   /**
-   * The `AssociativeFlatten` instance for `Const`.
+   * The `AssociativeFlatten` instance for `Const`, which returns the `Const`
+   * value unchanged.
    */
   implicit def ConstAssociativeFlatten[A]: AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] =
     new AssociativeFlatten[({ type ConstA[+B] = Const[A, B] })#ConstA] {
@@ -135,7 +151,9 @@ object AssociativeFlatten {
     }
 
   /**
-   * The `AssociativeFlatten` instance for `Map`
+   * The `AssociativeFlatten` instance for `Map`. It merges the inner maps and
+   * drops the outer keys; when inner maps share a key, the value from the
+   * inner map that comes later in the outer map's iteration order is kept.
    */
   implicit def MapAssociativeFlatten[K]: AssociativeFlatten[({ type lambda[+v] = Map[K, v] })#lambda] =
     new AssociativeFlatten[({ type lambda[+v] = Map[K, v] })#lambda] {
@@ -225,6 +243,9 @@ object AssociativeFlatten {
 
 }
 
+/**
+ * Syntax for `AssociativeFlatten`, available with `import zio.prelude._`.
+ */
 trait AssociativeFlattenSyntax {
 
   /**
