@@ -101,7 +101,7 @@ trait Associative[A] { self =>
   /**
    * Combines `n` copies of `a` with this operator. Returns `a` unchanged when
    * `n` is 1 or less, including 0 and negative counts. Use `multiplyOption`
-   * when the count can be below 1.
+   * when the count can be less than 1.
    *
    * {{{
    * val tripled: String = Associative[String].repeat("ab")(3)
