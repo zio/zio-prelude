@@ -74,7 +74,7 @@ object AssociativeEitherDeriveEqualInvariant {
 }
 
 /**
- * An instance that is `Associative` and `Equal` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `Associative` and `Equal` at the same time, so that one implicit value can supply both.
  */
 trait AssociativeEqual[A] extends Associative[A] with Equal[A]
 
@@ -180,7 +180,7 @@ object CommutativeEitherDeriveEqualInvariant {
 }
 
 /**
- * An instance that is `Commutative` and `Equal` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `Commutative` and `Equal` at the same time, so that one implicit value can supply both.
  */
 trait CommutativeEqual[A] extends AssociativeEqual[A] with Commutative[A]
 
@@ -200,7 +200,7 @@ object CommutativeEqual {
 }
 
 /**
- * An instance that is `Commutative` and `Identity` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `Commutative` and `Identity` at the same time, so that one implicit value can supply both.
  */
 trait CommutativeIdentity[A] extends Commutative[A] with Identity[A]
 
@@ -221,8 +221,7 @@ object CommutativeIdentity {
 }
 
 /**
- * An instance that is `Covariant` and `DeriveEqual` at the same time, so that one implicit value can supply all of
- * them.
+ * An instance that is `Covariant` and `DeriveEqual` at the same time, so that one implicit value can supply both.
  */
 trait CovariantDeriveEqual[F[+_]] extends Covariant[F] with DeriveEqual[F]
 
@@ -245,8 +244,7 @@ object CovariantDeriveEqual {
 }
 
 /**
- * An instance that is `Contravariant` and `DeriveEqual` at the same time, so that one implicit value can supply all of
- * them.
+ * An instance that is `Contravariant` and `DeriveEqual` at the same time, so that one implicit value can supply both.
  */
 trait ContravariantDeriveEqual[F[-_]] extends Contravariant[F] with DeriveEqual[F]
 
@@ -450,8 +448,8 @@ object DeriveEqualIdentityEitherInvariant {
 }
 
 /**
- * An instance that is `DeriveEqual` and `NonEmptyForEach` at the same time, so that one implicit value can supply all
- * of them.
+ * An instance that is `DeriveEqual` and `NonEmptyForEach` at the same time, so that one implicit value can supply
+ * both.
  */
 trait DeriveEqualNonEmptyForEach[F[+_]] extends DeriveEqualForEach[F] with NonEmptyForEach[F]
 
@@ -477,7 +475,7 @@ object DeriveEqualNonEmptyForEach {
 }
 
 /**
- * An instance that is `DeriveEqual` and `ForEach` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `DeriveEqual` and `ForEach` at the same time, so that one implicit value can supply both.
  */
 trait DeriveEqualForEach[F[+_]] extends CovariantDeriveEqual[F] with ForEach[F]
 
@@ -502,7 +500,7 @@ object DeriveEqualForEach {
 }
 
 /**
- * An instance that is `Equal` and `Identity` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `Equal` and `Identity` at the same time, so that one implicit value can supply both.
  */
 trait EqualIdentity[A] extends AssociativeEqual[A] with Identity[A]
 
@@ -523,7 +521,7 @@ object EqualIdentity {
 }
 
 /**
- * An instance that is `Equal` and `Idempotent` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `Equal` and `Idempotent` at the same time, so that one implicit value can supply both.
  */
 trait EqualIdempotent[A] extends AssociativeEqual[A] with Idempotent[A]
 
@@ -543,7 +541,7 @@ object EqualIdempotent {
 }
 
 /**
- * An instance that is `Equal` and `Inverse` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `Equal` and `Inverse` at the same time, so that one implicit value can supply both.
  */
 trait EqualInverse[A] extends EqualPartialInverse[A] with Inverse[A]
 
@@ -565,7 +563,7 @@ object EqualInverse {
 }
 
 /**
- * An instance that is `Equal` and `PartialInverse` at the same time, so that one implicit value can supply all of them.
+ * An instance that is `Equal` and `PartialInverse` at the same time, so that one implicit value can supply both.
  */
 trait EqualPartialInverse[A] extends EqualIdentity[A] with PartialInverse[A]
 
@@ -633,7 +631,7 @@ object HashPartialOrd {
 
   /**
    * Constructs an instance from a `hash0` function and an `ord` function.
-   * Two values are equal when `ord` returns `Ordering.Equals` for them, so every equality check calls `ord`.
+   * Two values that are not the same reference are equal when `ord` returns `Ordering.Equals` for them.
    */
   def make[A](hash0: A => Int, ord: (A, A) => PartialOrdering): Hash[A] with PartialOrd[A] =
     new HashPartialOrd[A] {
@@ -693,7 +691,7 @@ object HashOrd {
 
   /**
    * Constructs an instance from a `hash0` function and an `ord` function.
-   * Two values are equal when `ord` returns `Ordering.Equals` for them, so every equality check calls `ord`.
+   * Two values that are not the same reference are equal when `ord` returns `Ordering.Equals` for them.
    */
   def make[A](hash0: A => Int, ord: (A, A) => Ordering): Hash[A] with Ord[A] =
     new HashOrd[A] {
