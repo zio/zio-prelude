@@ -30,6 +30,21 @@ import scala.util.{Success, Try}
 /**
  * An associative binary operator that combines two values of types `F[A]`
  * and `F[B]` to produce an `F[(A, B)]`.
+ *
+ * For collections such as `List`, the instances pair every value of the first
+ * collection with every value of the second; for `Option`, `Either` and
+ * `Try`, the result holds a pair only when both values do. Importing
+ * `zio.prelude._` adds `<*>`, `zip`, `zipWith`, `<*`, `*>` and, on tuples of
+ * `F` values, `mapN` and `tupleN`.
+ *
+ * {{{
+ * val pair: Option[(Int, String)] = Option(1) <*> Option("a")
+ * // Some((1,a))
+ * val sum: Option[Int] = (Option(1), Option(2), Option(3)).mapN(_ + _ + _)
+ * // Some(6)
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/parameterized-types/associativeboth/ AssociativeBoth]]
  */
 @implicitNotFound("No implicit AssociativeBoth defined for ${F}.")
 trait AssociativeBoth[F[_]] {
@@ -40,6 +55,10 @@ trait AssociativeBoth[F[_]] {
   def both[A, B](fa: => F[A], fb: => F[B]): F[(A, B)]
 }
 
+/**
+ * Constructors, `mapN` and `tupleN` combinators, and instances of
+ * `AssociativeBoth` and `IdentityBoth` for standard library and ZIO types.
+ */
 object AssociativeBoth extends AssociativeBothLowPriority {
 
   /**
@@ -48,6 +67,17 @@ object AssociativeBoth extends AssociativeBothLowPriority {
   def apply[F[_]](implicit associativeBoth: AssociativeBoth[F]): AssociativeBoth[F] =
     associativeBoth
 
+  /**
+   * Composes the `AssociativeBoth` instances of `F` and `G` into one for
+   * `F[G[A]]`, which also is a `Covariant`. `both` combines the outer `F`
+   * values and then, for each pair, the inner `G` values.
+   *
+   * {{{
+   * val nested: List[Option[(Int, String)]] =
+   *   AssociativeBoth.compose[List, Option].both(List(Option(1), None), List(Option("a")))
+   * // List(Some((1,a)), None)
+   * }}}
+   */
   def compose[F[+_]: AssociativeBoth, G[+_]: AssociativeBoth](implicit
     f: Covariant[F],
     g: Covariant[G]
@@ -393,7 +423,7 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * Combines 18 `F` values into a tuple in maps the result with the provided function.
+   * Combines 18 `F` values using the provided function `f`.
    */
   def mapN[F[
     +_
@@ -1208,7 +1238,9 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     )
 
   /**
-   * The `IdentityBoth` instance for `Chunk`.
+   * The `IdentityBoth` instance for `Chunk`. `both` pairs every element of
+   * the first chunk with every element of the second, and `any` is
+   * `Chunk.unit`.
    */
   implicit val ChunkIdentityBoth: IdentityBoth[Chunk] =
     new IdentityBoth[Chunk] {
@@ -1217,7 +1249,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `IdentityBoth` instance for `Config`.
+   * The `IdentityBoth` instance for `Config`. `both` combines two configs
+   * with `++`, and `any` is `Config.succeed(())`.
    */
   implicit val ConfigIdentityBoth: IdentityBoth[Config] =
     new IdentityBoth[Config] {
@@ -1226,7 +1259,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `AssociativeBoth` instance for `Const`.
+   * The `AssociativeBoth` instance for `Const`. `both` combines the two
+   * wrapped values with `Associative[A]`.
    */
   implicit def ConstAssociativeBoth[A: Associative]: AssociativeBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] =
     new AssociativeBoth[({ type ConstA[+B] = Const[A, B] })#ConstA] {
@@ -1246,7 +1280,9 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `IdentityBoth` (and `AssociativeBoth`) instance for a failed `Either`
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for a failed `Either`.
+   * `both` pairs the two `Left` values when both are `Left`, and otherwise
+   * returns the first `Right`.
    */
   implicit def EitherFailedIdentityBoth[R]: IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] =
     new IdentityBoth[({ type lambda[+l] = Failure[Either[l, R]] })#lambda] {
@@ -1299,7 +1335,9 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `IdentityBoth` (and `AssociativeBoth`) instance for `List`.
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `List`. `both`
+   * pairs every element of the first list with every element of the second,
+   * and `any` is `List(())`.
    */
   implicit val ListIdentityBoth: IdentityBoth[List] =
     new IdentityBoth[List] {
@@ -1310,7 +1348,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `AssociativeBoth` instance for `NonEmptyChunk`.
+   * The `AssociativeBoth` instance for `NonEmptyChunk`, which pairs every
+   * element of the first chunk with every element of the second.
    */
   implicit val NonEmptyChunkAssociativeBoth: AssociativeBoth[NonEmptyChunk] =
     new AssociativeBoth[NonEmptyChunk] {
@@ -1356,7 +1395,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `AssociativeBoth` instance for And `Schedule`.
+   * The `AssociativeBoth` instance for `AndF[Schedule[R, E, A]]`, which
+   * combines two schedules with `&&`.
    */
   implicit def ScheduleAndAssociativeBoth[R, E]
     : AssociativeBoth[({ type lambda[+a] = AndF[Schedule[R, E, a]] })#lambda] =
@@ -1368,7 +1408,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `AssociativeBoth` instance for Or `Schedule`.
+   * The `AssociativeBoth` instance for `OrF[Schedule[R, E, A]]`, which
+   * combines two schedules with `||`.
    */
   implicit def ScheduleOrAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] =
     new AssociativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] {
@@ -1389,7 +1430,9 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Vector`.
+   * The `IdentityBoth` (and `AssociativeBoth`) instance for `Vector`. `both`
+   * pairs every element of the first vector with every element of the
+   * second, and `any` is `Vector(())`.
    */
   implicit val VectorIdentityBoth: IdentityBoth[Vector] =
     new IdentityBoth[Vector] {
@@ -1398,7 +1441,10 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `IdentityBoth` instance for `ZIO`.
+   * The `IdentityBoth` instance for `ZIO`, which is also a `Covariant`.
+   * `both` runs the two effects in parallel with `zipWithPar`, and `any` is
+   * `ZIO.unit`. `ZIO`'s own `zip` and `<*>` methods, which run the effects one
+   * after the other, take precedence over the `zio.prelude._` syntax.
    */
   implicit def ZIOCovariantIdentityBoth[R, E]: CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
     new CovariantIdentityBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
@@ -1431,7 +1477,10 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `IdentityBoth` instance for failed `ZIO`.
+   * The `IdentityBoth` instance for failed `ZIO`. `both` runs the first
+   * effect and, if it fails, the second one: it fails with both errors when
+   * both effects fail, and succeeds with the value of the first effect that
+   * succeeds. `any` is `ZIO.fail(())`.
    */
   implicit def ZIOFailureIdentityBoth[R, A]: IdentityBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
     new IdentityBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
@@ -1447,7 +1496,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `AssociativeBoth` instance for `ZSink`.
+   * The `AssociativeBoth` instance for `ZSink`, which combines two sinks
+   * with `zip`.
    */
   implicit def ZSinkAssociativeBoth[R, E, In, L <: In]
     : AssociativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] =
@@ -1459,7 +1509,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `IdentityBoth` instance for `ZSTM`.
+   * The `IdentityBoth` instance for `ZSTM`. `both` combines two transactions
+   * with `zip`, and `any` is `ZSTM.unit`.
    */
   implicit def ZSTMIdentityBoth[R, E]: IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] =
     new IdentityBoth[({ type lambda[+a] = ZSTM[R, E, a] })#lambda] {
@@ -1468,7 +1519,8 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 
   /**
-   * The `AssociativeBoth` instance for `ZStream`.
+   * The `AssociativeBoth` instance for `ZStream`, which pairs every element
+   * of the first stream with every element of the second with `cross`.
    */
   implicit def ZStreamAssociativeBoth[R, E]: AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new AssociativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
@@ -1476,8 +1528,18 @@ object AssociativeBoth extends AssociativeBothLowPriority {
     }
 }
 
+/**
+ * `AssociativeBoth` instances with a lower priority than the instances in
+ * the `AssociativeBoth` companion object: when one instance from each
+ * applies, the compiler picks the one from the companion object.
+ */
 trait AssociativeBothLowPriority {
 
+  /**
+   * Derives an `AssociativeBoth[F]` from a `Covariant[F]` and an
+   * `AssociativeFlatten[F]`: `both` pairs every value of the first `F` with
+   * every value of the second one, by mapping and flattening.
+   */
   implicit def fromCovariantAssociativeFlatten[F[+_]](implicit
     covariant: Covariant[F],
     identityFlatten: AssociativeFlatten[F]
@@ -1487,6 +1549,9 @@ trait AssociativeBothLowPriority {
     }
 }
 
+/**
+ * Syntax for `AssociativeBoth`, available with `import zio.prelude._`.
+ */
 trait AssociativeBothSyntax {
 
   /**
@@ -1527,20 +1592,25 @@ trait AssociativeBothSyntax {
 
     /**
      * Combines an `F[A]` value with itself using `zipRight` forever.
+     *
+     * For a strict type such as `Option`, it returns only when `both` does not
+     * evaluate its second argument, as for `None`; for `Some` the recursion
+     * does not end and throws a `StackOverflowError`. Types with their own
+     * `forever` method, such as `ZIO`, use that method instead.
      */
     def forever(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[A] =
       fa *> forever
 
     /**
-     * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[(A, B)]`, keeping only the left value.
+     * Combines two values of types `F[A]` and `F[B]` and keeps only the
+     * left value, producing an `F[A]`.
      */
     def zipLeft[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[A] =
       zipWith(fb)((a, _) => a)
 
     /**
-     * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[(A, B)]`, keeping only the right value.
+     * Combines two values of types `F[A]` and `F[B]` and keeps only the
+     * right value, producing an `F[B]`.
      */
     def zipRight[B](fb: => F[B])(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[B] =
       zipWith(fb)((_, b) => b)
@@ -1568,63 +1638,143 @@ trait AssociativeBothSyntax {
       both.both(fa, fb).contramap(f)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 2 `F` values.
+   */
   implicit class AssociativeBothTuple2Ops[F[+_], T1, T2](tf: => (F[T1], F[T2])) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](f: (T1, T2) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2)] =
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2])).tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 3 `F` values.
+   */
   implicit class AssociativeBothTuple3Ops[F[+_], T1, T2, T3](tf: => (F[T1], F[T2], F[T3])) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](f: (T1, T2, T3) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3)] =
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3])).tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 4 `F` values.
+   */
   implicit class AssociativeBothTuple4Ops[F[+_], T1, T2, T3, T4](tf: => (F[T1], F[T2], F[T3], F[T4])) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](f: (T1, T2, T3, T4) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4)] =
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])).tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 5 `F` values.
+   */
   implicit class AssociativeBothTuple5Ops[F[+_], T1, T2, T3, T4, T5](tf: => (F[T1], F[T2], F[T3], F[T4], F[T5])) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](f: (T1, T2, T3, T4, T5) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5)] =
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5])).tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 6 `F` values.
+   */
   implicit class AssociativeBothTuple6Ops[F[+_], T1, T2, T3, T4, T5, T6](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](f: (T1, T2, T3, T4, T5, T6) => R)(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6)] =
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6])).tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 7 `F` values.
+   */
   implicit class AssociativeBothTuple7Ops[F[+_], T1, T2, T3, T4, T5, T6, T7](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
       (AssociativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7)] =
       (AssociativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7])).tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 8 `F` values.
+   */
   implicit class AssociativeBothTuple8Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1632,15 +1782,27 @@ trait AssociativeBothSyntax {
         .mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8])(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8)] =
       (AssociativeBoth
         .tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8]))
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 9 `F` values.
+   */
   implicit class AssociativeBothTuple9Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1648,15 +1810,27 @@ trait AssociativeBothSyntax {
         .mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8], _: F[T9])(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] =
       (AssociativeBoth
         .tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8], _: F[T9]))
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 10 `F` values.
+   */
   implicit class AssociativeBothTuple10Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1664,6 +1838,10 @@ trait AssociativeBothSyntax {
         .mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8], _: F[T9], _: F[T10])(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -1673,9 +1851,17 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 11 `F` values.
+   */
   implicit class AssociativeBothTuple11Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1695,6 +1881,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -1716,9 +1906,17 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 12 `F` values.
+   */
   implicit class AssociativeBothTuple12Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11], F[T12])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1739,6 +1937,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -1761,9 +1963,17 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 13 `F` values.
+   */
   implicit class AssociativeBothTuple13Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11], F[T12], F[T13])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1785,6 +1995,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -1808,9 +2022,17 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 14 `F` values.
+   */
   implicit class AssociativeBothTuple14Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11], F[T12], F[T13], F[T14])
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1833,6 +2055,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -1857,6 +2083,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 15 `F` values.
+   */
   implicit class AssociativeBothTuple15Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](
     tf: => (
       F[T1],
@@ -1876,6 +2105,11 @@ trait AssociativeBothSyntax {
       F[T15]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1899,6 +2133,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -1924,6 +2162,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 16 `F` values.
+   */
   implicit class AssociativeBothTuple16Ops[
     F[+_],
     T1,
@@ -1962,6 +2203,11 @@ trait AssociativeBothSyntax {
       F[T16]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1986,6 +2232,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -2014,6 +2264,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 17 `F` values.
+   */
   implicit class AssociativeBothTuple17Ops[
     F[+_],
     T1,
@@ -2054,6 +2307,11 @@ trait AssociativeBothSyntax {
       F[T17]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2079,6 +2337,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -2108,6 +2370,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 18 `F` values.
+   */
   implicit class AssociativeBothTuple18Ops[
     F[+_],
     T1,
@@ -2150,6 +2415,11 @@ trait AssociativeBothSyntax {
       F[T18]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2176,6 +2446,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -2206,6 +2480,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 19 `F` values.
+   */
   implicit class AssociativeBothTuple19Ops[
     F[+_],
     T1,
@@ -2250,6 +2527,11 @@ trait AssociativeBothSyntax {
       F[T19]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2277,6 +2559,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -2308,6 +2594,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 20 `F` values.
+   */
   implicit class AssociativeBothTuple20Ops[
     F[+_],
     T1,
@@ -2354,6 +2643,11 @@ trait AssociativeBothSyntax {
       F[T20]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2382,6 +2676,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -2414,6 +2712,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 21 `F` values.
+   */
   implicit class AssociativeBothTuple21Ops[
     F[+_],
     T1,
@@ -2462,6 +2763,11 @@ trait AssociativeBothSyntax {
       F[T21]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2491,6 +2797,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
@@ -2524,6 +2834,9 @@ trait AssociativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapN` and `tupleN` for a tuple of 22 `F` values.
+   */
   implicit class AssociativeBothTuple22Ops[
     F[+_],
     T1,
@@ -2574,6 +2887,11 @@ trait AssociativeBothSyntax {
       F[T22]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22) => R
     )(implicit both: AssociativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2604,6 +2922,10 @@ trait AssociativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `AssociativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupleN(implicit
       both: AssociativeBoth[F],
       covariant: Covariant[F]
