@@ -102,7 +102,7 @@ trait Bicovariant[<=>[+_, +_]] extends RightCovariant[<=>] { self =>
   /**
    * Lifts a function to a function that maps the left parameter.
    */
-  def leftMap[A, B, AA](f: A => AA): (A <=> B) => (AA <=> B)  =
+  def leftMap[A, B, AA](f: A => AA): (A <=> B) => (AA <=> B) =
     bimap(f, identity[B])
 
   /**

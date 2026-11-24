@@ -61,6 +61,7 @@ trait IdentityFlattenSyntax {
    * Provides infix syntax for identity operations for covariant types.
    */
   implicit class IdentityFlattenCovariantOps[F[+_], A](fa: F[A]) {
+
     /**
      * Returns `any` with its values replaced by `None` when `b` is `true`, and
      * this value with its values wrapped in `Some` otherwise.
