@@ -35,9 +35,9 @@ extension ($: Debug.type) {
  * on the trait or on an enum on Scala 3. Stored in a plain `val`, the
  * instance renders values.
  *
- * On Scala 3, `DeriveDebug` also has Magnolia's `autoDerived` given:
- * importing `DeriveDebug.autoDerived` derives an instance wherever one is
- * needed.
+ * On Scala 3, `DeriveDebug` also has Magnolia's `autoDerived` given: after
+ * `import DeriveDebug.autoDerived`, the compiler derives a missing `Debug`
+ * instance for a case class implicitly.
  *
  * On Scala 2:
  *
