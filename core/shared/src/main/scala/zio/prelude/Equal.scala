@@ -395,7 +395,9 @@ object Equal extends EqualVersionSpecific {
    * Derives a `PartialOrd[Map[A, B]]` (and thus `Equal[Map[A, B]]`) given an `Equal[B]`.
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
    * Two maps are equal when they have the same keys and the values of each
-   * key are equal with `Equal[B]`.
+   * key are equal with `Equal[B]`. One map is less than another when its keys
+   * are a strict subset of the other's keys and the values of the shared keys
+   * are equal; otherwise two maps that are not equal are `Incomparable`.
    */
   implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] = new PartialOrd[Map[A, B]] {
 

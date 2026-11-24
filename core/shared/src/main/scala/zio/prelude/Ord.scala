@@ -26,12 +26,36 @@ import scala.{math => sm}
 /**
  * `Ord[A]` provides implicit evidence that values of type `A` have a total
  * ordering.
+ *
+ * Comparing two values returns an `Ordering`: `Ordering.LessThan`,
+ * `Ordering.Equals` or `Ordering.GreaterThan`. An `Ord` is also a
+ * `PartialOrd` and an `Equal`, and values are equal exactly when they compare
+ * as `Ordering.Equals`. Importing `zio.prelude._` adds `=?=`, `<`, `<=`, `>`,
+ * `>=`, `max` and `min` to every value of a type with an `Ord` instance.
+ *
+ * {{{
+ * final case class Version(major: Int, minor: Int)
+ *
+ * implicit val versionOrd: Ord[Version] =
+ *   Ord[(Int, Int)].contramap(version => (version.major, version.minor))
+ *
+ * val ordering: Ordering = Version(1, 2) =?= Version(1, 10)
+ * // LessThan
+ * val older: Boolean = Version(1, 2) < Version(2, 0)
+ * // true
+ * val sorted: List[Version] = List(Version(2, 0), Version(1, 2)).sorted(versionOrd.toScala[Version])
+ * // List(Version(1,2), Version(2,0))
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/concrete-types/ord/ Ord]]
  */
 @implicitNotFound("No implicit Ord defined for ${A}.")
 trait Ord[-A] extends PartialOrd[A] { self =>
 
   /**
-   * Returns the result of comparing two values of type `A`.
+   * Returns the result of comparing two values of type `A`. Returns
+   * `Ordering.Equals` without calling the instance's comparison when `l` and
+   * `r` are the same reference.
    */
   final override def compare(l: A, r: A): Ordering =
     if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
@@ -47,7 +71,7 @@ trait Ord[-A] extends PartialOrd[A] { self =>
   /**
    * Constructs an `Ord[(A, B)]` given an `Ord[A]` and `Ord[B]` by first
    * comparing the `A` values, and then if the `A` values are equal comparing
-   * the `B` values
+   * the `B` values.
    */
   final def both[B](that: => Ord[B]): Ord[(A, B)] =
     bothWith(that)(identity)
@@ -69,6 +93,13 @@ trait Ord[-A] extends PartialOrd[A] { self =>
    * Constructs an `Ord[B]` given an `Ord[A]` and a function `f` to transform a
    * `B` value into an `A` value. The instance will convert each `B` value into
    * an `A` and compare the `A` values.
+   *
+   * {{{
+   * val byLength: Ord[String] = Ord[Int].contramap(_.length)
+   *
+   * val ordering: Ordering = byLength.compare("zio", "prelude")
+   * // LessThan
+   * }}}
    */
   override def contramap[B](f: B => A): Ord[B] =
     Ord.make((b1, b2) => compare(f(b1), f(b2)))
@@ -107,23 +138,36 @@ trait Ord[-A] extends PartialOrd[A] { self =>
     Ord.make((l, r) => f(compare(l, r)))
 
   /**
-   * Returns the maximum of the left value and the right value.
+   * Returns the maximum of the left value and the right value, or the left
+   * value when they compare as equal.
    */
   final def max[A1 <: A](l: A1, r: A1): A1 =
     if (greaterOrEqual(l, r)) l else r
 
   /**
-   * Returns the minimum of the left value and the right value.
+   * Returns the minimum of the left value and the right value, or the left
+   * value when they compare as equal.
    */
   final def min[A1 <: A](l: A1, r: A1): A1 =
     if (lessOrEqual(l, r)) l else r
 
   /**
    * Returns a new ordering that is the reverse of this one.
+   *
+   * {{{
+   * val descending: Ord[Int] = Ord[Int].reverse
+   *
+   * val ordering: Ordering = descending.compare(1, 2)
+   * // GreaterThan
+   * }}}
    */
   final def reverse: Ord[A] =
     mapOrdering(_.opposite)
 
+  /**
+   * Converts this instance to a Scala `scala.math.Ordering`, for example to
+   * sort a collection with `sorted`.
+   */
   override def toScala[A1 <: A]: sm.Ordering[A1] =
     self.compare(_, _) match {
       case Ordering.LessThan    => -1
@@ -132,8 +176,15 @@ trait Ord[-A] extends PartialOrd[A] { self =>
     }
 }
 
+/**
+ * Constructors and instances of `Ord`. The `Ord` instances for primitive
+ * types and `String` are in the `Equal` companion object.
+ */
 object Ord {
 
+  /**
+   * Converts the implicit Scala `scala.math.Ordering[A]` to an `Ord[A]`.
+   */
   def fromScala[A](implicit ordering: sm.Ordering[A]): Ord[A] =
     (l: A, r: A) => Ordering.fromCompare(ordering.compare(l, r))
 
@@ -147,7 +198,8 @@ object Ord {
     }
 
   /**
-   * The `IdentityBoth` instance for `Ord`.
+   * The `IdentityBoth` instance for `Ord`. `both` combines two instances with
+   * `Ord#both`, and `any` is `Equal.AnyHashOrd`.
    */
   implicit val OrdIdentityBoth: IdentityBoth[Ord] =
     new IdentityBoth[Ord] {
@@ -158,7 +210,8 @@ object Ord {
     }
 
   /**
-   * The `IdentityEither` instance for `Ord`.
+   * The `IdentityEither` instance for `Ord`. `either` combines two instances
+   * with `Ord#either`, and `none` is `Equal.NothingHashOrd`.
    */
   implicit val OrdIdentityEither: IdentityEither[Ord] =
     new IdentityEither[Ord] {
@@ -177,7 +230,17 @@ object Ord {
   /**
    * Constructs an `Ord[A]` from a function. The instance will be optimized to
    * first compare the values for reference equality and then compare the
-   * values using the specified function.
+   * values using the specified function. Values are equal when the function
+   * returns `Ordering.Equals`. `make` does not check the laws;
+   * `zio.prelude.laws.OrdLaws` can test them.
+   *
+   * {{{
+   * val byAbsoluteValue: Ord[Int] =
+   *   Ord.make((l, r) => Ordering.fromCompare(math.abs(l).compare(math.abs(r))))
+   *
+   * val ordering: Ordering = byAbsoluteValue.compare(-3, 2)
+   * // GreaterThan
+   * }}}
    */
   def make[A](ord: (A, A) => Ordering): Ord[A] = new Ord[A] {
     override protected def checkCompare(l: A, r: A): Ordering = ord(l, r)
@@ -194,13 +257,15 @@ object Ord {
     }
 
   /**
-   * Constructs an `Ord[A]` from a [[scala.math.Ordering]].
+   * Constructs an `Ord[A]` from a [[scala.math.Ordering]]. Values are equal
+   * when the `Ordering`'s `equiv` returns `true`.
    */
   def default[A](implicit ord: scala.math.Ordering[A]): Ord[A] =
     makeFrom((a1, a2) => Ordering.fromCompare(ord.compare(a1, a2)), Equal.fromScala(ord))
 
   /**
-   * Derives an `Ord[Chunk[A]]` given an `Ord[A]`.
+   * Derives an `Ord[Chunk[A]]` given an `Ord[A]`. Chunks are compared element
+   * by element, and a chunk that is a prefix of another is less than it.
    */
   implicit def ChunkOrd[A: Ord]: Ord[Chunk[A]] =
     makeFrom(
@@ -231,7 +296,8 @@ object Ord {
     derive.derive(ord)
 
   /**
-   * Derives an `Ord[Either[A, B]]` given an `Ord[A]` and an `Ord[B]`.
+   * Derives an `Ord[Either[A, B]]` given an `Ord[A]` and an `Ord[B]`. A
+   * `Left` is less than a `Right`.
    */
   implicit def EitherOrd[A: Ord, B: Ord]: Ord[Either[A, B]] =
     makeFrom(
@@ -245,7 +311,8 @@ object Ord {
     )
 
   /**
-   * Derives an `Ord[List[A]]` given an `Ord[A]`.
+   * Derives an `Ord[List[A]]` given an `Ord[A]`. Lists are compared element
+   * by element, and a list that is a prefix of another is less than it.
    */
   implicit def ListOrd[A: Ord]: Ord[List[A]] = {
     val OrdA = Ord[A]
@@ -796,7 +863,9 @@ object Ord {
     )
 
   /**
-   * Derives an `Ord[Vector[A]]` given an `Ord[A]`.
+   * Derives an `Ord[Vector[A]]` given an `Ord[A]`. Vectors are compared
+   * element by element, and a vector that is a prefix of another is less than
+   * it.
    */
   implicit def VectorOrd[A: Ord]: Ord[Vector[A]] =
     makeFrom(
@@ -821,6 +890,9 @@ object Ord {
     )
 }
 
+/**
+ * Syntax for `Ord`, available with `import zio.prelude._`.
+ */
 trait OrdSyntax {
 
   /**
@@ -834,27 +906,48 @@ trait OrdSyntax {
     def =?=[A1 >: A](r: A1)(implicit ord: Ord[A1]): Ordering = ord.compare(l, r)
 
     /**
-     * Returns the maximum of this value and the specified value.
+     * Returns the maximum of this value and the specified value, or this value
+     * when they compare as equal.
      */
     def max[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
       ord.max(l, r)
 
     /**
-     * Returns the minimum of this value and the specified value.
+     * Returns the minimum of this value and the specified value, or this value
+     * when they compare as equal.
      */
     def min[A1 >: A](r: A1)(implicit ord: Ord[A1]): A1 =
       ord.min(l, r)
   }
 }
 
+/**
+ * A marker trait that every comparison result extends: `Ordering.Equals`
+ * directly, and `Ordering.LessThan`, `Ordering.GreaterThan` and
+ * `PartialOrdering.Incomparable` through `Comparison.NotEqual`.
+ */
 sealed trait Comparison extends Product with Serializable
 
+/**
+ * The subtypes of `Comparison`.
+ */
 object Comparison {
 
+  /**
+   * A marker for a comparison result that is not `Ordering.Equals`:
+   * `Ordering.LessThan`, `Ordering.GreaterThan` or
+   * `PartialOrdering.Incomparable`.
+   */
   sealed trait NotEqual extends Comparison
 
 }
 
+/**
+ * The result of comparing two values with a partial ordering:
+ * `Ordering.LessThan`, `Ordering.Equals`, `Ordering.GreaterThan`, or
+ * `PartialOrdering.Incomparable` when the two values are not ordered relative
+ * to each other.
+ */
 sealed trait PartialOrdering extends Product with Serializable { self =>
 
   /**
@@ -900,6 +993,13 @@ sealed trait PartialOrdering extends Product with Serializable { self =>
       case ordering        => ordering
     }
 
+  /**
+   * Combines two results that must agree, such as the comparisons of each
+   * element of two collections in a non-lexicographic order. Returns the other
+   * result when one of them is `Ordering.Equals`, the shared result when both
+   * are `Ordering.LessThan` or both are `Ordering.GreaterThan`, and
+   * `PartialOrdering.Incomparable` otherwise.
+   */
   def unify(that: PartialOrdering): PartialOrdering = (self, that) match {
     case (Ordering.LessThan, Ordering.LessThan)       => Ordering.LessThan
     case (Ordering.GreaterThan, Ordering.GreaterThan) => Ordering.GreaterThan
@@ -909,8 +1009,15 @@ sealed trait PartialOrdering extends Product with Serializable { self =>
   }
 }
 
+/**
+ * The `Incomparable` result and the instances of `PartialOrdering`.
+ */
 object PartialOrdering {
 
+  /**
+   * The result of comparing two values that are not ordered relative to each
+   * other, such as two sets where neither is a subset of the other.
+   */
   case object Incomparable extends PartialOrdering with Comparison.NotEqual
 
   /**
@@ -929,6 +1036,8 @@ object PartialOrdering {
 
   /**
    * `Idempotent`, `Identity` (and thus `Associative`) instance for `PartialOrdering` values.
+   * It combines results with `orElse`, so the first result that is not
+   * `Ordering.Equals` wins, and the identity is `Ordering.Equals`.
    */
   implicit val PartialOrderingIdempotentIdentity: Idempotent[PartialOrdering] with Identity[PartialOrdering] =
     new Idempotent[PartialOrdering] with Identity[PartialOrdering] {
@@ -937,8 +1046,9 @@ object PartialOrdering {
     }
 
   /**
-   * `Idempotent`, `Identity` (and thus `Associative`) instance for `PartialOrdering` values
-   * that combines them for non-lexicographic purposes.
+   * `Commutative`, `Idempotent`, `Identity` (and thus `Associative`) instance for `PartialOrdering` values
+   * that combines them for non-lexicographic purposes, with `unify`. The
+   * identity is `Ordering.Equals`. It is not implicit.
    */
   val PartialOrderingNonlexicographicCommutativeIdempotentIdentity
     : Commutative[PartialOrdering] with Idempotent[PartialOrdering] with Identity[PartialOrdering] =
@@ -994,14 +1104,30 @@ sealed trait Ordering extends PartialOrdering { self =>
     }
 }
 
+/**
+ * The three `Ordering` results and the instances of `Ordering`.
+ */
 object Ordering {
-  case object LessThan    extends Ordering with Comparison.NotEqual
-  case object Equals      extends Ordering with Comparison
+
+  /**
+   * The left value is less than the right value.
+   */
+  case object LessThan extends Ordering with Comparison.NotEqual
+
+  /**
+   * The two values are equal.
+   */
+  case object Equals extends Ordering with Comparison
+
+  /**
+   * The left value is greater than the right value.
+   */
   case object GreaterThan extends Ordering with Comparison.NotEqual
 
   /**
    * Converts an integer result from [[scala.math.Ordering.compare]] or
-   * [[java.lang.Comparable]] to a `Compare`.
+   * [[java.lang.Comparable]] to an `Ordering`: a negative number gives
+   * `LessThan`, zero gives `Equals` and a positive number gives `GreaterThan`.
    */
   def fromCompare(n: Int): Ordering =
     if (n < 0) LessThan
@@ -1009,7 +1135,8 @@ object Ordering {
     else Equals
 
   /**
-   * `Hash` and `Ord` instance for `Ordering` values.
+   * `Hash` and `Ord` instance for `Ordering` values, ordered as `LessThan`,
+   * `Equals`, `GreaterThan`.
    */
   implicit val OrderingHashOrd: Hash[Ordering] with Ord[Ordering] =
     HashOrd.make(
@@ -1019,6 +1146,9 @@ object Ordering {
 
   /**
    * `Idempotent`, `Identity` (and thus `Associative`) instance for `Ordering` values.
+   * Combining returns the left result unless it is `Equals`, so it combines
+   * the comparisons of several fields lexicographically. The identity is
+   * `Equals`.
    */
   implicit val OrderingIdempotentIdentity: Idempotent[Ordering] with Identity[Ordering] =
     new Idempotent[Ordering] with Identity[Ordering] {
