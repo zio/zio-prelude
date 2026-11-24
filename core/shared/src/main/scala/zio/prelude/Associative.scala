@@ -40,19 +40,74 @@ import scala.annotation.tailrec
  * twice as much weight on one number as the others, which is rarely what we
  * want.
  *
- * If we instead define this operation using a `StatsCounter` object then means
- * can be combined in ways that are associative, commutative, and have an
- * identity element, supporting much more interesting modes of composition.
+ * If we instead define this operation on a value that keeps a running sum and
+ * a count (a "stats counter"), then means can be combined in ways that are
+ * associative, commutative, and have an identity element, supporting much
+ * more interesting modes of composition.
+ *
+ * Importing `zio.prelude._` adds the `<>` operator, which combines two values
+ * with the `Associative` instance in implicit scope. Types with more than one
+ * associative operator, such as numbers, select one with a newtype from
+ * `zio.prelude.newtypes`, such as `Sum`, `Prod`, `Max`, `Min`, `And`, `Or`,
+ * `First` and `Last`.
+ *
+ * {{{
+ * import zio.prelude.newtypes.{Max, Sum}
+ *
+ * val greeting: String = "Hello, " <> "world!"
+ * // "Hello, world!"
+ * val total: Sum[Int] = Sum(2) <> Sum(3)
+ * // 5
+ * val largest: Max[Int] = Max(2) <> Max(3)
+ * // 3
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/concrete-types/associative/ Associative]]
  */
 trait Associative[A] { self =>
+
+  /**
+   * Combines `l` and `r` with this associative operator. For every `a`, `b`
+   * and `c`, `combine(combine(a, b), c)` must equal `combine(a, combine(b, c))`.
+   * The `<>` operator from `zio.prelude._` calls this method.
+   *
+   * {{{
+   * import zio.prelude.newtypes.Prod
+   *
+   * val product: Int = Associative[Prod[Int]].combine(Prod(3), Prod(4))
+   * // 12
+   * }}}
+   */
   def combine(l: => A, r: => A): A
 
+  /**
+   * Returns an `Associative[A]` that puts `middle` between the two values it
+   * combines, so `combine(l, r)` returns `l`, `middle` and `r` combined with
+   * this operator.
+   *
+   * {{{
+   * val commaSeparated: Associative[String] = Associative[String].intersperse(", ")
+   *
+   * val list: String = commaSeparated.combine(commaSeparated.combine("a", "b"), "c")
+   * // "a, b, c"
+   * }}}
+   */
   final def intersperse(middle: A): Associative[A] =
     new Associative[A] {
       def combine(l: => A, r: => A): A =
         self.combine(l, self.combine(middle, r))
     }
 
+  /**
+   * Combines `n` copies of `a` with this operator. Returns `a` unchanged when
+   * `n` is 1 or less, including 0 and negative counts. Use `multiplyOption`
+   * when the count can be below 1.
+   *
+   * {{{
+   * val tripled: String = Associative[String].repeat("ab")(3)
+   * // "ababab"
+   * }}}
+   */
   final def repeat(a: A)(n: Int): A = {
     @tailrec
     def repeatHelper(res: A, n: Int): A =
@@ -62,6 +117,26 @@ trait Associative[A] { self =>
     repeatHelper(a, n)
   }
 
+  /**
+   * Combines `n` copies of `a` with this operator, or returns `None` when `n`
+   * is 0 or less. An `Identity` instance overrides it to return
+   * `Some(identity)` when `n` is 0, and an `Inverse` instance returns `Some`
+   * for every `n`, combining inverses for negative counts.
+   *
+   * {{{
+   * import zio.NonEmptyChunk
+   * import zio.prelude.newtypes.Sum
+   *
+   * val three: Option[NonEmptyChunk[Int]] =
+   *   Associative[NonEmptyChunk[Int]].multiplyOption(3)(NonEmptyChunk(1, 2))
+   * // Some(NonEmptyChunk(1, 2, 1, 2, 1, 2))
+   * val none: Option[NonEmptyChunk[Int]] =
+   *   Associative[NonEmptyChunk[Int]].multiplyOption(0)(NonEmptyChunk(1, 2))
+   * // None
+   * val negative: Option[Sum[Int]] = Associative[Sum[Int]].multiplyOption(-2)(Sum(3))
+   * // Some(-6)
+   * }}}
+   */
   def multiplyOption(n: Int)(a: A): Option[A] = {
     def multiplyHelper(res: A, n: Int): Option[A] =
       if (n <= 0) None
@@ -71,6 +146,10 @@ trait Associative[A] { self =>
   }
 }
 
+/**
+ * Constructors and instances of `Associative`, for standard library, ZIO and
+ * ZIO Prelude types.
+ */
 object Associative extends AssociativeLowPriority {
 
   /**
@@ -80,6 +159,18 @@ object Associative extends AssociativeLowPriority {
 
   /**
    * Constructs an `Associative` instance from an associative binary operator.
+   * `make` does not check that the operator is associative;
+   * `zio.prelude.laws.AssociativeLaws` can test it.
+   *
+   * {{{
+   * final case class Votes(count: Int)
+   *
+   * implicit val votesAssociative: Associative[Votes] =
+   *   Associative.make((l, r) => Votes(l.count + r.count))
+   *
+   * val votes: Votes = Votes(2) <> Votes(5)
+   * // Votes(7)
+   * }}}
    */
   def make[A](f: (A, A) => A): Associative[A] =
     (l, r) => f(l, r)
@@ -118,7 +209,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Inverse` instance for the `OrF`` of `Boolean` values.
+   * The `Commutative`, `Idempotent` and `Inverse` instance for the `OrF` of `Boolean` values.
    */
   implicit val BooleanOrFCommutativeIdempotentInverse
     : Commutative[OrF[Boolean]] with Idempotent[OrF[Boolean]] with Inverse[OrF[Boolean]] =
@@ -129,7 +220,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Boolean` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Boolean` values.
    */
   implicit val BooleanMaxIdempotentIdentity: Commutative[Max[Boolean]] with Idempotent[Max[Boolean]] =
     new Commutative[Max[Boolean]] with Idempotent[Max[Boolean]] {
@@ -137,7 +228,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Boolean` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Boolean` values.
    */
   implicit val BooleanMinIdempotentIdentity: Commutative[Min[Boolean]] with Idempotent[Min[Boolean]] =
     new Commutative[Min[Boolean]] with Idempotent[Min[Boolean]] {
@@ -167,7 +258,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` instance for the max of `BigDecimal` values
+   * The `Commutative` and `Idempotent` instance for the max of `BigDecimal`
+   * values.
    */
   implicit val BigDecimalMaxCommutativeIdempotent: Commutative[Max[BigDecimal]] with Idempotent[Max[BigDecimal]] =
     new Commutative[Max[BigDecimal]] with Idempotent[Max[BigDecimal]] {
@@ -175,7 +267,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` instance for the min of `BigDecimal` values
+   * The `Commutative` and `Idempotent` instance for the min of `BigDecimal`
+   * values.
    */
   implicit val BigDecimalMinCommutativeIdempotent: Commutative[Min[BigDecimal]] with Idempotent[Min[BigDecimal]] =
     new Commutative[Min[BigDecimal]] with Idempotent[Min[BigDecimal]] {
@@ -183,7 +276,9 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `PartialInverse` instance for the product of `BigDecimal` values
+   * The `Commutative` and `PartialInverse` instance for the product of
+   * `BigDecimal` values. The inverse divides, and is `None` when the divisor is
+   * zero.
    */
   implicit val BigDecimalProdCommutativePartialInverse
     : Commutative[Prod[BigDecimal]] with PartialInverse[Prod[BigDecimal]] =
@@ -195,7 +290,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` instance for the sum of `BigDecimal` values
+   * The `Commutative` and `Inverse` instance for the sum of `BigDecimal`
+   * values.
    */
   implicit val BigDecimalSumCommutativeInverse: Commutative[Sum[BigDecimal]] with Inverse[Sum[BigDecimal]] =
     new Commutative[Sum[BigDecimal]] with Inverse[Sum[BigDecimal]] {
@@ -245,7 +341,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Byte` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Byte` values.
    */
   implicit val ByteMaxIdempotentIdentity: Commutative[Max[Byte]] with Idempotent[Max[Byte]] =
     new Commutative[Max[Byte]] with Idempotent[Max[Byte]] {
@@ -253,7 +349,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Byte` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Byte` values.
    */
   implicit val ByteMinIdempotentIdentity: Commutative[Min[Byte]] with Idempotent[Min[Byte]] =
     new Commutative[Min[Byte]] with Idempotent[Min[Byte]] {
@@ -283,7 +379,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Char` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Char` values.
    */
   implicit val CharMaxIdempotentIdentity: Commutative[Max[Char]] with Idempotent[Max[Char]] =
     new Commutative[Max[Char]] with Idempotent[Max[Char]] {
@@ -291,7 +387,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Char` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Char` values.
    */
   implicit val CharMinIdempotentIdentity: Commutative[Min[Char]] with Idempotent[Min[Char]] =
     new Commutative[Min[Char]] with Idempotent[Min[Char]] {
@@ -321,7 +417,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative` and `Identity` instance for `Cause`.
+   * The `Commutative` and `Identity` instance for `Both[Cause[A]]`, which
+   * combines causes in parallel with `&&`. The identity is `Cause.empty`.
    */
   implicit def CauseCommutativeIdentity[A]: Commutative[Both[Cause[A]]] with Identity[Both[Cause[A]]] =
     new Commutative[Both[Cause[A]]] with Identity[Both[Cause[A]]] {
@@ -334,7 +431,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Identity` instance for `Cause`.
+   * The `Identity` instance for `AndThen[Cause[A]]`, which combines causes
+   * sequentially with `++`. The identity is `Cause.empty`.
    */
   implicit def CauseIdentity[A]: Identity[AndThen[Cause[A]]] =
     new Identity[AndThen[Cause[A]]] {
@@ -353,7 +451,9 @@ object Associative extends AssociativeLowPriority {
     Identity.make(Chunk.empty, _ ++ _)
 
   /**
-   * The `Associative` instance for `ConfigProvider`.
+   * The `Associative` instance for `ConfigProvider`, which combines two
+   * providers with `orElse`: the result reads from the left provider and falls
+   * back to the right one.
    */
   implicit val ConfigProviderAssociative: Associative[ConfigProvider] =
     Associative.make(_.orElse(_))
@@ -369,7 +469,7 @@ object Associative extends AssociativeLowPriority {
     derive.derive(associative)
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Double` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Double` values.
    */
   implicit val DoubleMaxCommutativeIdempotentIdentity: Commutative[Max[Double]] with Idempotent[Max[Double]] =
     new Commutative[Max[Double]] with Idempotent[Max[Double]] {
@@ -377,7 +477,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Double` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Double` values.
    */
   implicit val DoubleMinCommutativeIdempotentIdentity: Commutative[Min[Double]] with Idempotent[Min[Double]] =
     new Commutative[Min[Double]] with Idempotent[Min[Double]] {
@@ -417,7 +517,9 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative[Either[E, A]]` given an `Associative[A]`.
+   * Derives an `Associative[Either[E, A]]` given an `Associative[A]`. Two
+   * `Right` values combine their contents; otherwise the result is the first
+   * `Left`.
    */
   implicit def EitherAssociative[E, A: Associative]: Associative[Either[E, A]] =
     make {
@@ -427,13 +529,14 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Associative` instance for the first of `A` values.
+   * The `Associative` instance for the first of `A` values: combining keeps
+   * the left value.
    */
   implicit def FirstAssociative[A]: Associative[First[A]] =
     make((l: First[A], _: First[A]) => l)
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Float` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Float` values.
    */
   implicit val FloatMaxCommutativeIdempotentIdentity: Commutative[Max[Float]] with Idempotent[Max[Float]] =
     new Commutative[Max[Float]] with Idempotent[Max[Float]] {
@@ -441,7 +544,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Float` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Float` values.
    */
   implicit val FloatMinCommutativeIdempotentIdentity: Commutative[Min[Float]] with Idempotent[Min[Float]] =
     new Commutative[Min[Float]] with Idempotent[Min[Float]] {
@@ -470,6 +573,10 @@ object Associative extends AssociativeLowPriority {
       def inverse(l: => Sum[Float], r: => Sum[Float]): Sum[Float] = Sum(l - r)
     }
 
+  /**
+   * The `Identity` instance for functions from `A` to `A`. Combining `f` with
+   * `g` returns `f andThen g`, and the identity is the identity function.
+   */
   implicit def Function1Identity[A]: Identity[A => A] = new Identity[A => A] {
     override def identity: A => A = scala.Predef.identity
 
@@ -477,7 +584,7 @@ object Associative extends AssociativeLowPriority {
   }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Int` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Int` values.
    */
   implicit val IntMaxIdempotentIdentity: Commutative[Max[Int]] with Idempotent[Max[Int]] =
     new Commutative[Max[Int]] with Idempotent[Max[Int]] {
@@ -485,7 +592,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Int` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Int` values.
    */
   implicit val IntMinIdempotentIdentity: Commutative[Min[Int]] with Idempotent[Min[Int]] =
     new Commutative[Min[Int]] with Idempotent[Min[Int]] {
@@ -493,7 +600,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Associative` instance for the last of `A` values.
+   * The `Associative` instance for the last of `A` values: combining keeps
+   * the right value.
    */
   implicit def LastAssociative[A]: Associative[Last[A]] =
     make((_: Last[A], r: Last[A]) => r)
@@ -505,7 +613,7 @@ object Associative extends AssociativeLowPriority {
     Identity.make[List[A]](Nil, _ ++ _)
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Long` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Long` values.
    */
   implicit val LongMaxIdempotentIdentity: Commutative[Max[Long]] with Idempotent[Max[Long]] =
     new Commutative[Max[Long]] with Idempotent[Max[Long]] {
@@ -513,7 +621,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Long` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Long` values.
    */
   implicit val LongMinIdempotentIdentity: Commutative[Min[Long]] with Idempotent[Min[Long]] =
     new Commutative[Min[Long]] with Idempotent[Min[Long]] {
@@ -543,7 +651,9 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Identity[Map[K, V]]` given an `Associative[V]`.
+   * Derives an `Identity[Map[K, V]]` given an `Associative[V]`. Combining
+   * two maps keeps the keys of both; for a key in both maps, the values are
+   * combined with the left map's value first. The identity is the empty map.
    */
   implicit def MapIdentity[K, V: Associative]: Identity[Map[K, V]] =
     new Identity[Map[K, V]] {
@@ -557,14 +667,14 @@ object Associative extends AssociativeLowPriority {
 
   /**
    * The `Commutative` instance for the maximum of `A` values for which an
-   * `Ord` is defined.
+   * `Ord` is defined. When the two values are equal, the left one is kept.
    */
   implicit def MaxCommutative[A: Ord]: Commutative[Max[A]] =
     Commutative.make((l: Max[A], r: Max[A]) => if (l >= r) l else r)
 
   /**
    * The `Commutative` instance for the minimum of `A` values for which an
-   * `Ord` is defined.
+   * `Ord` is defined. When the two values are equal, the left one is kept.
    */
   implicit def MinCommutative[A: Ord]: Commutative[Min[A]] =
     Commutative.make((l: Min[A], r: Min[A]) => if (l <= r) l else r)
@@ -580,6 +690,7 @@ object Associative extends AssociativeLowPriority {
 
   /**
    * The `Commutative` and `Inverse` instance for the sum of `Natural` values.
+   * The inverse subtracts and returns zero when the result would be negative.
    */
   implicit val NaturalSumCommutativeInverse: Commutative[Sum[Natural]] with Inverse[Sum[Natural]] =
     new Commutative[Sum[Natural]] with Inverse[Sum[Natural]] {
@@ -596,7 +707,9 @@ object Associative extends AssociativeLowPriority {
     make(_ ++ _)
 
   /**
-   * Derives an `Identity[Option[A]]` given an `Associative[A]`.
+   * Derives an `Identity[Option[A]]` given an `Associative[A]`. Two `Some`
+   * values combine their contents, a `Some` combined with `None` is kept, and
+   * the identity is `None`.
    */
   implicit def OptionIdentity[A: Associative]: Identity[Option[A]] =
     Identity.make(
@@ -609,6 +722,11 @@ object Associative extends AssociativeLowPriority {
       }
     )
 
+  /**
+   * The `Identity` instance for `Prod[ParSeq[Unit, A]]`, which combines two
+   * collections of events sequentially with `++`. The identity is
+   * `ParSeq.empty`.
+   */
   implicit def ParSeqProdIdentity[A]: Identity[Prod[ParSeq[Unit, A]]] = new Identity[Prod[ParSeq[Unit, A]]] {
     def identity: Prod[ParSeq[Unit, A]]                                                          =
       Prod(ParSeq.empty)
@@ -616,6 +734,11 @@ object Associative extends AssociativeLowPriority {
       Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
   }
 
+  /**
+   * The `Commutative` and `Identity` instance for `Sum[ParSeq[Unit, A]]`,
+   * which combines two collections of events in parallel with `&&`. The
+   * identity is `ParSeq.empty`.
+   */
   implicit def ParSeqSumCommutativeIdentity[A]: Commutative[Sum[ParSeq[Unit, A]]] with Identity[Sum[ParSeq[Unit, A]]] =
     new Commutative[Sum[ParSeq[Unit, A]]] with Identity[Sum[ParSeq[Unit, A]]] {
       def identity: Sum[ParSeq[Unit, A]]                                                        =
@@ -633,7 +756,9 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Inverse` instance for the union of `Set[A]` values.
+   * The `Commutative`, `Idempotent` and `Inverse` instance for the union of
+   * `Set[A]` values. The identity is the empty set, and the inverse is the set
+   * difference `l &~ r`.
    */
   implicit def SetOrFCommutativeIdempotentInverse[A]
     : Commutative[OrF[Set[A]]] with Idempotent[OrF[Set[A]]] with Inverse[OrF[Set[A]]] =
@@ -644,7 +769,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the max of `Short` values.
+   * The `Commutative` and `Idempotent` instance for the max of `Short` values.
    */
   implicit val ShortMaxIdempotentIdentity: Commutative[Max[Short]] with Idempotent[Max[Short]] =
     new Commutative[Max[Short]] with Idempotent[Max[Short]] {
@@ -652,7 +777,7 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * The `Commutative`, `Idempotent` and `Identity` instance for the min of `Short` values.
+   * The `Commutative` and `Idempotent` instance for the min of `Short` values.
    */
   implicit val ShortMinIdempotentIdentity: Commutative[Min[Short]] with Idempotent[Min[Short]] =
     new Commutative[Min[Short]] with Idempotent[Min[Short]] {
@@ -688,8 +813,8 @@ object Associative extends AssociativeLowPriority {
     Identity.make("", _ + _)
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple2Associative[A: Associative, B: Associative]: Associative[(A, B)] =
     make { case ((a1, b1), (a2, b2)) =>
@@ -697,8 +822,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple3Associative[A: Associative, B: Associative, C: Associative]: Associative[(A, B, C)] =
     make { case ((a1, b1, c1), (a2, b2, c2)) =>
@@ -706,8 +831,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple4Associative[A: Associative, B: Associative, C: Associative, D: Associative]
     : Associative[(A, B, C, D)] =
@@ -716,8 +841,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple5Associative[A: Associative, B: Associative, C: Associative, D: Associative, E: Associative]
     : Associative[(A, B, C, D, E)] =
@@ -726,8 +851,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple6Associative[
     A: Associative,
@@ -746,8 +871,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple7Associative[
     A: Associative,
@@ -767,8 +892,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple8Associative[
     A: Associative,
@@ -789,8 +914,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple9Associative[
     A: Associative,
@@ -812,8 +937,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple10Associative[
     A: Associative,
@@ -847,8 +972,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple11Associative[
     A: Associative,
@@ -884,8 +1009,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple12Associative[
     A: Associative,
@@ -923,8 +1048,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple13Associative[
     A: Associative,
@@ -964,8 +1089,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple14Associative[
     A: Associative,
@@ -1007,8 +1132,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple15Associative[
     A: Associative,
@@ -1052,8 +1177,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple16Associative[
     A: Associative,
@@ -1099,8 +1224,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple17Associative[
     A: Associative,
@@ -1148,8 +1273,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple18Associative[
     A: Associative,
@@ -1199,8 +1324,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple19Associative[
     A: Associative,
@@ -1252,8 +1377,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple20Associative[
     A: Associative,
@@ -1307,8 +1432,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple21Associative[
     A: Associative,
@@ -1364,8 +1489,8 @@ object Associative extends AssociativeLowPriority {
     }
 
   /**
-   * Derives an `Associative` for a product type given an `Associative` for
-   * each element of the product type.
+   * Derives an `Associative` for a tuple given an `Associative` for each
+   * element type. The elements are combined position by position.
    */
   implicit def Tuple22Associative[
     A: Associative,
@@ -1422,6 +1547,10 @@ object Associative extends AssociativeLowPriority {
         )
     }
 
+  /**
+   * The `Commutative`, `Idempotent` and `Inverse` instance for `Unit`. Every
+   * operation returns `()`.
+   */
   implicit val UnitCommutativeInverse: Commutative[Unit] with Idempotent[Unit] with Inverse[Unit] =
     new Commutative[Unit] with Idempotent[Unit] with Inverse[Unit] {
       def combine(l: => Unit, r: => Unit): Unit = ()
@@ -1435,6 +1564,10 @@ object Associative extends AssociativeLowPriority {
   implicit def VectorIdentity[A]: Identity[Vector[A]] =
     Identity.make(Vector.empty, _ ++ _)
 
+  /**
+   * The `Identity` instance for `Prod[Cause[A]]`, which combines causes
+   * sequentially with `++`. The identity is `Cause.empty`.
+   */
   implicit def zioCauseProdIdentity[A]: Identity[Prod[zio.Cause[A]]] = new Identity[Prod[zio.Cause[A]]] {
     def identity: Prod[zio.Cause[A]]                                                    =
       Prod(zio.Cause.empty)
@@ -1442,6 +1575,10 @@ object Associative extends AssociativeLowPriority {
       Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
   }
 
+  /**
+   * The `Commutative` and `Identity` instance for `Sum[Cause[A]]`, which
+   * combines causes in parallel with `&&`. The identity is `Cause.empty`.
+   */
   implicit def zioCauseSumCommutativeIdentity[A]: Commutative[Sum[zio.Cause[A]]] with Identity[Sum[zio.Cause[A]]] =
     new Commutative[Sum[zio.Cause[A]]] with Identity[Sum[zio.Cause[A]]] {
       def identity: Sum[zio.Cause[A]]                                                  =
@@ -1451,14 +1588,27 @@ object Associative extends AssociativeLowPriority {
     }
 }
 
+/**
+ * `Associative` instances with a lower priority than the instances in the
+ * `Associative` companion object: when one instance from each applies, the
+ * compiler picks the one from the companion object.
+ */
 trait AssociativeLowPriority {
 
+  /**
+   * The `Associative` instance for `Prod[ParSeq[Unit, A]]`, which combines two
+   * collections of events sequentially with `++`.
+   */
   implicit def parSeqProdAssociative[A]: Associative[Prod[ParSeq[Unit, A]]] =
     new Associative[Prod[ParSeq[Unit, A]]] {
       def combine(l: => Prod[ParSeq[Unit, A]], r: => Prod[ParSeq[Unit, A]]): Prod[ParSeq[Unit, A]] =
         Prod(Prod.unwrap(l) ++ Prod.unwrap(r))
     }
 
+  /**
+   * The `Commutative` instance for `Sum[ParSeq[Unit, A]]`, which combines two
+   * collections of events in parallel with `&&`.
+   */
   implicit def parSeqSumCommutative[A]: Commutative[Sum[ParSeq[Unit, A]]] =
     new Commutative[Sum[ParSeq[Unit, A]]] {
       def combine(l: => Sum[ParSeq[Unit, A]], r: => Sum[ParSeq[Unit, A]]): Sum[ParSeq[Unit, A]] =
@@ -1487,6 +1637,9 @@ trait AssociativeLowPriority {
     }
 }
 
+/**
+ * Syntax for `Associative`, available with `import zio.prelude._`.
+ */
 trait AssociativeSyntax {
 
   /**
@@ -1497,24 +1650,35 @@ trait AssociativeSyntax {
 
     /**
      * A symbolic alias for `combine`.
+     *
+     * {{{
+     * import zio.Chunk
+     *
+     * val chunk: Chunk[Int] = Chunk(1, 2) <> Chunk(3)
+     * // Chunk(1,2,3)
+     * }}}
      */
     def <>[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
-     * Associatively combines this value with the specified value
+     * Combines this value with `r`, using the `Associative[A1]` in implicit
+     * scope.
      */
     def combine[A1 >: A](r: => A1)(implicit associative: Associative[A1]): A1 =
       associative.combine(l, r)
 
     /**
-     * Associatively repeats value 'n' times
+     * Combines `n` copies of this value. Returns the value unchanged when `n`
+     * is 1 or less.
      */
     def repeat[A1 >: A](n: Int)(implicit associative: Associative[A1]): A1 =
       associative.repeat(l)(n)
 
     /**
-     * Associatively multiplies value 'n' times
+     * Combines `n` copies of this value, or returns `None` when `n` is 0 or
+     * less. See `Associative#multiplyOption` for how `Identity` and `Inverse`
+     * instances handle 0 and negative counts.
      */
     def multiplyOption[A1 >: A](n: Int)(implicit associative: Associative[A1]): Option[A1] =
       associative.multiplyOption(n)(l)
