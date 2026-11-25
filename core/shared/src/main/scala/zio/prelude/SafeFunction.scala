@@ -57,6 +57,9 @@ final class SafeFunction[-In, +Out] private (private val steps: Chunk[Any => Any
     new SafeFunction(that.steps ++ self.steps)
 }
 
+/**
+ * Constructors for `SafeFunction`.
+ */
 object SafeFunction {
 
   /**

@@ -24,12 +24,25 @@ import scala.annotation.{implicitNotFound, tailrec}
 /**
  * `PartialOrd[A]` provides implicit evidence that values of type `A` have a partial
  * ordering.
+ *
+ * Comparing two values returns a `PartialOrdering`, which is
+ * `PartialOrdering.Incomparable` when neither value is less than or equal to
+ * the other. Importing `zio.prelude._` adds `=??=`, `<`, `<=`, `>` and `>=`.
+ *
+ * {{{
+ * val subset: PartialOrdering = Set(1) =??= Set(1, 2)
+ * // LessThan
+ * val disjoint: PartialOrdering = Set(1) =??= Set(2)
+ * // Incomparable
+ * }}}
  */
 @implicitNotFound("No implicit PartialOrd defined for ${A}.")
 trait PartialOrd[-A] extends Equal[A] { self =>
 
   /**
-   * Returns the result of comparing two values of type `A`.
+   * Returns the result of comparing two values of type `A`. Returns
+   * `Ordering.Equals` without calling the instance's comparison when `l` and
+   * `r` are the same reference.
    */
   def compare(l: A, r: A): PartialOrdering =
     if (Equal.refEq(l, r)) Ordering.Equals else checkCompare(l, r)
@@ -43,15 +56,15 @@ trait PartialOrd[-A] extends Equal[A] { self =>
     compare(l, r).isEqual
 
   /**
-   * Constructs an `PartialOrd[(A, B)]` given an `PartialOrd[A]` and `PartialOrd[B]` by first
+   * Constructs a `PartialOrd[(A, B)]` given a `PartialOrd[A]` and `PartialOrd[B]` by first
    * comparing the `A` values, and then if the `A` values are equal comparing
-   * the `B` values
+   * the `B` values.
    */
   final def both[B](that: => PartialOrd[B]): PartialOrd[(A, B)] =
     bothWith(that)(identity)
 
   /**
-   * Constructs an `PartialOrd[C]` given an `PartialOrd[A]`, an `PartialOrd[B]` and a function `f`
+   * Constructs a `PartialOrd[C]` given a `PartialOrd[A]`, a `PartialOrd[B]` and a function `f`
    * to transform a `C` value into an `(A, B)`. The instance will convert each
    * `C` value into an `(A, B)`, compare the `A` values, and then if the `A`
    * values are equal compare the `B` values.
@@ -64,7 +77,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
     }
 
   /**
-   * Constructs an `PartialOrd[B]` given an `PartialOrd[A]` and a function `f` to transform a
+   * Constructs a `PartialOrd[B]` given a `PartialOrd[A]` and a function `f` to transform a
    * `B` value into an `A` value. The instance will convert each `B` value into
    * an `A` and compare the `A` values.
    */
@@ -72,7 +85,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
     PartialOrd.make((b1, b2) => checkCompare(f(b1), f(b2)))
 
   /**
-   * Constructs an `PartialOrd[Either[A, B]]` given an `PartialOrd[A]` and an `PartialOrd[B]`. If
+   * Constructs a `PartialOrd[Either[A, B]]` given a `PartialOrd[A]` and a `PartialOrd[B]`. If
    * one value is `Left` and one value is `Right` it will treat the `Left`
    * value as less than the `Right` value. Otherwise, it will compare the two
    * values.
@@ -81,7 +94,7 @@ trait PartialOrd[-A] extends Equal[A] { self =>
     eitherWith(that)(identity)
 
   /**
-   * Constructs an `PartialOrd[C]` given an `PartialOrd[A]`, an `PartialOrd[B]`, and a function `f`
+   * Constructs a `PartialOrd[C]` given a `PartialOrd[A]`, a `PartialOrd[B]`, and a function `f`
    * to transform a `C` value into an `Either[A, B]`. The instance will convert
    * each `C` value into an `Either[A, B]`. If one value is `Left` and one
    * value is `Right` it will treat the `Left` value as less than the `Right`
@@ -145,6 +158,10 @@ trait PartialOrd[-A] extends Equal[A] { self =>
 
 }
 
+/**
+ * Constructors and instances of `PartialOrd`. Every `Ord` is also a
+ * `PartialOrd`, so the `Ord` instances apply as well.
+ */
 object PartialOrd {
 
   /**
@@ -185,9 +202,11 @@ object PartialOrd {
     ord
 
   /**
-   * Constructs an `PartialOrd[A]` from a function. The instance will be optimized to
+   * Constructs a `PartialOrd[A]` from a function. The instance will be optimized to
    * first compare the values for reference equality and then compare the
-   * values using the specified function.
+   * values using the specified function. Values are equal when the function
+   * returns `Ordering.Equals`. `make` does not check the laws;
+   * `zio.prelude.laws.PartialOrdLaws` can test them.
    */
   def make[A](ord: (A, A) => PartialOrdering): PartialOrd[A] =
     (l, r) => ord(l, r)
@@ -203,7 +222,7 @@ object PartialOrd {
     }
 
   /**
-   * Derives an `PartialOrd[Chunk[A]]` given an `PartialOrd[A]`.
+   * Derives a `PartialOrd[Chunk[A]]` given a `PartialOrd[A]`.
    */
   implicit def ChunkPartialOrd[A: PartialOrd]: PartialOrd[Chunk[A]] =
     makeFrom(
@@ -229,13 +248,13 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd[F[A]]` given a `Derive[F, PartialOrd]` and an `PartialOrd[A]`.
+   * Derives a `PartialOrd[F[A]]` given a `Derive[F, PartialOrd]` and a `PartialOrd[A]`.
    */
   implicit def DerivePartialOrd[F[_], A](implicit derive: Derive[F, PartialOrd], ord: PartialOrd[A]): PartialOrd[F[A]] =
     derive.derive(ord)
 
   /**
-   * Derives an `PartialOrd[Either[A, B]]` given an `PartialOrd[A]` and an `PartialOrd[B]`.
+   * Derives a `PartialOrd[Either[A, B]]` given a `PartialOrd[A]` and a `PartialOrd[B]`.
    */
   implicit def EitherPartialOrd[A: PartialOrd, B: PartialOrd]: PartialOrd[Either[A, B]] =
     makeFrom(
@@ -249,7 +268,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd[List[A]]` given an `PartialOrd[A]`.
+   * Derives a `PartialOrd[List[A]]` given a `PartialOrd[A]`.
    */
   implicit def ListPartialOrd[A: PartialOrd]: PartialOrd[List[A]] = {
     val PartialOrdA = PartialOrd[A]
@@ -271,13 +290,13 @@ object PartialOrd {
   }
 
   /**
-   * Derives an `PartialOrd[NonEmptyChunk[A]]` given an `PartialOrd[A]`.
+   * Derives a `PartialOrd[NonEmptyChunk[A]]` given a `PartialOrd[A]`.
    */
   implicit def NonEmptyChunkPartialOrd[A: PartialOrd]: PartialOrd[NonEmptyChunk[A]] =
     PartialOrd[Chunk[A]].contramap(_.toChunk)
 
   /**
-   * Derives an `PartialOrd[Option[A]]` given an `PartialOrd[A]`. `None` will be treated as
+   * Derives a `PartialOrd[Option[A]]` given a `PartialOrd[A]`. `None` will be treated as
    * less than all other values.
    */
   implicit def OptionPartialOrd[A: PartialOrd]: PartialOrd[Option[A]] =
@@ -287,7 +306,7 @@ object PartialOrd {
     }
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple2PartialOrd[A: PartialOrd, B: PartialOrd]: PartialOrd[(A, B)] =
@@ -299,7 +318,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple3PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd]: PartialOrd[(A, B, C)] =
@@ -311,7 +330,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple4PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd, D: PartialOrd]: PartialOrd[(A, B, C, D)] =
@@ -323,7 +342,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple5PartialOrd[A: PartialOrd, B: PartialOrd, C: PartialOrd, D: PartialOrd, E: PartialOrd]
@@ -336,7 +355,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple6PartialOrd[
@@ -355,7 +374,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple7PartialOrd[
@@ -375,7 +394,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple8PartialOrd[
@@ -396,7 +415,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple9PartialOrd[
@@ -418,7 +437,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple10PartialOrd[
@@ -441,7 +460,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple11PartialOrd[
@@ -465,7 +484,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple12PartialOrd[
@@ -490,7 +509,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple13PartialOrd[
@@ -520,7 +539,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple14PartialOrd[
@@ -551,7 +570,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple15PartialOrd[
@@ -583,7 +602,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple16PartialOrd[
@@ -616,7 +635,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple17PartialOrd[
@@ -650,7 +669,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple18PartialOrd[
@@ -685,7 +704,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple19PartialOrd[
@@ -721,7 +740,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple20PartialOrd[
@@ -758,7 +777,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple21PartialOrd[
@@ -796,7 +815,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd` for a product type given an `PartialOrd` for each element of
+   * Derives a `PartialOrd` for a product type given a `PartialOrd` for each element of
    * the product type.
    */
   implicit def Tuple22PartialOrd[
@@ -835,7 +854,7 @@ object PartialOrd {
     )
 
   /**
-   * Derives an `PartialOrd[Vector[A]]` given an `PartialOrd[A]`.
+   * Derives a `PartialOrd[Vector[A]]` given a `PartialOrd[A]`.
    */
   implicit def VectorPartialOrd[A: PartialOrd]: PartialOrd[Vector[A]] =
     makeFrom(
@@ -896,10 +915,15 @@ object PartialOrd {
   }
 }
 
+/**
+ * Syntax for `PartialOrd`, available with `import zio.prelude._`.
+ */
 trait PartialOrdSyntax {
 
   /**
-   * Provides infix syntax for comparing two values with a total ordering.
+   * Provides infix syntax for comparing two values with a partial ordering.
+   * The `Boolean` operators return `false` when the values are
+   * `PartialOrdering.Incomparable`.
    */
   implicit class PartialOrdOps[A](val l: A) {
 

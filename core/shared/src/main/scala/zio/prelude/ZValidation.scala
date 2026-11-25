@@ -13,6 +13,28 @@ import scala.util.Try
  * particularly useful in validating data, where we want to attempt to validate
  * all of the data and retain information about all errors that arose, rather
  * than failing at the first error.
+ *
+ * `Validation[E, A]` is a `ZValidation` with no log. `zipPar`, `validate` and
+ * `validateWith` keep the errors of every input; `flatMap` stops at the first
+ * failure, because the next step needs the value:
+ *
+ * {{{
+ * final case class Person(name: String, age: Int)
+ *
+ * def validateName(name: String): Validation[String, String] =
+ *   if (name.isEmpty) Validation.fail("name is empty") else Validation.succeed(name)
+ *
+ * def validateAge(age: Int): Validation[String, Int] =
+ *   if (age < 0) Validation.fail(s"age \$age is negative") else Validation.succeed(age)
+ *
+ * Validation.validateWith(validateName(""), validateAge(-1))(Person(_, _))
+ * // Failure(Chunk(),NonEmptyChunk(name is empty, age -1 is negative))
+ *
+ * Validation.validateWith(validateName("Ada"), validateAge(36))(Person(_, _))
+ * // Success(Chunk(),Person(Ada,36))
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-data-types/zvalidation/ ZValidation]]
  */
 sealed trait ZValidation[+W, +E, +A] { self =>
 
@@ -58,7 +80,9 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 
   /**
    * Returns whether this `ZValidation` and the specified `ZValidation` are
-   * equal to each other.
+   * equal to each other. Two successes are equal when their values are equal,
+   * and two failures are equal when they have the same errors, in any order.
+   * The log is not compared.
    */
   override final def equals(that: Any): Boolean =
     that match {
@@ -67,15 +91,29 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case _                             => false
     }
 
+  /** Returns a hash code consistent with `equals`, which ignores the log and the order of errors. */
   override final def hashCode(): Int = toEitherMultiSet.hashCode()
 
+  /** Returns `true` if this `ZValidation` is a `Success`. */
   final def isSuccess: Boolean = self.isInstanceOf[Success[?, ?]]
 
+  /** Returns `true` if this `ZValidation` is a `Failure`. */
   final def isFailure: Boolean = !isSuccess
 
   /**
    * Transforms the value of this `ZValidation` with the specified validation
-   * function if it is a success or returns the value unchanged otherwise.
+   * function if it is a success or returns the value unchanged otherwise. The
+   * log of this `ZValidation` comes before the log of the result of `f`.
+   *
+   * Unlike `zipPar`, it does not accumulate errors: if this `ZValidation` is a
+   * failure, `f` is not called.
+   *
+   * {{{
+   * val parsed: Validation[String, Int] = Validation.succeed(42)
+   *
+   * parsed.flatMap(n => if (n > 0) Validation.succeed(n * 2) else Validation.fail("not positive"))
+   * // Success(Chunk(),84)
+   * }}}
    */
   final def flatMap[W1 >: W, E1 >: E, B](f: A => ZValidation[W1, E1, B]): ZValidation[W1, E1, B] =
     self match {
@@ -90,7 +128,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Returns a ZValidation that is this ZValidation if failing or the inner ZValidation if the outer one succeeds.
    * In particular, the sequential aspect of this combinator precludes combining error values of outer and inner ZValidations.
-   * This method can be used to "flatten" nested ZValidation.
+   * This method can be used to "flatten" nested ZValidation. The log of the outer ZValidation comes before the log of
+   * the inner one.
    */
   final def flatten[W1 >: W, E1 >: E, B](implicit ev1: A <:< ZValidation[W1, E1, B]): ZValidation[W1, E1, B] =
     self.flatMap(a => ev1(a))
@@ -147,7 +186,15 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
-   * Writes an entry to the log.
+   * Writes an entry to the end of the log, for a success or a failure.
+   *
+   * {{{
+   * val checked: ZValidation[String, Nothing, Int] =
+   *   ZValidation.succeed(8080).log("port read from config")
+   *
+   * checked.getLog
+   * // Chunk(port read from config)
+   * }}}
    */
   final def log[W1 >: W](w1: W1): ZValidation[W1, E, A] =
     self match {
@@ -166,7 +213,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 
   /**
-   * Transforms the error value of this `ZValidation` with the specified
+   * Transforms each error value of this `ZValidation` with the specified
    * function.
    */
   final def mapError[E2](f: E => E2): ZValidation[W, E2, A] =
@@ -216,12 +263,32 @@ sealed trait ZValidation[+W, +E, +A] { self =>
       case Success(w, a) => (w, Right(a))
     }
 
+  /**
+   * Returns this `ZValidation` if it is a success, and otherwise falls back to
+   * `that`. The errors of this `ZValidation` are dropped; its log is kept in
+   * front of the log of `that`. `that` is evaluated only when this
+   * `ZValidation` is a failure.
+   *
+   * {{{
+   * val primary: Validation[String, Int]  = Validation.fail("primary host down")
+   * val fallback: Validation[String, Int] = Validation.succeed(8081)
+   *
+   * primary.orElse(fallback)
+   * // Success(Chunk(),8081)
+   * }}}
+   */
   final def orElse[W1 >: W, E1, A1 >: A](that: => ZValidation[W1, E1, A1]): ZValidation[W1, E1, A1] =
     self match {
       case Failure(log, _)        => that.mapLogAll(log ++ _)
       case success: Success[_, _] => success
     }
 
+  /**
+   * Returns this `ZValidation` if it is a success, and otherwise falls back to
+   * `that`, moving the errors of this `ZValidation` into the log. The log of
+   * the result is the log of this `ZValidation`, then its errors, then the log
+   * of `that`. `that` is evaluated only when this `ZValidation` is a failure.
+   */
   final def orElseLog[W1 >: W, E1, A1 >: A](
     that: => ZValidation[W1, E1, A1]
   )(implicit ev: E <:< W1): ZValidation[W1, E1, A1] =
@@ -255,6 +322,7 @@ sealed trait ZValidation[+W, +E, +A] { self =>
 
   /**
    * Transforms `ZValidation` to an `Either`, where the failure case will be represented as an `Exception` with the first error as `cause`.
+   * The remaining errors are added to the exception as suppressed exceptions. The log is discarded.
    */
   final def toEitherException(implicit ev: E <:< Throwable): Either[ZValidationException[W, E], A] = self match {
     case Success(_, value)      => Right(value)
@@ -277,7 +345,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     toEither.left.map(f)
 
   /**
-   * Transforms this `ZValidation` to a `Future`, discarding the log.
+   * Transforms this `ZValidation` to a `Future`, discarding the log. A failure becomes a failed `Future` with a
+   * `ZValidationException` whose cause is the first error.
    */
   final def toFuture(implicit ev: E <:< Throwable): scala.concurrent.Future[A] = self match {
     case Success(_, value)      => scala.concurrent.Future.successful(value)
@@ -292,7 +361,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     fold(_ => None, Some(_))
 
   /**
-   * Transforms this `ZValidation` to a `Try`, discarding the log.
+   * Transforms this `ZValidation` to a `Try`, discarding the log. A failure becomes a `scala.util.Failure` with a
+   * `ZValidationException` whose cause is the first error.
    */
   final def toTry(implicit ev: E <:< Throwable): scala.util.Try[A] = self match {
     case Success(_, value)      => scala.util.Success(value)
@@ -300,7 +370,8 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   }
 
   /**
-   * Converts this `ZValidation` into a `ZIO` effect, discarding the log.
+   * Converts this `ZValidation` into a `ZIO` effect, discarding the log. A failure with several errors fails
+   * with a `Cause` that combines all of them with `Cause.Both`.
    */
   final def toZIO: IO[E, A] =
     self.fold(
@@ -351,7 +422,16 @@ sealed trait ZValidation[+W, +E, +A] { self =>
   /**
    * Combines this `ZValidation` with the specified `ZValidation`, returning a
    * tuple of their results. Returns either the combined result if both were
-   * successes or otherwise returns a failure with all errors.
+   * successes or otherwise returns a failure with all errors. The log of this
+   * `ZValidation` comes before the log of `that`.
+   *
+   * {{{
+   * val host: Validation[String, String] = Validation.fail("host is empty")
+   * val port: Validation[String, Int]    = Validation.fail("port is negative")
+   *
+   * host.zipPar(port)
+   * // Failure(Chunk(),NonEmptyChunk(host is empty, port is negative))
+   * }}}
    */
   final def zipPar[W1 >: W, E1 >: E, B](that: ZValidation[W1, E1, B])(implicit
     zippable: Zippable[A, B]
@@ -379,20 +459,34 @@ sealed trait ZValidation[+W, +E, +A] { self =>
     }
 }
 
+/**
+ * The cases of [[ZValidation]], its constructors and its type class instances.
+ * The `Validation` object in the `zio.prelude` package is this object under
+ * another name.
+ */
 object ZValidation extends LowPriorityValidationImplicits {
   private val unitFailure: Validation[Unit, Nothing] = fail(())
 
+  /** A failed `ZValidation` with its log and one or more errors. */
   final case class Failure[+W, +E](log: Chunk[W], errors: NonEmptyChunk[E]) extends ZValidation[W, E, Nothing] {
+
+    /** The errors as a `NonEmptyMultiSet`, which counts each error and ignores their order. */
     lazy val errorsUnordered: NonEmptyMultiSet[E] = NonEmptyMultiSet.fromIterable(errors.head, errors.tail)
 
+    /** Converts this failure to a `ZValidationException`, when the errors are `Throwable`s. */
     def toException(implicit ev: E <:< Throwable): ZValidationException[W, E] = ZValidationException(this)
   }
 
+  /**
+   * A `RuntimeException` that wraps a `Failure` whose errors are `Throwable`s. Its cause is the first error, and
+   * the remaining errors are added as suppressed exceptions.
+   */
   final case class ZValidationException[+W, +E](failure: Failure[W, E])(implicit ev: E <:< Throwable)
       extends RuntimeException(ev(failure.errors.head)) {
     failure.errors.tail.foreach(addSuppressed(_))
   }
 
+  /** A successful `ZValidation` with its log and its value. */
   final case class Success[+W, +A](log: Chunk[W], value: A) extends ZValidation[W, Nothing, A]
 
   /**
@@ -482,14 +576,16 @@ object ZValidation extends LowPriorityValidationImplicits {
     }
 
   /**
-   * Derives a `PartialOrd[ZValidation[W, E, A]]` given an `Ord[E]` and an `Ord[A]`.
+   * Derives a `PartialOrd[ZValidation[W, E, A]]` given a `PartialOrd[A]`. The
+   * log is ignored, and the errors are compared as `NonEmptyMultiSet`s.
    */
   implicit def ZValidationPartialOrd[W, E, A: PartialOrd]: PartialOrd[ZValidation[W, E, A]] =
     PartialOrd[Either[NonEmptyMultiSet[E], A]].contramap(_.toEitherMultiSet)
 
   /**
-   * Attempts to evaluate the specified value, catching any error that occurs
-   * during evaluation and capturing it as a failure.
+   * Attempts to evaluate the specified value, catching any `Throwable` that
+   * occurs during evaluation and capturing it as a failure. A
+   * `VirtualMachineError`, such as `StackOverflowError`, is rethrown.
    */
   def apply[A](a: => A): Validation[Throwable, A] =
     try succeed(a)
@@ -502,6 +598,13 @@ object ZValidation extends LowPriorityValidationImplicits {
    * Combine a collection of `ZValidation` values into a single `ZValidation`
    * that either returns the values of all of them, if they all succeed, or
    * else fails with all of their errors.
+   *
+   * {{{
+   * val ports = List(Validation.succeed(80), Validation.fail("bad port: x"), Validation.fail("bad port: y"))
+   *
+   * Validation.validateAll(ports)
+   * // Failure(Chunk(),NonEmptyChunk(bad port: x, bad port: y))
+   * }}}
    */
   def validateAll[F[+_]: ForEach, W, E, A](validations: F[ZValidation[W, E, A]]): ZValidation[W, E, F[A]] =
     validations.flip
@@ -515,8 +618,9 @@ object ZValidation extends LowPriorityValidationImplicits {
     validateAll[Iterable, W, E, A](validations).map(_.toSet)
 
   /**
-   * Combine a set of `ZValidation` values into a single `ZValidation` that
-   * succeeds if they all succeed, or else fails with all of their errors.
+   * Combine a collection of `ZValidation` values into a single `ZValidation`
+   * that succeeds with `Unit` if they all succeed, or else fails with all of
+   * their errors.
    */
   def validateAll_[F[+_]: ForEach, W, E](validations: F[ZValidation[W, E, Any]]): ZValidation[W, E, Unit] =
     ForEach[F].forEach_(validations)(identity)
@@ -548,7 +652,8 @@ object ZValidation extends LowPriorityValidationImplicits {
     value.fold(failNonEmptyChunk, succeed)
 
   /**
-   * Constructs a `ZValidation` from an `Option`.
+   * Constructs a `ZValidation` from an `Option`: `Some(a)` succeeds with `a`
+   * and `None` fails with `()`.
    */
   def fromOption[A](value: Option[A]): Validation[Unit, A] =
     value.fold[Validation[Unit, A]](unitFailure)(succeed)
@@ -574,7 +679,8 @@ object ZValidation extends LowPriorityValidationImplicits {
     else Validation.fail(error)
 
   /**
-   * Constructs a `ZValidation` from a `Try`.
+   * Constructs a `ZValidation` from a `Try`: `scala.util.Success(a)` succeeds
+   * with `a` and `scala.util.Failure(e)` fails with `e`.
    */
   def fromTry[A](value: => Try[A]): Validation[Throwable, A] =
     value match {
@@ -602,6 +708,8 @@ object ZValidation extends LowPriorityValidationImplicits {
   /**
    * Validates each element in a collection, collecting the results into a
    * collection of failed results and a collection of successful results.
+   * The result is always a success, whose log holds the logs of every
+   * validation.
    */
   def partition[F[+_]: ForEach: IdentityBoth: IdentityEither, W, E, A, B](
     fa: F[A]
@@ -1616,10 +1724,13 @@ object ZValidation extends LowPriorityValidationImplicits {
       .map(f.tupled)
 }
 
+/**
+ * Lower-priority implicit instances for [[ZValidation]].
+ */
 trait LowPriorityValidationImplicits {
 
   /**
-   * The `CommutativeBoth` instance for `Validation`.
+   * The `CommutativeBoth` instance for `ZValidation`.
    */
   implicit def ZValidationCommutativeBoth[W, E]: CommutativeBoth[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = ZValidation[W, E, a] })#lambda] {

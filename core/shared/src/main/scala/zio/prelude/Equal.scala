@@ -29,12 +29,33 @@ import scala.{math => sm}
 /**
  * `Equal[A]` provides implicit evidence that two values of type `A` can be
  * compared for equality.
+ *
+ * Importing `zio.prelude._` adds the `===` and `!==` operators. Unlike `==`,
+ * they compile only when an `Equal` instance exists for the type of both
+ * values, so `1 === "a"` and comparing two functions are compile errors.
+ * Instances must be reflexive, symmetric and transitive.
+ *
+ * {{{
+ * final case class Point(x: Int, y: Int)
+ *
+ * implicit val pointEqual: Equal[Point] =
+ *   Equal[(Int, Int)].contramap(point => (point.x, point.y))
+ *
+ * val same: Boolean = Point(1, 2) === Point(1, 2)
+ * // true
+ * val different: Boolean = Point(1, 2) !== Point(2, 1)
+ * // true
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/concrete-types/equal/ Equal]]
  */
 @implicitNotFound("No implicit Equal defined for ${A}.")
 trait Equal[-A] { self =>
 
   /**
-   * Returns whether two values of type `A` are equal.
+   * Returns whether two values of type `A` are equal. Returns `true` without
+   * calling the instance's comparison when `l` and `r` are the same
+   * reference.
    */
   final def equal(l: A, r: A): Boolean =
     Equal.refEq(l, r) || checkEqual(l, r)
@@ -48,6 +69,13 @@ trait Equal[-A] { self =>
    * Constructs an `Equal[(A, B)]` given an `Equal[A]` and `Equal[B]` by first
    * comparing the `A` values for equality and then comparing the `B` values
    * for equality, if necessary.
+   *
+   * {{{
+   * val pairs: Equal[(String, Int)] = Equal[String].both(Equal[Int])
+   *
+   * val same: Boolean = pairs.equal(("a", 1), ("a", 1))
+   * // true
+   * }}}
    */
   final def both[B](that: => Equal[B]): Equal[(A, B)] =
     bothWith(that)(identity)
@@ -68,7 +96,14 @@ trait Equal[-A] { self =>
   /**
    * Constructs an `Equal[B]` given an `Equal[A]` and a function `f` to
    * transform a `B` value into an `A` value. The instance will convert each
-   * `B` value into an `A` and the compare the `A` values for equality.
+   * `B` value into an `A` and then compare the `A` values for equality.
+   *
+   * {{{
+   * val byLength: Equal[String] = Equal[Int].contramap(_.length)
+   *
+   * val sameLength: Boolean = byLength.equal("cat", "dog")
+   * // true
+   * }}}
    */
   def contramap[B](f: B => A): Equal[B] =
     Equal.make((b1, b2) => equal(f(b1), f(b2)))
@@ -76,7 +111,8 @@ trait Equal[-A] { self =>
   /**
    * Constructs an `Equal[Either[A, B]]` given an `Equal[A]` and an
    * `Equal[B]`. The instance will compare the `Either[A, B]` values and if
-   * both are `Right` or `Left` compare them for equality.
+   * both are `Right` or `Left` compare them for equality. A `Left` and a
+   * `Right` are not equal.
    */
   final def either[B](that: => Equal[B]): Equal[Either[A, B]] =
     eitherWith(that)(identity)
@@ -85,7 +121,8 @@ trait Equal[-A] { self =>
    * Constructs an `Equal[C]` given an `Equal[A]`, an `Equal[B]`, and a
    * function `f` to transform a `C` value into an `Either[A, B]`. The
    * instance will convert each `C` value into an `Either[A, B]` and then
-   * if both are `Right` or `Left` compare them for equality.
+   * if both are `Right` or `Left` compare them for equality. A `Left` and a
+   * `Right` are not equal.
    */
   final def eitherWith[B, C](that: => Equal[B])(f: C => Either[A, B]): Equal[C] =
     Equal.make { (c1, c2) =>
@@ -102,25 +139,34 @@ trait Equal[-A] { self =>
   final def notEqual(l: A, r: A): Boolean =
     !equal(l, r)
 
+  /**
+   * Converts this instance to a Scala `scala.math.Equiv` that uses `equal`.
+   */
   def toScala[A1 <: A]: sm.Equiv[A1] = self.equal(_, _)
 }
 
+/**
+ * Constructors and instances of `Equal`, for standard library and ZIO types.
+ */
 object Equal extends EqualVersionSpecific {
 
+  /**
+   * Converts the implicit Scala `scala.math.Equiv[A]` to an `Equal[A]`.
+   */
   def fromScala[A](implicit equiv: sm.Equiv[A]): Equal[A] = equiv.equiv(_, _)
 
   /**
-   * `Ord` (and thus also `Equal`) instance for `Any` values.
-   * Note that since values of type `Any` contain no information,
-   * all values of type `Any` can be treated as equal to each other.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Any` values. It
+   * treats all values as equal: every hash is 0 and every comparison returns
+   * `Ordering.Equals`. It is not implicit.
    */
   val AnyHashOrd: Hash[Any] with Ord[Any] =
     HashOrd.make(_ => 0, (_, _) => Ordering.Equals, (_, _) => true)
 
   /**
    * `Hash` and `Ord` (and thus also `Equal`) instance for `Nothing` values.
-   * Note that since there are not values of
-   * type `Nothing` the `equals` method of this instance can never be called
+   * Note that since there are no values of
+   * type `Nothing` the methods of this instance can never be called
    * but it can be useful in deriving instances for more complex types.
    */
   implicit val NothingHashOrd: Hash[Nothing] with Ord[Nothing] =
@@ -133,6 +179,8 @@ object Equal extends EqualVersionSpecific {
 
   /**
    * The `CommutativeBoth` and `IdentityBoth` (and thus `AssociativeBoth`) instance for `Equal`.
+   * `both` combines two instances with `Equal#both`, and `any` is
+   * `AnyHashOrd`.
    */
   implicit val EqualCommutativeIdentityBoth: CommutativeBoth[Equal] with IdentityBoth[Equal] =
     new CommutativeBoth[Equal] with IdentityBoth[Equal] {
@@ -145,6 +193,8 @@ object Equal extends EqualVersionSpecific {
 
   /**
    * The `CommutativeEither` and `IdentityEither` (and thus `AssociativeEither`) instance for `Equal`.
+   * `either` combines two instances with `Equal#either`, and `none` is
+   * `NothingHashOrd`.
    */
   implicit val EqualCommutativeIdentityEither: CommutativeEither[Equal] with IdentityEither[Equal] =
     new CommutativeEither[Equal] with IdentityEither[Equal] {
@@ -173,20 +223,32 @@ object Equal extends EqualVersionSpecific {
   /**
    * Constructs an `Equal[A]` from a function. The instance will be optimized
    * to first compare the values for reference equality and then compare the
-   * values for value equality.
+   * values for value equality. `make` does not check the laws;
+   * `zio.prelude.laws.EqualLaws` can test them.
+   *
+   * {{{
+   * val caseInsensitive: Equal[String] =
+   *   Equal.make((l, r) => l.equalsIgnoreCase(r))
+   *
+   * val same: Boolean = caseInsensitive.equal("ZIO", "zio")
+   * // true
+   * }}}
    */
   def make[A](equal: (A, A) => Boolean): Equal[A] =
     (l, r) => equal(l, r)
 
   /**
    * Constructs an `Equal[A]` that uses the default notion of equality
-   * embodied in the implementation of `equals` for values of type `A`.
+   * embodied in the implementation of `equals` for values of type `A`. It is
+   * a lawful `Equal` only when `equals` is reflexive, symmetric and
+   * transitive for `A`.
    */
   def default[A]: Equal[A] =
     DefaultEqual
 
   /**
-   * The `Hash` and `Ord` instance for `BigDecimal`.
+   * The `Hash` and `Ord` instance for `BigDecimal`, which uses `##`, `==` and
+   * the standard `scala.math.Ordering[BigDecimal]`.
    */
   implicit val BigDecimalHashOrd: Hash[BigDecimal] with Ord[BigDecimal] =
     HashOrd.default
@@ -241,6 +303,12 @@ object Equal extends EqualVersionSpecific {
 
   /**
    * `Equal` instance for `Double` for imprecise equality with configurable tolerance.
+   * Two values are equal when the absolute value of their difference is less
+   * than `epsilon`, which is `2^-40` by default. This relation is not
+   * transitive, so the instance does not satisfy the `Equal` laws. On the
+   * JVM `Double.NaN` is not equal to itself; on Scala.js
+   * `equal(Double.NaN, Double.NaN)` returns `true`, because `equal` first
+   * checks reference equality. It is not implicit.
    */
   def DoubleEqualWithEpsilon(epsilon: Double = 1 / (1024d * 1024 * 1024 * 1024)): Equal[Double] = {
     (l: Double, r: Double) =>
@@ -248,15 +316,13 @@ object Equal extends EqualVersionSpecific {
   }
 
   /**
-   * `Hash` and `Ord` (and thus also `Equal`) instance for `Double` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Double` values,
+   * which orders values with `java.lang.Double.compare`.
    *
-   * Note that to honor the contract
-   *
-   *   * that a value is always equal to itself,
-   * comparing `Double.NaN` with itself will return `true`.
-   *
-   *   * of a total ordering,
-   * `Double.NaN` will be treated as greater than any other number.
+   * So that every value is equal to itself, `Double.NaN` is equal to
+   * `Double.NaN`. So that the ordering is total, `Double.NaN` is greater than
+   * every other value, including `Double.PositiveInfinity`, and `-0.0` is
+   * less than, and not equal to, `0.0`.
    */
   implicit val DoubleHashOrd: Hash[Double] with Ord[Double] =
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Double.compare(l, r)))
@@ -281,27 +347,32 @@ object Equal extends EqualVersionSpecific {
 
   /**
    * `Equal` instance for `Float` for imprecise equality with configurable tolerance.
+   * Two values are equal when the absolute value of their difference is less
+   * than `epsilon`, which is `2^-20` by default. This relation is not
+   * transitive, so the instance does not satisfy the `Equal` laws. On the
+   * JVM `Float.NaN` is not equal to itself; on Scala.js
+   * `equal(Float.NaN, Float.NaN)` returns `true`, because `equal` first
+   * checks reference equality. It is not implicit.
    */
   def FloatEqualWithEpsilon(epsilon: Float = 1 / (1024f * 1024)): Equal[Float] = { (l: Float, r: Float) =>
     (l - r).abs < epsilon
   }
 
   /**
-   * `Hash` and `Ord` (and thus also `Equal`) instance for `Float` values.
+   * `Hash` and `Ord` (and thus also `Equal`) instance for `Float` values,
+   * which orders values with `java.lang.Float.compare`.
    *
-   * Note that to honor the contract
-   *
-   *   * that a value is always equal to itself,
-   * comparing `Float.NaN` with itself will return `true`.
-   *
-   *   * of a total ordering,
-   * `Float.NaN` will be treated as greater than any other number.
+   * So that every value is equal to itself, `Float.NaN` is equal to
+   * `Float.NaN`. So that the ordering is total, `Float.NaN` is greater than
+   * every other value, including `Float.PositiveInfinity`, and `-0.0f` is
+   * less than, and not equal to, `0.0f`.
    */
   implicit val FloatHashOrd: Hash[Float] with Ord[Float] =
     HashOrd.make(_.##, (l, r) => Ordering.fromCompare(java.lang.Float.compare(l, r)))
 
   /**
-   * `Hash` and (and thus also `Equal`) instance for `FiberId` values.
+   * `Hash` (and thus also `Equal`) instance for `FiberId` values, which uses
+   * `equals` and `hashCode`.
    */
   implicit lazy val FiberIdHashOrd: Hash[FiberId] =
     Hash.default
@@ -327,6 +398,10 @@ object Equal extends EqualVersionSpecific {
   /**
    * Derives a `PartialOrd[Map[A, B]]` (and thus `Equal[Map[A, B]]`) given an `Equal[B]`.
    * Due to the limitations of Scala's `Map`, this uses object equality on the keys.
+   * Two maps are equal when they have the same keys and the values of each
+   * key are equal with `Equal[B]`. One map is less than another when its keys
+   * are a strict subset of the other's keys and the values of the shared keys
+   * are equal; otherwise two maps that are not equal are `Incomparable`.
    */
   implicit def MapPartialOrd[A, B: Equal]: PartialOrd[Map[A, B]] = new PartialOrd[Map[A, B]] {
 
@@ -387,7 +462,8 @@ object Equal extends EqualVersionSpecific {
     HashOrd.default
 
   /**
-   * Derives an `Equal[Try[A]]` given an `Equal[A]`.
+   * Derives an `Equal[Try[A]]` given an `Equal[A]`. Two `Failure` values are
+   * compared with `ThrowableHash`: the same class, message and cause.
    */
   implicit def TryEqual[A: Equal]: Equal[Try[A]] =
     make {
@@ -892,7 +968,9 @@ object Equal extends EqualVersionSpecific {
     Hash.default
 
   /**
-   * Derives an `Equal[Exit[E, A]]` given an `Equal[A]` and `Equal[B]`.
+   * Derives an `Equal[Exit[E, A]]` given an `Equal[A]`. Two failures are
+   * compared with `CauseHash`, which uses `equals` and does not need an
+   * `Equal[E]`.
    */
   implicit def ExitEqual[E, A: Equal]: Equal[Exit[E, A]] =
     make {
@@ -921,6 +999,9 @@ object Equal extends EqualVersionSpecific {
     Equal.make(_ == _)
 }
 
+/**
+ * Syntax for `Equal`, available with `import zio.prelude._`.
+ */
 trait EqualSyntax {
 
   /**
@@ -929,7 +1010,9 @@ trait EqualSyntax {
   implicit class EqualOps[A](l: A) {
 
     /**
-     * Returns whether this value and the specified value are equal.
+     * Returns whether this value and the specified value are equal, with the
+     * `Equal` instance for their common supertype `A1`. It does not compile
+     * when there is no such instance.
      */
     def ===[A1 >: A](r: A1)(implicit equal: Equal[A1]): Boolean =
       equal.equal(l, r)

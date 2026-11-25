@@ -16,7 +16,17 @@
 
 package zio.prelude
 
+/**
+ * A type class with an instance for every type `A`. It stands for "no
+ * constraint" where an abstraction takes a constraint as a type parameter:
+ * `Covariant[F]` is a `CovariantSubset[F, AnyType]`, so its `mapSubset`
+ * accepts any result type.
+ */
 sealed trait AnyType[A]
+
+/** Provides the `AnyType` instance for every type. */
 object AnyType {
+
+  /** Returns an `AnyType[A]` for the type `A`; it is found implicitly for every `A`. */
   implicit def apply[A]: AnyType[A] = new AnyType[A] {}
 }

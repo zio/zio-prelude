@@ -16,4 +16,9 @@
 
 package zio.prelude
 
+/**
+ * Members of the `Equal` companion object that differ between Scala versions.
+ * On Scala 3 it adds `derived`, so a case class, sealed trait or enum can
+ * derive an instance with `derives Equal`. On Scala 2 it is empty.
+ */
 trait EqualVersionSpecific

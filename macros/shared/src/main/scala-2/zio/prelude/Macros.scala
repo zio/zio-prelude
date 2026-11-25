@@ -5,11 +5,37 @@ import zio.prelude.ConsoleUtils._
 import scala.annotation.{StaticAnnotation, nowarn}
 import scala.reflect.macros.whitebox
 
-final case class assertionQuote[A](assertion: Assertion[A])                    extends StaticAnnotation
-final case class assertionLambdaQuote[A](f: A => Either[AssertionError, Unit]) extends StaticAnnotation
-final case class assertionString(string: String)                               extends StaticAnnotation
+/**
+ * Annotation that `Newtype.assert` places on the `QuotedAssertion` it
+ * generates. It holds the assertion so that the newtype macros can read it
+ * back at compile time.
+ */
+final case class assertionQuote[A](assertion: Assertion[A]) extends StaticAnnotation
 
+/**
+ * Annotation that `Newtype.assertCustom` places on the `QuotedAssertion` it
+ * generates. It holds the custom function so that the newtype macros can
+ * evaluate it at compile time.
+ */
+final case class assertionLambdaQuote[A](f: A => Either[AssertionError, Unit]) extends StaticAnnotation
+
+/**
+ * Annotation that holds the source code of a newtype's assertion, shown in
+ * compile-time error messages.
+ */
+final case class assertionString(string: String) extends StaticAnnotation
+
+/**
+ * The assertion of a Scala 2 newtype, as returned by `Newtype.assert` and
+ * `Newtype.assertCustom`. The newtype macros read its annotations to check
+ * literal values at compile time; `run` checks other values at run time.
+ */
 trait QuotedAssertion[A] {
+
+  /**
+   * Checks `value`, returning `Right(())` when it passes, or a `Left` with the
+   * failed conditions.
+   */
   def run(value: A): Either[AssertionError, Unit]
 }
 

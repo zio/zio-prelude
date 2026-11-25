@@ -16,7 +16,29 @@
 
 package zio.prelude
 
+/**
+ * Defines the `Id` type and its companion. The `zio.prelude` package object
+ * mixes this trait in, so `import zio.prelude._` brings `Id` into scope.
+ */
 trait IdExports {
+
+  /**
+   * The companion of `Id`: `Id(a)` wraps a value and `Id.unwrap` returns it.
+   */
   object Id extends NewtypeF
+
+  /**
+   * `Id[A]` is the identity type constructor: a newtype over `A` with no
+   * effect. Use it where an operator expects an effect type `F[_]` and the
+   * effect should do nothing, for example to run `ForEach#forEach` as a plain
+   * `map`.
+   *
+   * {{{
+   * val doubled: Id[List[Int]] =
+   *   ForEach[List].forEach(List(1, 2, 3))(a => Id(a * 2))
+   *
+   * Id.unwrap(doubled) // List(2, 4, 6)
+   * }}}
+   */
   type Id[+A] = Id.Type[A]
 }

@@ -26,10 +26,30 @@ import scala.annotation.implicitNotFound
 /**
  * A commutative binary operator that combines two values of types `F[A]` and
  * `F[B]` to produce an `F[(A, B)]`.
+ *
+ * Swapping the two arguments must give the same result with the pair
+ * swapped. For collections such as `List`, the instances pair the elements
+ * position by position, like `zip`, and drop the extra elements of the
+ * longer collection; for `ZIO`, they run the two effects in parallel.
+ * Importing `zio.prelude._` adds `<&>`, `zipPar`, `zipWithPar` and, on tuples
+ * of `F` values, `mapParN` and `tupledPar`.
+ *
+ * {{{
+ * val zipped: List[(Int, String)] = List(1, 2, 3) <&> List("a", "b")
+ * // List((1,a), (2,b))
+ * val sums: List[Int] = (List(1, 2), List(10, 20)).mapParN(_ + _)
+ * // List(11, 22)
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/parameterized-types/commutativeboth/ CommutativeBoth]]
  */
 @implicitNotFound("No implicit CommutativeBoth defined for ${F}.")
 trait CommutativeBoth[F[_]] extends AssociativeBoth[F]
 
+/**
+ * The `mapN` and `tupleN` combinators and the instances of
+ * `CommutativeBoth` for standard library and ZIO types.
+ */
 object CommutativeBoth {
 
   /**
@@ -39,7 +59,8 @@ object CommutativeBoth {
     commutativeBoth
 
   /**
-   * The `CommutativeBoth` instance for `Chunk`.
+   * The `CommutativeBoth` instance for `Chunk`, which pairs the elements
+   * position by position with `zip`.
    */
   implicit val ChunkCommutativeBoth: CommutativeBoth[Chunk] =
     new CommutativeBoth[Chunk] {
@@ -47,7 +68,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `Exit`.
+   * The `CommutativeBoth` instance for `Exit`, which combines two exits with
+   * `zipPar`.
    */
   implicit def ExitCommutativeBoth[E]: CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = Exit[E, a] })#lambda] {
@@ -63,7 +85,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `List`.
+   * The `CommutativeBoth` instance for `List`, which pairs the elements
+   * position by position with `zip`.
    */
   implicit val ListCommutativeBoth: CommutativeBoth[List] =
     new CommutativeBoth[List] {
@@ -71,7 +94,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `NonEmptyChunk`.
+   * The `CommutativeBoth` instance for `NonEmptyChunk`, which pairs the
+   * elements position by position.
    */
   implicit val NonEmptyChunkCommutativeBoth: CommutativeBoth[NonEmptyChunk] =
     new CommutativeBoth[NonEmptyChunk] {
@@ -112,7 +136,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for And `Schedule`.
+   * The `CommutativeBoth` instance for `AndF[Schedule[R, E, A]]`, which
+   * combines two schedules with `&&`.
    */
   implicit def ScheduleAndCommutativeBoth[R, E]
     : CommutativeBoth[({ type lambda[+a] = AndF[Schedule[R, E, a]] })#lambda] =
@@ -124,7 +149,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `AssociativeBoth` instance for Or `Schedule`.
+   * The `CommutativeBoth` instance for `OrF[Schedule[R, E, A]]`, which
+   * combines two schedules with `||`.
    */
   implicit def ScheduleOrCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = OrF[Schedule[R, E, a]] })#lambda] {
@@ -135,7 +161,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `Vector`.
+   * The `CommutativeBoth` instance for `Vector`, which pairs the elements
+   * position by position with `zip`.
    */
   implicit val VectorCommutativeBoth: CommutativeBoth[Vector] =
     new CommutativeBoth[Vector] {
@@ -143,7 +170,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `ZIO`.
+   * The `CommutativeBoth` instance for `ZIO`, which runs the two effects in
+   * parallel with `zipPar`.
    */
   implicit def ZIOCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = ZIO[R, E, a] })#lambda] {
@@ -151,7 +179,9 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for failed `ZIO`.
+   * The `CommutativeBoth` instance for failed `ZIO`. It runs both effects in
+   * parallel and fails with both errors when both fail; when one of them
+   * succeeds, the result succeeds.
    */
   implicit def ZIOFailureCommutativeBoth[R, A]: CommutativeBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] =
     new CommutativeBoth[({ type lambda[+e] = Failure[ZIO[R, e, A]] })#lambda] {
@@ -165,7 +195,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `ZSink`.
+   * The `CommutativeBoth` instance for `ZSink`, which combines two sinks
+   * with `zipPar`.
    */
   implicit def ZSinkCommutativeBoth[R, E, In, L <: In]
     : CommutativeBoth[({ type lambda[+a] = ZSink[R, E, In, L, a] })#lambda] =
@@ -177,7 +208,8 @@ object CommutativeBoth {
     }
 
   /**
-   * The `CommutativeBoth` instance for `ZStream`.
+   * The `CommutativeBoth` instance for `ZStream`, which pairs the elements of
+   * the two streams with `zip`.
    */
   implicit def ZStreamCommutativeBoth[R, E]: CommutativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] =
     new CommutativeBoth[({ type lambda[+a] = ZStream[R, E, a] })#lambda] {
@@ -185,7 +217,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 2 `F` values using the provided function `f` in parallel.
+   * Combines 2 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, B](
     a0: F[A0],
@@ -196,7 +229,8 @@ object CommutativeBoth {
     (a0 <&> a1).map(f.tupled)
 
   /**
-   * Combines 3 `F` values using the provided function `f` in parallel.
+   * Combines 3 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, B](
     a0: F[A0],
@@ -210,7 +244,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 4 `F` values using the provided function `f` in parallel.
+   * Combines 4 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, B](
     a0: F[A0],
@@ -225,7 +260,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 5 `F` values using the provided function `f` in parallel.
+   * Combines 5 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, B](
     a0: F[A0],
@@ -241,7 +277,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 6 `F` values using the provided function `f` in parallel.
+   * Combines 6 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, B](
     a0: F[A0],
@@ -258,7 +295,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 7 `F` values using the provided function `f` in parallel.
+   * Combines 7 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, B](
     a0: F[A0],
@@ -276,7 +314,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 8 `F` values using the provided function `f` in parallel.
+   * Combines 8 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, B](
     a0: F[A0],
@@ -295,7 +334,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 9 `F` values using the provided function `f` in parallel.
+   * Combines 9 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, B](
     a0: F[A0],
@@ -315,7 +355,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 10 `F` values using the provided function `f` in parallel.
+   * Combines 10 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, B](
     a0: F[A0],
@@ -336,7 +377,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 11 `F` values using the provided function `f` in parallel.
+   * Combines 11 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, B](
     a0: F[A0],
@@ -359,7 +401,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 12 `F` values using the provided function `f` in parallel.
+   * Combines 12 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, B](
     a0: F[A0],
@@ -383,7 +426,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 13 `F` values using the provided function `f` in parallel.
+   * Combines 13 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, B](
     a0: F[A0],
@@ -408,7 +452,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 14 `F` values using the provided function `f` in parallel.
+   * Combines 14 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, B](
     a0: F[A0],
@@ -434,7 +479,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 15 `F` values using the provided function `f` in parallel.
+   * Combines 15 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, B](
     a0: F[A0],
@@ -461,7 +507,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 16 `F` values using the provided function `f` in parallel.
+   * Combines 16 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[
     +_
@@ -491,7 +538,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 17 `F` values using the provided function `f` in parallel.
+   * Combines 17 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[
     +_
@@ -522,7 +570,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 18 `F` values using the provided function `f` in parallel.
+   * Combines 18 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[F[
     +_
@@ -557,7 +606,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 19 `F` values using the provided function `f` in parallel.
+   * Combines 19 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[
     F[
@@ -618,7 +668,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 20 `F` values using the provided function `f` in parallel.
+   * Combines 20 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[
     F[
@@ -687,7 +738,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 21 `F` values using the provided function `f` in parallel.
+   * Combines 21 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[
     F[
@@ -761,7 +813,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 22 `F` values using the provided function `f` in parallel.
+   * Combines 22 `F` values with `CommutativeBoth[F]`, which runs effects such
+   * as `ZIO` in parallel, using the provided function `f`.
    */
   def mapN[
     F[
@@ -843,7 +896,8 @@ object CommutativeBoth {
     }
 
   /**
-   * Combines 2 `F` values into a tuple in a parallel manner.
+   * Combines 2 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1](
     a0: F[A0],
@@ -852,7 +906,8 @@ object CommutativeBoth {
     mapN(a0, a1)((_, _))
 
   /**
-   * Combines 3 `F` values into a tuple in a parallel manner.
+   * Combines 3 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2](
     a0: F[A0],
@@ -862,7 +917,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2)((_, _, _))
 
   /**
-   * Combines 4 `F` values into a tuple in a parallel manner.
+   * Combines 4 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3](
     a0: F[A0],
@@ -873,7 +929,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3)((_, _, _, _))
 
   /**
-   * Combines 5 `F` values into a tuple in a parallel manner.
+   * Combines 5 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4](
     a0: F[A0],
@@ -885,7 +942,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4)((_, _, _, _, _))
 
   /**
-   * Combines 6 `F` values into a tuple in a parallel manner.
+   * Combines 6 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5](
     a0: F[A0],
@@ -898,7 +956,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5)((_, _, _, _, _, _))
 
   /**
-   * Combines 7 `F` values into a tuple in a parallel manner.
+   * Combines 7 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6](
     a0: F[A0],
@@ -912,7 +971,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6)((_, _, _, _, _, _, _))
 
   /**
-   * Combines 8 `F` values into a tuple in a parallel manner.
+   * Combines 8 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7](
     a0: F[A0],
@@ -927,7 +987,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6, a7)((_, _, _, _, _, _, _, _))
 
   /**
-   * Combines 9 `F` values into a tuple in a parallel manner.
+   * Combines 9 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8](
     a0: F[A0],
@@ -943,7 +1004,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6, a7, a8)((_, _, _, _, _, _, _, _, _))
 
   /**
-   * Combines 10 `F` values into a tuple in a parallel manner.
+   * Combines 10 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9](
     a0: F[A0],
@@ -960,7 +1022,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)((_, _, _, _, _, _, _, _, _, _))
 
   /**
-   * Combines 11 `F` values into a tuple in a parallel manner.
+   * Combines 11 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10](
     a0: F[A0],
@@ -978,7 +1041,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)((_, _, _, _, _, _, _, _, _, _, _))
 
   /**
-   * Combines 12 `F` values into a tuple in a parallel manner.
+   * Combines 12 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11](
     a0: F[A0],
@@ -997,7 +1061,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)((_, _, _, _, _, _, _, _, _, _, _, _))
 
   /**
-   * Combines 13 `F` values into a tuple in a parallel manner.
+   * Combines 13 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12](
     a0: F[A0],
@@ -1017,7 +1082,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)((_, _, _, _, _, _, _, _, _, _, _, _, _))
 
   /**
-   * Combines 14 `F` values into a tuple in a parallel manner.
+   * Combines 14 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13](
     a0: F[A0],
@@ -1038,7 +1104,8 @@ object CommutativeBoth {
     mapN(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)((_, _, _, _, _, _, _, _, _, _, _, _, _, _))
 
   /**
-   * Combines 15 `F` values into a tuple in a parallel manner.
+   * Combines 15 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[+_]: CommutativeBoth: Covariant, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14](
     a0: F[A0],
@@ -1062,7 +1129,8 @@ object CommutativeBoth {
     )
 
   /**
-   * Combines 16 `F` values into a tuple in a parallel manner.
+   * Combines 16 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[
     +_
@@ -1089,7 +1157,8 @@ object CommutativeBoth {
     )
 
   /**
-   * Combines 17 `F` values into a tuple in a parallel manner.
+   * Combines 17 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[
     +_
@@ -1117,7 +1186,8 @@ object CommutativeBoth {
     )
 
   /**
-   * Combines 18 `F` values into a tuple in a parallel manner.
+   * Combines 18 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[
     +_
@@ -1146,7 +1216,8 @@ object CommutativeBoth {
     )
 
   /**
-   * Combines 19 `F` values into a tuple in a parallel manner.
+   * Combines 19 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[F[
     +_
@@ -1176,7 +1247,8 @@ object CommutativeBoth {
     )
 
   /**
-   * Combines 20 `F` values into a tuple in a parallel manner.
+   * Combines 20 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[
     F[
@@ -1229,7 +1301,8 @@ object CommutativeBoth {
     )
 
   /**
-   * Combines 21 `F` values into a tuple in a parallel manner.
+   * Combines 21 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[
     F[
@@ -1284,7 +1357,8 @@ object CommutativeBoth {
     )
 
   /**
-   * Combines 22 `F` values into a tuple in a parallel manner.
+   * Combines 22 `F` values into a tuple with `CommutativeBoth[F]`, which runs
+   * effects such as `ZIO` in parallel.
    */
   def tupleN[
     F[
@@ -1341,6 +1415,9 @@ object CommutativeBoth {
     )
 }
 
+/**
+ * Syntax for `CommutativeBoth`, available with `import zio.prelude._`.
+ */
 trait CommutativeBothSyntax {
 
   /**
@@ -1356,7 +1433,7 @@ trait CommutativeBothSyntax {
 
     /**
      * Combines two values of types `F[A]` and `F[B]` to produce an
-     * `F[(A, B)]`.
+     * `F[(A, B)]` with `CommutativeBoth[F]`.
      */
     def zipPar[B](fb: => F[B])(implicit both: CommutativeBoth[F]): F[(A, B)] =
       both.both(fa, fb)
@@ -1391,63 +1468,144 @@ trait CommutativeBothSyntax {
     )(f: C => (A, B))(implicit both: CommutativeBoth[F], contravariant: Contravariant[F]): F[C] =
       both.both(fa, fb).contramap(f)
   }
+
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 2 `F` values.
+   */
   implicit class CommutativeBothTuple2Ops[F[+_], T1, T2](tf: => (F[T1], F[T2])) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](f: (T1, T2) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2])).tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 3 `F` values.
+   */
   implicit class CommutativeBothTuple3Ops[F[+_], T1, T2, T3](tf: => (F[T1], F[T2], F[T3])) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](f: (T1, T2, T3) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3])).tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 4 `F` values.
+   */
   implicit class CommutativeBothTuple4Ops[F[+_], T1, T2, T3, T4](tf: => (F[T1], F[T2], F[T3], F[T4])) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](f: (T1, T2, T3, T4) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4])).tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 5 `F` values.
+   */
   implicit class CommutativeBothTuple5Ops[F[+_], T1, T2, T3, T4, T5](tf: => (F[T1], F[T2], F[T3], F[T4], F[T5])) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](f: (T1, T2, T3, T4, T5) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5])).tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 6 `F` values.
+   */
   implicit class CommutativeBothTuple6Ops[F[+_], T1, T2, T3, T4, T5, T6](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](f: (T1, T2, T3, T4, T5, T6) => R)(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6])).tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 7 `F` values.
+   */
   implicit class CommutativeBothTuple7Ops[F[+_], T1, T2, T3, T4, T5, T6, T7](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
       (CommutativeBoth.mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7])(f)).tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7)] =
       (CommutativeBoth.tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7])).tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 8 `F` values.
+   */
   implicit class CommutativeBothTuple8Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1455,15 +1613,27 @@ trait CommutativeBothSyntax {
         .mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8])(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8)] =
       (CommutativeBoth
         .tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8]))
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 9 `F` values.
+   */
   implicit class CommutativeBothTuple9Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1471,15 +1641,27 @@ trait CommutativeBothSyntax {
         .mapN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8], _: F[T9])(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] =
       (CommutativeBoth
         .tupleN(_: F[T1], _: F[T2], _: F[T3], _: F[T4], _: F[T5], _: F[T6], _: F[T7], _: F[T8], _: F[T9]))
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 10 `F` values.
+   */
   implicit class CommutativeBothTuple10Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1489,6 +1671,10 @@ trait CommutativeBothSyntax {
         ))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1498,9 +1684,17 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 11 `F` values.
+   */
   implicit class CommutativeBothTuple11Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1520,6 +1714,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1541,9 +1739,17 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 12 `F` values.
+   */
   implicit class CommutativeBothTuple12Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11], F[T12])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1564,6 +1770,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1586,9 +1796,17 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 13 `F` values.
+   */
   implicit class CommutativeBothTuple13Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11], F[T12], F[T13])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1610,6 +1828,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1633,9 +1855,17 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 14 `F` values.
+   */
   implicit class CommutativeBothTuple14Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](
     tf: => (F[T1], F[T2], F[T3], F[T4], F[T5], F[T6], F[T7], F[T8], F[T9], F[T10], F[T11], F[T12], F[T13], F[T14])
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1658,6 +1888,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1682,6 +1916,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 15 `F` values.
+   */
   implicit class CommutativeBothTuple15Ops[F[+_], T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](
     tf: => (
       F[T1],
@@ -1701,6 +1938,11 @@ trait CommutativeBothSyntax {
       F[T15]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1724,6 +1966,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1751,6 +1997,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 16 `F` values.
+   */
   implicit class CommutativeBothTuple16Ops[
     F[+_],
     T1,
@@ -1789,6 +2038,11 @@ trait CommutativeBothSyntax {
       F[T16]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1813,6 +2067,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1841,6 +2099,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 17 `F` values.
+   */
   implicit class CommutativeBothTuple17Ops[
     F[+_],
     T1,
@@ -1881,6 +2142,11 @@ trait CommutativeBothSyntax {
       F[T17]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -1906,6 +2172,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -1935,6 +2205,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 18 `F` values.
+   */
   implicit class CommutativeBothTuple18Ops[
     F[+_],
     T1,
@@ -1977,6 +2250,11 @@ trait CommutativeBothSyntax {
       F[T18]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2003,6 +2281,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -2033,6 +2315,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 19 `F` values.
+   */
   implicit class CommutativeBothTuple19Ops[
     F[+_],
     T1,
@@ -2077,6 +2362,11 @@ trait CommutativeBothSyntax {
       F[T19]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2104,6 +2394,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -2135,6 +2429,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 20 `F` values.
+   */
   implicit class CommutativeBothTuple20Ops[
     F[+_],
     T1,
@@ -2181,6 +2478,11 @@ trait CommutativeBothSyntax {
       F[T20]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2209,6 +2511,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -2241,6 +2547,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 21 `F` values.
+   */
   implicit class CommutativeBothTuple21Ops[
     F[+_],
     T1,
@@ -2289,6 +2598,11 @@ trait CommutativeBothSyntax {
       F[T21]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2318,6 +2632,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]
@@ -2351,6 +2669,9 @@ trait CommutativeBothSyntax {
         .tupled(tf)
   }
 
+  /**
+   * Provides `mapParN` and `tupledPar` for a tuple of 22 `F` values.
+   */
   implicit class CommutativeBothTuple22Ops[
     F[+_],
     T1,
@@ -2401,6 +2722,11 @@ trait CommutativeBothSyntax {
       F[T22]
     )
   ) {
+
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` and maps the
+     * result with `f`.
+     */
     def mapParN[R](
       f: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22) => R
     )(implicit both: CommutativeBoth[F], covariant: Covariant[F]): F[R] =
@@ -2431,6 +2757,10 @@ trait CommutativeBothSyntax {
         )(f))
         .tupled(tf)
 
+    /**
+     * Combines the `F` values with `CommutativeBoth[F]` into an `F` of a
+     * tuple.
+     */
     def tupledPar(implicit
       both: CommutativeBoth[F],
       covariant: Covariant[F]

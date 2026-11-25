@@ -28,6 +28,26 @@ import scala.collection.immutable.HashMap
  * times each element appears in the set if `B` is a natural number, the
  * probability associated with an element in the set if `B` is a rational
  * number, or even whether an element appears at all if `B` is a boolean.
+ *
+ * A `MultiSet[A]` is a `ZSet[A, Natural]`. The set operations combine the
+ * measures with the `Sum`, `Prod`, `Min` and `Max` instances for `B`:
+ *
+ * {{{
+ * val words  = ZSet("apple", "apple", "pear")
+ * val basket = ZSet("apple", "plum")
+ * val both   = words <> basket
+ *
+ * words("apple")
+ * // 2
+ *
+ * both("apple")
+ * // 3
+ *
+ * (words & basket).toSet
+ * // Set(apple)
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-data-types/zset/ ZSet]]
  */
 final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance, B]) { self =>
 
@@ -62,7 +82,8 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
     self union that
 
   /**
-   * Returns the number of times the specified element appears in the set.
+   * Returns the number of times the specified element appears in the set, or
+   * the identity of `Sum[B1]` (zero for numbers) if it does not appear.
    */
   def apply[A1 >: A, B1 >: B](a: A1)(implicit ev: Identity[Sum[B1]]): B1 =
     map.asInstanceOf[Map[A1, B1]].getOrElse(a, ev.identity)
@@ -83,7 +104,19 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   /**
    * Combines this set with the specified set to produce a new set where the
    * number of times each element appears is the difference between the number
-   * of times it appears in this set and the specified set.
+   * of times it appears in this set and the specified set. An element that
+   * appears only in the specified set gets the inverse of its count, so with
+   * `Int` counts it is negative.
+   *
+   * {{{
+   * val diff = ZSet("a", "a", "b") &~ ZSet("a", "c")
+   *
+   * diff("a")
+   * // 1
+   *
+   * diff("c")
+   * // -1
+   * }}}
    */
   def diff[A1 >: A, B1 >: B](that: ZSet[A1, B1])(implicit ev: Inverse[Sum[B1]]): ZSet[A1, B1] =
     new ZSet(that.map.foldLeft(self.map.asInstanceOf[HashMap[A1, B1]]) { case (map, (a, b1)) =>
@@ -95,7 +128,9 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
 
   /**
    * Returns whether this set is equal to the specified set, meaning that the
-   * same elements appear in both sets the same number of times.
+   * same elements appear in both sets the same number of times. An element
+   * stored with a zero count is not equal to an absent element here; the
+   * `Equal` instance (`===`) ignores entries whose count is zero.
    */
   override def equals(that: Any): Boolean =
     that match {
@@ -117,6 +152,11 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
       set <> f(a).transform(b1 => ev2.combine(Prod(b), Prod(b1)))
     }
 
+  /**
+   * Applies the effectual function `f` once for each occurrence of each
+   * element of this `MultiSet`, and collects the results into a `MultiSet`
+   * that counts how many times each result was produced.
+   */
   def forEach[G[+_]: IdentityBoth: Covariant, C](f: A => G[C])(implicit ev: B <:< Natural): G[MultiSet[C]] = {
 
     @tailrec
@@ -177,12 +217,15 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
 
   /**
    * Converts this set to a `Map` from elements to how many times they appear
-   * in the set.
+   * in the set, including any entries with a zero count.
    */
   def toMap[A1 >: A]: Map[A1, B] =
     map.asInstanceOf[Map[A1, B]]
 
-  /** Converts this set to a non-empty one. */
+  /**
+   * Converts this set to a `ZNonEmptySet`, or returns `None` if the set has no
+   * entries. An entry with a zero count still counts as an entry.
+   */
   def toNonEmptyZSet: Option[ZNonEmptySet[A, B]] = ZNonEmptySet.fromMapOption(map)
 
   /**
@@ -217,7 +260,8 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
 
   /**
    * Combines this set with the specified set to produce their cartesian
-   * product.
+   * product. The count of each pair is the product of the counts of its
+   * elements.
    */
   def zip[B1 >: B, C](
     that: ZSet[C, B1]
@@ -229,6 +273,14 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
   /**
    * Combines this set with the specified set to produce their cartesian
    * product, combining pair of elements using the specified function `f`.
+   *
+   * {{{
+   * val die  = ZSet(1, 2, 3, 4, 5, 6)
+   * val sums = die.zipWith(die)(_ + _)
+   *
+   * sums(7)
+   * // 6
+   * }}}
    */
   def zipWith[B1 >: B, C, D](
     that: ZSet[C, B1]
@@ -236,10 +288,15 @@ final class ZSet[+A, +B] private (private val map: HashMap[A @uncheckedVariance,
     self.flatMap(a => that.map(c => f(a, c)))
 }
 
+/**
+ * Constructors for [[ZSet]] values and its type class instances. It is also
+ * available under the name `MultiSet`.
+ */
 object ZSet extends LowPriorityZSetImplicits {
 
   /**
-   * Constructs a set with the specified elements.
+   * Constructs a set with the specified elements, counting how many times
+   * each one occurs.
    */
   def apply[A](as: A*): ZSet[A, Int] =
     fromIterable(as)
@@ -269,9 +326,9 @@ object ZSet extends LowPriorityZSetImplicits {
     new ZSet(set.foldLeft(HashMap.empty[A, Boolean])((map, a) => map + (a -> true)))
 
   /**
-   * Constructs a set from the specified `Map`. The values will be the keys in
-   * the `Map` and the measure of how many times a value occurs will be the
-   * keys value.
+   * Constructs a set from the specified `Map`. The elements will be the keys
+   * of the `Map` and the measure of how many times an element occurs will be
+   * the value for that key.
    */
   def fromMap[A, B](map: Map[A, B]): ZSet[A, B] =
     new ZSet(
@@ -309,14 +366,15 @@ object ZSet extends LowPriorityZSetImplicits {
     chunk => Debug.Repr.VConstructor(List("zio", "prelude"), "ZSet", chunk.toMap.toList.map((t: (A, B)) => t.debug))
 
   /**
-   * Derives an `Equal[ZSet[A, B]]` given an `Equal[B]`. Due to the
+   * Derives an `Equal[ZSet[A, B]]` given an `Equal[B]`. Entries whose count
+   * equals the identity of `Sum[B]` (zero for numbers) are ignored. Due to the
    * limitations of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def ZSetEqual[A, B](implicit ev1: Equal[B], ev: Identity[Sum[B]]): Equal[ZSet[A, B]] =
     Equal[HashMap[A, B]].contramap(_.map.filterNot(_._2 === ev.identity))
 
   /**
-   * The `EqualF` instance for `ZSet`.
+   * The `DeriveEqual` instance for `ZSet`.
    */
   implicit def ZSetDeriveEqual[B: Equal](implicit
     ev: Identity[Sum[B]]
@@ -338,7 +396,7 @@ object ZSet extends LowPriorityZSetImplicits {
     }
 
   /**
-   * Derives a `Idempotent[ZSet[A, B]]` given a `Idempotent[B]`.
+   * Derives an `Idempotent[ZSet[A, B]]` given an `Idempotent[B]`.
    */
   implicit def ZSetIdempotent[A, B](implicit ev: Idempotent[B]): Idempotent[ZSet[A, B]] with Identity[ZSet[A, B]] =
     new Idempotent[ZSet[A, B]] with Identity[ZSet[A, B]] {
@@ -348,7 +406,9 @@ object ZSet extends LowPriorityZSetImplicits {
     }
 
   /**
-   * Derives a `Identity[ZSet[A, B]]` given a `Identity[B]`.
+   * Derives an `Identity[ZSet[A, B]]` given an `Associative[B]`. It combines
+   * the counts of each element with the `Associative[B]` and uses the empty
+   * set as the identity.
    */
   implicit def ZSetIdentity[A, B](implicit ev: Associative[B]): Identity[ZSet[A, B]] =
     new Identity[ZSet[A, B]] {
@@ -364,7 +424,8 @@ object ZSet extends LowPriorityZSetImplicits {
     }
 
   /**
-   * The `IdentityFlatten` instance for `ZSet`.
+   * The `IdentityFlatten` instance for `ZSet`. Its `any` is the empty set,
+   * so flattening `any.map(_ => fa)` gives the empty set rather than `fa`.
    */
   implicit def ZSetIdentityFlatten[B](implicit
     ev1: Commutative[Sum[B]],
@@ -378,14 +439,18 @@ object ZSet extends LowPriorityZSetImplicits {
     }
 
   /**
-   * Derives a `Hash[ZSet[A, B]]` given a `Hash[B]`. Due to the
-   * limitations of Scala's `Map`, this uses object equality on the keys.
+   * Derives a `Hash[ZSet[A, B]]` given a `Hash[B]`. Entries whose count
+   * equals the identity of `Sum[B]` are ignored. Due to the limitations of
+   * Scala's `Map`, this uses object equality on the keys.
    */
   implicit def ZSetHash[A, B: Hash](implicit ev: Identity[Sum[B]]): Hash[ZSet[A, B]] =
     Hash[HashMap[A, B]].contramap(_.map.filterNot(_._2 === ev.identity))
 
 }
 
+/**
+ * Lower-priority implicit instances for [[ZSet]].
+ */
 trait LowPriorityZSetImplicits {
 
   /**
@@ -403,23 +468,29 @@ trait LowPriorityZSetImplicits {
 
 }
 
+/**
+ * Extension methods for building and taking apart `MultiSet` values.
+ */
 trait ZSetSyntax {
+
+  /** Adds `toMultiSet` to a `Map[A, Natural]`. */
   implicit final class ZSetMapOps[+A](self: Map[A, Natural]) {
 
-    /** Converts a `Map[A, Int]` to a `MultiSet` */
+    /** Converts a `Map[A, Natural]` to a `MultiSet`, using each value as the count of its key. */
     def toMultiSet: MultiSet[A] = MultiSet.fromMap(self)
   }
 
+  /** Adds `head`, `peel` and `tail` to a `MultiSet`. */
   implicit final class ZSetMultiSetOps[+A](self: MultiSet[A]) {
 
     private def headFiltered: Option[(A, Natural)] = self.toMap[A].find { case (_, n) => n > 0 }
 
-    /** Returns an element or `None` if empty */
+    /** Returns an element with a count above zero, or `None` if there is none. */
     def head: Option[A] = headFiltered.map(_._1)
 
     /**
-     * Returns an element of this `MultiSet` and the remainder, which is a (possibly empty) `MultiSet`,
-     * or `None` if empty.
+     * Returns an element of this `MultiSet` and the remainder, which is a (possibly empty) `MultiSet`
+     * with one occurrence of that element removed, or `None` if no element has a count above zero.
      */
     def peel: Option[(A, MultiSet[A])] =
       headFiltered.map {

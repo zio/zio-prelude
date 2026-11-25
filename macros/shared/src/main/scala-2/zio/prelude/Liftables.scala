@@ -6,19 +6,32 @@ import scala.annotation.nowarn
 import scala.reflect.macros.whitebox
 
 // Wrongly emits warnings on Scala 2.12.x https://github.com/scala/bug/issues/11918
+/**
+ * Conversions between `Assertion` values and the Scala 2 macro trees that
+ * build them. The newtype macros use them to read a newtype's assertion at
+ * compile time.
+ */
 @nowarn("msg=pattern var .* in method unapply is never used: use a wildcard `_` or suppress this warning with .*")
 trait Liftables {
+
+  /** The macro context that the trees belong to. */
   val c: whitebox.Context
 
   import c.universe._
 
+  /** The tree `_root_.zio.prelude.Assertion`, the prefix of lifted trees. */
   final val AssertionPrefix: Select = q"_root_.zio.prelude.Assertion"
 
+  /**
+   * Reads a `scala.None` or `scala.Some.apply(...)` tree into an `Option`,
+   * reading the contained tree with `u`.
+   */
   implicit def optionUnliftable[T](implicit u: Unliftable[T]): Unliftable[Option[T]] = Unliftable[Option[T]] {
     case q"scala.None"               => None
     case q"scala.Some.apply[$_]($v)" => Some(u.unapply(v).get)
   }
 
+  /** Turns an `Assertion.Regex` value into a tree that rebuilds it. */
   implicit lazy val regexLiftable: Liftable[Assertion.Regex] =
     Liftable[Assertion.Regex] {
       case Assertion.Regex.AnyChar                     => q"$AssertionPrefix.Regex.AnyChar"
@@ -36,6 +49,11 @@ trait Liftables {
       case Assertion.Regex.OrElse(first, second)       => q"$AssertionPrefix.Regex.OrElse($first, $second)"
     }
 
+  /**
+   * Reads the tree of an `Assertion.Regex` expression back into a value. It
+   * reads the constructors of `Assertion.Regex` and the `~`, `|`, `*`, `+`,
+   * `?`, `min`, `max` and `between` operators. It reads `r.+` as `r.*`.
+   */
   implicit lazy val regexUnliftable: Unliftable[Assertion.Regex] =
     Unliftable[Assertion.Regex] {
       case q"${A(_)}.Regex.AnyChar"                                                                           =>
@@ -120,10 +138,20 @@ trait Liftables {
         left | right
     }
 
+  /**
+   * Reads each tree with `regexUnliftable`. Throws a
+   * `java.util.NoSuchElementException` when a tree is not a regex it reads.
+   */
   def unliftRegexes(ts: Seq[c.Tree]): Seq[Regex] = ts.map(t => regexUnliftable.unapply(t).get)
 
   // Match on zio.prelude.Assertion path prefix
+  /** Extractor for the tree of the `Assertion` object. */
   object A {
+
+    /**
+     * Returns `Some(Assertion)` when `tree` is `zio.prelude.Assertion` or
+     * `Assertion`, otherwise `None`.
+     */
     def unapply(tree: c.Tree): Option[Assertion.type] =
       tree match {
         case q"zio.prelude.Assertion" => Some(Assertion)
@@ -132,12 +160,21 @@ trait Liftables {
       }
   }
 
+  /**
+   * Reads a `"...".r` tree, where the string is a literal, into a
+   * `scala.util.matching.Regex`.
+   */
   implicit def scalaRegexUnliftable[A]: Unliftable[scala.util.matching.Regex] =
     Unliftable[scala.util.matching.Regex] {
       case q"scala.Predef.augmentString(${string: String}).r"      => string.r
       case q"scala.this.Predef.augmentString(${string: String}).r" => string.r
     }
 
+  /**
+   * Reads the tree of an `Assertion` expression back into a value. It reads
+   * the constructors of `Assertion` called with literal arguments and the
+   * `&&`, `||` and `!` operators.
+   */
   @nowarn("msg=Implicit resolves to enclosing method")
   implicit def assertionUnliftable[A]: Unliftable[Assertion[A]] =
     Unliftable[Assertion[A]] {
@@ -215,7 +252,15 @@ trait Liftables {
         Assertion.Or(left, right)
     }
 
+  /** Extractor that reads the value of a literal tree. */
   object LiteralUnlift {
+
+    /**
+     * Returns the value of an `Int`, `String`, `Double`, `Float`, `Long`,
+     * `Short` or `Byte` literal, of `Int.MaxValue` or `Int.MinValue`, or the
+     * `List` of such values in a `List(...)` tree, leaving out the elements
+     * that are not literals. Returns `None` for other trees.
+     */
     def unapply(expr: Tree): Option[Any] = expr match {
       case q"${int: Int}"       => Some(int)
       case q"Int.MaxValue"      => Some(Int.MaxValue)
@@ -234,7 +279,13 @@ trait Liftables {
     }
   }
 
+  /** Extractor that turns a value into a literal tree. */
   object LiteralLift {
+
+    /**
+     * Returns a literal tree for an `Int`, `String`, `Double`, `Float`,
+     * `Long`, `Short` or `Byte` value, and `None` for other values.
+     */
     def unapply(any: Any): Option[Tree] = any match {
       case int: Int       => Some(q"$int")
       case string: String => Some(q"$string")
@@ -274,6 +325,8 @@ trait Liftables {
    * This Ordering instance exists for compatibility between 2.12 and 2.13.
    */
   object DoubleOrdering extends Ordering[Double] {
+
+    /** Compares with `java.lang.Double.compare`. */
     def compare(x: Double, y: Double): Int = java.lang.Double.compare(x, y)
   }
 
@@ -281,6 +334,8 @@ trait Liftables {
    * This Ordering instance exists for compatibility between 2.12 and 2.13.
    */
   object FloatOrdering extends Ordering[Float] {
+
+    /** Compares with `java.lang.Float.compare`. */
     def compare(x: Float, y: Float): Int = java.lang.Float.compare(x, y)
   }
 }

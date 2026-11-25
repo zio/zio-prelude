@@ -32,8 +32,26 @@ import scala.util.Try
  * along with in either case a log with entries of type `W`. Because of its
  * polymorphism `ZPure` can be used to model a variety of effects including
  * context, state, failure, and logging.
+ *
+ * A `ZPure` runs synchronously on the calling thread when one of the `run` methods is called.
+ *
+ * {{{
+ * val withdraw: ZPure[String, Int, Int, Any, String, Int] =
+ *   for {
+ *     balance <- ZPure.get[Int]
+ *     _       <- if (balance < 30) ZPure.fail("insufficient funds") else ZPure.set(balance - 30)
+ *     _       <- ZPure.log(s"withdrew 30 from \$balance")
+ *   } yield balance - 30
+ *
+ * withdraw.runAll(100) // (Chunk(withdrew 30 from 100), Right((70, 70)))
+ * withdraw.runAll(10)  // (Chunk(), Left(insufficient funds))
+ * }}}
+ *
+ * When an operator such as `catchAll`, `foldM`, `orElse` or `either` recovers from a failure, the recovery runs with
+ * the state that the failed computation started with: state updates made before the failure are discarded.
+ *
+ * @see [[https://zio.dev/zio-prelude/zpure/ ZPure]]
  */
-
 sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   import ZPure._
 
@@ -124,7 +142,18 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     foldM(e => fail(f(e)), a => succeed(g(a)))
 
   /**
-   * Recovers from all errors.
+   * Recovers from all errors with `f`. `f` runs with the state that this computation started with, so the state
+   * updates this computation made before it failed are discarded.
+   *
+   * {{{
+   * val attempt: ZPure[Nothing, Int, Int, Any, String, Int] =
+   *   ZPure.set(5) *> ZPure.fail("boom")
+   *
+   * val recovered: ZPure[Nothing, Int, Int, Any, Nothing, Int] =
+   *   attempt.catchAll(_ => ZPure.get[Int])
+   *
+   * recovered.run(1) // (1, 1): the state set to 5 before the failure is discarded
+   * }}}
    */
   final def catchAll[W1 >: W, S0 <: S1, S3 >: S2, R1 <: R, E1, A1 >: A](
     f: E => ZPure[W1, S0, S3, R1, E1, A1]
@@ -132,7 +161,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     foldM(f, succeed)
 
   /**
-   * Recovers from some or all of the error cases.
+   * Recovers from the errors for which `pf` is defined, and fails again with the other errors. Like `catchAll`, the
+   * recovery runs with the state that this computation started with.
    */
   final def catchSome[W1 >: W, S0 <: S1, S3 >: S2, R1 <: R, E1 >: E, A1 >: A](
     pf: PartialFunction[E, ZPure[W1, S0, S3, R1, E1, A1]]
@@ -142,6 +172,19 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Modifies the behavior of the inner computation regarding logs, so that
    * logs written in a failed computation will be cleared.
+   *
+   * The setting applies to the failures handled by error handlers (`either`, `catchAll`, `foldM` and similar) applied
+   * inside this computation: when the handled computation fails, the log entries it wrote are dropped. When this
+   * computation itself fails, the entries it wrote are dropped as well, even when an error handler applied outside
+   * this computation recovers from the failure.
+   *
+   * {{{
+   * val logged: ZPure[String, Unit, Unit, Any, String, Unit] =
+   *   ZPure.log("started") *> ZPure.fail("boom")
+   *
+   * logged.runAll(())                 // (Chunk(started), Left(boom))
+   * logged.clearLogOnError.runAll(()) // (Chunk(), Left(boom))
+   * }}}
    */
   final def clearLogOnError: ZPure[W, S1, S2, R, E, A] =
     ClearLogOnError(value = true, self)
@@ -174,7 +217,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Returns a computation whose failure and success have been lifted into an
    * `Either`. The resulting computation cannot fail, because the failure case
-   * has been exposed as part of the `Either` success case.
+   * has been exposed as part of the `Either` success case. On failure, the state is the one that this computation
+   * started with.
    */
   final def either[S3 >: S2 <: S1](implicit ev: CanFail[E]): ZPure[W, S3, S3, R, Nothing, Either[E, A]] =
     fold(Left(_), Right(_))
@@ -225,7 +269,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     flatMap(ev)
 
   /**
-   * Swaps the error and success types of this computation.
+   * Swaps the error and success types of this computation. When this computation fails, the result succeeds with the
+   * error and the state that this computation started with.
    */
   final def flip[S3 >: S2 <: S1]: ZPure[W, S3, S3, R, A, E] =
     foldM(succeed, fail)
@@ -242,7 +287,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
   /**
    * Recovers from errors by accepting one computation to execute for the case
-   * of an error, and one computation to execute for the case of success.
+   * of an error, and one computation to execute for the case of success. The `failure` computation runs with the state
+   * that this computation started with.
    */
   final def foldM[W1 >: W, S0 <: S1, S3, R1 <: R, E1, B](
     failure: E => ZPure[W1, S0, S3, R1, E1, B],
@@ -258,7 +304,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
   /**
    * Returns a successful computation with the head of the list if the list is
-   * non-empty or fails with the error `None` if the list is empty.
+   * non-empty or fails with the error `None` if the list is empty. An error `e` of this computation becomes `Some(e)`.
    */
   final def head[B](implicit ev: A <:< List[B]): ZPure[W, S1, S2, R, Option[E], B] =
     foldM(
@@ -273,12 +319,18 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Modifies the behavior of the inner computation regarding logs, so that
    * logs written in a failed computation will be kept (this is the default behavior).
+   *
+   * Like `clearLogOnError`, the setting applies to the error handlers applied inside this computation and to this
+   * computation's own failure. An error handler applied outside this computation follows the setting in effect where
+   * it is applied, so inside a `clearLogOnError` computation, `c.keepLogOnError.either` still drops the entries of `c`
+   * when `c` fails.
    */
   final def keepLogOnError: ZPure[W, S1, S2, R, E, A] =
     ClearLogOnError(value = false, self)
 
   /**
-   * Returns a successful computation if the value is `Left`, or fails with error `None`.
+   * Returns a successful computation if the value is `Left`, or fails with error `None`. An error `e` of this
+   * computation becomes `Some(e)`.
    */
   final def left[B, C](implicit ev: A <:< Either[B, C]): ZPure[W, S1, S2, R, Option[E], B] =
     foldM(
@@ -305,7 +357,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     })
 
   /**
-   * Returns a successful computation if the value is `Left`, or fails with a [[java.util.NoSuchElementException]].
+   * Returns a successful computation if the value is `Left`, or fails with a [[java.util.NoSuchElementException]]
+   * whose message is `Either.left.get on Right`.
    */
   final def leftOrFailWithException[B, C, E1 >: NoSuchElementException](implicit
     ev: A <:< Either[B, C],
@@ -316,6 +369,10 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       a => ev(a).fold(ZPure.succeed, _ => ZPure.fail(new NoSuchElementException("Either.left.get on Right")))
     )
 
+  /**
+   * Writes `w` to the log after this computation succeeds, and keeps this computation's result. Nothing is written
+   * when this computation fails.
+   */
   final def log[W1 >: W](w: W1): ZPure[W1, S1, S2, R, E, A] =
     self.flatMap(a => ZPure.log(w).as(a))
 
@@ -346,7 +403,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     map(!_)
 
   /**
-   * Requires the value of this computation to be `None`, otherwise fails with `None`.
+   * Requires the value of this computation to be `None`, otherwise fails with `None`. An error `e` of this
+   * computation becomes `Some(e)`.
    */
   final def none[B](implicit ev: A <:< Option[B]): ZPure[W, S1, S2, R, Option[E], Unit] =
     self.foldM(
@@ -356,7 +414,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
-   * otherwise executes the specified computation.
+   * otherwise executes the specified computation, with the state that this computation started with.
    */
   final def orElse[W1 >: W, S0 <: S1, S3 >: S2, R1 <: R, E1, A1 >: A](
     that: => ZPure[W1, S0, S3, R1, E1, A1]
@@ -364,8 +422,9 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     foldM(_ => that, succeed)
 
   /**
-   * Executes this computation and returns its value, if it succeeds, but
-   * otherwise executes the specified computation.
+   * Executes this computation and returns its value in a `Left`, if it succeeds, but
+   * otherwise executes the specified computation, with the state that this computation started with, and returns its
+   * value in a `Right`.
    */
   final def orElseEither[W1 >: W, S0 <: S1, S3 >: S2, R1 <: R, E1, B](
     that: => ZPure[W1, S0, S3, R1, E1, B]
@@ -380,7 +439,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     orElse(fail(e1))
 
   /**
-   * Returns an computation that will produce the value of this computation, unless it
+   * Returns a computation that will produce the value of this computation, unless it
    * fails with the `None` value, in which case it will produce the value of
    * the specified computation.
    */
@@ -391,14 +450,14 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
-   * otherwise succeeds with the specified value.
+   * otherwise succeeds with the specified value, and the state that this computation started with.
    */
   final def orElseSucceed[A1 >: A](a1: => A1)(implicit ev: CanFail[E]): ZPure[W, S1, Any, R, Nothing, A1] =
     orElse(succeed(a1))
 
   /**
    * Executes this computation and returns its value, if it succeeds, but
-   * otherwise fallbacks to the new state with the specified value.
+   * otherwise sets the state to `s3` and succeeds with `a1`.
    */
   final def orElseFallback[A1 >: A, S3 >: S2](a1: => A1, s3: => S3)(implicit
     ev: CanFail[E]
@@ -432,7 +491,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     set(s) *> self
 
   /**
-   * Keeps some of the errors, and `throw` the rest
+   * Keeps the errors for which `pf` is defined, and throws the others (which are `Throwable`s) when the computation
+   * runs.
    */
   final def refineOrDie[E1](
     pf: PartialFunction[E, E1]
@@ -440,8 +500,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     refineOrDieWith(pf)(ev1)
 
   /**
-   * Keeps some of the errors, and `throw` the rest, using
-   * the specified function to convert the `E` into a `Throwable`.
+   * Keeps the errors for which `pf` is defined, and throws the others when the computation runs, using the specified
+   * function to convert the `E` into a `Throwable`.
    */
   final def refineOrDieWith[E1](pf: PartialFunction[E, E1])(f: E => Throwable)(implicit
     ev: CanFail[E]
@@ -474,6 +534,15 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
   /**
    * Repeats this computation the specified number of times (or until the first failure)
    * passing the updated state to each successive repetition.
+   *
+   * The first run is not counted, so the computation runs `n + 1` times in total, and once when `n <= 0`. The result
+   * is the value of the last run.
+   *
+   * {{{
+   * val increment: ZPure[Nothing, Int, Int, Any, Nothing, Unit] = ZPure.update[Int, Int](_ + 1)
+   *
+   * increment.repeatN(2).runState(0) // 3
+   * }}}
    */
   final def repeatN(n: Int)(implicit ev: S2 <:< S1): ZPure[W, S1, S2, R, E, A] =
     self.flatMap(a => if (n <= 0) ZPure.succeed(a) else repeatN(n - 1).contramapState(ev))
@@ -545,7 +614,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
   /**
    * Runs this computation with the specified initial state, returning both the
-   * log and either all the failures that occurred or the updated state and the
+   * log and either the error that this computation failed with or the updated state and the
    * result.
    */
   final def runAll(s: S1)(implicit ev: Any <:< R): (Chunk[W], Either[E, (S2, A)]) =
@@ -581,7 +650,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     run(s)._1
 
   /**
-   * Runs this computation to a `ZValidation` value.
+   * Runs this computation with the initial state `()` to a `ZValidation` value, whose warnings are the log. A failure
+   * becomes a `ZValidation` with that single error.
    */
   final def runValidation(implicit ev1: Unit <:< S1, ev2: Any <:< R): ZValidation[W, E, A] =
     runAll(()) match {
@@ -590,7 +660,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     }
 
   /**
-   * Converts an option on values into an option on errors leaving the state unchanged.
+   * Converts an option on values into an option on errors: succeeds with the value inside a `Some`, fails with `None`
+   * when the value is `None`, and turns an error `e` of this computation into `Some(e)`.
    */
   final def some[B](implicit ev: A <:< Option[B]): ZPure[W, S1, S2, R, Option[E], B] =
     self.foldM(
@@ -623,7 +694,7 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     })
 
   /**
-   * Extracts the optional value or fails with a [[java.util.NoSuchElementException]] leaving the state unchanged.
+   * Extracts the optional value or fails with a [[java.util.NoSuchElementException]] whose message is `None.get`.
    */
   final def someOrFailException[B, E1 >: E](implicit
     ev: A <:< Option[B],
@@ -635,8 +706,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     })
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
-   * The original state is supposed to be `()`.
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with `E`.
+   * It runs this computation with the initial state `()`, and discards the log and the final state.
    */
   final def toZIO(implicit ev: Unit <:< S1): zio.ZIO[R, E, A] =
     ZIO.environmentWithZIO[R] { r =>
@@ -647,7 +718,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     }
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `A` or fails with error(s) `E`.
+   * Transforms ZPure to ZIO that either succeeds with `A` or fails with `E`.
+   * It runs this computation with the initial state `s1`, and discards the log and the final state.
    */
   final def toZIOWith(s1: S1): zio.ZIO[R, E, A] =
     ZIO.environmentWithZIO[R] { r =>
@@ -659,7 +731,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     }
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with error(s) `E`.
+   * Transforms ZPure to ZIO that either succeeds with `S2` and `A` or fails with `E`.
+   * It runs this computation with the initial state `s1`, and discards the log.
    */
   final def toZIOWithState(s1: S1): zio.ZIO[R, E, (S2, A)] =
     ZIO.environmentWithZIO[R] { r =>
@@ -671,7 +744,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     }
 
   /**
-   * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with error(s) `E`.
+   * Transforms ZPure to ZIO that either succeeds with `Chunk[W]`, `S2` and `A` or fails with `E`.
+   * It runs this computation with the initial state `s1`; on failure, the log is discarded.
    */
   final def toZIOWithAll(s1: S1): ZIO[R, E, (Chunk[W], S2, A)] =
     ZIO.environmentWithZIO[R] { r =>
@@ -723,7 +797,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
     self.flatMap(a => that.map(b => f(a, b)))
 
   /**
-   * Returns a successful computation if the value is `Right`, or fails with error `None`.
+   * Returns a successful computation if the value is `Right`, or fails with error `None`. An error `e` of this
+   * computation becomes `Some(e)`.
    */
   final def right[B, C](implicit ev: A <:< Either[B, C]): ZPure[W, S1, S2, R, Option[E], C] =
     self.foldM(
@@ -731,8 +806,8 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       a => ev(a).fold(_ => ZPure.fail(None), ZPure.succeed)
     )
 
-  /*
-     Returns a successful computation if the value is `Right`, or fails with error `e`.
+  /**
+   * Returns a successful computation if the value is `Right`, or fails with error `e`.
    */
   final def rightOrFail[B, C, E1 >: E](e: => E1)(implicit ev: A <:< Either[B, C]): ZPure[W, S1, S2, R, E1, C] =
     self.flatMap(ev(_) match {
@@ -740,8 +815,9 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       case Left(_)      => ZPure.fail(e)
     })
 
-  /*
-     Returns a successful computation if the value is `Right`, or fails with error function `e`.
+  /**
+   * Returns a successful computation if the value is `Right`, or fails with the error that `e` returns for the `Left`
+   * value.
    */
   final def rightOrFailWith[B, C, E1 >: E](e: B => E1)(implicit ev: A <:< Either[B, C]): ZPure[W, S1, S2, R, E1, C] =
     self.flatMap(ev(_) match {
@@ -749,8 +825,9 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
       case Left(err)    => ZPure.fail(e(err))
     })
 
-  /*
-     Returns a successful computation if the value is `Right`, or fails with a [[java.util.NoSuchElementException]].
+  /**
+   * Returns a successful computation if the value is `Right`, or fails with a [[java.util.NoSuchElementException]]
+   * whose message is `Either.right.get on Left`.
    */
   final def rightOrFailWithException[B, C, E1 >: NoSuchElementException](implicit
     ev: A <:< Either[B, C],
@@ -769,13 +846,17 @@ sealed abstract class ZPure[+W, -S1, +S2, -R, +E, +A] { self =>
 
 }
 
+/**
+ * Constructors and instances for [[ZPure]] computations.
+ */
 object ZPure {
   private val succeedUnit: ZPure[Nothing, Any, Nothing, Any, Nothing, Unit]            = Succeed(())
   private val succeedNone: ZPure[Nothing, Any, Nothing, Any, Nothing, Option[Nothing]] = Succeed(None)
   private val succeedUnitFn                                                            = (_: Any) => succeedUnit
 
   /**
-   * Constructs a computation, catching any `Throwable` that is thrown.
+   * Constructs a computation, catching any `Throwable` that is thrown, except a `VirtualMachineError` (such as
+   * `StackOverflowError` or `OutOfMemoryError`), which is rethrown.
    */
   def attempt[S, A](a: => A): ZPure[Nothing, S, S, Any, Throwable, A] =
     suspend {
@@ -788,7 +869,7 @@ object ZPure {
 
   /**
    * Evaluate each computation in the structure from left to right, collecting
-   * the successful values and discarding the empty cases.
+   * the values inside `Some` and discarding the `None` cases.
    */
   def collect[W, S, R, E, A, B, Collection[+Element] <: Iterable[Element]](in: Collection[A])(
     f: A => ZPure[W, S, S, R, E, Option[B]]
@@ -838,6 +919,9 @@ object ZPure {
   def environmentWithPure[R]: EnvironmentWithPurePartiallyApplied[R] =
     new EnvironmentWithPurePartiallyApplied
 
+  /**
+   * Constructs a computation that fails with the error `e`.
+   */
   def fail[E](e: E): ZPure[Nothing, Any, Nothing, Any, E, Nothing] =
     ZPure.Fail(e)
 
@@ -848,7 +932,8 @@ object ZPure {
     either.fold(l => ZPure.fail(l), r => ZPure.succeed(r))
 
   /**
-   * Constructs a computation from an `Option`.
+   * Constructs a computation from an `Option`: it succeeds with the value inside a `Some`, and fails with `()` for
+   * `None`.
    */
   def fromOption[S, A](option: Option[A]): ZPure[Nothing, S, S, Any, Unit, A] =
     option match {
@@ -933,6 +1018,9 @@ object ZPure {
   def getWith[S, A](f: S => A): ZPure[Nothing, S, S, Any, Nothing, A] =
     Inspect(f)
 
+  /**
+   * Constructs a computation that writes `w` to the log and succeeds with `()`, passing the state through unchanged.
+   */
   def log[S, W](w: W): ZPure[W, S, S, Any, Nothing, Unit] =
     ZPure.Log(w)
 
@@ -1003,7 +1091,8 @@ object ZPure {
     succeedUnit
 
   /**
-   * The moral equivalent of `if (!p) exp`
+   * The moral equivalent of `if (!p) exp`: runs `pure` and succeeds with its value in a `Some` when `p` is `false`,
+   * and succeeds with `None` otherwise.
    */
   def unless[W, S, R, E, A](p: Boolean)(pure: => ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
     if (p) none else pure.asSome
@@ -1015,7 +1104,8 @@ object ZPure {
     Update(f)
 
   /**
-   * The moral equivalent of `if (p) exp`
+   * The moral equivalent of `if (p) exp`: runs `pure` and succeeds with its value in a `Some` when `p` is `true`, and
+   * succeeds with `None` otherwise.
    */
   def when[W, S, R, E, A](p: Boolean)(pure: => ZPure[W, S, S, R, E, A]): ZPure[W, S, S, R, E, Option[A]] =
     if (p) pure.asSome else none
@@ -1029,22 +1119,52 @@ object ZPure {
   ): ZPure[W, S, S, R, E, Option[B]] =
     pf.andThen(_.asSome).applyOrElse(a, (_: A) => none)
 
+  /**
+   * The partially applied form of `ZPure.environmentWith`, which fixes the environment type `R`.
+   */
   final class EnvironmentWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+
+    /**
+     * Constructs a computation that succeeds with the result of applying `f` to the environment.
+     */
     def apply[S, A](f: ZEnvironment[R] => A): ZPure[Nothing, S, S, R, Nothing, A] =
       Environment(f)
   }
 
+  /**
+   * The partially applied form of `ZPure.environmentWithPure`, which fixes the environment type `R`.
+   */
   final class EnvironmentWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+
+    /**
+     * Constructs a computation that applies `f` to the environment and runs the computation that `f` returns.
+     */
     def apply[W, S1, S2, E, A](f: ZEnvironment[R] => ZPure[W, S1, S2, Any, E, A]): ZPure[W, S1, S2, R, E, A] =
       Environment(f).flatten
   }
 
+  /**
+   * The partially applied form of `ZPure.serviceWith`, which fixes the service type `R`.
+   */
   final class ServiceWithPartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+
+    /**
+     * Constructs a computation that succeeds with the result of applying `f` to the service of type `R` in the
+     * environment.
+     */
     def apply[S, A](f: R => A)(implicit tag: Tag[R]): ZPure[Nothing, S, S, R, Nothing, A] =
       environmentWith(env => f(env.get))
   }
 
+  /**
+   * The partially applied form of `ZPure.serviceWithPure`, which fixes the service type `R`.
+   */
   final class ServiceWithPurePartiallyApplied[R](private val dummy: Boolean = true) extends AnyVal {
+
+    /**
+     * Constructs a computation that applies `f` to the service of type `R` in the environment and runs the computation
+     * that `f` returns.
+     */
     def apply[W, S1, S2, E, A](
       f: R => ZPure[W, S1, S2, Any, E, A]
     )(implicit tag: Tag[R]): ZPure[W, S1, S2, R, E, A] =
@@ -1061,7 +1181,10 @@ object ZPure {
     }
 
   /**
-   * The `IdentityBoth` instance for `ZPure`.
+   * The `CovariantIdentityBoth` instance (`Covariant` and `IdentityBoth`) for `ZPure` computations whose input and
+   * output
+   * states have the same type. `both` runs the two computations one after the other, passing the state from the first
+   * to the second.
    */
   implicit def ZPureCovariantIdentityBoth[W, S, R, E]
     : CovariantIdentityBoth[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
@@ -1089,7 +1212,7 @@ object ZPure {
     }
 
   /**
-   * The `IdentityFlatten` instance for `ZPure`.
+   * The `IdentityFlatten` instance for `ZPure` computations whose input and output states have the same type.
    */
   implicit def ZPureIdentityFlatten[W, S, R, E]
     : IdentityFlatten[({ type lambda[+A] = ZPure[W, S, S, R, E, A] })#lambda] =
@@ -1100,10 +1223,13 @@ object ZPure {
         ffa.flatten
     }
 
+  /**
+   * Adds `refineToOrDie` to computations whose error type is a `Throwable`.
+   */
   implicit final class ZPureRefineToOrDieOps[W, S1, S2, R, E <: Throwable, A](self: ZPure[W, S1, S2, R, E, A]) {
 
     /**
-     * Keeps some of the errors, and `throw` the rest.
+     * Keeps the errors of type `E1`, and throws the others when the computation runs.
      */
     def refineToOrDie[E1 <: E: ClassTag](implicit ev: CanFail[E]): ZPure[W, S1, S2, R, E1, A] =
       self.refineOrDie { case e: E1 => e }

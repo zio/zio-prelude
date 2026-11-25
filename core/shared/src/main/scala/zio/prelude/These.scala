@@ -21,7 +21,7 @@ import zio.prelude.These._
 
 /**
  * `These` is a data type representing a value that may either be a `Left`
- * with an`A`, a `Right` with a `B`, or a `Both` with an `A` and a `B`.
+ * with an `A`, a `Right` with a `B`, or a `Both` with an `A` and a `B`.
  *
  * `These` can be useful to model certain domains where both values may be
  * present in addition to one or the other. For example, in streaming
@@ -39,6 +39,23 @@ import zio.prelude.These._
  * verified. `These` allows modeling these types of computations and preserving
  * information regarding all errors while still potentially returning a
  * successful computation.
+ *
+ * When `These` models such a computation, `A` holds the errors or warnings
+ * and `B` the result. `zip` and `flatMap` combine the `A` values with the
+ * `Associative` instance for `A`:
+ *
+ * {{{
+ * val first: These[String, Int]  = These.both("low balance; ", 100)
+ * val second: These[String, Int] = These.both("unverified; ", 20)
+ *
+ * first.zip(second)
+ * // Both(low balance; unverified; ,(100,20))
+ *
+ * first.zip(These.left("no funds"))
+ * // Left(low balance; no funds)
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-data-types/these/ These]]
  */
 sealed trait These[+A, +B] extends Product with Serializable { self =>
 
@@ -108,6 +125,13 @@ sealed trait These[+A, +B] extends Product with Serializable { self =>
    * errors produced by the two computations will be combined using the
    * `Associative` instance for `A`. If this computation does not contain a
    * success then the original failure will be returned unchanged.
+   *
+   * {{{
+   * val checked: These[String, Int] = These.both("rounded; ", 41)
+   *
+   * checked.flatMap(n => These.both("adjusted", n + 1))
+   * // Both(rounded; adjusted,42)
+   * }}}
    */
   final def flatMap[A1 >: A: Associative, C](f: B => These[A1, C]): These[A1, C] =
     self match {
@@ -196,9 +220,30 @@ sealed trait These[+A, +B] extends Product with Serializable { self =>
       case Both(a, b) => both(f(a), b)
     }
 
+  /**
+   * Returns this value if it contains a `B` value, and otherwise falls back to
+   * `that`. `that` is evaluated only when this value is a `Left`; its `A`
+   * value is then combined with this one using the `Associative` instance for
+   * `A`.
+   *
+   * {{{
+   * val missing: These[String, Int]  = These.left("no cache; ")
+   * val fallback: These[String, Int] = These.both("slow path", 7)
+   *
+   * missing.orElse(fallback)
+   * // Both(no cache; slow path,7)
+   * }}}
+   */
   final def orElse[A1 >: A: Associative, B1 >: B](that: => These[A1, B1]): These[A1, B1] =
     orElseEither(that).map(_.merge)
 
+  /**
+   * Returns this value with its `B` value wrapped in `Left` if it contains
+   * one, and otherwise falls back to `that` with its `C` value wrapped in
+   * `Right`. `that` is evaluated only when this value is a `Left`; its `A`
+   * value is then combined with this one using the `Associative` instance for
+   * `A`.
+   */
   final def orElseEither[A1 >: A: Associative, C](that: => These[A1, C]): These[A1, Either[B, C]] =
     self match {
       case Left(a)    =>
@@ -246,72 +291,88 @@ sealed trait These[+A, +B] extends Product with Serializable { self =>
 
   /**
    * Combines this computation sequentially with that computation, combining
-   * their results into a tuple. If this computation does not return a success
-   * that computation will not be performed. If both computations are performed
-   * any errors will be combined using the `Associative` instance for `A`.
+   * their results into a tuple. If this value is a `Left`, it is returned
+   * unchanged and the `A` value of `that` is discarded. Otherwise the `A`
+   * values of both are combined using the `Associative` instance for `A`.
+   *
+   * {{{
+   * val host: These[String, String] = These.both("default host; ", "localhost")
+   * val port: These[String, Int]    = These.right(8080)
+   *
+   * host.zip(port)
+   * // Both(default host; ,(localhost,8080))
+   * }}}
    */
   final def zip[A1 >: A: Associative, C, D](that: These[A1, C]): These[A1, (B, C)] =
     zipWith(that)((_, _))
 
   /**
    * Combines this computation sequentially with that computation, returning
-   * only the left value. If this computation does not return a success that
-   * computation will not be performed. If both computations are performed any
-   * errors will be combined using the `Associative` instance for `A`.
+   * only the left value. If this value is a `Left`, it is returned unchanged
+   * and the `A` value of `that` is discarded. Otherwise the `A` values of both
+   * are combined using the `Associative` instance for `A`.
    */
   final def zipLeft[A1 >: A: Associative, C, D](that: These[A1, C]): These[A1, B] =
     zipWith(that)((b, _) => b)
 
   /**
-   * Combines this computation with that computation into a tuple, performing
-   * both computations even if this computation does not return a success and
-   * combining any errors using the `Commutative` instance for `A`.
+   * Combines this computation with that computation into a tuple, keeping the
+   * `A` values of both, even if this value is a `Left`, and combining them
+   * using the `Commutative` instance for `A`.
+   *
+   * {{{
+   * import zio.prelude.newtypes.Sum
+   *
+   * val a: These[Sum[Int], String] = These.left(Sum(1))
+   * val b: These[Sum[Int], String] = These.both(Sum(2), "ok")
+   *
+   * a.zipPar(b)
+   * // Left(3)
+   * }}}
    */
   final def zipPar[A1 >: A: Commutative, C, D](that: These[A1, C]): These[A1, (B, C)] =
     zipWithPar(that)((_, _))
 
   /**
-   * Combines this computation with that computation and returning only the
-   * left value, performing both computations even if this computation does not
-   * return a success and combining any errors using the `Commutative` instance
-   * for `A`.
+   * Combines this computation with that computation, returning only the left
+   * value, keeping the `A` values of both, even if this value is a `Left`, and
+   * combining them using the `Commutative` instance for `A`.
    */
   final def zipParLeft[A1 >: A: Commutative, C, D](that: These[A1, C]): These[A1, B] =
     zipWithPar(that)((b, _) => b)
 
   /**
-   * Combines this computation with that computation and returning only the
-   * right value, performing both computations even if this computation does
-   * not return a success and combining any errors using the `Commutative`
-   * instance for `A`.
+   * Combines this computation with that computation, returning only the right
+   * value, keeping the `A` values of both, even if this value is a `Left`, and
+   * combining them using the `Commutative` instance for `A`.
    */
   final def zipParRight[A1 >: A: Commutative, C, D](that: These[A1, C]): These[A1, C] =
     zipWithPar(that)((_, c) => c)
 
   /**
    * Combines this computation sequentially with that computation, returning
-   * only the right value. If this computation does not return a success that
-   * computation will not be performed. If both computations are performed any
-   * errors will be combined using the `Associative` instance for `A`.
+   * only the right value. If this value is a `Left`, it is returned unchanged
+   * and the `A` value of `that` is discarded. Otherwise the `A` values of both
+   * are combined using the `Associative` instance for `A`.
    */
   final def zipRight[A1 >: A: Associative, C, D](that: These[A1, C]): These[A1, C] =
     zipWith(that)((_, c) => c)
 
   /**
    * Combines this computation sequentially with that computation, combining
-   * their results with the specified function. If this computation does
-   * not return a success that computation will not be performed. If both
-   * computations are performed any errors will be combined using the
-   * `Associative` instance for `A`.
+   * their results with the specified function. If this value is a `Left`, it
+   * is returned unchanged and the `A` value of `that` is discarded. Otherwise
+   * the `A` values of both are combined using the `Associative` instance for
+   * `A`.
    */
   final def zipWith[A1 >: A: Associative, C, D](that: These[A1, C])(f: (B, C) => D): These[A1, D] =
     self.flatMap(b => that.map(c => f(b, c)))
 
   /**
    * Combines this computation with that computation using the specified
-   * function, performing both computations even if this computation does not
-   * return a success and combining any errors using the `Commutative`
-   * instance for `A`.
+   * function, keeping the `A` values of both, even if this value is a `Left`,
+   * and combining them using the `Commutative` instance for `A`. The result
+   * contains a `B` value only when both values contain one.
    */
   final def zipWithPar[A1 >: A: Commutative, C, D](that: These[A1, C])(f: (B, C) => D): These[A1, D] =
     (self, that) match {
@@ -326,6 +387,11 @@ sealed trait These[+A, +B] extends Product with Serializable { self =>
       case (Both(a, b), Both(a1, c)) => both(a <> a1, f(b, c))
     }
 
+  /**
+   * Maps the `A` value with `f` and the `B` value with `g`, and combines the
+   * two results with the `Associative` instance for `C` when this value is a
+   * `Both`.
+   */
   def reduceMap[C](f: A => C, g: B => C)(implicit C: Associative[C]): C =
     self match {
       case Left(l)    => f(l)
@@ -335,10 +401,18 @@ sealed trait These[+A, +B] extends Product with Serializable { self =>
 
 }
 
+/**
+ * Constructors for [[These]] values and its type class instances.
+ */
 object These {
 
-  final case class Left[+A](value: A)              extends These[A, Nothing]
-  final case class Right[+B](value: B)             extends These[Nothing, B]
+  /** A `These` that contains only an `A` value. */
+  final case class Left[+A](value: A) extends These[A, Nothing]
+
+  /** A `These` that contains only a `B` value. */
+  final case class Right[+B](value: B) extends These[Nothing, B]
+
+  /** A `These` that contains both an `A` value and a `B` value. */
   final case class Both[+A, +B](left: A, right: B) extends These[A, B]
 
   /**
@@ -496,13 +570,23 @@ object These {
     eab.fold(left, right)
 
   /**
-   * Constructs a `These` from an `Option` value.
+   * Constructs a `These` from an `Option` value: `Some(a)` becomes a `Right`
+   * with `a`, and `None` becomes a `Left` with `()`.
    */
   def fromOption[A](ob: Option[A]): These[Unit, A] =
     ob.fold[These[Unit, A]](left(()))(right)
 
   /**
-   *  Constructor from two options to an option of These.
+   * Combines two options into an option of `These`: `Both` when both are
+   * defined, `Left` or `Right` when only one is, and `None` when neither is.
+   *
+   * {{{
+   * These.fromOptions(Some("a"), Some(1))
+   * // Some(Both(a,1))
+   *
+   * These.fromOptions(Option.empty[String], Some(1))
+   * // Some(Right(1))
+   * }}}
    */
   def fromOptions[A, B](opA: Option[A], opB: Option[B]): Option[These[A, B]] =
     (opA, opB) match {
@@ -513,7 +597,8 @@ object These {
     }
 
   /**
-   * Constructs a `These` from a `Validation` value.
+   * Constructs a `These` from a `Validation` value: a failure becomes a `Left`
+   * with its errors and a success becomes a `Right` with its value.
    */
   def fromValidation[E, A](validation: Validation[E, A]): These[NonEmptyChunk[E], A] =
     validation.fold(left, right)
@@ -534,7 +619,7 @@ object These {
     left(NonEmptyChunk(a))
 
   /**
-   * Constructs a `Right` with an `A` value.
+   * Constructs a `Right` with the specified value.
    */
   def right[A](a: A): These[Nothing, A] =
     Right(a)

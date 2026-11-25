@@ -19,8 +19,30 @@ package zio.prelude
 import scala.deriving.*
 import scala.compiletime.{erasedValue, summonFrom, summonInline}
 
+/**
+ * Members of the `Equal` companion object that differ between Scala versions.
+ * On Scala 3 it adds `derived`, so a case class, sealed trait or enum can
+ * derive an instance with `derives Equal`. On Scala 2 it is empty.
+ */
 trait EqualVersionSpecific {
 
+  /**
+   * Derives an `Equal[A]` for a case class, sealed trait or enum, so it can be
+   * used with `derives Equal`. Two case class values are equal when each pair
+   * of fields is equal with the field type's `Equal` instance. Two values of a
+   * sealed trait or enum are equal when they are the same case and that case's
+   * values are equal. A case whose type is a subtype of `A` gets a derived
+   * instance; every other field type needs an `Equal` instance in scope, or the
+   * derivation does not compile.
+   *
+   * {{{
+   * // scala-3-only
+   * final case class Point(x: Int, y: Int) derives Equal
+   *
+   * val same: Boolean = Point(1, 2) === Point(1, 2)
+   * // true
+   * }}}
+   */
   inline def derived[A](using mirror: Mirror.Of[A]): Equal[A] =
     lazy val instances = summonAll[A, mirror.MirroredElemTypes]
     inline mirror match

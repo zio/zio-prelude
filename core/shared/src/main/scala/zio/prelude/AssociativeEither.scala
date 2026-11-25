@@ -28,6 +28,20 @@ import scala.util.Try
 /**
  * An associative binary operator that combines two values of types `F[A]`
  * and `F[B]` to produce an `F[Either[A, B]]`.
+ *
+ * For types that can fail or be empty, such as `Option`, `Try` and `ZIO`, the
+ * instances return the first value and fall back to the second one; for
+ * collections such as `List`, they keep the values of both. Importing
+ * `zio.prelude._` adds `<+>`, `orElseEither` and `orElse`.
+ *
+ * {{{
+ * val fallback: Option[Either[Int, String]] = (None: Option[Int]) <+> Option("a")
+ * // Some(Right(a))
+ * val both: List[Either[Int, String]] = List(1) <+> List("a")
+ * // List(Left(1), Right(a))
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/functional-abstractions/parameterized-types/associativeeither/ AssociativeEither]]
  */
 @implicitNotFound("No implicit AssociativeEither defined for ${F}.")
 trait AssociativeEither[F[_]] {
@@ -39,6 +53,10 @@ trait AssociativeEither[F[_]] {
   def either[A, B](fa: => F[A], fb: => F[B]): F[Either[A, B]]
 }
 
+/**
+ * Instances of `AssociativeEither` and `IdentityEither` for standard library
+ * and ZIO types.
+ */
 object AssociativeEither {
 
   /**
@@ -48,7 +66,9 @@ object AssociativeEither {
     associativeEither
 
   /**
-   * The `IdentityEither` instance for `Chunk`.
+   * The `IdentityEither` instance for `Chunk`. `either` keeps the elements of
+   * both chunks, the first ones as `Left` and the second ones as `Right`, and
+   * `none` is the empty chunk.
    */
   implicit val ChunkIdentityEither: IdentityEither[Chunk] =
     new IdentityEither[Chunk] {
@@ -68,7 +88,9 @@ object AssociativeEither {
     }
 
   /**
-   * The `AssociativeEither` instance for `Either`.
+   * The `AssociativeEither` instance for `Either`. `either` returns the first
+   * value when it is a `Right`, and falls back to the second one when the
+   * first is a `Left`.
    */
   implicit def EitherAssociativeEither[L]: AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] =
     new AssociativeEither[({ type lambda[+r] = Either[L, r] })#lambda] {
@@ -136,7 +158,9 @@ object AssociativeEither {
     }
 
   /**
-   * The `IdentityEither` instance for `List`.
+   * The `IdentityEither` instance for `List`. `either` keeps the elements of
+   * both lists, the first ones as `Left` and the second ones as `Right`, and
+   * `none` is the empty list.
    */
   implicit val ListIdentityEither: IdentityEither[List] =
     new IdentityEither[List] {
@@ -148,6 +172,8 @@ object AssociativeEither {
 
   /**
    * The `IdentityEither` (and `AssociativeEither`) instance for `Option`.
+   * `either` returns the first value as a `Left` when it is a `Some`, and the
+   * second one as a `Right` otherwise; `none` is `None`.
    */
   implicit val OptionIdentityEither: IdentityEither[Option] =
     new IdentityEither[Option] {
@@ -199,7 +225,9 @@ object AssociativeEither {
     }
 
   /**
-   * The `IdentityEither` instance for `Vector`.
+   * The `IdentityEither` instance for `Vector`. `either` keeps the elements of
+   * both vectors, the first ones as `Left` and the second ones as `Right`, and
+   * `none` is the empty vector.
    */
   implicit val VectorIdentityEither: IdentityEither[Vector] =
     new IdentityEither[Vector] {
@@ -258,6 +286,9 @@ object AssociativeEither {
     }
 }
 
+/**
+ * Syntax for `AssociativeEither`, available with `import zio.prelude._`.
+ */
 trait AssociativeEitherSyntax {
 
   /**
@@ -288,6 +319,12 @@ trait AssociativeEitherSyntax {
      * Combines an `F[A]` value with itself using `orElse` until it eventually
      * returns the result of the left value without having to evaluate the
      * right value.
+     *
+     * It returns only for types whose `orElse` does not evaluate the second
+     * value once the first one succeeds, such as `Option` or `ZIO`, where it
+     * repeats a failing effect until it succeeds. For collections such as
+     * `List`, `orElse` evaluates both values, so the recursion does not end
+     * and throws a `StackOverflowError`.
      */
     def eventually(implicit either: AssociativeEither[F], covariant: Covariant[F]): F[A] =
       fa orElse eventually

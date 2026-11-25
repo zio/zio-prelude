@@ -53,7 +53,8 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
     self union that
 
   /**
-   * Returns the number of times the specified element appears in the set.
+   * Returns the number of times the specified element appears in the set, or
+   * the identity of `Sum[B1]` (zero for numbers) if it does not appear.
    */
   def apply[A1 >: A, B1 >: B](a: A1)(implicit ev: Identity[Sum[B1]]): B1 =
     zset[A1, B1](a)(ev)
@@ -68,7 +69,9 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
 
   /**
    * Returns whether this set is equal to the specified set, meaning that the
-   * same elements appear in both sets the same number of times.
+   * same elements appear in both sets the same number of times. An element
+   * stored with a zero count is not equal to an absent element here; the
+   * `Equal` instance (`===`) ignores entries whose count is zero.
    */
   override def equals(that: Any): Boolean =
     that match {
@@ -112,14 +115,16 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
 
   /**
    * Converts this set to a `Map` from elements to how many times they appear
-   * in the set.
+   * in the set, including any entries with a zero count.
    */
   def toMap[A1 >: A]: Map[A1, B] =
     zset.toMap
 
   /**
-   * Converts this set to a `Set`, discarding information about how many times
-   * an element appears in the set beyond whether it appears at all.
+   * Converts this set to a `NonEmptySet`, discarding information about how
+   * many times an element appears in the set beyond whether it appears at
+   * all. Entries whose count equals the identity of `Sum[B1]` are dropped,
+   * except the first entry in iteration order, which is always kept.
    */
   def toNonEmptySet[A1 >: A, B1 >: B](implicit ev1: Equal[B1], ev2: Identity[Sum[B1]]): NonEmptySet[A1] =
     toMap.tail.foldLeft(NonEmptySet.single[A1](toMap.head._1)) { case (set, (a, b)) =>
@@ -132,6 +137,7 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
   override def toString: String =
     toMap.mkString("ZNonEmptySet(", ", ", ")")
 
+  /** Converts this set to a `ZSet` with the same entries. */
   def toZSet: ZSet[A, B] = zset
 
   /**
@@ -146,7 +152,8 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
 
   /**
    * Combines this set with the specified set to produce their cartesian
-   * product.
+   * product. The count of each pair is the product of the counts of its
+   * elements.
    */
   def zip[B1 >: B, C](
     that: ZNonEmptySet[C, B1]
@@ -163,18 +170,23 @@ final class ZNonEmptySet[+A, +B] private (private val zset: ZSet[A, B]) { self =
     new ZNonEmptySet(zset.zipWith(that)(f))
 }
 
+/**
+ * Constructors for [[ZNonEmptySet]] values and its type class instances. It is
+ * also available under the name `NonEmptyMultiSet`.
+ */
 object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
 
   /**
-   * Constructs a set with the specified elements.
+   * Constructs a set with the specified elements, counting how many times
+   * each one occurs.
    */
   def apply[A](a: A, as: A*): NonEmptyMultiSet[A] =
     fromIterable(a, as)
 
   /**
-   * Constructs a set from the specified `Iterable`. The measure of how many
-   * times a value occurs in the set will be an integer representing how many
-   * times the value occurred in the specified `Iterable`.
+   * Constructs a set from the specified head and `Iterable` tail. The measure
+   * of how many times a value occurs in the set will be an integer
+   * representing how many times the value occurred in `head` and `tail`.
    */
   def fromIterable[A](head: A, tail: Iterable[A]): NonEmptyMultiSet[A] =
     new ZNonEmptySet(ZSet.fromIterable(Iterable(head) ++ tail))
@@ -191,38 +203,40 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
   /**
    * Constructs a set from the specified `NonEmptyChunk`. The measure of how
    * many times a value occurs in the set will be an integer representing how
-   * many times the value occurred in the specified `Iterable`.
+   * many times the value occurred in the specified `NonEmptyChunk`.
    */
   def fromNonEmptyChunk[A](nonEmptyChunk: NonEmptyChunk[A]): NonEmptyMultiSet[A] =
     new ZNonEmptySet(ZSet.fromIterable(nonEmptyChunk))
 
   /**
-   * Constructs a set from the specified `Set`. The measure of how many times
-   * a value occurs in the set will be a boolean representing whether a value
-   * occurs at all.
+   * Constructs a set from the specified `NonEmptySet`. The measure of how
+   * many times a value occurs in the set will be a boolean representing
+   * whether a value occurs at all.
    */
   def fromNonEmptySet[A](set: NonEmptySet[A]): ZNonEmptySet[A, Boolean] =
     new ZNonEmptySet(ZSet.fromSet(set.toSet))
 
   /**
-   * Constructs a set from the specified `Map`. The values will be the keys in
-   * the `Map` and the measure of how many times a value occurs will be the
-   * keys value. Returns `None` if empty.
+   * Constructs a set from the specified `Map`. The elements will be the keys
+   * of the `Map` and the measure of how many times an element occurs will be
+   * the value for that key. Returns `None` if the `Map` is empty; a `Map`
+   * whose values are all zero gives `Some`.
    */
   def fromMapOption[A, B](map: Map[A, B]): Option[ZNonEmptySet[A, B]] =
     if (map.isEmpty) None
     else Some(new ZNonEmptySet(ZSet.fromMap(map)))
 
   /**
-   * Constructs a `NonEmptyMultiSet`, where, by definition, each element is present exactly once.
-   * Returns `None` if empty.
+   * Constructs a set from the specified `Set`, where the measure of each
+   * element is `true`. Returns `None` if the `Set` is empty.
    */
   def fromSetOption[A](set: Set[A]): Option[ZNonEmptySet[A, Boolean]] =
     if (set.isEmpty) None
     else Some(new ZNonEmptySet(ZSet.fromSet(set)))
 
   /**
-   * Derives a `Associative[ZNonEmptySet[A, B]]` given a `Associative[B]`.
+   * Derives an `Associative[ZNonEmptySet[A, B]]` given an `Associative[B]`,
+   * combining the counts of each element with the `Associative[B]`.
    */
   implicit def ZNonEmptySetAssociative[A, B](implicit ev: Associative[B]): Associative[ZNonEmptySet[A, B]] =
     new Idempotent[ZNonEmptySet[A, B]] {
@@ -247,14 +261,15 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
       Debug.Repr.VConstructor(List("zio", "prelude"), "ZNonEmptySet", chunk.toMap.toList.map((t: (A, B)) => t.debug))
 
   /**
-   * Derives an `Equal[ZNonEmptySet[A, B]]` given an `Equal[B]`. Due to the
-   * limitations of Scala's `Map`, this uses object equality on the keys.
+   * Derives an `Equal[ZNonEmptySet[A, B]]` given an `Equal[B]`. Entries whose
+   * count equals the identity of `Sum[B]` are ignored. Due to the limitations
+   * of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def ZNonEmptySetEqual[A, B: Equal](implicit ev: Identity[Sum[B]]): Equal[ZNonEmptySet[A, B]] =
     Equal[ZSet[A, B]].contramap(_.toZSet)
 
   /**
-   * The `EqualF` instance for `ZNonEmptySet`.
+   * The `DeriveEqual` instance for `ZNonEmptySet`.
    */
   implicit def ZNonEmptySetDeriveEqual[B: Equal](implicit
     ev: Identity[Sum[B]]
@@ -276,7 +291,7 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
     }
 
   /**
-   * The `IdentityFlatten` instance for `ZNonEmptySet`.
+   * The `AssociativeFlatten` instance for `ZNonEmptySet`.
    */
   implicit def ZNonEmptySetFlatten[B](implicit
     ev1: Commutative[Sum[B]],
@@ -288,7 +303,7 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
     }
 
   /**
-   * Derives a `Idempotent[ZNonEmptySet[A, B]]` given a `Idempotent[B]`.
+   * Derives an `Idempotent[ZNonEmptySet[A, B]]` given an `Idempotent[B]`.
    */
   implicit def ZNonEmptySetIdempotent[A, B](implicit ev: Idempotent[B]): Idempotent[ZNonEmptySet[A, B]] =
     new Idempotent[ZNonEmptySet[A, B]] {
@@ -297,20 +312,24 @@ object ZNonEmptySet extends LowPriorityZNonEmptySetImplicits {
     }
 
   /**
-   * Derives a `Hash[ZNonEmptySet[A, B]]` given a `Hash[B]`. Due to the
-   * limitations of Scala's `Map`, this uses object equality on the keys.
+   * Derives a `Hash[ZNonEmptySet[A, B]]` given a `Hash[B]`. Entries whose
+   * count equals the identity of `Sum[B]` are ignored. Due to the limitations
+   * of Scala's `Map`, this uses object equality on the keys.
    */
   implicit def ZNonEmptySetHash[A, B: Hash](implicit ev: Identity[Sum[B]]): Hash[ZNonEmptySet[A, B]] =
     Hash[ZSet[A, B]].contramap(_.zset)
 
   /**
-   * Provides an implicit conversion from `NonEmptySet` to the `Set`
-   * for interoperability with Scala's collection library.
+   * Provides an implicit conversion from `ZNonEmptySet` to `ZSet`, so a
+   * non-empty set can be passed where a `ZSet` is expected.
    */
   implicit def toZSet[A, B](zNonEmptySet: ZNonEmptySet[A, B]): ZSet[A, B] =
     zNonEmptySet.toZSet
 }
 
+/**
+ * Lower-priority implicit instances for [[ZNonEmptySet]].
+ */
 trait LowPriorityZNonEmptySetImplicits {
 
   /**
@@ -322,20 +341,32 @@ trait LowPriorityZNonEmptySetImplicits {
 
 }
 
+/**
+ * Extension methods for building and taking apart `NonEmptyMultiSet` values.
+ */
 trait ZNonEmptySetSyntax {
+
+  /** Adds `toNonEmptyMultiSetOption` to a `Map[A, Natural]`. */
   implicit final class ZNonEmptySetMapOps[+A](self: Map[A, Natural]) {
 
-    /** Returns a `NonEmptyMultiSet` or `None` if the original Multiset is empty */
+    /** Returns a `NonEmptyMultiSet` with each value as the count of its key, or `None` if the `Map` is empty. */
     def toNonEmptyMultiSetOption: Option[NonEmptyMultiSet[A]] = NonEmptyMultiSet.fromMapOption(self)
   }
 
+  /**
+   * Adds `head`, `peel`, `peelNonEmpty`, `tail` and `tailNonEmpty` to a
+   * `NonEmptyMultiSet`. Each of them throws a
+   * `java.util.NoSuchElementException` when no element has a count above
+   * zero, which a set built with `fromMapOption` can have.
+   */
   implicit final class ZNonEmptySetNonEmptyMultiSetOps[+A](self: NonEmptyMultiSet[A]) {
 
-    /** Returns an element */
+    /** Returns an element with a count above zero. */
     def head: A = peel._1
 
     /**
-     * Returns an element of this `NonEmptyMultiSet` and the remainder, which is a (possibly empty) `MultiSet`.
+     * Returns an element of this `NonEmptyMultiSet` and the remainder, which is a (possibly empty) `MultiSet`
+     * with one occurrence of that element removed.
      */
     def peel: (A, MultiSet[A]) =
       self.toZSet.peel.get

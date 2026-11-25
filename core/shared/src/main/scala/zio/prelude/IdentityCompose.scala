@@ -16,9 +16,22 @@
 
 package zio.prelude
 
+/**
+ * An `AssociativeCompose` that also has an identity value of type `A =>: A`
+ * for every `A`: composing it with any value on either side returns that
+ * value.
+ */
 trait IdentityCompose[=>:[-_, +_]] extends AssociativeCompose[=>:] {
+
+  /**
+   * The identity value of type `A =>: A`, such as the identity function.
+   */
   def identity[A]: A =>: A
 
+  /**
+   * Returns whether composing `ab` with `identity` on either side returns a
+   * value equal to `ab`, which the identity law requires.
+   */
   def identityCompose[A, B](
     ab: A =>: B
   )(implicit eq: Equal[A =>: B]): Boolean = {

@@ -16,6 +16,15 @@
 
 package zio.prelude
 
+/**
+ * Declares the abstract `Type` of a Scala 2 [[Newtype]]. The Scala 3 `Newtype`
+ * declares `Type` itself and does not extend this trait.
+ */
 trait NewtypeVersionSpecific {
+
+  /**
+   * The newtype. Declare a type alias for it next to the newtype object, for
+   * example `type Meter = Meter.Type`.
+   */
   type Type
 }

@@ -5,6 +5,7 @@ import zio.prelude.Hash.makeFrom
 
 import scala.collection.parallel.{immutable => par}
 
+/** `Hash` instances for `ParMap` and `ParSeq`. */
 trait HashInstances {
 
   /**

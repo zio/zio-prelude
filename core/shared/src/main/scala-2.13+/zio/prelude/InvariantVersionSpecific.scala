@@ -20,10 +20,17 @@ import zio.prelude.coherent.CovariantIdentityBoth
 
 import scala.collection.BuildFrom
 
+/**
+ * Members of the `Invariant` companion object that differ between Scala
+ * versions: a `ForEach` instance for collection types that extend `Iterable`,
+ * built on the Scala 2.12 `CanBuildFrom` or, on Scala 2.13 and 3, on
+ * `BuildFrom`.
+ */
 trait InvariantVersionSpecific {
 
   /**
-   * Derives a `ForEach[F]` from an `Iterable[F]`.
+   * Derives a `ForEach[F]` for a collection type `F` that extends `Iterable`,
+   * such as `Seq` or `Queue`, from the collection's builder factory.
    */
   implicit def IterableForEach[F[+a] <: Iterable[a]](implicit derive: DeriveBuildFrom[F]): ForEach[F] =
     new ForEach[F] {
@@ -37,11 +44,26 @@ trait InvariantVersionSpecific {
         CovariantIdentityBoth[G].forEach_(fa)(f)
     }
 
+  /**
+   * Provides a `BuildFrom` that builds an `F[A]` for every element type `A`.
+   */
   trait DeriveBuildFrom[F[+_]] {
+
+    /**
+     * Returns the `BuildFrom` that builds an `F[A]` from `A` values.
+     */
     def derive[A]: BuildFrom[F[Any], A, F[A]]
   }
 
+  /**
+   * Instances of `DeriveBuildFrom`.
+   */
   object DeriveBuildFrom {
+
+    /**
+     * Derives a `DeriveBuildFrom[F]` from the `BuildFrom` for `F[Any]`, which the
+     * standard collections provide.
+     */
     implicit def default[F[+_]](implicit bf: BuildFrom[F[Any], Any, F[Any]]): DeriveBuildFrom[F] =
       new DeriveBuildFrom[F] {
         def derive[A]: BuildFrom[F[Any], A, F[A]] =

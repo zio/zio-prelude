@@ -16,6 +16,32 @@
 
 package zio.prelude
 
+/**
+ * The base class for newtypes that are also subtypes of their underlying type
+ * `A`. A value of the subtype can be passed where an `A` is expected, and it
+ * keeps the methods of `A` and the instances of contravariant type classes
+ * such as `Equal` and `Ord`. A plain `A` still can't be passed where the
+ * subtype is expected. Operations inherited from `A` return an `A`, so wrap
+ * their result again to get the subtype back.
+ *
+ * Everything else works as for [[Newtype]], including smart subtypes that
+ * define an `assertion`.
+ *
+ * {{{
+ * object Count extends Subtype[Int]
+ * type Count = Count.Type
+ *
+ * val three: Count = Count(3)
+ * val next: Int    = three + 1 // 4
+ * val isEqual      = three === Count(3) // true
+ * }}}
+ *
+ * @see [[https://zio.dev/zio-prelude/newtypes/ New Types]]
+ */
 abstract class Subtype[A] extends Newtype[A] {
+
+  /**
+   * The subtype, which is a subtype of the underlying type `A`.
+   */
   type Type <: A
 }

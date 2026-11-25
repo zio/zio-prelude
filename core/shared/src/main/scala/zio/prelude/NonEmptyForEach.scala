@@ -167,6 +167,10 @@ trait NonEmptyForEach[F[+_]] extends ForEach[F] {
   def toNonEmptyList[A](fa: F[A]): NonEmptyList[A] =
     reduceMapLeft(fa)(NonEmptyList.single)((as, a) => NonEmptyList.cons(a, as)).reverse
 }
+
+/**
+ * Summoning for `NonEmptyForEach` instances.
+ */
 object NonEmptyForEach {
 
   /**
@@ -176,6 +180,9 @@ object NonEmptyForEach {
     nonEmptyForEach
 }
 
+/**
+ * Infix syntax for traversing non-empty collections.
+ */
 trait NonEmptyForEachSyntax {
 
   /**

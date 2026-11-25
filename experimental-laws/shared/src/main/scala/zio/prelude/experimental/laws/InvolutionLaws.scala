@@ -5,13 +5,28 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
+/**
+ * Laws that `Involution` instances must satisfy, checked with `complement` and
+ * `Equal`. They include the `ExcludedMiddleLaws` and the
+ * `NoncontradictionLaws`. They belong to the experimental module, so they can
+ * change between releases.
+ *
+ * {{{
+ * import zio.test._
+ * import zio.test.laws._
+ *
+ * val check = checkAllLaws(InvolutionLaws)(Gen.boolean)
+ * // succeeds with a passing TestResult
+ * }}}
+ */
 object InvolutionLaws extends Lawful[InvolutionEqual] {
 
   /**
-   * The join involution law states that for the complement operator `!`,
-   * and for any value `a`, the following must hold:
+   * The involution law states that for the complement operator `!`, for all
+   * values `a`, the following must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * !(!a) === a
    * }}}
    */
@@ -22,7 +37,8 @@ object InvolutionLaws extends Lawful[InvolutionEqual] {
     }
 
   /**
-   * The set of all laws that instances of `Involution` must satisfy.
+   * The set of all laws that instances of `Involution` must satisfy: the
+   * `ExcludedMiddleLaws`, the `NoncontradictionLaws` and the involution law.
    */
   lazy val laws: Laws[InvolutionEqual] =
     ExcludedMiddleLaws.laws + NoncontradictionLaws.laws + involutionLaw

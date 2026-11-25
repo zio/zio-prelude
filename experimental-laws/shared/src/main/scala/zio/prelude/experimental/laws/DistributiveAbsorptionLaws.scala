@@ -6,13 +6,28 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
+/**
+ * Laws that `DistributiveAbsorption` instances must satisfy, checked with
+ * `vvv`, `^^^` and `Equal`. They include the `AbsorptionLaws`. They belong to
+ * the experimental module, so they can change between releases.
+ *
+ * {{{
+ * import zio.test._
+ * import zio.test.laws._
+ *
+ * val check = checkAllLaws(DistributiveAbsorptionLaws)(Gen.boolean)
+ * // succeeds with a passing TestResult
+ * }}}
+ */
 object DistributiveAbsorptionLaws extends Lawful[DistributiveAbsorptionEqual] {
 
   /**
-   * The join distributiveAbsorption law states that for the join operator `vvv`, the meet operator `^^^`,
-   * and for any value `a`, the following must hold:
+   * The join distributive law states that for the join operator `vvv`, the
+   * meet operator `^^^`, and for all values `a1`, `a2` and `a3`, the following
+   * must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a1 vvv (a2 ^^^ a3) === (a1 vvv a2) ^^^ (a1 vvv a3)
    * }}}
    */
@@ -23,10 +38,12 @@ object DistributiveAbsorptionLaws extends Lawful[DistributiveAbsorptionEqual] {
     }
 
   /**
-   * The meet distributiveAbsorption law states that for the join operator `vvv`, the meet operator `^^^`,
-   * and for any value `a`, the following must hold:
+   * The meet distributive law states that for the join operator `vvv`, the
+   * meet operator `^^^`, and for all values `a1`, `a2` and `a3`, the following
+   * must hold:
    *
    * {{{
+   * // no-check: algebraic notation, not Scala code
    * a1 ^^^ (a2 vvv a3) === (a1 ^^^ a2) vvv (a1 ^^^ a3)
    * }}}
    */
@@ -37,7 +54,8 @@ object DistributiveAbsorptionLaws extends Lawful[DistributiveAbsorptionEqual] {
     }
 
   /**
-   * The set of all laws that instances of `DistributiveAbsorption` must satisfy.
+   * The set of all laws that instances of `DistributiveAbsorption` must
+   * satisfy: the `AbsorptionLaws` and the two distributive laws.
    */
   lazy val laws: Laws[DistributiveAbsorptionEqual] =
     AbsorptionLaws.laws + joinDistributiveAbsorptionLaw + meetDistributiveAbsorptionLaw

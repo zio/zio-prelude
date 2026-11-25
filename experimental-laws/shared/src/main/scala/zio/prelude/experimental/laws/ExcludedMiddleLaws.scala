@@ -6,14 +6,29 @@ import zio.prelude.laws._
 import zio.test._
 import zio.test.laws._
 
+/**
+ * Laws that `ExcludedMiddle` instances must satisfy, checked with `!`, `vvv`,
+ * `top` and `Equal`. They include the `AbsorptionLaws`. They belong to the
+ * experimental module, so they can change between releases.
+ *
+ * {{{
+ * import zio.test._
+ * import zio.test.laws._
+ *
+ * val check = checkAllLaws(ExcludedMiddleLaws)(Gen.boolean)
+ * // succeeds with a passing TestResult
+ * }}}
+ */
 object ExcludedMiddleLaws extends Lawful[ExcludedMiddleEqual] {
 
   /**
-   * The excluded middle law states that for the join operator `vvv`, the top element `1`, complement operator `!`
-   * and for any value `a`, the following must hold:
+   * The excluded middle law states that for the join operator `vvv`, the
+   * `top` element and the complement operator `!`, for all values `a`, the
+   * following must hold:
    *
    * {{{
-   * !a vvv a === 1
+   * // no-check: algebraic notation, not Scala code
+   * !a vvv a === top
    * }}}
    */
   lazy val excludedMiddleLaw: Laws[ExcludedMiddleEqual] =
@@ -23,7 +38,8 @@ object ExcludedMiddleLaws extends Lawful[ExcludedMiddleEqual] {
     }
 
   /**
-   * The set of all laws that instances of `ExcludedMiddle` must satisfy.
+   * The set of all laws that instances of `ExcludedMiddle` must satisfy: the
+   * `AbsorptionLaws` and the excluded middle law.
    */
   lazy val laws: Laws[ExcludedMiddleEqual] =
     AbsorptionLaws.laws + excludedMiddleLaw

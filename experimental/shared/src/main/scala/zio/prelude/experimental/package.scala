@@ -16,6 +16,22 @@
 
 package zio.prelude
 
+/**
+ * Experimental abstractions that are not part of the core ZIO Prelude API:
+ * lattices and Boolean algebras (`Absorption`, `DistributiveAbsorption`,
+ * `Complement`, `ExcludedMiddle`, `Noncontradiction`, `Involution`),
+ * arithmetic (`DistributiveProd`, `Annihilation`, `Subtract`,
+ * `PartialDivide`, `Divide`) and arrow composition (`BothCompose`,
+ * `EitherCompose`, `ApplicationCompose`). Their names and shapes can change
+ * between releases.
+ *
+ * Importing `zio.prelude.experimental._` brings the infix syntax for these
+ * type classes into scope. The laws objects, such as `AbsorptionLaws` and
+ * `DistributiveProdLaws`, are in the `zio.prelude.experimental.laws` package
+ * of zio-prelude-experimental-laws. The composition type classes state their
+ * laws as methods instead (`bothCompose`, `eitherCompose`,
+ * `applicationCompose`).
+ */
 package object experimental
     extends AbsorptionSyntax
     with ApplicationComposeSyntax
@@ -27,14 +43,32 @@ package object experimental
     with PartialDivideSyntax
     with SubtractSyntax {
 
+  /**
+   * Type aliases that combine the composition abstractions with
+   * `zio.prelude.classic.Category` under their category-theory names.
+   */
   object classic {
 
     import zio.prelude.classic._
 
-    type CartesianCategory[=>:[-_, +_], :*:[+_, +_]]                     = Category[=>:] with BothCompose.Aux[=>:, :*:]
+    /**
+     * A `Category` with products: `Category[=>:]` with a
+     * `BothCompose.Aux[=>:, :*:]`.
+     */
+    type CartesianCategory[=>:[-_, +_], :*:[+_, +_]] = Category[=>:] with BothCompose.Aux[=>:, :*:]
+
+    /**
+     * A `CartesianCategory` with exponentials: it adds an
+     * `ApplicationCompose.Aux[=>:, :*:, -->:]`.
+     */
     type ClosedCartesianCategory[=>:[-_, +_], :*:[+_, +_], -->:[-_, +_]] = CartesianCategory[=>:, :*:]
       with ApplicationCompose.Aux[=>:, :*:, -->:]
-    type CoCartesianCategory[=>:[-_, +_], :+:[+_, +_]]                   = Category[=>:] with EitherCompose.Aux[=>:, :+:]
+
+    /**
+     * A `Category` with sums: `Category[=>:]` with an
+     * `EitherCompose.Aux[=>:, :+:]`.
+     */
+    type CoCartesianCategory[=>:[-_, +_], :+:[+_, +_]] = Category[=>:] with EitherCompose.Aux[=>:, :+:]
   }
 
 }
